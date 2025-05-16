@@ -11,42 +11,66 @@ const Hero = () => {
   const headlineRef = useRef<HTMLDivElement>(null);
   const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
-    tl.fromTo(logoRef.current, 
+    tl.fromTo(
+      bgRef.current, 
       { opacity: 0 }, 
       { opacity: 1, duration: 1.5 }
     )
-    .fromTo(headlineRef.current,
+    .fromTo(
+      logoRef.current, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 1.5 },
+      "-=1"
+    )
+    .fromTo(
+      headlineRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.7"
+    )
+    .fromTo(
+      subheadlineRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8 },
       "-=0.5"
     )
-    .fromTo(subheadlineRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
-    )
-    .fromTo(ctaRef.current,
+    .fromTo(
+      ctaRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8 },
       "-=0.5"
     );
     
+    // Parallax effect
+    gsap.to(bgRef.current, {
+      yPercent: -30,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#home",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+      }
+    });
+    
     return () => {
       tl.kill();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return (
     <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 opacity-80 z-0"></div>
-      
-      <div className="absolute top-0 left-0 w-full h-full z-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 opacity-10 blur-3xl"></div>
+      {/* Dynamic background with parallax effect */}
+      <div ref={bgRef} className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-100 opacity-90"></div>
+        <div className="absolute top-[20%] left-[20%] w-96 h-96 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-[30%] right-[20%] w-64 h-64 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 opacity-20 blur-3xl"></div>
       </div>
       
       <div className="relative z-10 text-center max-w-4xl">
@@ -58,7 +82,7 @@ const Hero = () => {
           />
         </div>
         
-        <h1 ref={headlineRef} className="text-3xl md:text-5xl lg:text-6xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight gradient-text">
+        <h1 ref={headlineRef} className="text-4xl md:text-6xl lg:text-7xl mb-6 text-center max-w-3xl mx-auto font-canela tracking-tight gradient-text">
           Soluções Jurídicas Inovadoras
         </h1>
         

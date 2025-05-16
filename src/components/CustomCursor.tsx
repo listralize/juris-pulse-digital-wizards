@@ -30,6 +30,7 @@ const CustomCursor = () => {
     const enlargeCursor = () => {
       gsap.to(cursor, {
         scale: 1.5,
+        opacity: 0.6,
         duration: 0.3
       });
     };
@@ -37,6 +38,7 @@ const CustomCursor = () => {
     const shrinkCursor = () => {
       gsap.to(cursor, {
         scale: 1,
+        opacity: 1,
         duration: 0.3
       });
     };
@@ -65,8 +67,12 @@ const CustomCursor = () => {
     // Fix for mobile devices
     const handleTouchStart = () => {
       document.body.style.cursor = 'auto';
-      if (cursorRef.current) cursorRef.current.style.display = 'none';
-      if (cursorDotRef.current) cursorDotRef.current.style.display = 'none';
+      if (cursorRef.current) {
+        cursorRef.current.style.display = 'none';
+      }
+      if (cursorDotRef.current) {
+        cursorDotRef.current.style.display = 'none';
+      }
     };
     
     window.addEventListener('touchstart', handleTouchStart);
