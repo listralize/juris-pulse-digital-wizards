@@ -1,98 +1,83 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
 
 interface SidebarProps {
   activeSection: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const sidebarItems = [
     { id: 'home', label: 'Home', href: '#home' },
+    { id: 'about', label: 'Sobre', href: '#about' },
     { id: 'areas', label: 'Áreas', href: '#areas' },
     { id: 'partners', label: 'Sócios', href: '#partners' },
     { id: 'client', label: 'Cliente', href: '#client' },
     { id: 'contact', label: 'Contato', href: '#contact' }
   ];
 
-  // Close menu when clicking a link on mobile
-  const handleLinkClick = () => {
-    setIsOpen(false);
-  };
+  // Track if user has scrolled down
+  const [hasScrolled, setHasScrolled] = useState(false);
 
-  // Close menu when pressing escape key
+  // Track scroll position to update menu visibility
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <>
-      {/* Futuristic menu toggle button */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-6 right-6 z-50 w-14 h-14 flex items-center justify-center bg-black/20 backdrop-blur-lg rounded-full hover:bg-black/40 transition-all duration-500 border border-white/10 shadow-lg"
-        aria-label="Toggle menu"
-      >
-        <div className="relative flex items-center justify-center">
-          <span className={`absolute h-0.5 bg-white transition-all duration-500 ${isOpen ? 'w-6 rotate-45' : 'w-6 -translate-y-1.5'}`}></span>
-          <span className={`absolute h-0.5 w-6 bg-white transition-opacity duration-500 ${isOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-          <span className={`absolute h-0.5 bg-white transition-all duration-500 ${isOpen ? 'w-6 -rotate-45' : 'w-6 translate-y-1.5'}`}></span>
-        </div>
-      </button>
-
-      {/* Futuristic fullscreen menu overlay */}
-      <div 
-        className={`fixed inset-0 z-40 transition-all duration-700 ${
-          isOpen ? 'opacity-100 backdrop-blur-md' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {/* Animated background gradient */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black opacity-90 transition-opacity duration-700 ${
-          isOpen ? 'opacity-90' : 'opacity-0'
-        }`}></div>
-        
-        {/* Menu content */}
-        <div className="h-full w-full flex flex-col items-center justify-center relative">
-          {sidebarItems.map((item, index) => (
-            <a 
-              key={item.id}
-              href={item.href}
-              onClick={handleLinkClick}
-              className={`relative my-5 text-3xl md:text-4xl lg:text-5xl font-light group transition-all duration-500 hover:scale-110 ${
-                activeSection === item.id ? 'text-white' : 'text-gray-400'
-              }`}
-              style={{
-                transitionDelay: `${isOpen ? index * 100 : 0}ms`,
-                transform: isOpen ? 'translateY(0)' : 'translateY(20px)',
-                opacity: isOpen ? 1 : 0,
-              }}
-            >
-              <span className="flex items-center">
-                <span className="relative overflow-hidden">
-                  {item.label}
-                  <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-white transition-all duration-500 group-hover:w-full ${
-                    activeSection === item.id ? 'w-full' : ''
-                  }`}></span>
-                </span>
-              </span>
-            </a>
-          ))}
-          
-          {/* Decorative elements */}
-          <div className="absolute top-10 left-10 h-40 w-40 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20 blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 h-60 w-60 rounded-full bg-gradient-to-r from-blue-500 via-teal-500 to-emerald-500 opacity-20 blur-3xl"></div>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+      hasScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-transparent'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-center h-16">
+          <div className="flex items-center justify-center w-full">
+            <div className="hidden md:flex items-center justify-center w-full">
+              <div className="flex items-baseline space-x-8">
+                {sidebarItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={`relative px-3 py-2 text-sm font-medium group transition-all duration-300 ${
+                      activeSection === item.id 
+                        ? 'text-black' 
+                        : 'text-gray-500 hover:text-black'
+                    }`}
+                  >
+                    {item.label}
+                    <span className={`absolute -bottom-1 left-0 w-full h-0.5 bg-black transform origin-left transition-transform duration-300 ${
+                      activeSection === item.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}></span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </>
+      
+      {/* Mobile menu - always visible at top center */}
+      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex overflow-x-auto scrollbar-hide">
+          {sidebarItems.map((item) => (
+            <a
+              key={item.id}
+              href={item.href}
+              className={`whitespace-nowrap px-3 py-2 text-sm font-medium ${
+                activeSection === item.id 
+                  ? 'text-black border-b-2 border-black' 
+                  : 'text-gray-500 hover:text-black'
+              }`}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </nav>
   );
 };
 

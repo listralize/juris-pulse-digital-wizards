@@ -21,8 +21,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
-  const [canScroll, setCanScroll] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
   
   const sections = [
@@ -34,105 +33,150 @@ const Index = () => {
     { id: 'contact', component: Contact }
   ];
   
-  useEffect(() => {
-    const container = containerRef.current;
-    const sectionElements = sectionsRef.current;
+  // Function to scroll to section
+  const scrollToSection = (id: string) => {
+    if (isScrolling) return;
     
-    if (!container) return;
+    const sectionIndex = sections.findIndex(section => section.id === id);
+    if (sectionIndex === -1) return;
     
-    // Set up each section to be full height
-    sectionElements.forEach(section => {
-      section.style.height = '100vh';
-      section.style.width = '100%';
-      section.style.overflowY = 'hidden';
-    });
+    setIsScrolling(true);
     
-    // Function to scroll to a specific section
-    const scrollToSection = (index: number) => {
-      if (!canScroll) return;
-      
-      setCanScroll(false);
-      
-      const targetSection = sectionElements[index];
-      if (!targetSection) return;
-      
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: {
-          y: targetSection,
-          autoKill: false
-        },
-        ease: "power3.inOut",
-        onComplete: () => {
-          setCanScroll(true);
-          setActiveSection(sections[index].id);
-        }
-      });
-    };
+    const targetSection = sectionsRef.current[sectionIndex];
+    if (!targetSection) {
+      setIsScrolling(false);
+      return;
+    }
     
-    // Handle wheel events for custom scrolling
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      
-      if (!canScroll) return;
-      
-      const currentIndex = sectionElements.findIndex(section => {
-        const rect = section.getBoundingClientRect();
-        return rect.top <= 100 && rect.bottom >= 100;
-      });
-      
-      if (currentIndex === -1) return;
-      
-      const direction = e.deltaY > 0 ? 1 : -1;
-      const targetIndex = Math.min(Math.max(currentIndex + direction, 0), sectionElements.length - 1);
-      
-      if (targetIndex !== currentIndex) {
-        scrollToSection(targetIndex);
+    gsap.to(window, {
+      duration: 1,
+      scrollTo: {
+        y: targetSection,
+        autoKill: false,
+        offsetY: 0
+      },
+      ease: "power3.inOut",
+      onComplete: () => {
+        setTimeout(() => {
+          setIsScrolling(false);
+          setActiveSection(id);
+          
+          // Update URL without refreshing page
+          window.history.pushState({}, "", `#${id}`);
+        }, 200); // Small delay to prevent rapid scrolling
       }
-    };
-    
-    // Handle anchor links
+    });
+  };
+  
+  // Handle initial load and hash changes
+  useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.substring(1);
-      const index = sections.findIndex(section => section.id === hash);
-      
-      if (index !== -1) {
-        scrollToSection(index);
+      if (hash && !isScrolling) {
+        scrollToSection(hash);
       }
     };
     
-    // Handle initial hash and URL changes
-    setTimeout(handleHashChange, 500);
+    // Set initial active section based on URL hash
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash) {
+      setActiveSection(initialHash);
+      setTimeout(() => {
+        scrollToSection(initialHash);
+      }, 500);
+    }
+    
     window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [isScrolling]);
+  
+  // Set up scroll detection and section visibility
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isScrolling) {
+          const id = entry.target.id;
+          setActiveSection(id);
+          
+          // Update URL without refreshing page
+          if (window.location.hash !== `#${id}`) {
+            window.history.replaceState({}, "", `#${id}`);
+          }
+        }
+      });
+    }, {
+      threshold: 0.6 // More than half of the section must be visible
+    });
     
-    // Set up wheel event for custom scrolling
-    window.addEventListener('wheel', handleWheel, { passive: false });
+    // Get all section elements
+    const sectionElements = sectionsRef.current;
+    sectionElements.forEach(section => {
+      if (section) observer.observe(section);
+    });
     
-    // Handle keyboard navigation
+    return () => {
+      sectionElements.forEach(section => {
+        if (section) observer.unobserve(section);
+      });
+    };
+  }, [isScrolling]);
+  
+  // Handle keyboard navigation
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isScrolling) return;
+      
       const currentIndex = sections.findIndex(section => section.id === activeSection);
       
       if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
         const nextIndex = Math.min(currentIndex + 1, sections.length - 1);
-        scrollToSection(nextIndex);
+        scrollToSection(sections[nextIndex].id);
       } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
         const prevIndex = Math.max(currentIndex - 1, 0);
-        scrollToSection(prevIndex);
+        scrollToSection(sections[prevIndex].id);
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeSection, isScrolling]);
+  
+  // Handle mousewheel scrolling
+  useEffect(() => {
+    let wheelTimeout: NodeJS.Timeout;
+    
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      
+      if (isScrolling) return;
+      
+      // Clear any existing timeout
+      clearTimeout(wheelTimeout);
+      
+      // Set a timeout to prevent rapid scrolling
+      wheelTimeout = setTimeout(() => {
+        const currentIndex = sections.findIndex(section => section.id === activeSection);
+        const direction = e.deltaY > 0 ? 1 : -1;
+        const targetIndex = Math.min(Math.max(currentIndex + direction, 0), sections.length - 1);
+        
+        if (targetIndex !== currentIndex) {
+          scrollToSection(sections[targetIndex].id);
+        }
+      }, 50);
+    };
+    
+    window.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
       window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('hashchange', handleHashChange);
-      window.removeEventListener('keydown', handleKeyDown);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
+      clearTimeout(wheelTimeout);
     };
-  }, [activeSection, canScroll]);
+  }, [activeSection, isScrolling]);
   
   return (
-    <div className="min-h-screen bg-white" ref={containerRef}>
+    <div className="min-h-screen bg-white">
       <CustomCursor />
       <Sidebar activeSection={activeSection} />
       <WhatsAppButton />
@@ -144,7 +188,7 @@ const Index = () => {
             key={section.id} 
             id={section.id} 
             ref={el => el && (sectionsRef.current[index] = el)}
-            className="section-container"
+            className="min-h-screen w-full snap-start"
           >
             <Component />
           </div>
