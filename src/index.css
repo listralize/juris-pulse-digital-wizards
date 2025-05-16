@@ -98,11 +98,11 @@
   }
   
   .sidebar-link {
-    @apply flex items-center gap-3 group transition-all duration-300 text-gray-600 hover:text-black;
+    @apply flex items-center gap-3 transition-all duration-300 text-gray-600 hover:text-black;
   }
   
   .sidebar-link .icon-label {
-    @apply opacity-0 group-hover:opacity-100 transition-all duration-300;
+    @apply opacity-0 transition-all duration-300;
   }
 
   .input-floating {

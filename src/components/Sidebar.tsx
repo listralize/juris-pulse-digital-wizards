@@ -25,13 +25,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
           <a 
             key={item.id}
             href={item.href}
-            className={`sidebar-link ${activeSection === item.id ? 'text-black' : ''}`}
+            className={`sidebar-link group ${activeSection === item.id ? 'text-black' : ''}`}
             onMouseEnter={() => setIsHovering(item.id)}
             onMouseLeave={() => setIsHovering('')}
           >
             <item.icon className={`w-5 h-5 ${activeSection === item.id ? 'text-black' : ''}`} />
             <span 
-              className={`icon-label absolute left-16 text-sm whitespace-nowrap ${isHovering === item.id ? 'opacity-100' : ''}`}
+              className={`icon-label absolute left-16 text-sm whitespace-nowrap ${isHovering === item.id ? 'opacity-100' : ''} group-hover:opacity-100`}
             >
               {item.label}
             </span>
