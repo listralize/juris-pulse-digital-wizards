@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Card, CardContent } from '@/components/ui/card';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -82,10 +83,10 @@ const PracticeAreas = () => {
     cardsRef.current.forEach((card, index) => {
       gsap.fromTo(
         card,
-        { opacity: 0, x: index % 2 === 0 ? -30 : 30 },
+        { opacity: 0, y: 30 },
         {
           opacity: 1,
-          x: 0,
+          y: 0,
           duration: 0.8,
           delay: 0.1 * index,
           scrollTrigger: {
@@ -106,25 +107,27 @@ const PracticeAreas = () => {
     <section 
       id="areas" 
       ref={sectionRef} 
-      className="min-h-screen py-20 px-6 md:px-16 lg:px-24"
+      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative"
     >
-      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela">
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-[-1]"></div>
+      
+      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela gradient-text">
         Áreas de Atuação
       </h2>
       
-      <div className="overflow-hidden">
-        <div className="scroll-container pb-6">
-          {practiceAreas.map((area, index) => (
-            <div 
-              key={area.id}
-              ref={(el) => (cardsRef.current[index] = el)}
-              className="scroll-item area-card"
-            >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {practiceAreas.map((area, index) => (
+          <Card 
+            key={area.id}
+            ref={(el) => (cardsRef.current[index] = el)}
+            className="border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm"
+          >
+            <CardContent className="p-8">
               <h3 className="text-xl md:text-2xl mb-4 font-canela">{area.title}</h3>
               <p className="text-gray-700 font-satoshi">{area.description}</p>
-            </div>
-          ))}
-        </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </section>
   );

@@ -25,7 +25,7 @@ const partners = [
 ];
 
 const Partners = () => {
-  const [activeParnter, setActivePartner] = useState(0);
+  const [activePartner, setActivePartner] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -73,7 +73,7 @@ const Partners = () => {
     return () => {
       tl.kill();
     };
-  }, [activeParnter]);
+  }, [activePartner]);
   
   const handlePartnerChange = (index: number) => {
     setActivePartner(index);
@@ -83,39 +83,41 @@ const Partners = () => {
     <section 
       id="partners" 
       ref={sectionRef}
-      className="min-h-screen bg-white flex flex-col md:flex-row"
+      className="min-h-screen bg-white flex flex-col md:flex-row relative"
     >
-      <div ref={imageContainerRef} className="md:w-1/2 h-screen flex items-center justify-center relative">
+      <div className="absolute inset-0 bg-gradient-to-tr from-gray-50 to-white opacity-50 z-0"></div>
+      
+      <div ref={imageContainerRef} className="md:w-1/2 h-screen flex items-center justify-center relative z-10">
         {partners.map((partner, index) => (
           <div 
             key={partner.id} 
-            className={`absolute transition-opacity duration-500 ${index === activeParnter ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute transition-all duration-700 ${index === activePartner ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
           >
             <img 
               src={partner.image} 
               alt={partner.name}
-              className="max-h-[80vh] w-auto object-contain"
+              className="max-h-[80vh] w-auto object-contain drop-shadow-xl"
             />
           </div>
         ))}
       </div>
       
-      <div className="md:w-1/2 h-screen flex flex-col justify-center px-6 md:px-12 lg:px-16">
-        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela">Sócios</h2>
+      <div className="md:w-1/2 h-screen flex flex-col justify-center px-6 md:px-12 lg:px-16 relative z-10">
+        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela gradient-text">Sócios</h2>
         
-        <div ref={contentRef} className="mb-12">
-          <h3 className="text-2xl md:text-3xl mb-2 font-canela">{partners[activeParnter].name}</h3>
+        <div ref={contentRef} className="mb-12 backdrop-blur-sm bg-white/30 p-8 border border-gray-100">
+          <h3 className="text-2xl md:text-3xl mb-2 font-canela">{partners[activePartner].name}</h3>
           <p className="text-xl md:text-xl mb-1 font-satoshi text-gray-800">
-            {partners[activeParnter].title}
+            {partners[activePartner].title}
           </p>
           <p className="text-gray-700 mb-4 font-satoshi">
-            {partners[activeParnter].oab}
+            {partners[activePartner].oab}
           </p>
           <a 
-            href={`mailto:${partners[activeParnter].email}`}
+            href={`mailto:${partners[activePartner].email}`}
             className="text-gray-900 hover:underline font-satoshi inline-flex items-center"
           >
-            <span className="mr-2">📧</span> {partners[activeParnter].email}
+            <span className="mr-2">📧</span> {partners[activePartner].email}
           </a>
         </div>
         
@@ -125,9 +127,9 @@ const Partners = () => {
               key={partner.id}
               onClick={() => handlePartnerChange(index)}
               className={`h-1 transition-all duration-300 ${
-                index === activeParnter 
-                  ? 'bg-black w-12' 
-                  : 'bg-gray-400 w-8'
+                index === activePartner 
+                  ? 'bg-black w-16' 
+                  : 'bg-gray-400 w-8 hover:bg-gray-800 hover:w-12'
               }`}
               aria-label={`Ver perfil de ${partner.name}`}
             />

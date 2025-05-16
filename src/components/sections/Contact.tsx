@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Mail, Phone, MapPin } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -89,14 +90,20 @@ const Contact = () => {
   return (
     <section 
       id="contact" 
-      className="min-h-screen py-20 px-6 md:px-16 lg:px-24"
+      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative"
     >
-      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela">
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-[-1]"></div>
+      
+      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela gradient-text">
         Contato
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
+        <form 
+          ref={formRef} 
+          onSubmit={handleSubmit} 
+          className="space-y-8 backdrop-blur-sm bg-white/30 p-8 border border-gray-100 shadow-sm"
+        >
           <div className="input-floating">
             <input
               type="text"
@@ -155,46 +162,65 @@ const Contact = () => {
           
           <button
             type="submit"
-            className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition-colors duration-300 font-satoshi mt-4"
+            className="elegant-button w-full md:w-auto"
           >
             Enviar mensagem
           </button>
         </form>
         
         <div ref={addressRef} className="space-y-6">
-          <div>
-            <h3 className="text-xl font-canela mb-2">Nosso escritório</h3>
-            <p className="text-gray-700 font-satoshi">
-              World Trade Center<br />
-              Av. D, Av. 85 - St. Marista<br />
-              Goiânia - GO, 74150-040
-            </p>
+          <div className="backdrop-blur-sm bg-white/30 p-8 border border-gray-100 shadow-sm">
+            <h3 className="text-xl font-canela mb-4 gradient-text">Informações de Contato</h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <MapPin className="w-5 h-5 mr-3 mt-1" />
+                <div>
+                  <h4 className="font-medium mb-1">Endereço</h4>
+                  <p className="text-gray-700 font-satoshi">
+                    World Trade Center<br />
+                    Av. D, Av. 85 - St. Marista<br />
+                    Goiânia - GO, 74150-040
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <Phone className="w-5 h-5 mr-3 mt-1" />
+                <div>
+                  <h4 className="font-medium mb-1">Telefone</h4>
+                  <a 
+                    href="https://api.whatsapp.com/send?phone=5562994594496"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-900 hover:underline font-satoshi block"
+                  >
+                    +55 62 99459-4496
+                  </a>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <Mail className="w-5 h-5 mr-3 mt-1" />
+                <div>
+                  <h4 className="font-medium mb-1">E-mail</h4>
+                  <a 
+                    href="mailto:contato@stadv.com"
+                    className="text-gray-900 hover:underline font-satoshi block"
+                  >
+                    contato@stadv.com
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div className="h-64 md:h-80 bg-gray-100 rounded-md overflow-hidden">
+          <div className="h-64 md:h-80 bg-gray-100 rounded-none overflow-hidden shadow-sm border border-gray-100">
             <img 
               src="/lovable-uploads/a8cc2627-db98-4461-9afa-8b1f238766e0.png" 
               alt="Localização do escritório"
               className="w-full h-full object-cover"
             />
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-canela mb-2">Contato direto</h3>
-            <a 
-              href="https://api.whatsapp.com/send?phone=5562994594496"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-900 hover:underline font-satoshi block mb-2"
-            >
-              WhatsApp: +55 62 99459-4496
-            </a>
-            <a 
-              href="mailto:contato@stadv.com"
-              className="text-gray-900 hover:underline font-satoshi block"
-            >
-              Email: contato@stadv.com
-            </a>
           </div>
         </div>
       </div>

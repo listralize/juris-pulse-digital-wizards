@@ -74,6 +74,7 @@
   .custom-cursor {
     @apply fixed pointer-events-none z-50 w-6 h-6 border border-black rounded-full transform -translate-x-1/2 -translate-y-1/2;
     mix-blend-mode: difference;
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
   .custom-cursor-dot {
@@ -91,6 +92,12 @@
 
   .area-card {
     @apply border border-gray-200 p-8 rounded-md mb-6 transition-all duration-300 hover:bg-gray-50;
+    backdrop-filter: blur(5px);
+  }
+  
+  .area-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
   }
 
   .sidebar-icon {
@@ -123,6 +130,16 @@
   .input-floating input,
   .input-floating textarea {
     @apply w-full bg-transparent pt-5 pb-2 focus:outline-none;
+  }
+  
+  .elegant-button {
+    @apply bg-black text-white px-6 py-3 rounded-none border border-transparent hover:bg-white hover:text-black hover:border-black transition-all duration-300 font-satoshi;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(90deg, #000, #333);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 }
 

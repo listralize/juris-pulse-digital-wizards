@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,35 +41,53 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative">
-      <div ref={logoRef} className="mb-12 w-full max-w-xs md:max-w-sm">
-        <img 
-          src="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
-          alt="Serafim & Trombela Advocacia Logo"
-          className="w-full h-auto"
-        />
+    <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 opacity-80 z-0"></div>
+      
+      <div className="absolute top-0 left-0 w-full h-full z-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 opacity-10 blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 opacity-10 blur-3xl"></div>
       </div>
       
-      <h1 ref={headlineRef} className="text-3xl md:text-5xl lg:text-6xl mb-4 text-center max-w-3xl font-canela tracking-tight">
-        Soluções Jurídicas Inovadoras
-      </h1>
-      
-      <p ref={subheadlineRef} className="text-lg md:text-xl text-gray-700 mb-12 text-center max-w-lg font-satoshi">
-        Suas questões nas mãos de quem entende.
-      </p>
-      
-      <div ref={ctaRef}>
-        <a 
-          href="https://api.whatsapp.com/send?phone=5562994594496" 
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition-colors duration-300 font-satoshi"
-        >
-          Fale Conosco no WhatsApp
-        </a>
+      <div className="relative z-10 text-center max-w-4xl">
+        <div ref={logoRef} className="mb-12 w-full max-w-xs md:max-w-sm mx-auto">
+          <img 
+            src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
+            alt="Serafim & Trombela Advocacia Logo"
+            className="w-full h-auto"
+          />
+        </div>
+        
+        <h1 ref={headlineRef} className="text-3xl md:text-5xl lg:text-6xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight gradient-text">
+          Soluções Jurídicas Inovadoras
+        </h1>
+        
+        <p ref={subheadlineRef} className="text-lg md:text-xl text-gray-700 mb-12 text-center max-w-lg mx-auto font-satoshi">
+          Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
+        </p>
+        
+        <div ref={ctaRef} className="flex flex-col md:flex-row gap-4 justify-center">
+          <a 
+            href="https://api.whatsapp.com/send?phone=5562994594496" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="elegant-button flex items-center justify-center gap-2"
+          >
+            Fale Conosco no WhatsApp
+            <ArrowRight className="w-4 h-4" />
+          </a>
+          
+          <a 
+            href="#areas" 
+            className="elegant-button bg-white text-black border-black hover:bg-black hover:text-white flex items-center justify-center gap-2"
+          >
+            Conheça Nossas Áreas de Atuação
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
       </div>
       
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
         <svg 
           width="24" 
           height="24" 
