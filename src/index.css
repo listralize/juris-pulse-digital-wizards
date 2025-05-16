@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -76,14 +77,12 @@
 
 @layer components {
   .custom-cursor {
-    @apply fixed pointer-events-none z-50 w-6 h-6 border border-black rounded-full transform -translate-x-1/2 -translate-y-1/2;
-    mix-blend-mode: difference;
+    @apply fixed pointer-events-none z-50 w-6 h-6 border border-white rounded-full transform -translate-x-1/2 -translate-y-1/2 mix-blend-difference;
     background-color: rgba(255, 255, 255, 0.15);
   }
 
   .custom-cursor-dot {
-    @apply fixed pointer-events-none z-50 w-1 h-1 bg-black rounded-full transform -translate-x-1/2 -translate-y-1/2;
-    mix-blend-mode: difference;
+    @apply fixed pointer-events-none z-50 w-1 h-1 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 mix-blend-difference;
   }
 
   .hover-scale {
@@ -143,6 +142,31 @@
     background: linear-gradient(90deg, #000, #333);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+  
+  /* Add futuristic styles */
+  .glassmorphic {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg;
+  }
+  
+  .glowing-border {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    @apply border border-white/30;
+  }
+  
+  .page-transition {
+    transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1), 
+                opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .slide-enter {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .slide-exit {
+    transform: translateY(100%);
+    opacity: 0;
   }
 }
 
