@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from './navbar';
 import { Footer } from './sections';
 import CustomCursor from './CustomCursor';
 import WhatsAppButton from './WhatsAppButton';
