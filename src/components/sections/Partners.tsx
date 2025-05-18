@@ -96,10 +96,13 @@ const Partners = () => {
               <CardContent className="p-0">
                 <div className="flex flex-col p-6">
                   <div className="flex flex-col items-center md:items-start md:flex-row gap-6 mb-6">
-                    <Avatar className="w-32 h-32 rounded-full border-4 border-gray-100">
-                      <AvatarImage src={partner.image} alt={partner.name} className="object-cover" />
-                      <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                    <div className="w-32 h-32 border-4 border-gray-100 overflow-hidden">
+                      <img 
+                        src={partner.image} 
+                        alt={partner.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     
                     <div className="text-center md:text-left">
                       <h3 className="text-3xl font-canela mb-1">{partner.name}</h3>
