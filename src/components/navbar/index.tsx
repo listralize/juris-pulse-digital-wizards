@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
 import DesktopNavigation from './DesktopNavigation';
 import MobileNavigation from './MobileNavigation';
@@ -9,6 +9,7 @@ import ThemeToggle from './ThemeToggle';
 const Navbar = () => {
   const { theme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const isDark = theme === 'dark';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
@@ -43,7 +44,13 @@ const Navbar = () => {
     
     if (location.pathname !== '/') {
       // Navigate to home first with the hash
-      window.location.href = `/${sectionId}`;
+      navigate('/');
+      setTimeout(() => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
       return;
     }
     
@@ -58,12 +65,10 @@ const Navbar = () => {
     setIsMenuOpen(false);
     
     if (location.pathname === '/') {
-      const section = document.getElementById(sectionId);
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth' });
-      }
+      scrollToSection(sectionId);
     } else {
-      window.location.href = path;
+      navigate('/');
+      setTimeout(() => scrollToSection(sectionId), 100);
     }
   };
 

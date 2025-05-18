@@ -20,16 +20,25 @@ const Loading = () => {
       setLogoScale(1.2);
     }, 400);
 
-    // Animate gradient position
+    // Animate gradient position - smooth movement without repetition
     const gradientInterval = setInterval(() => {
-      setGradientPosition(prev => (prev + 1) % 100);
+      setGradientPosition(prev => {
+        // Move from 0 to 100 and then stop
+        if (prev < 100) return prev + 0.5;
+        return 100;
+      });
     }, 50);
 
-    // Progress bar animation
+    // Progress bar animation - smooth and without repetition
     const intervalId = setInterval(() => {
       setProgress((oldProgress) => {
-        const newProgress = Math.min(oldProgress + Math.random() * 6, 100);
-        return newProgress;
+        // Increase progressively and decelerate near the end
+        if (oldProgress < 85) {
+          return oldProgress + Math.random() * 5;
+        } else if (oldProgress < 99) {
+          return oldProgress + Math.random() * 1.5;
+        }
+        return 100; // Cap at 100%
       });
     }, 150);
 
@@ -98,7 +107,7 @@ const Loading = () => {
         }}
       >
         <img 
-          src="/lovable-uploads/69f01f04-0e29-4493-a363-b0f011029375.png" 
+          src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
           alt="Serafim & Trombela" 
           className="w-72 h-72 mb-16"
         />

@@ -10,7 +10,7 @@ const ThemeToggle = () => {
 
   return (
     <Toggle 
-      aria-label="Toggle theme"
+      aria-label="Alternar tema"
       pressed={isDark}
       onPressedChange={toggleTheme}
       className={`rounded-full p-2 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'}`}

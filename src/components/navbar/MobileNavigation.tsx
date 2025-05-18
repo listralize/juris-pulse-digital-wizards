@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Toggle } from '../ui/toggle';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
@@ -21,6 +21,7 @@ const MobileNavigation = ({
 }: MobileNavigationProps) => {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
 
   if (!isMenuOpen) return null;
 
@@ -32,7 +33,10 @@ const MobileNavigation = ({
           className={`block px-3 py-2 rounded-md ${activeSection === 'home'
             ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
             : ''} font-medium`}
-          onClick={() => setIsMenuOpen(false)}
+          onClick={() => {
+            setIsMenuOpen(false);
+            navigate('/');
+          }}
         >
           Home
         </Link>
@@ -48,7 +52,10 @@ const MobileNavigation = ({
                   window.location.pathname === area.path 
                   ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
                   : ''} font-medium`}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate(area.path);
+                }}
               >
                 {area.label}
               </Link>
@@ -61,6 +68,7 @@ const MobileNavigation = ({
           onClick={(e) => {
             e.preventDefault();
             handleNavigation('about', '/#about');
+            setIsMenuOpen(false);
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
@@ -72,6 +80,7 @@ const MobileNavigation = ({
           onClick={(e) => {
             e.preventDefault();
             handleNavigation('socios', '/#socios');
+            setIsMenuOpen(false);
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
@@ -83,6 +92,7 @@ const MobileNavigation = ({
           onClick={(e) => {
             e.preventDefault();
             handleNavigation('cliente', '/#cliente');
+            setIsMenuOpen(false);
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
@@ -94,6 +104,7 @@ const MobileNavigation = ({
           onClick={(e) => {
             e.preventDefault();
             handleNavigation('contact', '/#contact');
+            setIsMenuOpen(false);
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
@@ -102,7 +113,7 @@ const MobileNavigation = ({
         
         <div className="px-3 py-2">
           <Toggle 
-            aria-label="Toggle theme"
+            aria-label="Alternar tema"
             pressed={isDark}
             onPressedChange={toggleTheme}
             className={`rounded-full p-2 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'} w-full justify-start`}

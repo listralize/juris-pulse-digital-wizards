@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavigationItem from './NavigationItem';
 import PracticeAreasDropdown from './PracticeAreasDropdown';
 
@@ -10,12 +10,15 @@ interface DesktopNavigationProps {
 }
 
 const DesktopNavigation = ({ activeSection, handleNavigation }: DesktopNavigationProps) => {
+  const navigate = useNavigate();
+  
   return (
     <div className="hidden md:flex items-center space-x-8">
       <NavigationItem 
         to="/" 
         label="Home"
         isActive={activeSection === 'home'}
+        onClick={() => navigate('/')}
       />
       
       <PracticeAreasDropdown 

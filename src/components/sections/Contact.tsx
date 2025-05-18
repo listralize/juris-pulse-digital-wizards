@@ -19,9 +19,8 @@ const Contact = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Remove pinning to allow for full scrolling without cutting off content
+    // Remove pinning to ensure the section is fully visible
     if (titleRef.current && formContainerRef.current && mapRef.current) {
-      // Animate elements on initial load
       const tl = gsap.timeline();
       
       tl.fromTo(
@@ -62,11 +61,11 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="min-h-screen relative py-20 bg-white"
+      className="py-24 bg-white relative"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-0"></div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 h-full flex flex-col">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col">
         <div ref={titleRef} className="mb-12 relative z-10">
           <h2 className="text-3xl md:text-4xl lg:text-5xl mb-4 font-canela gradient-text">
             Contato
@@ -74,7 +73,7 @@ const Contact = () => {
           <div className="h-1 w-16 bg-black"></div>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-16 mb-12">
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-16 mb-20">
           <div ref={formContainerRef} className="md:w-1/2 z-10">
             {formSubmitted ? (
               <SuccessMessage onNewMessage={handleNewMessage} />

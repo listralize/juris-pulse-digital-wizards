@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
 import { practiceAreas } from './practiceAreas';
 
@@ -11,6 +11,7 @@ interface PracticeAreasDropdownProps {
 const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
 
   return (
     <div className="relative group">
@@ -31,6 +32,7 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
               key={area.id} 
               to={area.path} 
               className={`block px-4 py-2 ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-black/5 text-black'} transition-colors`}
+              onClick={() => navigate(area.path)}
             >
               {area.label}
             </Link>

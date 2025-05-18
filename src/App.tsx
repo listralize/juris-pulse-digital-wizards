@@ -34,12 +34,12 @@ const ScrollToTop = () => {
 };
 
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
-    // Initial app loading with longer animation to appreciate the loading screen
+    // Only show loading screen on initial app load
     const timer = setTimeout(() => {
-      setIsLoading(false);
+      setIsInitialLoading(false);
     }, 3000);
     
     return () => clearTimeout(timer);
@@ -51,7 +51,7 @@ const App = () => {
         <ThemeProvider>
           <Toaster />
           <Sonner />
-          {isLoading ? (
+          {isInitialLoading ? (
             <Loading />
           ) : (
             <BrowserRouter>
@@ -69,7 +69,6 @@ const App = () => {
                 <Route path="/previdenciario" element={<PrevidenciarioPage />} />
                 <Route path="/consumidor" element={<ConsumidorPage />} />
                 
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
