@@ -96,11 +96,11 @@ const Partners = () => {
               <CardContent className="p-0">
                 <div className="flex flex-col p-6">
                   <div className="flex flex-col items-center md:items-start md:flex-row gap-6 mb-6">
-                    <div className="w-32 h-32 border-4 border-gray-100 overflow-hidden">
+                    <div className="w-32 h-32 border-4 border-gray-100 overflow-hidden flex-shrink-0">
                       <img 
                         src={partner.image} 
                         alt={partner.name} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center"
                       />
                     </div>
                     
