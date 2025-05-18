@@ -1,12 +1,13 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import { Footer } from './sections';
 import CustomCursor from './CustomCursor';
 import WhatsAppButton from './WhatsAppButton';
 import Sidebar from './Sidebar';
 import { useTheme } from './ThemeProvider';
+import Loading from './Loading';
 
 interface PracticeAreaLayoutProps {
   title: string;
@@ -23,6 +24,19 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
 
   const practiceAreas = [
     { id: 'familia', label: 'Família', path: '/familia' },
@@ -34,6 +48,10 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
     { id: 'previdenciario', label: 'Previdenciário', path: '/previdenciario' },
     { id: 'consumidor', label: 'Consumidor', path: '/consumidor' }
   ];
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>

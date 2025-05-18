@@ -1,4 +1,5 @@
 
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Loading from "./components/Loading";
 
 // Áreas de Atuação
 import FamiliaPage from "./pages/areas/Familia";
@@ -20,33 +22,50 @@ import ConsumidorPage from "./pages/areas/Consumidor";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ThemeProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            
-            {/* Áreas de Atuação */}
-            <Route path="/familia" element={<FamiliaPage />} />
-            <Route path="/tributario" element={<TributarioPage />} />
-            <Route path="/empresarial" element={<EmpresarialPage />} />
-            <Route path="/trabalho" element={<TrabalhoPage />} />
-            <Route path="/constitucional" element={<ConstitucionalPage />} />
-            <Route path="/administrativo" element={<AdministrativoPage />} />
-            <Route path="/previdenciario" element={<PrevidenciarioPage />} />
-            <Route path="/consumidor" element={<ConsumidorPage />} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial app loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ThemeProvider>
+          <Toaster />
+          <Sonner />
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                
+                {/* Áreas de Atuação */}
+                <Route path="/familia" element={<FamiliaPage />} />
+                <Route path="/tributario" element={<TributarioPage />} />
+                <Route path="/empresarial" element={<EmpresarialPage />} />
+                <Route path="/trabalho" element={<TrabalhoPage />} />
+                <Route path="/constitucional" element={<ConstitucionalPage />} />
+                <Route path="/administrativo" element={<AdministrativoPage />} />
+                <Route path="/previdenciario" element={<PrevidenciarioPage />} />
+                <Route path="/consumidor" element={<ConsumidorPage />} />
+                
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          )}
+        </ThemeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

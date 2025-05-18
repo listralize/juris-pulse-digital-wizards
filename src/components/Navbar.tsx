@@ -1,14 +1,13 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from './ui/navigation-menu';
+import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { Toggle } from './ui/toggle';
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
+  const location = useLocation();
   const isDark = theme === 'dark';
 
   const practiceAreas = [
@@ -22,6 +21,10 @@ const Navbar = () => {
     { id: 'consumidor', label: 'Consumidor', path: '/consumidor' }
   ];
 
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className={`${isDark ? 'bg-black' : 'bg-white'} py-6 border-b ${isDark ? 'border-white/10' : 'border-black/10'} sticky top-0 z-50 w-full`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,18 +34,32 @@ const Navbar = () => {
               <img 
                 src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
                 alt="Serafim & Trombela Advocacia Logo" 
-                className="h-16 transform transition-transform hover:scale-105"
+                className="h-20 transform transition-transform hover:scale-105"
               />
             </Link>
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className={`px-4 py-2 font-medium ${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} transition-colors`}>
+            <Link 
+              to="/" 
+              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                isActiveRoute('/') 
+                  ? (isDark ? 'border-white text-white' : 'border-black text-black') 
+                  : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+              }`}
+            >
               Home
             </Link>
             
             <div className="relative group">
-              <Link to="#" className={`px-4 py-2 font-medium ${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} transition-colors`}>
+              <Link 
+                to="#" 
+                className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                  location.pathname.includes('/') && !isActiveRoute('/') && !location.pathname.includes('contact') && !location.pathname.includes('about')
+                    ? (isDark ? 'border-white text-white' : 'border-black text-black') 
+                    : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+                }`}
+              >
                 Áreas de Atuação
               </Link>
               <div className={`absolute left-0 mt-2 w-60 ${isDark ? 'bg-black/95 border-white/10' : 'bg-white border-black/10'} border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50`}>
@@ -60,11 +77,25 @@ const Navbar = () => {
               </div>
             </div>
             
-            <Link to="/#about" className={`px-4 py-2 font-medium ${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} transition-colors`}>
+            <Link 
+              to="/#about" 
+              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                location.pathname.includes('about') 
+                  ? (isDark ? 'border-white text-white' : 'border-black text-black') 
+                  : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+              }`}
+            >
               Sobre
             </Link>
             
-            <Link to="/#contact" className={`px-4 py-2 font-medium ${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} transition-colors`}>
+            <Link 
+              to="/#contact" 
+              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                location.pathname.includes('contact') 
+                  ? (isDark ? 'border-white text-white' : 'border-black text-black') 
+                  : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+              }`}
+            >
               Contato
             </Link>
           </div>

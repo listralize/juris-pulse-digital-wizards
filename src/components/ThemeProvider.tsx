@@ -6,6 +6,7 @@ type Theme = 'light' | 'dark';
 interface ThemeContextProps {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -17,7 +18,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (savedTheme === 'light' || savedTheme === 'dark') {
       return savedTheme as Theme;
     }
-    // If no saved preference, use light theme as default
+    
+    // If no saved preference, check for system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    
+    // Default to light theme
     return 'light';
   });
 
@@ -38,7 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
