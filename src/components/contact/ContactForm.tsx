@@ -87,7 +87,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess }) => {
               onBlur={handleBlur}
               placeholder=" "
               required
-              className="focus:ring-0"
+              className="focus:ring-0 w-full"
             />
             <label htmlFor="name">Nome</label>
           </div>
@@ -103,7 +103,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess }) => {
               onBlur={handleBlur}
               placeholder=" "
               required
-              className="focus:ring-0"
+              className="focus:ring-0 w-full"
             />
             <label htmlFor="email">E-mail</label>
           </div>
@@ -120,7 +120,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess }) => {
               onFocus={() => handleFocus('phone')}
               onBlur={handleBlur}
               placeholder=" "
-              className="focus:ring-0"
+              className="focus:ring-0 w-full"
             />
             <label htmlFor="phone">Telefone</label>
           </div>
@@ -136,7 +136,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess }) => {
               onBlur={handleBlur}
               placeholder=" "
               required
-              className="focus:ring-0"
+              className="focus:ring-0 w-full"
             />
             <label htmlFor="subject">Assunto</label>
           </div>
@@ -152,7 +152,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess }) => {
             onBlur={handleBlur}
             placeholder=" "
             required
-            className="focus:ring-0 h-full min-h-[120px]"
+            className="focus:ring-0 h-full min-h-[120px] resize-none w-full"
           ></textarea>
           <label htmlFor="message">Mensagem</label>
         </div>

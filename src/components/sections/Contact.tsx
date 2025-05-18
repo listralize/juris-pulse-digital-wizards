@@ -69,7 +69,7 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="py-24 bg-white relative min-h-screen w-full"
+      className="py-24 bg-white relative w-full"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-0"></div>
       
