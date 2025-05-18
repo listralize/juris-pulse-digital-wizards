@@ -23,7 +23,6 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
   
   const sections = [
     { id: 'home', component: Hero },
@@ -38,39 +37,57 @@ const Index = () => {
   const transitionToSection = (id: string) => {
     if (isTransitioning) return;
     
-    const sectionIndex = sections.findIndex(section => section.id === id);
-    if (sectionIndex === -1) return;
+    const targetIndex = sections.findIndex(section => section.id === id);
+    if (targetIndex === -1) return;
     
     setIsTransitioning(true);
-    
-    const targetSection = sectionsRef.current[sectionIndex];
-    if (!targetSection) {
-      setIsTransitioning(false);
-      return;
-    }
     
     // Update URL without refreshing page
     window.history.pushState({}, "", `#${id}`);
     
-    // Hide all sections except current and target
-    sectionsRef.current.forEach((section, idx) => {
-      if (section && idx !== sectionIndex) {
-        section.style.display = 'none';
-      }
-    });
+    // Get the current visible section index
+    const currentIndex = sections.findIndex(section => section.id === activeSection);
     
-    // Show target section
+    // Determine the direction of transition (up or down)
+    const direction = targetIndex > currentIndex ? 1 : -1;
+    
+    // Get target section element
+    const targetSection = sectionsRef.current[targetIndex];
+    const currentSection = sectionsRef.current[currentIndex];
+    
+    if (!targetSection || !currentSection) {
+      setIsTransitioning(false);
+      return;
+    }
+    
+    // Make target section visible but position it off-screen
     targetSection.style.display = 'block';
     
     // Animate transition
     gsap.fromTo(
-      targetSection,
-      { opacity: 0, y: 20 },
+      currentSection,
+      { y: 0, opacity: 1 },
       { 
-        opacity: 1, 
-        y: 0,
-        duration: 0.7,
-        ease: "power3.out",
+        y: -100 * direction, 
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => {
+          // Hide current section after animation
+          currentSection.style.display = 'none';
+        }
+      }
+    );
+    
+    gsap.fromTo(
+      targetSection,
+      { y: 100 * direction, opacity: 0 },
+      { 
+        y: 0, 
+        opacity: 1,
+        duration: 0.5,
+        delay: 0.3, // Slight delay for better transition feel
+        ease: "power2.out",
         onComplete: () => {
           setActiveSection(id);
           setIsTransitioning(false);
@@ -83,7 +100,8 @@ const Index = () => {
   useEffect(() => {
     // Set initial active section based on URL hash
     const initialHash = window.location.hash.substring(1);
-    const initialSection = initialHash || 'home';
+    const validIds = sections.map(section => section.id);
+    const initialSection = initialHash && validIds.includes(initialHash) ? initialHash : 'home';
     
     // Hide all sections except initial
     const initialIndex = sections.findIndex(section => section.id === initialSection);
@@ -122,18 +140,21 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSection, isTransitioning]);
   
-  // Handle mousewheel scrolling - Improved for page transition
+  // Handle mousewheel scrolling
   useEffect(() => {
-    let lastScrollTime = 0;
-    const scrollCooldown = 800; // ms between scroll events
+    let isThrottled = false;
+    const throttleDelay = 1000; // ms between scroll events
     
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault(); // Prevent default scrolling
       
-      const currentTime = new Date().getTime();
-      if (currentTime - lastScrollTime < scrollCooldown || isTransitioning) {
-        return;
-      }
+      if (isThrottled || isTransitioning) return;
+      
+      // Set throttle flag
+      isThrottled = true;
+      setTimeout(() => {
+        isThrottled = false;
+      }, throttleDelay);
       
       // Determine scroll direction
       const direction = e.deltaY > 0 ? 1 : -1;
@@ -144,7 +165,6 @@ const Index = () => {
       
       // Only proceed if we're changing sections
       if (targetIndex !== currentIndex) {
-        lastScrollTime = currentTime;
         transitionToSection(sections[targetIndex].id);
       }
     };
@@ -183,40 +203,37 @@ const Index = () => {
       }
     };
     
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('touchstart', handleTouchStart, { passive: true });
-      container.addEventListener('touchend', handleTouchEnd, { passive: true });
-    }
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
     
     return () => {
-      if (container) {
-        container.removeEventListener('touchstart', handleTouchStart);
-        container.removeEventListener('touchend', handleTouchEnd);
-      }
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
     };
   }, [activeSection, isTransitioning]);
   
   return (
-    <div ref={containerRef} className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       <CustomCursor />
       <Sidebar activeSection={activeSection} onSectionChange={transitionToSection} />
       <WhatsAppButton />
       
-      {sections.map((section, index) => {
-        const Component = section.component;
-        return (
-          <div 
-            key={section.id} 
-            id={section.id} 
-            ref={el => el && (sectionsRef.current[index] = el)}
-            className="min-h-screen w-full page-transition"
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          >
-            <Component />
-          </div>
-        );
-      })}
+      <div className="relative min-h-screen w-full">
+        {sections.map((section, index) => {
+          const Component = section.component;
+          return (
+            <div 
+              key={section.id} 
+              id={section.id} 
+              ref={el => el && (sectionsRef.current[index] = el)}
+              className="absolute inset-0 min-h-screen w-full"
+              style={{ display: index === 0 ? 'block' : 'none' }}
+            >
+              <Component />
+            </div>
+          );
+        })}
+      </div>
       
       <Footer />
     </div>
