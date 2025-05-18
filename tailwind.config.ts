@@ -104,6 +104,14 @@ export default {
 					'0%': { transform: 'translateX(100%)' },
 					'100%': { transform: 'translateX(0)' }
 				},
+				'pulse-subtle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
+				},
+				'scale-in-out': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' }
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -112,9 +120,20 @@ export default {
 				'fade-up': 'fade-up 0.8s ease-out forwards',
 				'stretch': 'stretch 0.8s ease-out forwards',
 				'slide-right': 'slide-right 0.8s ease-out forwards',
-				'slide-left': 'slide-left 0.8s ease-out forwards'
+				'slide-left': 'slide-left 0.8s ease-out forwards',
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
+				'scale-in-out': 'scale-in-out 4s ease-in-out infinite',
 			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
+	corePlugins: {
+		preflight: true,
+	},
+	// Add utilities for handling scrollbars
+	safelist: [
+		{
+			pattern: /no-scrollbar/,
+		}
+	],
 } satisfies Config;

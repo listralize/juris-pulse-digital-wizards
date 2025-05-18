@@ -37,10 +37,10 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initial app loading
+    // Initial app loading with longer animation to appreciate the loading screen
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 3000);
     
     return () => clearTimeout(timer);
   }, []);

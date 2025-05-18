@@ -73,10 +73,10 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         </section>
         
         {/* Areas navigation - fixed with overflow handling */}
-        <section className={`py-6 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-20 z-40 w-full`}>
+        <section className={`py-6 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-[89px] z-40 w-full`}>
           <div className="max-w-6xl mx-auto">
-            <div className="overflow-x-auto scrollbar-hide -mx-2">
-              <div className="inline-flex space-x-2 py-2 px-2 min-w-full">
+            <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+              <div className="inline-flex space-x-2 py-2 px-2 min-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {practiceAreas.map((area) => (
                   <Link 
                     key={area.id}

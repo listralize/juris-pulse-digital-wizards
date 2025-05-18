@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
@@ -10,6 +10,23 @@ const Navbar = () => {
   const location = useLocation();
   const isDark = theme === 'dark';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+
+  useEffect(() => {
+    // Set active section based on path
+    const path = location.pathname;
+    if (path === '/') {
+      setActiveSection('home');
+    } else if (path.includes('#about') || path.includes('sobre')) {
+      setActiveSection('about');
+    } else if (path.includes('#contact') || path.includes('contato')) {
+      setActiveSection('contact');
+    } else if (['/familia', '/tributario', '/empresarial', '/trabalho', 
+               '/constitucional', '/administrativo', '/previdenciario', 
+               '/consumidor'].includes(path)) {
+      setActiveSection('areas');
+    }
+  }, [location]);
 
   const practiceAreas = [
     { id: 'familia', label: 'Família', path: '/familia' },
@@ -30,6 +47,22 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Handle smooth scrolling for anchor links
+  const scrollToSection = (sectionId: string) => {
+    setIsMenuOpen(false);
+    
+    if (location.pathname !== '/') {
+      // Navigate to home first with the hash
+      window.location.href = `/${sectionId}`;
+      return;
+    }
+    
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav className={`${isDark ? 'bg-black' : 'bg-white'} py-6 border-b ${isDark ? 'border-white/10' : 'border-black/10'} sticky top-0 z-50 w-full`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,7 +81,7 @@ const Navbar = () => {
             <Link 
               to="/" 
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                isActiveRoute('/') 
+                activeSection === 'home'
                   ? (isDark ? 'border-white text-white' : 'border-black text-black') 
                   : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
               }`}
@@ -60,7 +93,7 @@ const Navbar = () => {
               <Link 
                 to="#" 
                 className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                  practiceAreas.some(area => location.pathname === area.path)
+                  activeSection === 'areas'
                     ? (isDark ? 'border-white text-white' : 'border-black text-black') 
                     : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
                 }`}
@@ -82,27 +115,35 @@ const Navbar = () => {
               </div>
             </div>
             
-            <Link 
-              to="/#about" 
+            <a 
+              href="/#about" 
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('about');
+              }}
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                location.pathname.includes('about') 
+                activeSection === 'about'
                   ? (isDark ? 'border-white text-white' : 'border-black text-black') 
                   : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
               }`}
             >
               Sobre
-            </Link>
+            </a>
             
-            <Link 
-              to="/#contact" 
+            <a 
+              href="/#contact" 
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('contact');
+              }}
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                location.pathname.includes('contact') 
+                activeSection === 'contact'
                   ? (isDark ? 'border-white text-white' : 'border-black text-black') 
                   : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
               }`}
             >
               Contato
-            </Link>
+            </a>
           </div>
 
           {/* Mobile menu button */}
@@ -147,7 +188,7 @@ const Navbar = () => {
             <div className={`pt-2 pb-4 space-y-1 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
               <Link 
                 to="/" 
-                className={`block px-3 py-2 rounded-md ${isActiveRoute('/') 
+                className={`block px-3 py-2 rounded-md ${activeSection === 'home'
                   ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
                   : ''} font-medium`}
                 onClick={() => setIsMenuOpen(false)}
@@ -174,21 +215,39 @@ const Navbar = () => {
                 </div>
               </div>
               
-              <Link 
-                to="/#about" 
+              <a 
+                href="/#about"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('about');
+                }}
                 className="block px-3 py-2 rounded-md font-medium"
-                onClick={() => setIsMenuOpen(false)}
               >
                 Sobre
-              </Link>
+              </a>
               
-              <Link 
-                to="/#contact" 
+              <a 
+                href="/#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('contact');
+                }}
                 className="block px-3 py-2 rounded-md font-medium"
-                onClick={() => setIsMenuOpen(false)}
               >
                 Contato
-              </Link>
+              </a>
+              
+              <div className="px-3 py-2">
+                <Toggle 
+                  aria-label="Toggle theme"
+                  pressed={isDark}
+                  onPressedChange={toggleTheme}
+                  className={`rounded-full p-2 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'} w-full justify-start`}
+                >
+                  <span className="mr-2">{isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</span>
+                  <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
+                </Toggle>
+              </div>
             </div>
           </div>
         )}
