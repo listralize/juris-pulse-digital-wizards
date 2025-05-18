@@ -19,6 +19,7 @@ const ConstitucionalPage = () => {
     <PracticeAreaLayout
       title="Direito Constitucional"
       description="Trata das leis fundamentais que regem um país, incluindo a Constituição. Essa área abrange a estrutura do governo, os direitos individuais e coletivos, a organização dos poderes e as garantias fundamentais."
+      currentArea="constitucional"
     >
       <div className="mt-12">
         <h2 className="text-2xl md:text-3xl font-canela mb-6">Serviços Oferecidos</h2>
