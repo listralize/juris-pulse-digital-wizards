@@ -143,35 +143,41 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSection, isScrolling]);
   
-  // Handle mousewheel scrolling
+  // Handle mousewheel scrolling - Modified to fix issues
   useEffect(() => {
-    let wheelTimeout: NodeJS.Timeout;
+    let wheelTimer: number | null = null;
+    let lastScrollTime = 0;
+    const scrollCooldown = 800; // ms between scroll events
     
     const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
+      const currentTime = new Date().getTime();
       
-      if (isScrolling) return;
+      if (currentTime - lastScrollTime < scrollCooldown) {
+        e.preventDefault();
+        return;
+      }
       
-      // Clear any existing timeout
-      clearTimeout(wheelTimeout);
+      // Determine scroll direction
+      const direction = e.deltaY > 0 ? 1 : -1;
       
-      // Set a timeout to prevent rapid scrolling
-      wheelTimeout = setTimeout(() => {
-        const currentIndex = sections.findIndex(section => section.id === activeSection);
-        const direction = e.deltaY > 0 ? 1 : -1;
-        const targetIndex = Math.min(Math.max(currentIndex + direction, 0), sections.length - 1);
+      // Find current and target section index
+      const currentIndex = sections.findIndex(section => section.id === activeSection);
+      const targetIndex = Math.min(Math.max(currentIndex + direction, 0), sections.length - 1);
+      
+      // Only proceed if we're changing sections
+      if (targetIndex !== currentIndex && !isScrolling) {
+        e.preventDefault();
         
-        if (targetIndex !== currentIndex) {
-          scrollToSection(sections[targetIndex].id);
-        }
-      }, 50);
+        lastScrollTime = currentTime;
+        scrollToSection(sections[targetIndex].id);
+      }
     };
     
     window.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
       window.removeEventListener('wheel', handleWheel);
-      clearTimeout(wheelTimeout);
+      if (wheelTimer) clearTimeout(wheelTimer);
     };
   }, [activeSection, isScrolling]);
   
@@ -188,7 +194,7 @@ const Index = () => {
             key={section.id} 
             id={section.id} 
             ref={el => el && (sectionsRef.current[index] = el)}
-            className="min-h-screen w-full snap-start"
+            className="min-h-screen w-full"
           >
             <Component />
           </div>

@@ -28,6 +28,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Handle smooth scrolling
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      window.location.hash = id;
+    }
+  };
+
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
       hasScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-transparent'
@@ -41,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
                   <a
                     key={item.id}
                     href={item.href}
+                    onClick={(e) => handleNavClick(e, item.id)}
                     className={`relative px-3 py-2 text-sm font-medium group transition-all duration-300 ${
                       activeSection === item.id 
                         ? 'text-black' 
@@ -66,6 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
             <a
               key={item.id}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.id)}
               className={`whitespace-nowrap px-3 py-2 text-sm font-medium ${
                 activeSection === item.id 
                   ? 'text-black border-b-2 border-black' 
