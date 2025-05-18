@@ -72,22 +72,25 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
           </div>
         </section>
         
-        <section className={`py-6 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-20 z-40`}>
-          <div className="max-w-6xl mx-auto overflow-x-auto scrollbar-hide">
-            <div className="flex space-x-4 py-2">
-              {practiceAreas.map((area) => (
-                <Link 
-                  key={area.id}
-                  to={area.path}
-                  className={`px-6 py-2 whitespace-nowrap rounded-full transition-colors duration-300 ${
-                    currentArea === area.id 
-                      ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
-                      : (isDark ? 'text-white/70 hover:text-white bg-white/10 hover:bg-white/20' : 'text-black/70 hover:text-black bg-black/10 hover:bg-black/20')
-                  }`}
-                >
-                  {area.label}
-                </Link>
-              ))}
+        {/* Areas navigation - fixed with overflow handling */}
+        <section className={`py-6 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-20 z-40 w-full`}>
+          <div className="max-w-6xl mx-auto">
+            <div className="overflow-x-auto scrollbar-hide -mx-2">
+              <div className="inline-flex space-x-2 py-2 px-2 min-w-full">
+                {practiceAreas.map((area) => (
+                  <Link 
+                    key={area.id}
+                    to={area.path}
+                    className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
+                      currentArea === area.id 
+                        ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
+                        : (isDark ? 'text-white/70 hover:text-white bg-white/10 hover:bg-white/20' : 'text-black/70 hover:text-black bg-black/10 hover:bg-black/20')
+                    }`}
+                  >
+                    {area.label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -100,17 +103,6 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       </main>
       
       <Footer />
-      
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 };

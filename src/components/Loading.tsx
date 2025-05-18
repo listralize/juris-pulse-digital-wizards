@@ -22,20 +22,48 @@ const Loading = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
-      {/* Marble background with overlay */}
+      {/* Marble-like background effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ 
-          backgroundImage: `url('/lovable-uploads/36d1e670-c31a-4c66-ae2f-dfb952037683.png')`,
-          opacity: isDark ? 0.7 : 0.9
-        }}
+        className={`absolute inset-0 ${isDark ? 'bg-black' : 'bg-white'}`}
       />
       
-      {/* Dark overlay for better contrast */}
-      <div 
-        className={`absolute inset-0 ${isDark ? 'bg-black/70' : 'bg-white/30'}`} 
-        style={{ backdropFilter: 'blur(5px)' }}
-      />
+      {/* Marble veins effect */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-0 left-0 w-full h-full">
+          {[...Array(8)].map((_, i) => (
+            <div 
+              key={i} 
+              className={`absolute ${isDark ? 'bg-white/30' : 'bg-black/10'}`}
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                height: `${Math.random() * 40 + 10}%`,
+                width: `${Math.random() * 1 + 0.2}%`,
+                transform: `rotate(${Math.random() * 360}deg)`,
+                borderRadius: '50%',
+                filter: 'blur(8px)',
+                opacity: 0.6
+              }}
+            />
+          ))}
+          {[...Array(15)].map((_, i) => (
+            <div 
+              key={`vein-${i}`} 
+              className={`absolute ${isDark ? 'bg-white/20' : 'bg-black/5'}`}
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                height: `${Math.random() * 20 + 5}%`,
+                width: `${Math.random() * 0.8 + 0.1}%`,
+                transform: `rotate(${Math.random() * 360}deg)`,
+                borderRadius: '50%',
+                filter: 'blur(4px)',
+                opacity: Math.random() * 0.5 + 0.2
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center">

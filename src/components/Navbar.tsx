@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
@@ -9,6 +9,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const isDark = theme === 'dark';
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const practiceAreas = [
     { id: 'familia', label: 'Família', path: '/familia' },
@@ -23,6 +24,10 @@ const Navbar = () => {
 
   const isActiveRoute = (path: string) => {
     return location.pathname === path;
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
@@ -55,7 +60,7 @@ const Navbar = () => {
               <Link 
                 to="#" 
                 className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                  location.pathname.includes('/') && !isActiveRoute('/') && !location.pathname.includes('contact') && !location.pathname.includes('about')
+                  practiceAreas.some(area => location.pathname === area.path)
                     ? (isDark ? 'border-white text-white' : 'border-black text-black') 
                     : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
                 }`}
@@ -100,6 +105,30 @@ const Navbar = () => {
             </Link>
           </div>
 
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className={`p-2 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
+            >
+              <span className="sr-only">Open menu</span>
+              <svg
+                className="h-6 w-6"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                />
+              </svg>
+            </button>
+          </div>
+
           <div className="flex items-center space-x-4">
             <Toggle 
               aria-label="Toggle theme"
@@ -111,6 +140,58 @@ const Navbar = () => {
             </Toggle>
           </div>
         </div>
+        
+        {/* Mobile menu, show/hide based on menu state */}
+        {isMenuOpen && (
+          <div className="md:hidden">
+            <div className={`pt-2 pb-4 space-y-1 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+              <Link 
+                to="/" 
+                className={`block px-3 py-2 rounded-md ${isActiveRoute('/') 
+                  ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
+                  : ''} font-medium`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              
+              <div className="relative space-y-1">
+                <p className="block px-3 py-2 font-medium">Áreas de Atuação</p>
+                <div className="pl-6 space-y-1">
+                  {practiceAreas.map((area) => (
+                    <Link 
+                      key={area.id} 
+                      to={area.path} 
+                      className={`block px-3 py-2 rounded-md ${
+                        isActiveRoute(area.path) 
+                        ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
+                        : ''} font-medium`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {area.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              
+              <Link 
+                to="/#about" 
+                className="block px-3 py-2 rounded-md font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sobre
+              </Link>
+              
+              <Link 
+                to="/#contact" 
+                className="block px-3 py-2 rounded-md font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contato
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
