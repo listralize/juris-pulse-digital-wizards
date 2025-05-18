@@ -17,14 +17,18 @@ const Navbar = () => {
     const path = location.pathname;
     if (path === '/') {
       setActiveSection('home');
-    } else if (path.includes('#about') || path.includes('sobre')) {
+    } else if (path.includes('sobre') || path === '/#about') {
       setActiveSection('about');
-    } else if (path.includes('#contact') || path.includes('contato')) {
+    } else if (path.includes('contato') || path === '/#contact') {
       setActiveSection('contact');
     } else if (['/familia', '/tributario', '/empresarial', '/trabalho', 
                '/constitucional', '/administrativo', '/previdenciario', 
                '/consumidor'].includes(path)) {
       setActiveSection('areas');
+    } else if (path.includes('socios')) {
+      setActiveSection('socios');
+    } else if (path.includes('cliente')) {
+      setActiveSection('cliente');
     }
   }, [location]);
 
@@ -62,6 +66,20 @@ const Navbar = () => {
       section.scrollIntoView({ behavior: 'smooth' });
     }
   };
+  
+  // Navigate to section on home page or specific page
+  const handleNavigation = (sectionId: string, path: string) => {
+    setIsMenuOpen(false);
+    
+    if (location.pathname === '/') {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      window.location.href = path;
+    }
+  };
 
   return (
     <nav className={`${isDark ? 'bg-black' : 'bg-white'} py-6 border-b ${isDark ? 'border-white/10' : 'border-black/10'} sticky top-0 z-50 w-full`}>
@@ -72,7 +90,7 @@ const Navbar = () => {
               <img 
                 src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
                 alt="Serafim & Trombela Advocacia Logo" 
-                className="h-20 transform transition-transform hover:scale-105"
+                className="h-20 object-contain transform transition-transform hover:scale-105"
               />
             </Link>
           </div>
@@ -119,7 +137,7 @@ const Navbar = () => {
               href="/#about" 
               onClick={(e) => {
                 e.preventDefault();
-                scrollToSection('about');
+                handleNavigation('about', '/#about');
               }}
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
                 activeSection === 'about'
@@ -130,11 +148,41 @@ const Navbar = () => {
               Sobre
             </a>
             
+            <Link
+              to="/#socios"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation('socios', '/#socios');
+              }}
+              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                activeSection === 'socios'
+                  ? (isDark ? 'border-white text-white' : 'border-black text-black') 
+                  : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+              }`}
+            >
+              Sócios
+            </Link>
+            
+            <Link
+              to="/#cliente"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation('cliente', '/#cliente');
+              }}
+              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                activeSection === 'cliente'
+                  ? (isDark ? 'border-white text-white' : 'border-black text-black') 
+                  : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+              }`}
+            >
+              Cliente
+            </Link>
+            
             <a 
               href="/#contact" 
               onClick={(e) => {
                 e.preventDefault();
-                scrollToSection('contact');
+                handleNavigation('contact', '/#contact');
               }}
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
                 activeSection === 'contact'
@@ -146,30 +194,6 @@ const Navbar = () => {
             </a>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMenu}
-              className={`p-2 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
-            >
-              <span className="sr-only">Open menu</span>
-              <svg
-                className="h-6 w-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                />
-              </svg>
-            </button>
-          </div>
-
           <div className="flex items-center space-x-4">
             <Toggle 
               aria-label="Toggle theme"
@@ -179,6 +203,30 @@ const Navbar = () => {
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Toggle>
+            
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={toggleMenu}
+                className={`p-2 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
+              >
+                <span className="sr-only">Open menu</span>
+                <svg
+                  className="h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         
@@ -219,18 +267,40 @@ const Navbar = () => {
                 href="/#about"
                 onClick={(e) => {
                   e.preventDefault();
-                  scrollToSection('about');
+                  handleNavigation('about', '/#about');
                 }}
                 className="block px-3 py-2 rounded-md font-medium"
               >
                 Sobre
               </a>
               
+              <Link
+                to="/#socios"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation('socios', '/#socios');
+                }}
+                className="block px-3 py-2 rounded-md font-medium"
+              >
+                Sócios
+              </Link>
+              
+              <Link
+                to="/#cliente"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation('cliente', '/#cliente');
+                }}
+                className="block px-3 py-2 rounded-md font-medium"
+              >
+                Cliente
+              </Link>
+              
               <a 
                 href="/#contact"
                 onClick={(e) => {
                   e.preventDefault();
-                  scrollToSection('contact');
+                  handleNavigation('contact', '/#contact');
                 }}
                 className="block px-3 py-2 rounded-md font-medium"
               >

@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Mail } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -77,6 +76,7 @@ const Partners = () => {
 
   return (
     <section 
+      id="socios"
       ref={sectionRef}
       className="min-h-screen w-full flex flex-col justify-center items-center bg-gray-50 py-16 px-4"
     >
@@ -100,7 +100,7 @@ const Partners = () => {
                       <img 
                         src={partner.image} 
                         alt={partner.name} 
-                        className="w-full h-full object-cover object-center"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                     

@@ -12,7 +12,7 @@ const Footer = () => {
             <img 
               src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
               alt="Serafim & Trombela Advocacia Logo"
-              className="h-16 mb-4"
+              className="h-20 mb-4 object-contain"
             />
             <p className="text-gray-600 font-satoshi max-w-sm">
               Soluções jurídicas inovadoras com foco em resultados. Nossa equipe está pronta para atender suas necessidades.
