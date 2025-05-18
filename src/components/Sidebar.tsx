@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useSectionTransition } from '../hooks/useSectionTransition';
 
 interface SidebarProps {
   activeSection: string;
