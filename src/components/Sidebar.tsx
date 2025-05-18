@@ -44,8 +44,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
       hasScrolled 
         ? (isDark 
-            ? 'bg-black/90 backdrop-blur-md shadow-md' 
-            : 'bg-white/90 backdrop-blur-md shadow-sm') 
+            ? 'bg-black/90 backdrop-blur-md border-b border-gray-800' 
+            : 'bg-white/90 backdrop-blur-md border-b border-gray-100') 
         : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4">

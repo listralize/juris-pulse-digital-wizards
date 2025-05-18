@@ -44,17 +44,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.style.backgroundColor = '#ffffff';
         document.body.style.backgroundColor = '#ffffff';
       }
-      
-      console.log(`Theme applied: ${theme}`);
     }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      console.log(`Toggling theme from ${prevTheme} to ${newTheme}`);
-      return newTheme;
-    });
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
   return (

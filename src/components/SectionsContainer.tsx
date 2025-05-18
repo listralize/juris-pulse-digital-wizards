@@ -45,10 +45,10 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
             ref={el => el && (sectionsRef.current[index] = el)}
           >
             <Component />
+            {section.id === 'contact' && <Footer />}
           </Section>
         );
       })}
-      {activeSection === 'contact' && <Footer />}
     </div>
   );
 };

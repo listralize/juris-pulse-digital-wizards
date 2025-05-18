@@ -20,17 +20,15 @@ const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) =>
       onPressedChange={toggleTheme}
       className={`rounded-full p-2 transition-all hover:scale-105 
         ${isDark 
-          ? 'bg-white/20 text-white hover:bg-white/30 shadow-glow' 
+          ? 'bg-white/10 text-yellow-300 hover:bg-white/20' 
           : 'bg-black/10 text-black hover:bg-black/20'
         } ${className}`}
     >
-      <span className="mr-2">
-        {isDark 
-          ? <Sun className="h-5 w-5 text-yellow-300" /> 
-          : <Moon className="h-5 w-5" />
-        }
-      </span>
-      {showLabel && <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>}
+      {isDark 
+        ? <Sun className="h-5 w-5" /> 
+        : <Moon className="h-5 w-5" />
+      }
+      {showLabel && <span className="ml-2">{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>}
       <span className="sr-only">{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
     </Toggle>
   );

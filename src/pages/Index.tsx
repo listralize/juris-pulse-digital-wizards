@@ -22,7 +22,7 @@ const Index = () => {
   };
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'} transition-colors duration-300`}>
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-300`}>
       <CustomCursor />
       <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <WhatsAppButton />

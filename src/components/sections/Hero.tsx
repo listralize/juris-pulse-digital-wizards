@@ -68,13 +68,13 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <section id="home" className="min-h-screen flex flex-col items-center pt-24 md:pt-16 justify-center px-6 relative overflow-hidden">
       {/* Dynamic background with parallax effect */}
       <div ref={bgRef} className="absolute inset-0 z-0">
         <div className={`absolute inset-0 ${
           isDark 
-            ? 'bg-gradient-to-br from-black to-gray-900 opacity-90' 
-            : 'bg-gradient-to-br from-white to-gray-100 opacity-90'
+            ? 'bg-black' 
+            : 'bg-white'
         }`}></div>
         <div className={`absolute top-[20%] left-[20%] w-96 h-96 rounded-full ${
           isDark 
@@ -89,7 +89,7 @@ const Hero = () => {
       </div>
       
       <div className="relative z-10 text-center max-w-4xl">
-        <div ref={logoRef} className="mb-12 w-full max-w-xs md:max-w-sm mx-auto">
+        <div ref={logoRef} className="mb-8 w-full max-w-xs md:max-w-sm mx-auto">
           <img 
             src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
             alt="Serafim & Trombela Advocacia Logo"
@@ -97,15 +97,15 @@ const Hero = () => {
           />
         </div>
         
-        <h1 ref={headlineRef} className={`text-4xl md:text-6xl lg:text-7xl mb-6 text-center max-w-3xl mx-auto font-canela tracking-tight ${
-          isDark ? 'text-gradient' : 'gradient-text'
+        <h1 ref={headlineRef} className={`text-4xl md:text-6xl lg:text-7xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight ${
+          isDark ? 'text-white' : 'text-black'
         }`}>
           Soluções Jurídicas Inovadoras
         </h1>
         
         <p ref={subheadlineRef} className={`text-lg md:text-xl ${
           isDark ? 'text-gray-300' : 'text-gray-700'
-        } mb-12 text-center max-w-lg mx-auto font-satoshi`}>
+        } mb-8 text-center max-w-lg mx-auto font-satoshi`}>
           Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
         </p>
         
