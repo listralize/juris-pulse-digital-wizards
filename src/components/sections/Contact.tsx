@@ -7,11 +7,14 @@ import ContactForm from '../contact/ContactForm';
 import SuccessMessage from '../contact/SuccessMessage';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
+import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -19,7 +22,7 @@ const Contact = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Remove pin behavior and just animate the elements
+    // Animation for the elements
     if (titleRef.current && formContainerRef.current && mapRef.current) {
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -69,19 +72,19 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="py-24 bg-white dark:bg-black relative w-full min-h-screen overflow-y-auto"
+      className={`py-16 relative w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white dark:from-black dark:via-gray-900 dark:to-black opacity-50 z-0"></div>
+      <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-b from-black via-gray-900 to-black' : 'bg-gradient-to-b from-white via-gray-50 to-white'} opacity-50 z-0`}></div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col">
-        <div ref={titleRef} className="mb-12 relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl mb-4 font-canela gradient-text dark:text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
+        <div ref={titleRef} className="mb-10 relative z-10">
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'gradient-text'}`}>
             Contato
           </h2>
-          <div className="h-1 w-16 bg-black dark:bg-white"></div>
+          <div className={`h-1 w-16 ${isDark ? 'bg-white' : 'bg-black'}`}></div>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-16 mb-20">
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-12 mb-10">
           <div ref={formContainerRef} className="md:w-1/2 z-10">
             {formSubmitted ? (
               <SuccessMessage onNewMessage={handleNewMessage} />
@@ -92,7 +95,7 @@ const Contact = () => {
           
           <div ref={mapRef} className="md:w-1/2 z-10 flex flex-col">
             <ContactInfo />
-            <div className="mt-8 flex-grow">
+            <div className="mt-6 flex-grow">
               <LocationMap />
             </div>
           </div>

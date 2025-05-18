@@ -8,7 +8,6 @@ import CustomCursor from '../components/CustomCursor';
 import Sidebar from '../components/Sidebar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
-import Footer from '../components/sections/Footer';
 import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -29,8 +28,6 @@ const Index = () => {
       <WhatsAppButton />
       
       <SectionsContainer onActiveChange={handleSectionChange} />
-      
-      <Footer />
     </div>
   );
 };

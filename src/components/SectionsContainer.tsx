@@ -10,6 +10,7 @@ import PracticeAreas from './sections/PracticeAreas';
 import Partners from './sections/Partners';
 import ClientArea from './sections/ClientArea';
 import Contact from './sections/Contact';
+import Footer from './sections/Footer';
 
 interface SectionsContainerProps {
   onActiveChange: (sectionId: string) => void;
@@ -47,6 +48,7 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
           </Section>
         );
       })}
+      {activeSection === 'contact' && <Footer />}
     </div>
   );
 };
