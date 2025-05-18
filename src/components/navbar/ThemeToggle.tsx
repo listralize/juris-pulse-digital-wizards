@@ -18,7 +18,7 @@ const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) =>
       aria-label="Alternar tema"
       pressed={isDark}
       onPressedChange={toggleTheme}
-      className={`rounded-full p-2 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'} ${className}`}
+      className={`rounded-full p-2 transition-all hover:scale-105 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'} ${className}`}
     >
       <span className="mr-2">{isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</span>
       {showLabel && <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>}

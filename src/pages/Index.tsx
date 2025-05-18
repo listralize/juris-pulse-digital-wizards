@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -9,11 +9,13 @@ import Sidebar from '../components/Sidebar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
 import Footer from '../components/sections/Footer';
+import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
+  const { theme } = useTheme();
   
   const handleSectionChange = (sectionId: string) => {
     setActiveSection(sectionId);
