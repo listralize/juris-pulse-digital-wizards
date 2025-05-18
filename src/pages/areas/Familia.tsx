@@ -45,21 +45,17 @@ const FamiliaPage = () => {
       description="É uma área do direito que lida com questões relacionadas às relações familiares, incluindo casamento, divórcio, guarda de crianças, pensão alimentícia, adoção, proteção de menores, entre outras."
       currentArea="familia"
     >
-      <div className="mt-8 md:mt-16">
-        <h2 className="text-3xl md:text-4xl font-canela mb-8 inline-block bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-          Serviços Especializados
-        </h2>
+      <h2 className="text-4xl font-canela mb-16">Serviços Especializados</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-          {services.map((service, index) => (
-            <Card key={index} className="service-card bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
-              <CardContent className="p-6 md:p-8">
-                <h3 className="text-xl md:text-2xl font-canela mb-3 text-white">{service.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{service.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {services.map((service, index) => (
+          <Card key={index} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-canela mb-4 text-white">{service.title}</h3>
+              <p className="text-gray-300 leading-relaxed">{service.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </PracticeAreaLayout>
   );
