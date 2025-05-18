@@ -16,6 +16,7 @@ const ThemeToggle = () => {
       className={`rounded-full p-2 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'}`}
     >
       {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      <span className="sr-only">{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
     </Toggle>
   );
 };

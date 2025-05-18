@@ -19,9 +19,16 @@ const Contact = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Remove pinning to ensure the section is fully visible
+    // Remove pin behavior and just animate the elements
     if (titleRef.current && formContainerRef.current && mapRef.current) {
-      const tl = gsap.timeline();
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top bottom-=100",
+          end: "bottom bottom",
+          toggleActions: "play none none none"
+        }
+      });
       
       tl.fromTo(
         titleRef.current,
@@ -45,6 +52,7 @@ const Contact = () => {
     }
     
     return () => {
+      // Clean up all ScrollTrigger instances to avoid memory leaks
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
     };
   }, []);
@@ -61,7 +69,7 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="py-24 bg-white relative"
+      className="py-24 bg-white relative min-h-screen w-full"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-0"></div>
       

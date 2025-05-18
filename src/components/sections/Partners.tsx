@@ -9,15 +9,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const partners = [
   {
-    id: 'serafim',
-    name: 'Dr. Vinicius Serafim',
-    title: 'Advogado',
-    oab: 'OAB/GO: 67.790',
-    email: 'serafim@stadv.com',
-    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
-    description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
-  },
-  {
     id: 'trombela',
     name: 'Dr. Enzo Trombela',
     title: 'Advogado',
@@ -25,6 +16,15 @@ const partners = [
     email: 'trombela@stadv.com',
     image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
     description: 'Atuação em Direito Civil e Contratual, com foco em soluções jurídicas para empresas e pessoas físicas.'
+  },
+  {
+    id: 'serafim',
+    name: 'Dr. Vinicius Serafim',
+    title: 'Advogado',
+    oab: 'OAB/GO: 67.790',
+    email: 'serafim@stadv.com',
+    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
+    description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
   }
 ];
 
@@ -33,44 +33,33 @@ const Partners = () => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   
   useEffect(() => {
-    if (sectionRef.current) {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top top',
-        end: '+=100%',
-        pin: true,
-        pinSpacing: true
+    // Remove pinning which might cause layout issues
+    const animateCards = () => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top center",
+          end: "bottom center",
+          toggleActions: "play none none reverse"
+        }
       });
-    }
+      
+      cardsRef.current.forEach((card, index) => {
+        if (card) {
+          tl.fromTo(
+            card,
+            { y: 50, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", delay: index * 0.2 },
+            index > 0 ? "-=0.4" : 0
+          );
+        }
+      });
+    };
+    
+    animateCards();
     
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
-    };
-  }, []);
-  
-  useEffect(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top center",
-        end: "bottom center",
-        toggleActions: "play none none reverse"
-      }
-    });
-    
-    cardsRef.current.forEach((card, index) => {
-      if (card) {
-        tl.fromTo(
-          card,
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", delay: index * 0.2 },
-          index > 0 ? "-=0.4" : 0
-        );
-      }
-    });
-    
-    return () => {
-      tl.kill();
     };
   }, []);
 
@@ -96,7 +85,7 @@ const Partners = () => {
               <CardContent className="p-0">
                 <div className="flex flex-col p-6">
                   <div className="flex flex-col items-center md:items-start md:flex-row gap-6 mb-6">
-                    <div className="w-32 h-32 border-4 border-gray-100 overflow-hidden flex-shrink-0 relative">
+                    <div className="w-32 h-32 rounded-full border-4 border-gray-100 overflow-hidden flex-shrink-0">
                       <img 
                         src={partner.image} 
                         alt={partner.name} 

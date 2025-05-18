@@ -40,7 +40,7 @@ const App = () => {
     // Only show loading screen on initial app load
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 3000);
+    }, 2500); // Reduced loading time for better user experience
     
     return () => clearTimeout(timer);
   }, []);
