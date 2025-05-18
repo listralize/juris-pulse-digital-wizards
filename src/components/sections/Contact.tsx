@@ -19,6 +19,7 @@ const Contact = () => {
   
   const sectionRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const formContainerRef = useRef<HTMLDivElement>(null); // Added separate ref for the container div
   const mapRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   
@@ -41,8 +42,8 @@ const Contact = () => {
     
     // Animate form submission
     const tl = gsap.timeline();
-    if (formRef.current) {
-      tl.to(formRef.current, { 
+    if (formContainerRef.current) {
+      tl.to(formContainerRef.current, { 
         y: -20, 
         opacity: 0, 
         duration: 0.5,
@@ -59,7 +60,7 @@ const Contact = () => {
         }
       });
       
-      tl.to(formRef.current, { 
+      tl.to(formContainerRef.current, { 
         y: 0, 
         opacity: 1, 
         duration: 0.5,
@@ -79,7 +80,7 @@ const Contact = () => {
       });
     }
     
-    if (titleRef.current && formRef.current && mapRef.current) {
+    if (titleRef.current && formContainerRef.current && mapRef.current) {
       // Animate elements on initial load
       const tl = gsap.timeline();
       
@@ -90,7 +91,7 @@ const Contact = () => {
       );
       
       tl.fromTo(
-        formRef.current,
+        formContainerRef.current,
         { x: -50, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
         "-=0.4"
@@ -128,7 +129,7 @@ const Contact = () => {
         <div className="flex flex-col md:flex-row flex-grow gap-8 lg:gap-16">
           <div className="md:w-1/2 z-10">
             {formState.submitted ? (
-              <div ref={formRef} className="h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-sm bg-white/70 shadow-lg border border-gray-100">
+              <div ref={formContainerRef} className="h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-sm bg-white/70 shadow-lg border border-gray-100">
                 <div className="w-16 h-16 mb-6 rounded-full bg-green-50 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -146,102 +147,104 @@ const Contact = () => {
                 </button>
               </div>
             ) : (
-              <form 
-                ref={formRef} 
-                onSubmit={handleSubmit} 
-                className="p-8 backdrop-blur-sm bg-white/70 shadow-lg border border-gray-100 h-full flex flex-col"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? 'border-black' : ''}`}>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formState.name}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('name')}
-                      onBlur={handleBlur}
-                      placeholder=" "
-                      required
-                      className="focus:ring-0"
-                    />
-                    <label htmlFor="name">Nome</label>
+              <div ref={formContainerRef} className="p-8 backdrop-blur-sm bg-white/70 shadow-lg border border-gray-100 h-full flex flex-col">
+                <form 
+                  ref={formRef} 
+                  onSubmit={handleSubmit} 
+                  className="h-full flex flex-col"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? 'border-black' : ''}`}>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formState.name}
+                        onChange={handleChange}
+                        onFocus={() => handleFocus('name')}
+                        onBlur={handleBlur}
+                        placeholder=" "
+                        required
+                        className="focus:ring-0"
+                      />
+                      <label htmlFor="name">Nome</label>
+                    </div>
+                    
+                    <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? 'border-black' : ''}`}>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formState.email}
+                        onChange={handleChange}
+                        onFocus={() => handleFocus('email')}
+                        onBlur={handleBlur}
+                        placeholder=" "
+                        required
+                        className="focus:ring-0"
+                      />
+                      <label htmlFor="email">E-mail</label>
+                    </div>
                   </div>
                   
-                  <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? 'border-black' : ''}`}>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formState.email}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('email')}
-                      onBlur={handleBlur}
-                      placeholder=" "
-                      required
-                      className="focus:ring-0"
-                    />
-                    <label htmlFor="email">E-mail</label>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? 'border-black' : ''}`}>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formState.phone}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('phone')}
-                      onBlur={handleBlur}
-                      placeholder=" "
-                      className="focus:ring-0"
-                    />
-                    <label htmlFor="phone">Telefone</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? 'border-black' : ''}`}>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formState.phone}
+                        onChange={handleChange}
+                        onFocus={() => handleFocus('phone')}
+                        onBlur={handleBlur}
+                        placeholder=" "
+                        className="focus:ring-0"
+                      />
+                      <label htmlFor="phone">Telefone</label>
+                    </div>
+                    
+                    <div className={`input-floating transition-all duration-300 ${formState.focused === 'subject' ? 'border-black' : ''}`}>
+                      <input
+                        type="text"
+                        id="subject"
+                        name="subject"
+                        value={formState.subject}
+                        onChange={handleChange}
+                        onFocus={() => handleFocus('subject')}
+                        onBlur={handleBlur}
+                        placeholder=" "
+                        required
+                        className="focus:ring-0"
+                      />
+                      <label htmlFor="subject">Assunto</label>
+                    </div>
                   </div>
                   
-                  <div className={`input-floating transition-all duration-300 ${formState.focused === 'subject' ? 'border-black' : ''}`}>
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      value={formState.subject}
+                  <div className={`input-floating mb-8 flex-grow transition-all duration-300 ${formState.focused === 'message' ? 'border-black' : ''}`}>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formState.message}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('subject')}
+                      onFocus={() => handleFocus('message')}
                       onBlur={handleBlur}
                       placeholder=" "
                       required
-                      className="focus:ring-0"
-                    />
-                    <label htmlFor="subject">Assunto</label>
+                      className="focus:ring-0 h-full min-h-[120px]"
+                    ></textarea>
+                    <label htmlFor="message">Mensagem</label>
                   </div>
-                </div>
-                
-                <div className={`input-floating mb-8 flex-grow transition-all duration-300 ${formState.focused === 'message' ? 'border-black' : ''}`}>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formState.message}
-                    onChange={handleChange}
-                    onFocus={() => handleFocus('message')}
-                    onBlur={handleBlur}
-                    placeholder=" "
-                    required
-                    className="focus:ring-0 h-full min-h-[120px]"
-                  ></textarea>
-                  <label htmlFor="message">Mensagem</label>
-                </div>
-                
-                <div className="mt-auto">
-                  <button
-                    type="submit"
-                    className="elegant-button w-full md:w-auto hover:scale-105 transform transition-transform"
-                  >
-                    Enviar mensagem
-                  </button>
-                </div>
-              </form>
+                  
+                  <div className="mt-auto">
+                    <button
+                      type="submit"
+                      className="elegant-button w-full md:w-auto hover:scale-105 transform transition-transform"
+                    >
+                      Enviar mensagem
+                    </button>
+                  </div>
+                </form>
+              </div>
             )}
           </div>
           
