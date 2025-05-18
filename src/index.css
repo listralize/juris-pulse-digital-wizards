@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -52,9 +53,8 @@
   }
 
   html {
-    scroll-behavior: smooth;
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden; /* Prevent scrolling */
   }
 
   body {
@@ -63,7 +63,7 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: auto;
+    overflow: hidden; /* Prevent scrolling */
   }
 
   h1, h2, h3, h4 {
@@ -155,8 +155,8 @@
   }
   
   .page-transition {
-    transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1), 
-                opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1), 
+                opacity 0.6s cubic-bezier(0.65, 0, 0.35, 1);
   }
   
   .slide-enter {

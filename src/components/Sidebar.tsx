@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 
 interface SidebarProps {
   activeSection: string;
+  onSectionChange: (id: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => {
   const sidebarItems = [
     { id: 'home', label: 'Home', href: '#home' },
     { id: 'about', label: 'Sobre', href: '#about' },
@@ -28,13 +29,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Handle smooth scrolling
+  // Handle section transition navigation
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
-    const element = document.getElementById(id);
-    if (element) {
-      window.location.hash = id;
-    }
+    onSectionChange(id);
   };
 
   return (

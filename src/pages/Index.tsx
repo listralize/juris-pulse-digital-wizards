@@ -21,8 +21,9 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
-  const [isScrolling, setIsScrolling] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const sections = [
     { id: 'home', component: Hero },
@@ -33,127 +34,104 @@ const Index = () => {
     { id: 'contact', component: Contact }
   ];
   
-  // Function to scroll to section
-  const scrollToSection = (id: string) => {
-    if (isScrolling) return;
+  // Function to transition to a section
+  const transitionToSection = (id: string) => {
+    if (isTransitioning) return;
     
     const sectionIndex = sections.findIndex(section => section.id === id);
     if (sectionIndex === -1) return;
     
-    setIsScrolling(true);
+    setIsTransitioning(true);
     
     const targetSection = sectionsRef.current[sectionIndex];
     if (!targetSection) {
-      setIsScrolling(false);
+      setIsTransitioning(false);
       return;
     }
     
-    gsap.to(window, {
-      duration: 1,
-      scrollTo: {
-        y: targetSection,
-        autoKill: false,
-        offsetY: 0
-      },
-      ease: "power3.inOut",
-      onComplete: () => {
-        setTimeout(() => {
-          setIsScrolling(false);
-          setActiveSection(id);
-          
-          // Update URL without refreshing page
-          window.history.pushState({}, "", `#${id}`);
-        }, 200); // Small delay to prevent rapid scrolling
+    // Update URL without refreshing page
+    window.history.pushState({}, "", `#${id}`);
+    
+    // Hide all sections except current and target
+    sectionsRef.current.forEach((section, idx) => {
+      if (section && idx !== sectionIndex) {
+        section.style.display = 'none';
       }
     });
+    
+    // Show target section
+    targetSection.style.display = 'block';
+    
+    // Animate transition
+    gsap.fromTo(
+      targetSection,
+      { opacity: 0, y: 20 },
+      { 
+        opacity: 1, 
+        y: 0,
+        duration: 0.7,
+        ease: "power3.out",
+        onComplete: () => {
+          setActiveSection(id);
+          setIsTransitioning(false);
+        }
+      }
+    );
   };
   
-  // Handle initial load and hash changes
+  // Handle initial load
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.substring(1);
-      if (hash && !isScrolling) {
-        scrollToSection(hash);
-      }
-    };
-    
     // Set initial active section based on URL hash
     const initialHash = window.location.hash.substring(1);
-    if (initialHash) {
-      setActiveSection(initialHash);
-      setTimeout(() => {
-        scrollToSection(initialHash);
-      }, 500);
-    }
+    const initialSection = initialHash || 'home';
     
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [isScrolling]);
-  
-  // Set up scroll detection and section visibility
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !isScrolling) {
-          const id = entry.target.id;
-          setActiveSection(id);
-          
-          // Update URL without refreshing page
-          if (window.location.hash !== `#${id}`) {
-            window.history.replaceState({}, "", `#${id}`);
-          }
-        }
-      });
-    }, {
-      threshold: 0.6 // More than half of the section must be visible
+    // Hide all sections except initial
+    const initialIndex = sections.findIndex(section => section.id === initialSection);
+    sectionsRef.current.forEach((section, idx) => {
+      if (section) {
+        section.style.display = idx === initialIndex ? 'block' : 'none';
+      }
     });
     
-    // Get all section elements
-    const sectionElements = sectionsRef.current;
-    sectionElements.forEach(section => {
-      if (section) observer.observe(section);
-    });
-    
-    return () => {
-      sectionElements.forEach(section => {
-        if (section) observer.unobserve(section);
-      });
-    };
-  }, [isScrolling]);
+    setActiveSection(initialSection);
+  }, []);
   
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isScrolling) return;
+      if (isTransitioning) return;
       
       const currentIndex = sections.findIndex(section => section.id === activeSection);
       
       if (e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault();
         const nextIndex = Math.min(currentIndex + 1, sections.length - 1);
-        scrollToSection(sections[nextIndex].id);
+        if (nextIndex !== currentIndex) {
+          transitionToSection(sections[nextIndex].id);
+        }
       } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault();
         const prevIndex = Math.max(currentIndex - 1, 0);
-        scrollToSection(sections[prevIndex].id);
+        if (prevIndex !== currentIndex) {
+          transitionToSection(sections[prevIndex].id);
+        }
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSection, isScrolling]);
+  }, [activeSection, isTransitioning]);
   
-  // Handle mousewheel scrolling - Modified to fix issues
+  // Handle mousewheel scrolling - Improved for page transition
   useEffect(() => {
-    let wheelTimer: number | null = null;
     let lastScrollTime = 0;
     const scrollCooldown = 800; // ms between scroll events
     
     const handleWheel = (e: WheelEvent) => {
-      const currentTime = new Date().getTime();
+      e.preventDefault(); // Prevent default scrolling
       
-      if (currentTime - lastScrollTime < scrollCooldown) {
-        e.preventDefault();
+      const currentTime = new Date().getTime();
+      if (currentTime - lastScrollTime < scrollCooldown || isTransitioning) {
         return;
       }
       
@@ -165,11 +143,9 @@ const Index = () => {
       const targetIndex = Math.min(Math.max(currentIndex + direction, 0), sections.length - 1);
       
       // Only proceed if we're changing sections
-      if (targetIndex !== currentIndex && !isScrolling) {
-        e.preventDefault();
-        
+      if (targetIndex !== currentIndex) {
         lastScrollTime = currentTime;
-        scrollToSection(sections[targetIndex].id);
+        transitionToSection(sections[targetIndex].id);
       }
     };
     
@@ -177,14 +153,54 @@ const Index = () => {
     
     return () => {
       window.removeEventListener('wheel', handleWheel);
-      if (wheelTimer) clearTimeout(wheelTimer);
     };
-  }, [activeSection, isScrolling]);
+  }, [activeSection, isTransitioning]);
+  
+  // Handle touch events for mobile
+  useEffect(() => {
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const minSwipeDistance = 50;
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (isTransitioning) return;
+      
+      touchEndY = e.changedTouches[0].clientY;
+      const distance = touchStartY - touchEndY;
+      
+      if (Math.abs(distance) < minSwipeDistance) return;
+      
+      const direction = distance > 0 ? 1 : -1;
+      const currentIndex = sections.findIndex(section => section.id === activeSection);
+      const targetIndex = Math.min(Math.max(currentIndex + direction, 0), sections.length - 1);
+      
+      if (targetIndex !== currentIndex) {
+        transitionToSection(sections[targetIndex].id);
+      }
+    };
+    
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('touchstart', handleTouchStart, { passive: true });
+      container.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchend', handleTouchEnd);
+      }
+    };
+  }, [activeSection, isTransitioning]);
   
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={containerRef} className="min-h-screen bg-white">
       <CustomCursor />
-      <Sidebar activeSection={activeSection} />
+      <Sidebar activeSection={activeSection} onSectionChange={transitionToSection} />
       <WhatsAppButton />
       
       {sections.map((section, index) => {
@@ -194,7 +210,8 @@ const Index = () => {
             key={section.id} 
             id={section.id} 
             ref={el => el && (sectionsRef.current[index] = el)}
-            className="min-h-screen w-full"
+            className="min-h-screen w-full page-transition"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           >
             <Component />
           </div>
