@@ -2,8 +2,12 @@
 import React from 'react';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
 import { Card, CardContent } from '../../components/ui/card';
+import { useTheme } from '../../components/ThemeProvider';
 
 const FamiliaPage = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   const services = [
     {
       title: "Casamento e União Estável",
@@ -45,14 +49,18 @@ const FamiliaPage = () => {
       description="É uma área do direito que lida com questões relacionadas às relações familiares, incluindo casamento, divórcio, guarda de crianças, pensão alimentícia, adoção, proteção de menores, entre outras."
       currentArea="familia"
     >
-      <h2 className="text-4xl font-canela mb-16">Serviços Especializados</h2>
+      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+          <Card key={index} className={`${
+            isDark 
+              ? 'bg-white/5 border-white/10 hover:bg-white/10' 
+              : 'bg-black/5 border-black/10 hover:bg-black/10'
+            } transition-all duration-300`}>
             <CardContent className="p-8">
-              <h3 className="text-2xl font-canela mb-4 text-white">{service.title}</h3>
-              <p className="text-gray-300 leading-relaxed">{service.description}</p>
+              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>{service.description}</p>
             </CardContent>
           </Card>
         ))}

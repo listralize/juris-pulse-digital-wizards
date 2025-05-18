@@ -46,15 +46,15 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <main className="flex-grow">
         <section className={`py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-canela mb-10">{title}</h1>
+            <h1 className={`text-4xl md:text-6xl lg:text-7xl font-canela mb-10 ${isDark ? 'text-white' : 'text-black'}`}>{title}</h1>
             <div className={`w-24 h-1 ${isDark ? 'bg-white/40' : 'bg-black/40'} mb-10`}></div>
-            <p className="text-lg md:text-xl max-w-3xl">
+            <p className={`text-lg md:text-xl max-w-3xl ${isDark ? 'text-white/80' : 'text-black/80'}`}>
               {description}
             </p>
           </div>
         </section>
         
-        <section className={`py-10 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black/90 border-white/10' : 'bg-white/90 border-black/10'} border-y sticky top-20 z-40`}>
+        <section className={`py-6 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-20 z-40`}>
           <div className="max-w-6xl mx-auto overflow-x-auto scrollbar-hide">
             <div className="flex space-x-4 py-2">
               {practiceAreas.map((area) => (
@@ -83,7 +83,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       
       <Footer />
       
-      <style jsx="true">{`
+      <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }

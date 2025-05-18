@@ -49,7 +49,7 @@ const TrabalhoPage = () => {
       description="O Direito do Trabalho se concentra nas relações laborais, incluindo contratos de trabalho, salários, direitos e deveres de empregadores e empregados, segurança no trabalho e solução de conflitos trabalhistas."
       currentArea="trabalho"
     >
-      <h2 className={`text-4xl font-canela mb-16 ${isDark ? '' : 'text-black'}`}>Serviços Especializados</h2>
+      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
