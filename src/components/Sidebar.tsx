@@ -42,13 +42,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-center py-4">
           <div className="flex items-center justify-center">
-            <div className="flex items-center justify-center space-x-8">
+            <div className="flex items-center justify-center space-x-8 md:space-x-12">
               {sidebarItems.map((item) => (
                 <a
                   key={item.id}
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.id)}
-                  className={`relative px-3 py-2 text-sm font-medium transition-colors duration-300 ${
+                  className={`relative px-3 py-2 text-sm font-medium transition-colors duration-300 hover:scale-105 transform ${
                     activeSection === item.id 
                       ? 'text-black' 
                       : 'text-gray-500 hover:text-black'

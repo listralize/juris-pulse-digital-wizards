@@ -90,7 +90,7 @@
   }
   
   .hover-scale:hover {
-    transform: scale(1.02);
+    transform: scale(1.05);
   }
 
   .area-card {
@@ -101,6 +101,7 @@
   .area-card:hover {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
   }
 
   .sidebar-link {
@@ -126,7 +127,7 @@
   .input-floating input:not(:placeholder-shown) ~ label,
   .input-floating textarea:focus ~ label,
   .input-floating textarea:not(:placeholder-shown) ~ label {
-    @apply -top-2 text-xs text-black;
+    @apply -top-2 text-xs text-black font-medium;
   }
   
   .input-floating input,
@@ -167,6 +168,27 @@
   .slide-exit {
     transform: translateY(100%);
     opacity: 0;
+  }
+
+  /* Enhanced input focus effect */
+  .input-floating input:focus,
+  .input-floating textarea:focus {
+    @apply border-black;
+  }
+  
+  /* Enhanced button hover effect */
+  .elegant-button:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Enhanced card hover effects */
+  .enhanced-card {
+    @apply transition-all duration-500 ease-in-out;
+  }
+  
+  .enhanced-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.05);
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
