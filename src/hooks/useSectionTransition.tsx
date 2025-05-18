@@ -19,20 +19,12 @@ export const useSectionTransition = (sections: Section[]) => {
     const validIds = sections.map(section => section.id);
     const initialSection = initialHash && validIds.includes(initialHash) ? initialHash : 'home';
     
-    // Hide all sections except initial
-    const initialIndex = sections.findIndex(section => section.id === initialSection);
-    sectionsRef.current.forEach((section, idx) => {
-      if (section) {
-        section.style.display = idx === initialIndex ? 'block' : 'none';
-      }
-    });
-    
     setActiveSection(initialSection);
   }, [sections]);
   
   // Function to transition to a section
   const transitionToSection = (id: string) => {
-    if (isTransitioning) return;
+    if (isTransitioning || id === activeSection) return;
     
     const targetIndex = sections.findIndex(section => section.id === id);
     if (targetIndex === -1) return;
@@ -57,28 +49,22 @@ export const useSectionTransition = (sections: Section[]) => {
       return;
     }
     
-    // Make target section visible but position it off-screen
-    targetSection.style.display = 'block';
+    // Animate current section out
+    gsap.to(currentSection, { 
+      y: -100 * direction, 
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.in"
+    });
     
-    // Animate transition
-    gsap.fromTo(
-      currentSection,
-      { y: 0, opacity: 1 },
-      { 
-        y: -100 * direction, 
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
-        onComplete: () => {
-          // Hide current section after animation
-          currentSection.style.display = 'none';
-        }
-      }
-    );
-    
+    // Show and animate target section in
     gsap.fromTo(
       targetSection,
-      { y: 100 * direction, opacity: 0 },
+      { 
+        y: 100 * direction, 
+        opacity: 0,
+        display: "block" 
+      },
       { 
         y: 0, 
         opacity: 1,
@@ -92,7 +78,7 @@ export const useSectionTransition = (sections: Section[]) => {
       }
     );
   };
-  
+
   // Setup navigation handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

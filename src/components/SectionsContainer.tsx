@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
+import Section from './Section';
 
 // Import Sections
 import Hero from './sections/Hero';
@@ -36,15 +37,14 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
       {sections.map((section, index) => {
         const Component = section.component;
         return (
-          <div 
+          <Section 
             key={section.id} 
             id={section.id} 
-            ref={el => el && (sectionsRef.current[index] = el)}
-            className="absolute inset-0 min-h-screen w-full"
-            style={{ display: index === 0 ? 'block' : 'none' }}
+            isActive={section.id === activeSection}
+            ref={el => el && (sectionsRef.current[index] = el as HTMLDivElement)}
           >
             <Component />
-          </div>
+          </Section>
         );
       })}
     </div>
