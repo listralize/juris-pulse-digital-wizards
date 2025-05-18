@@ -20,7 +20,7 @@ const Index = () => {
   };
   
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen dark:bg-black bg-white dark:text-white">
       <CustomCursor />
       <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <WhatsAppButton />
