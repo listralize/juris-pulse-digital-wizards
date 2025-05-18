@@ -41,7 +41,7 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
             key={section.id} 
             id={section.id} 
             isActive={section.id === activeSection}
-            ref={el => el && (sectionsRef.current[index] = el as HTMLDivElement)}
+            ref={el => el && (sectionsRef.current[index] = el)}
           >
             <Component />
           </Section>
