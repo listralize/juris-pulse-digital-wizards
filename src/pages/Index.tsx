@@ -16,13 +16,14 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
   const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   const handleSectionChange = (sectionId: string) => {
     setActiveSection(sectionId);
   };
   
   return (
-    <div className="min-h-screen dark:bg-black bg-white dark:text-white">
+    <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'} transition-colors duration-300`}>
       <CustomCursor />
       <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <WhatsAppButton />

@@ -42,7 +42,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-      hasScrolled ? (isDark ? 'bg-black/90 backdrop-blur-md shadow-sm' : 'bg-white/90 backdrop-blur-md shadow-sm') : 'bg-transparent'
+      hasScrolled 
+        ? (isDark 
+            ? 'bg-black/90 backdrop-blur-md shadow-md' 
+            : 'bg-white/90 backdrop-blur-md shadow-sm') 
+        : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between py-4">
@@ -60,7 +64,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
                   }`}
                 >
                   {item.label}
-                  <span className={`absolute -bottom-1 left-0 w-full h-0.5 ${isDark ? 'bg-white' : 'bg-black'} transform origin-left transition-transform duration-300 ${
+                  <span className={`absolute -bottom-1 left-0 w-full h-0.5 ${
+                    isDark ? 'bg-white' : 'bg-black'
+                  } transform origin-left transition-transform duration-300 ${
                     activeSection === item.id ? 'scale-x-100' : 'scale-x-0'
                   }`}></span>
                 </a>
