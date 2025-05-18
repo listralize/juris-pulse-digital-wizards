@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Mail } from 'lucide-react';
@@ -28,11 +28,10 @@ const partners = [
 ];
 
 const Partners = () => {
-  const [activePartner, setActivePartner] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (sectionRef.current) {
@@ -54,15 +53,16 @@ const Partners = () => {
   useEffect(() => {
     const tl = gsap.timeline();
     
-    if (contentRef.current && imageRef.current && cardRef.current) {
+    if (contentRef.current && card1Ref.current && card2Ref.current) {
+      // Animate both cards to enter from opposite sides
       tl.fromTo(
-        imageRef.current,
+        card1Ref.current,
         { x: -50, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" }
       );
       
       tl.fromTo(
-        cardRef.current,
+        card2Ref.current,
         { x: 50, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
         "-=0.5"
@@ -72,11 +72,7 @@ const Partners = () => {
     return () => {
       tl.kill();
     };
-  }, [activePartner]);
-  
-  const handlePartnerChange = (index: number) => {
-    setActivePartner(index);
-  };
+  }, []);
 
   return (
     <section 
@@ -86,65 +82,86 @@ const Partners = () => {
     >
       <div className="absolute inset-0 bg-gradient-to-tr from-gray-50 to-white opacity-50 z-0"></div>
       
-      <div className="flex flex-col md:flex-row h-screen">
-        <div ref={imageRef} className="md:w-1/2 h-full flex items-center justify-center relative z-10 px-6 md:px-12">
-          {partners.map((partner, index) => (
-            <div 
-              key={partner.id} 
-              className={`absolute transition-opacity duration-700 ease-in-out ${index === activePartner ? 'opacity-100' : 'opacity-0'}`}
-            >
-              <img 
-                src={partner.image} 
-                alt={partner.name}
-                className="max-h-[80vh] w-auto object-contain drop-shadow-xl"
-              />
-            </div>
-          ))}
+      <div className="container mx-auto px-4 md:px-8 py-20 h-full">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl mb-2 font-canela gradient-text">Sócios</h2>
+          <div className="h-1 w-16 bg-black mx-auto"></div>
         </div>
         
-        <div className="md:w-1/2 h-full flex flex-col justify-center px-6 md:px-12 lg:px-16 relative z-10">
-          <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl mb-2 font-canela gradient-text">Sócios</h2>
-            <div className="h-1 w-16 bg-black"></div>
-          </div>
-          
+        <div 
+          ref={contentRef}
+          className="flex flex-col lg:flex-row gap-6 md:gap-8 lg:gap-12 justify-center items-center lg:items-stretch h-full"
+        >
+          {/* First Partner Card */}
           <div 
-            ref={cardRef}
-            className={`backdrop-blur-sm bg-white/70 p-8 border border-gray-100 shadow-lg transition-all duration-500`}
+            ref={card1Ref}
+            className="w-full lg:w-1/2 max-w-xl"
           >
-            <h3 className="text-2xl md:text-3xl mb-3 font-canela">{partners[activePartner].name}</h3>
-            <p className="text-xl mb-2 font-satoshi text-gray-800">
-              {partners[activePartner].title}
-            </p>
-            <p className="text-gray-700 mb-3 font-satoshi">
-              {partners[activePartner].oab}
-            </p>
-            <p className="text-gray-800 mb-6 font-satoshi leading-relaxed">
-              {partners[activePartner].description}
-            </p>
-            
-            <a 
-              href={`mailto:${partners[activePartner].email}`}
-              className="inline-flex items-center text-gray-900 hover:text-black hover:underline font-satoshi transition-colors duration-300"
-            >
-              <Mail className="w-5 h-5 mr-3" /> 
-              {partners[activePartner].email}
-            </a>
+            <div className="backdrop-blur-sm bg-white/70 p-8 border border-gray-100 shadow-lg h-full flex flex-col">
+              <div className="flex flex-col md:flex-row gap-6 items-center mb-6">
+                <img 
+                  src={partners[0].image} 
+                  alt={partners[0].name}
+                  className="w-40 h-40 object-cover rounded-full shadow-md"
+                />
+                <div>
+                  <h3 className="text-2xl md:text-3xl mb-2 font-canela">{partners[0].name}</h3>
+                  <p className="text-lg mb-1 font-satoshi text-gray-800">
+                    {partners[0].title}
+                  </p>
+                  <p className="text-gray-700 mb-0 font-satoshi">
+                    {partners[0].oab}
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-800 mb-6 font-satoshi leading-relaxed flex-grow">
+                {partners[0].description}
+              </p>
+              
+              <a 
+                href={`mailto:${partners[0].email}`}
+                className="inline-flex items-center text-gray-900 hover:text-black hover:underline font-satoshi transition-colors duration-300 mt-auto"
+              >
+                <Mail className="w-5 h-5 mr-3" /> 
+                {partners[0].email}
+              </a>
+            </div>
           </div>
           
-          <div className="flex space-x-4 mt-8">
-            {partners.map((partner, index) => (
-              <button
-                key={partner.id}
-                onClick={() => handlePartnerChange(index)}
-                className={`h-1 transition-all duration-300 ${
-                  index === activePartner 
-                    ? 'bg-black w-16' 
-                    : 'bg-gray-300 w-8 hover:bg-gray-800 hover:w-12'
-                }`}
-                aria-label={`Ver perfil de ${partner.name}`}
-              />
-            ))}
+          {/* Second Partner Card */}
+          <div 
+            ref={card2Ref}
+            className="w-full lg:w-1/2 max-w-xl"
+          >
+            <div className="backdrop-blur-sm bg-white/70 p-8 border border-gray-100 shadow-lg h-full flex flex-col">
+              <div className="flex flex-col md:flex-row gap-6 items-center mb-6">
+                <img 
+                  src={partners[1].image} 
+                  alt={partners[1].name}
+                  className="w-40 h-40 object-cover rounded-full shadow-md"
+                />
+                <div>
+                  <h3 className="text-2xl md:text-3xl mb-2 font-canela">{partners[1].name}</h3>
+                  <p className="text-lg mb-1 font-satoshi text-gray-800">
+                    {partners[1].title}
+                  </p>
+                  <p className="text-gray-700 mb-0 font-satoshi">
+                    {partners[1].oab}
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-800 mb-6 font-satoshi leading-relaxed flex-grow">
+                {partners[1].description}
+              </p>
+              
+              <a 
+                href={`mailto:${partners[1].email}`}
+                className="inline-flex items-center text-gray-900 hover:text-black hover:underline font-satoshi transition-colors duration-300 mt-auto"
+              >
+                <Mail className="w-5 h-5 mr-3" /> 
+                {partners[1].email}
+              </a>
+            </div>
           </div>
         </div>
       </div>
