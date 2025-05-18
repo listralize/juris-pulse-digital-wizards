@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Toggle } from '../ui/toggle';
-import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { practiceAreas } from './practiceAreas';
+import ThemeToggle from './ThemeToggle';
 
 interface MobileNavigationProps {
   isMenuOpen: boolean;
@@ -19,7 +18,7 @@ const MobileNavigation = ({
   handleNavigation, 
   setIsMenuOpen 
 }: MobileNavigationProps) => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
 
@@ -112,15 +111,7 @@ const MobileNavigation = ({
         </a>
         
         <div className="px-3 py-2">
-          <Toggle 
-            aria-label="Alternar tema"
-            pressed={isDark}
-            onPressedChange={toggleTheme}
-            className={`rounded-full p-2 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/5 text-black hover:bg-black/10'} w-full justify-start`}
-          >
-            <span className="mr-2">{isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</span>
-            <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
-          </Toggle>
+          <ThemeToggle showLabel={true} className="w-full justify-start" />
         </div>
       </div>
     </div>
