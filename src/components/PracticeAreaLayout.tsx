@@ -6,6 +6,7 @@ import { Footer } from './sections';
 import CustomCursor from './CustomCursor';
 import WhatsAppButton from './WhatsAppButton';
 import Sidebar from './Sidebar';
+import { useTheme } from './ThemeProvider';
 
 interface PracticeAreaLayoutProps {
   title: string;
@@ -20,6 +21,9 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   children, 
   currentArea 
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const practiceAreas = [
     { id: 'familia', label: 'Família', path: '/familia' },
     { id: 'tributario', label: 'Tributário', path: '/tributario' },
@@ -32,7 +36,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <CustomCursor />
       <Sidebar activeSection="areas" onSectionChange={() => {}} />
       <WhatsAppButton />
@@ -40,29 +44,28 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <Navbar />
       
       <main className="flex-grow">
-        <section className="py-20 px-6 md:px-16 lg:px-24 bg-black text-white relative">
+        <section className={`py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
           <div className="max-w-6xl mx-auto">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-canela mb-10">{title}</h1>
-            <div className="w-24 h-1 bg-white/40 mb-10"></div>
+            <div className={`w-24 h-1 ${isDark ? 'bg-white/40' : 'bg-black/40'} mb-10`}></div>
             <p className="text-lg md:text-xl max-w-3xl">
               {description}
             </p>
           </div>
         </section>
         
-        <section className="py-10 px-6 md:px-16 lg:px-24 bg-black/90 border-y border-white/10 sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto overflow-x-auto hide-scrollbar">
+        <section className={`py-10 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black/90 border-white/10' : 'bg-white/90 border-black/10'} border-y sticky top-20 z-40`}>
+          <div className="max-w-6xl mx-auto overflow-x-auto scrollbar-hide">
             <div className="flex space-x-4 py-2">
               {practiceAreas.map((area) => (
                 <Link 
                   key={area.id}
                   to={area.path}
-                  className={`px-6 py-2 whitespace-nowrap rounded-full ${
+                  className={`px-6 py-2 whitespace-nowrap rounded-full transition-colors duration-300 ${
                     currentArea === area.id 
-                      ? 'bg-white text-black' 
-                      : 'text-white/70 hover:text-white bg-white/10 hover:bg-white/20'
-                  } transition-colors duration-300`
-                  }
+                      ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
+                      : (isDark ? 'text-white/70 hover:text-white bg-white/10 hover:bg-white/20' : 'text-black/70 hover:text-black bg-black/10 hover:bg-black/20')
+                  }`}
                 >
                   {area.label}
                 </Link>
@@ -71,7 +74,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
           </div>
         </section>
       
-        <section className="py-20 px-6 md:px-16 lg:px-24 bg-black text-white">
+        <section className={`py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
           <div className="max-w-6xl mx-auto">
             {children}
           </div>
@@ -81,11 +84,11 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <Footer />
       
       <style jsx="true">{`
-        .hide-scrollbar::-webkit-scrollbar {
+        .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
         
-        .hide-scrollbar {
+        .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
