@@ -56,7 +56,7 @@ const SectionsContainer: React.FC = () => {
   }, [sectionsRef]);
 
   return (
-    <div className="relative min-h-screen w-full bg-black dark:bg-black">
+    <div className="relative min-h-screen w-full">
       {sections.map((section, index) => {
         const Component = section.component;
         return (
