@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Card, CardContent } from '@/components/ui/card';
+import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,6 +63,8 @@ const PracticeAreas = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   useEffect(() => {
     gsap.fromTo(
@@ -106,11 +109,11 @@ const PracticeAreas = () => {
     <section 
       id="areas" 
       ref={sectionRef} 
-      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative"
+      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-white'}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-[-1]"></div>
+      {!isDark && <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-[-1]"></div>}
       
-      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela">
+      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
         Áreas de Atuação
       </h2>
       
@@ -119,11 +122,19 @@ const PracticeAreas = () => {
           <Link to={area.link} key={area.id}>
             <Card 
               ref={(el) => (cardsRef.current[index] = el)}
-              className="border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm h-full"
+              className={`border transition-all duration-300 h-full ${
+                isDark 
+                  ? 'border-gray-800 bg-gray-900/80 backdrop-blur-sm hover:bg-gray-900' 
+                  : 'border-gray-100 shadow-sm hover:shadow-lg bg-white/80 backdrop-blur-sm'
+              }`}
             >
               <CardContent className="p-8">
-                <h3 className="text-xl md:text-2xl mb-4 font-canela">{area.title}</h3>
-                <p className="text-gray-700 font-satoshi">{area.description}</p>
+                <h3 className={`text-xl md:text-2xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                  {area.title}
+                </h3>
+                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>
+                  {area.description}
+                </p>
               </CardContent>
             </Card>
           </Link>

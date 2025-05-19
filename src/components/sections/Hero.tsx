@@ -68,14 +68,10 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="min-h-screen flex flex-col items-center pt-24 md:pt-16 justify-center px-6 relative overflow-hidden">
+    <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Dynamic background with parallax effect */}
       <div ref={bgRef} className="absolute inset-0 z-0">
-        <div className={`absolute inset-0 ${
-          isDark 
-            ? 'bg-black' 
-            : 'bg-white'
-        }`}></div>
+        <div className={`absolute inset-0 ${isDark ? 'bg-black' : 'bg-white'}`}></div>
         <div className={`absolute top-[20%] left-[20%] w-96 h-96 rounded-full ${
           isDark 
             ? 'bg-gradient-to-r from-gray-800 to-gray-900 opacity-20 blur-3xl' 
@@ -88,8 +84,8 @@ const Hero = () => {
         }`}></div>
       </div>
       
-      <div className="relative z-10 text-center max-w-4xl">
-        <div ref={logoRef} className="mb-8 w-full max-w-xs md:max-w-sm mx-auto">
+      <div className="relative z-10 text-center max-w-4xl mt-[-80px]">
+        <div ref={logoRef} className="mb-6 w-full max-w-xs md:max-w-sm mx-auto">
           <img 
             src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
             alt="Serafim & Trombela Advocacia Logo"

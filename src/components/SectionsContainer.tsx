@@ -34,7 +34,7 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
   }, [activeSection, onActiveChange]);
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative min-h-screen w-full bg-black dark:bg-black">
       {sections.map((section, index) => {
         const Component = section.component;
         return (
