@@ -10,15 +10,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const partners = [
   {
-    id: 'serafim', // Swapping the order to match the requested changes
-    name: 'Dr. Vinicius Serafim',
-    title: 'Advogado',
-    oab: 'OAB/GO: 67.790',
-    email: 'serafim@stadv.com',
-    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
-    description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
-  },
-  {
     id: 'trombela',
     name: 'Dr. Enzo Trombela',
     title: 'Advogado',
@@ -26,6 +17,15 @@ const partners = [
     email: 'trombela@stadv.com',
     image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
     description: 'Atuação em Direito Civil e Contratual, com foco em soluções jurídicas para empresas e pessoas físicas.'
+  },
+  {
+    id: 'serafim',
+    name: 'Dr. Vinicius Serafim',
+    title: 'Advogado',
+    oab: 'OAB/GO: 67.790',
+    email: 'serafim@stadv.com',
+    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
+    description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
   }
 ];
 

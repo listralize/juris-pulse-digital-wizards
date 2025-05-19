@@ -63,8 +63,6 @@ const PracticeAreas = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
   
   useEffect(() => {
     gsap.fromTo(
@@ -109,9 +107,9 @@ const PracticeAreas = () => {
     <section 
       id="areas" 
       ref={sectionRef} 
-      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} transition-colors duration-500`}
+      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative bg-black transition-colors duration-500"
     >
-      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
+      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center text-white">
         Áreas de Atuação
       </h2>
       
@@ -120,17 +118,13 @@ const PracticeAreas = () => {
           <Link to={area.link} key={area.id}>
             <Card 
               ref={(el) => (cardsRef.current[index] = el)}
-              className={`border transition-all duration-500 h-full hover-scale ${
-                isDark 
-                  ? 'tech-card text-white' 
-                  : 'border-gray-200 shadow-sm hover:shadow-lg bg-white/80'
-              }`}
+              className="tech-card text-white border-white/10 transition-all duration-500 h-full hover-scale"
             >
-              <CardContent className="p-8">
-                <h3 className={`text-xl md:text-2xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+              <CardContent className="p-6">
+                <h3 className="text-xl md:text-2xl mb-4 font-canela text-white">
                   {area.title}
                 </h3>
-                <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} font-satoshi`}>
+                <p className="text-white/80 font-satoshi">
                   {area.description}
                 </p>
               </CardContent>

@@ -73,7 +73,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} py-4 md:py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} sticky top-0 z-50 w-full`}>
+    <nav className="bg-black py-4 md:py-4 border-b border-gray-800 sticky top-0 z-50 w-full">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="flex justify-center items-center relative h-12 md:h-auto">
           {/* Theme toggle on the left for both mobile and desktop */}
@@ -85,11 +85,15 @@ const Navbar = () => {
           <div className="text-center">
             <Link to="/" className="font-canela text-xl flex items-center justify-center">
               {/* Desktop: Text logo */}
-              <span className="hidden md:block">{isDark ? 'S&T Advocacia' : 'S&T Advocacia'}</span>
+              <span className="hidden md:block text-white">S&T Advocacia</span>
               
               {/* Mobile: Logo image */}
               <span className="md:hidden flex items-center justify-center">
-                S&T
+                <img 
+                  src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
+                  alt="S&T Advocacia"
+                  className="h-10 w-auto"
+                />
               </span>
             </Link>
           </div>
@@ -104,7 +108,7 @@ const Navbar = () => {
             <div className="md:hidden">
               <button
                 onClick={toggleMenu}
-                className={`p-2 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
+                className="p-2 rounded-md text-white"
               >
                 <span className="sr-only">Open menu</span>
                 <svg
