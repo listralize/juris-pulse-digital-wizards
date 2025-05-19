@@ -76,25 +76,20 @@ const Navbar = () => {
     <nav className="bg-black py-4 md:py-4 border-b border-gray-800 sticky top-0 z-50 w-full">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="flex justify-center items-center relative h-12 md:h-auto">
-          {/* Theme toggle on the left for both mobile and desktop */}
-          <div className="absolute left-0 flex">
+          {/* Theme toggle - on the left for mobile, on the right for desktop */}
+          <div className="md:hidden absolute left-0 flex">
             <ThemeToggle />
           </div>
-
+          
           {/* Centered logo */}
           <div className="text-center">
             <Link to="/" className="font-canela text-xl flex items-center justify-center">
-              {/* Desktop: Text logo */}
-              <span className="hidden md:block text-white">S&T Advocacia</span>
-              
               {/* Mobile: Logo image */}
-              <span className="md:hidden flex items-center justify-center">
-                <img 
-                  src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
-                  alt="S&T Advocacia"
-                  className="h-10 w-auto"
-                />
-              </span>
+              <img 
+                src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
+                alt="S&T Advocacia"
+                className="h-10 w-auto"
+              />
             </Link>
           </div>
           
@@ -103,7 +98,12 @@ const Navbar = () => {
             handleNavigation={handleNavigation}
           />
 
-          <div className="flex items-center space-x-4 absolute right-0">
+          {/* Theme toggle - on the right for desktop only */}
+          <div className="hidden md:flex absolute right-0">
+            <ThemeToggle />
+          </div>
+
+          <div className="flex items-center absolute right-0">
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button

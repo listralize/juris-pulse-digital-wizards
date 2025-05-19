@@ -2,12 +2,11 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Mail } from 'lucide-react';
-import { Card, CardContent } from '../ui/card';
 import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Partner data
 const partners = [
   {
     id: 'trombela',
@@ -15,53 +14,73 @@ const partners = [
     title: 'Advogado',
     oab: 'OAB/GO: 67.754',
     email: 'trombela@stadv.com',
-    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
+    image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
     description: 'Atuação em Direito Civil e Contratual, com foco em soluções jurídicas para empresas e pessoas físicas.'
   },
   {
     id: 'serafim',
-    name: 'Dr. Vinicius Serafim',
+    name: 'Dr. Rafael Serafim',
     title: 'Advogado',
     oab: 'OAB/GO: 67.790',
     email: 'serafim@stadv.com',
-    image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
+    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
     description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
   }
 ];
 
 const Partners = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  
+
   useEffect(() => {
-    const animateCards = () => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top center",
-          end: "bottom center",
-          toggleActions: "play none none reverse"
-        }
-      });
-      
-      cardsRef.current.forEach((card, index) => {
-        if (card) {
-          tl.fromTo(
-            card,
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: index * 0.15 },
-            index > 0 ? "-=0.4" : 0
-          );
-        }
-      });
-    };
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reverse"
+      }
+    });
     
-    animateCards();
+    tl.fromTo(
+      titleRef.current,
+      {
+        opacity: 0,
+        y: 20
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6
+      }
+    );
+    
+    cardsRef.current.forEach((card, index) => {
+      gsap.fromTo(
+        card,
+        {
+          opacity: 0,
+          y: 30
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          delay: 0.2 * index,
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
@@ -69,17 +88,19 @@ const Partners = () => {
     <section 
       id="socios"
       ref={sectionRef}
-      className={`min-h-screen w-full flex flex-col justify-center items-center ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-16 px-4 transition-colors duration-500`}
+      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative"
     >
-      <div className="max-w-7xl w-full mx-auto">
-        <div className="text-center mb-12">
-          <h2 className={`text-4xl md:text-5xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>Sócios</h2>
-          <div className={`h-1 w-16 ${isDark ? 'bg-white' : 'bg-black'} mx-auto`}></div>
-        </div>
+      <div className="max-w-6xl mx-auto">
+        <h2 
+          ref={titleRef}
+          className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center"
+        >
+          Nossos Sócios
+        </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {partners.map((partner, index) => (
-            <Card 
+            <div 
               key={partner.id}
               className={`${
                 isDark 
@@ -88,38 +109,35 @@ const Partners = () => {
               } shadow-lg hover:shadow-xl transition-all duration-500`}
               ref={el => cardsRef.current[index] = el}
             >
-              <CardContent className="p-0">
-                <div className="flex flex-col p-6">
-                  <div className="flex flex-col items-center md:items-start md:flex-row gap-6 mb-6">
-                    <div className="w-32 h-32 overflow-hidden rounded-lg flex-shrink-0 border-4 border-white shadow-md bg-white">
-                      <img 
-                        src={partner.image} 
-                        alt={partner.name} 
-                        className="w-full h-full object-contain object-center"
-                      />
-                    </div>
-                    
-                    <div className="text-center md:text-left">
-                      <h3 className={`text-3xl font-canela mb-1 ${isDark ? 'text-white' : 'text-black'}`}>{partner.name}</h3>
-                      <p className={`text-lg ${isDark ? 'text-white/80' : 'text-gray-700'} mb-1`}>{partner.title}</p>
-                      <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{partner.oab}</p>
-                    </div>
+              <div className="p-6 md:p-8">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                  <div className="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/20">
+                    <img 
+                      src={partner.image} 
+                      alt={partner.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  
-                  <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} leading-relaxed mb-6`}>
-                    {partner.description}
-                  </p>
-                  
-                  <a 
-                    href={`mailto:${partner.email}`}
-                    className={`flex items-center ${isDark ? 'text-white/70 hover:text-white' : 'text-gray-700 hover:text-black'} transition-colors mt-auto self-start font-medium`}
-                  >
-                    <Mail className="w-5 h-5 mr-2" />
-                    {partner.email}
-                  </a>
+                  <div className="flex-grow text-center md:text-left">
+                    <h3 className="text-2xl md:text-3xl font-canela mb-2">
+                      {partner.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      {partner.title} - {partner.oab}
+                    </p>
+                    <a 
+                      href={`mailto:${partner.email}`} 
+                      className="text-sm hover:underline"
+                    >
+                      {partner.email}
+                    </a>
+                    <p className="mt-4 text-gray-700 dark:text-gray-300 font-satoshi">
+                      {partner.description}
+                    </p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </div>

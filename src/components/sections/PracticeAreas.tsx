@@ -63,6 +63,8 @@ const PracticeAreas = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   useEffect(() => {
     gsap.fromTo(

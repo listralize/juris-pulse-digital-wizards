@@ -27,7 +27,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          minHeight: '80vh' // Reduced height
+          minHeight: '75vh' // Further reduced height to prevent cutting off sections
         }}
       >
         {children}

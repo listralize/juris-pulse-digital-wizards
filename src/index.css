@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -148,7 +149,7 @@
   }
 
   .dark .area-card {
-    @apply bg-neutral-900/90;
+    @apply bg-black/80;
   }
 
   .dark .area-card:hover {
@@ -165,7 +166,7 @@
   }
   
   .dark .enhanced-card {
-    @apply bg-neutral-900/90;
+    @apply bg-black/80;
   }
 
   .dark .enhanced-card:hover {
@@ -231,17 +232,14 @@
     -webkit-text-fill-color: transparent;
   }
   
-  /* Glassmorphism effects for dark mode */
-  .dark .glass-card {
-    @apply bg-neutral-900/80 backdrop-blur-md border border-white/10 shadow-lg;
+  /* Glassmorphism effects for dark mode - standardized for all components */
+  .dark .glass-card,
+  .dark .tech-card {
+    @apply bg-black/80 backdrop-blur-md border border-white/10 shadow-lg;
   }
   
   .dark .glass-form {
-    @apply bg-neutral-900/80 backdrop-blur-xl border border-white/20;
-  }
-  
-  .dark .tech-card {
-    @apply bg-gradient-to-br from-neutral-900/90 to-neutral-900/80 backdrop-blur-xl border border-white/10 shadow-lg;
+    @apply bg-black/80 backdrop-blur-xl border border-white/20;
   }
 }
 
