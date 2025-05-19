@@ -122,7 +122,7 @@ const PracticeAreas = () => {
               ref={(el) => (cardsRef.current[index] = el)}
               className={`border transition-all duration-300 h-full ${
                 isDark 
-                  ? 'border-gray-800 bg-gray-900/50 hover:bg-gray-900' 
+                  ? 'border-gray-800 bg-gray-900 hover:bg-gray-800' 
                   : 'border-gray-100 shadow-sm hover:shadow-lg bg-white/80'
               }`}
             >
