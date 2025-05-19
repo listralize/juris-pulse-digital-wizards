@@ -13,7 +13,7 @@ const DesktopNavigation = ({
   const navigate = useNavigate();
   return <div className="flex w-full justify-between items-center">
       <Link to="/" className="flex-shrink-0">
-        <img alt="Serafim & Trombela Advocacia Logo" src="/lovable-uploads/12e19203-a8e7-4940-9116-c281d94b1602.png" className="h-14 transform transition-transform hover:scale-105d object-cover" />
+        
       </Link>
       
       <div className="hidden md:flex items-center space-x-8">
