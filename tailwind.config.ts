@@ -62,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				neutral: {
+					100: '#FFFFFF',
+					200: '#F6F6F6',
+					300: '#E8E8E8',
+					400: '#DADADA',
+					500: '#ACACAC',
+					600: '#8E8E8E',
+					700: '#5C5C5C',
+					800: '#2F2F2F',
+					900: '#212121',
+					950: '#1A1A1A',
 				}
 			},
 			fontFamily: {

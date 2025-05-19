@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -47,42 +48,42 @@
   }
 
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 40%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 0 0% 35%;
     
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 80%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 0 0% 40%;
+    --sidebar-background: 0 0% 12%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-ring: 0 0% 35%;
   }
 
   * {
@@ -138,7 +139,7 @@
 
   /* Cards */
   .area-card {
-    @apply border border-gray-200 dark:border-gray-700 p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
+    @apply border border-gray-200 dark:border-neutral-700 p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
   }
   
   .area-card:hover {
@@ -165,33 +166,33 @@
 
   /* Navigation */
   .sidebar-link {
-    @apply flex items-center gap-3 transition-all duration-300 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white;
+    @apply flex items-center gap-3 transition-all duration-300 text-gray-600 dark:text-neutral-400 hover:text-black dark:hover:text-neutral-200;
   }
 
   /* Form Elements */
   .input-floating {
-    @apply relative border-b border-gray-300 dark:border-gray-700 focus-within:border-black dark:focus-within:border-white transition-colors duration-300;
+    @apply relative border-b border-gray-300 dark:border-neutral-700 focus-within:border-black dark:focus-within:border-neutral-400 transition-colors duration-300;
   }
   
   .input-floating label {
-    @apply absolute top-5 left-0 text-gray-500 dark:text-gray-400 transition-all duration-300;
+    @apply absolute top-5 left-0 text-gray-500 dark:text-neutral-500 transition-all duration-300;
   }
   
   .input-floating input:focus ~ label,
   .input-floating input:not(:placeholder-shown) ~ label,
   .input-floating textarea:focus ~ label,
   .input-floating textarea:not(:placeholder-shown) ~ label {
-    @apply -top-2 text-xs text-black dark:text-white font-medium;
+    @apply -top-2 text-xs text-black dark:text-neutral-300 font-medium;
   }
   
   .input-floating input,
   .input-floating textarea {
-    @apply w-full bg-transparent pt-5 pb-2 focus:outline-none dark:text-white;
+    @apply w-full bg-transparent pt-5 pb-2 focus:outline-none dark:text-neutral-200;
   }
   
   .input-floating input:focus,
   .input-floating textarea:focus {
-    @apply border-black dark:border-white;
+    @apply border-black dark:border-neutral-400;
   }
 
   /* Buttons */
@@ -200,7 +201,7 @@
   }
   
   .dark .elegant-button {
-    @apply bg-white text-black hover:bg-black hover:text-white hover:border-white hover:shadow-md;
+    @apply bg-neutral-300 text-neutral-900 hover:bg-neutral-800 hover:text-neutral-200 hover:border-neutral-500 hover:shadow-md;
   }
 
   /* Text Effects */
@@ -211,49 +212,15 @@
   }
   
   .dark .gradient-text {
-    background: linear-gradient(90deg, #fff, #ccc);
+    background: linear-gradient(90deg, #E8E8E8, #ACACAC);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   
   .text-gradient {
-    background: linear-gradient(90deg, #fff, #ccc);
+    background: linear-gradient(90deg, #E8E8E8, #ACACAC);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-  }
-  
-  /* Modern UI Effects */
-  .glassmorphic {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg;
-  }
-  
-  .glowing-border {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-    @apply border border-white/30;
-  }
-  
-  .text-glow {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-  
-  .shadow-glow {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-  }
-
-  /* Page Transitions */
-  .page-transition {
-    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1), 
-                opacity 0.6s cubic-bezier(0.65, 0, 0.35, 1);
-  }
-  
-  .slide-enter {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  
-  .slide-exit {
-    transform: translateY(100%);
-    opacity: 0;
   }
 }
 
