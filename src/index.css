@@ -96,12 +96,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground h-full m-0 p-0 overflow-x-hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
   }
 
   h1, h2, h3, h4 {
@@ -114,6 +110,7 @@
 }
 
 @layer components {
+  /* Cursor Styles */
   .custom-cursor {
     @apply fixed pointer-events-none z-50 w-6 h-6 border border-white rounded-full transform -translate-x-1/2 -translate-y-1/2 mix-blend-difference;
     background-color: rgba(255, 255, 255, 0.15);
@@ -123,6 +120,15 @@
     @apply fixed pointer-events-none z-50 w-1 h-1 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 mix-blend-difference;
   }
 
+  /* Layout & Page Structure */
+  .min-h-screen {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Hover Effects */
   .hover-scale {
     @apply transition-all duration-300;
   }
@@ -131,15 +137,14 @@
     transform: scale(1.05);
   }
 
+  /* Cards */
   .area-card {
-    @apply border border-gray-200 dark:border-gray-800 p-8 rounded-md mb-6 transition-all duration-300;
-    backdrop-filter: blur(5px);
+    @apply border border-gray-200 dark:border-gray-800 p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
   }
   
   .area-card:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    @apply shadow-lg -translate-y-1;
     border-color: rgba(0, 0, 0, 0.1);
-    transform: translateY(-5px);
   }
 
   .dark .area-card:hover {
@@ -147,17 +152,24 @@
     border-color: rgba(255, 255, 255, 0.1);
   }
 
+  .enhanced-card {
+    @apply transition-all duration-500 ease-in-out;
+  }
+  
+  .enhanced-card:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+  
+  .dark .enhanced-card:hover {
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Navigation */
   .sidebar-link {
     @apply flex items-center gap-3 transition-all duration-300 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white;
   }
 
-  .min-h-screen {
-    min-height: 100vh;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-  }
-
+  /* Form Elements */
   .input-floating {
     @apply relative border-b border-gray-300 dark:border-gray-700 focus-within:border-black dark:focus-within:border-white transition-colors duration-300;
   }
@@ -178,14 +190,21 @@
     @apply w-full bg-transparent pt-5 pb-2 focus:outline-none dark:text-white;
   }
   
+  .input-floating input:focus,
+  .input-floating textarea:focus {
+    @apply border-black dark:border-white;
+  }
+
+  /* Buttons */
   .elegant-button {
-    @apply bg-black text-white px-6 py-3 rounded-none border border-transparent hover:bg-white hover:text-black hover:border-black transition-all duration-300 font-satoshi;
+    @apply bg-black text-white px-6 py-3 rounded-none border border-transparent hover:bg-white hover:text-black hover:border-black transition-all duration-300 font-satoshi hover:shadow-md;
   }
   
   .dark .elegant-button {
-    @apply bg-white text-black hover:bg-black hover:text-white hover:border-white;
+    @apply bg-white text-black hover:bg-black hover:text-white hover:border-white hover:shadow-md;
   }
-  
+
+  /* Text Effects */
   .gradient-text {
     background: linear-gradient(90deg, #000, #333);
     -webkit-background-clip: text;
@@ -204,7 +223,7 @@
     -webkit-text-fill-color: transparent;
   }
   
-  /* Modern futuristic styles */
+  /* Modern UI Effects */
   .glassmorphic {
     @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg;
   }
@@ -214,6 +233,15 @@
     @apply border border-white/30;
   }
   
+  .text-glow {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Page Transitions */
   .page-transition {
     transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1), 
                 opacity 0.6s cubic-bezier(0.65, 0, 0.35, 1);
@@ -228,67 +256,13 @@
     transform: translateY(100%);
     opacity: 0;
   }
-
-  /* Enhanced input focus effect */
-  .input-floating input:focus,
-  .input-floating textarea:focus {
-    @apply border-black dark:border-white;
-  }
-  
-  /* Enhanced button hover effect */
-  .elegant-button:hover {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  .dark .elegant-button:hover {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Enhanced card hover effects */
-  .enhanced-card {
-    @apply transition-all duration-500 ease-in-out;
-  }
-  
-  .enhanced-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.05);
-  }
-  
-  .dark .enhanced-card:hover {
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-  
-  /* Futuristic styles */
-  .text-glow {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-  
-  .shadow-glow {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-  }
 }
 
+/* Scroll Container */
 .scroll-container {
-  overflow-x: auto;
+  @apply overflow-x-auto flex scrollbar-hide;
   scroll-snap-type: x mandatory;
-  display: flex;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* For Firefox */
-}
-
-.scroll-container::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
 }
 
 .scroll-item {
@@ -308,4 +282,15 @@
     flex: 0 0 30%;
     margin-right: 2rem;
   }
+}
+
+/* Hide scrollbar utilities */
+.scrollbar-hide::-webkit-scrollbar,
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
