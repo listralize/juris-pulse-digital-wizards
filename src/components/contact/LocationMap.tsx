@@ -8,7 +8,7 @@ const LocationMap: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`flex-grow rounded-lg overflow-hidden shadow-lg ${isDark ? 'border border-gray-800' : 'border border-gray-100'} relative h-[300px]`}>
+    <div className={`flex-grow rounded-lg overflow-hidden shadow-lg ${isDark ? 'border border-gray-700 bg-gray-900/80' : 'border border-gray-100'} relative h-[300px]`}>
       <img 
         src="/lovable-uploads/a8cc2627-db98-4461-9afa-8b1f238766e0.png" 
         alt="Localização do escritório"

@@ -70,7 +70,7 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-16 pb-32`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-16 pb-40`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-8 relative z-10">
@@ -88,7 +88,7 @@ const Contact = () => {
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           <div className="space-y-6">
-            <div className={`p-5 rounded-lg ${isDark ? 'bg-black border-gray-800' : 'bg-white/90 border-gray-100'} border shadow-lg`}>
+            <div className={`p-5 rounded-lg ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white/90 border-gray-100'} border shadow-lg`}>
               <h3 className={`text-xl mb-4 font-medium ${isDark ? 'text-white' : 'text-black'}`}>
                 Por que escolher a Serafim & Trombela Advocacia?
               </h3>

@@ -108,7 +108,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
   return (
     <div 
       ref={formContainerRef} 
-      className={`p-4 md:p-5 ${isDark ? 'bg-black/90 border-gray-800' : 'bg-white/90 border-gray-100'} shadow-lg border rounded-lg flex flex-col max-h-[600px]`}
+      className={`p-4 md:p-5 ${isDark ? 'bg-gray-900/90 border-gray-700' : 'bg-white/90 border-gray-100'} shadow-lg border rounded-lg flex flex-col max-h-[600px]`}
     >
       <div className="mb-4">
         <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -125,7 +125,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
         className="flex flex-col gap-3 overflow-y-auto pr-1 scrollbar-thin"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-[#0A0A0A] text-white' : ''}`}>
+          <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800 text-white' : ''}`}>
             <input
               type="text"
               id="name"
@@ -141,7 +141,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             <label htmlFor="name" className={isDark ? 'text-white/70' : ''}>Nome</label>
           </div>
           
-          <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-[#0A0A0A] text-white' : ''}`}>
+          <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800 text-white' : ''}`}>
             <input
               type="tel"
               id="phone"
@@ -157,7 +157,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
           </div>
         </div>
         
-        <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-[#0A0A0A] text-white' : ''}`}>
+        <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800 text-white' : ''}`}>
           <input
             type="email"
             id="email"
@@ -178,10 +178,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             Qual problema você precisa resolver?
           </label>
           <Select onValueChange={handleServiceChange} value={formState.service}>
-            <SelectTrigger className={`w-full ${isDark ? 'bg-[#0A0A0A] border-gray-800 text-white' : 'bg-white'}`}>
+            <SelectTrigger className={`w-full ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white'}`}>
               <SelectValue placeholder="Selecione seu problema jurídico" />
             </SelectTrigger>
-            <SelectContent className={`${isDark ? 'bg-[#0F0F0F] border-gray-800 text-white' : ''}`}>
+            <SelectContent className={`${isDark ? 'bg-gray-800 border-gray-700 text-white' : ''}`}>
               {serviceOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -191,7 +191,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
           </Select>
         </div>
         
-        <div className={`input-floating transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-[#0A0A0A] text-white' : ''}`}>
+        <div className={`input-floating transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800 text-white' : ''}`}>
           <textarea
             id="message"
             name="message"
