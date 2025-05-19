@@ -55,7 +55,7 @@ const AdministrativoPage = () => {
         {services.map((service, index) => (
           <Card key={index} className={`${
             isDark 
-              ? 'bg-black border-white/10 hover:bg-white/5' 
+              ? 'bg-gray-900 border-gray-800 hover:bg-gray-800' 
               : 'bg-gray-100 border-gray-200 hover:bg-gray-50'
             } transition-all duration-300`}>
             <CardContent className="p-8">
