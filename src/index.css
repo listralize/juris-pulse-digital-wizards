@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 96%; /* Light gray background */
     --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
@@ -48,7 +48,7 @@
   }
 
   .dark {
-    --background: 0 0% 12%;
+    --background: 0 0% 0%; /* Pure black background */
     --foreground: 0 0% 95%;
 
     --card: 0 0% 15%;
@@ -58,7 +58,7 @@
     --popover-foreground: 0 0% 95%;
 
     --primary: 0 0% 95%;
-    --primary-foreground: 0 0% 10%;
+    --primary-foreground: 0 0% 0%;
 
     --secondary: 0 0% 18%;
     --secondary-foreground: 0 0% 95%;
@@ -98,6 +98,7 @@
   body {
     @apply bg-background text-foreground h-full m-0 p-0 overflow-x-hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.5s ease;
   }
 
   h1, h2, h3, h4 {
@@ -130,16 +131,16 @@
 
   /* Hover Effects */
   .hover-scale {
-    @apply transition-all duration-300;
+    @apply transition-all duration-500;
   }
   
   .hover-scale:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
   }
 
   /* Cards */
   .area-card {
-    @apply border border-gray-200 dark:border-neutral-700 p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
+    @apply border border-gray-200 dark:border-white/10 p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
   }
   
   .area-card:hover {
@@ -148,8 +149,8 @@
   }
 
   .dark .area-card:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .enhanced-card {
@@ -161,38 +162,38 @@
   }
   
   .dark .enhanced-card:hover {
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 30px rgba(255, 255, 255, 0.05);
   }
 
   /* Navigation */
   .sidebar-link {
-    @apply flex items-center gap-3 transition-all duration-300 text-gray-600 dark:text-neutral-400 hover:text-black dark:hover:text-neutral-200;
+    @apply flex items-center gap-3 transition-all duration-500 text-gray-600 dark:text-white/70 hover:text-black dark:hover:text-white;
   }
 
   /* Form Elements */
   .input-floating {
-    @apply relative border-b border-gray-300 dark:border-neutral-600 focus-within:border-black dark:focus-within:border-neutral-400 transition-colors duration-300;
+    @apply relative border-b border-gray-300 dark:border-white/20 focus-within:border-black dark:focus-within:border-white/60 transition-colors duration-300;
   }
   
   .input-floating label {
-    @apply absolute top-5 left-0 text-gray-500 dark:text-neutral-400 transition-all duration-300;
+    @apply absolute top-5 left-0 text-gray-500 dark:text-white/60 transition-all duration-300;
   }
   
   .input-floating input:focus ~ label,
   .input-floating input:not(:placeholder-shown) ~ label,
   .input-floating textarea:focus ~ label,
   .input-floating textarea:not(:placeholder-shown) ~ label {
-    @apply -top-2 text-xs text-black dark:text-neutral-300 font-medium;
+    @apply -top-2 text-xs text-black dark:text-white/80 font-medium;
   }
   
   .input-floating input,
   .input-floating textarea {
-    @apply w-full bg-transparent pt-5 pb-2 focus:outline-none dark:text-neutral-200;
+    @apply w-full bg-transparent pt-5 pb-2 focus:outline-none dark:text-white;
   }
   
   .input-floating input:focus,
   .input-floating textarea:focus {
-    @apply border-black dark:border-neutral-400;
+    @apply border-black dark:border-white/60;
   }
 
   /* Buttons */
@@ -201,7 +202,7 @@
   }
   
   .dark .elegant-button {
-    @apply bg-neutral-300 text-neutral-900 hover:bg-neutral-800 hover:text-neutral-200 hover:border-neutral-500 hover:shadow-md;
+    @apply bg-white text-black hover:bg-black/5 hover:text-white hover:border-white/20 hover:shadow-md backdrop-blur-md;
   }
 
   /* Text Effects */
@@ -212,15 +213,28 @@
   }
   
   .dark .gradient-text {
-    background: linear-gradient(90deg, #E8E8E8, #ACACAC);
+    background: linear-gradient(90deg, #FFFFFF, #E0E0E0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   
   .text-gradient {
-    background: linear-gradient(90deg, #E8E8E8, #ACACAC);
+    background: linear-gradient(90deg, #FFFFFF, #E0E0E0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+  
+  /* Glassmorphism effects for dark mode */
+  .dark .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg;
+  }
+  
+  .dark .glass-form {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20;
+  }
+  
+  .dark .tech-card {
+    @apply bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-lg;
   }
 }
 

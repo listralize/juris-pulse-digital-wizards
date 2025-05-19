@@ -41,8 +41,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.body.style.backgroundColor = '#000000'; // True black background
       } else {
         document.documentElement.classList.remove('dark');
-        document.documentElement.style.backgroundColor = '#ffffff';
-        document.body.style.backgroundColor = '#ffffff';
+        document.documentElement.style.backgroundColor = '#f5f5f5'; // Light gray background
+        document.body.style.backgroundColor = '#f5f5f5'; // Light gray background
       }
     }
   }, [theme]);

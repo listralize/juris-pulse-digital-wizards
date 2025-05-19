@@ -3,11 +3,8 @@ import React, { useRef, useState } from 'react';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { Checkbox } from "../ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { ChevronDown, MessageCircle, HelpCircle, Phone, Mail, Send } from 'lucide-react';
+import { Phone, Mail, Send } from 'lucide-react';
 import gsap from 'gsap';
 import { useTheme } from '../ThemeProvider';
 
@@ -16,7 +13,6 @@ interface ContactFormProps {
   isSubmitting?: boolean;
 }
 
-// Updated with more client-focused language
 const serviceOptions = [
   { value: "familia", label: "Divórcio e questões familiares" },
   { value: "tributario", label: "Problemas com impostos" },
@@ -75,9 +71,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
     const tl = gsap.timeline();
     if (formContainerRef.current) {
       tl.to(formContainerRef.current, { 
-        y: -20, 
+        y: -10, 
         opacity: 0, 
-        duration: 0.5,
+        duration: 0.4,
         onComplete: () => {
           onSubmitSuccess();
           setFormState(prev => ({
@@ -95,27 +91,23 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
       tl.to(formContainerRef.current, { 
         y: 0, 
         opacity: 1, 
-        duration: 0.5,
-        delay: 0.3
+        duration: 0.4,
+        delay: 0.2
       });
     }
-  };
-
-  const getServiceIcon = () => {
-    return <MessageCircle className="h-4 w-4 opacity-70" />;
   };
 
   return (
     <div 
       ref={formContainerRef} 
-      className={`p-3 ${isDark ? 'bg-neutral-800 border-neutral-700' : 'bg-white/90 border-gray-100'} shadow-lg border rounded-lg flex flex-col h-full`}
+      className={`p-3 h-full ${isDark ? 'glass-form text-white' : 'bg-white/90 border-gray-100 border'} shadow-lg rounded-lg flex flex-col`}
     >
       <div className="mb-2">
-        <h3 className={`text-base font-medium ${isDark ? 'text-neutral-200' : 'text-gray-900'}`}>
+        <h3 className={`text-base font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
           Como podemos ajudar você?
         </h3>
-        <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-gray-600'}`}>
-          Conte-nos sobre seu problema jurídico e entraremos em contato rapidamente.
+        <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+          Conte-nos sobre seu problema jurídico
         </p>
       </div>
       
@@ -125,7 +117,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
         className="flex flex-col gap-2 flex-grow overflow-y-auto pr-1 scrollbar-thin"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-neutral-400' : 'border-black') : ''} ${isDark ? 'bg-neutral-700 text-neutral-200' : ''}`}>
+          <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-white/60' : 'border-black') : ''} ${isDark ? 'bg-white/5 text-white' : ''}`}>
             <input
               type="text"
               id="name"
@@ -136,12 +128,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
               onBlur={handleBlur}
               placeholder=" "
               required
-              className={`focus:ring-0 w-full text-sm ${isDark ? 'bg-transparent text-neutral-200 placeholder-neutral-400' : ''}`}
+              className={`focus:ring-0 w-full text-sm ${isDark ? 'bg-transparent text-white placeholder-white/40' : ''}`}
             />
-            <label htmlFor="name" className={`text-xs ${isDark ? 'text-neutral-400' : ''}`}>Nome</label>
+            <label htmlFor="name" className={`text-xs ${isDark ? 'text-white/60' : ''}`}>Nome</label>
           </div>
           
-          <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? (isDark ? 'border-neutral-400' : 'border-black') : ''} ${isDark ? 'bg-neutral-700 text-neutral-200' : ''}`}>
+          <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? (isDark ? 'border-white/60' : 'border-black') : ''} ${isDark ? 'bg-white/5 text-white' : ''}`}>
             <input
               type="tel"
               id="phone"
@@ -151,13 +143,13 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
               onFocus={() => handleFocus('phone')}
               onBlur={handleBlur}
               placeholder=" "
-              className={`focus:ring-0 w-full text-sm ${isDark ? 'bg-transparent text-neutral-200 placeholder-neutral-400' : ''}`}
+              className={`focus:ring-0 w-full text-sm ${isDark ? 'bg-transparent text-white placeholder-white/40' : ''}`}
             />
-            <label htmlFor="phone" className={`text-xs ${isDark ? 'text-neutral-400' : ''}`}><Phone className="inline h-3 w-3 mr-1" />Telefone</label>
+            <label htmlFor="phone" className={`text-xs ${isDark ? 'text-white/60' : ''}`}><Phone className="inline h-3 w-3 mr-1" />Telefone</label>
           </div>
         </div>
         
-        <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? (isDark ? 'border-neutral-400' : 'border-black') : ''} ${isDark ? 'bg-neutral-700 text-neutral-200' : ''}`}>
+        <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? (isDark ? 'border-white/60' : 'border-black') : ''} ${isDark ? 'bg-white/5 text-white' : ''}`}>
           <input
             type="email"
             id="email"
@@ -168,20 +160,20 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             onBlur={handleBlur}
             placeholder=" "
             required
-            className={`focus:ring-0 w-full text-sm ${isDark ? 'bg-transparent text-neutral-200 placeholder-neutral-400' : ''}`}
+            className={`focus:ring-0 w-full text-sm ${isDark ? 'bg-transparent text-white placeholder-white/40' : ''}`}
           />
-          <label htmlFor="email" className={`text-xs ${isDark ? 'text-neutral-400' : ''}`}><Mail className="inline h-3 w-3 mr-1" />E-mail</label>
+          <label htmlFor="email" className={`text-xs ${isDark ? 'text-white/60' : ''}`}><Mail className="inline h-3 w-3 mr-1" />E-mail</label>
         </div>
         
         <div className="form-group">
-          <label htmlFor="service" className={`block text-xs font-medium mb-1 ${isDark ? 'text-neutral-400' : 'text-gray-700'}`}>
+          <label htmlFor="service" className={`block text-xs font-medium mb-1 ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
             Qual problema você precisa resolver?
           </label>
           <Select onValueChange={handleServiceChange} value={formState.service}>
-            <SelectTrigger className={`w-full text-sm h-9 ${isDark ? 'bg-neutral-700 border-neutral-600 text-neutral-200' : 'bg-white'}`}>
+            <SelectTrigger className={`w-full text-sm h-8 ${isDark ? 'bg-white/5 border-white/20 text-white' : 'bg-white'}`}>
               <SelectValue placeholder="Selecione seu problema jurídico" />
             </SelectTrigger>
-            <SelectContent className={`${isDark ? 'bg-neutral-700 border-neutral-600 text-neutral-200' : ''}`}>
+            <SelectContent className={`${isDark ? 'bg-neutral-800 border-white/10 text-white' : ''}`}>
               {serviceOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -191,7 +183,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
           </Select>
         </div>
         
-        <div className={`input-floating transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-neutral-400' : 'border-black') : ''} ${isDark ? 'bg-neutral-700 text-neutral-200' : ''}`}>
+        <div className={`input-floating transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white/60' : 'border-black') : ''} ${isDark ? 'bg-white/5 text-white' : ''}`}>
           <textarea
             id="message"
             name="message"
@@ -201,9 +193,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             onBlur={handleBlur}
             placeholder=" "
             required
-            className={`focus:ring-0 h-16 resize-none w-full text-sm ${isDark ? 'bg-transparent text-neutral-200 placeholder-neutral-400' : ''}`}
+            className={`focus:ring-0 h-14 resize-none w-full text-sm ${isDark ? 'bg-transparent text-white placeholder-white/40' : ''}`}
           ></textarea>
-          <label htmlFor="message" className={`text-xs ${isDark ? 'text-neutral-400' : ''}`}><MessageCircle className="inline h-3 w-3 mr-1" />Detalhes do seu caso</label>
+          <label htmlFor="message" className={`text-xs ${isDark ? 'text-white/60' : ''}`}>Detalhes do seu caso</label>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -211,11 +203,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             id="urgent" 
             checked={formState.urgent}
             onCheckedChange={handleUrgentChange}
-            className={isDark ? "border-neutral-500" : ""}
+            className={isDark ? "border-white/40" : ""}
           />
           <label
             htmlFor="urgent"
-            className={`text-xs font-medium leading-none ${isDark ? 'text-neutral-400' : 'text-gray-700'}`}
+            className={`text-xs font-medium leading-none ${isDark ? 'text-white/70' : 'text-gray-700'}`}
           >
             Preciso de atendimento urgente
           </label>
@@ -227,7 +219,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             disabled={isSubmitting}
             className={`w-full flex items-center justify-center space-x-2 py-1.5 px-4 rounded-md transition-all text-sm ${
               isDark 
-                ? 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300' 
+                ? 'bg-white text-black hover:bg-white/90' 
                 : 'bg-black text-white hover:bg-gray-800'
             }`}
           >

@@ -72,8 +72,8 @@ export default {
 					600: '#8E8E8E',
 					700: '#5C5C5C',
 					800: '#2F2F2F',
-					900: '#1E1E1E', // Adjusted to be more neutral
-					950: '#121212', // Adjusted to be more neutral
+					900: '#1E1E1E',
+					950: '#121212',
 				}
 			},
 			fontFamily: {
@@ -101,11 +101,11 @@ export default {
 					'100%': { opacity: '1' }
 				},
 				'fade-up': {
-					'0%': { opacity: '0', transform: 'translateY(30px)' },
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
 				'stretch': {
-					'0%': { transform: 'scaleY(0.8)', opacity: '0' },
+					'0%': { transform: 'scaleY(0.95)', opacity: '0' },
 					'100%': { transform: 'scaleY(1)', opacity: '1' }
 				},
 				'slide-right': {
@@ -118,21 +118,21 @@ export default {
 				},
 				'pulse-subtle': {
 					'0%, 100%': { opacity: '1' },
-					'50%': { opacity: '0.8' }
+					'50%': { opacity: '0.9' }
 				},
 				'scale-in-out': {
 					'0%, 100%': { transform: 'scale(1)' },
-					'50%': { transform: 'scale(1.05)' }
+					'50%': { transform: 'scale(1.02)' }
 				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.8s ease-out forwards',
-				'fade-up': 'fade-up 0.8s ease-out forwards',
-				'stretch': 'stretch 0.8s ease-out forwards',
-				'slide-right': 'slide-right 0.8s ease-out forwards',
-				'slide-left': 'slide-left 0.8s ease-out forwards',
+				'fade-in': 'fade-in 0.6s ease-out forwards',
+				'fade-up': 'fade-up 0.6s ease-out forwards',
+				'stretch': 'stretch 0.6s ease-out forwards',
+				'slide-right': 'slide-right 0.6s ease-out forwards',
+				'slide-left': 'slide-left 0.6s ease-out forwards',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
 				'scale-in-out': 'scale-in-out 4s ease-in-out infinite',
 			}
@@ -142,7 +142,6 @@ export default {
 	corePlugins: {
 		preflight: true,
 	},
-	// Add utilities for handling scrollbars
 	safelist: [
 		{
 			pattern: /no-scrollbar/,

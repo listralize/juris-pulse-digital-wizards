@@ -69,7 +69,7 @@ const PracticeAreas = () => {
   useEffect(() => {
     gsap.fromTo(
       titleRef.current,
-      { opacity: 0, scaleY: 0.9 },
+      { opacity: 0, scaleY: 0.95 },
       {
         opacity: 1,
         scaleY: 1,
@@ -85,12 +85,12 @@ const PracticeAreas = () => {
     cardsRef.current.forEach((card, index) => {
       gsap.fromTo(
         card,
-        { opacity: 0, y: 30 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.8,
-          delay: 0.1 * index,
+          duration: 0.6,
+          delay: 0.05 * index,
           scrollTrigger: {
             trigger: card,
             start: 'top 90%',
@@ -109,7 +109,7 @@ const PracticeAreas = () => {
     <section 
       id="areas" 
       ref={sectionRef} 
-      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-white'}`}
+      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} transition-colors duration-500`}
     >
       <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
         Áreas de Atuação
@@ -120,17 +120,17 @@ const PracticeAreas = () => {
           <Link to={area.link} key={area.id}>
             <Card 
               ref={(el) => (cardsRef.current[index] = el)}
-              className={`border transition-all duration-300 h-full ${
+              className={`border transition-all duration-500 h-full hover-scale ${
                 isDark 
-                  ? 'border-gray-800 bg-gray-900 hover:bg-gray-800' 
-                  : 'border-gray-100 shadow-sm hover:shadow-lg bg-white/80'
+                  ? 'tech-card text-white' 
+                  : 'border-gray-200 shadow-sm hover:shadow-lg bg-white/80'
               }`}
             >
               <CardContent className="p-8">
                 <h3 className={`text-xl md:text-2xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
                   {area.title}
                 </h3>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>
+                <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} font-satoshi`}>
                   {area.description}
                 </p>
               </CardContent>

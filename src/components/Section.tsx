@@ -16,10 +16,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         ref={ref}
         className={`section-container w-full min-h-screen ${className}`}
         style={{ 
-          opacity: 1, // Always visible
-          pointerEvents: 'auto', // Always interactive
-          position: 'relative', // Changed from absolute to relative
-          transition: 'opacity 500ms ease'
+          opacity: 1, 
+          pointerEvents: 'auto', 
+          position: 'relative', 
+          transition: 'opacity 500ms ease, transform 500ms ease'
         }}
       >
         {children}

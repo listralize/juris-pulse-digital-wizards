@@ -35,12 +35,14 @@ export const useSectionTransition = (sections: Section[]) => {
     }
   }, [sections]);
   
-  // Function to transition to a section
+  // Function to transition to a section with improved behavior
   const transitionToSection = (id: string) => {
     if (isTransitioning || id === activeSection) return;
+    setIsTransitioning(true);
     
     const targetSection = document.getElementById(id);
     if (targetSection) {
+      // Smoother scroll with animation
       targetSection.scrollIntoView({ behavior: 'smooth' });
       
       // Update URL without reloading
@@ -51,6 +53,13 @@ export const useSectionTransition = (sections: Section[]) => {
       }
       
       setActiveSection(id);
+      
+      // Reset transitioning state after animation completes
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 1000);
+    } else {
+      setIsTransitioning(false);
     }
   };
 

@@ -26,31 +26,40 @@ const SectionsContainer: React.FC = () => {
   
   const { transitionToSection, sectionsRef } = useSectionTransition(sections);
   
-  // Load home section on first render
+  // Load home section on first render and handle navigation
   useEffect(() => {
-    // Force scroll to top on initial load
-    window.scrollTo(0, 0);
-    
-    // Handle hash if present
+    // Force scroll to top on initial load if no hash
     const hash = window.location.hash.substring(1);
+    
     if (!hash || hash === 'home') {
+      window.scrollTo(0, 0);
       setActiveSection('home');
-      window.history.replaceState(null, '', '#home');
+      
+      // Make sure URL has #home hash
+      if (history.pushState && hash !== 'home') {
+        history.pushState(null, '', '#home');
+      }
+    } else {
+      // Try to scroll to the section corresponding to the hash
+      const sectionElement = document.getElementById(hash);
+      if (sectionElement) {
+        setTimeout(() => {
+          sectionElement.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
     }
   }, []);
   
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
           const sectionId = entry.target.id;
           setActiveSection(sectionId);
           
           // Update URL without reloading
-          if (history.pushState) {
+          if (history.pushState && window.location.hash !== `#${sectionId}`) {
             history.pushState(null, '', `#${sectionId}`);
-          } else {
-            window.location.hash = sectionId;
           }
         }
       });
@@ -59,7 +68,7 @@ const SectionsContainer: React.FC = () => {
     const options = {
       root: null,
       rootMargin: '0px',
-      threshold: 0.3,
+      threshold: 0.4,
     };
     
     const observer = new IntersectionObserver(handleIntersection, options);
@@ -83,7 +92,7 @@ const SectionsContainer: React.FC = () => {
           <Section 
             key={section.id} 
             id={section.id} 
-            isActive={true} // Make all sections visible
+            isActive={true}
             ref={el => el && (sectionsRef.current[index] = el)}
             className={section.id === 'contact' ? 'pb-0' : ''}
           >

@@ -17,13 +17,13 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage, onReset }
   };
 
   return (
-    <div className={`h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-sm ${
-      isDark ? 'bg-gray-900 border border-gray-700' : 'bg-white/70 border border-gray-100'
+    <div className={`h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-xl ${
+      isDark ? 'glass-form text-white' : 'bg-white/70 border border-gray-100'
     } shadow-lg`}>
       <div className={`w-16 h-16 mb-6 rounded-full flex items-center justify-center ${
-        isDark ? 'bg-green-900/50' : 'bg-green-50'
+        isDark ? 'bg-white/20' : 'bg-green-50'
       }`}>
-        <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 ${isDark ? 'text-green-400' : 'text-green-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 ${isDark ? 'text-white' : 'text-green-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
@@ -34,7 +34,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage, onReset }
       <button
         onClick={handleClick}
         className={`elegant-button ${
-          isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'
+          isDark ? 'bg-white text-black hover:bg-white/80' : 'bg-black text-white hover:bg-gray-800'
         }`}
       >
         Enviar nova mensagem

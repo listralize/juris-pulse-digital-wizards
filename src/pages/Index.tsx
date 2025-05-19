@@ -27,7 +27,7 @@ const Index = () => {
   }, []);
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-neutral-200' : 'bg-white text-black'} transition-colors duration-300`}>
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500`}>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
