@@ -20,7 +20,7 @@ const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) =>
       onPressedChange={toggleTheme}
       className={`rounded-full p-2 transition-all hover:scale-105 
         ${isDark 
-          ? 'bg-neutral-700/30 text-neutral-200 hover:bg-neutral-700/50' 
+          ? 'bg-neutral-800/30 text-neutral-300 hover:bg-neutral-800/50' 
           : 'bg-black/10 text-black hover:bg-black/20'
         } ${className}`}
     >

@@ -26,6 +26,19 @@ const SectionsContainer: React.FC = () => {
   
   const { transitionToSection, sectionsRef } = useSectionTransition(sections);
   
+  // Load home section on first render
+  useEffect(() => {
+    // Force scroll to top on initial load
+    window.scrollTo(0, 0);
+    
+    // Handle hash if present
+    const hash = window.location.hash.substring(1);
+    if (!hash || hash === 'home') {
+      setActiveSection('home');
+      window.history.replaceState(null, '', '#home');
+    }
+  }, []);
+  
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {

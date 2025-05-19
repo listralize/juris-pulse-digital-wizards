@@ -22,13 +22,16 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(initialSection);
     
     // If there's a hash in the URL, scroll to that section
-    if (initialHash) {
+    if (initialHash && initialHash !== 'home') {
       setTimeout(() => {
         const section = document.getElementById(initialHash);
         if (section) {
           section.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
+    } else {
+      // Scroll to top for home section
+      window.scrollTo(0, 0);
     }
   }, [sections]);
   

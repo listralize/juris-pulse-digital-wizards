@@ -37,8 +37,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
-        document.documentElement.style.backgroundColor = '#1E1E1E'; // More neutral dark background
-        document.body.style.backgroundColor = '#1E1E1E'; // More neutral dark background
+        document.documentElement.style.backgroundColor = '#000000'; // True black background
+        document.body.style.backgroundColor = '#000000'; // True black background
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.style.backgroundColor = '#ffffff';
