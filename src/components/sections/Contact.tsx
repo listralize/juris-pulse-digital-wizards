@@ -61,10 +61,10 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className={`min-h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-16`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div ref={titleRef} className="mb-10 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div ref={titleRef} className="mb-8 relative z-10">
           <h2 className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             Contato
           </h2>
@@ -73,9 +73,9 @@ const Contact = () => {
         
         <div 
           ref={contentRef} 
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="space-y-8">
+          <div className="space-y-6">
             <ContactInfo />
             <LocationMap />
           </div>

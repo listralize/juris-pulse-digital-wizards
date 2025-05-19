@@ -88,7 +88,7 @@ const Partners = () => {
               <CardContent className="p-0">
                 <div className="flex flex-col p-6">
                   <div className="flex flex-col items-center md:items-start md:flex-row gap-6 mb-6">
-                    <div className="w-32 h-32 overflow-hidden flex-shrink-0">
+                    <div className="w-32 h-32 overflow-hidden rounded-lg flex-shrink-0 border-4 border-white shadow-md bg-white">
                       <img 
                         src={partner.image} 
                         alt={partner.name} 

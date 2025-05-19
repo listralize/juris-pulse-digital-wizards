@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import gsap from 'gsap';
 import { useTheme } from '../ThemeProvider';
 
@@ -10,6 +11,18 @@ interface ContactFormProps {
   onSubmitSuccess: () => void;
   isSubmitting?: boolean;
 }
+
+const practiceAreas = [
+  { value: "familia", label: "Direito da Família" },
+  { value: "tributario", label: "Direito Tributário" },
+  { value: "empresarial", label: "Direito Empresarial" },
+  { value: "trabalho", label: "Direito do Trabalho" },
+  { value: "constitucional", label: "Direito Constitucional" },
+  { value: "administrativo", label: "Direito Administrativo" },
+  { value: "previdenciario", label: "Direito Previdenciário" },
+  { value: "consumidor", label: "Direito do Consumidor" },
+  { value: "outro", label: "Outro assunto" }
+];
 
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting = false }) => {
   const { theme } = useTheme();
@@ -19,7 +32,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
     name: '',
     email: '',
     phone: '',
-    subject: '',
+    area: '',
     message: '',
     focused: ''
   });
@@ -30,6 +43,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormState(prev => ({ ...prev, area: value }));
   };
   
   const handleFocus = (field: string) => {
@@ -58,7 +75,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             name: '',
             email: '',
             phone: '',
-            subject: '',
+            area: '',
             message: ''
           }));
         }
@@ -76,14 +93,14 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
   return (
     <div 
       ref={formContainerRef} 
-      className={`p-6 md:p-8 ${isDark ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-100'} shadow-lg border h-full flex flex-col`}
+      className={`p-5 md:p-6 ${isDark ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-100'} shadow-lg border rounded-lg h-full flex flex-col`}
     >
       <form 
         ref={formRef} 
         onSubmit={handleSubmit} 
-        className="h-full flex flex-col"
+        className="h-full flex flex-col gap-4"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
             <input
               type="text"
@@ -117,7 +134,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
             <input
               type="tel"
@@ -133,24 +150,26 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             <label htmlFor="phone" className={isDark ? 'text-gray-300' : ''}>Telefone</label>
           </div>
           
-          <div className={`input-floating transition-all duration-300 ${formState.focused === 'subject' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
-            <input
-              type="text"
-              id="subject"
-              name="subject"
-              value={formState.subject}
-              onChange={handleChange}
-              onFocus={() => handleFocus('subject')}
-              onBlur={handleBlur}
-              placeholder=" "
-              required
-              className={`focus:ring-0 w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
-            />
-            <label htmlFor="subject" className={isDark ? 'text-gray-300' : ''}>Assunto</label>
+          <div className="form-group">
+            <label htmlFor="area" className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Área de interesse
+            </label>
+            <Select onValueChange={handleSelectChange} value={formState.area}>
+              <SelectTrigger className={`w-full ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white'}`}>
+                <SelectValue placeholder="Selecione a área" />
+              </SelectTrigger>
+              <SelectContent className={`${isDark ? 'bg-gray-800 border-gray-700 text-white' : ''}`}>
+                {practiceAreas.map((area) => (
+                  <SelectItem key={area.value} value={area.value}>
+                    {area.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         
-        <div className={`input-floating mb-8 flex-grow transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
+        <div className={`input-floating flex-grow transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
           <textarea
             id="message"
             name="message"
@@ -160,12 +179,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             onBlur={handleBlur}
             placeholder=" "
             required
-            className={`focus:ring-0 h-full min-h-[120px] resize-none w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
+            className={`focus:ring-0 h-full min-h-[100px] resize-none w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
           ></textarea>
           <label htmlFor="message" className={isDark ? 'text-gray-300' : ''}>Mensagem</label>
         </div>
         
-        <div className="mt-auto">
+        <div className="mt-2">
           <button
             type="submit"
             disabled={isSubmitting}

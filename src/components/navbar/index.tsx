@@ -73,15 +73,15 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`${isDark ? 'bg-black' : 'bg-white'} py-6 border-b ${isDark ? 'border-white/10' : 'border-black/10'} sticky top-0 z-50 w-full`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+    <nav className={`${isDark ? 'bg-black' : 'bg-white'} py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} sticky top-0 z-50 w-full`}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="flex justify-center items-center">
           <DesktopNavigation 
             activeSection={activeSection}
             handleNavigation={handleNavigation}
           />
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 absolute right-4">
             <ThemeToggle />
             
             {/* Mobile menu button */}
