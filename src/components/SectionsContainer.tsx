@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
 import Section from './Section';
 
@@ -12,11 +12,9 @@ import ClientArea from './sections/ClientArea';
 import Contact from './sections/Contact';
 import Footer from './sections/Footer';
 
-interface SectionsContainerProps {
-  onActiveChange: (sectionId: string) => void;
-}
-
-const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange }) => {
+const SectionsContainer: React.FC = () => {
+  const [activeSection, setActiveSection] = useState('home');
+  
   const sections = [
     { id: 'home', component: Hero },
     { id: 'about', component: About },
@@ -26,12 +24,36 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
     { id: 'contact', component: Contact }
   ];
   
-  const { activeSection, transitionToSection, sectionsRef } = useSectionTransition(sections);
+  const { transitionToSection, sectionsRef } = useSectionTransition(sections);
   
-  // Update parent component when active section changes
-  React.useEffect(() => {
-    onActiveChange(activeSection);
-  }, [activeSection, onActiveChange]);
+  useEffect(() => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          setActiveSection(sectionId);
+        }
+      });
+    };
+    
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5,
+    };
+    
+    const observer = new IntersectionObserver(handleIntersection, options);
+    
+    sectionsRef.current.forEach((section) => {
+      if (section) observer.observe(section);
+    });
+    
+    return () => {
+      sectionsRef.current.forEach((section) => {
+        if (section) observer.unobserve(section);
+      });
+    };
+  }, [sectionsRef]);
 
   return (
     <div className="relative min-h-screen w-full bg-black dark:bg-black">
