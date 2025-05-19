@@ -1,7 +1,6 @@
 
 import React, { useRef, useState } from 'react';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from "../ui/checkbox";
 import { Phone, Mail, Send } from 'lucide-react';
@@ -102,21 +101,16 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
       ref={formContainerRef} 
       className={`p-3 h-full ${isDark ? 'glass-form text-white' : 'bg-white/90 border-gray-100 border'} shadow-lg rounded-lg flex flex-col`}
     >
-      <div className="mb-2">
-        <h3 className={`text-base font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Como podemos ajudar você?
-        </h3>
-        <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
-          Conte-nos sobre seu problema jurídico
-        </p>
-      </div>
+      <h3 className={`text-base font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        Como podemos ajudar você?
+      </h3>
       
       <form 
         ref={formRef} 
         onSubmit={handleSubmit} 
-        className="flex flex-col gap-2 flex-grow overflow-y-auto pr-1 scrollbar-thin"
+        className="flex flex-col gap-1.5 flex-grow overflow-y-auto scrollbar-thin"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-white/60' : 'border-black') : ''} ${isDark ? 'bg-white/5 text-white' : ''}`}>
             <input
               type="text"
@@ -170,7 +164,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             Qual problema você precisa resolver?
           </label>
           <Select onValueChange={handleServiceChange} value={formState.service}>
-            <SelectTrigger className={`w-full text-sm h-8 ${isDark ? 'bg-white/5 border-white/20 text-white' : 'bg-white'}`}>
+            <SelectTrigger className={`w-full text-xs h-8 ${isDark ? 'bg-white/5 border-white/20 text-white' : 'bg-white'}`}>
               <SelectValue placeholder="Selecione seu problema jurídico" />
             </SelectTrigger>
             <SelectContent className={`${isDark ? 'bg-neutral-800 border-white/10 text-white' : ''}`}>
@@ -193,7 +187,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             onBlur={handleBlur}
             placeholder=" "
             required
-            className={`focus:ring-0 h-14 resize-none w-full text-sm ${isDark ? 'bg-transparent text-white placeholder-white/40' : ''}`}
+            className={`focus:ring-0 h-12 resize-none w-full text-sm ${isDark ? 'bg-transparent text-white placeholder-white/40' : ''}`}
           ></textarea>
           <label htmlFor="message" className={`text-xs ${isDark ? 'text-white/60' : ''}`}>Detalhes do seu caso</label>
         </div>
@@ -213,11 +207,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
           </label>
         </div>
         
-        <div className="mt-2">
+        <div className="mt-1">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full flex items-center justify-center space-x-2 py-1.5 px-4 rounded-md transition-all text-sm ${
+            className={`w-full flex items-center justify-center space-x-2 py-1 px-4 rounded-md transition-all text-sm ${
               isDark 
                 ? 'bg-white text-black hover:bg-white/90' 
                 : 'bg-black text-white hover:bg-gray-800'

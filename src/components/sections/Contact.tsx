@@ -70,11 +70,11 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-6 pb-16 transition-colors duration-500`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 pb-16 transition-colors duration-500`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={titleRef} className="mb-4 relative z-10">
-          <h2 className={`text-2xl md:text-3xl mb-2 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div ref={titleRef} className="mb-2 relative z-10">
+          <h2 className={`text-2xl md:text-3xl font-canela ${isDark ? 'text-white' : 'text-black'} overflow-visible`}>
             Precisa de ajuda jurídica?
           </h2>
           <div className={`w-20 h-1 ${isDark ? 'bg-white/70' : 'bg-black'}`}></div>
@@ -85,39 +85,42 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-3"
+          className="grid grid-cols-12 gap-3 overflow-visible"
         >
-          {/* Contact columns - repositioned for better compact view */}
-          <div className="lg:col-span-3 space-y-3">
-            <ContactInfo />
-            <div className={`p-3 rounded-lg ${isDark ? 'glass-card text-white' : 'bg-white/90 border-gray-100 border shadow-lg'}`}>
-              <h3 className={`text-sm mb-2 font-medium ${isDark ? 'text-white' : 'text-black'}`}>
-                Por que escolher a Serafim & Trombela Advocacia?
-              </h3>
-              <ul className="space-y-1.5 text-xs">
-                <li className="flex items-start">
-                  <Check className={`mt-0.5 mr-1.5 h-3.5 w-3.5 ${isDark ? 'text-white/70' : 'text-black'}`} />
-                  <span>Atendimento personalizado para cada cliente</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className={`mt-0.5 mr-1.5 h-3.5 w-3.5 ${isDark ? 'text-white/70' : 'text-black'}`} />
-                  <span>Equipe especializada em diversas áreas do direito</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className={`mt-0.5 mr-1.5 h-3.5 w-3.5 ${isDark ? 'text-white/70' : 'text-black'}`} />
-                  <span>Comunicação clara e transparente durante todo o processo</span>
-                </li>
-              </ul>
+          {/* Left side - Contact info */}
+          <div className="col-span-12 md:col-span-3">
+            <div className="grid grid-cols-1 gap-3">
+              <ContactInfo />
+              
+              <div className={`p-3 rounded-lg ${isDark ? 'glass-card text-white' : 'bg-white/90 border-gray-100 border shadow-lg'}`}>
+                <h3 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                  Por que escolher a Serafim & Trombela Advocacia?
+                </h3>
+                <ul className="space-y-1.5 text-xs mt-2">
+                  <li className="flex items-start">
+                    <Check className={`mt-0.5 mr-1.5 h-3.5 w-3.5 ${isDark ? 'text-white/70' : 'text-black'}`} />
+                    <span>Atendimento personalizado para cada cliente</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className={`mt-0.5 mr-1.5 h-3.5 w-3.5 ${isDark ? 'text-white/70' : 'text-black'}`} />
+                    <span>Equipe especializada em diversas áreas do direito</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className={`mt-0.5 mr-1.5 h-3.5 w-3.5 ${isDark ? 'text-white/70' : 'text-black'}`} />
+                    <span>Comunicação clara e transparente durante todo o processo</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
           
-          {/* Map in the middle */}
-          <div className="lg:col-span-3 h-64 sm:h-auto">
+          {/* Middle - Map */}
+          <div className="col-span-12 md:col-span-4 h-64 md:h-auto">
             <LocationMap />
           </div>
           
-          {/* Form on the right - made more compact */}
-          <div className="lg:col-span-6">
+          {/* Right - Contact form */}
+          <div className="col-span-12 md:col-span-5">
             {!isSuccess ? (
               <ContactForm 
                 onSubmitSuccess={handleSubmitSuccess} 

@@ -8,8 +8,8 @@ const ContactInfo: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`${isDark ? 'glass-card text-white' : 'bg-white border-gray-100 border'} p-3 shadow-lg h-full`}>
-      <h3 className={`text-xs font-medium mb-2 ${isDark ? 'text-white' : 'gradient-text'}`}>Informações de Contato</h3>
+    <div className={`${isDark ? 'glass-card text-white' : 'bg-white border-gray-100 border'} p-3 shadow-lg h-full rounded-lg`}>
+      <h3 className={`text-xs font-medium mb-1 ${isDark ? 'text-white' : 'gradient-text'}`}>Informações de Contato</h3>
       
       <div className="space-y-2 text-xs">
         <div className="flex items-start group">
@@ -17,7 +17,7 @@ const ContactInfo: React.FC = () => {
             <MapPin className="w-2.5 h-2.5" />
           </div>
           <div>
-            <h4 className="font-medium text-xs mb-0.5">Endereço</h4>
+            <h4 className="font-medium text-xs">Endereço</h4>
             <p className={`${isDark ? 'text-white/70' : 'text-gray-700'} font-satoshi text-xs`}>
               World Trade Center<br />
               Av. D, Av. 85 - St. Marista<br />
@@ -31,7 +31,7 @@ const ContactInfo: React.FC = () => {
             <Phone className="w-2.5 h-2.5" />
           </div>
           <div>
-            <h4 className="font-medium text-xs mb-0.5">Telefone</h4>
+            <h4 className="font-medium text-xs">Telefone</h4>
             <a 
               href="https://api.whatsapp.com/send?phone=5562994594496"
               target="_blank"
@@ -48,7 +48,7 @@ const ContactInfo: React.FC = () => {
             <Mail className="w-2.5 h-2.5" />
           </div>
           <div>
-            <h4 className="font-medium text-xs mb-0.5">E-mail</h4>
+            <h4 className="font-medium text-xs">E-mail</h4>
             <a 
               href="mailto:contato@stadv.com"
               className={`${isDark ? 'text-white/70' : 'text-gray-900'} hover:underline font-satoshi block text-xs`}

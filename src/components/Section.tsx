@@ -19,7 +19,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           opacity: 1, 
           pointerEvents: 'auto', 
           position: 'relative', 
-          transition: 'opacity 500ms ease, transform 500ms ease'
+          transition: 'opacity 500ms ease, transform 500ms ease',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
         }}
       >
         {children}

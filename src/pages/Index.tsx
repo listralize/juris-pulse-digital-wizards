@@ -22,6 +22,11 @@ const Index = () => {
       const hash = window.location.hash;
       if (!hash || hash === '#' || hash === '#home') {
         window.scrollTo(0, 0);
+      } else if (hash) {
+        const targetElement = document.getElementById(hash.substring(1));
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }, 100);
   }, []);
