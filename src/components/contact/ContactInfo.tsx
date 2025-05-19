@@ -8,17 +8,17 @@ const ContactInfo: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`${isDark ? 'glass-card text-white' : 'bg-white border-gray-100 border'} p-3 shadow-lg h-full rounded-lg`}>
-      <h3 className={`text-xs font-medium mb-1 ${isDark ? 'text-white' : 'gradient-text'}`}>Informações de Contato</h3>
+    <div className={`${isDark ? 'bg-black/80 border-white/10 text-white' : 'bg-white border-gray-200 text-black'} p-4 border shadow-lg h-full rounded-lg backdrop-blur-sm`}>
+      <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : 'text-black'}`}>Informações de Contato</h3>
       
-      <div className="space-y-2 text-xs">
-        <div className="flex items-start group">
-          <div className={`mr-2 p-1 rounded-full ${isDark ? 'bg-white/10 group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
-            <MapPin className="w-2.5 h-2.5" />
+      <div className="space-y-4">
+        <div className="flex items-start">
+          <div className={`mr-2 p-1.5 rounded-full ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-black'}`}>
+            <MapPin className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="font-medium text-xs">Endereço</h4>
-            <p className={`${isDark ? 'text-white/70' : 'text-gray-700'} font-satoshi text-xs`}>
+            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>Endereço</h4>
+            <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} font-satoshi`}>
               World Trade Center<br />
               Av. D, Av. 85 - St. Marista<br />
               Goiânia - GO, 74150-040
@@ -26,32 +26,32 @@ const ContactInfo: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex items-start group">
-          <div className={`mr-2 p-1 rounded-full ${isDark ? 'bg-white/10 group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
-            <Phone className="w-2.5 h-2.5" />
+        <div className="flex items-start">
+          <div className={`mr-2 p-1.5 rounded-full ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-black'}`}>
+            <Phone className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="font-medium text-xs">Telefone</h4>
+            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>Telefone</h4>
             <a 
               href="https://api.whatsapp.com/send?phone=5562994594496"
               target="_blank"
               rel="noopener noreferrer"
-              className={`${isDark ? 'text-white/70' : 'text-gray-900'} hover:underline font-satoshi block text-xs`}
+              className={`${isDark ? 'text-white/80 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline font-satoshi block`}
             >
               +55 62 99459-4496
             </a>
           </div>
         </div>
         
-        <div className="flex items-start group">
-          <div className={`mr-2 p-1 rounded-full ${isDark ? 'bg-white/10 group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
-            <Mail className="w-2.5 h-2.5" />
+        <div className="flex items-start">
+          <div className={`mr-2 p-1.5 rounded-full ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-black'}`}>
+            <Mail className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="font-medium text-xs">E-mail</h4>
+            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>E-mail</h4>
             <a 
               href="mailto:contato@stadv.com"
-              className={`${isDark ? 'text-white/70' : 'text-gray-900'} hover:underline font-satoshi block text-xs`}
+              className={`${isDark ? 'text-white/80 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline font-satoshi block`}
             >
               contato@stadv.com
             </a>

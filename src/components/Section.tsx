@@ -1,5 +1,6 @@
 
 import React, { forwardRef } from 'react';
+import { useTheme } from './ThemeProvider';
 
 interface SectionProps {
   id: string;
@@ -10,16 +11,19 @@ interface SectionProps {
 
 const Section = forwardRef<HTMLDivElement, SectionProps>(
   ({ id, isActive, className = "", children }, ref) => {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    
     return (
       <div 
         id={id} 
         ref={ref}
-        className={`section-container w-full min-h-screen ${className}`}
+        className={`section-container w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} ${className}`}
         style={{ 
           opacity: 1, 
           pointerEvents: 'auto', 
           position: 'relative', 
-          transition: 'opacity 500ms ease, transform 500ms ease',
+          transition: 'opacity 500ms ease, transform 500ms ease, background-color 500ms ease',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center'

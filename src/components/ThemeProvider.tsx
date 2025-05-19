@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     }
     
-    // Default to dark theme for luxury feel
+    // Default to dark theme
     return 'dark';
   });
   
@@ -41,6 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.body.style.backgroundColor = '#000000'; // True black background
       } else {
         document.documentElement.classList.remove('dark');
+        // Use the same color as in the client area section
         document.documentElement.style.backgroundColor = '#f5f5f5'; // Light gray background
         document.body.style.backgroundColor = '#f5f5f5'; // Light gray background
       }
