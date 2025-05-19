@@ -27,8 +27,8 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          minHeight: id === 'contact' ? '100vh' : '80vh', // Increased height for contact section
-          paddingTop: id === 'contact' ? '80px' : '0' // Add padding to contact section
+          minHeight: id === 'contact' ? '90vh' : '80vh', // Reduced contact section height slightly
+          paddingTop: id === 'contact' ? '100px' : '0' // Increased padding for contact section
         }}
       >
         {children}

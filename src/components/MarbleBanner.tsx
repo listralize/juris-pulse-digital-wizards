@@ -19,7 +19,8 @@ const MarbleBanner = () => {
       
       // Animate with a slight delay for each path
       setTimeout(() => {
-        path.style.transition = `stroke-dashoffset 2s ease-in-out ${index * 0.15}s`;
+        // Properly cast the path to SVGPathElement to access its style property
+        (path as SVGPathElement).style.transition = `stroke-dashoffset 2s ease-in-out ${index * 0.15}s`;
         path.setAttribute('stroke-dashoffset', '0');
       }, 500);
     });
