@@ -59,7 +59,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <Navbar />
       
       <main className="flex-grow">
-        <section className={`pt-16 pb-16 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
+        <section className={`pt-8 pb-16 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
           <div className="max-w-6xl mx-auto flex flex-col items-center">
             {/* Logo added above title with reduced spacing */}
             <div className="mb-8 w-full max-w-xs md:max-w-sm mx-auto">
