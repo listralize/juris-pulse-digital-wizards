@@ -73,10 +73,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-black py-4 md:py-4 border-b border-gray-800 sticky top-0 z-50 w-full">
+    <nav className={`bg-black py-4 md:py-4 border-b border-gray-800 sticky top-0 z-50 w-full ${isDark ? 'text-white' : 'text-black'}`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="flex justify-center items-center relative h-12 md:h-auto">
-          {/* Theme toggle - on the left for mobile, on the right for desktop */}
+          {/* Theme toggle - on the left for mobile */}
           <div className="md:hidden absolute left-0 flex">
             <ThemeToggle />
           </div>
@@ -84,7 +84,6 @@ const Navbar = () => {
           {/* Centered logo */}
           <div className="text-center">
             <Link to="/" className="font-canela text-xl flex items-center justify-center">
-              {/* Mobile: Logo image */}
               <img 
                 src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
                 alt="S&T Advocacia"

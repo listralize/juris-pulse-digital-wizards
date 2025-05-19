@@ -26,6 +26,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     // Simulate loading time
@@ -66,12 +67,12 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white">
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <CustomCursor />
       <Navbar />
       
       <main className="flex-grow pb-24"> {/* Added bottom padding for WhatsApp button */}
-        <section className="pt-8 pb-4 px-6 md:px-16 lg:px-24 bg-black text-white relative">
+        <section className={`pt-8 pb-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
           <div className="max-w-6xl mx-auto flex flex-col items-center">
             <div className="w-full max-w-xs md:max-w-sm mx-auto mb-8">
               <img 
@@ -81,16 +82,16 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
               />
             </div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-canela mb-6 text-white">{title}</h1>
-            <div className="w-24 h-1 bg-white/40 mb-6"></div>
-            <p className="text-lg md:text-xl max-w-3xl text-center mb-10 text-white/80">
+            <h1 className={`text-4xl md:text-6xl lg:text-7xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>{title}</h1>
+            <div className={`w-24 h-1 ${isDark ? 'bg-white/40' : 'bg-black/40'} mb-6`}></div>
+            <p className={`text-lg md:text-xl max-w-3xl text-center mb-10 ${isDark ? 'text-white/80' : 'text-black/80'}`}>
               {description}
             </p>
           </div>
         </section>
 
         {/* Areas navigation */}
-        <section className="py-4 px-6 md:px-16 lg:px-24 bg-black border-white/10 border-y sticky top-[89px] z-30 w-full overflow-visible">
+        <section className={`py-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-[89px] z-30 w-full overflow-visible`}>
           <div className="max-w-6xl mx-auto">
             <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', paddingTop: '5px', paddingBottom: '5px' }}>
               <div className="inline-flex space-x-2 py-2 px-2 min-w-full justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -100,8 +101,12 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
                     to={area.path}
                     className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
                       currentArea === area.id 
-                        ? 'bg-white text-black' 
-                        : 'text-white/70 hover:text-white bg-gray-800 hover:bg-gray-700'
+                        ? isDark
+                          ? 'bg-white text-black'
+                          : 'bg-black text-white'
+                        : isDark
+                          ? 'text-white/70 hover:text-white bg-gray-800 hover:bg-gray-700'
+                          : 'text-black/70 hover:text-black bg-gray-200 hover:bg-gray-300'
                     }`}
                   >
                     {area.label}
@@ -115,11 +120,11 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         {/* Scroll indicator */}
         {showScrollIndicator && (
           <div className="flex justify-center py-6 animate-bounce">
-            <ArrowDown className="w-6 h-6 text-white/70" />
+            <ArrowDown className={`w-6 h-6 ${isDark ? 'text-white/70' : 'text-black/70'}`} />
           </div>
         )}
       
-        <section className="py-12 px-6 md:px-16 lg:px-24 bg-black text-white">
+        <section className={`py-12 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
           <div className="max-w-6xl mx-auto">
             {children}
           </div>

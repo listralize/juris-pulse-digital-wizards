@@ -70,7 +70,7 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="w-full bg-black text-white py-24 transition-colors duration-500"
+      className="w-full bg-black text-white pt-32 pb-24 transition-colors duration-500"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-12 relative z-10">
