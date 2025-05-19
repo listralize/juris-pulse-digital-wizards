@@ -32,6 +32,13 @@ const SectionsContainer: React.FC = () => {
         if (entry.isIntersecting) {
           const sectionId = entry.target.id;
           setActiveSection(sectionId);
+          
+          // Update URL without reloading
+          if (history.pushState) {
+            history.pushState(null, '', `#${sectionId}`);
+          } else {
+            window.location.hash = sectionId;
+          }
         }
       });
     };
@@ -39,7 +46,7 @@ const SectionsContainer: React.FC = () => {
     const options = {
       root: null,
       rootMargin: '0px',
-      threshold: 0.5,
+      threshold: 0.3,
     };
     
     const observer = new IntersectionObserver(handleIntersection, options);
@@ -63,7 +70,7 @@ const SectionsContainer: React.FC = () => {
           <Section 
             key={section.id} 
             id={section.id} 
-            isActive={section.id === activeSection}
+            isActive={true} // Make all sections visible
             ref={el => el && (sectionsRef.current[index] = el)}
             className={section.id === 'contact' ? 'pb-0' : ''}
           >

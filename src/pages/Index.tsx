@@ -17,7 +17,7 @@ const Index = () => {
   const isDark = theme === 'dark';
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-300`}>
+    <div className={`min-h-screen ${isDark ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-black'} transition-colors duration-300`}>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />

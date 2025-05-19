@@ -36,62 +36,19 @@ export const useSectionTransition = (sections: Section[]) => {
   const transitionToSection = (id: string) => {
     if (isTransitioning || id === activeSection) return;
     
-    const targetIndex = sections.findIndex(section => section.id === id);
-    if (targetIndex === -1) return;
-    
-    setIsTransitioning(true);
-    
-    // Update URL without refreshing page
-    window.history.pushState({}, "", `#${id}`);
-    
-    // Get the current visible section index
-    const currentIndex = sections.findIndex(section => section.id === activeSection);
-    
-    // Determine the direction of transition (up or down)
-    const direction = targetIndex > currentIndex ? 1 : -1;
-    
-    // Get target section element
-    const targetSection = sectionsRef.current[targetIndex];
-    const currentSection = sectionsRef.current[currentIndex];
-    
-    if (!targetSection || !currentSection) {
-      setIsTransitioning(false);
-      return;
+    const targetSection = document.getElementById(id);
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth' });
+      
+      // Update URL without reloading
+      if (history.pushState) {
+        history.pushState(null, '', `#${id}`);
+      } else {
+        window.location.hash = id;
+      }
+      
+      setActiveSection(id);
     }
-    
-    // Show both sections during transition
-    gsap.set(targetSection, { display: 'block', opacity: 0 });
-    
-    // Animate current section out
-    gsap.to(currentSection, { 
-      y: -100 * direction, 
-      opacity: 0,
-      duration: 0.5,
-      ease: "power2.in",
-      onComplete: () => {
-        gsap.set(currentSection, { display: 'none' });
-      }
-    });
-    
-    // Animate target section in
-    gsap.fromTo(
-      targetSection,
-      { 
-        y: 100 * direction, 
-        opacity: 0,
-      },
-      { 
-        y: 0, 
-        opacity: 1,
-        duration: 0.5,
-        delay: 0.3, // Slight delay for better transition feel
-        ease: "power2.out",
-        onComplete: () => {
-          setActiveSection(id);
-          setIsTransitioning(false);
-        }
-      }
-    );
   };
 
   return {

@@ -8,20 +8,20 @@ const LocationMap: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`flex-grow rounded-lg overflow-hidden shadow-lg ${isDark ? 'border border-gray-700 bg-gray-900/80' : 'border border-gray-100'} relative h-[300px]`}>
+    <div className={`${isDark ? 'border-neutral-700 bg-neutral-800 text-neutral-100' : 'border border-gray-100'} rounded-lg overflow-hidden shadow-lg relative h-full min-h-[150px]`}>
       <img 
         src="/lovable-uploads/a8cc2627-db98-4461-9afa-8b1f238766e0.png" 
         alt="Localização do escritório"
         className="w-full h-full object-cover"
       />
-      <div className="absolute bottom-4 right-4">
+      <div className="absolute bottom-2 right-2">
         <a 
           href="https://maps.google.com/?q=World+Trade+Center+Goiania" 
           target="_blank"
           rel="noopener noreferrer"
-          className={`elegant-button ${isDark ? 'bg-black/80 text-white hover:bg-black' : 'bg-black/80 text-white hover:bg-black'} backdrop-blur-sm text-sm py-2 flex items-center px-4 rounded-none`}
+          className={`elegant-button ${isDark ? 'bg-neutral-800/80 text-neutral-100 hover:bg-neutral-700' : 'bg-black/80 text-white hover:bg-black'} backdrop-blur-sm text-xs py-1 flex items-center px-2 rounded-none`}
         >
-          <MapPin className="w-4 h-4 mr-1" /> Abrir no Google Maps
+          <MapPin className="w-3 h-3 mr-1" /> Abrir no Google Maps
         </a>
       </div>
     </div>

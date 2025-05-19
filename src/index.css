@@ -48,7 +48,7 @@
   }
 
   .dark {
-    --background: 0 0% 10%;
+    --background: 0 0% 12%;
     --foreground: 0 0% 95%;
 
     --card: 0 0% 15%;
@@ -76,7 +76,7 @@
     --input: 0 0% 25%;
     --ring: 0 0% 35%;
     
-    --sidebar-background: 0 0% 12%;
+    --sidebar-background: 0 0% 14%;
     --sidebar-foreground: 0 0% 85%;
     --sidebar-primary: 0 0% 95%;
     --sidebar-primary-foreground: 0 0% 10%;
@@ -171,11 +171,11 @@
 
   /* Form Elements */
   .input-floating {
-    @apply relative border-b border-gray-300 dark:border-neutral-700 focus-within:border-black dark:focus-within:border-neutral-400 transition-colors duration-300;
+    @apply relative border-b border-gray-300 dark:border-neutral-600 focus-within:border-black dark:focus-within:border-neutral-400 transition-colors duration-300;
   }
   
   .input-floating label {
-    @apply absolute top-5 left-0 text-gray-500 dark:text-neutral-500 transition-all duration-300;
+    @apply absolute top-5 left-0 text-gray-500 dark:text-neutral-400 transition-all duration-300;
   }
   
   .input-floating input:focus ~ label,

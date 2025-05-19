@@ -72,8 +72,8 @@ export default {
 					600: '#8E8E8E',
 					700: '#5C5C5C',
 					800: '#2F2F2F',
-					900: '#212121',
-					950: '#1A1A1A',
+					900: '#1E1E1E', // Adjusted to be more neutral
+					950: '#121212', // Adjusted to be more neutral
 				}
 			},
 			fontFamily: {
