@@ -2,8 +2,12 @@
 import React, { useRef, useState } from 'react';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+import { Checkbox } from "../ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { ChevronDown, MessageCircle, HelpCircle, Phone, Mail, Send } from 'lucide-react';
 import gsap from 'gsap';
 import { useTheme } from '../ThemeProvider';
 
@@ -12,16 +16,17 @@ interface ContactFormProps {
   isSubmitting?: boolean;
 }
 
-const practiceAreas = [
-  { value: "familia", label: "Direito da Família" },
-  { value: "tributario", label: "Direito Tributário" },
-  { value: "empresarial", label: "Direito Empresarial" },
-  { value: "trabalho", label: "Direito do Trabalho" },
-  { value: "constitucional", label: "Direito Constitucional" },
-  { value: "administrativo", label: "Direito Administrativo" },
-  { value: "previdenciario", label: "Direito Previdenciário" },
-  { value: "consumidor", label: "Direito do Consumidor" },
-  { value: "outro", label: "Outro assunto" }
+// Updated with more client-focused language
+const serviceOptions = [
+  { value: "familia", label: "Divórcio e questões familiares" },
+  { value: "tributario", label: "Problemas com impostos" },
+  { value: "empresarial", label: "Assessoria para sua empresa" },
+  { value: "trabalho", label: "Questões trabalhistas" },
+  { value: "constitucional", label: "Defesa de direitos fundamentais" },
+  { value: "administrativo", label: "Problemas com órgãos públicos" },
+  { value: "previdenciario", label: "Aposentadoria e benefícios" },
+  { value: "consumidor", label: "Direitos como consumidor" },
+  { value: "outro", label: "Outro problema jurídico" }
 ];
 
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting = false }) => {
@@ -32,9 +37,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
     name: '',
     email: '',
     phone: '',
-    area: '',
+    service: '',
     message: '',
-    focused: ''
+    focused: '',
+    urgent: false,
   });
   
   const formRef = useRef<HTMLFormElement>(null);
@@ -45,8 +51,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: string) => {
-    setFormState(prev => ({ ...prev, area: value }));
+  const handleServiceChange = (value: string) => {
+    setFormState(prev => ({ ...prev, service: value }));
+  };
+
+  const handleUrgentChange = (checked: boolean) => {
+    setFormState(prev => ({ ...prev, urgent: checked }));
   };
   
   const handleFocus = (field: string) => {
@@ -75,8 +85,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             name: '',
             email: '',
             phone: '',
-            area: '',
-            message: ''
+            service: '',
+            message: '',
+            urgent: false
           }));
         }
       });
@@ -90,17 +101,30 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
     }
   };
 
+  const getServiceIcon = () => {
+    return <MessageCircle className="h-4 w-4 opacity-70" />;
+  };
+
   return (
     <div 
       ref={formContainerRef} 
-      className={`p-5 md:p-6 ${isDark ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-100'} shadow-lg border rounded-lg h-full flex flex-col`}
+      className={`p-4 md:p-5 ${isDark ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-100'} shadow-lg border rounded-lg flex flex-col max-h-[600px]`}
     >
+      <div className="mb-4">
+        <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          Como podemos ajudar você?
+        </h3>
+        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+          Conte-nos sobre seu problema jurídico e entraremos em contato rapidamente.
+        </p>
+      </div>
+      
       <form 
         ref={formRef} 
         onSubmit={handleSubmit} 
-        className="h-full flex flex-col gap-4"
+        className="flex flex-col gap-3 overflow-y-auto pr-1 scrollbar-thin"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className={`input-floating transition-all duration-300 ${formState.focused === 'name' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
             <input
               type="text"
@@ -117,24 +141,6 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             <label htmlFor="name" className={isDark ? 'text-gray-300' : ''}>Nome</label>
           </div>
           
-          <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formState.email}
-              onChange={handleChange}
-              onFocus={() => handleFocus('email')}
-              onBlur={handleBlur}
-              placeholder=" "
-              required
-              className={`focus:ring-0 w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
-            />
-            <label htmlFor="email" className={isDark ? 'text-gray-300' : ''}>E-mail</label>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`input-floating transition-all duration-300 ${formState.focused === 'phone' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
             <input
               type="tel"
@@ -147,29 +153,45 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
               placeholder=" "
               className={`focus:ring-0 w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
             />
-            <label htmlFor="phone" className={isDark ? 'text-gray-300' : ''}>Telefone</label>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="area" className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Área de interesse
-            </label>
-            <Select onValueChange={handleSelectChange} value={formState.area}>
-              <SelectTrigger className={`w-full ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white'}`}>
-                <SelectValue placeholder="Selecione a área" />
-              </SelectTrigger>
-              <SelectContent className={`${isDark ? 'bg-gray-800 border-gray-700 text-white' : ''}`}>
-                {practiceAreas.map((area) => (
-                  <SelectItem key={area.value} value={area.value}>
-                    {area.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label htmlFor="phone" className={isDark ? 'text-gray-300' : ''}><Phone className="inline h-3 w-3 mr-1" />Telefone</label>
           </div>
         </div>
         
-        <div className={`input-floating flex-grow transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
+        <div className={`input-floating transition-all duration-300 ${formState.focused === 'email' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formState.email}
+            onChange={handleChange}
+            onFocus={() => handleFocus('email')}
+            onBlur={handleBlur}
+            placeholder=" "
+            required
+            className={`focus:ring-0 w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
+          />
+          <label htmlFor="email" className={isDark ? 'text-gray-300' : ''}><Mail className="inline h-3 w-3 mr-1" />E-mail</label>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="service" className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Qual problema você precisa resolver?
+          </label>
+          <Select onValueChange={handleServiceChange} value={formState.service}>
+            <SelectTrigger className={`w-full ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white'}`}>
+              <SelectValue placeholder="Selecione seu problema jurídico" />
+            </SelectTrigger>
+            <SelectContent className={`${isDark ? 'bg-gray-800 border-gray-700 text-white' : ''}`}>
+              {serviceOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className={`input-floating transition-all duration-300 ${formState.focused === 'message' ? (isDark ? 'border-white' : 'border-black') : ''} ${isDark ? 'bg-gray-800/50 text-white' : ''}`}>
           <textarea
             id="message"
             name="message"
@@ -179,16 +201,35 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
             onBlur={handleBlur}
             placeholder=" "
             required
-            className={`focus:ring-0 h-full min-h-[100px] resize-none w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
+            className={`focus:ring-0 h-20 resize-none w-full ${isDark ? 'bg-transparent text-white placeholder-gray-400' : ''}`}
           ></textarea>
-          <label htmlFor="message" className={isDark ? 'text-gray-300' : ''}>Mensagem</label>
+          <label htmlFor="message" className={isDark ? 'text-gray-300' : ''}><MessageCircle className="inline h-3 w-3 mr-1" />Detalhes do seu caso</label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="urgent" 
+            checked={formState.urgent}
+            onCheckedChange={handleUrgentChange}
+            className={isDark ? "border-gray-500" : ""}
+          />
+          <label
+            htmlFor="urgent"
+            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+          >
+            Preciso de atendimento urgente
+          </label>
         </div>
         
         <div className="mt-2">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`elegant-button w-full md:w-auto hover:scale-105 transform transition-transform ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
+            className={`w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-all ${
+              isDark 
+                ? 'bg-white text-black hover:bg-gray-200' 
+                : 'bg-black text-white hover:bg-gray-800'
+            }`}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center">
@@ -198,7 +239,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
                 </svg>
                 Enviando...
               </span>
-            ) : "Enviar mensagem"}
+            ) : (
+              <>
+                <Send className="h-4 w-4" /> 
+                <span>Enviar mensagem</span>
+              </>
+            )}
           </button>
         </div>
       </form>

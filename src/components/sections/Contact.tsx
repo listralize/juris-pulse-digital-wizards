@@ -61,14 +61,17 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-16`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-12`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-8 relative z-10">
           <h2 className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            Contato
+            Precisa de ajuda jurídica?
           </h2>
           <div className={`w-20 h-1 ${isDark ? 'bg-white' : 'bg-black'}`}></div>
+          <p className={`mt-4 text-lg ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Entre em contato para uma consulta personalizada
+          </p>
         </div>
         
         <div 
@@ -76,11 +79,34 @@ const Contact = () => {
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           <div className="space-y-6">
+            <div className={`p-5 rounded-lg ${isDark ? 'bg-gray-900/70 border-gray-800' : 'bg-white/90 border-gray-100'} border shadow-lg`}>
+              <h3 className={`text-xl mb-4 font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                Por que escolher a Serafim & Trombela Advocacia?
+              </h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <Check className={`mt-1 mr-2 h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+                  <span>Atendimento personalizado para cada cliente</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className={`mt-1 mr-2 h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+                  <span>Equipe especializada em diversas áreas do direito</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className={`mt-1 mr-2 h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+                  <span>Comunicação clara e transparente durante todo o processo</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className={`mt-1 mr-2 h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+                  <span>Soluções jurídicas eficientes para seus problemas</span>
+                </li>
+              </ul>
+            </div>
             <ContactInfo />
             <LocationMap />
           </div>
           
-          <div className="relative h-full">
+          <div className="relative h-auto">
             {!isSuccess ? (
               <ContactForm 
                 onSubmitSuccess={handleSubmitSuccess} 
