@@ -111,14 +111,6 @@ const PracticeAreas = () => {
       ref={sectionRef} 
       className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-white'}`}
     >
-      <div className="mb-10 w-full max-w-xs md:max-w-sm mx-auto">
-        <img 
-          src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
-          alt="Serafim & Trombela Advocacia Logo"
-          className={`w-full h-auto ${isDark ? 'filter brightness-150' : ''}`}
-        />
-      </div>
-      
       <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
         Áreas de Atuação
       </h2>
