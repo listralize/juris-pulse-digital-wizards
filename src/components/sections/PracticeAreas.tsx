@@ -109,30 +109,32 @@ const PracticeAreas = () => {
     <section 
       id="areas" 
       ref={sectionRef} 
-      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative bg-black transition-colors duration-500"
+      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} transition-colors duration-500`}
     >
-      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center text-white">
+      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
         Áreas de Atuação
       </h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {practiceAreas.map((area, index) => (
-          <Link to={area.link} key={area.id}>
-            <Card 
-              ref={(el) => (cardsRef.current[index] = el)}
-              className="bg-black/80 border border-white/10 backdrop-blur-sm text-white transition-all duration-500 h-full hover-scale"
-            >
-              <CardContent className="p-6">
-                <h3 className="text-xl md:text-2xl mb-4 font-canela text-white">
-                  {area.title}
-                </h3>
-                <p className="text-white/80 font-satoshi">
-                  {area.description}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {practiceAreas.map((area, index) => (
+            <Link to={area.link} key={area.id}>
+              <Card 
+                ref={(el) => (cardsRef.current[index] = el)}
+                className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm transition-all duration-500 h-full hover-scale`}
+              >
+                <CardContent className="p-6">
+                  <h3 className={`text-xl md:text-2xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                    {area.title}
+                  </h3>
+                  <p className={isDark ? 'text-white/80' : 'text-black/80'}>
+                    {area.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -81,23 +81,15 @@ const Navbar = () => {
             <ThemeToggle />
           </div>
           
-          {/* Centered logo */}
-          <div className="text-center">
-            <Link to="/" className="font-canela text-xl flex items-center justify-center">
-              <img 
-                src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
-                alt="S&T Advocacia"
-                className="h-10 w-auto"
-              />
-            </Link>
+          {/* Desktop navigation in the center */}
+          <div className="hidden md:flex justify-center items-center w-full">
+            <DesktopNavigation 
+              activeSection={activeSection}
+              handleNavigation={handleNavigation}
+            />
           </div>
-          
-          <DesktopNavigation 
-            activeSection={activeSection}
-            handleNavigation={handleNavigation}
-          />
 
-          {/* Theme toggle - on the right for desktop only */}
+          {/* Theme toggle - on the right for desktop, moved outside contact overlap */}
           <div className="hidden md:flex absolute right-0">
             <ThemeToggle />
           </div>

@@ -41,12 +41,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.style.color = '#FFFFFF';
         document.body.style.backgroundColor = '#000000'; // Pure black background for dark mode
         document.body.style.color = '#FFFFFF';
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.style.backgroundColor = '#f5f5f5'; // Light gray background
         document.documentElement.style.color = '#000000';
         document.body.style.backgroundColor = '#f5f5f5'; // Light gray background
         document.body.style.color = '#000000';
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
       }
     }
   }, [theme]);

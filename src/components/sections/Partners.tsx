@@ -14,7 +14,7 @@ const partners = [
     title: 'Advogado',
     oab: 'OAB/GO: 67.754',
     email: 'trombela@stadv.com',
-    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png', // Swapped image
+    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
     description: 'Atuação em Direito Civil e Contratual, com foco em soluções jurídicas para empresas e pessoas físicas.'
   },
   {
@@ -23,7 +23,7 @@ const partners = [
     title: 'Advogado',
     oab: 'OAB/GO: 67.790',
     email: 'serafim@stadv.com',
-    image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png', // Swapped image
+    image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
     description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
   }
 ];
@@ -88,12 +88,12 @@ const Partners = () => {
     <section 
       id="socios"
       ref={sectionRef}
-      className="min-h-screen py-20 px-6 md:px-16 lg:px-24 relative bg-black dark:bg-black text-white"
+      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
     >
       <div className="max-w-6xl mx-auto">
         <h2 
           ref={titleRef}
-          className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center text-white"
+          className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
         >
           Nossos Sócios
         </h2>
@@ -102,7 +102,7 @@ const Partners = () => {
           {partners.map((partner, index) => (
             <div 
               key={partner.id}
-              className={`bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500`}
+              className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500`}
               ref={el => cardsRef.current[index] = el}
             >
               <div className="p-6 md:p-8">
@@ -115,19 +115,19 @@ const Partners = () => {
                     />
                   </div>
                   <div className="flex-grow text-center md:text-left">
-                    <h3 className="text-2xl md:text-3xl font-canela mb-2 text-white">
+                    <h3 className={`text-2xl md:text-3xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                       {partner.name}
                     </h3>
-                    <p className="text-sm text-gray-300 mb-1">
+                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                       {partner.title} - {partner.oab}
                     </p>
                     <a 
                       href={`mailto:${partner.email}`} 
-                      className="text-sm hover:underline text-white"
+                      className={`text-sm hover:underline ${isDark ? 'text-white' : 'text-black'}`}
                     >
                       {partner.email}
                     </a>
-                    <p className="mt-4 text-gray-300">
+                    <p className={`mt-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {partner.description}
                     </p>
                   </div>
