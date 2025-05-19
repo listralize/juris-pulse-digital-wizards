@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -15,6 +15,11 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [activeSection, setActiveSection] = useState('home');
+  
+  const handleActiveChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+  };
   
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-300`}>
@@ -22,7 +27,7 @@ const Index = () => {
       <Navbar />
       <WhatsAppButton />
       
-      <SectionsContainer />
+      <SectionsContainer onActiveChange={handleActiveChange} />
     </div>
   );
 };
