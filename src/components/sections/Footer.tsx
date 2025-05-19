@@ -8,7 +8,7 @@ const Footer = () => {
   const isDark = theme === 'dark';
   
   return (
-    <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-gray-800 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
+    <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
@@ -54,7 +54,7 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className={`mt-10 pt-6 ${isDark ? 'border-t border-gray-800' : 'border-t border-gray-100'} flex flex-col md:flex-row justify-between items-center`}>
+        <div className={`mt-10 pt-6 ${isDark ? 'border-t border-white' : 'border-t border-gray-100'} flex flex-col md:flex-row justify-between items-center`}>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi mb-4 md:mb-0`}>
             © {currentYear} Serafim & Trombela Advocacia. Todos os direitos reservados.
           </p>
