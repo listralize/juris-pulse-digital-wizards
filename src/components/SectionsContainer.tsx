@@ -43,6 +43,7 @@ const SectionsContainer: React.FC<SectionsContainerProps> = ({ onActiveChange })
             id={section.id} 
             isActive={section.id === activeSection}
             ref={el => el && (sectionsRef.current[index] = el)}
+            className={section.id === 'contact' ? 'pb-0' : ''}
           >
             <Component />
             {section.id === 'contact' && <Footer />}

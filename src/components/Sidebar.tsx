@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
     }`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between py-4">
-          <div className="flex items-center justify-center">
+          <div className="hidden md:flex items-center justify-center">
             <div className="flex items-center justify-center space-x-8 md:space-x-12">
               {sidebarItems.map((item) => (
                 <a
@@ -72,6 +72,26 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
                 </a>
               ))}
             </div>
+          </div>
+          
+          {/* Mobile navigation */}
+          <div className="md:hidden flex items-center space-x-4">
+            {/* Mobile menu button or dropdown can be added here */}
+            <select 
+              className={`
+                block appearance-none px-3 py-2 rounded border
+                ${isDark ? 'bg-black text-white border-gray-800' : 'bg-white text-black border-gray-100'}
+                focus:outline-none
+              `}
+              value={activeSection}
+              onChange={(e) => onSectionChange(e.target.value)}
+            >
+              {sidebarItems.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
           </div>
           
           {/* Theme toggle */}

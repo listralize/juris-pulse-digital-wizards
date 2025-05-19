@@ -75,7 +75,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess }) => {
   return (
     <div 
       ref={formContainerRef} 
-      className={`p-8 backdrop-blur-sm ${isDark ? 'bg-gray-900/70 border-gray-800' : 'bg-white/70 border-gray-100'} shadow-lg border h-full flex flex-col`}
+      className={`p-6 md:p-8 ${isDark ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-100'} shadow-lg border h-full flex flex-col`}
     >
       <form 
         ref={formRef} 
