@@ -23,7 +23,7 @@ const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) =>
           ? 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20' 
           : 'bg-black/10 text-black hover:bg-black/20'
         } ${className}`}
-      style={{ zIndex: 40 }} // Lowered z-index to prevent contact section overlap
+      style={{ zIndex: 20 }} // Lower z-index to prevent overlap with contact section
     >
       {isDark 
         ? <Sun className="h-5 w-5" /> 

@@ -25,6 +25,12 @@ const Index = () => {
       document.body.classList.add('light');
       document.body.classList.remove('dark');
     }
+    
+    // Force reload theme colors on document
+    document.documentElement.style.backgroundColor = isDark ? '#000000' : '#ffffff';
+    document.documentElement.style.color = isDark ? '#FFFFFF' : '#000000';
+    document.body.style.backgroundColor = isDark ? '#000000' : '#ffffff';
+    document.body.style.color = isDark ? '#FFFFFF' : '#000000';
   }, [isDark]);
   
   // Scroll to home section when component mounts
@@ -43,7 +49,7 @@ const Index = () => {
   }, []);
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500`}>
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500`}>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />

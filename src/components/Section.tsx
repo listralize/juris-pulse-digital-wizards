@@ -18,7 +18,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
       <div 
         id={id} 
         ref={ref}
-        className={`section-container w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} ${className}`}
+        className={`section-container w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
         style={{ 
           opacity: 1, 
           pointerEvents: 'auto', 

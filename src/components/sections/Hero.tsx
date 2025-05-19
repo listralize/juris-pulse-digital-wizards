@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
+import MarbleBanner from '../MarbleBanner';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -85,11 +86,15 @@ const Hero = () => {
       </div>
       
       <div className="relative z-10 text-center max-w-4xl mt-[-80px]">
-        <div ref={logoRef} className="mb-6 w-full max-w-xs md:max-w-sm mx-auto">
+        <div ref={logoRef} className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative">
+          {/* Marble Banner SVG behind the logo */}
+          <div className="absolute inset-0 -m-10 z-0">
+            <MarbleBanner />
+          </div>
           <img 
             src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
             alt="Serafim & Trombela Advocacia Logo"
-            className={`w-full h-auto ${isDark ? 'filter brightness-150' : ''}`}
+            className={`w-full h-auto relative z-10 ${isDark ? 'filter brightness-150' : ''}`}
           />
         </div>
         

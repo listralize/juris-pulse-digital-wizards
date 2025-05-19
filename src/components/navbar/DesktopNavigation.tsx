@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import NavigationItem from './NavigationItem';
 import PracticeAreasDropdown from './PracticeAreasDropdown';
 import { useTheme } from '../ThemeProvider';
