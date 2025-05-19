@@ -18,7 +18,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
       <div 
         id={id} 
         ref={ref}
-        className={`section-container w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} ${className}`}
+        className={`section-container w-full ${isDark ? 'bg-neutral-900 text-white' : 'bg-[#f5f5f5] text-black'} ${className}`}
         style={{ 
           opacity: 1, 
           pointerEvents: 'auto', 
@@ -26,7 +26,8 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           transition: 'opacity 500ms ease, transform 500ms ease, background-color 500ms ease',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          minHeight: '90vh' // Reduced height
         }}
       >
         {children}

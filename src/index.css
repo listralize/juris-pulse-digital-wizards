@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -48,7 +47,7 @@
   }
 
   .dark {
-    --background: 0 0% 0%; /* Pure black background */
+    --background: 0 0% 9%; /* Slightly lighter black background */
     --foreground: 0 0% 95%;
 
     --card: 0 0% 15%;
@@ -148,6 +147,10 @@
     border-color: rgba(0, 0, 0, 0.1);
   }
 
+  .dark .area-card {
+    @apply bg-neutral-900/90;
+  }
+
   .dark .area-card:hover {
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.15);
@@ -161,6 +164,10 @@
     @apply -translate-y-1 shadow-lg;
   }
   
+  .dark .enhanced-card {
+    @apply bg-neutral-900/90;
+  }
+
   .dark .enhanced-card:hover {
     box-shadow: 0 20px 30px rgba(255, 255, 255, 0.05);
   }
@@ -226,15 +233,15 @@
   
   /* Glassmorphism effects for dark mode */
   .dark .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg;
+    @apply bg-neutral-900/80 backdrop-blur-md border border-white/10 shadow-lg;
   }
   
   .dark .glass-form {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20;
+    @apply bg-neutral-900/80 backdrop-blur-xl border border-white/20;
   }
   
   .dark .tech-card {
-    @apply bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-lg;
+    @apply bg-gradient-to-br from-neutral-900/90 to-neutral-900/80 backdrop-blur-xl border border-white/10 shadow-lg;
   }
 }
 

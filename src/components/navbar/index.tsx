@@ -75,16 +75,22 @@ const Navbar = () => {
   return (
     <nav className={`${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} py-4 md:py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} sticky top-0 z-50 w-full`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="flex justify-center items-center relative h-10 md:h-auto">
-          {/* Theme toggle on the left for mobile */}
-          <div className="absolute left-0 flex md:hidden">
+        <div className="flex justify-center items-center relative h-12 md:h-auto">
+          {/* Theme toggle on the left for both mobile and desktop */}
+          <div className="absolute left-0 flex">
             <ThemeToggle />
           </div>
 
-          {/* Centered logo placeholder */}
+          {/* Centered logo */}
           <div className="text-center">
-            <Link to="/" className="font-canela text-xl">
-              {isDark ? 'S&T Advocacia' : 'S&T Advocacia'}
+            <Link to="/" className="font-canela text-xl flex items-center justify-center">
+              {/* Desktop: Text logo */}
+              <span className="hidden md:block">{isDark ? 'S&T Advocacia' : 'S&T Advocacia'}</span>
+              
+              {/* Mobile: Logo image */}
+              <span className="md:hidden flex items-center justify-center">
+                S&T
+              </span>
             </Link>
           </div>
           
@@ -94,11 +100,6 @@ const Navbar = () => {
           />
 
           <div className="flex items-center space-x-4 absolute right-0">
-            {/* Theme toggle on the right for desktop */}
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-            
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button

@@ -37,11 +37,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
-        document.documentElement.style.backgroundColor = '#000000'; // True black background
-        document.body.style.backgroundColor = '#000000'; // True black background
+        document.documentElement.style.backgroundColor = '#171717'; // Slightly lighter background for dark mode
+        document.body.style.backgroundColor = '#171717'; // Slightly lighter background for dark mode
       } else {
         document.documentElement.classList.remove('dark');
-        // Use the same color as in the client area section
         document.documentElement.style.backgroundColor = '#f5f5f5'; // Light gray background
         document.body.style.backgroundColor = '#f5f5f5'; // Light gray background
       }

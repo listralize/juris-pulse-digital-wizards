@@ -3,7 +3,6 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
 import { practiceAreas } from './practiceAreas';
-import ThemeToggle from './ThemeToggle';
 
 interface MobileNavigationProps {
   isMenuOpen: boolean;
@@ -109,10 +108,6 @@ const MobileNavigation = ({
         >
           Contato
         </a>
-        
-        <div className="px-3 py-2">
-          <ThemeToggle showLabel={true} className="w-full justify-start" />
-        </div>
       </div>
     </div>
   );
