@@ -3,9 +3,15 @@ import React from 'react';
 
 interface SuccessMessageProps {
   onNewMessage: () => void;
+  onReset: () => void;
 }
 
-const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage }) => {
+const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage, onReset }) => {
+  const handleClick = () => {
+    onNewMessage && onNewMessage();
+    onReset && onReset();
+  };
+
   return (
     <div className="h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-sm bg-white/70 shadow-lg border border-gray-100">
       <div className="w-16 h-16 mb-6 rounded-full bg-green-50 flex items-center justify-center">
@@ -18,7 +24,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage }) => {
         Obrigado pelo contato. Retornaremos em breve.
       </p>
       <button
-        onClick={onNewMessage}
+        onClick={handleClick}
         className="elegant-button"
       >
         Enviar nova mensagem

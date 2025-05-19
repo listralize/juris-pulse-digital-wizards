@@ -22,18 +22,9 @@ const Contact = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const handleSubmit = async (data: any) => {
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setIsSuccess(true);
-      setIsSubmitting(false);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setIsSubmitting(false);
-    }
+  const handleSubmitSuccess = () => {
+    setIsSuccess(true);
+    setIsSubmitting(false);
   };
   
   const resetForm = () => {
@@ -92,11 +83,11 @@ const Contact = () => {
           <div className="relative h-full">
             {!isSuccess ? (
               <ContactForm 
-                onSubmit={handleSubmit} 
+                onSubmitSuccess={handleSubmitSuccess} 
                 isSubmitting={isSubmitting} 
               />
             ) : (
-              <SuccessMessage onReset={resetForm} />
+              <SuccessMessage onNewMessage={resetForm} onReset={resetForm} />
             )}
           </div>
         </div>
