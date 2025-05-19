@@ -18,7 +18,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage, onReset }
 
   return (
     <div className={`h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-sm ${
-      isDark ? 'bg-gray-900/70 shadow-lg border border-gray-800' : 'bg-white/70 shadow-lg border border-gray-100'
+      isDark ? 'bg-black/70 shadow-lg border border-gray-800' : 'bg-white/70 shadow-lg border border-gray-100'
     }`}>
       <div className={`w-16 h-16 mb-6 rounded-full flex items-center justify-center ${
         isDark ? 'bg-green-900/50' : 'bg-green-50'
@@ -28,7 +28,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage, onReset }
         </svg>
       </div>
       <h3 className={`text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>Mensagem Enviada!</h3>
-      <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi mb-6`}>
+      <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} font-satoshi mb-6`}>
         Obrigado pelo contato. Retornaremos em breve.
       </p>
       <button

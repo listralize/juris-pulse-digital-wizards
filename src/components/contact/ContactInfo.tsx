@@ -8,17 +8,17 @@ const ContactInfo: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`${isDark ? 'bg-gray-900 border-gray-800 text-white' : 'bg-white border-gray-100'} p-6 md:p-8 border shadow-lg mb-6`}>
+    <div className={`${isDark ? 'bg-black border-gray-800 text-white' : 'bg-white border-gray-100'} p-6 md:p-8 border shadow-lg mb-6`}>
       <h3 className={`text-xl font-canela mb-6 ${isDark ? 'text-white' : 'gradient-text'}`}>Informações de Contato</h3>
       
       <div className="space-y-6">
         <div className="flex items-start group">
-          <div className={`mr-3 p-2 rounded-full ${isDark ? 'bg-gray-800 group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
+          <div className={`mr-3 p-2 rounded-full ${isDark ? 'bg-[#0F0F0F] group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
             <MapPin className="w-5 h-5" />
           </div>
           <div>
             <h4 className="font-medium mb-1">Endereço</h4>
-            <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>
+            <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} font-satoshi`}>
               World Trade Center<br />
               Av. D, Av. 85 - St. Marista<br />
               Goiânia - GO, 74150-040
@@ -27,7 +27,7 @@ const ContactInfo: React.FC = () => {
         </div>
         
         <div className="flex items-start group">
-          <div className={`mr-3 p-2 rounded-full ${isDark ? 'bg-gray-800 group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
+          <div className={`mr-3 p-2 rounded-full ${isDark ? 'bg-[#0F0F0F] group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
             <Phone className="w-5 h-5" />
           </div>
           <div>
@@ -44,7 +44,7 @@ const ContactInfo: React.FC = () => {
         </div>
         
         <div className="flex items-start group">
-          <div className={`mr-3 p-2 rounded-full ${isDark ? 'bg-gray-800 group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
+          <div className={`mr-3 p-2 rounded-full ${isDark ? 'bg-[#0F0F0F] group-hover:bg-white group-hover:text-black' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'} transition-colors duration-300`}>
             <Mail className="w-5 h-5" />
           </div>
           <div>

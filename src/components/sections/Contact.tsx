@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Check, Loader } from 'lucide-react';
+import { Check, Loader, ChevronDown } from 'lucide-react';
 
 import ContactForm from '../contact/ContactForm';
 import SuccessMessage from '../contact/SuccessMessage';
@@ -79,7 +79,7 @@ const Contact = () => {
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           <div className="space-y-6">
-            <div className={`p-5 rounded-lg ${isDark ? 'bg-gray-900/70 border-gray-800' : 'bg-white/90 border-gray-100'} border shadow-lg`}>
+            <div className={`p-5 rounded-lg ${isDark ? 'bg-black border-gray-800' : 'bg-white/90 border-gray-100'} border shadow-lg`}>
               <h3 className={`text-xl mb-4 font-medium ${isDark ? 'text-white' : 'text-black'}`}>
                 Por que escolher a Serafim & Trombela Advocacia?
               </h3>
@@ -115,6 +115,13 @@ const Contact = () => {
             ) : (
               <SuccessMessage onNewMessage={resetForm} onReset={resetForm} />
             )}
+          </div>
+        </div>
+        
+        {/* Indicador de rolagem */}
+        <div className="flex justify-center mt-10">
+          <div className={`animate-bounce cursor-pointer ${isDark ? 'text-white' : 'text-black'}`}>
+            <ChevronDown size={30} />
           </div>
         </div>
       </div>

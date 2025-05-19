@@ -1,8 +1,12 @@
 
 import React from 'react';
 import { MapPin } from 'lucide-react';
+import { useTheme } from '../ThemeProvider';
 
 const LocationMap: React.FC = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <div className="flex-grow rounded-lg overflow-hidden shadow-lg border border-gray-100 relative">
       <img 
@@ -15,7 +19,7 @@ const LocationMap: React.FC = () => {
           href="https://maps.google.com/?q=World+Trade+Center+Goiania" 
           target="_blank"
           rel="noopener noreferrer"
-          className="elegant-button bg-black/80 backdrop-blur-sm hover:bg-black/100 text-sm py-2 flex items-center"
+          className={`elegant-button ${isDark ? 'bg-black/80 text-white hover:bg-black' : 'bg-black/80 text-white hover:bg-black'} backdrop-blur-sm text-sm py-2 flex items-center`}
         >
           <MapPin className="w-4 h-4 mr-1" /> Abrir no Google Maps
         </a>
