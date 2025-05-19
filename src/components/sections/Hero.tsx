@@ -80,19 +80,15 @@ const Hero = () => {
           <img 
             src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
             alt="Serafim & Trombela Advocacia Logo"
-            className={`w-full h-auto relative z-10 ${isDark ? 'filter brightness-150' : ''}`}
+            className="w-full h-auto relative z-10 brightness-150"
           />
         </div>
         
-        <h1 ref={headlineRef} className={`text-4xl md:text-6xl lg:text-7xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight ${
-          isDark ? 'text-white' : 'text-white'
-        }`}>
+        <h1 ref={headlineRef} className="text-4xl md:text-6xl lg:text-7xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
           Soluções Jurídicas Inovadoras
         </h1>
         
-        <p ref={subheadlineRef} className={`text-lg md:text-xl ${
-          isDark ? 'text-gray-300' : 'text-gray-200'
-        } mb-8 text-center max-w-lg mx-auto font-satoshi`}>
+        <p ref={subheadlineRef} className="text-lg md:text-xl text-gray-200 mb-8 text-center max-w-lg mx-auto font-satoshi">
           Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
         </p>
         
@@ -101,9 +97,7 @@ const Hero = () => {
             href="https://api.whatsapp.com/send?phone=5562994594496" 
             target="_blank"
             rel="noopener noreferrer"
-            className={`elegant-button flex items-center justify-center gap-2 ${
-              isDark ? 'bg-white text-black hover:bg-black hover:text-white hover:border-white' : ''
-            }`}
+            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white"
           >
             Fale Conosco no WhatsApp
             <ArrowRight className="w-4 h-4" />
@@ -111,11 +105,7 @@ const Hero = () => {
           
           <a 
             href="#areas" 
-            className={`elegant-button flex items-center justify-center gap-2 ${
-              isDark 
-                ? 'bg-transparent text-white border-white hover:bg-white hover:text-black' 
-                : 'bg-transparent text-white border-white hover:bg-white hover:text-black'
-            }`}
+            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black"
           >
             Conheça Nossas Áreas de Atuação
             <ArrowRight className="w-4 h-4" />
