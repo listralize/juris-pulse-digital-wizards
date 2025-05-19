@@ -57,11 +57,20 @@ const Contact = () => {
     };
   }, []);
 
+  const scrollToNext = () => {
+    if (window) {
+      window.scrollBy({
+        top: window.innerHeight * 0.5,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <section 
       id="contact" 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-12`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-16 pb-32`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-8 relative z-10">
@@ -119,10 +128,8 @@ const Contact = () => {
         </div>
         
         {/* Indicador de rolagem */}
-        <div className="flex justify-center mt-10">
-          <div className={`animate-bounce cursor-pointer ${isDark ? 'text-white' : 'text-black'}`}>
-            <ChevronDown size={30} />
-          </div>
+        <div className="flex justify-center mt-16 animate-bounce cursor-pointer" onClick={scrollToNext}>
+          <ChevronDown size={30} className={isDark ? 'text-white' : 'text-black'} />
         </div>
       </div>
     </section>
