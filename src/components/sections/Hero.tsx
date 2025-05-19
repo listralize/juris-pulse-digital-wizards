@@ -70,27 +70,13 @@ const Hero = () => {
 
   return (
     <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Dynamic background with parallax effect */}
-      <div ref={bgRef} className="absolute inset-0 z-0">
-        <div className={`absolute inset-0 ${isDark ? 'bg-black' : 'bg-white'}`}></div>
-        <div className={`absolute top-[20%] left-[20%] w-96 h-96 rounded-full ${
-          isDark 
-            ? 'bg-gradient-to-r from-gray-800 to-gray-900 opacity-20 blur-3xl' 
-            : 'bg-gradient-to-r from-gray-200 to-gray-300 opacity-20 blur-3xl'
-        }`}></div>
-        <div className={`absolute bottom-[30%] right-[20%] w-64 h-64 rounded-full ${
-          isDark 
-            ? 'bg-gradient-to-r from-gray-800 to-gray-900 opacity-20 blur-3xl' 
-            : 'bg-gradient-to-r from-gray-200 to-gray-300 opacity-20 blur-3xl'
-        }`}></div>
+      {/* Full-width marble banner background */}
+      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full">
+        <MarbleBanner />
       </div>
       
       <div className="relative z-10 text-center max-w-4xl mt-[-80px]">
         <div ref={logoRef} className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative">
-          {/* Marble Banner SVG behind the logo */}
-          <div className="absolute inset-0 -m-10 z-0">
-            <MarbleBanner />
-          </div>
           <img 
             src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
             alt="Serafim & Trombela Advocacia Logo"
@@ -99,13 +85,13 @@ const Hero = () => {
         </div>
         
         <h1 ref={headlineRef} className={`text-4xl md:text-6xl lg:text-7xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight ${
-          isDark ? 'text-white' : 'text-black'
+          isDark ? 'text-white' : 'text-white'
         }`}>
           Soluções Jurídicas Inovadoras
         </h1>
         
         <p ref={subheadlineRef} className={`text-lg md:text-xl ${
-          isDark ? 'text-gray-300' : 'text-gray-700'
+          isDark ? 'text-gray-300' : 'text-gray-200'
         } mb-8 text-center max-w-lg mx-auto font-satoshi`}>
           Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
         </p>
@@ -128,7 +114,7 @@ const Hero = () => {
             className={`elegant-button flex items-center justify-center gap-2 ${
               isDark 
                 ? 'bg-transparent text-white border-white hover:bg-white hover:text-black' 
-                : 'bg-white text-black border-black hover:bg-black hover:text-white'
+                : 'bg-transparent text-white border-white hover:bg-white hover:text-black'
             }`}
           >
             Conheça Nossas Áreas de Atuação
@@ -147,14 +133,14 @@ const Hero = () => {
         >
           <path 
             d="M7 13L12 18L17 13" 
-            stroke={isDark ? "#FFFFFF" : "#000000"} 
+            stroke="#FFFFFF"
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round"
           />
           <path 
             d="M7 7L12 12L17 7" 
-            stroke={isDark ? "#FFFFFF" : "#000000"} 
+            stroke="#FFFFFF"
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round"
