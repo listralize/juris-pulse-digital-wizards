@@ -55,8 +55,8 @@ const FamiliaPage = () => {
         {services.map((service, index) => (
           <Card key={index} className={`${
             isDark 
-              ? 'bg-white/5 border-white/10 hover:bg-white/10' 
-              : 'bg-black/5 border-black/10 hover:bg-black/10'
+              ? 'bg-black border-white/10 hover:bg-white/5' 
+              : 'bg-gray-100 border-gray-200 hover:bg-gray-50'
             } transition-all duration-300`}>
             <CardContent className="p-8">
               <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>

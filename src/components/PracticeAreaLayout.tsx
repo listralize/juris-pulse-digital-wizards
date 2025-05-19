@@ -5,7 +5,6 @@ import Navbar from './navbar';
 import { Footer } from './sections';
 import CustomCursor from './CustomCursor';
 import WhatsAppButton from './WhatsAppButton';
-import Sidebar from './Sidebar';
 import { useTheme } from './ThemeProvider';
 import Loading from './Loading';
 
@@ -60,10 +59,10 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <Navbar />
       
       <main className="flex-grow">
-        <section className={`pt-24 pb-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
+        <section className={`pt-16 pb-16 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
           <div className="max-w-6xl mx-auto flex flex-col items-center">
-            {/* Logo added above title */}
-            <div className="mb-10 w-full max-w-xs md:max-w-sm mx-auto">
+            {/* Logo added above title with reduced spacing */}
+            <div className="mb-8 w-full max-w-xs md:max-w-sm mx-auto">
               <img 
                 src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
                 alt="Serafim & Trombela Advocacia Logo"
@@ -83,7 +82,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         <section className={`py-6 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-[89px] z-40 w-full overflow-visible`}>
           <div className="max-w-6xl mx-auto">
             <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', paddingTop: '5px', paddingBottom: '5px' }}>
-              <div className="inline-flex space-x-2 py-2 px-2 min-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <div className="inline-flex space-x-2 py-2 px-2 min-w-full justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {practiceAreas.map((area) => (
                   <Link 
                     key={area.id}
