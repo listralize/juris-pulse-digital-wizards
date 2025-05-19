@@ -18,7 +18,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ onNewMessage, onReset }
 
   return (
     <div className={`h-full flex flex-col items-center justify-center text-center p-8 backdrop-blur-xl ${
-      isDark ? 'glass-form text-white' : 'bg-white/70 border border-gray-100'
+      isDark ? 'glass-form text-white' : 'bg-white/70 border border-gray-100 text-black'
     } shadow-lg`}>
       <div className={`w-16 h-16 mb-6 rounded-full flex items-center justify-center ${
         isDark ? 'bg-white/20' : 'bg-green-50'

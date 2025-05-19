@@ -8,7 +8,7 @@ const ContactInfo: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`${isDark ? 'bg-black/80 border-white/10 text-white' : 'bg-white border-gray-200 text-black'} p-4 border shadow-lg h-full rounded-lg backdrop-blur-sm`}>
+    <div className={`${isDark ? 'bg-black/80 border-white/10 text-white' : 'bg-white/90 border-black/10 text-black'} p-4 border shadow-lg h-full rounded-lg backdrop-blur-sm`}>
       <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : 'text-black'}`}>Informações de Contato</h3>
       
       <div className="space-y-4">

@@ -70,15 +70,16 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="w-full bg-black text-white pt-32 pb-24 transition-colors duration-500"
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} pt-32 pb-24 transition-colors duration-500`}
+      style={{ paddingTop: '140px' }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-12 relative z-10">
-          <h2 className="text-3xl md:text-4xl font-canela text-white overflow-visible">
+          <h2 className={`text-3xl md:text-4xl font-canela overflow-visible ${isDark ? 'text-white' : 'text-black'}`}>
             Precisa de ajuda jurídica?
           </h2>
-          <div className="w-20 h-1 bg-white/70"></div>
-          <p className="mt-2 text-base text-white/60">
+          <div className={`w-20 h-1 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+          <p className={`mt-2 text-base ${isDark ? 'text-white/60' : 'text-black/60'}`}>
             Entre em contato para uma consulta personalizada
           </p>
         </div>
@@ -92,22 +93,22 @@ const Contact = () => {
             <div className="grid grid-cols-1 gap-4">
               <ContactInfo />
               
-              <div className="bg-black/80 border border-white/10 p-4 rounded-lg backdrop-blur-sm">
-                <h3 className="text-lg font-medium text-white mb-3">
+              <div className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/90 border-black/10'} p-4 border rounded-lg backdrop-blur-sm`}>
+                <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
                   Por que escolher a Serafim & Trombela Advocacia?
                 </h3>
                 <ul className="space-y-2">
                   <li className="flex items-start">
-                    <Check className="mt-0.5 mr-2 h-5 w-5 text-white" />
-                    <span className="text-white/90">Atendimento personalizado para cada cliente</span>
+                    <Check className={`mt-0.5 mr-2 h-5 w-5 ${isDark ? 'text-white' : 'text-black'}`} />
+                    <span className={`${isDark ? 'text-white/90' : 'text-black/90'}`}>Atendimento personalizado para cada cliente</span>
                   </li>
                   <li className="flex items-start">
-                    <Check className="mt-0.5 mr-2 h-5 w-5 text-white" />
-                    <span className="text-white/90">Equipe especializada em diversas áreas do direito</span>
+                    <Check className={`mt-0.5 mr-2 h-5 w-5 ${isDark ? 'text-white' : 'text-black'}`} />
+                    <span className={`${isDark ? 'text-white/90' : 'text-black/90'}`}>Equipe especializada em diversas áreas do direito</span>
                   </li>
                   <li className="flex items-start">
-                    <Check className="mt-0.5 mr-2 h-5 w-5 text-white" />
-                    <span className="text-white/90">Comunicação clara e transparente durante todo o processo</span>
+                    <Check className={`mt-0.5 mr-2 h-5 w-5 ${isDark ? 'text-white' : 'text-black'}`} />
+                    <span className={`${isDark ? 'text-white/90' : 'text-black/90'}`}>Comunicação clara e transparente durante todo o processo</span>
                   </li>
                 </ul>
               </div>
@@ -134,7 +135,7 @@ const Contact = () => {
         
         {/* Scroll indicator */}
         <div className="flex justify-center mt-8 mb-6 animate-bounce cursor-pointer" onClick={scrollToNext}>
-          <ChevronDown size={24} className="text-white/50" />
+          <ChevronDown size={24} className={`${isDark ? 'text-white/50' : 'text-black/50'}`} />
         </div>
       </div>
     </section>

@@ -96,9 +96,20 @@
   }
 
   body {
-    @apply bg-background text-foreground h-full m-0 p-0 overflow-x-hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
-    transition: background-color 0.5s ease;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
+  body.light {
+    @apply bg-[#f5f5f5] text-black;
+  }
+
+  body.dark {
+    @apply bg-black text-white;
   }
 
   h1, h2, h3, h4 {
@@ -140,16 +151,24 @@
 
   /* Cards */
   .area-card {
-    @apply border border-white/10 p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
+    @apply border p-8 rounded-md mb-6 transition-all duration-300 backdrop-blur-[5px];
   }
   
   .area-card:hover {
     @apply shadow-lg -translate-y-1;
-    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .light .area-card {
+    @apply bg-white/90 border-gray-200;
+  }
+  
+  .light .area-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.15);
   }
 
   .dark .area-card {
-    @apply bg-black/80;
+    @apply bg-black/80 border-white/10;
   }
 
   .dark .area-card:hover {
@@ -165,8 +184,16 @@
     @apply -translate-y-1 shadow-lg;
   }
   
+  .light .enhanced-card {
+    @apply bg-white/90 border-gray-200;
+  }
+  
+  .light .enhanced-card:hover {
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.05);
+  }
+  
   .dark .enhanced-card {
-    @apply bg-black/80;
+    @apply bg-black/80 border-white/10;
   }
 
   .dark .enhanced-card:hover {
@@ -175,46 +202,103 @@
 
   /* Navigation */
   .sidebar-link {
-    @apply flex items-center gap-3 transition-all duration-500 text-gray-600 dark:text-white/70 hover:text-black dark:hover:text-white;
+    @apply flex items-center gap-3 transition-all duration-500;
+  }
+  
+  .light .sidebar-link {
+    @apply text-gray-600 hover:text-black;
+  }
+  
+  .dark .sidebar-link {
+    @apply text-white/70 hover:text-white;
   }
 
   /* Form Elements */
   .input-floating {
-    @apply relative border-b border-gray-300 dark:border-white/20 focus-within:border-black dark:focus-within:border-white/60 transition-colors duration-300;
+    @apply relative border-b transition-colors duration-300;
+  }
+  
+  .light .input-floating {
+    @apply border-gray-300 focus-within:border-black;
+  }
+  
+  .dark .input-floating {
+    @apply border-white/20 focus-within:border-white/60;
   }
   
   .input-floating label {
-    @apply absolute top-5 left-0 text-gray-500 dark:text-white/60 transition-all duration-300;
+    @apply absolute top-5 left-0 transition-all duration-300;
+  }
+  
+  .light .input-floating label {
+    @apply text-gray-500;
+  }
+  
+  .dark .input-floating label {
+    @apply text-white/60;
   }
   
   .input-floating input:focus ~ label,
   .input-floating input:not(:placeholder-shown) ~ label,
   .input-floating textarea:focus ~ label,
   .input-floating textarea:not(:placeholder-shown) ~ label {
-    @apply -top-2 text-xs text-black dark:text-white/80 font-medium;
+    @apply -top-2 text-xs font-medium;
+  }
+  
+  .light .input-floating input:focus ~ label,
+  .light .input-floating input:not(:placeholder-shown) ~ label,
+  .light .input-floating textarea:focus ~ label,
+  .light .input-floating textarea:not(:placeholder-shown) ~ label {
+    @apply text-black;
+  }
+  
+  .dark .input-floating input:focus ~ label,
+  .dark .input-floating input:not(:placeholder-shown) ~ label,
+  .dark .input-floating textarea:focus ~ label,
+  .dark .input-floating textarea:not(:placeholder-shown) ~ label {
+    @apply text-white/80;
   }
   
   .input-floating input,
   .input-floating textarea {
-    @apply w-full bg-transparent pt-5 pb-2 focus:outline-none dark:text-white;
+    @apply w-full bg-transparent pt-5 pb-2 focus:outline-none;
   }
   
-  .input-floating input:focus,
-  .input-floating textarea:focus {
-    @apply border-black dark:border-white/60;
+  .light .input-floating input,
+  .light .input-floating textarea {
+    @apply text-black;
+  }
+  
+  .dark .input-floating input,
+  .dark .input-floating textarea {
+    @apply text-white;
+  }
+  
+  .light .input-floating input:focus,
+  .light .input-floating textarea:focus {
+    @apply border-black;
+  }
+  
+  .dark .input-floating input:focus,
+  .dark .input-floating textarea:focus {
+    @apply border-white/60;
   }
 
   /* Buttons */
   .elegant-button {
-    @apply bg-black text-white px-6 py-3 rounded-none border border-transparent hover:bg-white hover:text-black hover:border-black transition-all duration-300 font-satoshi hover:shadow-md;
+    @apply px-6 py-3 rounded-none border transition-all duration-300 font-satoshi hover:shadow-md;
+  }
+  
+  .light .elegant-button {
+    @apply bg-black text-white border-transparent hover:bg-white hover:text-black hover:border-black;
   }
   
   .dark .elegant-button {
-    @apply bg-white text-black hover:bg-black/5 hover:text-white hover:border-white/20 hover:shadow-md backdrop-blur-md;
+    @apply bg-white text-black border-transparent hover:bg-black/5 hover:text-white hover:border-white/20 backdrop-blur-md;
   }
 
   /* Text Effects */
-  .gradient-text {
+  .light .gradient-text {
     background: linear-gradient(90deg, #000, #333);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -232,10 +316,19 @@
     -webkit-text-fill-color: transparent;
   }
   
-  /* Glassmorphism effects for dark mode - standardized for all components */
+  /* Glassmorphism effects */
+  .light .glass-card,
+  .light .tech-card {
+    @apply bg-white/80 backdrop-blur-md border border-black/10 shadow-lg;
+  }
+  
   .dark .glass-card,
   .dark .tech-card {
     @apply bg-black/80 backdrop-blur-md border border-white/10 shadow-lg;
+  }
+  
+  .light .glass-form {
+    @apply bg-white/90 backdrop-blur-xl border border-black/10;
   }
   
   .dark .glass-form {

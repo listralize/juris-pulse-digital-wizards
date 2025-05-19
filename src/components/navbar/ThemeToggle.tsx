@@ -23,6 +23,7 @@ const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) =>
           ? 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20' 
           : 'bg-black/10 text-black hover:bg-black/20'
         } ${className}`}
+      style={{ zIndex: 100 }}
     >
       {isDark 
         ? <Sun className="h-5 w-5" /> 

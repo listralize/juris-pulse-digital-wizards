@@ -38,11 +38,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.style.backgroundColor = '#000000'; // Pure black background for dark mode
+        document.documentElement.style.color = '#FFFFFF';
         document.body.style.backgroundColor = '#000000'; // Pure black background for dark mode
+        document.body.style.color = '#FFFFFF';
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.style.backgroundColor = '#f5f5f5'; // Light gray background
+        document.documentElement.style.color = '#000000';
         document.body.style.backgroundColor = '#f5f5f5'; // Light gray background
+        document.body.style.color = '#000000';
       }
     }
   }, [theme]);

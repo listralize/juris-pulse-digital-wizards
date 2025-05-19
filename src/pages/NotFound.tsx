@@ -9,7 +9,7 @@ const NotFound = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
       <Navbar />
       
       <div className="flex-grow flex items-center justify-center">

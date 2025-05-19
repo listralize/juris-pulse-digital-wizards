@@ -25,7 +25,7 @@ const MobileNavigation = ({
 
   return (
     <div className="md:hidden">
-      <div className={`pt-2 pb-4 space-y-1 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
+      <div className={`pt-2 pb-4 space-y-1 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500`}>
         <Link 
           to="/" 
           className={`block px-3 py-2 rounded-md ${activeSection === 'home'

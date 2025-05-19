@@ -73,7 +73,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`bg-black py-4 md:py-4 border-b border-gray-800 sticky top-0 z-50 w-full ${isDark ? 'text-white' : 'text-black'}`}>
+    <nav className={`${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 md:py-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} sticky top-0 z-50 w-full transition-colors duration-500`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="flex justify-center items-center relative h-12 md:h-auto">
           {/* Theme toggle - on the left for mobile */}
@@ -107,7 +107,7 @@ const Navbar = () => {
             <div className="md:hidden">
               <button
                 onClick={toggleMenu}
-                className="p-2 rounded-md text-white"
+                className={isDark ? "p-2 rounded-md text-white" : "p-2 rounded-md text-black"}
               >
                 <span className="sr-only">Open menu</span>
                 <svg

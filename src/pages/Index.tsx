@@ -16,6 +16,17 @@ const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
+  // Apply theme class to body
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+    } else {
+      document.body.classList.add('light');
+      document.body.classList.remove('dark');
+    }
+  }, [isDark]);
+  
   // Scroll to home section when component mounts
   useEffect(() => {
     setTimeout(() => {
