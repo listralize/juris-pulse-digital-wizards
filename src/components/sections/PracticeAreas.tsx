@@ -111,9 +111,15 @@ const PracticeAreas = () => {
       ref={sectionRef} 
       className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-white'}`}
     >
-      {!isDark && <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-white opacity-50 z-[-1]"></div>}
+      <div className="mb-10 w-full max-w-xs md:max-w-sm mx-auto">
+        <img 
+          src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
+          alt="Serafim & Trombela Advocacia Logo"
+          className={`w-full h-auto ${isDark ? 'filter brightness-150' : ''}`}
+        />
+      </div>
       
-      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
         Áreas de Atuação
       </h2>
       
@@ -124,8 +130,8 @@ const PracticeAreas = () => {
               ref={(el) => (cardsRef.current[index] = el)}
               className={`border transition-all duration-300 h-full ${
                 isDark 
-                  ? 'border-gray-800 bg-gray-900/80 backdrop-blur-sm hover:bg-gray-900' 
-                  : 'border-gray-100 shadow-sm hover:shadow-lg bg-white/80 backdrop-blur-sm'
+                  ? 'border-gray-800 bg-gray-900/50 hover:bg-gray-900' 
+                  : 'border-gray-100 shadow-sm hover:shadow-lg bg-white/80'
               }`}
             >
               <CardContent className="p-8">

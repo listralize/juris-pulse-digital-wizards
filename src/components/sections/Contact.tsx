@@ -65,7 +65,7 @@ const Contact = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div ref={titleRef} className="mb-10 relative z-10">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'gradient-text'}`}>
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             Contato
           </h2>
           <div className={`w-20 h-1 ${isDark ? 'bg-white' : 'bg-black'}`}></div>

@@ -56,14 +56,21 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <CustomCursor />
-      <Sidebar activeSection="areas" onSectionChange={() => {}} />
       <WhatsAppButton />
-      
       <Navbar />
       
       <main className="flex-grow">
         <section className={`pt-24 pb-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto flex flex-col items-center">
+            {/* Logo added above title */}
+            <div className="mb-10 w-full max-w-xs md:max-w-sm mx-auto">
+              <img 
+                src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
+                alt="Serafim & Trombela Advocacia Logo"
+                className={`w-full h-auto ${isDark ? 'filter brightness-150' : ''}`}
+              />
+            </div>
+            
             <h1 className={`text-4xl md:text-6xl lg:text-7xl font-canela mb-10 ${isDark ? 'text-white' : 'text-black'}`}>{title}</h1>
             <div className={`w-24 h-1 ${isDark ? 'bg-white/40' : 'bg-black/40'} mb-10`}></div>
             <p className={`text-lg md:text-xl max-w-3xl ${isDark ? 'text-white/80' : 'text-black/80'}`}>

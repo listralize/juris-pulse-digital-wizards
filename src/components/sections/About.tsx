@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,6 +10,8 @@ const About = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const textRef1 = useRef<HTMLParagraphElement>(null);
   const textRef2 = useRef<HTMLParagraphElement>(null);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   useEffect(() => {
     ScrollTrigger.matchMedia({
@@ -114,21 +117,21 @@ const About = () => {
   }, []);
 
   return (
-    <section id="about" className="min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 bg-white">
-      <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-12 font-canela">Sobre Nós</h2>
+    <section id="about" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela ${isDark ? 'text-white' : 'text-black'}`}>Sobre Nós</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-        <p ref={textRef1} className="text-lg leading-relaxed text-gray-800 font-satoshi">
+        <p ref={textRef1} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi`}>
           A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.
         </p>
         
-        <p ref={textRef2} className="text-lg leading-relaxed text-gray-800 font-satoshi">
+        <p ref={textRef2} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi`}>
           Nossa equipe é formada por advogados experientes e apaixonados, que compreendem a fundo os desafios enfrentados por cada cliente. Buscamos soluções inovadoras, eficazes e com foco em resultados reais.
         </p>
       </div>
       
       <div className="mt-16 flex justify-center">
-        <div className="w-24 h-1 bg-black"></div>
+        <div className={`w-24 h-1 ${isDark ? 'bg-white' : 'bg-black'}`}></div>
       </div>
     </section>
   );

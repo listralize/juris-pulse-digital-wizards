@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,6 +11,8 @@ const ClientArea = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
   const button1Ref = useRef<HTMLAnchorElement>(null);
   const button2Ref = useRef<HTMLAnchorElement>(null);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   useEffect(() => {
     gsap.fromTo(
@@ -82,14 +85,14 @@ const ClientArea = () => {
   return (
     <section 
       id="client" 
-      className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 bg-gray-50"
+      className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-gray-50'}`}
     >
       <div className="max-w-2xl text-center">
-        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-8 font-canela">
+        <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
           Área Exclusiva do Cliente
         </h2>
         
-        <p ref={textRef} className="text-lg md:text-xl mb-12 font-satoshi text-gray-700">
+        <p ref={textRef} className={`text-lg md:text-xl mb-12 font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
           Acompanhe seus processos com total segurança e transparência.
         </p>
         
@@ -97,7 +100,11 @@ const ClientArea = () => {
           <a 
             ref={button1Ref}
             href="#" 
-            className="bg-black text-white px-8 py-4 rounded hover:bg-gray-800 transition-all duration-300 font-satoshi flex items-center justify-center"
+            className={`px-8 py-4 rounded transition-all duration-300 font-satoshi flex items-center justify-center ${
+              isDark 
+                ? 'bg-white text-black hover:bg-gray-200'
+                : 'bg-black text-white hover:bg-gray-800'
+            }`}
           >
             <span className="mr-2">🔐</span> Acessar minha área
           </a>
@@ -107,7 +114,11 @@ const ClientArea = () => {
             href="https://api.whatsapp.com/send?phone=5562994594496" 
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white text-black border border-black px-8 py-4 rounded hover:bg-gray-100 transition-all duration-300 font-satoshi flex items-center justify-center"
+            className={`border px-8 py-4 rounded transition-all duration-300 font-satoshi flex items-center justify-center ${
+              isDark 
+                ? 'bg-black text-white border-white hover:bg-gray-900'
+                : 'bg-white text-black border-black hover:bg-gray-100'
+            }`}
           >
             <span className="mr-2">📲</span> Primeiro acesso via WhatsApp
           </a>
