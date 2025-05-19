@@ -15,7 +15,7 @@ const partners = [
     title: 'Advogado',
     oab: 'OAB/GO: 67.754',
     email: 'trombela@stadv.com',
-    image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
+    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
     description: 'Atuação em Direito Civil e Contratual, com foco em soluções jurídicas para empresas e pessoas físicas.'
   },
   {
@@ -24,7 +24,7 @@ const partners = [
     title: 'Advogado',
     oab: 'OAB/GO: 67.790',
     email: 'serafim@stadv.com',
-    image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
+    image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
     description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
   }
 ];
@@ -83,7 +83,7 @@ const Partners = () => {
               key={partner.id}
               className={`${
                 isDark 
-                  ? 'tech-card' 
+                  ? 'bg-black/80 border border-white/10 backdrop-blur-sm' 
                   : 'bg-white border-none'
               } shadow-lg hover:shadow-xl transition-all duration-500`}
               ref={el => cardsRef.current[index] = el}

@@ -118,7 +118,7 @@ const PracticeAreas = () => {
           <Link to={area.link} key={area.id}>
             <Card 
               ref={(el) => (cardsRef.current[index] = el)}
-              className="tech-card text-white border-white/10 transition-all duration-500 h-full hover-scale"
+              className="bg-black/80 border border-white/10 backdrop-blur-sm text-white transition-all duration-500 h-full hover-scale"
             >
               <CardContent className="p-6">
                 <h3 className="text-xl md:text-2xl mb-4 font-canela text-white">

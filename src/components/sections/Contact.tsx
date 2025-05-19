@@ -70,10 +70,10 @@ const Contact = () => {
     <section 
       id="contact" 
       ref={sectionRef}
-      className="w-full bg-black text-white py-6 transition-colors duration-500"
+      className="w-full bg-black text-white py-16 transition-colors duration-500"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-        <div ref={titleRef} className="mb-10 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
+        <div ref={titleRef} className="mb-8 relative z-10">
           <h2 className="text-3xl md:text-4xl font-canela text-white overflow-visible">
             Precisa de ajuda jurídica?
           </h2>
