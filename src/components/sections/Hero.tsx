@@ -70,7 +70,7 @@ const Hero = () => {
 
   return (
     <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Full-width marble banner background */}
+      {/* Full-width marble banner background - always using black regardless of theme */}
       <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full">
         <MarbleBanner />
       </div>

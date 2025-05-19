@@ -19,264 +19,303 @@ const MarbleBanner = () => {
       
       // Animate with a slight delay for each path
       setTimeout(() => {
-        pathElement.style.transition = `stroke-dashoffset 2s ease-in-out ${index * 0.15}s`;
+        pathElement.style.transition = `stroke-dashoffset 2.5s ease-in-out ${index * 0.12}s`;
         pathElement.setAttribute('stroke-dashoffset', '0');
       }, 300);
     });
   }, []);
 
   return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 1920 1080"
-      preserveAspectRatio="xMidYMid slice"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-    >
-      {/* Background - always black regardless of theme */}
-      <rect width="100%" height="100%" fill="#000000" />
-      
-      {/* Marble texture with thick white irregular streaks - with straight lines and sharp angles */}
-      
-      {/* Major thick horizontal streaks */}
-      <path 
-        className="marble-streak"
-        d="M-100,320 L500,330 L960,350 L1400,300 L2020,280"
-        fill="none"
-        stroke="white"
-        strokeWidth="22"
-        strokeLinecap="square"
-        opacity="0.85"
+    <div className="relative w-full h-full overflow-hidden">
+      {/* Base dark texture */}
+      <div 
+        className="absolute inset-0 bg-black"
+        style={{ 
+          backgroundImage: 'radial-gradient(circle at 50% 50%, #111 0%, #000 100%)',
+          backgroundSize: 'cover'
+        }}
       />
       
-      <path 
-        className="marble-streak"
-        d="M-50,120 L320,180 L680,140 L1200,160 L1600,140 L1800,120"
-        fill="none"
-        stroke="white"
-        strokeWidth="15"
-        strokeLinecap="square"
-        opacity="0.7"
-      />
-      
-      {/* Angular streaks with sharp turns */}
-      <path 
-        className="marble-streak"
-        d="M400,50 L650,180 L500,400 L800,600"
-        fill="none"
-        stroke="white"
-        strokeWidth="12"
-        strokeLinecap="square"
-        opacity="0.65"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M1100,-50 L1000,150 L1200,300 L1300,500"
-        fill="none"
-        stroke="white"
-        strokeWidth="18"
-        strokeLinecap="square"
-        opacity="0.7"
-      />
-      
-      {/* Straight line segments with abrupt angles */}
-      <path 
-        className="marble-streak"
-        d="M1400,50 L1340,220 L1460,350"
-        fill="none"
-        stroke="white"
-        strokeWidth="8"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        opacity="0.6"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M200,450 L280,410 L350,480 L300,550"
-        fill="none"
-        stroke="white"
-        strokeWidth="10"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        opacity="0.7"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M880,50 L910,120 L890,190 L950,280"
-        fill="none"
-        stroke="white"
-        strokeWidth="14"
-        strokeLinecap="square"
-        opacity="0.75"
-      />
-      
-      {/* Connecting angular lines */}
-      <path 
-        className="marble-streak"
-        d="M700,250 L900,280"
-        fill="none"
-        stroke="white"
-        strokeWidth="9"
-        strokeLinecap="square"
-        opacity="0.6"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M1150,200 L1320,170"
-        fill="none"
-        stroke="white"
-        strokeWidth="7"
-        strokeLinecap="square"
-        opacity="0.55"
-      />
-      
-      {/* Short angular accents */}
-      <path 
-        className="marble-streak"
-        d="M600,100 L650,120"
-        fill="none"
-        stroke="white"
-        strokeWidth="11"
-        strokeLinecap="square"
-        opacity="0.8"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M1500,250 L1560,230"
-        fill="none"
-        stroke="white"
-        strokeWidth="12"
-        strokeLinecap="square"
-        opacity="0.85"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M300,180 L340,150"
-        fill="none"
-        stroke="white"
-        strokeWidth="9"
-        strokeLinecap="square"
-        opacity="0.7"
-      />
-      
-      {/* Thicker angular streaks */}
-      <path 
-        className="marble-streak"
-        d="M500,80 L530,150 L510,220"
-        fill="none"
-        stroke="white"
-        strokeWidth="6"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        opacity="0.5"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M1100,110 L1130,170 L1080,230"
-        fill="none"
-        stroke="white"
-        strokeWidth="7"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        opacity="0.6"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M800,350 L830,380 L810,420"
-        fill="none"
-        stroke="white"
-        strokeWidth="8"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        opacity="0.65"
-      />
-      
-      {/* Large angular streaks across lower part */}
-      <path 
-        className="marble-streak"
-        d="M-50,500 L480,450 L960,480 L1400,440 L1920,430"
-        fill="none"
-        stroke="white"
-        strokeWidth="25"
-        strokeLinecap="square"
-        opacity="0.8"
-      />
-      
-      {/* Add some straight thin lines crossing others */}
-      <path 
-        className="marble-streak"
-        d="M100,200 L300,205"
-        fill="none"
-        stroke="white"
-        strokeWidth="3"
-        strokeLinecap="square"
-        opacity="0.5"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M1600,350 L1800,345"
-        fill="none"
-        stroke="white"
-        strokeWidth="4"
-        strokeLinecap="square"
-        opacity="0.6"
-      />
-      
-      <path 
-        className="marble-streak"
-        d="M400,520 L700,525"
-        fill="none"
-        stroke="white"
-        strokeWidth="5"
-        strokeLinecap="square"
-        opacity="0.7"
-      />
-      
-      {/* Subtle texture overlay */}
-      <rect
+      {/* Marble texture overlay */}
+      <svg
         width="100%"
         height="100%"
-        fill="url(#marbleTexture)"
-        opacity="0.15"
-      />
-      
-      <defs>
-        <pattern id="marbleTexture" x="0" y="0" width="300" height="300" patternUnits="userSpaceOnUse">
-          <rect width="100%" height="100%" fill="#000000" />
-          {/* Small white specs to simulate marble crystalline structure */}
-          <rect width="2" height="2" fill="white" opacity="0.8" x="10" y="10" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="30" y="35" />
-          <rect width="3" height="3" fill="white" opacity="0.9" x="50" y="20" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="70" y="45" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="90" y="15" />
-          <rect width="3" height="3" fill="white" opacity="0.9" x="25" y="55" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="65" y="75" />
-          <rect width="4" height="4" fill="white" opacity="0.95" x="85" y="60" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="15" y="80" />
-          <rect width="3" height="3" fill="white" opacity="0.9" x="45" y="95" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="110" y="40" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="130" y="65" />
-          <rect width="3" height="3" fill="white" opacity="0.9" x="150" y="25" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="170" y="85" />
-          <rect width="4" height="4" fill="white" opacity="0.95" x="190" y="35" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="210" y="115" />
-          <rect width="3" height="3" fill="white" opacity="0.9" x="230" y="75" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="250" y="45" />
-          <rect width="2" height="2" fill="white" opacity="0.8" x="270" y="95" />
-          <rect width="3" height="3" fill="white" opacity="0.9" x="280" y="10" />
-        </pattern>
-      </defs>
-    </svg>
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ 
+          position: 'absolute', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%',
+          opacity: 0.9
+        }}
+      >
+        {/* Fine angular white veins */}
+        <g opacity="0.95">
+          {/* Main diagonal vein patterns */}
+          <path 
+            className="marble-streak"
+            d="M350,80 L650,380 L620,550 L900,730"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.7"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M450,50 L380,150 L600,420 L500,600"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.65"
+          />
+          
+          {/* Larger prominent vein */}
+          <path 
+            className="marble-streak"
+            d="M-100,350 L300,300 L600,320 L900,270 L1200,330 L1500,290 L1950,310"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.8"
+          />
+          
+          {/* Secondary diagonal veins */}
+          <path 
+            className="marble-streak"
+            d="M800,50 L700,200 L820,350 L750,500"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.2"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.7"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M950,100 L1100,250 L1000,500 L1150,600"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.8"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.75"
+          />
+          
+          {/* Finer crossing veins */}
+          <path 
+            className="marble-streak"
+            d="M300,200 L500,190"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.8"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.6"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M400,400 L600,380"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.7"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.55"
+          />
+          
+          {/* Additional diagonal patterns */}
+          <path 
+            className="marble-streak"
+            d="M1200,80 L1100,230 L1300,350 L1200,500"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.3"
+            strokeLinecap="square" 
+            strokeLinejoin="miter"
+            opacity="0.65"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M1400,120 L1350,300 L1500,450 L1400,600"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.6"
+          />
+          
+          {/* Branching veins */}
+          <path 
+            className="marble-streak"
+            d="M600,320 L650,280 L700,320"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.7"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M900,270 L950,220 L980,270"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.9"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.65"
+          />
+          
+          {/* Lower left area veins */}
+          <path 
+            className="marble-streak"
+            d="M100,500 L300,520 L450,480 L600,520 L800,490"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.4"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.7"
+          />
+          
+          {/* Lower right area veins */}
+          <path 
+            className="marble-streak"
+            d="M1000,450 L1200,470 L1350,430 L1600,460 L1800,430"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.2"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.65"
+          />
+          
+          {/* Additional fine veins */}
+          <path 
+            className="marble-streak"
+            d="M200,150 L250,250 L180,350"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.7"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.5"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M1600,200 L1650,300 L1580,400"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.8"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.55"
+          />
+          
+          {/* Thin horizontal veins */}
+          <path 
+            className="marble-streak"
+            d="M300,370 L700,360"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.6"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.45"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M1100,380 L1500,370"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.7"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.5"
+          />
+        </g>
+        
+        {/* More detailed thin veins */}
+        <g opacity="0.8">
+          {/* Additional detailed diagonal veins */}
+          <path 
+            className="marble-streak"
+            d="M500,150 L600,280 L550,380 L650,470"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.5"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.6"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M1050,150 L1150,280 L1100,380 L1200,470"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.6"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.55"
+          />
+          
+          <path 
+            className="marble-streak"
+            d="M1350,100 L1300,230 L1380,320 L1330,450"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.4"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            opacity="0.5"
+          />
+        </g>
+        
+        {/* Texture noise overlay */}
+        <rect
+          width="100%"
+          height="100%"
+          fill="url(#noiseTexture)"
+          opacity="0.05"
+        />
+        
+        <defs>
+          <pattern id="noiseTexture" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100%" height="100%" fill="#000000" />
+            {/* Tiny speckles for texture */}
+            {Array(200).fill(0).map((_, i) => (
+              <rect 
+                key={i}
+                width="0.5" 
+                height="0.5" 
+                fill="white" 
+                opacity={Math.random() * 0.5 + 0.3}
+                x={Math.random() * 100}
+                y={Math.random() * 100}
+              />
+            ))}
+          </pattern>
+        </defs>
+      </svg>
+    </div>
   );
 };
 
