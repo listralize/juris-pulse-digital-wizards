@@ -11,10 +11,6 @@ interface PageBannerProps {
 const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  
-  // Text colors can still respond to theme, but background will always be black
-  const textColor = isDark ? 'text-white' : 'text-white';
-  const subtitleColor = isDark ? 'text-white/80' : 'text-white/80';
 
   return (
     <div className="relative w-full overflow-hidden bg-black" style={{ height: '450px' }}>
@@ -35,12 +31,12 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
           />
         </div>
         
-        <h1 className={`text-4xl md:text-5xl lg:text-6xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight ${textColor}`}>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
           {title}
         </h1>
         
         {subtitle && (
-          <p className={`text-lg md:text-xl ${subtitleColor} mb-8 text-center max-w-lg mx-auto font-satoshi`}>
+          <p className="text-lg md:text-xl text-white/80 mb-8 text-center max-w-lg mx-auto font-satoshi">
             {subtitle}
           </p>
         )}
