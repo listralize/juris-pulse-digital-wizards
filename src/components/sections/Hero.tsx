@@ -62,6 +62,15 @@ const Hero = () => {
       }
     });
     
+    // Add subtle floating animation to logo
+    gsap.to(logoRef.current, {
+      y: '-10px',
+      duration: 2,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut"
+    });
+    
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -76,12 +85,21 @@ const Hero = () => {
       </div>
       
       <div className="relative z-10 text-center max-w-4xl mt-[-80px]">
-        <div ref={logoRef} className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative">
-          <img 
-            src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
-            alt="Serafim & Trombela Advocacia Logo"
-            className="w-full h-auto relative z-10 brightness-150"
-          />
+        <div 
+          ref={logoRef} 
+          className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative"
+        >
+          <div className="logo-glow absolute inset-0 opacity-60 blur-xl rounded-full bg-white/20"></div>
+          <div className="logo-container relative">
+            <img 
+              src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
+              alt="Serafim & Trombela Advocacia Logo"
+              className="w-full h-auto relative z-10 brightness-150 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+              style={{
+                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3)) drop-shadow(0 0 20px rgba(255,255,255,0.2))'
+              }}
+            />
+          </div>
         </div>
         
         <h1 ref={headlineRef} className="text-4xl md:text-6xl lg:text-7xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
