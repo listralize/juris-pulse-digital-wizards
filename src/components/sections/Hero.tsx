@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -92,15 +91,13 @@ const Hero = () => {
           {/* Static glow effect */}
           <div className="logo-glow absolute inset-0 opacity-70 blur-xl rounded-full bg-white/20"></div>
           
-          {/* Removed the circular shadow div */}
-          
           <div className="logo-container relative">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
               className="w-full h-auto relative z-10 brightness-150"
               style={{
-                filter: 'drop-shadow(0 0 15px rgba(255,255,255,0.25)) drop-shadow(3px 5px 8px rgba(0,0,0,0.85))'
+                filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
               }}
             />
           </div>
