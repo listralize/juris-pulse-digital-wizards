@@ -12,12 +12,12 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  const textColor = isDark ? 'text-white' : 'text-black';
-  const subtitleColor = isDark ? 'text-white/80' : 'text-black/80';
-  const bgColor = isDark ? 'bg-black' : 'bg-white';
+  // Text colors can still respond to theme, but background will always be black
+  const textColor = isDark ? 'text-white' : 'text-white';
+  const subtitleColor = isDark ? 'text-white/80' : 'text-white/80';
 
   return (
-    <div className={`relative w-full overflow-hidden ${bgColor}`} style={{ height: '450px' }}>
+    <div className="relative w-full overflow-hidden bg-black" style={{ height: '450px' }}>
       {/* Marble Banner Background */}
       <div className="absolute inset-0 z-0 w-full h-full">
         <MarbleBanner />

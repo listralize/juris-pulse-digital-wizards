@@ -25,13 +25,13 @@ const MarbleBanner = () => {
     });
   }, []);
 
-  const backgroundStyle = theme === 'dark' 
-    ? { backgroundImage: 'radial-gradient(circle at 50% 50%, #000 0%, #000 100%)' }
-    : { backgroundImage: 'radial-gradient(circle at 50% 50%, #fff 0%, #f5f5f5 100%)' };
+  // Always use dark background styling
+  const backgroundStyle = { backgroundImage: 'radial-gradient(circle at 50% 50%, #000 0%, #000 100%)' };
   
-  const strokeColor = theme === 'dark' ? 'white' : 'black';
-  const opacityBase = theme === 'dark' ? 0.3 : 0.15;
-  const opacityHighlight = theme === 'dark' ? 0.65 : 0.3;
+  // Always use white stroke for the marble veins
+  const strokeColor = 'white';
+  const opacityBase = 0.3;
+  const opacityHighlight = 0.65;
 
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -207,7 +207,7 @@ const MarbleBanner = () => {
         
         <defs>
           <pattern id="noiseTexture" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-            <rect width="100%" height="100%" fill={theme === 'dark' ? '#000000' : '#ffffff'} />
+            <rect width="100%" height="100%" fill="#000000" />
             {Array(300).fill(0).map((_, i) => (
               <rect 
                 key={i}

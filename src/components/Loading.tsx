@@ -10,20 +10,14 @@ const Loading = () => {
   const [logoOpacity, setLogoOpacity] = useState(0);
   const [gradientPosition, setGradientPosition] = useState(0);
 
-  const bgColor = isDark ? 'bg-black' : 'bg-white';
-  const textColor = isDark ? 'text-white/80' : 'text-black/80';
-  const progressBg = isDark ? 'bg-white/10' : 'bg-black/10';
-  const progressFill = isDark 
-    ? 'linear-gradient(90deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.5) 100%)' 
-    : 'linear-gradient(90deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.5) 100%)';
-  const progressShadow = isDark 
-    ? '0 0 10px 1px rgba(255,255,255,0.5)' 
-    : '0 0 10px 1px rgba(0,0,0,0.3)';
+  // Always use dark theme colors for the loading screen
+  const textColor = 'text-white/80';
+  const progressBg = 'bg-white/10';
+  const progressFill = 'linear-gradient(90deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.5) 100%)';
+  const progressShadow = '0 0 10px 1px rgba(255,255,255,0.5)';
   
   // Logo shadow effect based on theme
-  const logoFilter = isDark
-    ? 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
-    : 'drop-shadow(0 0 15px rgba(0,0,0,0.2)) drop-shadow(2px 4px 8px rgba(0,0,0,0.3))';
+  const logoFilter = 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))';
 
   useEffect(() => {
     // Animate logo entrance
@@ -66,13 +60,13 @@ const Loading = () => {
   }, []);
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center ${bgColor} overflow-hidden`}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black overflow-hidden">
       {/* Marble texture background for loading screen */}
       <div className="absolute inset-0 opacity-30 overflow-hidden">
         {[...Array(20)].map((_, i) => (
           <div 
             key={`vein-main-${i}`} 
-            className={isDark ? "absolute bg-white/30" : "absolute bg-black/30"}
+            className="absolute bg-white/30"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
@@ -90,7 +84,7 @@ const Loading = () => {
         {[...Array(30)].map((_, i) => (
           <div 
             key={`vein-small-${i}`} 
-            className={isDark ? "absolute bg-white/20" : "absolute bg-black/20"}
+            className="absolute bg-white/20"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
@@ -109,9 +103,7 @@ const Loading = () => {
       <div 
         className="absolute inset-0 opacity-30"
         style={{
-          background: isDark
-            ? `radial-gradient(circle at ${gradientPosition}% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0) 50%)`
-            : `radial-gradient(circle at ${gradientPosition}% 50%, rgba(0,0,0,0.3) 0%, rgba(255,255,255,0) 50%)`,
+          background: `radial-gradient(circle at ${gradientPosition}% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0) 50%)`,
           transition: 'background 0.5s ease'
         }}
       />
@@ -129,7 +121,7 @@ const Loading = () => {
           <img 
             src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" 
             alt="Serafim & Trombela" 
-            className={`w-auto h-auto max-w-full max-h-full object-contain ${isDark ? 'brightness-150' : 'brightness-110'}`}
+            className="w-auto h-auto max-w-full max-h-full object-contain brightness-150"
             style={{
               filter: logoFilter
             }}
