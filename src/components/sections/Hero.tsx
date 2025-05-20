@@ -89,14 +89,26 @@ const Hero = () => {
           ref={logoRef} 
           className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative"
         >
-          <div className="logo-glow absolute inset-0 opacity-60 blur-xl rounded-full bg-white/20"></div>
+          {/* Stronger outer glow effect */}
+          <div className="logo-glow absolute inset-0 opacity-70 blur-xl rounded-full bg-white/20"></div>
+          
+          {/* Dark shadow underneath for depth */}
+          <div 
+            className="absolute inset-0 z-0" 
+            style={{
+              boxShadow: '0 5px 25px 8px rgba(0, 0, 0, 0.8)',
+              transform: 'translateY(2px)',
+              borderRadius: '50%'
+            }}
+          ></div>
+          
           <div className="logo-container relative">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
               className="w-full h-auto relative z-10 brightness-150 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
               style={{
-                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3)) drop-shadow(0 0 20px rgba(255,255,255,0.2))'
+                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3)) drop-shadow(0 0 20px rgba(255,255,255,0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.8))'
               }}
             />
           </div>
