@@ -49,14 +49,20 @@ const EmpresarialPage = () => {
       description="O Direito Empresarial tem como objetivo cuidar o exercício da atividade econômica organizada de fornecimento de bens e serviços, a chamada empresa. Seu objeto de estudo é resolver os conflitos de interesses envolvendo empresários ou relacionados às empresas que eles exploram."
       currentArea="empresarial"
     >
-      <h2 className="text-4xl font-canela mb-16 text-white">Serviços Especializados</h2>
+      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className="bg-black border border-white/20 hover:bg-black/80 transition-all duration-300">
+          <Card 
+            key={index} 
+            className={isDark 
+              ? "bg-black border border-white/20 hover:bg-black/80 transition-all duration-300" 
+              : "bg-white border border-black/10 hover:bg-gray-50 transition-all duration-300 shadow-sm"
+            }
+          >
             <CardContent className="p-8">
-              <h3 className="text-2xl font-canela mb-4 text-white">{service.title}</h3>
-              <p className="text-white/80 leading-relaxed">{service.description}</p>
+              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
+              <p className={isDark ? 'text-white/80 leading-relaxed' : 'text-black/80 leading-relaxed'}>{service.description}</p>
             </CardContent>
           </Card>
         ))}

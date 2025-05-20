@@ -49,14 +49,20 @@ const AdministrativoPage = () => {
       description="Trata das relações entre os cidadãos e a administração pública. Isso inclui questões como licitações, contratos públicos, responsabilidade do Estado, direitos dos administrados e a atuação de órgãos governamentais."
       currentArea="administrativo"
     >
-      <h2 className="text-4xl font-canela mb-16 text-white">Serviços Especializados</h2>
+      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className="bg-black border border-white/20 hover:bg-black/80 transition-all duration-300">
+          <Card 
+            key={index} 
+            className={isDark 
+              ? "bg-black border border-white/20 hover:bg-black/80 transition-all duration-300" 
+              : "bg-white border border-black/10 hover:bg-gray-50 transition-all duration-300 shadow-sm"
+            }
+          >
             <CardContent className="p-8">
-              <h3 className="text-2xl font-canela mb-4 text-white">{service.title}</h3>
-              <p className="text-white/80 leading-relaxed">{service.description}</p>
+              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
+              <p className={isDark ? 'text-white/80 leading-relaxed' : 'text-black/80 leading-relaxed'}>{service.description}</p>
             </CardContent>
           </Card>
         ))}
