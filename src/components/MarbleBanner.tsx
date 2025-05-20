@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useTheme } from './ThemeProvider';
 
@@ -27,16 +26,16 @@ const MarbleBanner = () => {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* Base dark texture */}
+      {/* Base dark texture - pure black background */}
       <div 
         className="absolute inset-0 bg-black"
         style={{ 
-          backgroundImage: 'radial-gradient(circle at 50% 50%, #111 0%, #000 100%)',
+          backgroundImage: 'radial-gradient(circle at 50% 50%, #000 0%, #000 100%)',
           backgroundSize: 'cover'
         }}
       />
       
-      {/* Marble texture overlay */}
+      {/* Marble texture overlay - positioned lower */}
       <svg
         width="100%"
         height="100%"
@@ -45,15 +44,15 @@ const MarbleBanner = () => {
         xmlns="http://www.w3.org/2000/svg"
         style={{ 
           position: 'absolute', 
-          top: 0, 
+          top: '20%', // Moved down 20%
           left: 0, 
           width: '100%', 
           height: '100%',
-          opacity: 0.9
+          opacity: 0.7 // Reduced opacity for more subtle effect
         }}
       >
         {/* Fine angular white veins */}
-        <g opacity="0.95">
+        <g opacity="0.75">
           {/* Main diagonal vein patterns */}
           <path 
             className="marble-streak"
@@ -63,7 +62,7 @@ const MarbleBanner = () => {
             strokeWidth="2"
             strokeLinecap="square"
             strokeLinejoin="miter"
-            opacity="0.7"
+            opacity="0.5"
           />
           
           <path 
@@ -74,7 +73,7 @@ const MarbleBanner = () => {
             strokeWidth="1.5"
             strokeLinecap="square"
             strokeLinejoin="miter"
-            opacity="0.65"
+            opacity="0.45"
           />
           
           {/* Larger prominent vein */}
@@ -86,7 +85,7 @@ const MarbleBanner = () => {
             strokeWidth="3"
             strokeLinecap="square"
             strokeLinejoin="miter"
-            opacity="0.8"
+            opacity="0.6"
           />
           
           {/* Secondary diagonal veins */}
@@ -98,7 +97,7 @@ const MarbleBanner = () => {
             strokeWidth="1.2"
             strokeLinecap="square"
             strokeLinejoin="miter"
-            opacity="0.7"
+            opacity="0.5"
           />
           
           <path 
@@ -109,7 +108,7 @@ const MarbleBanner = () => {
             strokeWidth="1.8"
             strokeLinecap="square"
             strokeLinejoin="miter"
-            opacity="0.75"
+            opacity="0.55"
           />
           
           {/* Finer crossing veins */}
@@ -253,7 +252,7 @@ const MarbleBanner = () => {
         </g>
         
         {/* More detailed thin veins */}
-        <g opacity="0.8">
+        <g opacity="0.6">
           {/* Additional detailed diagonal veins */}
           <path 
             className="marble-streak"
@@ -294,7 +293,7 @@ const MarbleBanner = () => {
           width="100%"
           height="100%"
           fill="url(#noiseTexture)"
-          opacity="0.05"
+          opacity="0.03" // Reduced noise opacity
         />
         
         <defs>
