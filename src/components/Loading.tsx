@@ -107,12 +107,9 @@ const Loading = () => {
         }}
       >
         <img 
-          src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" 
+          src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" 
           alt="Serafim & Trombela" 
-          className="w-72 h-72 mb-16 brightness-150"
-          style={{
-            filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
-          }}
+          className="w-72 h-72 mb-16"
         />
         
         {/* Elegant loading bar with marble-inspired design */}

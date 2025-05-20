@@ -24,7 +24,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
           <img 
             src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
             alt="Serafim & Trombela Advocacia Logo"
-            className="w-full h-auto relative z-10"
+            className="w-full h-auto relative z-10 brightness-150"
             style={{
               filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
             }}
@@ -36,7 +36,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
         </h1>
         
         {subtitle && (
-          <p className="text-lg md:text-xl text-white/80 mb-8 text-center max-w-lg mx-auto font-satoshi">
+          <p className="text-lg md:text-xl text-gray-200 mb-8 text-center max-w-lg mx-auto font-satoshi">
             {subtitle}
           </p>
         )}
