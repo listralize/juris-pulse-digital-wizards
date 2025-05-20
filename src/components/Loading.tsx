@@ -1,8 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
+import { useTheme } from './ThemeProvider';
 
 const Loading = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [progress, setProgress] = useState(0);
+  const [logoScale, setLogoScale] = useState(0.8);
   const [logoOpacity, setLogoOpacity] = useState(0);
   const [gradientPosition, setGradientPosition] = useState(0);
 
@@ -12,6 +16,10 @@ const Loading = () => {
       setLogoOpacity(1);
     }, 200);
     
+    let timer2 = setTimeout(() => {
+      setLogoScale(1.2);
+    }, 400);
+
     // Animate gradient position - smooth movement without repetition
     const gradientInterval = setInterval(() => {
       setGradientPosition(prev => {
@@ -36,6 +44,7 @@ const Loading = () => {
 
     return () => {
       clearTimeout(timer1);
+      clearTimeout(timer2);
       clearInterval(intervalId);
       clearInterval(gradientInterval);
     };
@@ -92,14 +101,18 @@ const Loading = () => {
       <div 
         className="relative z-10 flex flex-col items-center"
         style={{
+          transform: `scale(${logoScale})`,
           opacity: logoOpacity,
-          transition: 'opacity 1.2s ease-in-out'
+          transition: 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.2s ease-in-out'
         }}
       >
         <img 
           src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" 
           alt="Serafim & Trombela" 
-          className="w-64 h-auto mb-16"
+          className="w-72 h-72 mb-16 brightness-150"
+          style={{
+            filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
+          }}
         />
         
         {/* Elegant loading bar with marble-inspired design */}

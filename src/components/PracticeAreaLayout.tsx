@@ -68,16 +68,16 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    <div className={`min-h-screen flex flex-col bg-black text-white`}>
       <CustomCursor />
       <Navbar />
       
-      <main className="flex-grow pb-24">
-        {/* Banner section - always black */}
+      <main className="flex-grow pb-24"> {/* Added bottom padding for WhatsApp button */}
+        {/* Substituindo a seção anterior pelo novo PageBanner */}
         <PageBanner title={title} subtitle={description} />
 
         {/* Areas navigation */}
-        <section className="py-4 px-6 md:px-16 lg:px-24 bg-black border-y border-white/10 sticky top-[89px] z-30 w-full overflow-visible">
+        <section className="py-4 px-6 md:px-16 lg:px-24 bg-black border-white/10 border-y sticky top-[89px] z-30 w-full overflow-visible">
           <div className="max-w-6xl mx-auto">
             <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', paddingTop: '5px', paddingBottom: '5px' }}>
               <div className="inline-flex space-x-2 py-2 px-2 min-w-full justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -88,7 +88,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
                     className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
                       currentArea === area.id 
                         ? 'bg-white text-black' 
-                        : 'text-white/70 hover:text-white bg-white/10 hover:bg-white/20'
+                        : 'text-white/70 hover:text-white bg-gray-800 hover:bg-gray-700'
                     }`}
                   >
                     {area.label}
@@ -106,7 +106,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
           </div>
         )}
       
-        <section className={`py-12 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+        <section className="py-12 px-6 md:px-16 lg:px-24 bg-black text-white">
           <div className="max-w-6xl mx-auto">
             {children}
           </div>

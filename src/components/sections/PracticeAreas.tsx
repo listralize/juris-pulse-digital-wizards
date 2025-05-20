@@ -109,7 +109,7 @@ const PracticeAreas = () => {
     <section 
       id="areas" 
       ref={sectionRef} 
-      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-white'} transition-colors duration-500`}
+      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} transition-colors duration-500`}
     >
       <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
         Áreas de Atuação
@@ -121,10 +121,7 @@ const PracticeAreas = () => {
             <Link to={area.link} key={area.id}>
               <Card 
                 ref={(el) => (cardsRef.current[index] = el)}
-                className={isDark 
-                  ? "bg-black border border-white/20 hover:bg-black/80 transition-all duration-300 h-full hover-scale" 
-                  : "bg-white border border-black/10 hover:bg-gray-50 transition-all duration-300 h-full hover-scale shadow-sm"
-                }
+                className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm transition-all duration-500 h-full hover-scale`}
               >
                 <CardContent className="p-6">
                   <h3 className={`text-xl md:text-2xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>

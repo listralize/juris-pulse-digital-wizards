@@ -1,6 +1,7 @@
 
 import React from 'react';
 import MarbleBanner from './MarbleBanner';
+import { useTheme } from './ThemeProvider';
 
 interface PageBannerProps {
   title: string;
@@ -8,11 +9,14 @@ interface PageBannerProps {
 }
 
 const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <div className="relative w-full overflow-hidden bg-black" style={{ height: '450px' }}>
       {/* Marble Banner Background */}
       <div className="absolute inset-0 z-0 w-full h-full">
-        <MarbleBanner streakDelay={100} />
+        <MarbleBanner />
       </div>
       
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-center px-6">
@@ -20,7 +24,10 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
           <img 
             src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
             alt="Serafim & Trombela Advocacia Logo"
-            className="w-full h-auto relative z-10 drop-shadow-[0_0_25px_rgba(255,255,255,0.5)]"
+            className="w-full h-auto relative z-10"
+            style={{
+              filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
+            }}
           />
         </div>
         
@@ -29,7 +36,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
         </h1>
         
         {subtitle && (
-          <p className="text-lg md:text-xl text-gray-200 mb-8 text-center max-w-lg mx-auto font-satoshi">
+          <p className="text-lg md:text-xl text-white/80 mb-8 text-center max-w-lg mx-auto font-satoshi">
             {subtitle}
           </p>
         )}

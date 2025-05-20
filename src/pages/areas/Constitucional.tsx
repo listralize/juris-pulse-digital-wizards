@@ -53,16 +53,14 @@ const ConstitucionalPage = () => {
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card 
-            key={index} 
-            className={isDark 
-              ? "bg-black border border-white/20 hover:bg-black/80 transition-all duration-300" 
-              : "bg-white border border-black/10 hover:bg-gray-50 transition-all duration-300 shadow-sm"
-            }
-          >
+          <Card key={index} className={`${
+            isDark 
+              ? 'bg-gray-900 border-gray-800 hover:bg-gray-800' 
+              : 'bg-gray-100 border-gray-200 hover:bg-gray-50'
+            } transition-all duration-300`}>
             <CardContent className="p-8">
               <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
-              <p className={isDark ? 'text-white/80 leading-relaxed' : 'text-black/80 leading-relaxed'}>{service.description}</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>{service.description}</p>
             </CardContent>
           </Card>
         ))}
