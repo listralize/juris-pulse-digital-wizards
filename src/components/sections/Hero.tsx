@@ -62,14 +62,27 @@ const Hero = () => {
       }
     });
     
-    // Add subtle floating animation to logo
-    gsap.to(logoRef.current, {
-      y: '-10px',
-      duration: 2,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut"
-    });
+    // Subtle shine/glow effect for logo instead of the floating animation
+    const logoElement = logoRef.current;
+    if (logoElement) {
+      // Create a subtle pulse effect for the glow
+      gsap.to(logoElement.querySelector('.logo-glow'), {
+        opacity: 0.9,
+        duration: 2.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+      
+      // Create a subtle scale effect for the logo
+      gsap.to(logoElement.querySelector('.logo-container'), {
+        scale: 1.02,
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }
     
     return () => {
       tl.kill();
@@ -102,7 +115,7 @@ const Hero = () => {
             }}
           ></div>
           
-          <div className="logo-container relative">
+          <div className="logo-container relative transition-transform">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
