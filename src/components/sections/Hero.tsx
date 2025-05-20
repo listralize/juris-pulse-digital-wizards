@@ -62,25 +62,12 @@ const Hero = () => {
       }
     });
     
-    // Subtle shine/glow effect for logo instead of the floating animation
+    // Subtle glow effect for logo without any animation
     const logoElement = logoRef.current;
     if (logoElement) {
-      // Create a subtle pulse effect for the glow
-      gsap.to(logoElement.querySelector('.logo-glow'), {
-        opacity: 0.9,
-        duration: 2.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      });
-      
-      // Create a subtle scale effect for the logo
-      gsap.to(logoElement.querySelector('.logo-container'), {
-        scale: 1.02,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
+      // Static glow effect - no animation
+      gsap.set(logoElement.querySelector('.logo-glow'), {
+        opacity: 0.7
       });
     }
     
@@ -102,26 +89,26 @@ const Hero = () => {
           ref={logoRef} 
           className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative"
         >
-          {/* Stronger outer glow effect */}
+          {/* Static glow effect */}
           <div className="logo-glow absolute inset-0 opacity-70 blur-xl rounded-full bg-white/20"></div>
           
-          {/* Dark shadow underneath for depth */}
+          {/* Enhanced shadow with stronger dark effect */}
           <div 
             className="absolute inset-0 z-0" 
             style={{
-              boxShadow: '0 5px 25px 8px rgba(0, 0, 0, 0.8)',
-              transform: 'translateY(2px)',
+              boxShadow: '0 8px 30px 12px rgba(0, 0, 0, 0.9)',
+              transform: 'translateY(3px)',
               borderRadius: '50%'
             }}
           ></div>
           
-          <div className="logo-container relative transition-transform">
+          <div className="logo-container relative">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
-              className="w-full h-auto relative z-10 brightness-150 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+              className="w-full h-auto relative z-10 brightness-150"
               style={{
-                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3)) drop-shadow(0 0 20px rgba(255,255,255,0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.8))'
+                filter: 'drop-shadow(0 0 15px rgba(255,255,255,0.25)) drop-shadow(3px 5px 8px rgba(0,0,0,0.85))'
               }}
             />
           </div>
