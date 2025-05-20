@@ -121,17 +121,13 @@ const PracticeAreas = () => {
             <Link to={area.link} key={area.id}>
               <Card 
                 ref={(el) => (cardsRef.current[index] = el)}
-                className={`${
-                  isDark 
-                    ? 'bg-black/80 border border-white/10' 
-                    : 'bg-white/80 border border-black/10'
-                  } backdrop-blur-sm transition-all duration-500 h-full hover-scale`}
+                className="bg-black border border-white/20 hover:bg-black/80 transition-all duration-300 h-full hover-scale"
               >
                 <CardContent className="p-6">
-                  <h3 className={`text-xl md:text-2xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                  <h3 className="text-xl md:text-2xl mb-4 font-canela text-white">
                     {area.title}
                   </h3>
-                  <p className={isDark ? 'text-white/80' : 'text-black/80'}>
+                  <p className="text-white/80">
                     {area.description}
                   </p>
                 </CardContent>

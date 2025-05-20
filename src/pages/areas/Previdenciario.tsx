@@ -49,18 +49,14 @@ const PrevidenciarioPage = () => {
       description="Esta área lida com a seguridade social, incluindo benefícios como aposentadoria, pensões, auxílio-doença e assistência social. A ST te auxilia na obtenção desses benefícios e na resolução de questões relacionadas."
       currentArea="previdenciario"
     >
-      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
+      <h2 className="text-4xl font-canela mb-16 text-white">Serviços Especializados</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className={`${
-            isDark 
-              ? 'bg-gray-900 border-gray-800 hover:bg-gray-800' 
-              : 'bg-white/80 backdrop-blur-md border-gray-200 hover:bg-white/90'
-            } transition-all duration-300`}>
+          <Card key={index} className="bg-black border border-white/20 hover:bg-black/80 transition-all duration-300">
             <CardContent className="p-8">
-              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
-              <p className={`${isDark ? 'text-gray-300' : 'text-black/80'} leading-relaxed`}>{service.description}</p>
+              <h3 className="text-2xl font-canela mb-4 text-white">{service.title}</h3>
+              <p className="text-white/80 leading-relaxed">{service.description}</p>
             </CardContent>
           </Card>
         ))}
