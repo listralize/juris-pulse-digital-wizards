@@ -8,6 +8,7 @@ import WhatsAppButton from './WhatsAppButton';
 import { useTheme } from './ThemeProvider';
 import Loading from './Loading';
 import { ArrowDown } from 'lucide-react';
+import PageBanner from './PageBanner';
 
 interface PracticeAreaLayoutProps {
   title: string;
@@ -72,23 +73,8 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <Navbar />
       
       <main className="flex-grow pb-24"> {/* Added bottom padding for WhatsApp button */}
-        <section className={`pt-8 pb-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
-          <div className="max-w-6xl mx-auto flex flex-col items-center">
-            <div className="w-full max-w-xs md:max-w-sm mx-auto mb-8">
-              <img 
-                src="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png"
-                alt="Serafim & Trombela Advocacia Logo"
-                className="w-full h-auto filter brightness-150"
-              />
-            </div>
-            
-            <h1 className={`text-4xl md:text-6xl lg:text-7xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>{title}</h1>
-            <div className={`w-24 h-1 ${isDark ? 'bg-white/40' : 'bg-black/40'} mb-6`}></div>
-            <p className={`text-lg md:text-xl max-w-3xl text-center mb-10 ${isDark ? 'text-white/80' : 'text-black/80'}`}>
-              {description}
-            </p>
-          </div>
-        </section>
+        {/* Substituindo a seção anterior pelo novo PageBanner */}
+        <PageBanner title={title} subtitle={description} />
 
         {/* Areas navigation */}
         <section className={`py-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'} border-y sticky top-[89px] z-30 w-full overflow-visible`}>
