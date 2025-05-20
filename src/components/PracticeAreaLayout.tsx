@@ -73,11 +73,11 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       <Navbar />
       
       <main className="flex-grow pb-24">
-        {/* Banner section */}
+        {/* Banner section - always black */}
         <PageBanner title={title} subtitle={description} />
 
         {/* Areas navigation */}
-        <section className={`py-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black border-white/10' : 'bg-white border-gray-200'} border-y sticky top-[89px] z-30 w-full overflow-visible`}>
+        <section className="py-4 px-6 md:px-16 lg:px-24 bg-black border-y border-white/10 sticky top-[89px] z-30 w-full overflow-visible">
           <div className="max-w-6xl mx-auto">
             <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', paddingTop: '5px', paddingBottom: '5px' }}>
               <div className="inline-flex space-x-2 py-2 px-2 min-w-full justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -87,12 +87,8 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
                     to={area.path}
                     className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
                       currentArea === area.id 
-                        ? isDark 
-                          ? 'bg-white text-black' 
-                          : 'bg-black text-white'
-                        : isDark
-                          ? 'text-white/70 hover:text-white bg-gray-800 hover:bg-gray-700'
-                          : 'text-black/70 hover:text-black bg-gray-200 hover:bg-gray-300'
+                        ? 'bg-white text-black' 
+                        : 'text-white/70 hover:text-white bg-white/10 hover:bg-white/20'
                     }`}
                   >
                     {area.label}
@@ -106,7 +102,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         {/* Scroll indicator */}
         {showScrollIndicator && (
           <div className="flex justify-center py-6 animate-bounce">
-            <ArrowDown className={`w-6 h-6 ${isDark ? 'text-white/70' : 'text-black/70'}`} />
+            <ArrowDown className="w-6 h-6 text-white/70" />
           </div>
         )}
       

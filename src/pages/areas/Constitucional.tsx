@@ -56,11 +56,11 @@ const ConstitucionalPage = () => {
           <Card key={index} className={`${
             isDark 
               ? 'bg-gray-900 border-gray-800 hover:bg-gray-800' 
-              : 'bg-gray-100 border-gray-200 hover:bg-gray-50'
+              : 'bg-white/80 backdrop-blur-md border-gray-200 hover:bg-white/90'
             } transition-all duration-300`}>
             <CardContent className="p-8">
               <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>{service.description}</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-black/80'} leading-relaxed`}>{service.description}</p>
             </CardContent>
           </Card>
         ))}

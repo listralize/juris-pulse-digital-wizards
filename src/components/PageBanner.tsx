@@ -20,7 +20,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
           <img 
             src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
             alt="Serafim & Trombela Advocacia Logo"
-            className="w-full h-auto relative z-10"
+            className="w-full h-auto relative z-10 drop-shadow-[0_0_25px_rgba(255,255,255,0.5)]"
           />
         </div>
         
