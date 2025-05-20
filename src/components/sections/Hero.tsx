@@ -92,15 +92,7 @@ const Hero = () => {
           {/* Static glow effect */}
           <div className="logo-glow absolute inset-0 opacity-70 blur-xl rounded-full bg-white/20"></div>
           
-          {/* Enhanced shadow with stronger dark effect */}
-          <div 
-            className="absolute inset-0 z-0" 
-            style={{
-              boxShadow: '0 8px 30px 12px rgba(0, 0, 0, 0.9)',
-              transform: 'translateY(3px)',
-              borderRadius: '50%'
-            }}
-          ></div>
+          {/* Removed the circular shadow div */}
           
           <div className="logo-container relative">
             <img 
