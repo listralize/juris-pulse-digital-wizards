@@ -13,7 +13,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
   const isDark = theme === 'dark';
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: '450px' }}>
+    <div className="relative w-full overflow-hidden bg-black" style={{ height: '450px' }}>
       {/* Marble Banner Background */}
       <div className="absolute inset-0 z-0 w-full h-full">
         <MarbleBanner />
@@ -26,7 +26,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
             alt="Serafim & Trombela Advocacia Logo"
             className="w-full h-auto relative z-10 brightness-150"
             style={{
-              filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
+              filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
             }}
           />
         </div>
