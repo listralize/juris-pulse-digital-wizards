@@ -12,7 +12,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
     <div className="relative w-full overflow-hidden bg-black" style={{ height: '450px' }}>
       {/* Marble Banner Background */}
       <div className="absolute inset-0 z-0 w-full h-full">
-        <MarbleBanner />
+        <MarbleBanner streakDelay={100} />
       </div>
       
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-center px-6">
