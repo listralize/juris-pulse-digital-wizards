@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useTheme } from './ThemeProvider';
 
@@ -24,18 +25,23 @@ const MarbleBanner = () => {
     });
   }, []);
 
+  const backgroundStyle = theme === 'dark' 
+    ? { backgroundImage: 'radial-gradient(circle at 50% 50%, #000 0%, #000 100%)' }
+    : { backgroundImage: 'radial-gradient(circle at 50% 50%, #fff 0%, #f5f5f5 100%)' };
+  
+  const strokeColor = theme === 'dark' ? 'white' : 'black';
+  const opacityBase = theme === 'dark' ? 0.3 : 0.15;
+  const opacityHighlight = theme === 'dark' ? 0.65 : 0.3;
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Base dark texture - pure black background */}
       <div 
-        className="absolute inset-0 bg-black"
-        style={{ 
-          backgroundImage: 'radial-gradient(circle at 50% 50%, #000 0%, #000 100%)',
-          backgroundSize: 'cover'
-        }}
+        className="absolute inset-0" 
+        style={backgroundStyle}
       />
       
-      {/* Marble texture overlay - positioned lower */}
+      {/* Marble texture overlay - positioned lower and more deformed */}
       <svg
         width="100%"
         height="100%"
@@ -44,248 +50,151 @@ const MarbleBanner = () => {
         xmlns="http://www.w3.org/2000/svg"
         style={{ 
           position: 'absolute', 
-          top: '20%', // Moved down 20%
+          top: '30%', // Moved down 30%
           left: 0, 
           width: '100%', 
           height: '100%',
-          opacity: 0.7 // Reduced opacity for more subtle effect
+          opacity: 0.8 // Increased opacity for more visibility
         }}
       >
-        {/* Fine angular white veins */}
-        <g opacity="0.75">
-          {/* Main diagonal vein patterns */}
+        {/* Main thick veins with more deformation */}
+        <g opacity="0.8">
+          {/* Main diagonal vein patterns - thicker and more deformed */}
           <path 
             className="marble-streak"
-            d="M350,80 L650,380 L620,550 L900,730"
+            d="M350,80 C450,130 600,390 620,550 Q650,650 900,730"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.5"
+            stroke={strokeColor}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
           <path 
             className="marble-streak"
-            d="M450,50 L380,150 L600,420 L500,600"
+            d="M450,50 C400,180 520,320 600,420 Q580,500 500,600"
             fill="none"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.45"
+            stroke={strokeColor}
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
-          {/* Larger prominent vein */}
+          {/* Larger prominent vein with curves */}
           <path 
             className="marble-streak"
-            d="M-100,350 L300,300 L600,320 L900,270 L1200,330 L1500,290 L1950,310"
+            d="M-100,350 C100,320 300,280 600,320 Q800,340 1200,330 T1950,310"
             fill="none"
-            stroke="white"
+            stroke={strokeColor}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
+          />
+          
+          {/* Secondary diagonal veins with more curves */}
+          <path 
+            className="marble-streak"
+            d="M800,50 C750,150 820,300 820,350 Q780,400 750,500"
+            fill="none"
+            stroke={strokeColor}
             strokeWidth="3"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.6"
-          />
-          
-          {/* Secondary diagonal veins */}
-          <path 
-            className="marble-streak"
-            d="M800,50 L700,200 L820,350 L750,500"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.2"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
           <path 
             className="marble-streak"
-            d="M950,100 L1100,250 L1000,500 L1150,600"
+            d="M950,100 C1050,200 1050,350 1000,500 Q1050,550 1150,600"
             fill="none"
-            stroke="white"
-            strokeWidth="1.8"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.55"
+            stroke={strokeColor}
+            strokeWidth="3.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
-          {/* Finer crossing veins */}
+          {/* Additional diagonal patterns with more distortion */}
           <path 
             className="marble-streak"
-            d="M300,200 L500,190"
+            d="M1200,80 C1150,180 1250,300 1300,350 Q1250,450 1200,500"
             fill="none"
-            stroke="white"
-            strokeWidth="0.8"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.6"
-          />
-          
-          <path 
-            className="marble-streak"
-            d="M400,400 L600,380"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.7"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.55"
-          />
-          
-          {/* Additional diagonal patterns */}
-          <path 
-            className="marble-streak"
-            d="M1200,80 L1100,230 L1300,350 L1200,500"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.3"
-            strokeLinecap="square" 
-            strokeLinejoin="miter"
-            opacity="0.65"
+            stroke={strokeColor}
+            strokeWidth="3.3"
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
           <path 
             className="marble-streak"
-            d="M1400,120 L1350,300 L1500,450 L1400,600"
+            d="M1400,120 C1380,200 1480,380 1500,450 Q1450,520 1400,600"
             fill="none"
-            stroke="white"
-            strokeWidth="1"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.6"
+            stroke={strokeColor}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
-          {/* Branching veins */}
+          {/* Lower area veins with more curvature */}
           <path 
             className="marble-streak"
-            d="M600,320 L650,280 L700,320"
+            d="M100,500 C200,510 300,520 450,480 Q550,500 800,490"
             fill="none"
-            stroke="white"
-            strokeWidth="1"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.7"
+            stroke={strokeColor}
+            strokeWidth="4.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
+          {/* Lower right area veins with distortion */}
           <path 
             className="marble-streak"
-            d="M900,270 L950,220 L980,270"
+            d="M1000,450 C1100,460 1250,450 1350,430 Q1500,440 1800,430"
             fill="none"
-            stroke="white"
-            strokeWidth="0.9"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.65"
+            stroke={strokeColor}
+            strokeWidth="4.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacityHighlight}
           />
           
-          {/* Lower left area veins */}
-          <path 
-            className="marble-streak"
-            d="M100,500 L300,520 L450,480 L600,520 L800,490"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.4"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.7"
-          />
-          
-          {/* Lower right area veins */}
-          <path 
-            className="marble-streak"
-            d="M1000,450 L1200,470 L1350,430 L1600,460 L1800,430"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.2"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.65"
-          />
-          
-          {/* Additional fine veins */}
-          <path 
-            className="marble-streak"
-            d="M200,150 L250,250 L180,350"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.7"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.5"
-          />
-          
-          <path 
-            className="marble-streak"
-            d="M1600,200 L1650,300 L1580,400"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.8"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.55"
-          />
-          
-          {/* Thin horizontal veins */}
-          <path 
-            className="marble-streak"
-            d="M300,370 L700,360"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.6"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.45"
-          />
-          
-          <path 
-            className="marble-streak"
-            d="M1100,380 L1500,370"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.7"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.5"
-          />
+          {/* Add some cracks and finer details */}
+          {Array.from({ length: 15 }).map((_, i) => (
+            <path 
+              key={`crack-${i}`}
+              className="marble-streak"
+              d={`M${Math.random() * 1800},${Math.random() * 500 + 100} C${Math.random() * 1800},${Math.random() * 500 + 100} ${Math.random() * 1800},${Math.random() * 500 + 100} ${Math.random() * 1800},${Math.random() * 500 + 100}`}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={Math.random() * 2 + 1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={Math.random() * 0.3 + opacityBase}
+            />
+          ))}
         </g>
         
-        {/* More detailed thin veins */}
-        <g opacity="0.6">
-          {/* Additional detailed diagonal veins */}
-          <path 
-            className="marble-streak"
-            d="M500,150 L600,280 L550,380 L650,470"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.5"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.6"
-          />
-          
-          <path 
-            className="marble-streak"
-            d="M1050,150 L1150,280 L1100,380 L1200,470"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.6"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.55"
-          />
-          
-          <path 
-            className="marble-streak"
-            d="M1350,100 L1300,230 L1380,320 L1330,450"
-            fill="none"
-            stroke="white"
-            strokeWidth="0.4"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            opacity="0.5"
-          />
+        {/* Smaller veins and details for texture */}
+        <g opacity="0.7">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <path 
+              key={`detail-${i}`}
+              className="marble-streak"
+              d={`M${Math.random() * 1800},${Math.random() * 700 + 200} Q${Math.random() * 1800},${Math.random() * 500 + 200} ${Math.random() * 1800},${Math.random() * 700 + 200}`}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={Math.random() * 1.5 + 0.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={Math.random() * 0.25 + opacityBase}
+            />
+          ))}
         </g>
         
         {/* Texture noise overlay */}
@@ -293,19 +202,18 @@ const MarbleBanner = () => {
           width="100%"
           height="100%"
           fill="url(#noiseTexture)"
-          opacity="0.03" // Reduced noise opacity
+          opacity="0.05" 
         />
         
         <defs>
           <pattern id="noiseTexture" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-            <rect width="100%" height="100%" fill="#000000" />
-            {/* Tiny speckles for texture */}
-            {Array(200).fill(0).map((_, i) => (
+            <rect width="100%" height="100%" fill={theme === 'dark' ? '#000000' : '#ffffff'} />
+            {Array(300).fill(0).map((_, i) => (
               <rect 
                 key={i}
-                width="0.5" 
-                height="0.5" 
-                fill="white" 
+                width="0.8" 
+                height="0.8" 
+                fill={strokeColor} 
                 opacity={Math.random() * 0.5 + 0.3}
                 x={Math.random() * 100}
                 y={Math.random() * 100}

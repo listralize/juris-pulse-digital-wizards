@@ -37,6 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
         document.documentElement.style.backgroundColor = '#000000'; // Pure black background for dark mode
         document.documentElement.style.color = '#FFFFFF';
         document.body.style.backgroundColor = '#000000'; // Pure black background for dark mode
@@ -45,6 +46,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.body.classList.remove('light');
       } else {
         document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
         document.documentElement.style.backgroundColor = '#f5f5f5'; // Light gray background
         document.documentElement.style.color = '#000000';
         document.body.style.backgroundColor = '#f5f5f5'; // Light gray background
