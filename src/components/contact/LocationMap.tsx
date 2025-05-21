@@ -9,11 +9,13 @@ const LocationMap: React.FC = () => {
 
   return (
     <div className={`${isDark ? 'border-white/10 bg-neutral-900/90' : 'border-black/10 bg-neutral-100/90'} rounded-lg overflow-hidden shadow-lg relative h-full backdrop-blur-sm border`}>
-      <img 
-        src="/lovable-uploads/19f07831-e584-4a1f-b8ef-284685df9717.png" 
-        alt="World Trade Center Goiânia"
-        className="w-full h-full object-cover opacity-90"
-      />
+      <div className="w-full h-full flex items-center justify-center overflow-hidden">
+        <img 
+          src="/lovable-uploads/19f07831-e584-4a1f-b8ef-284685df9717.png" 
+          alt="World Trade Center Goiânia"
+          className="w-full h-full object-cover opacity-90"
+        />
+      </div>
       <div className="absolute bottom-2 right-2">
         <a 
           href="https://maps.google.com/?q=World+Trade+Center+Goiania" 
