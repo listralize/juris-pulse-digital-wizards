@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -102,25 +103,25 @@ const ClientArea = () => {
       id="client" 
       className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
     >
-      <div className={`max-w-2xl rounded-2xl ${isDark ? '' : 'bg-black text-white'} py-16 px-8 md:px-12`}>
+      <div className={`max-w-2xl rounded-2xl ${isDark ? '' : 'bg-black text-white'}`}>
         <div className="mb-8 flex justify-center">
           <img 
             ref={imageRef}
             src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
             alt="Área do Cliente em Smartphone" 
-            className="max-w-[280px] md:max-w-[320px] lg:max-w-[350px] h-auto" 
+            className="max-w-[280px] md:max-w-[320px] lg:max-w-[350px] h-auto"
           />
         </div>
         
-        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-8 font-canela text-white">
+        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-8 font-canela text-white text-center">
           Área Exclusiva do Cliente
         </h2>
         
-        <p ref={textRef} className="text-lg md:text-xl mb-12 font-satoshi text-gray-300">
+        <p ref={textRef} className="text-lg md:text-xl mb-12 font-satoshi text-gray-300 text-center">
           Acompanhe seus processos com total segurança e transparência.
         </p>
         
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-4 px-4 pb-6">
           <a 
             ref={button1Ref}
             href="#" 
