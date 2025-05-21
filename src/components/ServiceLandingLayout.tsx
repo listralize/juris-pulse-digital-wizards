@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion';
+import UnifiedContactForm from './contact/UnifiedContactForm';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -101,10 +102,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
     };
   }, []);
 
-  const handleContactClick = () => {
-    window.location.href = "https://api.whatsapp.com/send?phone=5562994594496&text=Olá! Tenho interesse em consultar sobre " + serviceName;
-  };
-
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <Navbar />
@@ -136,22 +133,15 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
               {serviceDescription}
             </p>
             
-            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 max-w-md">
-              <Button 
-                onClick={handleContactClick}
-                className={`px-6 py-5 text-base ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} transition-all`}
-              >
-                Fale com um Especialista <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              
+            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4">
               <Button 
                 variant="outline"
                 onClick={() => navigate(mainAreaPath)}
-                className={`px-6 py-5 text-base ${isDark 
+                className={`px-5 py-5 text-base ${isDark 
                   ? 'border-white/20 text-white hover:bg-white/10' 
                   : 'border-black/20 text-black hover:bg-black/10'} transition-all`}
               >
-                Saiba mais
+                Ver mais serviços
               </Button>
             </div>
           </div>
@@ -358,27 +348,33 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 ${
-        isDark ? 'bg-gradient-to-r from-black/90 to-black/80' : 'bg-gradient-to-r from-black to-gray-800'
-      } relative overflow-hidden`}>
+      {/* CTA Section with Form */}
+      <section className="px-6 md:px-16 lg:px-24 py-16 bg-black relative overflow-hidden">
         <div className="absolute inset-0 bg-pattern opacity-10"></div>
         
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl font-canela mb-6 text-white">
-            Pronto para Resolver sua Situação?
-          </h2>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-canela mb-6 text-white">
+              Pronto para Resolver sua Situação?
+            </h2>
+            
+            <p className="text-lg md:text-xl mb-8 text-gray-300">
+              Nossa equipe de especialistas está pronta para ajudar você. Entre em contato agora e dê o primeiro passo para resolver seu caso.
+            </p>
+          </div>
           
-          <p className="text-lg md:text-xl mb-8 text-gray-300">
-            Nossa equipe de especialistas está pronta para ajudar você. Entre em contato agora e dê o primeiro passo para resolver seu caso.
-          </p>
-          
-          <Button 
-            onClick={handleContactClick}
-            className="px-6 py-5 text-base bg-white text-black hover:bg-gray-200 transition-all shadow-lg max-w-xs mx-auto"
-          >
-            Agendar Consulta Gratuita <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <UnifiedContactForm 
+            preselectedService={serviceArea.toLowerCase().includes('tributario') ? 'tributario' : 
+              serviceArea.toLowerCase().includes('familia') ? 'familia' : 
+              serviceArea.toLowerCase().includes('empresarial') ? 'empresarial' : 
+              serviceArea.toLowerCase().includes('trabalho') ? 'trabalho' : 
+              serviceArea.toLowerCase().includes('constitucional') ? 'constitucional' : 
+              serviceArea.toLowerCase().includes('administrativo') ? 'administrativo' : 
+              serviceArea.toLowerCase().includes('previdenciario') ? 'previdenciario' : 
+              serviceArea.toLowerCase().includes('consumidor') ? 'consumidor' : 'outro'
+            }
+            darkBackground={true}
+          />
         </div>
       </section>
       

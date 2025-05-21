@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Check, Loader, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
-import ContactForm from '../contact/ContactForm';
-import SuccessMessage from '../contact/SuccessMessage';
+import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
 import { useTheme } from '../ThemeProvider';
@@ -13,23 +12,12 @@ import { useTheme } from '../ThemeProvider';
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-
-  const handleSubmitSuccess = () => {
-    setIsSuccess(true);
-    setIsSubmitting(false);
-  };
-  
-  const resetForm = () => {
-    setIsSuccess(false);
-  };
   
   useEffect(() => {
     const tl = gsap.timeline({
@@ -90,29 +78,7 @@ const Contact = () => {
         >
           {/* Left side - Contact info */}
           <div className="col-span-12 md:col-span-5 lg:col-span-4">
-            <div className="grid grid-cols-1 gap-4">
-              <ContactInfo />
-              
-              <div className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/90 border-black/10'} p-4 border rounded-lg backdrop-blur-sm`}>
-                <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                  Por que escolher a Serafim & Trombela Advocacia?
-                </h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <Check className={`mt-0.5 mr-2 h-5 w-5 ${isDark ? 'text-white' : 'text-black'}`} />
-                    <span className={`${isDark ? 'text-white/90' : 'text-black/90'}`}>Atendimento personalizado para cada cliente</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className={`mt-0.5 mr-2 h-5 w-5 ${isDark ? 'text-white' : 'text-black'}`} />
-                    <span className={`${isDark ? 'text-white/90' : 'text-black/90'}`}>Equipe especializada em diversas áreas do direito</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className={`mt-0.5 mr-2 h-5 w-5 ${isDark ? 'text-white' : 'text-black'}`} />
-                    <span className={`${isDark ? 'text-white/90' : 'text-black/90'}`}>Comunicação clara e transparente durante todo o processo</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <ContactInfo />
           </div>
           
           {/* Middle - Map */}
@@ -122,14 +88,7 @@ const Contact = () => {
           
           {/* Right - Contact form */}
           <div className="col-span-12 lg:col-span-5">
-            {!isSuccess ? (
-              <ContactForm 
-                onSubmitSuccess={handleSubmitSuccess} 
-                isSubmitting={isSubmitting} 
-              />
-            ) : (
-              <SuccessMessage onNewMessage={resetForm} onReset={resetForm} />
-            )}
+            <UnifiedContactForm />
           </div>
         </div>
         
