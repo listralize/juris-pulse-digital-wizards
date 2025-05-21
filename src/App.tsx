@@ -20,6 +20,9 @@ import AdministrativoPage from "./pages/areas/Administrativo";
 import PrevidenciarioPage from "./pages/areas/Previdenciario";
 import ConsumidorPage from "./pages/areas/Consumidor";
 
+// Serviços Específicos
+import DivorceService from "./pages/services/DivorceService";
+
 const queryClient = new QueryClient();
 
 // ScrollToTop component to handle navigation scroll behavior
@@ -68,6 +71,9 @@ const App = () => {
                 <Route path="/administrativo" element={<AdministrativoPage />} />
                 <Route path="/previdenciario" element={<PrevidenciarioPage />} />
                 <Route path="/consumidor" element={<ConsumidorPage />} />
+                
+                {/* Serviços Específicos */}
+                <Route path="/servicos/divorcio-separacao" element={<DivorceService />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

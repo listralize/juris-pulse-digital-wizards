@@ -103,8 +103,8 @@ const ClientArea = () => {
       id="client" 
       className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
     >
-      <div className={`max-w-2xl rounded-2xl ${isDark ? '' : 'bg-black text-white'}`}>
-        <div className="mb-8 flex justify-center">
+      <div className={`max-w-2xl rounded-2xl ${isDark ? '' : ''}`}>
+        <div className={`mb-8 flex justify-center ${!isDark && 'bg-black p-8 rounded-2xl'}`}>
           <img 
             ref={imageRef}
             src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
@@ -113,11 +113,11 @@ const ClientArea = () => {
           />
         </div>
         
-        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-8 font-canela text-white text-center">
+        <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-8 font-canela ${isDark ? 'text-white' : 'text-black'} text-center`}>
           Área Exclusiva do Cliente
         </h2>
         
-        <p ref={textRef} className="text-lg md:text-xl mb-12 font-satoshi text-gray-300 text-center">
+        <p ref={textRef} className={`text-lg md:text-xl mb-12 font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'} text-center`}>
           Acompanhe seus processos com total segurança e transparência.
         </p>
         

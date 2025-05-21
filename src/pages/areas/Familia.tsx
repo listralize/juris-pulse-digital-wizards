@@ -3,6 +3,7 @@ import React from 'react';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
 import { Card, CardContent } from '../../components/ui/card';
 import { useTheme } from '../../components/ThemeProvider';
+import FamilyServiceLinks from '../../components/FamilyServiceLinks';
 
 const FamiliaPage = () => {
   const { theme } = useTheme();
@@ -61,6 +62,17 @@ const FamiliaPage = () => {
           </Card>
         ))}
       </div>
+
+      <h3 className={`text-3xl font-canela mt-20 mb-8 ${isDark ? 'text-white' : 'text-black'}`}>
+        Conheça Nossos Serviços Detalhados
+      </h3>
+      
+      <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+        Oferecemos soluções jurídicas personalizadas para cada situação familiar. Clique em um dos serviços abaixo para obter informações mais detalhadas:
+      </p>
+      
+      <FamilyServiceLinks />
+      
     </PracticeAreaLayout>
   );
 };
