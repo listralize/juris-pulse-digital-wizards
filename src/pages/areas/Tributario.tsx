@@ -49,14 +49,14 @@ const TributarioPage = () => {
       description="Trata das leis e regulamentos relacionados a impostos e tributos. Isso inclui a interpretação e aplicação de leis fiscais, planejamento tributário, disputas fiscais e recursos relacionados a impostos."
       currentArea="tributario"
     >
-      <h2 className="text-4xl font-canela mb-16 text-white">Serviços Especializados</h2>
+      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className="bg-black/80 border-white/10 border hover:bg-black/60 transition-all duration-300">
+          <Card key={index} className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300`}>
             <CardContent className="p-8">
-              <h3 className="text-2xl font-canela mb-4 text-white">{service.title}</h3>
-              <p className="text-gray-300 leading-relaxed">{service.description}</p>
+              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
+              <p className={isDark ? 'text-gray-300' : 'text-gray-700' + ' leading-relaxed'}>{service.description}</p>
             </CardContent>
           </Card>
         ))}

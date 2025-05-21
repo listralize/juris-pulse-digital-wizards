@@ -68,16 +68,16 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   }
 
   return (
-    <div className={`min-h-screen flex flex-col bg-black text-white`}>
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
       <CustomCursor />
       <Navbar />
       
       <main className="flex-grow pb-24"> {/* Added bottom padding for WhatsApp button */}
-        {/* Substituindo a seção anterior pelo novo PageBanner */}
+        {/* Using PageBanner component */}
         <PageBanner title={title} subtitle={description} />
 
         {/* Areas navigation */}
-        <section className="py-4 px-6 md:px-16 lg:px-24 bg-black border-white/10 border-y sticky top-[89px] z-30 w-full overflow-visible">
+        <section className={`py-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} border-y ${isDark ? 'border-white/10' : 'border-black/10'} sticky top-[89px] z-30 w-full overflow-visible transition-colors duration-300`}>
           <div className="max-w-6xl mx-auto">
             <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', paddingTop: '5px', paddingBottom: '5px' }}>
               <div className="inline-flex space-x-2 py-2 px-2 min-w-full justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -87,8 +87,8 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
                     to={area.path}
                     className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
                       currentArea === area.id 
-                        ? 'bg-white text-black' 
-                        : 'text-white/70 hover:text-white bg-gray-800 hover:bg-gray-700'
+                        ? (isDark ? 'bg-amber-500 text-black' : 'bg-amber-600 text-white') 
+                        : (isDark ? 'text-white/70 hover:text-white bg-neutral-800 hover:bg-neutral-700' : 'text-black/70 hover:text-black bg-neutral-200 hover:bg-neutral-300')
                     }`}
                   >
                     {area.label}
@@ -102,11 +102,11 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         {/* Scroll indicator */}
         {showScrollIndicator && (
           <div className="flex justify-center py-6 animate-bounce">
-            <ArrowDown className="w-6 h-6 text-white/70" />
+            <ArrowDown className={`w-6 h-6 ${isDark ? 'text-white/70' : 'text-black/70'}`} />
           </div>
         )}
       
-        <section className="py-12 px-6 md:px-16 lg:px-24 bg-black text-white">
+        <section className={`py-12 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-300`}>
           <div className="max-w-6xl mx-auto">
             {children}
           </div>
