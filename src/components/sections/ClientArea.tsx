@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -101,15 +100,15 @@ const ClientArea = () => {
   return (
     <section 
       id="client" 
-      className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 bg-black text-white"
+      className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
     >
-      <div className="max-w-2xl text-center">
+      <div className={`max-w-2xl rounded-2xl ${isDark ? '' : 'bg-black text-white'} py-16 px-8 md:px-12`}>
         <div className="mb-8 flex justify-center">
           <img 
             ref={imageRef}
             src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
             alt="Área do Cliente em Smartphone" 
-            className="max-w-[280px] md:max-w-[320px] lg:max-w-[350px] h-auto" // Increased from 220px
+            className="max-w-[280px] md:max-w-[320px] lg:max-w-[350px] h-auto" 
           />
         </div>
         
