@@ -10,9 +10,9 @@ const LocationMap: React.FC = () => {
   return (
     <div className={`${isDark ? 'border-white/10 bg-neutral-900/90' : 'border-black/10 bg-neutral-100/90'} rounded-lg overflow-hidden shadow-lg relative h-full backdrop-blur-sm border`}>
       <img 
-        src="/lovable-uploads/a8cc2627-db98-4461-9afa-8b1f238766e0.png" 
-        alt="Localização do escritório"
-        className="w-full h-full object-cover opacity-80"
+        src="/lovable-uploads/19f07831-e584-4a1f-b8ef-284685df9717.png" 
+        alt="World Trade Center Goiânia"
+        className="w-full h-full object-cover opacity-90"
       />
       <div className="absolute bottom-2 right-2">
         <a 
