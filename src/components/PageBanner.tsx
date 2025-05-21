@@ -6,9 +6,10 @@ import { useTheme } from './ThemeProvider';
 interface PageBannerProps {
   title: string;
   subtitle?: string;
+  bgImage?: string;
 }
 
-const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle }) => {
+const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle, bgImage }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 

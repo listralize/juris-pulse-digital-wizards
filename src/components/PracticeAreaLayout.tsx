@@ -34,7 +34,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       
       <PageBanner 
         title={title}
-        description={description}
+        subtitle={description}
         bgImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       />
       
