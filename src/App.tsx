@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -40,6 +39,7 @@ function App() {
       <BrowserRouter>
         <CustomCursor />
         <Routes>
+          {/* Main Areas */}
           <Route path="/" element={<Index />} />
           <Route path="/familia" element={<FamiliaPage />} />
           <Route path="/tributario" element={<TributarioPage />} />
@@ -50,13 +50,7 @@ function App() {
           <Route path="/previdenciario" element={<PrevidenciarioPage />} />
           <Route path="/consumidor" element={<ConsumidorPage />} />
 
-          {/* Serviços */}
-          <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />
-          <Route path="/servicos/liberdades-constitucionais" element={<LiberdadesConstitucionaisService />} />
-          <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />
-          <Route path="/servicos/contencioso-trabalhista" element={<ContenciosoTrabalhistaService />} />
-          <Route path="/servicos/planejamento-tributario" element={<PlanejamentoTributarioService />} />
-          <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
+          {/* Família Services */}
           <Route path="/servicos/divorcio" element={<DivorceService />} />
           <Route path="/servicos/casamento-uniao" element={<CasamentoUniaoService />} />
           <Route path="/servicos/guarda-filhos" element={<GuardaFilhosService />} />
@@ -65,13 +59,28 @@ function App() {
           <Route path="/servicos/protecao-menores" element={<ProtecaoMenoresService />} />
           <Route path="/servicos/inventario-partilha" element={<InventarioPartilhaService />} />
           <Route path="/servicos/testamentos-sucessoes" element={<TestamentosSucessoesService />} />
+
+          {/* Tributário Services */}
+          <Route path="/servicos/planejamento-tributario" element={<PlanejamentoTributarioService />} />
+          <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
+
+          {/* Trabalho Services */}
+          <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />
+          <Route path="/servicos/contencioso-trabalhista" element={<ContenciosoTrabalhistaService />} />
+
+          {/* Constitucional Services */}
+          <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />
+          <Route path="/servicos/liberdades-constitucionais" element={<LiberdadesConstitucionaisService />} />
+
+          {/* Administrativo Services */}
           <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
           <Route path="/servicos/processos-administrativos" element={<ProcessosAdministrativosService />} />
+
+          {/* Consumidor Services */}
           <Route path="/servicos/direitos-consumidor" element={<DireitosConsumidorService />} />
           <Route path="/servicos/praticas-abusivas" element={<PraticasAbusivasService />} />
           
           <Route path="/obrigado" element={<ObrigadoPage />} />
-
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

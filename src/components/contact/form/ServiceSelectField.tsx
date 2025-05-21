@@ -16,14 +16,13 @@ const ServiceSelectField: React.FC<ServiceSelectFieldProps> = ({ darkBackground 
   
   const serviceOptions = [
     { value: "familia", label: "Divórcio e questões familiares" },
-    { value: "tributario", label: "Problemas com impostos" },
-    { value: "empresarial", label: "Assessoria para sua empresa" },
-    { value: "trabalho", label: "Questões trabalhistas" },
-    { value: "constitucional", label: "Defesa de direitos fundamentais" },
-    { value: "administrativo", label: "Problemas com órgãos públicos" },
-    { value: "previdenciario", label: "Aposentadoria e benefícios" },
-    { value: "consumidor", label: "Direitos como consumidor" },
-    { value: "outro", label: "Outro problema jurídico" }
+    { value: "tributario", label: "Consultoria tributária" },
+    { value: "empresarial", label: "Direito empresarial" },
+    { value: "trabalho", label: "Direito trabalhista" },
+    { value: "constitucional", label: "Direitos fundamentais" },
+    { value: "administrativo", label: "Direito administrativo" },
+    { value: "previdenciario", label: "Direito previdenciário" },
+    { value: "consumidor", label: "Direito do consumidor" }
   ];
   
   return (
