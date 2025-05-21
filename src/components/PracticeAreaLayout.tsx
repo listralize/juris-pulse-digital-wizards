@@ -87,7 +87,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
                     to={area.path}
                     className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
                       currentArea === area.id 
-                        ? (isDark ? 'bg-amber-500 text-black' : 'bg-amber-600 text-white') 
+                        ? (isDark ? 'bg-white text-black' : 'bg-black text-white') 
                         : (isDark ? 'text-white/70 hover:text-white bg-neutral-800 hover:bg-neutral-700' : 'text-black/70 hover:text-black bg-neutral-200 hover:bg-neutral-300')
                     }`}
                   >
