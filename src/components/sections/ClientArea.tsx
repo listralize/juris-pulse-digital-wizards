@@ -109,7 +109,7 @@ const ClientArea = () => {
             ref={imageRef}
             src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
             alt="Área do Cliente em Smartphone" 
-            className="max-w-[220px] h-auto"
+            className="max-w-[280px] md:max-w-[320px] lg:max-w-[350px] h-auto" // Increased from 220px
           />
         </div>
         
