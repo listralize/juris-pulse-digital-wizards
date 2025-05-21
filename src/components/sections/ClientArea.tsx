@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import { Lock, ArrowRight, WhatsApp } from 'lucide-react';
+import { Lock, ArrowRight, MessageSquare } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -160,7 +160,7 @@ const ClientArea = () => {
                 <span className={`absolute inset-0 w-0 ${isDark 
                   ? 'bg-white/10' 
                   : 'bg-black/5'} transition-all duration-500 ease-out group-hover:w-full`}></span>
-                <WhatsApp className="mr-3 h-5 w-5 relative z-10" />
+                <MessageSquare className="mr-3 h-5 w-5 relative z-10" />
                 <span className="font-medium relative z-10">Primeiro acesso via WhatsApp</span>
               </a>
             </div>
