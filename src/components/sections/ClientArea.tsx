@@ -104,7 +104,7 @@ const ClientArea = () => {
       className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
     >
       <div className={`max-w-2xl rounded-2xl ${isDark ? '' : ''}`}>
-        <div className={`mb-8 flex justify-center ${!isDark && 'bg-black p-8 rounded-2xl'}`}>
+        <div className="mb-8 flex justify-center bg-black p-8 rounded-2xl">
           <img 
             ref={imageRef}
             src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
