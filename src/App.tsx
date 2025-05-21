@@ -20,8 +20,15 @@ import AdministrativoPage from "./pages/areas/Administrativo";
 import PrevidenciarioPage from "./pages/areas/Previdenciario";
 import ConsumidorPage from "./pages/areas/Consumidor";
 
-// Serviços Específicos
+// Serviços Específicos de Família
 import DivorceService from "./pages/services/DivorceService";
+import CasamentoUniaoService from "./pages/services/CasamentoUniaoService";
+import GuardaFilhosService from "./pages/services/GuardaFilhosService";
+import PensaoAlimenticiaService from "./pages/services/PensaoAlimenticiaService";
+import AdocaoService from "./pages/services/AdocaoService";
+import InventarioPartilhaService from "./pages/services/InventarioPartilhaService";
+import ProtecaoMenoresService from "./pages/services/ProtecaoMenoresService";
+import TestamentosSucessoesService from "./pages/services/TestamentosSucessoesService";
 
 const queryClient = new QueryClient();
 
@@ -72,8 +79,15 @@ const App = () => {
                 <Route path="/previdenciario" element={<PrevidenciarioPage />} />
                 <Route path="/consumidor" element={<ConsumidorPage />} />
                 
-                {/* Serviços Específicos */}
+                {/* Serviços Específicos de Família */}
                 <Route path="/servicos/divorcio-separacao" element={<DivorceService />} />
+                <Route path="/servicos/casamento-uniao-estavel" element={<CasamentoUniaoService />} />
+                <Route path="/servicos/guarda-filhos" element={<GuardaFilhosService />} />
+                <Route path="/servicos/pensao-alimenticia" element={<PensaoAlimenticiaService />} />
+                <Route path="/servicos/adocao" element={<AdocaoService />} />
+                <Route path="/servicos/inventario-partilha" element={<InventarioPartilhaService />} />
+                <Route path="/servicos/protecao-menores" element={<ProtecaoMenoresService />} />
+                <Route path="/servicos/testamentos-sucessoes" element={<TestamentosSucessoesService />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
