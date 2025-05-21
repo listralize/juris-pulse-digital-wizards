@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
@@ -121,7 +120,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </div>
 
-      {/* Hero Section - Improved layout with proper spacing */}
+      {/* Hero Section - Improved layout with proper spacing and button sizing */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f9f9f9]'}`}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -137,10 +136,10 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
               {serviceDescription}
             </p>
             
-            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4">
+            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 max-w-md">
               <Button 
                 onClick={handleContactClick}
-                className={`px-8 py-6 text-base ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} transition-all`}
+                className={`px-6 py-5 text-base ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} transition-all`}
               >
                 Fale com um Especialista <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -148,11 +147,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
               <Button 
                 variant="outline"
                 onClick={() => navigate(mainAreaPath)}
-                className={`px-8 py-6 text-base ${isDark 
+                className={`px-6 py-5 text-base ${isDark 
                   ? 'border-white/20 text-white hover:bg-white/10' 
                   : 'border-black/20 text-black hover:bg-black/10'} transition-all`}
               >
-                Saiba mais sobre {serviceArea}
+                Saiba mais
               </Button>
             </div>
           </div>
@@ -168,7 +167,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* Benefits Section - Visually enhanced with better styling */}
+      {/* Benefits Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
           <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
@@ -185,7 +184,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
                 key={index}
                 className={`p-8 rounded-xl ${isDark 
                   ? 'bg-white/5 border border-white/10' 
-                  : 'bg-gray-50 border border-black/5'} 
+                  : 'bg-black/5 border border-black/5'} 
                   hover:transform hover:scale-105 transition-all duration-300 
                   backdrop-blur-sm shadow-lg`}
               >
@@ -214,7 +213,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* Process Section - Completely redesigned to be more engaging */}
+      {/* Process Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-6xl mx-auto">
           <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
@@ -274,7 +273,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* Testimonials - Enhanced design */}
+      {/* Testimonials */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
           <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
@@ -321,7 +320,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* FAQ Section - Now interactive with Accordion */}
+      {/* FAQ Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-4xl mx-auto">
           <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
@@ -359,7 +358,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* CTA Section - Improved visual design */}
+      {/* CTA Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 ${
         isDark ? 'bg-gradient-to-r from-black/90 to-black/80' : 'bg-gradient-to-r from-black to-gray-800'
       } relative overflow-hidden`}>
@@ -376,14 +375,14 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           
           <Button 
             onClick={handleContactClick}
-            className="px-8 py-6 text-base bg-white text-black hover:bg-gray-200 transition-all shadow-lg"
+            className="px-6 py-5 text-base bg-white text-black hover:bg-gray-200 transition-all shadow-lg max-w-xs mx-auto"
           >
             Agendar Consulta Gratuita <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </section>
       
-      {/* Related Services - Enhanced appearance */}
+      {/* Related Services */}
       {relatedServices && relatedServices.length > 0 && (
         <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
           <div className="max-w-6xl mx-auto">
