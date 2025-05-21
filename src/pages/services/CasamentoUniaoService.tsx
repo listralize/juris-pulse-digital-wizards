@@ -1,8 +1,13 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ServiceLandingLayout from '../../components/ServiceLandingLayout';
 
 const CasamentoUniaoService = () => {
+  // Add auto-scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <ServiceLandingLayout
       serviceArea="Direito da Família"

@@ -53,6 +53,11 @@ const FamiliaPage = () => {
     }
   ];
 
+  // Add auto-scroll to top when page loads
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <PracticeAreaLayout
       title="Direito da Família"

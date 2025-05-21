@@ -1,117 +1,50 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import Navbar from './navbar';
-import { Footer } from './sections';
-import CustomCursor from './CustomCursor';
-import WhatsAppButton from './WhatsAppButton';
-import { useTheme } from './ThemeProvider';
-import Loading from './Loading';
-import { ArrowDown } from 'lucide-react';
 import PageBanner from './PageBanner';
+import WhatsAppButton from './WhatsAppButton';
+import Footer from './sections/Footer';
+import { useTheme } from './ThemeProvider';
+import CtaSection from './serviceLanding/CtaSection';
 
 interface PracticeAreaLayoutProps {
   title: string;
   description: string;
-  children?: React.ReactNode;
-  currentArea: string;
+  children: React.ReactNode;
+  currentArea?: string;
 }
 
 const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({ 
   title, 
   description, 
-  children, 
-  currentArea 
+  children,
+  currentArea = ''
 }) => {
   const { theme } = useTheme();
-  const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const isDark = theme === 'dark';
 
+  // Add scroll to top on mount
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-
-    // Hide scroll indicator on scroll
-    const handleScroll = () => {
-      if (window.scrollY > 200) {
-        setShowScrollIndicator(false);
-      } else {
-        setShowScrollIndicator(true);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('scroll', handleScroll);
-    };
+    window.scrollTo(0, 0);
   }, []);
-
-  const practiceAreas = [
-    { id: 'familia', label: 'Família', path: '/familia' },
-    { id: 'tributario', label: 'Tributário', path: '/tributario' },
-    { id: 'empresarial', label: 'Empresarial', path: '/empresarial' },
-    { id: 'trabalho', label: 'Trabalho', path: '/trabalho' },
-    { id: 'constitucional', label: 'Constitucional', path: '/constitucional' },
-    { id: 'administrativo', label: 'Administrativo', path: '/administrativo' },
-    { id: 'previdenciario', label: 'Previdenciário', path: '/previdenciario' },
-    { id: 'consumidor', label: 'Consumidor', path: '/consumidor' }
-  ];
-
-  if (isLoading) {
-    return <Loading />;
-  }
-
+  
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
-      <CustomCursor />
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <Navbar />
       
-      <main className="flex-grow pb-24"> {/* Added bottom padding for WhatsApp button */}
-        {/* Using PageBanner component */}
-        <PageBanner title={title} subtitle={description} />
-
-        {/* Areas navigation */}
-        <section className={`py-4 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'} border-y ${isDark ? 'border-white/10' : 'border-black/10'} sticky top-[89px] z-30 w-full overflow-visible transition-colors duration-300`}>
-          <div className="max-w-6xl mx-auto">
-            <div className="overflow-x-auto no-scrollbar -mx-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', paddingTop: '5px', paddingBottom: '5px' }}>
-              <div className="inline-flex space-x-2 py-2 px-2 min-w-full justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
-                {practiceAreas.map((area) => (
-                  <Link 
-                    key={area.id}
-                    to={area.path}
-                    className={`px-4 py-2 whitespace-nowrap rounded-full transition-colors duration-300 flex-shrink-0 ${
-                      currentArea === area.id 
-                        ? (isDark ? 'bg-white text-black' : 'bg-black text-white') 
-                        : (isDark ? 'text-white/70 hover:text-white bg-neutral-800 hover:bg-neutral-700' : 'text-black/70 hover:text-black bg-neutral-200 hover:bg-neutral-300')
-                    }`}
-                  >
-                    {area.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+      <PageBanner 
+        title={title}
+        description={description}
+        bgImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
+      />
       
-        {/* Scroll indicator */}
-        {showScrollIndicator && (
-          <div className="flex justify-center py-6 animate-bounce">
-            <ArrowDown className={`w-6 h-6 ${isDark ? 'text-white/70' : 'text-black/70'}`} />
-          </div>
-        )}
+      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
+        <div className="max-w-6xl mx-auto">
+          {children}
+        </div>
+      </section>
       
-        <section className={`py-12 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-300`}>
-          <div className="max-w-6xl mx-auto">
-            {children}
-          </div>
-        </section>
-      </main>
+      {currentArea && <CtaSection serviceArea={title} />}
       
       <WhatsAppButton />
       <Footer />

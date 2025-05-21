@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
 import Index from './pages/Index';
 import FamiliaPage from './pages/areas/Familia';
@@ -33,11 +34,23 @@ import DireitosConsumidorService from './pages/services/DireitosConsumidorServic
 import PraticasAbusivasService from './pages/services/PraticasAbusivasService';
 import ObrigadoPage from './pages/Obrigado';
 
+// ScrollToTop component that uses the location hook
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  
+  return null;
+};
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <BrowserRouter>
         <CustomCursor />
+        <ScrollToTop />
         <Routes>
           {/* Main Areas */}
           <Route path="/" element={<Index />} />
@@ -51,8 +64,8 @@ function App() {
           <Route path="/consumidor" element={<ConsumidorPage />} />
 
           {/* Família Services */}
-          <Route path="/servicos/divorcio" element={<DivorceService />} />
-          <Route path="/servicos/casamento-uniao" element={<CasamentoUniaoService />} />
+          <Route path="/servicos/divorcio-separacao" element={<DivorceService />} />
+          <Route path="/servicos/casamento-uniao-estavel" element={<CasamentoUniaoService />} />
           <Route path="/servicos/guarda-filhos" element={<GuardaFilhosService />} />
           <Route path="/servicos/pensao-alimenticia" element={<PensaoAlimenticiaService />} />
           <Route path="/servicos/adocao" element={<AdocaoService />} />

@@ -1,11 +1,16 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ServiceLandingLayout from '../../components/ServiceLandingLayout';
 
 const DivorceService = () => {
+  // Add auto-scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Mock data for the divorce service landing page
   const serviceData = {
-    serviceArea: "Direito de Família",
+    serviceArea: "Direito da Família",
     serviceName: "Divórcio e Separação",
     serviceDescription: "Assessoria jurídica especializada para processos de divórcio e separação, buscando sempre a melhor solução para todas as partes envolvidas. Nossa abordagem combina profundo conhecimento jurídico com sensibilidade para questões familiares.",
     mainImage: "/lovable-uploads/12e19203-a8e7-4940-9116-c281d94b1602.png",
@@ -114,8 +119,8 @@ const DivorceService = () => {
         path: "/servicos/pensao-alimenticia"
       },
       {
-        name: "Partilha de Bens",
-        path: "/servicos/partilha-bens"
+        name: "Inventário e Partilha",
+        path: "/servicos/inventario-partilha"
       }
     ],
     mainAreaPath: "/familia"

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
@@ -71,6 +72,9 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+    
     // Hero section animations
     gsap.fromTo(
       titleRef.current,
