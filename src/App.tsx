@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
-import IndexPage from './pages';
+import Index from './pages/Index';
 import FamiliaPage from './pages/areas/Familia';
 import TributarioPage from './pages/areas/Tributario';
 import EmpresarialPage from './pages/areas/Empresarial';
@@ -12,7 +13,7 @@ import PrevidenciarioPage from './pages/areas/Previdenciario';
 import ConsumidorPage from './pages/areas/Consumidor';
 import NotFound from './pages/NotFound';
 import CustomCursor from './components/CustomCursor';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
 import LiberdadesConstitucionaisService from './pages/services/LiberdadesConstitucionaisService';
 import AssessoriaTrabalhista from './pages/services/AssessoriaTrabalhista';
@@ -39,7 +40,7 @@ function App() {
       <BrowserRouter>
         <CustomCursor />
         <Routes>
-          <Route path="/" element={<IndexPage />} />
+          <Route path="/" element={<Index />} />
           <Route path="/familia" element={<FamiliaPage />} />
           <Route path="/tributario" element={<TributarioPage />} />
           <Route path="/empresarial" element={<EmpresarialPage />} />

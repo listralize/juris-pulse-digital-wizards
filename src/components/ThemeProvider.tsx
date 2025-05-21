@@ -9,13 +9,23 @@ interface ThemeContextProps {
   setTheme: (theme: Theme) => void;
 }
 
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+}
+
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ 
+  children, 
+  defaultTheme = 'dark',
+  storageKey = 'theme' 
+}: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     // Check for saved theme preference
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
+      const savedTheme = localStorage.getItem(storageKey);
       if (savedTheme === 'light' || savedTheme === 'dark') {
         return savedTheme as Theme;
       }
@@ -26,14 +36,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     }
     
-    // Default to dark theme
-    return 'dark';
+    // Default to provided default theme
+    return defaultTheme;
   });
   
   // Update document class and localStorage when theme changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
+      localStorage.setItem(storageKey, theme);
       
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -53,7 +63,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.body.classList.remove('dark');
       }
     }
-  }, [theme]);
+  }, [theme, storageKey]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
