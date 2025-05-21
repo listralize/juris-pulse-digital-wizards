@@ -7,6 +7,7 @@ import { useTheme } from '../ThemeProvider';
 gsap.registerPlugin(ScrollTrigger);
 
 const ClientArea = () => {
+  const imageRef = useRef<HTMLImageElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const button1Ref = useRef<HTMLAnchorElement>(null);
@@ -15,6 +16,21 @@ const ClientArea = () => {
   const isDark = theme === 'dark';
   
   useEffect(() => {
+    gsap.fromTo(
+      imageRef.current,
+      { opacity: 0, y: -20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: imageRef.current,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+    
     gsap.fromTo(
       titleRef.current,
       { opacity: 0, scaleY: 0.9 },
@@ -85,14 +101,23 @@ const ClientArea = () => {
   return (
     <section 
       id="client" 
-      className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-gray-50'}`}
+      className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 bg-black text-white"
     >
       <div className="max-w-2xl text-center">
-        <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="mb-8 flex justify-center">
+          <img 
+            ref={imageRef}
+            src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
+            alt="Área do Cliente em Smartphone" 
+            className="max-w-[220px] h-auto"
+          />
+        </div>
+        
+        <h2 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl mb-8 font-canela text-white">
           Área Exclusiva do Cliente
         </h2>
         
-        <p ref={textRef} className={`text-lg md:text-xl mb-12 font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+        <p ref={textRef} className="text-lg md:text-xl mb-12 font-satoshi text-gray-300">
           Acompanhe seus processos com total segurança e transparência.
         </p>
         
@@ -100,11 +125,7 @@ const ClientArea = () => {
           <a 
             ref={button1Ref}
             href="#" 
-            className={`px-8 py-4 rounded transition-all duration-300 font-satoshi flex items-center justify-center ${
-              isDark 
-                ? 'bg-white text-black hover:bg-gray-200'
-                : 'bg-black text-white hover:bg-gray-800'
-            }`}
+            className="bg-white text-black hover:bg-gray-200 px-8 py-4 rounded transition-all duration-300 font-satoshi flex items-center justify-center"
           >
             <span className="mr-2">🔐</span> Acessar minha área
           </a>
@@ -114,11 +135,7 @@ const ClientArea = () => {
             href="https://api.whatsapp.com/send?phone=5562994594496" 
             target="_blank"
             rel="noopener noreferrer"
-            className={`border px-8 py-4 rounded transition-all duration-300 font-satoshi flex items-center justify-center ${
-              isDark 
-                ? 'bg-black text-white border-white hover:bg-gray-900'
-                : 'bg-white text-black border-black hover:bg-gray-100'
-            }`}
+            className="bg-black text-white border border-white hover:bg-gray-900 px-8 py-4 rounded transition-all duration-300 font-satoshi flex items-center justify-center"
           >
             <span className="mr-2">📲</span> Primeiro acesso via WhatsApp
           </a>
