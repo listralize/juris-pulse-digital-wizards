@@ -30,6 +30,26 @@ import InventarioPartilhaService from "./pages/services/InventarioPartilhaServic
 import ProtecaoMenoresService from "./pages/services/ProtecaoMenoresService";
 import TestamentosSucessoesService from "./pages/services/TestamentosSucessoesService";
 
+// Serviços de Trabalho
+import ContenciosoTrabalhistaService from "./pages/services/ContenciosoTrabalhistaService";
+import AssessoriaTrabalhista from "./pages/services/AssessoriaTrabalhista";
+
+// Serviços de Tributário
+import PlanejamentoTributarioService from "./pages/services/PlanejamentoTributarioService";
+import ContenciosoTributarioService from "./pages/services/ContenciosoTributarioService";
+
+// Serviços de Consumidor
+import DireitosConsumidorService from "./pages/services/DireitosConsumidorService";
+import PraticasAbusivasService from "./pages/services/PraticasAbusivasService";
+
+// Serviços Administrativo
+import LicitacoesContratosService from "./pages/services/LicitacoesContratosService";
+import ProcessosAdministrativosService from "./pages/services/ProcessosAdministrativosService";
+
+// Serviços Constitucional
+import DireitosFundamentaisService from "./pages/services/DireitosFundamentaisService";
+import LiberdadesConstitucionaisService from "./pages/services/LiberdadesConstitucionaisService";
+
 const queryClient = new QueryClient();
 
 // ScrollToTop component to handle navigation scroll behavior
@@ -88,6 +108,26 @@ const App = () => {
                 <Route path="/servicos/inventario-partilha" element={<InventarioPartilhaService />} />
                 <Route path="/servicos/protecao-menores" element={<ProtecaoMenoresService />} />
                 <Route path="/servicos/testamentos-sucessoes" element={<TestamentosSucessoesService />} />
+                
+                {/* Serviços de Trabalho */}
+                <Route path="/servicos/contencioso-trabalhista" element={<ContenciosoTrabalhistaService />} />
+                <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />
+                
+                {/* Serviços de Tributário */}
+                <Route path="/servicos/planejamento-tributario" element={<PlanejamentoTributarioService />} />
+                <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
+                
+                {/* Serviços de Consumidor */}
+                <Route path="/servicos/direitos-consumidor" element={<DireitosConsumidorService />} />
+                <Route path="/servicos/praticas-abusivas" element={<PraticasAbusivasService />} />
+                
+                {/* Serviços de Administrativo */}
+                <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
+                <Route path="/servicos/processos-administrativos" element={<ProcessosAdministrativosService />} />
+                
+                {/* Serviços de Constitucional */}
+                <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />
+                <Route path="/servicos/liberdades-constitucionais" element={<LiberdadesConstitucionaisService />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

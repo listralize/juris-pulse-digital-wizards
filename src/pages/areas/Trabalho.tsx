@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
 import { Card, CardContent } from '../../components/ui/card';
 import { useTheme } from '../../components/ThemeProvider';
@@ -7,39 +8,48 @@ import { useTheme } from '../../components/ThemeProvider';
 const TrabalhoPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
   
   const services = [
     {
       title: "Assessoria em Relações Trabalhistas",
-      description: "Orientação preventiva para empregadores sobre questões trabalhistas cotidianas e estratégicas."
+      description: "Orientação preventiva para empregadores sobre questões trabalhistas cotidianas e estratégicas.",
+      path: "/servicos/assessoria-trabalhista"
     },
     {
       title: "Contencioso Trabalhista",
-      description: "Defesa em reclamações trabalhistas individuais e coletivas em todas as instâncias."
+      description: "Defesa em reclamações trabalhistas individuais e coletivas em todas as instâncias.",
+      path: "/servicos/contencioso-trabalhista"
     },
     {
       title: "Acordos Coletivos",
-      description: "Negociação e elaboração de acordos e convenções coletivas com sindicatos."
+      description: "Negociação e elaboração de acordos e convenções coletivas com sindicatos.",
+      path: "/servicos/contencioso-trabalhista"
     },
     {
       title: "Rescisões Contratuais",
-      description: "Assessoria em demissões individuais e coletivas, minimizando riscos e passivos."
+      description: "Assessoria em demissões individuais e coletivas, minimizando riscos e passivos.",
+      path: "/servicos/assessoria-trabalhista"
     },
     {
       title: "Compliance Trabalhista",
-      description: "Implementação de programas de conformidade com a legislação trabalhista e previdenciária."
+      description: "Implementação de programas de conformidade com a legislação trabalhista e previdenciária.",
+      path: "/servicos/assessoria-trabalhista"
     },
     {
       title: "Consultoria Previdenciária",
-      description: "Orientação sobre contribuições previdenciárias, benefícios e impactos nas relações de trabalho."
+      description: "Orientação sobre contribuições previdenciárias, benefícios e impactos nas relações de trabalho.",
+      path: "/servicos/assessoria-trabalhista"
     },
     {
       title: "Defesa em Reclamações",
-      description: "Representação legal de empresas e empregadores em processos trabalhistas."
+      description: "Representação legal de empresas e empregadores em processos trabalhistas.",
+      path: "/servicos/contencioso-trabalhista"
     },
     {
       title: "Saúde e Segurança",
-      description: "Consultoria sobre normas de segurança ocupacional e prevenção de acidentes de trabalho."
+      description: "Consultoria sobre normas de segurança ocupacional e prevenção de acidentes de trabalho.",
+      path: "/servicos/assessoria-trabalhista"
     }
   ];
 
@@ -53,10 +63,17 @@ const TrabalhoPage = () => {
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300`}>
+          <Card 
+            key={index} 
+            className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer`}
+            onClick={() => navigate(service.path)}
+          >
             <CardContent className="p-8">
               <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
               <p className={isDark ? 'text-gray-300' : 'text-gray-700' + ' leading-relaxed'}>{service.description}</p>
+              <p className={`mt-4 font-medium ${isDark ? 'text-white/70' : 'text-black/70'}`}>
+                Saiba mais →
+              </p>
             </CardContent>
           </Card>
         ))}

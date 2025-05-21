@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
 import { Card, CardContent } from '../../components/ui/card';
 import { useTheme } from '../../components/ThemeProvider';
@@ -7,39 +8,48 @@ import { useTheme } from '../../components/ThemeProvider';
 const TributarioPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
   
   const services = [
     {
       title: "Planejamento Tributário",
-      description: "Estruturação de estratégias legais para otimizar a carga tributária de pessoas físicas e jurídicas."
+      description: "Estruturação de estratégias legais para otimizar a carga tributária de pessoas físicas e jurídicas.",
+      path: "/servicos/planejamento-tributario"
     },
     {
       title: "Contencioso Administrativo e Judicial",
-      description: "Defesa em processos fiscais junto aos órgãos administrativos e Poder Judiciário."
+      description: "Defesa em processos fiscais junto aos órgãos administrativos e Poder Judiciário.",
+      path: "/servicos/contencioso-tributario"
     },
     {
       title: "Recuperação de Créditos Tributários",
-      description: "Identificação e recuperação de créditos fiscais pagos indevidamente ou a maior."
+      description: "Identificação e recuperação de créditos fiscais pagos indevidamente ou a maior.",
+      path: "/servicos/contencioso-tributario"
     },
     {
       title: "Consultoria em Impostos",
-      description: "Orientação especializada sobre a aplicação de impostos federais, estaduais e municipais."
+      description: "Orientação especializada sobre a aplicação de impostos federais, estaduais e municipais.",
+      path: "/servicos/planejamento-tributario"
     },
     {
       title: "Análise de Benefícios Fiscais",
-      description: "Avaliação e implementação de incentivos e benefícios fiscais aplicáveis ao negócio."
+      description: "Avaliação e implementação de incentivos e benefícios fiscais aplicáveis ao negócio.",
+      path: "/servicos/planejamento-tributario"
     },
     {
       title: "Gestão de Passivos Tributários",
-      description: "Assessoria na administração e negociação de dívidas tributárias e parcelamentos."
+      description: "Assessoria na administração e negociação de dívidas tributárias e parcelamentos.",
+      path: "/servicos/contencioso-tributario"
     },
     {
       title: "Defesas em Autuações Fiscais",
-      description: "Elaboração de defesas administrativas e judiciais contra autos de infração."
+      description: "Elaboração de defesas administrativas e judiciais contra autos de infração.",
+      path: "/servicos/contencioso-tributario"
     },
     {
       title: "Recursos Administrativos e Judiciais",
-      description: "Interposição de recursos em todas as instâncias administrativas e judiciais."
+      description: "Interposição de recursos em todas as instâncias administrativas e judiciais.",
+      path: "/servicos/contencioso-tributario"
     }
   ];
 
@@ -53,10 +63,17 @@ const TributarioPage = () => {
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
-          <Card key={index} className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300`}>
+          <Card 
+            key={index} 
+            className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer`}
+            onClick={() => navigate(service.path)}
+          >
             <CardContent className="p-8">
               <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
               <p className={isDark ? 'text-gray-300' : 'text-gray-700' + ' leading-relaxed'}>{service.description}</p>
+              <p className={`mt-4 font-medium ${isDark ? 'text-white/70' : 'text-black/70'}`}>
+                Saiba mais →
+              </p>
             </CardContent>
           </Card>
         ))}
