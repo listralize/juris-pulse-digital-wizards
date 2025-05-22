@@ -44,10 +44,10 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         </div>
       </section>
       
-      {currentArea && <CtaSection serviceArea={title} />}
+      {currentArea && <CtaSection serviceArea={title} respectTheme={true} />}
       
       <WhatsAppButton />
-      <Footer />
+      <Footer respectTheme={true} />
     </div>
   );
 };
