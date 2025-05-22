@@ -12,7 +12,7 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = false }) => {
   const isDark = respectTheme ? theme === 'dark' : true; // Always dark if respectTheme is false
   
   return (
-    <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
+    <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
