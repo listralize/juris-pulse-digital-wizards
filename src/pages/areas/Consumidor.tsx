@@ -29,7 +29,7 @@ const ConsumidorPage = () => {
     {
       title: "Publicidade Enganosa",
       description: "Combate a propagandas enganosas ou abusivas que violam direitos do consumidor.",
-      path: "/servicos/praticas-abusivas"
+      path: "/servicos/publicidade-enganosa"
     },
     {
       title: "Contratos de Consumo",

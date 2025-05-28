@@ -16,12 +16,6 @@ import CustomCursor from './components/CustomCursor';
 import { Toaster } from "@/components/ui/toaster";
 
 // Família Services
-import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
-import LiberdadesConstitucionaisService from './pages/services/LiberdadesConstitucionaisService';
-import AssessoriaTrabalhista from './pages/services/AssessoriaTrabalhista';
-import ContenciosoTrabalhistaService from './pages/services/ContenciosoTrabalhistaService';
-import PlanejamentoTributarioService from './pages/services/PlanejamentoTributarioService';
-import ContenciosoTributarioService from './pages/services/ContenciosoTributarioService';
 import DivorceService from './pages/services/DivorceService';
 import CasamentoUniaoService from './pages/services/CasamentoUniaoService';
 import GuardaFilhosService from './pages/services/GuardaFilhosService';
@@ -30,25 +24,40 @@ import AdocaoService from './pages/services/AdocaoService';
 import ProtecaoMenoresService from './pages/services/ProtecaoMenoresService';
 import InventarioPartilhaService from './pages/services/InventarioPartilhaService';
 import TestamentosSucessoesService from './pages/services/TestamentosSucessoesService';
-import LicitacoesContratosService from './pages/services/LicitacoesContratosService';
-import ProcessosAdministrativosService from './pages/services/ProcessosAdministrativosService';
-import DireitosConsumidorService from './pages/services/DireitosConsumidorService';
-import PraticasAbusivasService from './pages/services/PraticasAbusivasService';
+
+// Tributário Services
+import PlanejamentoTributarioService from './pages/services/PlanejamentoTributarioService';
+import ContenciosoTributarioService from './pages/services/ContenciosoTributarioService';
 
 // Empresarial Services
 import ConstituicaoEmpresasService from './pages/services/ConstituicaoEmpresasService';
 import ContratosEmpresariaisService from './pages/services/ContratosEmpresariaisService';
 import RecuperacaoCreditosService from './pages/services/RecuperacaoCreditosService';
 
-// Previdenciário Services
-import BeneficiosPrevidenciariosService from './pages/services/BeneficiosPrevidenciariosService';
-
 // Trabalho Services
+import AssessoriaTrabalhista from './pages/services/AssessoriaTrabalhista';
+import ContenciosoTrabalhistaService from './pages/services/ContenciosoTrabalhistaService';
 import AcordosColetivosService from './pages/services/AcordosColetivosService';
 import RescisaoContratualService from './pages/services/RescisaoContratualService';
 import ComplianceTrabalhistaService from './pages/services/ComplianceTrabalhistaService';
 import ConsultoriaPrevidenciariaService from './pages/services/ConsultoriaPrevidenciariaService';
 import SaudeSegurancaService from './pages/services/SaudeSegurancaService';
+
+// Constitucional Services
+import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
+import LiberdadesConstitucionaisService from './pages/services/LiberdadesConstitucionaisService';
+
+// Administrativo Services
+import LicitacoesContratosService from './pages/services/LicitacoesContratosService';
+import ProcessosAdministrativosService from './pages/services/ProcessosAdministrativosService';
+
+// Previdenciário Services
+import BeneficiosPrevidenciariosService from './pages/services/BeneficiosPrevidenciariosService';
+
+// Consumidor Services
+import DireitosConsumidorService from './pages/services/DireitosConsumidorService';
+import PraticasAbusivasService from './pages/services/PraticasAbusivasService';
+import PublicidadeEnganosaService from './pages/services/PublicidadeEnganosaService';
 
 import ObrigadoPage from './pages/Obrigado';
 
@@ -94,11 +103,11 @@ function App() {
           {/* Tributário Services */}
           <Route path="/servicos/planejamento-tributario" element={<PlanejamentoTributarioService />} />
           <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
-          <Route path="/servicos/recuperacao-creditos" element={<RecuperacaoCreditosService />} />
 
           {/* Empresarial Services */}
           <Route path="/servicos/constituicao-empresas" element={<ConstituicaoEmpresasService />} />
           <Route path="/servicos/contratos-empresariais" element={<ContratosEmpresariaisService />} />
+          <Route path="/servicos/recuperacao-creditos" element={<RecuperacaoCreditosService />} />
 
           {/* Trabalho Services */}
           <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />
@@ -123,6 +132,7 @@ function App() {
           {/* Consumidor Services */}
           <Route path="/servicos/direitos-consumidor" element={<DireitosConsumidorService />} />
           <Route path="/servicos/praticas-abusivas" element={<PraticasAbusivasService />} />
+          <Route path="/servicos/publicidade-enganosa" element={<PublicidadeEnganosaService />} />
           
           <Route path="/obrigado" element={<ObrigadoPage />} />
           <Route path="*" element={<NotFound />} />
