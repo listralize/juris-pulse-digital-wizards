@@ -24,22 +24,22 @@ const TrabalhoPage = () => {
     {
       title: "Acordos Coletivos",
       description: "Negociação e elaboração de acordos e convenções coletivas com sindicatos.",
-      path: "/servicos/contencioso-trabalhista"
+      path: "/servicos/acordos-coletivos"
     },
     {
       title: "Rescisões Contratuais",
       description: "Assessoria em demissões individuais e coletivas, minimizando riscos e passivos.",
-      path: "/servicos/assessoria-trabalhista"
+      path: "/servicos/rescisoes-contratuais"
     },
     {
       title: "Compliance Trabalhista",
       description: "Implementação de programas de conformidade com a legislação trabalhista e previdenciária.",
-      path: "/servicos/assessoria-trabalhista"
+      path: "/servicos/compliance-trabalhista"
     },
     {
       title: "Consultoria Previdenciária",
       description: "Orientação sobre contribuições previdenciárias, benefícios e impactos nas relações de trabalho.",
-      path: "/servicos/assessoria-trabalhista"
+      path: "/servicos/consultoria-previdenciaria"
     },
     {
       title: "Defesa em Reclamações",
@@ -49,7 +49,7 @@ const TrabalhoPage = () => {
     {
       title: "Saúde e Segurança",
       description: "Consultoria sobre normas de segurança ocupacional e prevenção de acidentes de trabalho.",
-      path: "/servicos/assessoria-trabalhista"
+      path: "/servicos/saude-seguranca"
     }
   ];
 

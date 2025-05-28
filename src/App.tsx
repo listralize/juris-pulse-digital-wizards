@@ -35,11 +35,20 @@ import ProcessosAdministrativosService from './pages/services/ProcessosAdministr
 import DireitosConsumidorService from './pages/services/DireitosConsumidorService';
 import PraticasAbusivasService from './pages/services/PraticasAbusivasService';
 
-// New Services
+// Empresarial Services
 import ConstituicaoEmpresasService from './pages/services/ConstituicaoEmpresasService';
 import ContratosEmpresariaisService from './pages/services/ContratosEmpresariaisService';
 import RecuperacaoCreditosService from './pages/services/RecuperacaoCreditosService';
+
+// Previdenciário Services
 import BeneficiosPrevidenciariosService from './pages/services/BeneficiosPrevidenciariosService';
+
+// Trabalho Services
+import AcordosColetivosService from './pages/services/AcordosColetivosService';
+import RescisaoContratualService from './pages/services/RescisaoContratualService';
+import ComplianceTrabalhistaService from './pages/services/ComplianceTrabalhistaService';
+import ConsultoriaPrevidenciariaService from './pages/services/ConsultoriaPrevidenciariaService';
+import SaudeSegurancaService from './pages/services/SaudeSegurancaService';
 
 import ObrigadoPage from './pages/Obrigado';
 
@@ -94,6 +103,11 @@ function App() {
           {/* Trabalho Services */}
           <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />
           <Route path="/servicos/contencioso-trabalhista" element={<ContenciosoTrabalhistaService />} />
+          <Route path="/servicos/acordos-coletivos" element={<AcordosColetivosService />} />
+          <Route path="/servicos/rescisoes-contratuais" element={<RescisaoContratualService />} />
+          <Route path="/servicos/compliance-trabalhista" element={<ComplianceTrabalhistaService />} />
+          <Route path="/servicos/consultoria-previdenciaria" element={<ConsultoriaPrevidenciariaService />} />
+          <Route path="/servicos/saude-seguranca" element={<SaudeSegurancaService />} />
 
           {/* Constitucional Services */}
           <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />
