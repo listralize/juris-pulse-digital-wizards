@@ -69,7 +69,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
   
   useEffect(() => {
     // Scroll to top when component mounts
@@ -94,12 +93,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       { opacity: 1, y: 0, duration: 0.8, delay: 0.6 }
     );
     
-    gsap.fromTo(
-      imageRef.current,
-      { opacity: 0, scale: 0.95 },
-      { opacity: 1, scale: 1, duration: 0.8, delay: 0.8 }
-    );
-    
     // Clean up animations
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
@@ -121,7 +114,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </div>
 
-      {/* Hero Section - Improved layout with proper spacing and button sizing */}
+      {/* Hero Section - Now with form instead of image */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f9f9f9]'}`}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -151,11 +144,17 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           </div>
           
           <div className="flex justify-center lg:justify-end">
-            <img 
-              ref={imageRef}
-              src={mainImage} 
-              alt={serviceName}
-              className={`rounded-xl shadow-lg max-h-[500px] w-auto object-cover ${isDark ? 'shadow-white/5' : 'shadow-black/10'}`}
+            <UnifiedContactForm 
+              preselectedService={serviceArea.toLowerCase().includes('tributario') ? 'tributario' : 
+                serviceArea.toLowerCase().includes('familia') ? 'familia' : 
+                serviceArea.toLowerCase().includes('empresarial') ? 'empresarial' : 
+                serviceArea.toLowerCase().includes('trabalho') ? 'trabalho' : 
+                serviceArea.toLowerCase().includes('constitucional') ? 'constitucional' : 
+                serviceArea.toLowerCase().includes('administrativo') ? 'administrativo' : 
+                serviceArea.toLowerCase().includes('previdenciario') ? 'previdenciario' : 
+                serviceArea.toLowerCase().includes('consumidor') ? 'consumidor' : 'outro'
+              }
+              darkBackground={isDark}
             />
           </div>
         </div>
@@ -352,36 +351,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         </div>
       </section>
       
-      {/* CTA Section with Form */}
-      <section className="px-6 md:px-16 lg:px-24 py-16 bg-black relative overflow-hidden">
-        <div className="absolute inset-0 bg-pattern opacity-10"></div>
-        
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-canela mb-6 text-white">
-              Pronto para Resolver sua Situação?
-            </h2>
-            
-            <p className="text-lg md:text-xl mb-8 text-gray-300">
-              Nossa equipe de especialistas está pronta para ajudar você. Entre em contato agora e dê o primeiro passo para resolver seu caso.
-            </p>
-          </div>
-          
-          <UnifiedContactForm 
-            preselectedService={serviceArea.toLowerCase().includes('tributario') ? 'tributario' : 
-              serviceArea.toLowerCase().includes('familia') ? 'familia' : 
-              serviceArea.toLowerCase().includes('empresarial') ? 'empresarial' : 
-              serviceArea.toLowerCase().includes('trabalho') ? 'trabalho' : 
-              serviceArea.toLowerCase().includes('constitucional') ? 'constitucional' : 
-              serviceArea.toLowerCase().includes('administrativo') ? 'administrativo' : 
-              serviceArea.toLowerCase().includes('previdenciario') ? 'previdenciario' : 
-              serviceArea.toLowerCase().includes('consumidor') ? 'consumidor' : 'outro'
-            }
-            darkBackground={true}
-          />
-        </div>
-      </section>
-      
       {/* Related Services */}
       {relatedServices && relatedServices.length > 0 && (
         <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
@@ -412,7 +381,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       )}
       
       <WhatsAppButton />
-      <Footer />
+      <Footer respectTheme={true} />
     </div>
   );
 };
