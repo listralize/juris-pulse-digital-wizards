@@ -24,32 +24,32 @@ const EmpresarialPage = () => {
     {
       title: "Fusões e Aquisições",
       description: "Assessoria em operações de compra, venda, fusão, incorporação e outras formas de reorganização societária.",
-      path: "/servicos/contratos-empresariais"
+      path: "/servicos/fusoes-aquisicoes"
     },
     {
       title: "Reestruturação Societária",
       description: "Planejamento e execução de reorganizações societárias para otimização operacional, tributária e sucessória.",
-      path: "/servicos/constituicao-empresas"
+      path: "/servicos/reestruturacao-societaria"
     },
     {
       title: "Governança Corporativa",
       description: "Implementação de práticas de governança, regulamentos internos e estruturas de compliance.",
-      path: "/servicos/contratos-empresariais"
+      path: "/servicos/governanca-corporativa"
     },
     {
       title: "Compliance Empresarial",
       description: "Desenvolvimento de programas de integridade e conformidade com as legislações aplicáveis.",
-      path: "/servicos/constituicao-empresas"
+      path: "/servicos/compliance-empresarial"
     },
     {
       title: "Propriedade Intelectual",
       description: "Proteção de marcas, patentes, direitos autorais e outros ativos intangíveis das empresas.",
-      path: "/servicos/contratos-empresariais"
+      path: "/servicos/propriedade-intelectual"
     },
     {
       title: "Contencioso Empresarial",
       description: "Representação em litígios societários, disputas contratuais e outras controvérsias empresariais.",
-      path: "/servicos/contratos-empresariais"
+      path: "/servicos/contencioso-empresarial"
     }
   ];
 

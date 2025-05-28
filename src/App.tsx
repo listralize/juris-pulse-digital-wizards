@@ -28,11 +28,18 @@ import TestamentosSucessoesService from './pages/services/TestamentosSucessoesSe
 // Tributário Services
 import PlanejamentoTributarioService from './pages/services/PlanejamentoTributarioService';
 import ContenciosoTributarioService from './pages/services/ContenciosoTributarioService';
+import RecuperacaoCreditosService from './pages/services/RecuperacaoCreditosService';
+import ConsultoriaImpostosService from './pages/services/ConsultoriaImpostosService';
 
 // Empresarial Services
 import ConstituicaoEmpresasService from './pages/services/ConstituicaoEmpresasService';
 import ContratosEmpresariaisService from './pages/services/ContratosEmpresariaisService';
-import RecuperacaoCreditosService from './pages/services/RecuperacaoCreditosService';
+import ReestruturacaoSocietariaService from './pages/services/ReestruturacaoSocietariaService';
+import FusoesAquisicoesService from './pages/services/FusoesAquisicoesService';
+import GovernancaCorporativaService from './pages/services/GovernancaCorporativaService';
+import ComplianceEmpresarialService from './pages/services/ComplianceEmpresarialService';
+import PropriedadeIntelectualService from './pages/services/PropriedadeIntelectualService';
+import ContenciosoEmpresarialService from './pages/services/ContenciosoEmpresarialService';
 
 // Trabalho Services
 import AssessoriaTrabalhista from './pages/services/AssessoriaTrabalhista';
@@ -103,11 +110,18 @@ function App() {
           {/* Tributário Services */}
           <Route path="/servicos/planejamento-tributario" element={<PlanejamentoTributarioService />} />
           <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
+          <Route path="/servicos/recuperacao-creditos" element={<RecuperacaoCreditosService />} />
+          <Route path="/servicos/consultoria-impostos" element={<ConsultoriaImpostosService />} />
 
           {/* Empresarial Services */}
           <Route path="/servicos/constituicao-empresas" element={<ConstituicaoEmpresasService />} />
           <Route path="/servicos/contratos-empresariais" element={<ContratosEmpresariaisService />} />
-          <Route path="/servicos/recuperacao-creditos" element={<RecuperacaoCreditosService />} />
+          <Route path="/servicos/reestruturacao-societaria" element={<ReestruturacaoSocietariaService />} />
+          <Route path="/servicos/fusoes-aquisicoes" element={<FusoesAquisicoesService />} />
+          <Route path="/servicos/governanca-corporativa" element={<GovernancaCorporativaService />} />
+          <Route path="/servicos/compliance-empresarial" element={<ComplianceEmpresarialService />} />
+          <Route path="/servicos/propriedade-intelectual" element={<PropriedadeIntelectualService />} />
+          <Route path="/servicos/contencioso-empresarial" element={<ContenciosoEmpresarialService />} />
 
           {/* Trabalho Services */}
           <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />

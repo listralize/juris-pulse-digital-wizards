@@ -24,32 +24,12 @@ const TributarioPage = () => {
     {
       title: "Recuperação de Créditos Tributários",
       description: "Identificação e recuperação de créditos fiscais pagos indevidamente ou a maior.",
-      path: "/servicos/contencioso-tributario"
+      path: "/servicos/recuperacao-creditos"
     },
     {
       title: "Consultoria em Impostos",
       description: "Orientação especializada sobre a aplicação de impostos federais, estaduais e municipais.",
-      path: "/servicos/planejamento-tributario"
-    },
-    {
-      title: "Análise de Benefícios Fiscais",
-      description: "Avaliação e implementação de incentivos e benefícios fiscais aplicáveis ao negócio.",
-      path: "/servicos/planejamento-tributario"
-    },
-    {
-      title: "Gestão de Passivos Tributários",
-      description: "Assessoria na administração e negociação de dívidas tributárias e parcelamentos.",
-      path: "/servicos/contencioso-tributario"
-    },
-    {
-      title: "Defesas em Autuações Fiscais",
-      description: "Elaboração de defesas administrativas e judiciais contra autos de infração.",
-      path: "/servicos/contencioso-tributario"
-    },
-    {
-      title: "Recursos Administrativos e Judiciais",
-      description: "Interposição de recursos em todas as instâncias administrativas e judiciais.",
-      path: "/servicos/contencioso-tributario"
+      path: "/servicos/consultoria-impostos"
     }
   ];
 
