@@ -14,6 +14,8 @@ import ConsumidorPage from './pages/areas/Consumidor';
 import NotFound from './pages/NotFound';
 import CustomCursor from './components/CustomCursor';
 import { Toaster } from "@/components/ui/toaster";
+
+// Família Services
 import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
 import LiberdadesConstitucionaisService from './pages/services/LiberdadesConstitucionaisService';
 import AssessoriaTrabalhista from './pages/services/AssessoriaTrabalhista';
@@ -32,6 +34,13 @@ import LicitacoesContratosService from './pages/services/LicitacoesContratosServ
 import ProcessosAdministrativosService from './pages/services/ProcessosAdministrativosService';
 import DireitosConsumidorService from './pages/services/DireitosConsumidorService';
 import PraticasAbusivasService from './pages/services/PraticasAbusivasService';
+
+// New Services
+import ConstituicaoEmpresasService from './pages/services/ConstituicaoEmpresasService';
+import ContratosEmpresariaisService from './pages/services/ContratosEmpresariaisService';
+import RecuperacaoCreditosService from './pages/services/RecuperacaoCreditosService';
+import BeneficiosPrevidenciariosService from './pages/services/BeneficiosPrevidenciariosService';
+
 import ObrigadoPage from './pages/Obrigado';
 
 // ScrollToTop component that uses the location hook
@@ -76,6 +85,11 @@ function App() {
           {/* Tributário Services */}
           <Route path="/servicos/planejamento-tributario" element={<PlanejamentoTributarioService />} />
           <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
+          <Route path="/servicos/recuperacao-creditos" element={<RecuperacaoCreditosService />} />
+
+          {/* Empresarial Services */}
+          <Route path="/servicos/constituicao-empresas" element={<ConstituicaoEmpresasService />} />
+          <Route path="/servicos/contratos-empresariais" element={<ContratosEmpresariaisService />} />
 
           {/* Trabalho Services */}
           <Route path="/servicos/assessoria-trabalhista" element={<AssessoriaTrabalhista />} />
@@ -88,6 +102,9 @@ function App() {
           {/* Administrativo Services */}
           <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
           <Route path="/servicos/processos-administrativos" element={<ProcessosAdministrativosService />} />
+
+          {/* Previdenciário Services */}
+          <Route path="/servicos/beneficios-previdenciarios" element={<BeneficiosPrevidenciariosService />} />
 
           {/* Consumidor Services */}
           <Route path="/servicos/direitos-consumidor" element={<DireitosConsumidorService />} />
