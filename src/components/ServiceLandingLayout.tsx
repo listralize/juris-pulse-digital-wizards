@@ -1,52 +1,51 @@
 
-import React, { useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useEffect } from 'react';
 import Navbar from './navbar';
-import { Footer } from './sections';
+import PageBanner from './PageBanner';
 import WhatsAppButton from './WhatsAppButton';
+import Footer from './sections/Footer';
 import { useTheme } from './ThemeProvider';
-import { Button } from './ui/button';
-import { ArrowRight } from 'lucide-react';
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from './ui/accordion';
-import UnifiedContactForm from './contact/UnifiedContactForm';
+import CtaSection from './serviceLanding/CtaSection';
+import { Card, CardContent } from './ui/card';
+import { CheckCircle, ArrowRight, MessageCircle, Clock, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-gsap.registerPlugin(ScrollTrigger);
+interface Benefit {
+  title: string;
+  description: string;
+}
+
+interface ProcessStep {
+  step: number;
+  title: string;
+  description: string;
+}
+
+interface Testimonial {
+  name: string;
+  quote: string;
+}
+
+interface FAQ {
+  question: string;
+  answer: string;
+}
+
+interface RelatedService {
+  name: string;
+  path: string;
+}
 
 interface ServiceLandingLayoutProps {
   serviceArea: string;
   serviceName: string;
   serviceDescription: string;
   mainImage: string;
-  benefits: {
-    title: string;
-    description: string;
-    icon?: string;
-  }[];
-  process: {
-    title: string;
-    description: string;
-    step: number;
-  }[];
-  testimonials: {
-    name: string;
-    quote: string;
-    image?: string;
-  }[];
-  faq: {
-    question: string;
-    answer: string;
-  }[];
-  relatedServices?: {
-    name: string;
-    path: string;
-  }[];
+  benefits: Benefit[];
+  process: ProcessStep[];
+  testimonials: Testimonial[];
+  faq: FAQ[];
+  relatedServices: RelatedService[];
   mainAreaPath: string;
 }
 
@@ -65,320 +64,192 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
-    // Scroll to top when component mounts
     window.scrollTo(0, 0);
-    
-    // Hero section animations
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.8, delay: 0.2 }
-    );
-    
-    gsap.fromTo(
-      descriptionRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.8, delay: 0.4 }
-    );
-    
-    gsap.fromTo(
-      ctaRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8, delay: 0.6 }
-    );
-    
-    // Clean up animations
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
-    };
   }, []);
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <Navbar />
       
-      {/* Breadcrumbs */}
-      <div className={`px-6 md:px-16 lg:px-24 py-4 ${isDark ? 'bg-black/80 text-white/80' : 'bg-white/80 text-black/80'} border-b ${isDark ? 'border-white/10' : 'border-black/10'}`}>
-        <div className="max-w-6xl mx-auto flex items-center text-sm">
-          <Link to="/" className="hover:underline">Home</Link>
-          <span className="mx-2">/</span>
-          <Link to={mainAreaPath} className="hover:underline">{serviceArea}</Link>
-          <span className="mx-2">/</span>
-          <span>{serviceName}</span>
-        </div>
-      </div>
-
-      {/* Hero Section - Now with form instead of image */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f9f9f9]'}`}>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 ${isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black'}`}>
-              {serviceArea}
+      <PageBanner 
+        title={serviceName}
+        subtitle={serviceDescription}
+        bgImage={mainImage}
+      />
+      
+      {/* Service Overview */}
+      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className={`text-3xl font-canela mb-6 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+                Por que escolher nossos serviços?
+              </h2>
+              <div className="space-y-6">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-start space-x-4">
+                    <CheckCircle className={`w-6 h-6 mt-1 flex-shrink-0 ${isDark ? 'text-white' : 'text-black'}`} />
+                    <div>
+                      <h3 className={`text-xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                        {benefit.title}
+                      </h3>
+                      <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {benefit.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             
-            <h1 ref={titleRef} className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
-              {serviceName}
-            </h1>
-            
-            <p ref={descriptionRef} className={`text-lg md:text-xl mb-8 font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              {serviceDescription}
-            </p>
-            
-            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                variant="outline"
-                onClick={() => navigate(mainAreaPath)}
-                className={`px-5 py-5 text-base ${isDark 
-                  ? 'border-white/20 text-white hover:bg-white/10' 
-                  : 'border-black/20 text-black hover:bg-black/10'} transition-all`}
-              >
-                Ver mais serviços
-              </Button>
+            <div className="text-left">
+              <img 
+                src={mainImage}
+                alt={serviceName}
+                className="w-full h-64 object-cover rounded-lg"
+              />
+              <div className={`mt-6 p-6 rounded-lg ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
+                <div className="flex items-center space-x-4 mb-4">
+                  <MessageCircle className={`w-6 h-6 ${isDark ? 'text-white' : 'text-black'}`} />
+                  <span className={`text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                    Consulta Gratuita
+                  </span>
+                </div>
+                <p className={`mb-4 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Agende uma consulta gratuita para avaliar seu caso e conhecer suas opções.
+                </p>
+                <button 
+                  onClick={() => navigate('/contato')}
+                  className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
+                    isDark 
+                      ? 'bg-white text-black hover:bg-gray-200' 
+                      : 'bg-black text-white hover:bg-gray-800'
+                  }`}
+                >
+                  Agendar Consulta
+                </button>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex justify-center lg:justify-end">
-            <UnifiedContactForm 
-              preselectedService={serviceArea.toLowerCase().includes('tributario') ? 'tributario' : 
-                serviceArea.toLowerCase().includes('familia') ? 'familia' : 
-                serviceArea.toLowerCase().includes('empresarial') ? 'empresarial' : 
-                serviceArea.toLowerCase().includes('trabalho') ? 'trabalho' : 
-                serviceArea.toLowerCase().includes('constitucional') ? 'constitucional' : 
-                serviceArea.toLowerCase().includes('administrativo') ? 'administrativo' : 
-                serviceArea.toLowerCase().includes('previdenciario') ? 'previdenciario' : 
-                serviceArea.toLowerCase().includes('consumidor') ? 'consumidor' : 'outro'
-              }
-              darkBackground={isDark}
-            />
           </div>
         </div>
       </section>
-      
-      {/* Benefits Section */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
+
+      {/* Process Section */}
+      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
-            Benefícios e Vantagens
+          <h2 className={`text-3xl font-canela mb-12 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+            Como funciona nosso processo
           </h2>
           
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Nossa assessoria jurídica proporciona diversos benefícios para você
-          </p>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => (
-              <div 
-                key={index}
-                className={`p-8 rounded-xl ${isDark 
-                  ? 'bg-white/5 border border-white/10' 
-                  : 'bg-black/5 border border-black/5'} 
-                  hover:transform hover:scale-105 transition-all duration-300 
-                  backdrop-blur-sm shadow-lg`}
-              >
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 ${
-                  isDark ? 'bg-white/10' : 'bg-black/5'
-                }`}>
-                  {benefit.icon ? (
-                    <div className="text-2xl">{benefit.icon}</div>
-                  ) : (
-                    <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-black'}`}>
-                      {index + 1}
-                    </div>
-                  )}
-                </div>
-                
-                <h3 className={`text-xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                  {benefit.title}
-                </h3>
-                
-                <p className={isDark ? 'text-gray-300' : 'text-gray-700'}>
-                  {benefit.description}
-                </p>
-              </div>
+            {process.map((step, index) => (
+              <Card key={index} className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border`}>
+                <CardContent className="p-6">
+                  <div className={`w-12 h-12 rounded-full ${isDark ? 'bg-white text-black' : 'bg-black text-white'} flex items-center justify-center font-bold text-lg mb-4`}>
+                    {step.step}
+                  </div>
+                  <h3 className={`text-xl font-canela mb-3 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+                    {step.title}
+                  </h3>
+                  <p className={`text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {step.description}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
-      
-      {/* Process Section */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
-        <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
-            Como Funciona o Processo
-          </h2>
-          
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Entenda o passo a passo de como trabalhamos para resolver seu caso
-          </p>
-          
-          <div className="relative">
-            {/* Connection line */}
-            <div className="absolute left-[26px] md:left-1/2 top-10 bottom-10 w-1 bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-20 hidden md:block"></div>
-            
-            <div className="space-y-16">
-              {process.map((step, index) => (
-                <div 
-                  key={index}
-                  className="relative"
-                >
-                  <div className={`flex flex-col md:flex-row md:items-center gap-6 md:gap-12 ${
-                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                  }`}
-                >
-                    <div className="md:w-1/2 flex md:justify-center">
-                      <div className={`flex flex-row md:flex-col items-center gap-6 ${
-                        index % 2 === 0 ? 'md:items-end text-left' : 'md:items-start text-right'
-                      }`}>
-                        <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold z-10 
-                          ${isDark ? 'bg-white text-black' : 'bg-black text-white'} shadow-lg`}
-                        >
-                          {step.step}
-                        </div>
-                        
-                        <div className={`flex-1 md:flex-initial`}>
-                          <h3 className={`text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                            {step.title}
-                          </h3>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="md:w-1/2">
-                      <div className={`p-8 rounded-xl ${isDark 
-                        ? 'bg-white/5 border border-white/10' 
-                        : 'bg-white border border-black/5'} shadow-md`}>
-                        <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                </div>
-              </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-      
+
       {/* Testimonials */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
+      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
-            O que Nossos Clientes Dizem
+          <h2 className={`text-3xl font-canela mb-12 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+            O que nossos clientes dizem
           </h2>
-          
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Histórias de sucesso compartilhadas por quem confiou em nossos serviços
-          </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div 
-                key={index}
-                className={`p-8 rounded-xl ${isDark 
-                  ? 'bg-white/5 border border-white/10' 
-                  : 'bg-gray-50 border border-black/5'} shadow-lg`}
-              >
-                <div className={`text-4xl mb-6 font-serif ${isDark ? 'text-white/40' : 'text-black/40'}`}>"</div>
-                <p className={`italic mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {testimonial.quote}
-                </p>
-                <div className="flex items-center">
-                  {testimonial.image ? (
-                    <img 
-                      src={testimonial.image} 
-                      alt={testimonial.name} 
-                      className="w-12 h-12 rounded-full mr-4 object-cover"
-                    />
-                  ) : (
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 ${
-                      isDark ? 'bg-white/10' : 'bg-black/5'
-                    }`}>
-                      <span className={`text-xl font-bold ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-                        {testimonial.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  <span className="font-medium">{testimonial.name}</span>
-                </div>
-              </div>
+              <Card key={index} className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'} border`}>
+                <CardContent className="p-6">
+                  <p className={`mb-4 italic text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    "{testimonial.quote}"
+                  </p>
+                  <p className={`font-medium text-left ${isDark ? 'text-white' : 'text-black'}`}>
+                    - {testimonial.name}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
-      
-      {/* FAQ Section */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+
+      {/* FAQ */}
+      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl font-canela mb-12 text-left ${isDark ? 'text-white' : 'text-black'}`}>
             Perguntas Frequentes
           </h2>
           
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Respostas para as dúvidas mais comuns sobre nossos serviços
-          </p>
-          
-          <Accordion type="single" collapsible className="space-y-4">
+          <div className="space-y-6">
             {faq.map((item, index) => (
-              <AccordionItem 
-                key={index} 
-                value={`faq-${index}`}
-                className={`border-0 rounded-xl ${isDark 
-                  ? 'bg-white/5 border-white/10' 
-                  : 'bg-white border-black/5'} shadow-sm overflow-hidden`}
-              >
-                <AccordionTrigger 
-                  className={`p-6 ${isDark ? 'hover:text-white' : 'hover:text-black'} no-underline hover:no-underline`}
-                >
-                  <span className={`text-xl font-medium text-left ${isDark ? 'text-white' : 'text-black'}`}>
+              <Card key={index} className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border`}>
+                <CardContent className="p-6">
+                  <h3 className={`text-xl font-canela mb-3 text-left ${isDark ? 'text-white' : 'text-black'}`}>
                     {item.question}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6 pt-0">
-                  <p className={isDark ? 'text-gray-300' : 'text-gray-700'}>
+                  </h3>
+                  <p className={`text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {item.answer}
                   </p>
-                </AccordionContent>
-              </AccordionItem>
+                </CardContent>
+              </Card>
             ))}
-          </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* Related Services */}
+      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
+        <div className="max-w-6xl mx-auto">
+          <h2 className={`text-3xl font-canela mb-8 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+            Serviços Relacionados
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {relatedServices.map((service, index) => (
+              <Card 
+                key={index}
+                className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'} border hover:${isDark ? 'bg-white/10' : 'bg-black/10'} transition-colors cursor-pointer`}
+                onClick={() => navigate(service.path)}
+              >
+                <CardContent className="p-6 flex items-center justify-between">
+                  <span className={`text-lg font-medium text-left ${isDark ? 'text-white' : 'text-black'}`}>
+                    {service.name}
+                  </span>
+                  <ArrowRight className={`w-5 h-5 ${isDark ? 'text-white' : 'text-black'}`} />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <Card 
+            className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'} border hover:${isDark ? 'bg-white/10' : 'bg-black/10'} transition-colors cursor-pointer`}
+            onClick={() => navigate(mainAreaPath)}
+          >
+            <CardContent className="p-6 flex items-center justify-between">
+              <span className={`text-lg font-medium text-left ${isDark ? 'text-white' : 'text-black'}`}>
+                Ver todos os serviços de {serviceArea}
+              </span>
+              <ArrowRight className={`w-5 h-5 ${isDark ? 'text-white' : 'text-black'}`} />
+            </CardContent>
+          </Card>
         </div>
       </section>
       
-      {/* Related Services */}
-      {relatedServices && relatedServices.length > 0 && (
-        <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
-          <div className="max-w-6xl mx-auto">
-            <h2 className={`text-2xl md:text-3xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
-              Serviços Relacionados
-            </h2>
-            
-            <p className={`mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Explore outros serviços que podem ser de seu interesse
-            </p>
-            
-            <div className="flex flex-wrap gap-4">
-              {relatedServices.map((service, index) => (
-                <Link 
-                  key={index}
-                  to={service.path}
-                  className={`px-5 py-3 rounded-full transition-all ${isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white' 
-                    : 'bg-black/5 hover:bg-black/10 text-black'} hover:shadow-md`}
-                >
-                  {service.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <CtaSection serviceArea={serviceArea} respectTheme={true} />
       
       <WhatsAppButton />
       <Footer respectTheme={true} />
