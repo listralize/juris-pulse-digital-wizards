@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -79,6 +78,19 @@ import ADCService from './pages/services/ADCService';
 import ADOService from './pages/services/ADOService';
 import ADPFService from './pages/services/ADPFService';
 import ReclamacaoConstitucionalService from './pages/services/ReclamacaoConstitucionalService';
+import LiberdadeExpressaoService from './pages/services/LiberdadeExpressaoService';
+import IgualdadeNaoDiscriminacaoService from './pages/services/IgualdadeNaoDiscriminacaoService';
+import DireitosSociaisService from './pages/services/DireitosSociaisService';
+import DireitosMinoriasService from './pages/services/DireitosMinoriasService';
+import AnaliseConstitucionalidadeService from './pages/services/AnaliseConstitucionalidadeService';
+import PareceresTecnicosService from './pages/services/PareceresTecnicosService';
+import AssessoriaPoliticasPublicasService from './pages/services/AssessoriaPoliticasPublicasService';
+import AtuacaoSTFService from './pages/services/AtuacaoSTFService';
+import AtuacaoSTJService from './pages/services/AtuacaoSTJService';
+import ProjetosLeiService from './pages/services/ProjetosLeiService';
+import EmendasParlamentaresService from './pages/services/EmendasParlamentaresService';
+import LobbyLegislativoService from './pages/services/LobbyLegislativoService';
+import MonitoramentoLegislativoService from './pages/services/MonitoramentoLegislativoService';
 
 // Administrativo Services
 import LicitacoesContratosService from './pages/services/LicitacoesContratosService';
@@ -213,6 +225,19 @@ function App() {
           <Route path="/servicos/ado" element={<ADOService />} />
           <Route path="/servicos/adpf" element={<ADPFService />} />
           <Route path="/servicos/reclamacao-constitucional" element={<ReclamacaoConstitucionalService />} />
+          <Route path="/servicos/liberdade-expressao" element={<LiberdadeExpressaoService />} />
+          <Route path="/servicos/igualdade-nao-discriminacao" element={<IgualdadeNaoDiscriminacaoService />} />
+          <Route path="/servicos/direitos-sociais" element={<DireitosSociaisService />} />
+          <Route path="/servicos/direitos-minorias" element={<DireitosMinoriasService />} />
+          <Route path="/servicos/analise-constitucionalidade" element={<AnaliseConstitucionalidadeService />} />
+          <Route path="/servicos/pareceres-tecnicos" element={<PareceresTecnicosService />} />
+          <Route path="/servicos/assessoria-politicas-publicas" element={<AssessoriaPoliticasPublicasService />} />
+          <Route path="/servicos/atuacao-stf" element={<AtuacaoSTFService />} />
+          <Route path="/servicos/atuacao-stj" element={<AtuacaoSTJService />} />
+          <Route path="/servicos/projetos-lei" element={<ProjetosLeiService />} />
+          <Route path="/servicos/emendas-parlamentares" element={<EmendasParlamentaresService />} />
+          <Route path="/servicos/lobby-legislativo" element={<LobbyLegislativoService />} />
+          <Route path="/servicos/monitoramento-legislativo" element={<MonitoramentoLegislativoService />} />
 
           {/* Administrativo Services */}
           <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
