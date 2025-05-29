@@ -6,52 +6,52 @@ const BeneficiosINSSService = () => {
   return (
     <ServiceLandingLayout
       serviceArea="Direito Previdenciário"
-      serviceName="Benefícios do INSS"
-      serviceDescription="Assessoria completa para obtenção de todos os tipos de benefícios oferecidos pelo INSS, incluindo auxílios, pensões e aposentadorias, com acompanhamento desde o requerimento até a concessão."
+      serviceName="Auxílios e Benefícios do INSS"
+      serviceDescription="Obtenção de auxílio-doença, auxílio-acidente, pensão por morte, salário-maternidade e outros benefícios assistenciais oferecidos pelo INSS."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Assessoria Completa",
-          description: "Orientação especializada para todos os tipos de benefícios previdenciários disponíveis."
+          title: "Auxílio-Doença",
+          description: "Assistência para obtenção do benefício por incapacidade temporária para o trabalho."
         },
         {
-          title: "Documentação Correta",
-          description: "Auxílio na reunião e organização de toda documentação necessária para cada tipo de benefício."
+          title: "Pensão por Morte",
+          description: "Orientação completa para familiares na obtenção da pensão por morte do segurado."
         },
         {
-          title: "Acompanhamento Processual",
-          description: "Monitoramento de todo o processo administrativo junto ao INSS até a concessão do benefício."
+          title: "Salário-Maternidade",
+          description: "Assessoria para trabalhadoras e seguradas especiais na obtenção do salário-maternidade."
         },
         {
-          title: "Recursos e Contestações",
-          description: "Interposição de recursos em caso de indeferimento ou valor inferior ao devido."
+          title: "Auxílio-Acidente",
+          description: "Suporte para obtenção do auxílio em casos de acidente de trabalho com sequelas."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Identificação do Benefício",
-          description: "Análise da situação para determinar qual benefício é aplicável ao caso específico."
+          title: "Análise do Tipo de Benefício",
+          description: "Identificação do benefício adequado conforme a situação específica do segurado."
         },
         {
           step: 2,
-          title: "Verificação de Requisitos",
-          description: "Conferência de todos os requisitos legais necessários para concessão do benefício."
+          title: "Verificação de Carência",
+          description: "Análise do período de carência necessário para cada tipo de benefício."
         },
         {
           step: 3,
-          title: "Preparação da Documentação",
-          description: "Organização de toda documentação comprobatória necessária para o requerimento."
+          title: "Coleta de Documentação",
+          description: "Reunião de todos os documentos médicos, laborais e pessoais necessários."
         },
         {
           step: 4,
-          title: "Protocolo do Requerimento",
-          description: "Formalização do pedido junto ao INSS com acompanhamento de todo processo."
+          title: "Agendamento e Requerimento",
+          description: "Protocolo do pedido no INSS com acompanhamento de toda tramitação."
         },
         {
           step: 5,
-          title: "Defesa de Direitos",
-          description: "Recursos administrativos ou judiciais quando necessário para garantir o direito."
+          title: "Perícias e Recursos",
+          description: "Acompanhamento em perícias médicas e recursos em caso de indeferimento."
         }
       ]}
       testimonials={[
@@ -64,28 +64,28 @@ const BeneficiosINSSService = () => {
           quote: "A orientação para obter a pensão por morte foi essencial. Recebi todos os esclarecimentos necessários."
         },
         {
-          name: "Lucia R., Aposentada",
-          quote: "Com a ajuda especializada, obtive minha aposentadoria por invalidez com o valor correto desde o início."
+          name: "Lucia R., Segurada",
+          quote: "Com a ajuda especializada, obtive meu salário-maternidade sem complicações burocráticas."
         }
       ]}
       faq={[
-        {
-          question: "Quais são os principais benefícios oferecidos pelo INSS?",
-          answer: "O INSS oferece: aposentadorias (por idade, tempo de contribuição, especial, invalidez), auxílios (doença, acidente, reclusão), pensão por morte, salário-família, salário-maternidade, e BPC (Benefício de Prestação Continuada). Cada benefício tem requisitos específicos que devem ser atendidos."
-        },
         {
           question: "Qual a diferença entre auxílio-doença e aposentadoria por invalidez?",
           answer: "O auxílio-doença é temporário, concedido quando há incapacidade temporária para o trabalho, com possibilidade de retorno. A aposentadoria por invalidez é definitiva, concedida quando a incapacidade é total e permanente, sem possibilidade de reabilitação para qualquer atividade laboral."
         },
         {
-          question: "Como funciona o período de carência para os benefícios?",
-          answer: "A carência é o número mínimo de contribuições necessárias. Aposentadoria por idade e tempo: 180 meses. Auxílio-doença: 12 meses. Aposentadoria por invalidez: 12 meses. Alguns benefícios não têm carência (acidente de trabalho, pensão por morte) e outros têm carência reduzida para trabalhadores rurais e segurados especiais."
+          question: "Quem tem direito à pensão por morte?",
+          answer: "Dependentes do segurado falecido: cônjuge/companheiro(a), filhos menores de 21 anos ou inválidos, pais (se dependentes economicamente). O valor varia conforme o número de dependentes e pode ser de 50% a 100% da aposentadoria que o segurado recebia ou teria direito."
+        },
+        {
+          question: "Como funciona o período de carência para auxílios?",
+          answer: "Auxílio-doença: 12 meses de carência (exceto em casos de acidente ou doenças graves listadas em lei). Salário-maternidade: 10 meses para contribuinte individual e doméstica. Pensão por morte: sem carência. Auxílio-acidente: sem carência quando decorrente de acidente de trabalho."
         }
       ]}
       relatedServices={[
         {
-          name: "Planejamento Previdenciário",
-          path: "/servicos/planejamento-previdenciario"
+          name: "Aposentadoria Especial",
+          path: "/servicos/aposentadoria-especial"
         },
         {
           name: "Revisão de Benefícios",
