@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
@@ -64,13 +65,13 @@ const ConsumidorPage = () => {
         {services.map((service, index) => (
           <Card 
             key={index} 
-            className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-red-900/40 border-red-700/30' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
+            className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer`}
             onClick={() => navigate(service.path)}
           >
             <CardContent className="p-8">
-              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-red-300' : 'text-blue-600'} transition-colors`}>{service.title}</h3>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>{service.description}</p>
-              <p className={`mt-4 font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-red-300' : 'text-blue-600'} transition-colors`}>
+              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>{service.title}</h3>
+              <p className={isDark ? 'text-gray-300' : 'text-gray-700' + ' leading-relaxed'}>{service.description}</p>
+              <p className={`mt-4 font-medium ${isDark ? 'text-white/70' : 'text-black/70'}`}>
                 Saiba mais →
               </p>
             </CardContent>
