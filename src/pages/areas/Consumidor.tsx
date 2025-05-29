@@ -25,12 +25,12 @@ const ConsumidorPage = () => {
         {
           name: "Responsabilidade por Produtos",
           description: "Representação em casos de danos causados por produtos ou serviços defeituosos.",
-          path: "/servicos/direitos-consumidor"
+          path: "/servicos/responsabilidade-produtos"
         },
         {
           name: "Recalls e Segurança",
           description: "Orientação sobre direitos em casos de recall e problemas de segurança em produtos.",
-          path: "/servicos/direitos-consumidor"
+          path: "/servicos/recalls-seguranca"
         }
       ]
     },
@@ -59,12 +59,12 @@ const ConsumidorPage = () => {
         {
           name: "Contratos de Consumo",
           description: "Análise e contestação de cláusulas abusivas em contratos de adesão e outros contratos de consumo.",
-          path: "/servicos/direitos-consumidor"
+          path: "/servicos/contratos-consumo"
         },
         {
           name: "Indenizações por Danos",
           description: "Busca de compensação por danos morais e materiais em relações de consumo.",
-          path: "/servicos/praticas-abusivas"
+          path: "/servicos/indenizacao-danos"
         }
       ]
     },
@@ -76,7 +76,7 @@ const ConsumidorPage = () => {
         {
           name: "Defesa Coletiva",
           description: "Atuação em ações coletivas para proteção de grupos de consumidores lesados.",
-          path: "/servicos/direitos-consumidor"
+          path: "/servicos/defesa-coletiva"
         }
       ]
     }

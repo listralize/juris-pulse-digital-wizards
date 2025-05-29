@@ -129,6 +129,11 @@ import PlanejamentoPrevidenciarioService from './pages/services/PlanejamentoPrev
 import DireitosConsumidorService from './pages/services/DireitosConsumidorService';
 import PraticasAbusivasService from './pages/services/PraticasAbusivasService';
 import PublicidadeEnganosaService from './pages/services/PublicidadeEnganosaService';
+import ResponsabilidadeProdutosService from './pages/services/ResponsabilidadeProdutosService';
+import RecallsSegurancaService from './pages/services/RecallsSegurancaService';
+import ContratosConsumoService from './pages/services/ContratosConsumoService';
+import IndenizacaoDanosService from './pages/services/IndenizacaoDanosService';
+import DefesaColetivaService from './pages/services/DefesaColetivaService';
 
 import ObrigadoPage from './pages/Obrigado';
 
@@ -276,6 +281,11 @@ function App() {
           <Route path="/servicos/direitos-consumidor" element={<DireitosConsumidorService />} />
           <Route path="/servicos/praticas-abusivas" element={<PraticasAbusivasService />} />
           <Route path="/servicos/publicidade-enganosa" element={<PublicidadeEnganosaService />} />
+          <Route path="/servicos/responsabilidade-produtos" element={<ResponsabilidadeProdutosService />} />
+          <Route path="/servicos/recalls-seguranca" element={<RecallsSegurancaService />} />
+          <Route path="/servicos/contratos-consumo" element={<ContratosConsumoService />} />
+          <Route path="/servicos/indenizacao-danos" element={<IndenizacaoDanosService />} />
+          <Route path="/servicos/defesa-coletiva" element={<DefesaColetivaService />} />
           
           <Route path="/obrigado" element={<ObrigadoPage />} />
           <Route path="*" element={<NotFound />} />
