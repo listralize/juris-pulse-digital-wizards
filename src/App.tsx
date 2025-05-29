@@ -138,6 +138,11 @@ import DefesaColetivaService from './pages/services/DefesaColetivaService';
 
 import ObrigadoPage from './pages/Obrigado';
 
+// Civil Services
+import ADIADCADPFService from './pages/services/ADIADCADPFService';
+import AcoesOriginariasSuperioresService from './pages/services/AcoesOriginariasSuperioresService';
+import RecursosExtraordinarioEspecialService from './pages/services/RecursosExtraordinarioEspecialService';
+
 // ScrollToTop component that uses the location hook
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -288,6 +293,10 @@ function App() {
           <Route path="/servicos/contratos-consumo" element={<ContratosConsumoService />} />
           <Route path="/servicos/indenizacao-danos" element={<IndenizacaoDanosService />} />
           <Route path="/servicos/defesa-coletiva" element={<DefesaColetivaService />} />
+          
+          <Route path="/servicos/adi-adc-adpf" element={<ADIADCADPFService />} />
+          <Route path="/servicos/acoes-originarias-tribunais-superiores" element={<AcoesOriginariasSuperioresService />} />
+          <Route path="/servicos/recursos-extraordinarios-especiais" element={<RecursosExtraordinarioEspecialService />} />
           
           <Route path="/obrigado" element={<ObrigadoPage />} />
           <Route path="*" element={<NotFound />} />
