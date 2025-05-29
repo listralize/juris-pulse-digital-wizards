@@ -65,7 +65,7 @@ const TributarioPage = () => {
         {services.map((service, index) => (
           <Card 
             key={index} 
-            className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer`}
+            className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60 border-white/20' : 'bg-white/60 border-black/20'} transition-all duration-300 cursor-pointer`}
             onClick={() => navigate(service.path)}
           >
             <CardContent className="p-8">
