@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -148,6 +149,21 @@ import MandadoInjuncaoAcaoPopularService from './pages/services/MandadoInjuncaoA
 import ParecereConstituicionalidadeService from './pages/services/ParecereConstituicionalidadeService';
 import AssessoriaProcessosLegislativosService from './pages/services/AssessoriaProcessosLegislativosService';
 import DefesaDireitosFundamentaisCivilService from './pages/services/DefesaDireitosFundamentaisCivilService';
+import DefesaPADCivilService from './pages/services/DefesaPADCivilService';
+import AcoesImprobidadeCivilService from './pages/services/AcoesImprobidadeCivilService';
+import ContestacaoAtosAdministrativosService from './pages/services/ContestacaoAtosAdministrativosService';
+import ResponsabilidadeCivilEstadoService from './pages/services/ResponsabilidadeCivilEstadoService';
+import AssessoriaCompletaLicitacoesService from './pages/services/AssessoriaCompletaLicitacoesService';
+import GestaoContratosAdministrativosService from './pages/services/GestaoContratosAdministrativosService';
+import ReequilibrioEconomicoFinanceiroService from './pages/services/ReequilibrioEconomicoFinanceiroService';
+import AssessoriaMercadosReguladosService from './pages/services/AssessoriaMercadosReguladosService';
+import EstruturacaoConcessoesPPPsService from './pages/services/EstruturacaoConcessoesPPPsService';
+import ComplianceAdministrativoCivilService from './pages/services/ComplianceAdministrativoCivilService';
+import LicenciamentosRegularizacaoService from './pages/services/LicenciamentosRegularizacaoService';
+import DefesaProcessosAmbientaisService from './pages/services/DefesaProcessosAmbientaisService';
+import ConsultoriaAdequacaoLegalService from './pages/services/ConsultoriaAdequacaoLegalService';
+import AssessoriaConcursosPublicosService from './pages/services/AssessoriaConcursosPublicosService';
+import DefesaDireitosProgressoesService from './pages/services/DefesaDireitosProgressoesService';
 
 // ScrollToTop component that uses the location hook
 const ScrollToTop = () => {
@@ -300,9 +316,31 @@ function App() {
           <Route path="/servicos/indenizacao-danos" element={<IndenizacaoDanosService />} />
           <Route path="/servicos/defesa-coletiva" element={<DefesaColetivaService />} />
           
+          {/* Civil Services */}
           <Route path="/servicos/adi-adc-adpf" element={<ADIADCADPFService />} />
           <Route path="/servicos/acoes-originarias-tribunais-superiores" element={<AcoesOriginariasSuperioresService />} />
           <Route path="/servicos/recursos-extraordinarios-especiais" element={<RecursosExtraordinarioEspecialService />} />
+          <Route path="/servicos/mandado-seguranca-civil" element={<MandadoSegurancaCivilService />} />
+          <Route path="/servicos/habeas-corpus-data-civil" element={<HabeasCorpusDataCivilService />} />
+          <Route path="/servicos/mandado-injuncao-acao-popular" element={<MandadoInjuncaoAcaoPopularService />} />
+          <Route path="/servicos/pareceres-constitucionalidade" element={<ParecereConstituicionalidadeService />} />
+          <Route path="/servicos/assessoria-processos-legislativos" element={<AssessoriaProcessosLegislativosService />} />
+          <Route path="/servicos/defesa-direitos-fundamentais-civil" element={<DefesaDireitosFundamentaisCivilService />} />
+          <Route path="/servicos/defesa-pad-civil" element={<DefesaPADCivilService />} />
+          <Route path="/servicos/acoes-improbidade-civil" element={<AcoesImprobidadeCivilService />} />
+          <Route path="/servicos/contestacao-atos-administrativos" element={<ContestacaoAtosAdministrativosService />} />
+          <Route path="/servicos/responsabilidade-civil-estado" element={<ResponsabilidadeCivilEstadoService />} />
+          <Route path="/servicos/assessoria-completa-licitacoes" element={<AssessoriaCompletaLicitacoesService />} />
+          <Route path="/servicos/gestao-contratos-administrativos" element={<GestaoContratosAdministrativosService />} />
+          <Route path="/servicos/reequilibrio-economico-financeiro" element={<ReequilibrioEconomicoFinanceiroService />} />
+          <Route path="/servicos/assessoria-mercados-regulados" element={<AssessoriaMercadosReguladosService />} />
+          <Route path="/servicos/estruturacao-concessoes-ppps" element={<EstruturacaoConcessoesPPPsService />} />
+          <Route path="/servicos/compliance-administrativo-civil" element={<ComplianceAdministrativoCivilService />} />
+          <Route path="/servicos/licenciamentos-regularizacao" element={<LicenciamentosRegularizacaoService />} />
+          <Route path="/servicos/defesa-processos-ambientais" element={<DefesaProcessosAmbientaisService />} />
+          <Route path="/servicos/consultoria-adequacao-legal" element={<ConsultoriaAdequacaoLegalService />} />
+          <Route path="/servicos/assessoria-concursos-publicos" element={<AssessoriaConcursosPublicosService />} />
+          <Route path="/servicos/defesa-direitos-progressoes" element={<DefesaDireitosProgressoesService />} />
           
           <Route path="/obrigado" element={<ObrigadoPage />} />
           <Route path="*" element={<NotFound />} />
