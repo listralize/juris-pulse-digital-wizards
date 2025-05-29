@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -53,6 +52,9 @@ import RescisaoContratualService from './pages/services/RescisaoContratualServic
 import ComplianceTrabalhistaService from './pages/services/ComplianceTrabalhistaService';
 import ConsultoriaPrevidenciariaService from './pages/services/ConsultoriaPrevidenciariaService';
 import SaudeSegurancaService from './pages/services/SaudeSegurancaService';
+import DefesaTrabalhadorService from './pages/services/DefesaTrabalhadaorService';
+import VerbaRescissoriaService from './pages/services/VerbaRescissoriaService';
+import ConsultoriaEmpresarialTrabalhistaService from './pages/services/ConsultoriaEmpresarialTrabalhistaService';
 
 // Constitucional Services
 import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
@@ -139,6 +141,9 @@ function App() {
           <Route path="/servicos/compliance-trabalhista" element={<ComplianceTrabalhistaService />} />
           <Route path="/servicos/consultoria-previdenciaria" element={<ConsultoriaPrevidenciariaService />} />
           <Route path="/servicos/saude-seguranca" element={<SaudeSegurancaService />} />
+          <Route path="/servicos/defesa-trabalhador" element={<DefesaTrabalhadorService />} />
+          <Route path="/servicos/verbas-rescissorias" element={<VerbaRescissoriaService />} />
+          <Route path="/servicos/consultoria-empresarial-trabalhista" element={<ConsultoriaEmpresarialTrabalhistaService />} />
 
           {/* Constitucional Services */}
           <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />

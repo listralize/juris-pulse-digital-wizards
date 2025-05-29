@@ -12,54 +12,74 @@ const TrabalhoPage = () => {
   
   const services = [
     {
-      title: "Assessoria em Relações Trabalhistas",
-      description: "Orientação preventiva para empregadores sobre questões trabalhistas cotidianas e estratégicas.",
-      path: "/servicos/assessoria-trabalhista"
+      title: "Defesa do Trabalhador",
+      description: "Transformamos sua insatisfação em reivindicação poderosa. Não deixamos um centavo do que é seu na mesa.",
+      path: "/servicos/defesa-trabalhador"
     },
     {
-      title: "Contencioso Trabalhista",
-      description: "Defesa em reclamações trabalhistas individuais e coletivas em todas as instâncias.",
-      path: "/servicos/contencioso-trabalhista"
+      title: "Cálculo de Verbas Rescisórias",
+      description: "Foi demitido? Analisamos cada detalhe da rescisão e garantimos que cada valor seja quitado com a força necessária.",
+      path: "/servicos/verbas-rescissorias"
     },
     {
-      title: "Acordos Coletivos",
-      description: "Negociação e elaboração de acordos e convenções coletivas com sindicatos.",
-      path: "/servicos/acordos-coletivos"
+      title: "Horas Extras e Intervalos",
+      description: "Seu tempo vale ouro. Exigimos o reconhecimento e pagamento de cada hora extra não remunerada.",
+      path: "/servicos/horas-extras"
     },
     {
-      title: "Rescisões Contratuais",
-      description: "Assessoria em demissões individuais e coletivas, minimizando riscos e passivos.",
-      path: "/servicos/rescisoes-contratuais"
+      title: "Reconhecimento de Vínculo",
+      description: "Trabalho informal não anula direitos. Transformamos informalidade em segurança jurídica.",
+      path: "/servicos/reconhecimento-vinculo"
+    },
+    {
+      title: "Defesa Contra Justa Causa",
+      description: "Sua reputação é seu maior ativo. Defendemos sua honra contra acusações infundadas.",
+      path: "/servicos/defesa-justa-causa"
+    },
+    {
+      title: "Direitos da Gestante",
+      description: "A maternidade é intocável. Garantimos estabilidade e combatemos discriminação com ferocidade.",
+      path: "/servicos/direitos-gestante"
+    },
+    {
+      title: "Assédio Moral e Sexual",
+      description: "Basta de silêncio. Somos sua voz contra humilhações e abusos. O respeito não se negocia.",
+      path: "/servicos/assedio-moral-sexual"
+    },
+    {
+      title: "Acidentes e Doenças Ocupacionais",
+      description: "Sua saúde é um direito. Lutamos por estabilidade, indenizações e pensão vitalícia quando necessário.",
+      path: "/servicos/acidentes-doencas"
+    },
+    {
+      title: "Adicionais e Insalubridade",
+      description: "Riscos devem ser compensados. Exigimos pagamento retroativo com provas irrefutáveis.",
+      path: "/servicos/adicionais-insalubridade"
+    },
+    {
+      title: "Desvio de Função",
+      description: "Suas responsabilidades aumentaram, seu salário também deveria. Sua dedicação não será subvalorizada.",
+      path: "/servicos/desvio-funcao"
+    },
+    {
+      title: "Consultoria Empresarial",
+      description: "Construímos a blindagem jurídica que sua empresa precisa. Prevenção é o seu maior ativo.",
+      path: "/servicos/consultoria-empresarial-trabalhista"
     },
     {
       title: "Compliance Trabalhista",
-      description: "Implementação de programas de conformidade com a legislação trabalhista e previdenciária.",
+      description: "Transformamos o risco em segurança, garantindo conformidade e longe de passivos desnecessários.",
       path: "/servicos/compliance-trabalhista"
-    },
-    {
-      title: "Consultoria Previdenciária",
-      description: "Orientação sobre contribuições previdenciárias, benefícios e impactos nas relações de trabalho.",
-      path: "/servicos/consultoria-previdenciaria"
-    },
-    {
-      title: "Defesa em Reclamações",
-      description: "Representação legal de empresas e empregadores em processos trabalhistas.",
-      path: "/servicos/contencioso-trabalhista"
-    },
-    {
-      title: "Saúde e Segurança",
-      description: "Consultoria sobre normas de segurança ocupacional e prevenção de acidentes de trabalho.",
-      path: "/servicos/saude-seguranca"
     }
   ];
 
   return (
     <PracticeAreaLayout
       title="Direito do Trabalho"
-      description="O Direito do Trabalho se concentra nas relações laborais, incluindo contratos de trabalho, salários, direitos e deveres de empregadores e empregados, segurança no trabalho e solução de conflitos trabalhistas."
+      description="Quando a relação de trabalho falha em reconhecer seu esforço, a ação se torna inevitável. Transformamos sua insatisfação em reivindicação poderosa, garantindo que cada direito seja respeitado e cada valor seja quitado."
       currentArea="trabalho"
     >
-      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Especializados</h2>
+      <h2 className={`text-4xl font-canela mb-16 ${isDark ? 'text-white' : 'text-black'}`}>Serviços Estratégicos</h2>
         
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, index) => (
