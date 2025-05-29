@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -12,10 +11,10 @@ const partners = [
     id: 'trombela',
     name: 'Dr. Enzo Trombela',
     title: 'Advogado Sócio',
-    oab: 'OAB/GO: 67.754',
+    oab: 'OAB/GO: 67.754 | OAB/SP: 521.263',
     email: 'trombela@stadv.com',
     image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
-    description: 'Atuação em Direito Civil e Contratual, com foco em soluções jurídicas para empresas e pessoas físicas.'
+    description: 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Pós-graduado em Direito Civil e Processo Civil pelo Instituto Goiano de Direito. Vice-Presidente Jovem da Comissão Especial de Direito Processual Civil (CEDPC) – Triênio 2025/2027 – OAB/GO. Presidente Científico da Força da Advocacia. Ex-Coordenador da Comissão da Advocacia Jovem (CAJ) da OAB/GO. Sócio fundador do escritório Serafim & Trombela Advogados. Atuação em direito privado, especialmente em demandas cíveis, empresariais e contratuais.'
   },
   {
     id: 'serafim',
