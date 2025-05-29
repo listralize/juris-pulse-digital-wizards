@@ -145,6 +145,9 @@ import RecursosExtraordinarioEspecialService from './pages/services/RecursosExtr
 import MandadoSegurancaCivilService from './pages/services/MandadoSegurancaCivilService';
 import HabeasCorpusDataCivilService from './pages/services/HabeasCorpusDataCivilService';
 import MandadoInjuncaoAcaoPopularService from './pages/services/MandadoInjuncaoAcaoPopularService';
+import ParecereConstituicionalidadeService from './pages/services/ParecereConstituicionalidadeService';
+import AssessoriaProcessosLegislativosService from './pages/services/AssessoriaProcessosLegislativosService';
+import DefesaDireitosFundamentaisCivilService from './pages/services/DefesaDireitosFundamentaisCivilService';
 
 // ScrollToTop component that uses the location hook
 const ScrollToTop = () => {
