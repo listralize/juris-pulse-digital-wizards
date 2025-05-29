@@ -30,6 +30,10 @@ import PlanejamentoTributarioService from './pages/services/PlanejamentoTributar
 import ContenciosoTributarioService from './pages/services/ContenciosoTributarioService';
 import RecuperacaoCreditosService from './pages/services/RecuperacaoCreditosService';
 import ConsultoriaImpostosService from './pages/services/ConsultoriaImpostosService';
+import ElisaoFiscalService from './pages/services/ElisaoFiscalService';
+import AuditoriaTributariaService from './pages/services/AuditoriaTributariaService';
+import ParcelamentoDebitosService from './pages/services/ParcelamentoDebitosService';
+import ComplianceTributarioService from './pages/services/ComplianceTributarioService';
 
 // Empresarial Services
 import ConstituicaoEmpresasService from './pages/services/ConstituicaoEmpresasService';
@@ -112,6 +116,10 @@ function App() {
           <Route path="/servicos/contencioso-tributario" element={<ContenciosoTributarioService />} />
           <Route path="/servicos/recuperacao-creditos" element={<RecuperacaoCreditosService />} />
           <Route path="/servicos/consultoria-impostos" element={<ConsultoriaImpostosService />} />
+          <Route path="/servicos/elisao-fiscal" element={<ElisaoFiscalService />} />
+          <Route path="/servicos/auditoria-tributaria" element={<AuditoriaTributariaService />} />
+          <Route path="/servicos/parcelamento-debitos" element={<ParcelamentoDebitosService />} />
+          <Route path="/servicos/compliance-tributario" element={<ComplianceTributarioService />} />
 
           {/* Empresarial Services */}
           <Route path="/servicos/constituicao-empresas" element={<ConstituicaoEmpresasService />} />
