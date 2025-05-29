@@ -29,15 +29,10 @@ export function ThemeProvider({
       if (savedTheme === 'light' || savedTheme === 'dark') {
         return savedTheme as Theme;
       }
-      
-      // If no saved preference, check for system preference
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
     }
     
-    // Default to provided default theme
-    return defaultTheme;
+    // Always default to dark theme
+    return 'dark';
   });
   
   // Update document class and localStorage when theme changes
@@ -64,6 +59,23 @@ export function ThemeProvider({
       }
     }
   }, [theme, storageKey]);
+
+  // Force dark theme on initial load
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Set dark theme immediately
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.backgroundColor = '#000000';
+      document.documentElement.style.color = '#FFFFFF';
+      document.body.style.backgroundColor = '#000000';
+      document.body.style.color = '#FFFFFF';
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+      
+      // Save dark as default
+      localStorage.setItem(storageKey, 'dark');
+    }
+  }, []);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
