@@ -120,11 +120,11 @@ const TrabalhoPage = () => {
 
         {serviceCategories.map((category, categoryIndex) => (
           <div key={categoryIndex} className="space-y-8">
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center justify-center gap-4 mb-8">
               <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
                 {category.icon}
               </div>
-              <div>
+              <div className="text-center">
                 <h3 className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
                   {category.title}
                 </h3>
@@ -134,14 +134,14 @@ const TrabalhoPage = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
               {category.services.map((service, serviceIndex) => (
                 <Card 
                   key={serviceIndex}
                   className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
                   onClick={() => navigate(service.path)}
                 >
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 text-center">
                     <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
                       {service.name}
                     </h4>
