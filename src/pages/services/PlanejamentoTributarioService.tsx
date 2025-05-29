@@ -6,86 +6,86 @@ const PlanejamentoTributarioService = () => {
   return (
     <ServiceLandingLayout
       serviceArea="Direito Tributário"
-      serviceName="Planejamento Tributário"
-      serviceDescription="Estruturação de estratégias legais para otimizar a carga tributária de pessoas físicas e jurídicas, identificando oportunidades de economia fiscal dentro dos limites legais."
+      serviceName="Planejamento Tributário Estratégico"
+      serviceDescription="Analisamos detalhadamente as operações e o regime fiscal de sua empresa para identificar oportunidades legais de redução da carga tributária. Nosso objetivo é prevenir autuações fiscais, otimizar resultados e garantir maior competitividade."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Economia Fiscal",
-          description: "Redução legal e segura da carga tributária, aumentando a rentabilidade e competitividade do seu negócio."
+          title: "Escolha do Regime Tributário Ideal",
+          description: "Avaliamos qual o melhor enquadramento para sua empresa (Simples Nacional, Lucro Presumido ou Lucro Real), considerando faturamento, margens de lucro, custos operacionais e atividade econômica."
         },
         {
-          title: "Segurança Jurídica",
-          description: "Estratégias fundamentadas e documentadas, protegendo você e sua empresa de questionamentos futuros pelo fisco."
+          title: "Reorganização Societária Tributária",
+          description: "Estruturamos fusões, cisões, incorporações com base na Lei das S.A. (Lei nº 6.404/76), visando otimizar a tributação e aproveitar benefícios fiscais."
         },
         {
-          title: "Previsibilidade Financeira",
-          description: "Maior controle sobre os custos tributários, permitindo um planejamento financeiro mais eficiente e preciso."
+          title: "Simulação de Cenários",
+          description: "Projetamos o impacto tributário de diferentes decisões de negócios, permitindo escolhas mais assertivas e seguras."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Diagnóstico Tributário",
-          description: "Análise completa da situação fiscal atual, identificando oportunidades e pontos de atenção específicos para seu caso."
+          title: "Diagnóstico Tributário Completo",
+          description: "Análise detalhada da situação fiscal atual, identificando oportunidades de otimização e pontos de atenção específicos para seu negócio."
         },
         {
           step: 2,
-          title: "Elaboração da Estratégia",
-          description: "Desenvolvimento de um plano personalizado com alternativas legais para otimização tributária, considerando riscos e benefícios."
+          title: "Análise de Regime Tributário",
+          description: "Avaliação comparativa entre Simples Nacional, Lucro Presumido e Lucro Real para identificar o enquadramento mais vantajoso."
         },
         {
           step: 3,
-          title: "Implementação",
-          description: "Execução das medidas planejadas, incluindo possíveis reorganizações societárias, mudanças de regime tributário ou processos operacionais."
+          title: "Estruturação de Reorganizações",
+          description: "Planejamento de fusões, cisões e incorporações para otimizar a tributação e segregar riscos empresariais."
         },
         {
           step: 4,
-          title: "Documentação e Compliance",
-          description: "Elaboração de toda documentação necessária para suportar as estratégias adotadas, garantindo conformidade com a legislação."
+          title: "Simulação e Modelagem",
+          description: "Projeção do impacto tributário de diferentes cenários e decisões estratégicas do negócio."
         },
         {
           step: 5,
-          title: "Monitoramento e Ajustes",
-          description: "Acompanhamento contínuo dos resultados e adaptação das estratégias conforme mudanças legislativas ou nas operações da empresa."
+          title: "Implementação e Monitoramento",
+          description: "Execução das estratégias planejadas e acompanhamento contínuo dos resultados e mudanças legislativas."
         }
       ]}
       testimonials={[
         {
-          name: "Indústrias Romano",
-          quote: "O planejamento tributário implementado reduziu nossa carga fiscal em 22%, mantendo total conformidade com a legislação e trazendo segurança jurídica."
+          name: "Indústria Metalúrgica Nacional",
+          quote: "O planejamento tributário estratégico reduziu nossa carga fiscal em 28% através da reorganização societária e mudança de regime tributário."
         },
         {
-          name: "Carlos M., Empresário",
-          quote: "A reestruturação societária sugerida não apenas diminuiu nossos impostos como simplificou nossos processos administrativos."
+          name: "Grupo Empresarial Tecnologia",
+          quote: "A simulação de cenários nos permitiu tomar decisões estratégicas com segurança, evitando armadilhas fiscais em uma aquisição."
         },
         {
-          name: "Grupo Serrana",
-          quote: "Após anos pagando impostos excessivamente, descobrimos através da consultoria várias oportunidades legais de economia que transformaram nossa lucratividade."
+          name: "Holding Familiar Santos",
+          quote: "A reestruturação societária proposta otimizou nossa tributação sobre dividendos e protegeu nosso patrimônio familiar."
         }
       ]}
       faq={[
         {
-          question: "Qual a diferença entre planejamento tributário, elisão e evasão fiscal?",
-          answer: "O planejamento tributário é a organização legal dos negócios para reduzir a carga tributária, atuando antes da ocorrência do fato gerador. A elisão fiscal é o planejamento feito dentro dos limites legais. Já a evasão fiscal é a redução tributária por meios ilegais, como sonegação ou fraude, o que não faz parte de nossa atuação profissional."
+          question: "Qual a diferença entre os regimes tributários disponíveis?",
+          answer: "O Simples Nacional é voltado para empresas com faturamento até R$ 4,8 milhões, oferecendo tributação simplificada. O Lucro Presumido presume uma margem de lucro fixa e é adequado para empresas com alta lucratividade. O Lucro Real tributa sobre o lucro efetivo e é obrigatório para empresas com faturamento acima de R$ 78 milhões ou determinadas atividades."
         },
         {
-          question: "Em quanto tempo posso ver resultados de um planejamento tributário?",
-          answer: "Os primeiros resultados geralmente podem ser observados entre 3 e 6 meses após a implementação, dependendo da complexidade das medidas adotadas. Algumas estratégias, como mudança de regime tributário, podem trazer benefícios imediatos, enquanto outras, como reestruturações societárias, podem levar mais tempo para gerar economia."
+          question: "Como a reorganização societária pode reduzir impostos?",
+          answer: "Através de fusões, cisões e incorporações estruturadas conforme a Lei das S.A., é possível aproveitar prejuízos fiscais, otimizar a tributação sobre dividendos, segregar atividades com tributações diferentes e criar estruturas mais eficientes. Cada operação deve ter propósito negocial legítimo além da economia fiscal."
         },
         {
-          question: "O planejamento tributário pode ser considerado ilegal pela Receita Federal?",
-          answer: "Um planejamento tributário bem elaborado opera dentro dos limites legais e não deve ser considerado ilegal. No entanto, é importante que ele tenha propósito negocial, substância econômica e não seja baseado apenas na economia fiscal. Nossa abordagem inclui a documentação adequada e fundamentação legal de todas as estratégias adotadas."
+          question: "Qual o prazo para ver resultados do planejamento tributário?",
+          answer: "Os resultados podem variar conforme a estratégia adotada. Mudanças de regime tributário podem gerar economia imediata no próximo exercício fiscal. Reorganizações societárias podem levar de 3 a 12 meses para implementação completa, mas os benefícios são duradouros e estruturais."
         }
       ]}
       relatedServices={[
         {
-          name: "Contencioso Tributário",
-          path: "/servicos/contencioso-tributario"
+          name: "Elisão Fiscal",
+          path: "/servicos/elisao-fiscal"
         },
         {
-          name: "Recuperação de Créditos Tributários",
-          path: "/servicos/recuperacao-creditos"
+          name: "Compliance Tributário",
+          path: "/servicos/compliance-tributario"
         }
       ]}
       mainAreaPath="/tributario"

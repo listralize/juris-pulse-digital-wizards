@@ -6,76 +6,76 @@ const RecuperacaoCreditosService = () => {
   return (
     <ServiceLandingLayout
       serviceArea="Direito Tributário"
-      serviceName="Recuperação de Créditos Tributários"
-      serviceDescription="Identificação e recuperação de créditos tributários pagos indevidamente ou a maior, incluindo compensações, restituições e aproveitamento de créditos não utilizados."
+      serviceName="Revisão e Recuperação de Tributos"
+      serviceDescription="Realizamos uma revisão fiscal completa de suas operações, identificando tributos pagos indevidamente ou a maior nos últimos 5 anos. Atuamos de forma estratégica para a restituição, ressarcimento ou compensação desses valores, melhorando seu fluxo de caixa."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Recursos Financeiros Imediatos",
-          description: "Recuperação de valores significativos através de restituições e compensações com outros tributos devidos."
+          title: "Recuperação de Tributos Diretos",
+          description: "IRPJ (Imposto de Renda Pessoa Jurídica) e CSLL (Contribuição Social sobre o Lucro Líquido) pagos indevidamente ou a maior."
         },
         {
-          title: "Melhoria do Fluxo de Caixa",
-          description: "Otimização do capital de giro através do aproveitamento de créditos e redução da carga tributária efetiva."
+          title: "Recuperação de Tributos Indiretos",
+          description: "PIS, COFINS, ICMS e IPI. Inclui exclusão do ICMS da base de cálculo de PIS/COFINS (Tema 69 STF) e ressarcimento de IPI via PER/DCOMP."
         },
         {
-          title: "Revisão Sistemática",
-          description: "Análise completa dos últimos 5 anos para identificar todas as oportunidades de recuperação disponíveis."
+          title: "Compensação Tributária Estratégica",
+          description: "Utilização de créditos tributários para quitar débitos futuros, com base na Lei nº 9.430/96, otimizando o fluxo de caixa."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Auditoria Tributária",
-          description: "Análise detalhada dos tributos pagos nos últimos 5 anos para identificar pagamentos indevidos ou excessivos."
+          title: "Auditoria Tributária Retrospectiva",
+          description: "Análise completa dos tributos pagos nos últimos 5 anos para identificar pagamentos indevidos, excessivos ou oportunidades de créditos."
         },
         {
           step: 2,
-          title: "Quantificação dos Créditos",
-          description: "Cálculo preciso dos valores a serem recuperados, incluindo correção monetária e juros aplicáveis."
+          title: "Quantificação e Documentação",
+          description: "Cálculo preciso dos valores a serem recuperados, incluindo correção monetária e juros, com documentação robusta para suporte."
         },
         {
           step: 3,
           title: "Estratégia de Recuperação",
-          description: "Definição da melhor estratégia: pedido administrativo de restituição, compensação ou ação judicial."
+          description: "Definição da melhor via: pedido administrativo de restituição, compensação com outros tributos ou ação judicial, conforme cada caso."
         },
         {
           step: 4,
           title: "Execução dos Procedimentos",
-          description: "Protocolo dos pedidos administrativos ou ajuizamento de ações judiciais para recuperação dos créditos."
+          description: "Protocolo de pedidos administrativos (PER/DCOMP) ou ajuizamento de ações de repetição de indébito conforme estratégia definida."
         },
         {
           step: 5,
           title: "Acompanhamento e Recebimento",
-          description: "Monitoramento dos processos até o efetivo recebimento dos valores ou compensação com outros tributos."
+          description: "Monitoramento dos processos até o efetivo recebimento dos valores ou compensação com tributos futuros."
         }
       ]}
       testimonials={[
         {
-          name: "Metalúrgica Progresso",
-          quote: "Conseguimos recuperar mais de R$ 2 milhões em créditos de ICMS não aproveitados, o que foi fundamental para nossos investimentos."
+          name: "Indústria Química Brasileira",
+          quote: "Recuperamos R$ 3,2 milhões em créditos de IPI e PIS/COFINS não aproveitados, recursos fundamentais para nossa expansão."
         },
         {
-          name: "Comércio Atacadista ABC",
-          quote: "A revisão tributária identificou pagamentos indevidos de PIS/COFINS que nem sabíamos que existiam. Recuperamos valores substanciais."
+          name: "Rede de Supermercados Regional",
+          quote: "A exclusão do ICMS da base de PIS/COFINS (Tema 69 STF) nos permitiu recuperar R$ 1,8 milhão dos últimos 5 anos."
         },
         {
-          name: "Prestadora de Serviços XYZ",
-          quote: "O processo de recuperação de créditos de ISS foi conduzido com total profissionalismo, resultando em significativa melhoria do nosso fluxo de caixa."
+          name: "Grupo Logístico Nacional",
+          quote: "A compensação de créditos de IRPJ com débitos de CSLL otimizou nosso fluxo de caixa em mais de R$ 800 mil anuais."
         }
       ]}
       faq={[
         {
-          question: "Quais tipos de créditos tributários podem ser recuperados?",
-          answer: "Podem ser recuperados diversos tipos de créditos: ICMS pago por substituição tributária, créditos de IPI na aquisição de insumos, PIS/COFINS sobre insumos e energia elétrica, contribuições previdenciárias sobre valores não salariais, IR retido na fonte em excesso, entre outros. Cada caso deve ser analisado individualmente para identificar as oportunidades específicas."
+          question: "Quais são os principais tributos que podem ser recuperados?",
+          answer: "Os principais são: IRPJ e CSLL (quando há base negativa ou presunção inadequada), PIS/COFINS (créditos sobre insumos, energia, exclusão do ICMS), ICMS (substituição tributária, diferencial de alíquotas), IPI (créditos na aquisição de insumos), e contribuições previdenciárias sobre valores não salariais."
         },
         {
-          question: "Qual é o prazo para recuperar créditos tributários?",
-          answer: "O prazo decadencial para recuperação de créditos tributários é de 5 anos contados do pagamento indevido. Por isso é importante fazer revisões periódicas para não perder o direito à recuperação. Os prazos para resposta dos órgãos fiscais variam: administrativamente pode levar de 6 meses a 2 anos, enquanto judicialmente pode ser mais longo, mas com possibilidade de antecipação de tutela."
+          question: "Qual o prazo para recuperar tributos pagos indevidamente?",
+          answer: "O prazo decadencial é de 5 anos contados do pagamento indevido, conforme art. 168 do CTN. Por isso é fundamental fazer revisões periódicas. Administrativamente, os pedidos podem levar de 6 meses a 2 anos para análise. Judicialmente, é possível obter antecipação de tutela em casos com jurisprudência consolidada."
         },
         {
-          question: "É possível compensar créditos tributários com outros tributos?",
-          answer: "Sim, em muitos casos é possível compensar créditos de um tributo com débitos de outros tributos da mesma esfera (federal, estadual ou municipal). Por exemplo, créditos de PIS podem ser compensados com débitos de COFINS ou IRPJ. Isso pode ser mais rápido que aguardar a restituição em dinheiro e melhora imediatamente o fluxo de caixa da empresa."
+          question: "Como funciona a compensação de tributos?",
+          answer: "A compensação permite utilizar créditos de um tributo para quitar débitos de outros tributos da mesma esfera, conforme Lei nº 9.430/96. Por exemplo, créditos de PIS podem compensar débitos de COFINS ou IRPJ. É mais rápida que a restituição em dinheiro e melhora imediatamente o fluxo de caixa, sendo formalizada via DCTF e PER/DCOMP."
         }
       ]}
       relatedServices={[

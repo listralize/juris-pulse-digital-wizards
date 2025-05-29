@@ -6,76 +6,76 @@ const ContenciosoTributarioService = () => {
   return (
     <ServiceLandingLayout
       serviceArea="Direito Tributário"
-      serviceName="Contencioso Tributário"
-      serviceDescription="Defesa especializada em processos fiscais junto aos órgãos administrativos e Poder Judiciário, protegendo contribuintes contra cobranças indevidas e garantindo seus direitos."
+      serviceName="Defesas Administrativas e Judiciais"
+      serviceDescription="Atuamos com expertise na defesa contra autos de infração e demais notificações fiscais, protegendo seus direitos e buscando a anulação ou redução de cobranças indevidas através de contencioso administrativo e judicial estratégico."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Defesa Técnica Especializada",
-          description: "Representação por advogados com profundo conhecimento em legislação tributária e jurisprudência atualizada."
+          title: "Contencioso Administrativo",
+          description: "Elaboração de impugnações e recursos perante RFB, SEFAZ, CARF e TIT. Resolução mais célere e menos custosa que a via judicial."
         },
         {
-          title: "Estratégias Processuais Eficientes",
-          description: "Utilização das melhores abordagens processuais para cada caso, maximizando as chances de êxito."
+          title: "Contencioso Judicial Estratégico",
+          description: "Ações declaratórias, anulatórias, mandados de segurança e repetição de indébito no Poder Judiciário com fundamentação robusta."
         },
         {
-          title: "Prevenção de Bloqueios e Penhoras",
-          description: "Atuação preventiva para evitar constrições patrimoniais e garantir a continuidade das operações."
+          title: "Defesa em Execuções Fiscais",
+          description: "Embargos à execução e exceção de pré-executividade para suspender cobranças e evitar penhoras, conforme Lei nº 6.830/80."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Análise do Caso",
-          description: "Avaliação detalhada das autuações fiscais ou cobranças, identificando fundamentos para defesa e possibilidades de êxito."
+          title: "Análise do Auto de Infração",
+          description: "Estudo detalhado da autuação, identificação de vícios formais e materiais, e definição da estratégia de defesa mais adequada."
         },
         {
           step: 2,
-          title: "Planejamento da Defesa",
-          description: "Elaboração de estratégia jurídica personalizada, definindo as teses a serem aplicadas e os procedimentos a serem adotados."
+          title: "Defesa Administrativa",
+          description: "Elaboração de impugnação robusta com fundamentação jurídica, doutrinária e jurisprudencial perante o órgão competente."
         },
         {
           step: 3,
-          title: "Defesas Administrativas",
-          description: "Elaboração e apresentação de impugnações, recursos e outros instrumentos de defesa junto aos órgãos administrativos."
+          title: "Recursos Administrativos",
+          description: "Interposição de recursos ao CARF, TIT ou órgãos superiores, aprofundando a argumentação e buscando precedentes favoráveis."
         },
         {
           step: 4,
-          title: "Medidas Judiciais",
-          description: "Quando necessário, ajuizamento de ações ou defesas em execuções fiscais, utilizando todos os recursos processuais cabíveis."
+          title: "Estratégia Judicial",
+          description: "Caso necessário, ajuizamento de ações judiciais específicas (declaratória, anulatória, mandado de segurança) conforme o caso."
         },
         {
           step: 5,
-          title: "Acompanhamento até Decisão Final",
-          description: "Monitoramento contínuo do processo em todas suas fases, com participação em sustentações orais e representação em todas as instâncias."
+          title: "Acompanhamento Integral",
+          description: "Monitoramento de todos os processos até decisão definitiva, incluindo recursos especiais e extraordinários quando cabíveis."
         }
       ]}
       testimonials={[
         {
-          name: "Distribuidora EastWest",
-          quote: "Conseguimos anular uma autuação milionária graças à defesa técnica impecável apresentada no contencioso administrativo."
+          name: "Indústria Farmacêutica Delta",
+          quote: "Nossa defesa administrativa no CARF resultou no cancelamento de R$ 5 milhões em autuações de PIS/COFINS, evitando um longo processo judicial."
         },
         {
-          name: "Marcos T., Empresário",
-          quote: "A estratégia processual adotada nos permitiu suspender a exigibilidade do crédito tributário enquanto discutíamos o mérito, preservando nossa operação."
+          name: "Grupo de Construção Civil",
+          quote: "O mandado de segurança preventivo impediu a cobrança indevida de ISS sobre nossa atividade, garantindo segurança jurídica para o negócio."
         },
         {
-          name: "Farmacêutica VitaSaúde",
-          quote: "Após anos de batalha judicial, conseguimos o reconhecimento definitivo de nosso direito a um crédito tributário que havia sido negado inicialmente."
+          name: "Holding de Investimentos",
+          quote: "A ação anulatória de débito fiscal desconstituiu uma cobrança de R$ 2,8 milhões baseada em interpretação equivocada da legislação."
         }
       ]}
       faq={[
         {
-          question: "Qual é a diferença entre o contencioso administrativo e judicial tributário?",
-          answer: "O contencioso administrativo ocorre dentro dos órgãos da administração pública (como Receita Federal, Conselhos de Contribuintes ou Secretarias de Fazenda), sem a participação do Poder Judiciário. Já o contencioso judicial acontece perante juízes e tribunais, permitindo uma análise mais ampla da legalidade dos atos administrativos. Cada esfera tem suas vantagens, como a não exigência de garantias na esfera administrativa e a maior imparcialidade na judicial."
+          question: "Qual a diferença entre defesa administrativa e judicial?",
+          answer: "A defesa administrativa é feita perante órgãos como CARF, TIT e SEFAZ, seguindo o Decreto nº 70.235/72. É mais rápida e menos custosa, mas limitada à revisão de legalidade. A defesa judicial permite argumentação constitucional mais ampla, produção de provas e suspensão da exigibilidade, mas tem custos maiores e tramitação mais longa."
         },
         {
-          question: "É possível suspender a exigibilidade do tributo durante a discussão?",
-          answer: "Sim, através de diversos mecanismos legais como depósito judicial do valor integral, obtenção de liminar ou tutela antecipada, ou oferecimento de garantia em execução fiscal. A suspensão da exigibilidade impede a cobrança do tributo, a inclusão em listas de devedores e permite a emissão de certidões de regularidade fiscal enquanto o mérito é discutido."
+          question: "Quais são os principais tipos de ações judiciais tributárias?",
+          answer: "As principais são: Ação Declaratória (para declarar inexistência de obrigação tributária), Ação Anulatória (para desconstituir crédito já formalizado), Mandado de Segurança (para direitos líquidos e certos), Ação de Repetição de Indébito (para reaver tributos pagos indevidamente) e Ação de Consignação em Pagamento (para efetuar pagamento contestado)."
         },
         {
-          question: "Qual o prazo para contestar uma autuação fiscal?",
-          answer: "Os prazos variam conforme o âmbito e o tipo de processo. Na esfera federal, o prazo para impugnação administrativa é geralmente de 30 dias. Nos estados e municípios, pode variar conforme a legislação local. Na esfera judicial, o prazo para contestar uma execução fiscal é de 15 dias úteis após a citação. É fundamental observar estes prazos, pois são peremptórios."
+          question: "É possível suspender a cobrança durante o processo?",
+          answer: "Sim. Administrativamente, a impugnação tempestiva suspende a exigibilidade. Judicialmente, é possível obter liminar ou tutela antecipada para suspender a cobrança, especialmente em casos com jurisprudência favorável ou quando há fumaça do bom direito e risco de dano irreparável."
         }
       ]}
       relatedServices={[
@@ -84,8 +84,8 @@ const ContenciosoTributarioService = () => {
           path: "/servicos/planejamento-tributario"
         },
         {
-          name: "Recuperação de Créditos Tributários",
-          path: "/servicos/recuperacao-creditos"
+          name: "Parcelamento de Débitos",
+          path: "/servicos/parcelamento-debitos"
         }
       ]}
       mainAreaPath="/tributario"
