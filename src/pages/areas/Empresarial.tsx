@@ -77,13 +77,13 @@ const EmpresarialPage = () => {
             onClick={() => navigate(service.path)}
           >
             <CardContent className="p-8">
-              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'} group-hover:text-blue-600 transition-colors`}>
+              <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'} transition-colors`}>
                 {service.title}
               </h3>
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed mb-4`}>
                 {service.description}
               </p>
-              <p className={`font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:text-blue-600 transition-colors`}>
+              <p className={`font-medium ${isDark ? 'text-white/70' : 'text-black/70'} transition-colors`}>
                 Saiba mais →
               </p>
             </CardContent>
@@ -91,7 +91,7 @@ const EmpresarialPage = () => {
         ))}
       </div>
 
-      <div className="mt-16 p-8 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800">
+      <div className={`mt-16 p-8 rounded-xl ${isDark ? 'bg-gradient-to-r from-gray-900/20 to-gray-800/20 border-gray-800' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200'} border`}>
         <h3 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
           Nossa Abordagem: A Diferença que Vence
         </h3>
