@@ -10,6 +10,7 @@ import TrabalhoPage from './pages/areas/Trabalho';
 import AdministrativoPage from './pages/areas/Administrativo';
 import PrevidenciarioPage from './pages/areas/Previdenciario';
 import ConsumidorPage from './pages/areas/Consumidor';
+import CivilPage from './pages/areas/Civil';
 import NotFound from './pages/NotFound';
 import CustomCursor from './components/CustomCursor';
 import { Toaster } from "@/components/ui/toaster";
@@ -165,6 +166,7 @@ function App() {
           <Route path="/administrativo" element={<AdministrativoPage />} />
           <Route path="/previdenciario" element={<PrevidenciarioPage />} />
           <Route path="/consumidor" element={<ConsumidorPage />} />
+          <Route path="/civil" element={<CivilPage />} />
 
           {/* Família Services */}
           <Route path="/servicos/divorcio-separacao" element={<DivorceService />} />
