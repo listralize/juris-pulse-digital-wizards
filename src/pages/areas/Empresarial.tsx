@@ -106,36 +106,38 @@ const EmpresarialPage = () => {
         </div>
 
         {serviceCategories.map((category, categoryIndex) => (
-          <div key={categoryIndex} className="space-y-8">
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
-                {category.icon}
+          <div key={categoryIndex} className="space-y-12">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
+                  {category.icon}
+                </div>
               </div>
-              <div className="text-center">
-                <h3 className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-                  {category.title}
-                </h3>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {category.description}
-                </p>
-              </div>
+              <h3 className={`text-3xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                {category.title}
+              </h3>
+              <p className={`text-lg max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                {category.description}
+              </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {category.services.map((service, serviceIndex) => (
                 <Card 
                   key={serviceIndex}
-                  className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
+                  className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group h-full`}
                   onClick={() => navigate(service.path)}
                 >
-                  <CardContent className="p-6 text-center">
-                    <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
-                      {service.name}
-                    </h4>
-                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
-                      {service.description}
-                    </p>
-                    <p className={`text-sm font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                  <CardContent className="p-8 text-center h-full flex flex-col justify-between">
+                    <div>
+                      <h4 className={`text-xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                        {service.name}
+                      </h4>
+                      <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-base leading-relaxed mb-6`}>
+                        {service.description}
+                      </p>
+                    </div>
+                    <p className={`text-base font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
                       Saiba mais →
                     </p>
                   </CardContent>
