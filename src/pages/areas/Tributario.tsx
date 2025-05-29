@@ -30,6 +30,26 @@ const TributarioPage = () => {
       title: "Consultoria em Impostos",
       description: "Orientação especializada sobre a aplicação de impostos federais, estaduais e municipais.",
       path: "/servicos/consultoria-impostos"
+    },
+    {
+      title: "Elisão Fiscal",
+      description: "Estratégias legais para redução da carga tributária através de planejamento estruturado.",
+      path: "/servicos/elisao-fiscal"
+    },
+    {
+      title: "Auditoria Tributária",
+      description: "Revisão completa da situação fiscal para identificar riscos e oportunidades de otimização.",
+      path: "/servicos/auditoria-tributaria"
+    },
+    {
+      title: "Parcelamento de Débitos",
+      description: "Negociação e estruturação de parcelamentos fiscais junto aos órgãos competentes.",
+      path: "/servicos/parcelamento-debitos"
+    },
+    {
+      title: "Compliance Tributário",
+      description: "Implementação de rotinas e controles para garantir conformidade com as obrigações fiscais.",
+      path: "/servicos/compliance-tributario"
     }
   ];
 
