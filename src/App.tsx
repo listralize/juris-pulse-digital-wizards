@@ -55,6 +55,14 @@ import SaudeSegurancaService from './pages/services/SaudeSegurancaService';
 import DefesaTrabalhadorService from './pages/services/DefesaTrabalhadaorService';
 import VerbaRescissoriaService from './pages/services/VerbaRescissoriaService';
 import ConsultoriaEmpresarialTrabalhistaService from './pages/services/ConsultoriaEmpresarialTrabalhistaService';
+import HorasExtrasService from './pages/services/HorasExtrasService';
+import ReconhecimentoVinculoService from './pages/services/ReconhecimentoVinculoService';
+import DefesaJustaCausaService from './pages/services/DefesaJustaCausaService';
+import DireitosGestanteService from './pages/services/DireitosGestanteService';
+import AssedioMoralSexualService from './pages/services/AssedioMoralSexualService';
+import AcidentesDoencasService from './pages/services/AcidentesDoencasService';
+import AdicionaisInsalubridadeService from './pages/services/AdicionaisInsalubridadeService';
+import DesvioFuncaoService from './pages/services/DesvioFuncaoService';
 
 // Constitucional Services
 import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
@@ -144,6 +152,14 @@ function App() {
           <Route path="/servicos/defesa-trabalhador" element={<DefesaTrabalhadorService />} />
           <Route path="/servicos/verbas-rescissorias" element={<VerbaRescissoriaService />} />
           <Route path="/servicos/consultoria-empresarial-trabalhista" element={<ConsultoriaEmpresarialTrabalhistaService />} />
+          <Route path="/servicos/horas-extras" element={<HorasExtrasService />} />
+          <Route path="/servicos/reconhecimento-vinculo" element={<ReconhecimentoVinculoService />} />
+          <Route path="/servicos/defesa-justa-causa" element={<DefesaJustaCausaService />} />
+          <Route path="/servicos/direitos-gestante" element={<DireitosGestanteService />} />
+          <Route path="/servicos/assedio-moral-sexual" element={<AssedioMoralSexualService />} />
+          <Route path="/servicos/acidentes-doencas" element={<AcidentesDoencasService />} />
+          <Route path="/servicos/adicionais-insalubridade" element={<AdicionaisInsalubridadeService />} />
+          <Route path="/servicos/desvio-funcao" element={<DesvioFuncaoService />} />
 
           {/* Constitucional Services */}
           <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />
