@@ -6,80 +6,76 @@ const BeneficiosPrevidenciariosService = () => {
   return (
     <ServiceLandingLayout
       serviceArea="Direito Previdenciário"
-      serviceName="Aposentadorias"
-      serviceDescription="Assessoria especializada para obtenção de todos os tipos de aposentadoria, garantindo o melhor benefício para sua situação específica."
+      serviceName="Benefícios Previdenciários"
+      serviceDescription="Assessoria completa para obtenção de aposentadorias, pensões, auxílios e outros benefícios previdenciários, garantindo seus direitos junto ao INSS e outros órgãos previdenciários."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Aposentadoria por Idade",
-          description: "Orientação para aposentadoria aos 65 anos (homens) ou 62 anos (mulheres) com 15 anos de contribuição."
+          title: "Análise Especializada do Caso",
+          description: "Avaliação detalhada do histórico contributivo e identificação da melhor estratégia para obtenção do benefício."
         },
         {
-          title: "Aposentadoria por Tempo de Contribuição",
-          description: "Assessoria para aposentadoria com 35 anos (homens) ou 30 anos (mulheres) de contribuição."
+          title: "Maximização do Valor",
+          description: "Orientação para obtenção do maior valor possível de benefício conforme sua situação específica."
         },
         {
-          title: "Aposentadoria por Invalidez",
-          description: "Suporte para casos de incapacidade total e permanente para qualquer atividade laboral."
-        },
-        {
-          title: "Aposentadoria Rural",
-          description: "Especialização em aposentadoria para trabalhadores rurais com regras diferenciadas."
+          title: "Acompanhamento Completo",
+          description: "Representação em todas as fases do processo, desde o requerimento administrativo até eventual ação judicial."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Análise do Perfil",
-          description: "Identificação da modalidade de aposentadoria mais vantajosa para seu caso específico."
+          title: "Análise Documental",
+          description: "Levantamento e análise de toda documentação previdenciária, incluindo CNIS, vínculos empregatícios e contribuições."
         },
         {
           step: 2,
-          title: "Levantamento Contributivo",
-          description: "Verificação completa do histórico de contribuições através do CNIS e documentação."
+          title: "Planejamento Estratégico",
+          description: "Definição da melhor modalidade de aposentadoria ou benefício a ser requerido, considerando todas as variáveis."
         },
         {
           step: 3,
-          title: "Cálculo de Benefício",
-          description: "Simulação do valor da aposentadoria considerando todas as regras aplicáveis."
+          title: "Requerimento Administrativo",
+          description: "Protocolo do pedido junto ao INSS com toda documentação necessária e acompanhamento da análise."
         },
         {
           step: 4,
-          title: "Protocolo do Pedido",
-          description: "Requerimento junto ao INSS com toda documentação necessária organizada."
+          title: "Recursos e Contestações",
+          description: "Interposição de recursos em caso de indeferimento ou valor inferior ao devido, fundamentando tecnicamente a pretensão."
         },
         {
           step: 5,
-          title: "Acompanhamento Completo",
-          description: "Monitoramento do processo até a concessão e recursos se necessário."
+          title: "Ação Judicial (se necessário)",
+          description: "Ajuizamento de ação judicial quando esgotadas as vias administrativas, buscando a concessão do benefício na Justiça."
         }
       ]}
       testimonials={[
         {
-          name: "José Carlos, Aposentado",
-          quote: "Consegui me aposentar por tempo de contribuição antes da reforma. A orientação foi perfeita sobre as regras de transição."
+          name: "Maria S., Aposentada",
+          quote: "Consegui minha aposentadoria especial que havia sido negada pelo INSS. O acompanhamento jurídico foi fundamental para provar minha exposição a agentes nocivos."
         },
         {
-          name: "Maria Aparecida, Rural",
-          quote: "Como trabalhadora rural, a assessoria foi fundamental para comprovar minha atividade e obter a aposentadoria."
+          name: "João P., Beneficiário",
+          quote: "Após anos tentando sozinho, finalmente obtive meu auxílio-doença com o valor correto e retroativo desde a data correta de início da incapacidade."
         },
         {
-          name: "Antonio Silva, Invalidez",
-          quote: "Após acidente, obtive minha aposentadoria por invalidez com acompanhamento completo em todas as perícias."
+          name: "Ana R., Pensionista",
+          quote: "A assessoria para obtenção da pensão por morte foi essencial. Recebi orientação completa e consegui o benefício sem complicações."
         }
       ]}
       faq={[
         {
-          question: "Quais são as modalidades de aposentadoria disponíveis?",
-          answer: "As principais são: aposentadoria por idade (65/62 anos), por tempo de contribuição (35/30 anos), especial (atividades insalubres), por invalidez (incapacidade permanente), rural (trabalhadores do campo), e da pessoa com deficiência. Cada uma tem requisitos específicos e regras de transição da reforma da previdência."
+          question: "Quais são os tipos de aposentadoria disponíveis?",
+          answer: "Os principais tipos são: aposentadoria por idade (65 anos homens/62 anos mulheres), aposentadoria por tempo de contribuição (35 anos homens/30 anos mulheres), aposentadoria especial (para atividades insalubres/perigosas), aposentadoria por invalidez (incapacidade permanente) e aposentadoria da pessoa com deficiência. Cada modalidade tem regras específicas e pode haver regras de transição para quem já contribuía antes da reforma da previdência."
         },
         {
-          question: "Como funcionam as regras de transição?",
-          answer: "Para quem já contribuía antes de 13/11/2019, existem regras de transição: regra dos pontos (idade + tempo de contribuição), idade progressiva, pedágio de 50%, pedágio de 100%. Cada regra tem vantagens específicas conforme o perfil do segurado."
+          question: "Como comprovar tempo de contribuição em atividade rural?",
+          answer: "A comprovação pode ser feita através de: declaração do sindicato de trabalhadores rurais, contratos de arrendamento/parceria, notas fiscais de venda de produção rural, comprovantes de financiamento bancário para atividade rural, cadastro no INCRA, declarações de vizinhos (início de prova material), entre outros. É importante reunir o máximo de documentos possível para fortalecer a comprovação."
         },
         {
-          question: "Posso me aposentar por invalidez e depois trabalhar?",
-          answer: "A aposentadoria por invalidez pressupõe incapacidade total e permanente. Se houver recuperação da capacidade, o benefício pode ser suspenso após nova perícia. Em casos de recuperação parcial, pode haver conversão para auxílio-acidente. É importante comunicar ao INSS qualquer melhora na condição de saúde."
+          question: "É possível aposentar por invalidez e depois voltar a trabalhar?",
+          answer: "A aposentadoria por invalidez pressupõe incapacidade total e permanente para o trabalho. Se houver recuperação da capacidade laboral, o benefício deve ser cessado após perícia médica. Existe a possibilidade de reabilitação profissional pelo INSS. Em casos de recuperação parcial, pode haver conversão para auxílio-acidente. O retorno ao trabalho durante o recebimento de aposentadoria por invalidez pode levar ao cancelamento do benefício."
         }
       ]}
       relatedServices={[
@@ -88,8 +84,8 @@ const BeneficiosPrevidenciariosService = () => {
           path: "/servicos/planejamento-previdenciario"
         },
         {
-          name: "Aposentadoria Especial",
-          path: "/servicos/aposentadoria-especial"
+          name: "Revisão de Benefícios",
+          path: "/servicos/revisao-beneficios"
         }
       ]}
       mainAreaPath="/previdenciario"
