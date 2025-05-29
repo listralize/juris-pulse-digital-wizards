@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -95,6 +96,13 @@ import TribunaisContasService from './pages/services/TribunaisContasService';
 
 // Previdenciário Services
 import BeneficiosPrevidenciariosService from './pages/services/BeneficiosPrevidenciariosService';
+import AposentadoriaIdadeService from './pages/services/AposentadoriaIdadeService';
+import AuxilioDoencaService from './pages/services/AuxilioDoencaService';
+import AposentadoriaTempoContribuicaoService from './pages/services/AposentadoriaTempoContribuicaoService';
+import AposentadoriaInvalidezService from './pages/services/AposentadoriaInvalidezService';
+import BPCService from './pages/services/BPCService';
+import RevisaoVidaTodaService from './pages/services/RevisaoVidaTodaService';
+import PlanejamentoPrevidenciarioService from './pages/services/PlanejamentoPrevidenciarioService';
 
 // Consumidor Services
 import DireitosConsumidorService from './pages/services/DireitosConsumidorService';
@@ -213,6 +221,13 @@ function App() {
 
           {/* Previdenciário Services */}
           <Route path="/servicos/beneficios-previdenciarios" element={<BeneficiosPrevidenciariosService />} />
+          <Route path="/servicos/aposentadoria-idade" element={<AposentadoriaIdadeService />} />
+          <Route path="/servicos/auxilio-doenca" element={<AuxilioDoencaService />} />
+          <Route path="/servicos/aposentadoria-tempo-contribuicao" element={<AposentadoriaTempoContribuicaoService />} />
+          <Route path="/servicos/aposentadoria-invalidez" element={<AposentadoriaInvalidezService />} />
+          <Route path="/servicos/bpc-loas" element={<BPCService />} />
+          <Route path="/servicos/revisao-vida-toda" element={<RevisaoVidaTodaService />} />
+          <Route path="/servicos/planejamento-previdenciario" element={<PlanejamentoPrevidenciarioService />} />
 
           {/* Consumidor Services */}
           <Route path="/servicos/direitos-consumidor" element={<DireitosConsumidorService />} />

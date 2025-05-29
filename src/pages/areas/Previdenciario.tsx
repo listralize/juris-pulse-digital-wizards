@@ -13,19 +13,24 @@ const PrevidenciarioPage = () => {
   
   const serviceCategories = [
     {
-      title: "Benefícios de Aposentadoria",
+      title: "Aposentadorias",
       icon: <Calendar className="w-8 h-8" />,
       description: "Assessoria completa para obtenção de diferentes modalidades de aposentadoria pelo INSS.",
       services: [
         {
-          name: "Benefícios Previdenciários",
-          description: "Assessoria na obtenção de aposentadorias por idade, tempo de contribuição, especial e por invalidez.",
-          path: "/servicos/beneficios-previdenciarios"
+          name: "Aposentadoria por Idade",
+          description: "Benefício para trabalhadores que atingiram idade mínima e tempo de contribuição.",
+          path: "/servicos/aposentadoria-idade"
         },
         {
-          name: "Planejamento Previdenciário",
-          description: "Elaboração de estratégias personalizadas para maximizar os benefícios previdenciários futuros.",
-          path: "/servicos/beneficios-previdenciarios"
+          name: "Aposentadoria por Tempo de Contribuição",
+          description: "Assessoria para aposentadoria por tempo de contribuição com regras de transição.",
+          path: "/servicos/aposentadoria-tempo-contribuicao"
+        },
+        {
+          name: "Aposentadoria por Invalidez",
+          description: "Representação para trabalhadores permanentemente incapacitados.",
+          path: "/servicos/aposentadoria-invalidez"
         }
       ]
     },
@@ -35,48 +40,43 @@ const PrevidenciarioPage = () => {
       description: "Representação em casos de incapacidade temporária ou permanente para o trabalho.",
       services: [
         {
-          name: "Benefícios por Incapacidade",
-          description: "Assessoria para obtenção e manutenção de benefícios por incapacidade temporária ou permanente.",
-          path: "/servicos/beneficios-previdenciarios"
-        },
-        {
           name: "Auxílio-Doença",
-          description: "Representação em casos de solicitação, prorrogação ou restabelecimento de auxílio-doença.",
+          description: "Representação para obtenção e manutenção de auxílio-doença.",
+          path: "/servicos/auxilio-doenca"
+        },
+        {
+          name: "Benefícios Previdenciários",
+          description: "Assessoria geral para aposentadorias, pensões, auxílios e outros benefícios.",
           path: "/servicos/beneficios-previdenciarios"
         }
       ]
     },
     {
-      title: "Benefícios aos Dependentes",
+      title: "Benefícios Assistenciais",
       icon: <Users className="w-8 h-8" />,
-      description: "Orientação e representação para dependentes em processos de pensão e outros benefícios.",
+      description: "Orientação para benefícios assistenciais e de proteção social.",
       services: [
         {
-          name: "Pensões",
-          description: "Orientação e representação em processos de concessão de pensão por morte e outros benefícios a dependentes.",
-          path: "/servicos/beneficios-previdenciarios"
-        },
-        {
-          name: "Benefícios Assistenciais",
-          description: "Orientação sobre o BPC/LOAS e outros benefícios assistenciais para idosos e pessoas com deficiência.",
-          path: "/servicos/beneficios-previdenciarios"
+          name: "BPC/LOAS",
+          description: "Assessoria para Benefício de Prestação Continuada para idosos e deficientes.",
+          path: "/servicos/bpc-loas"
         }
       ]
     },
     {
-      title: "Revisão e Contencioso",
+      title: "Planejamento e Revisões",
       icon: <TrendingUp className="w-8 h-8" />,
-      description: "Análise de benefícios concedidos e representação em litígios previdenciários.",
+      description: "Planejamento estratégico e revisão de benefícios previdenciários.",
       services: [
         {
-          name: "Revisão de Benefícios",
-          description: "Análise e revisão de benefícios previdenciários já concedidos para correção de valores.",
-          path: "/servicos/beneficios-previdenciarios"
+          name: "Planejamento Previdenciário",
+          description: "Estratégias personalizadas para otimizar sua futura aposentadoria.",
+          path: "/servicos/planejamento-previdenciario"
         },
         {
-          name: "Contencioso Previdenciário",
-          description: "Representação em litígios administrativos e judiciais contra o INSS e outras entidades previdenciárias.",
-          path: "/servicos/beneficios-previdenciarios"
+          name: "Revisão da Vida Toda",
+          description: "Revisão de benefícios para incluir contribuições anteriores a 1994.",
+          path: "/servicos/revisao-vida-toda"
         }
       ]
     }
