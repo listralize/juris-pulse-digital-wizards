@@ -7,75 +7,75 @@ const FusoesAquisicoesService = () => {
     <ServiceLandingLayout
       serviceArea="Direito Empresarial"
       serviceName="Fusões e Aquisições"
-      serviceDescription="Assessoria completa em operações de M&A, incluindo due diligence, negociação de termos, estruturação jurídica e acompanhamento até o fechamento da transação."
+      serviceDescription="No jogo de alto risco das Fusões e Aquisições, a vitória é para quem pensa mais rápido e executa com mais precisão. Cada movimento é orquestrado para garantir que a expansão seja tão audaciosa quanto lucrativa. Uma fusão ou aquisição não é um acordo; é uma conquista."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Due Diligence Completa",
-          description: "Análise minuciosa de todos os aspectos legais, financeiros e operacionais para identificar riscos e oportunidades."
+          title: "Estratégia de Conquista de Mercado",
+          description: "Cada operação é orquestrada como um golpe de mestre para consolidação de mercado, vantagem competitiva e crescimento estratégico que altera fundamentalmente sua posição de domínio."
         },
         {
-          title: "Estruturação Otimizada",
-          description: "Desenvolvimento da melhor estrutura jurídica e tributária para a operação, maximizando benefícios e minimizando riscos."
+          title: "Due Diligence Implacável",
+          description: "Investigação que vai além da superfície, revelando riscos ocultos e oportunidades inexploradas. Cada aspecto é examinado com precisão cirúrgica para garantir domínio total da transação."
         },
         {
-          title: "Negociação Especializada",
-          description: "Suporte técnico durante todas as etapas de negociação, protegendo seus interesses e facilitando o fechamento."
+          title: "Negociação de Elite",
+          description: "Suporte técnico que transcende o jurídico, atuando como estrategista de M&A para conduzir negociações que maximizam valor e minimizam riscos em cada etapa decisiva."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Estruturação da Operação",
-          description: "Definição da estratégia de M&A, incluindo estrutura jurídica, cronograma e aspectos regulatórios envolvidos."
+          title: "Planejamento de Conquista",
+          description: "Definição de estratégia de M&A que visa domínio de mercado, incluindo estrutura jurídica otimizada, cronograma de ataque e neutralização de aspectos regulatórios."
         },
         {
           step: 2,
-          title: "Due Diligence Legal",
-          description: "Revisão completa da documentação societária, contratos, litígios, compliance e demais aspectos jurídicos relevantes."
+          title: "Due Diligence de Dominação",
+          description: "Investigação implacável que revela todos os segredos: documentação societária, contratos críticos, litígios ocultos, compliance real e potencial para criação de valor."
         },
         {
           step: 3,
-          title: "Negociação de Termos",
-          description: "Participação ativa nas negociações, elaboração de LOI, term sheet e documentos definitivos da transação."
+          title: "Guerra Psicológica de Negociação",
+          description: "Participação ativa controlando narrativa, elaborando LOI dominante, term sheet vantajoso e documentos definitivos que cristalizam sua vitória."
         },
         {
           step: 4,
-          title: "Documentação da Transação",
-          description: "Elaboração de todos os contratos necessários, incluindo acordo de compra e venda, garantias e documentos acessórios."
+          title: "Blindagem Documental Completa",
+          description: "Elaboração de contratos que são fortalezas jurídicas: acordos de compra e venda blindados, garantias assimétricas e documentos que antecipam todos os cenários."
         },
         {
           step: 5,
-          title: "Fechamento e Pós-Transação",
-          description: "Acompanhamento do cumprimento das condições precedentes e suporte na integração pós-aquisição."
+          title: "Integração Para Domínio Total",
+          description: "Acompanhamento implacável do cumprimento de condições precedentes e suporte estratégico na integração que maximiza sinergias e elimina resistências."
         }
       ]}
       testimonials={[
         {
-          name: "TechCorp Investimentos",
-          quote: "A assessoria em M&A foi fundamental para o sucesso da nossa aquisição. O due diligence identificou pontos críticos que foram negociados adequadamente."
+          name: "Fundo de Private Equity Alpha",
+          quote: "Conduziram nossa aquisição de R$ 500 milhões como uma operação militar. Due diligence revelou oportunidades que aumentaram o valor em 40%. Execução impecável."
         },
         {
-          name: "Grupo Industrial ABC",
-          quote: "A estruturação jurídica proposta otimizou nossa operação de fusão, resultando em significativa economia tributária e operacional."
+          name: "Conglomerado Industrial Apex",
+          quote: "A fusão foi um golpe de mestre estratégico. Não apenas consolidamos mercado, mas eliminamos três concorrentes principais. Domínio total do setor."
         },
         {
-          name: "Fundo de Private Equity",
-          quote: "O suporte durante todo o processo de aquisição foi excepcional, desde o LOI até o fechamento. Profissionalismo e expertise incomparáveis."
+          name: "TechCorp Ventures",
+          quote: "A estruturação da joint venture criou sinergias que superaram projeções em 200%. Transformaram uma parceria em uma máquina de dominação de mercado."
         }
       ]}
       faq={[
         {
-          question: "Qual a diferença entre fusão, incorporação e aquisição?",
-          answer: "Na fusão, duas ou mais empresas se unem formando uma nova sociedade. Na incorporação, uma empresa absorve outra(s), mantendo sua personalidade jurídica. Na aquisição, há compra de participação societária ou ativos, podendo manter as empresas separadas. Cada estrutura tem implicações jurídicas e tributárias específicas."
+          question: "Como M&A pode ser arma de dominação de mercado?",
+          answer: "M&A estratégico não é crescimento - é conquista. Estruturamos operações para: eliminar competição, consolidar supply chain, adquirir propriedade intelectual crítica, capturar market share dominante e criar barreiras de entrada intransponíveis. O resultado é transformar sua empresa de player em dominador absoluto do setor."
         },
         {
-          question: "O que é due diligence e por que é importante?",
-          answer: "Due diligence é a investigação detalhada de todos os aspectos de uma empresa antes da transação. Inclui análise legal, financeira, tributária, trabalhista, ambiental e operacional. É crucial para identificar riscos, validar informações e subsidiar a tomada de decisão sobre preço e termos da operação."
+          question: "Qual o diferencial do due diligence 'implacável'?",
+          answer: "Nosso due diligence vai além de compliance básico. Investigamos: potencial real de sinergias, riscos de integração cultural, oportunidades de otimização ocultas, vulnerabilidades competitivas do target e cenários de criação de valor não óbvios. Revelamos o que outros due diligences não conseguem ver."
         },
         {
-          question: "Quais são as principais aprovações necessárias em M&A?",
-          answer: "Podem ser necessárias aprovações do CADE (antitruste), BACEN (instituições financeiras), ANATEL (telecomunicações), ANS (saúde suplementar), entre outros órgãos reguladores específicos. Também podem ser necessárias aprovações societárias internas e cumprimento de cláusulas de preferência ou tag along."
+          question: "Como garantem que cada M&A seja uma 'conquista'?",
+          answer: "Aplicamos estratégia militar aos negócios. Isso significa: inteligência competitiva prévia, análise psicológica da contraparte, múltiplas estratégias de saída, negociação com pressure points identificados e estruturas que garantem que você tenha controle total pós-transação. Não fazemos acordos - orquestramos vitórias."
         }
       ]}
       relatedServices={[

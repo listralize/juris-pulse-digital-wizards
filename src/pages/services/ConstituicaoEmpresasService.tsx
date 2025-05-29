@@ -6,76 +6,76 @@ const ConstituicaoEmpresasService = () => {
   return (
     <ServiceLandingLayout
       serviceArea="Direito Empresarial"
-      serviceName="Constituição de Empresas"
-      serviceDescription="Assessoria completa para abertura de empresas, escolha do tipo societário adequado e elaboração dos atos constitutivos, garantindo o melhor enquadramento legal e fiscal para seu negócio."
+      serviceName="Constituição e Estruturação de Empresas"
+      serviceDescription="Construir um império começa com uma fundação sólida. Não apenas registramos uma empresa; arquitetamos para o sucesso, garantindo que cada cláusula, cada escolha societária, seja uma peça estratégica no plano de dominação de mercado."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Estrutura Societária Adequada",
-          description: "Escolha do tipo societário mais vantajoso considerando aspectos tributários, operacionais e de responsabilidade dos sócios."
+          title: "Estrutura Societária Blindada",
+          description: "Escolhemos a armadura certa para a batalha. A estrutura que maximiza proteção e flexibilidade é definida desde o primeiro dia, criando uma fortaleza jurídica inexpugnável."
         },
         {
-          title: "Conformidade Legal Completa",
-          description: "Cumprimento de todas as exigências legais para constituição, evitando problemas futuros com órgãos reguladores."
+          title: "Documentos Constitutivos Estratégicos",
+          description: "Elaboramos contratos sociais e estatutos como a constituição do seu legado. Documentos redigidos com precisão cirúrgica e visão estratégica, blindando relações internas."
         },
         {
-          title: "Planejamento Fiscal Otimizado",
-          description: "Orientação sobre o melhor regime tributário desde a constituição, maximizando a eficiência fiscal da empresa."
+          title: "Planejamento para Dominação",
+          description: "Preparamos o terreno para crescimento futuro, eficiência fiscal e prevenção de disputas. Cada movimento orquestrado para otimizar estrutura e impulsionar eficiência operacional."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Consultoria Inicial",
-          description: "Análise do modelo de negócio, objetivos dos sócios e definição da estrutura societária mais adequada."
+          title: "Análise Estratégica do Negócio",
+          description: "Entendimento profundo do modelo de negócio, objetivos de dominação e definição da estrutura societária como arma competitiva."
         },
         {
           step: 2,
-          title: "Elaboração dos Atos Constitutivos",
-          description: "Redação do contrato social ou estatuto social, definindo direitos e obrigações dos sócios e administradores."
+          title: "Arquitetura Jurídica Personalizada",
+          description: "Redação de atos constitutivos como mapas de rota para o sucesso, definindo direitos e blindando relações entre sócios e administradores."
         },
         {
           step: 3,
-          title: "Registros e Licenças",
-          description: "Protocolo na Junta Comercial, obtenção do CNPJ e demais registros necessários para início das atividades."
+          title: "Blindagem Regulatória Completa",
+          description: "Protocolo estratégico em Juntas Comerciais, obtenção de CNPJ e registros necessários para dominar desde o primeiro dia de operação."
         },
         {
           step: 4,
-          title: "Licenças Específicas",
-          description: "Orientação para obtenção de licenças específicas do ramo de atividade junto aos órgãos competentes."
+          title: "Licenciamento Setorial Estratégico",
+          description: "Orientação especializada para obtenção de licenças específicas, transformando complexidade regulatória em vantagem competitiva."
         },
         {
           step: 5,
-          title: "Entrega e Orientações",
-          description: "Entrega de toda documentação da empresa constituída e orientações sobre obrigações societárias e fiscais."
+          title: "Entrega de Fortaleza Empresarial",
+          description: "Entrega completa da documentação e orientações estratégicas sobre obrigações societárias que maximizam proteção e oportunidades."
         }
       ]}
       testimonials={[
         {
-          name: "Ricardo M., Empreendedor",
-          quote: "A assessoria foi fundamental para estruturar minha empresa da forma mais eficiente. Economizei impostos desde o primeiro mês de funcionamento."
+          name: "TechStart Innovation",
+          quote: "A estrutura societária criada foi nossa vantagem competitiva desde o dia um. Crescemos 400% em dois anos com total proteção jurídica e otimização fiscal."
         },
         {
-          name: "StartTech Inovação",
-          quote: "O acompanhamento durante toda a constituição foi excepcional. Nossa empresa nasceu com uma estrutura sólida e bem planejada."
+          name: "Holding Empresarial Alpha",
+          quote: "Não apenas constituíram nossa empresa, arquitetaram um império. A estrutura permite expansões estratégicas e protege nossos ativos como uma fortaleza."
         },
         {
-          name: "Grupo Familiar Investimentos",
-          quote: "A escolha da estrutura societária sugerida facilitou nossa governança e otimizou nossa carga tributária significativamente."
+          name: "Grupo Industrial Beta",
+          quote: "A visão estratégica na constituição nos poupou milhões em reorganizações futuras. Nascemos prontos para dominar o mercado."
         }
       ]}
       faq={[
         {
-          question: "Qual a diferença entre os tipos societários disponíveis?",
-          answer: "Os principais tipos são: LTDA (limitada) - mais comum, com responsabilidade limitada ao capital social; SA (sociedade anônima) - para empresas de grande porte ou com captação de investimento; EIRELI - para empresário individual com responsabilidade limitada; MEI - para pequenos negócios com faturamento limitado. Cada tipo tem características específicas de responsabilidade, tributação e governança."
+          question: "Como a estrutura societária pode ser uma vantagem competitiva?",
+          answer: "A escolha estratégica do tipo societário (LTDA, SA, EIRELI) não é apenas conformidade legal - é uma arma competitiva. Estruturamos para maximizar proteção patrimonial, otimizar tributação, facilitar captação de investimento e preparar para futuras expansões. Cada cláusula é pensada para criar vantagem, não apenas cumprir lei."
         },
         {
-          question: "Quanto tempo demora para constituir uma empresa?",
-          answer: "O prazo varia de 15 a 45 dias úteis, dependendo da complexidade da estrutura societária, tipo de atividade e órgãos envolvidos. Empresas simples (LTDA comum) costumam ficar prontas em 15-20 dias, enquanto estruturas mais complexas ou atividades regulamentadas podem demorar mais tempo devido às licenças específicas necessárias."
+          question: "Qual o diferencial de uma constituição estratégica versus tradicional?",
+          answer: "Enquanto escritórios tradicionais apenas 'abrem empresas', nós arquitetamos impérios. Analisamos objetivos de longo prazo, planejamos crescimento, estruturamos para eficiência fiscal máxima e criamos documentos que antecipam cenários futuros. É a diferença entre construir uma casa e construir uma fortaleza."
         },
         {
-          question: "É possível alterar a estrutura societária depois da constituição?",
-          answer: "Sim, é possível fazer alterações societárias após a constituição, como mudança de tipo societário, inclusão/exclusão de sócios, alteração de capital social, mudança de administração, etc. No entanto, algumas alterações podem ter custos e implicações tributárias, por isso é importante planejar bem a estrutura inicial."
+          question: "Como garantem proteção máxima desde a constituição?",
+          answer: "Implementamos blindagem jurídica multicamadas: escolha de tipo societário que limita responsabilidade, cláusulas que protegem sócios minoritários, estruturas que segregam riscos operacionais, planejamento sucessório preventivo e documentação que previne conflitos futuros. Proteção não é opcional - é mandatória."
         }
       ]}
       relatedServices={[
@@ -84,8 +84,8 @@ const ConstituicaoEmpresasService = () => {
           path: "/servicos/contratos-empresariais"
         },
         {
-          name: "Fusões e Aquisições",
-          path: "/servicos/fusoes-aquisicoes"
+          name: "Reestruturação Societária",
+          path: "/servicos/reestruturacao-societaria"
         }
       ]}
       mainAreaPath="/empresarial"
