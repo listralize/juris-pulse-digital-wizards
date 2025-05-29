@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -19,7 +20,7 @@ const partners = [
   },
   {
     id: 'serafim',
-    name: 'Dr. Rafael Serafim',
+    name: 'Dr. Vinicius Serafim',
     title: 'Advogado Sócio',
     oab: 'OAB/GO: 67.790',
     email: 'serafim@stadv.com',
