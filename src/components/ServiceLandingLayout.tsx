@@ -163,11 +163,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* Benefits Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
             Benefícios e Vantagens
           </h2>
           
-          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Nossa assessoria jurídica proporciona diversos benefícios para você
           </p>
           
@@ -209,11 +209,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* Process Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
             Como Funciona o Processo
           </h2>
           
-          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Entenda o passo a passo de como trabalhamos para resolver seu caso
           </p>
           
@@ -248,11 +248,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* Testimonials */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
             O que Nossos Clientes Dizem
           </h2>
           
-          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Histórias de sucesso compartilhadas por quem confiou em nossos serviços
           </p>
           
@@ -295,11 +295,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* FAQ Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
             Perguntas Frequentes
           </h2>
           
-          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Respostas para as dúvidas mais comuns sobre nossos serviços
           </p>
           
@@ -334,15 +334,15 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {relatedServices && relatedServices.length > 0 && (
         <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
           <div className="max-w-6xl mx-auto">
-            <h2 className={`text-2xl md:text-3xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
+            <h2 className={`text-2xl md:text-3xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
               Serviços Relacionados
             </h2>
             
-            <p className={`mb-8 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            <p className={`mb-8 text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
               Explore outros serviços que podem ser de seu interesse
             </p>
             
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 justify-center">
               {relatedServices.map((service, index) => (
                 <Link 
                   key={index}
