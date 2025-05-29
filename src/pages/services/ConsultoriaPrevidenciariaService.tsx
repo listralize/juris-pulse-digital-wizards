@@ -5,94 +5,82 @@ import ServiceLandingLayout from '../../components/ServiceLandingLayout';
 const ConsultoriaPrevidenciariaService = () => {
   return (
     <ServiceLandingLayout
-      serviceArea="Direito Previdenciário"
-      serviceName="Consultoria e Planejamento Previdenciário"
-      serviceDescription="Planejamento estratégico personalizado para otimização de benefícios previdenciários. Análise detalhada do histórico contributivo, simulação de cenários e desenvolvimento de estratégias para maximizar a renda de aposentadoria, com foco no planejamento inteligente do futuro previdenciário."
+      serviceArea="Direito do Trabalho"
+      serviceName="Consultoria Previdenciária"
+      serviceDescription="Orientação especializada sobre contribuições previdenciárias, benefícios e impactos nas relações de trabalho, garantindo conformidade e otimização de custos."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
+          title: "Otimização de Custos",
+          description: "Estratégias para redução legal dos encargos previdenciários sem prejudicar os direitos dos trabalhadores."
+        },
+        {
+          title: "Conformidade Previdenciária",
+          description: "Garantia de cumprimento correto das obrigações previdenciárias, evitando multas e autuações."
+        },
+        {
           title: "Planejamento Estratégico",
-          description: "Análise completa do histórico contributivo e projeção de cenários para otimização do benefício futuro."
-        },
-        {
-          title: "Simulação de Renda",
-          description: "Cálculos precisos e simulações detalhadas para projeção do valor da aposentadoria em diferentes cenários."
-        },
-        {
-          title: "Otimização de Contribuições",
-          description: "Estratégias para maximizar o valor do benefício através de planejamento contributivo inteligente."
+          description: "Desenvolvimento de estratégias previdenciárias que se alinhem aos objetivos de negócio da empresa."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Auditoria Previdenciária",
-          description: "Análise forense completa do histórico contributivo, identificando lacunas, inconsistências e oportunidades."
+          title: "Análise da Folha de Pagamento",
+          description: "Revisão detalhada da folha de pagamento e cálculo das contribuições previdenciárias."
         },
         {
           step: 2,
-          title: "Projeção de Cenários",
-          description: "Modelagem de múltiplos cenários de aposentadoria com diferentes estratégias e tempos de contribuição."
+          title: "Identificação de Oportunidades",
+          description: "Mapeamento de oportunidades de otimização e adequação das práticas previdenciárias."
         },
         {
           step: 3,
-          title: "Planejamento Personalizado",
-          description: "Desenvolvimento de estratégia sob medida para maximizar o benefício e minimizar riscos previdenciários."
+          title: "Plano de Adequação",
+          description: "Elaboração de plano para implementação das melhorias identificadas de forma gradual e segura."
         },
         {
           step: 4,
-          title: "Simulações Atuariais",
-          description: "Cálculos precisos utilizando ferramentas atuariais avançadas para projeção da renda futura."
+          title: "Implementação",
+          description: "Execução das medidas de otimização com acompanhamento jurídico especializado."
         },
         {
           step: 5,
-          title: "Monitoramento Contínuo",
-          description: "Acompanhamento periódico e ajustes na estratégia conforme mudanças na legislação e situação do cliente."
+          title: "Monitoramento",
+          description: "Acompanhamento contínuo para garantir manutenção da conformidade e benefícios obtidos."
         }
       ]}
       testimonials={[
         {
-          name: "Roberto Almeida",
-          quote: "O planejamento previdenciário aumentou minha aposentadoria em 40%. Investimento que se pagou muito antes do que imaginei."
+          name: "Empresa de Serviços",
+          quote: "A consultoria previdenciária resultou em economia significativa nos encargos mensais, mantendo total conformidade legal."
         },
         {
-          name: "Carla Mendes",
-          quote: "Com a consultoria, descobri que poderia me aposentar 3 anos antes mantendo o mesmo valor. Mudou completamente meus planos."
-        },
-        {
-          name: "Eduardo Lima",
-          quote: "As simulações me mostraram o caminho exato para maximizar meu benefício. Planejamento impecável e resultados excepcionais."
+          name: "Indústria Farmacêutica",
+          quote: "O planejamento previdenciário nos ajudou a evitar autuações e otimizar nossos custos de folha de pagamento."
         }
       ]}
       faq={[
         {
-          question: "Quando devo começar o planejamento previdenciário?",
-          answer: "O ideal é iniciar o mais cedo possível, preferencialmente com pelo menos 10-15 anos antes da aposentadoria desejada."
+          question: "Como pode ser reduzida a carga previdenciária legalmente?",
+          answer: "Através de estratégias como: adequação do enquadramento sindical, revisão de verbas salariais, implementação de benefícios não tributáveis, análise de isenções aplicáveis e estruturação adequada da remuneração."
         },
         {
-          question: "Como funciona a simulação de renda?",
-          answer: "Utilizamos ferramentas atuariais para calcular diferentes cenários baseados no seu histórico contributivo e projeções futuras."
-        },
-        {
-          question: "O planejamento garante aumento no valor da aposentadoria?",
-          answer: "O planejamento identifica oportunidades de otimização, mas o resultado depende da situação específica de cada cliente."
-        },
-        {
-          question: "Posso alterar minha estratégia durante o planejamento?",
-          answer: "Sim, oferecemos monitoramento contínuo e ajustes na estratégia conforme mudanças na legislação ou na sua situação."
+          question: "Quais são as principais obrigações previdenciárias das empresas?",
+          answer: "As empresas devem recolher contribuições sobre a folha de salários, enviar informações através do eSocial, manter documentação adequada, cumprir prazos de recolhimento e declaração, e observar as alíquotas corretas conforme o regime tributário."
         }
       ]}
       relatedServices={[
         {
-          name: "Benefícios Previdenciários",
-          path: "/servicos/beneficios-previdenciarios"
+          name: "Assessoria Trabalhista",
+          path: "/servicos/assessoria-trabalhista"
         },
         {
-          name: "Reconhecimento de Tempo Especial",
-          path: "/servicos/tempo-especial"
+          name: "Compliance Trabalhista",
+          path: "/servicos/compliance-trabalhista"
         }
       ]}
-      mainAreaPath="/previdenciario"
+      mainAreaPath="/trabalho"
     />
   );
 };

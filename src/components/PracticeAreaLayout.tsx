@@ -39,7 +39,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       />
       
       <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
-        <div className="max-w-6xl">
+        <div className="max-w-6xl mx-auto">
           {children}
         </div>
       </section>

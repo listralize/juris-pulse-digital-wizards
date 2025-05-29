@@ -7,89 +7,85 @@ const BeneficiosPrevidenciariosService = () => {
     <ServiceLandingLayout
       serviceArea="Direito Previdenciário"
       serviceName="Benefícios Previdenciários"
-      serviceDescription="Assessoria completa para obtenção de aposentadorias, pensões, auxílios e demais benefícios previdenciários. Atuação especializada em todas as modalidades de benefícios do INSS e regimes próprios de previdência social, com planejamento estratégico e acompanhamento processual completo."
+      serviceDescription="Assessoria completa para obtenção de aposentadorias, pensões, auxílios e outros benefícios previdenciários, garantindo seus direitos junto ao INSS e outros órgãos previdenciários."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Aposentadorias Completas",
-          description: "Assessoria para todas as modalidades: por idade, tempo de contribuição, especial, por invalidez, rural e da pessoa com deficiência."
+          title: "Análise Especializada do Caso",
+          description: "Avaliação detalhada do histórico contributivo e identificação da melhor estratégia para obtenção do benefício."
         },
         {
-          title: "Benefícios por Incapacidade",
-          description: "Auxílio-doença, auxílio-acidente e aposentadoria por invalidez com acompanhamento em perícias médicas do INSS."
+          title: "Maximização do Valor",
+          description: "Orientação para obtenção do maior valor possível de benefício conforme sua situação específica."
         },
         {
-          title: "Pensões e Auxílios",
-          description: "Pensão por morte, auxílio-reclusão, salário-maternidade e BPC/LOAS com suporte completo aos dependentes."
+          title: "Acompanhamento Completo",
+          description: "Representação em todas as fases do processo, desde o requerimento administrativo até eventual ação judicial."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Análise Previdenciária",
-          description: "Avaliação completa do histórico contributivo, identificação de direitos e análise de elegibilidade para benefícios."
+          title: "Análise Documental",
+          description: "Levantamento e análise de toda documentação previdenciária, incluindo CNIS, vínculos empregatícios e contribuições."
         },
         {
           step: 2,
           title: "Planejamento Estratégico",
-          description: "Desenvolvimento de estratégia personalizada para otimização do benefício e definição do melhor momento para requerimento."
+          description: "Definição da melhor modalidade de aposentadoria ou benefício a ser requerido, considerando todas as variáveis."
         },
         {
           step: 3,
-          title: "Documentação e Requerimento",
-          description: "Organização de documentos, elaboração de requerimentos e protocolo junto ao INSS ou regime próprio."
+          title: "Requerimento Administrativo",
+          description: "Protocolo do pedido junto ao INSS com toda documentação necessária e acompanhamento da análise."
         },
         {
           step: 4,
-          title: "Acompanhamento Processual",
-          description: "Monitoramento do andamento, acompanhamento em perícias médicas quando necessário e interposição de recursos."
+          title: "Recursos e Contestações",
+          description: "Interposição de recursos em caso de indeferimento ou valor inferior ao devido, fundamentando tecnicamente a pretensão."
         },
         {
           step: 5,
-          title: "Ação Judicial se Necessário",
-          description: "Ajuizamento de ação judicial em caso de indeferimento ou concessão com valor incorreto."
+          title: "Ação Judicial (se necessário)",
+          description: "Ajuizamento de ação judicial quando esgotadas as vias administrativas, buscando a concessão do benefício na Justiça."
         }
       ]}
       testimonials={[
         {
-          name: "Maria Silva",
-          quote: "Consegui minha aposentadoria especial após 15 anos de tentativas. O planejamento foi perfeito e recebi todos os atrasados."
+          name: "Maria S., Aposentada",
+          quote: "Consegui minha aposentadoria especial que havia sido negada pelo INSS. O acompanhamento jurídico foi fundamental para provar minha exposição a agentes nocivos."
         },
         {
-          name: "João Santos",
-          quote: "Meu auxílio-doença foi concedido rapidamente com o acompanhamento jurídico. Senti segurança em todo o processo."
+          name: "João P., Beneficiário",
+          quote: "Após anos tentando sozinho, finalmente obtive meu auxílio-doença com o valor correto e retroativo desde a data correta de início da incapacidade."
         },
         {
-          name: "Ana Costa",
-          quote: "A pensão por morte foi concedida sem complicações. O suporte da equipe foi fundamental em um momento tão difícil."
+          name: "Ana R., Pensionista",
+          quote: "A assessoria para obtenção da pensão por morte foi essencial. Recebi orientação completa e consegui o benefício sem complicações."
         }
       ]}
       faq={[
         {
-          question: "Quais documentos preciso para solicitar aposentadoria?",
-          answer: "Documentos pessoais, carteira de trabalho, carnês de contribuição, certidões de tempo de serviço e, se aplicável, laudos médicos ou de atividade especial."
+          question: "Quais são os tipos de aposentadoria disponíveis?",
+          answer: "Os principais tipos são: aposentadoria por idade (65 anos homens/62 anos mulheres), aposentadoria por tempo de contribuição (35 anos homens/30 anos mulheres), aposentadoria especial (para atividades insalubres/perigosas), aposentadoria por invalidez (incapacidade permanente) e aposentadoria da pessoa com deficiência. Cada modalidade tem regras específicas e pode haver regras de transição para quem já contribuía antes da reforma da previdência."
         },
         {
-          question: "Quanto tempo demora para sair um benefício?",
-          answer: "O prazo legal é de até 45 dias, mas pode variar conforme a complexidade do caso e necessidade de perícia médica."
+          question: "Como comprovar tempo de contribuição em atividade rural?",
+          answer: "A comprovação pode ser feita através de: declaração do sindicato de trabalhadores rurais, contratos de arrendamento/parceria, notas fiscais de venda de produção rural, comprovantes de financiamento bancário para atividade rural, cadastro no INCRA, declarações de vizinhos (início de prova material), entre outros. É importante reunir o máximo de documentos possível para fortalecer a comprovação."
         },
         {
-          question: "Posso trabalhar recebendo auxílio-doença?",
-          answer: "Não, o auxílio-doença é incompatível com o exercício de atividade remunerada, salvo exceções específicas previstas em lei."
-        },
-        {
-          question: "Como funciona a aposentadoria especial?",
-          answer: "É concedida a trabalhadores expostos a agentes nocivos à saúde, com tempo de contribuição reduzido (15, 20 ou 25 anos conforme o grau de exposição)."
+          question: "É possível aposentar por invalidez e depois voltar a trabalhar?",
+          answer: "A aposentadoria por invalidez pressupõe incapacidade total e permanente para o trabalho. Se houver recuperação da capacidade laboral, o benefício deve ser cessado após perícia médica. Existe a possibilidade de reabilitação profissional pelo INSS. Em casos de recuperação parcial, pode haver conversão para auxílio-acidente. O retorno ao trabalho durante o recebimento de aposentadoria por invalidez pode levar ao cancelamento do benefício."
         }
       ]}
       relatedServices={[
         {
           name: "Planejamento Previdenciário",
-          path: "/servicos/consultoria-previdenciaria"
+          path: "/servicos/planejamento-previdenciario"
         },
         {
-          name: "Revisões de Aposentadoria",
-          path: "/servicos/revisoes-previdenciarias"
+          name: "Revisão de Benefícios",
+          path: "/servicos/revisao-beneficios"
         }
       ]}
       mainAreaPath="/previdenciario"

@@ -96,19 +96,19 @@ const EmpresarialPage = () => {
       currentArea="empresarial"
     >
       <div className="space-y-16">
-        <div className="text-left">
+        <div className="text-center">
           <h2 className={`text-4xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
             🏢 Serviços Jurídicos em Direito Empresarial
           </h2>
-          <p className={`text-lg max-w-4xl ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg max-w-4xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Atuação especializada em todas as esferas do Direito Empresarial, desde constituição e estruturação até fusões e aquisições, garantindo crescimento seguro e estratégico para seu negócio.
           </p>
         </div>
 
         {serviceCategories.map((category, categoryIndex) => (
           <div key={categoryIndex} className="space-y-12">
-            <div className="text-left space-y-4">
-              <div className="flex justify-start">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
                 <div className={`p-4 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
                   {category.icon}
                 </div>
@@ -116,12 +116,12 @@ const EmpresarialPage = () => {
               <h3 className={`text-3xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
                 {category.title}
               </h3>
-              <p className={`text-lg max-w-3xl ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <p className={`text-lg max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                 {category.description}
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {category.services.map((service, serviceIndex) => (
                 <Card 
                   key={serviceIndex}
