@@ -31,6 +31,11 @@ const PrevidenciarioPage = () => {
           name: "Aposentadoria por Invalidez",
           description: "Representação para trabalhadores permanentemente incapacitados.",
           path: "/servicos/aposentadoria-invalidez"
+        },
+        {
+          name: "Aposentadoria Especial",
+          description: "Benefício para trabalhadores expostos a agentes nocivos à saúde.",
+          path: "/servicos/aposentadoria-especial"
         }
       ]
     },
@@ -45,6 +50,11 @@ const PrevidenciarioPage = () => {
           path: "/servicos/auxilio-doenca"
         },
         {
+          name: "Auxílio-Acidente",
+          description: "Benefício indenizatório para sequelas que reduzam a capacidade de trabalho.",
+          path: "/servicos/auxilio-acidente"
+        },
+        {
           name: "Benefícios Previdenciários",
           description: "Assessoria geral para aposentadorias, pensões, auxílios e outros benefícios.",
           path: "/servicos/beneficios-previdenciarios"
@@ -52,10 +62,20 @@ const PrevidenciarioPage = () => {
       ]
     },
     {
-      title: "Benefícios Assistenciais",
+      title: "Benefícios Familiares",
       icon: <Users className="w-8 h-8" />,
-      description: "Orientação para benefícios assistenciais e de proteção social.",
+      description: "Suporte para benefícios destinados à família e proteção social.",
       services: [
+        {
+          name: "Pensão por Morte",
+          description: "Suporte financeiro para dependentes de segurado falecido.",
+          path: "/servicos/pensao-morte"
+        },
+        {
+          name: "Salário-Maternidade",
+          description: "Benefício para licença maternidade e adoção.",
+          path: "/servicos/salario-maternidade"
+        },
         {
           name: "BPC/LOAS",
           description: "Assessoria para Benefício de Prestação Continuada para idosos e deficientes.",

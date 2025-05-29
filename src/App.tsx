@@ -100,6 +100,10 @@ import AposentadoriaIdadeService from './pages/services/AposentadoriaIdadeServic
 import AuxilioDoencaService from './pages/services/AuxilioDoencaService';
 import AposentadoriaTempoContribuicaoService from './pages/services/AposentadoriaTempoContribuicaoService';
 import AposentadoriaInvalidezService from './pages/services/AposentadoriaInvalidezService';
+import AposentadoriaEspecialService from './pages/services/AposentadoriaEspecialService';
+import PensaoMorteService from './pages/services/PensaoMorteService';
+import SalarioMaternidadeService from './pages/services/SalarioMaternidadeService';
+import AuxilioAcidenteService from './pages/services/AuxilioAcidenteService';
 import BPCService from './pages/services/BPCService';
 import RevisaoVidaTodaService from './pages/services/RevisaoVidaTodaService';
 import PlanejamentoPrevidenciarioService from './pages/services/PlanejamentoPrevidenciarioService';
@@ -225,6 +229,10 @@ function App() {
           <Route path="/servicos/auxilio-doenca" element={<AuxilioDoencaService />} />
           <Route path="/servicos/aposentadoria-tempo-contribuicao" element={<AposentadoriaTempoContribuicaoService />} />
           <Route path="/servicos/aposentadoria-invalidez" element={<AposentadoriaInvalidezService />} />
+          <Route path="/servicos/aposentadoria-especial" element={<AposentadoriaEspecialService />} />
+          <Route path="/servicos/pensao-morte" element={<PensaoMorteService />} />
+          <Route path="/servicos/salario-maternidade" element={<SalarioMaternidadeService />} />
+          <Route path="/servicos/auxilio-acidente" element={<AuxilioAcidenteService />} />
           <Route path="/servicos/bpc-loas" element={<BPCService />} />
           <Route path="/servicos/revisao-vida-toda" element={<RevisaoVidaTodaService />} />
           <Route path="/servicos/planejamento-previdenciario" element={<PlanejamentoPrevidenciarioService />} />
