@@ -11,7 +11,7 @@ const partners = [
   {
     id: 'trombela',
     name: 'Dr. Enzo Trombela',
-    title: 'Advogado',
+    title: 'Advogado Sócio',
     oab: 'OAB/GO: 67.754',
     email: 'trombela@stadv.com',
     image: '/lovable-uploads/9b5a5e2d-bc9e-4a28-880e-7b2acf0ff5a6.png',
@@ -20,11 +20,20 @@ const partners = [
   {
     id: 'serafim',
     name: 'Dr. Rafael Serafim',
-    title: 'Advogado',
+    title: 'Advogado Sócio',
     oab: 'OAB/GO: 67.790',
     email: 'serafim@stadv.com',
     image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
     description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
+  },
+  {
+    id: 'lanzana',
+    name: 'Dr. João Victor Lanzana',
+    title: 'Advogado Associado',
+    oab: 'OAB/GO: 71.163',
+    email: 'lanzana@stadv.com',
+    image: '/lovable-uploads/d11e57cf-ddb3-4377-9caf-91e75503165b.png',
+    description: 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Pós-graduado em Direito Penal e Processo Penal pelo Gran Centro Universitário. Atuação em direito privado, especialmente em demandas cíveis, imobiliárias e do consumidor.'
   }
 ];
 
@@ -95,10 +104,10 @@ const Partners = () => {
           ref={titleRef}
           className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
         >
-          Nossos Sócios
+          Nossa Equipe
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {partners.map((partner, index) => (
             <div 
               key={partner.id}
@@ -106,7 +115,7 @@ const Partners = () => {
               ref={el => cardsRef.current[index] = el}
             >
               <div className="p-6 md:p-8">
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                <div className="flex flex-col items-center text-center gap-6">
                   <div className="w-32 h-32 overflow-hidden flex-shrink-0 border-2 border-white/20">
                     <img 
                       src={partner.image} 
@@ -114,7 +123,7 @@ const Partners = () => {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="flex-grow text-center md:text-left">
+                  <div className="flex-grow">
                     <h3 className={`text-2xl md:text-3xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                       {partner.name}
                     </h3>
@@ -127,7 +136,7 @@ const Partners = () => {
                     >
                       {partner.email}
                     </a>
-                    <p className={`mt-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`mt-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {partner.description}
                     </p>
                   </div>
