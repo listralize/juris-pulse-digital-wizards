@@ -142,6 +142,9 @@ import ObrigadoPage from './pages/Obrigado';
 import ADIADCADPFService from './pages/services/ADIADCADPFService';
 import AcoesOriginariasSuperioresService from './pages/services/AcoesOriginariasSuperioresService';
 import RecursosExtraordinarioEspecialService from './pages/services/RecursosExtraordinarioEspecialService';
+import MandadoSegurancaCivilService from './pages/services/MandadoSegurancaCivilService';
+import HabeasCorpusDataCivilService from './pages/services/HabeasCorpusDataCivilService';
+import MandadoInjuncaoAcaoPopularService from './pages/services/MandadoInjuncaoAcaoPopularService';
 
 // ScrollToTop component that uses the location hook
 const ScrollToTop = () => {
