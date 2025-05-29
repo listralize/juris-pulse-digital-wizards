@@ -74,6 +74,11 @@ import HabeasCorpusService from './pages/services/HabeasCorpusService';
 import HabeasDataService from './pages/services/HabeasDataService';
 import MandadoInjuncaoService from './pages/services/MandadoInjuncaoService';
 import ConsultoriaConstitucionalService from './pages/services/ConsultoriaConstitucionalService';
+import ADIService from './pages/services/ADIService';
+import ADCService from './pages/services/ADCService';
+import ADOService from './pages/services/ADOService';
+import ADPFService from './pages/services/ADPFService';
+import ReclamacaoConstitucionalService from './pages/services/ReclamacaoConstitucionalService';
 
 // Administrativo Services
 import LicitacoesContratosService from './pages/services/LicitacoesContratosService';
@@ -203,6 +208,11 @@ function App() {
           <Route path="/servicos/habeas-data" element={<HabeasDataService />} />
           <Route path="/servicos/mandado-injuncao" element={<MandadoInjuncaoService />} />
           <Route path="/servicos/consultoria-constitucional" element={<ConsultoriaConstitucionalService />} />
+          <Route path="/servicos/adi" element={<ADIService />} />
+          <Route path="/servicos/adc" element={<ADCService />} />
+          <Route path="/servicos/ado" element={<ADOService />} />
+          <Route path="/servicos/adpf" element={<ADPFService />} />
+          <Route path="/servicos/reclamacao-constitucional" element={<ReclamacaoConstitucionalService />} />
 
           {/* Administrativo Services */}
           <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
