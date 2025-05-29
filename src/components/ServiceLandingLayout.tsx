@@ -163,11 +163,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* Benefits Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
             Benefícios e Vantagens
           </h2>
           
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Nossa assessoria jurídica proporciona diversos benefícios para você
           </p>
           
@@ -209,59 +209,38 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* Process Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
             Como Funciona o Processo
           </h2>
           
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Entenda o passo a passo de como trabalhamos para resolver seu caso
           </p>
           
-          <div className="relative">
-            {/* Connection line */}
-            <div className="absolute left-[26px] md:left-1/2 top-10 bottom-10 w-1 bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-20 hidden md:block"></div>
-            
-            <div className="space-y-16">
-              {process.map((step, index) => (
-                <div 
-                  key={index}
-                  className="relative"
+          <div className="space-y-8">
+            {process.map((step, index) => (
+              <div 
+                key={index}
+                className={`flex flex-col md:flex-row items-start gap-6 p-8 rounded-xl ${isDark 
+                  ? 'bg-white/5 border border-white/10' 
+                  : 'bg-white border border-black/5'} shadow-md`}
+              >
+                <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold 
+                  ${isDark ? 'bg-white text-black' : 'bg-black text-white'} shadow-lg`}
                 >
-                  <div className={`flex flex-col md:flex-row md:items-center gap-6 md:gap-12 ${
-                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                  }`}
-                >
-                    <div className="md:w-1/2 flex md:justify-center">
-                      <div className={`flex flex-row md:flex-col items-center gap-6 ${
-                        index % 2 === 0 ? 'md:items-end text-left' : 'md:items-start text-right'
-                      }`}>
-                        <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold z-10 
-                          ${isDark ? 'bg-white text-black' : 'bg-black text-white'} shadow-lg`}
-                        >
-                          {step.step}
-                        </div>
-                        
-                        <div className={`flex-1 md:flex-initial`}>
-                          <h3 className={`text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                            {step.title}
-                          </h3>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="md:w-1/2">
-                      <div className={`p-8 rounded-xl ${isDark 
-                        ? 'bg-white/5 border border-white/10' 
-                        : 'bg-white border border-black/5'} shadow-md`}>
-                        <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
+                  {step.step}
+                </div>
+                
+                <div className="flex-1">
+                  <h3 className={`text-xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+                    {step.title}
+                  </h3>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {step.description}
+                  </p>
                 </div>
               </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -269,11 +248,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* Testimonials */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black/80' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
             O que Nossos Clientes Dizem
           </h2>
           
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Histórias de sucesso compartilhadas por quem confiou em nossos serviços
           </p>
           
@@ -316,11 +295,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {/* FAQ Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-center ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
             Perguntas Frequentes
           </h2>
           
-          <p className={`text-lg max-w-3xl mx-auto text-center mb-12 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg mb-12 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Respostas para as dúvidas mais comuns sobre nossos serviços
           </p>
           
@@ -355,11 +334,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       {relatedServices && relatedServices.length > 0 && (
         <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
           <div className="max-w-6xl mx-auto">
-            <h2 className={`text-2xl md:text-3xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+            <h2 className={`text-2xl md:text-3xl font-canela mb-4 text-left ${isDark ? 'text-white' : 'text-black'}`}>
               Serviços Relacionados
             </h2>
             
-            <p className={`mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            <p className={`mb-8 text-left ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
               Explore outros serviços que podem ser de seu interesse
             </p>
             
