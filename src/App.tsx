@@ -77,6 +77,21 @@ import ConsultoriaConstitucionalService from './pages/services/ConsultoriaConsti
 // Administrativo Services
 import LicitacoesContratosService from './pages/services/LicitacoesContratosService';
 import ProcessosAdministrativosService from './pages/services/ProcessosAdministrativosService';
+import AssessoriaLicitacoesService from './pages/services/AssessoriaLicitacoesService';
+import DefesaLicitacoesService from './pages/services/DefesaLicitacoesService';
+import GestaoContratosPublicosService from './pages/services/GestaoContratosPublicosService';
+import PADSindicanciaService from './pages/services/PADSindicanciaService';
+import ResponsabilidadeEstadoService from './pages/services/ResponsabilidadeEstadoService';
+import DireitosServidoresService from './pages/services/DireitosServidoresService';
+import DesapropriacaoService from './pages/services/DesapropriacaoService';
+import AtosAdministrativosService from './pages/services/AtosAdministrativosService';
+import ImprobidadeAdministrativaService from './pages/services/ImprobidadeAdministrativaService';
+import RegulacaoFiscalizacaoService from './pages/services/RegulacaoFiscalizacaoService';
+import DireitoAmbientalAdministrativoService from './pages/services/DireitoAmbientalAdministrativoService';
+import DireitoUrbanisticoService from './pages/services/DireitoUrbanisticoService';
+import InfraestruturaProjetos from './pages/services/InfraestruturaProjetos';
+import ConsultoriaAdministrativoService from './pages/services/ConsultoriaAdministrativoService';
+import TribunaisContasService from './pages/services/TribunaisContasService';
 
 // Previdenciário Services
 import BeneficiosPrevidenciariosService from './pages/services/BeneficiosPrevidenciariosService';
@@ -180,6 +195,21 @@ function App() {
           {/* Administrativo Services */}
           <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
           <Route path="/servicos/processos-administrativos" element={<ProcessosAdministrativosService />} />
+          <Route path="/servicos/assessoria-licitacoes" element={<AssessoriaLicitacoesService />} />
+          <Route path="/servicos/defesa-licitacoes" element={<DefesaLicitacoesService />} />
+          <Route path="/servicos/gestao-contratos-publicos" element={<GestaoContratosPublicosService />} />
+          <Route path="/servicos/pad-sindicancia" element={<PADSindicanciaService />} />
+          <Route path="/servicos/responsabilidade-estado" element={<ResponsabilidadeEstadoService />} />
+          <Route path="/servicos/direitos-servidores" element={<DireitosServidoresService />} />
+          <Route path="/servicos/desapropriacao" element={<DesapropriacaoService />} />
+          <Route path="/servicos/atos-administrativos" element={<AtosAdministrativosService />} />
+          <Route path="/servicos/improbidade-administrativa" element={<ImprobidadeAdministrativaService />} />
+          <Route path="/servicos/regulacao-fiscalizacao" element={<RegulacaoFiscalizacaoService />} />
+          <Route path="/servicos/direito-ambiental-administrativo" element={<DireitoAmbientalAdministrativoService />} />
+          <Route path="/servicos/direito-urbanistico" element={<DireitoUrbanisticoService />} />
+          <Route path="/servicos/infraestrutura-projetos" element={<InfraestruturaProjetos />} />
+          <Route path="/servicos/consultoria-administrativo" element={<ConsultoriaAdministrativoService />} />
+          <Route path="/servicos/tribunais-contas" element={<TribunaisContasService />} />
 
           {/* Previdenciário Services */}
           <Route path="/servicos/beneficios-previdenciarios" element={<BeneficiosPrevidenciariosService />} />
