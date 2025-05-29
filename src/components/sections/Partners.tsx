@@ -33,6 +33,15 @@ const partners = [
     email: 'lanzana@stadv.com',
     image: '/lovable-uploads/d11e57cf-ddb3-4377-9caf-91e75503165b.png',
     description: 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Pós-graduado em Direito Penal e Processo Penal pelo Gran Centro Universitário. Atuação em direito privado, especialmente em demandas cíveis, imobiliárias e do consumidor.'
+  },
+  {
+    id: 'rafaella',
+    name: 'Dra. Rafaella Alves Da Silva',
+    title: 'Advogada Associada',
+    oab: 'OAB/GO: 72.342',
+    email: 'rafaella@stadv.com',
+    image: '/lovable-uploads/7dbb1fd3-c3ce-4f91-a88d-95a969448804.png',
+    description: 'Graduada pelo Centro Universitário de Goiás (UniGoiás). Advogada Associada do escritório Serafim & Trombela Advogados. Departamento Comercial.'
   }
 ];
 
@@ -106,7 +115,7 @@ const Partners = () => {
           Nossa Equipe
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {partners.map((partner, index) => (
             <div 
               key={partner.id}
