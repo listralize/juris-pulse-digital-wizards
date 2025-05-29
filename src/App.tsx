@@ -67,6 +67,12 @@ import DesvioFuncaoService from './pages/services/DesvioFuncaoService';
 // Constitucional Services
 import DireitosFundamentaisService from './pages/services/DireitosFundamentaisService';
 import LiberdadesConstitucionaisService from './pages/services/LiberdadesConstitucionaisService';
+import AcoesInconstitucionalidadeService from './pages/services/AcoesInconstitucionalidadeService';
+import MandadoSegurancaService from './pages/services/MandadoSegurancaService';
+import HabeasCorpusService from './pages/services/HabeasCorpusService';
+import HabeasDataService from './pages/services/HabeasDataService';
+import MandadoInjuncaoService from './pages/services/MandadoInjuncaoService';
+import ConsultoriaConstitucionalService from './pages/services/ConsultoriaConstitucionalService';
 
 // Administrativo Services
 import LicitacoesContratosService from './pages/services/LicitacoesContratosService';
@@ -164,6 +170,12 @@ function App() {
           {/* Constitucional Services */}
           <Route path="/servicos/direitos-fundamentais" element={<DireitosFundamentaisService />} />
           <Route path="/servicos/liberdades-constitucionais" element={<LiberdadesConstitucionaisService />} />
+          <Route path="/servicos/acoes-inconstitucionalidade" element={<AcoesInconstitucionalidadeService />} />
+          <Route path="/servicos/mandado-seguranca" element={<MandadoSegurancaService />} />
+          <Route path="/servicos/habeas-corpus" element={<HabeasCorpusService />} />
+          <Route path="/servicos/habeas-data" element={<HabeasDataService />} />
+          <Route path="/servicos/mandado-injuncao" element={<MandadoInjuncaoService />} />
+          <Route path="/servicos/consultoria-constitucional" element={<ConsultoriaConstitucionalService />} />
 
           {/* Administrativo Services */}
           <Route path="/servicos/licitacoes-contratos" element={<LicitacoesContratosService />} />
