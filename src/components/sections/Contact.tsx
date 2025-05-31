@@ -77,7 +77,7 @@ const Contact = () => {
           className="grid grid-cols-1 lg:grid-cols-5 gap-8 overflow-visible"
         >
           {/* Map and Contact info stacked - left side (smaller) */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4 flex flex-col">
             {/* Map - smaller and horizontal */}
             <div className="w-full">
               <div className="h-64 lg:h-72">
@@ -85,15 +85,17 @@ const Contact = () => {
               </div>
             </div>
             
-            {/* Contact info - smaller */}
-            <div className="w-full">
+            {/* Contact info - smaller and aligned with form */}
+            <div className="w-full flex-1">
               <ContactInfo />
             </div>
           </div>
           
           {/* Contact form - larger and more prominent */}
-          <div className="lg:col-span-3">
-            <UnifiedContactForm />
+          <div className="lg:col-span-3 flex">
+            <div className="w-full">
+              <UnifiedContactForm />
+            </div>
           </div>
         </div>
         
