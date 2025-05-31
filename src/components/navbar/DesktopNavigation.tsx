@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavigationItem from './NavigationItem';
 import PracticeAreasDropdown from './PracticeAreasDropdown';
+import ThemeToggle from './ThemeToggle';
 
 interface DesktopNavigationProps {
   activeSection: string;
@@ -42,7 +43,7 @@ const DesktopNavigation = ({
         
         <NavigationItem 
           to="/#socios" 
-          label="Sócios" 
+          label="Nossa Equipe" 
           isActive={activeSection === 'socios'} 
           onClick={e => {
             e.preventDefault();
@@ -69,6 +70,8 @@ const DesktopNavigation = ({
             handleNavigation('contact', '/#contact');
           }} 
         />
+        
+        <ThemeToggle />
       </div>
     </div>
   );

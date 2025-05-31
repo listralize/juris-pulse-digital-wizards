@@ -82,7 +82,7 @@ const MobileNavigation = ({
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
-          Sócios
+          Nossa Equipe
         </Link>
         
         <Link

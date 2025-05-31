@@ -99,11 +99,6 @@ const Navbar = () => {
             />
           </div>
 
-          {/* Theme toggle - on the right for desktop, moved outside contact overlap */}
-          <div className="hidden md:flex absolute right-0">
-            <ThemeToggle />
-          </div>
-
           <div className="flex items-center absolute right-0">
             {/* Mobile menu button */}
             <div className="md:hidden">

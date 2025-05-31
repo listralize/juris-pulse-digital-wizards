@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -61,15 +62,6 @@ const Hero = () => {
       }
     });
     
-    // Subtle glow effect for logo without any animation
-    const logoElement = logoRef.current;
-    if (logoElement) {
-      // Static glow effect - no animation
-      gsap.set(logoElement.querySelector('.logo-glow'), {
-        opacity: 0.7
-      });
-    }
-    
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -88,16 +80,13 @@ const Hero = () => {
           ref={logoRef} 
           className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative"
         >
-          {/* Static glow effect */}
-          <div className="logo-glow absolute inset-0 opacity-70 blur-xl rounded-full bg-white/20"></div>
-          
           <div className="logo-container relative">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
               className="w-full h-auto relative z-10 brightness-150"
               style={{
-                filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
+                filter: 'drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
               }}
             />
           </div>
