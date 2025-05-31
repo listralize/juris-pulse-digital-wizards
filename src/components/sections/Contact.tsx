@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -60,7 +61,7 @@ const Contact = () => {
       className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} pt-32 pb-24 transition-colors duration-500`}
       style={{ paddingTop: '140px' }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-12 relative z-10">
           <h2 className={`text-3xl md:text-4xl font-canela overflow-visible ${isDark ? 'text-white' : 'text-black'}`}>
             Precisa de ajuda jurídica?
@@ -73,20 +74,18 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-12 gap-4 overflow-visible"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 overflow-visible"
         >
-          {/* Left side - Contact info */}
-          <div className="col-span-12 md:col-span-5 lg:col-span-4">
+          {/* Left side - Contact info and Map */}
+          <div className="space-y-6">
             <ContactInfo />
+            <div className="h-80 lg:h-96">
+              <LocationMap />
+            </div>
           </div>
           
-          {/* Middle - Map */}
-          <div className="col-span-12 md:col-span-7 lg:col-span-3 h-auto">
-            <LocationMap />
-          </div>
-          
-          {/* Right - Contact form */}
-          <div className="col-span-12 lg:col-span-5">
+          {/* Right side - Contact form */}
+          <div>
             <UnifiedContactForm />
           </div>
         </div>
