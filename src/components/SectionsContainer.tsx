@@ -30,6 +30,7 @@ const SectionsContainer: React.FC = () => {
   useEffect(() => {
     // Force scroll to top on initial load if no hash
     const hash = window.location.hash.substring(1);
+    console.log('Initial hash:', hash);
     
     if (!hash || hash === 'home') {
       window.scrollTo(0, 0);
@@ -42,10 +43,12 @@ const SectionsContainer: React.FC = () => {
     } else {
       // Try to scroll to the section corresponding to the hash
       const sectionElement = document.getElementById(hash);
+      console.log('Found section for hash:', hash, sectionElement);
       if (sectionElement) {
         setTimeout(() => {
           sectionElement.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+        setActiveSection(hash);
       }
     }
   }, []);
@@ -55,6 +58,7 @@ const SectionsContainer: React.FC = () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
           const sectionId = entry.target.id;
+          console.log('Section intersecting:', sectionId);
           setActiveSection(sectionId);
           
           // Update URL without reloading
@@ -67,14 +71,17 @@ const SectionsContainer: React.FC = () => {
     
     const options = {
       root: null,
-      rootMargin: '0px',
-      threshold: 0.4,
+      rootMargin: '-20% 0px -20% 0px',
+      threshold: 0.3,
     };
     
     const observer = new IntersectionObserver(handleIntersection, options);
     
     sectionsRef.current.forEach((section) => {
-      if (section) observer.observe(section);
+      if (section) {
+        console.log('Observing section:', section.id);
+        observer.observe(section);
+      }
     });
     
     return () => {
@@ -93,7 +100,12 @@ const SectionsContainer: React.FC = () => {
             key={section.id} 
             id={section.id} 
             isActive={true}
-            ref={el => el && (sectionsRef.current[index] = el)}
+            ref={el => {
+              if (el) {
+                sectionsRef.current[index] = el;
+                console.log('Section ref set:', section.id, el);
+              }
+            }}
             className={section.id === 'contact' ? 'pb-0' : ''}
           >
             <Component />

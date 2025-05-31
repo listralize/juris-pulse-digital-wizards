@@ -41,23 +41,26 @@ const Navbar = () => {
   
   // Handle smooth scrolling for anchor links
   const scrollToSection = (sectionId: string) => {
+    console.log('Scrolling to section:', sectionId);
     setIsMenuOpen(false);
     
     if (location.pathname !== '/') {
       // Navigate to home first with the hash
-      navigate('/');
+      navigate(`/#${sectionId}`);
       setTimeout(() => {
         const section = document.getElementById(sectionId);
+        console.log('Found section element:', section);
         if (section) {
-          section.scrollIntoView({ behavior: 'smooth' });
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 100);
+      }, 200);
       return;
     }
     
     const section = document.getElementById(sectionId);
+    console.log('Direct scroll - Found section element:', section);
     if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       // Update URL hash
       if (history.pushState) {
         history.pushState(null, '', `#${sectionId}`);
@@ -68,13 +71,14 @@ const Navbar = () => {
   
   // Navigate to section on home page or specific page
   const handleNavigation = (sectionId: string, path: string) => {
+    console.log('Handle navigation called:', sectionId, path);
     setIsMenuOpen(false);
     
     if (location.pathname === '/') {
       scrollToSection(sectionId);
     } else {
-      navigate('/');
-      setTimeout(() => scrollToSection(sectionId), 100);
+      navigate(`/#${sectionId}`);
+      setTimeout(() => scrollToSection(sectionId), 200);
     }
   };
 

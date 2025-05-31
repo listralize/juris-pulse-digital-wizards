@@ -19,16 +19,18 @@ export const useSectionTransition = (sections: Section[]) => {
     const validIds = sections.map(section => section.id);
     const initialSection = initialHash && validIds.includes(initialHash) ? initialHash : 'home';
     
+    console.log('Initial section:', initialSection);
     setActiveSection(initialSection);
     
     // If there's a hash in the URL, scroll to that section
     if (initialHash && initialHash !== 'home') {
       setTimeout(() => {
         const section = document.getElementById(initialHash);
+        console.log('Scrolling to initial hash section:', initialHash, section);
         if (section) {
           section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 100);
+      }, 300);
     } else {
       // Scroll to top for home section
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -37,10 +39,12 @@ export const useSectionTransition = (sections: Section[]) => {
   
   // Function to transition to a section with improved behavior
   const transitionToSection = (id: string) => {
+    console.log('Transition to section:', id);
     if (isTransitioning || id === activeSection) return;
     setIsTransitioning(true);
     
     const targetSection = document.getElementById(id);
+    console.log('Target section found:', targetSection);
     if (targetSection) {
       // Smoother scroll with animation
       targetSection.scrollIntoView({ 
@@ -61,8 +65,9 @@ export const useSectionTransition = (sections: Section[]) => {
       // Reset transitioning state after animation completes
       setTimeout(() => {
         setIsTransitioning(false);
-      }, 800);
+      }, 1000);
     } else {
+      console.log('Section not found:', id);
       setIsTransitioning(false);
     }
   };
