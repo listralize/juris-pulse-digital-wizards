@@ -74,25 +74,25 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-visible"
+          className="grid grid-cols-1 lg:grid-cols-5 gap-8 overflow-visible"
         >
-          {/* Map and Contact info stacked - left side */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Map - horizontal and larger */}
+          {/* Map and Contact info stacked - left side (smaller) */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Map - smaller and horizontal */}
             <div className="w-full">
-              <div className="h-80 lg:h-96">
+              <div className="h-64 lg:h-72">
                 <LocationMap />
               </div>
             </div>
             
-            {/* Contact info - below map */}
+            {/* Contact info - smaller */}
             <div className="w-full">
               <ContactInfo />
             </div>
           </div>
           
-          {/* Contact form - right side, full height */}
-          <div className="lg:col-span-1">
+          {/* Contact form - larger and more prominent */}
+          <div className="lg:col-span-3">
             <UnifiedContactForm />
           </div>
         </div>
