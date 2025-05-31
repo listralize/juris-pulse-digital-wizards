@@ -25,12 +25,12 @@ const MobileNavigation = ({
 
   return (
     <div className="md:hidden">
-      <div className={`pt-2 pb-4 space-y-1 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500`}>
+      <div className={`pt-4 pb-4 space-y-2 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
         <Link 
           to="/" 
-          className={`block px-3 py-2 rounded-md ${activeSection === 'home'
+          className={`block px-4 py-3 rounded-lg mx-2 ${activeSection === 'home'
             ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
-            : ''} font-medium`}
+            : ''} font-medium text-sm transition-colors duration-200`}
           onClick={() => {
             setIsMenuOpen(false);
             handleNavigation('home', '/');
@@ -40,16 +40,16 @@ const MobileNavigation = ({
         </Link>
         
         <div className="relative space-y-1">
-          <p className="block px-3 py-2 font-medium">Áreas de Atuação</p>
-          <div className="pl-6 space-y-1">
+          <p className="block px-4 py-3 font-medium text-sm mx-2">Áreas de Atuação</p>
+          <div className="pl-4 space-y-1">
             {practiceAreas.map((area) => (
               <Link 
                 key={area.id} 
                 to={area.path} 
-                className={`block px-3 py-2 rounded-md ${
+                className={`block px-4 py-2 rounded-lg mx-2 ${
                   window.location.pathname === area.path 
                   ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
-                  : ''} font-medium`}
+                  : ''} font-medium text-sm transition-colors duration-200`}
                 onClick={() => {
                   setIsMenuOpen(false);
                   navigate(area.path);
@@ -68,7 +68,7 @@ const MobileNavigation = ({
             handleNavigation('about', '/#about');
             setIsMenuOpen(false);
           }}
-          className="block px-3 py-2 rounded-md font-medium"
+          className="block px-4 py-3 rounded-lg mx-2 font-medium text-sm transition-colors duration-200"
         >
           Sobre Nós
         </a>
@@ -80,7 +80,7 @@ const MobileNavigation = ({
             handleNavigation('socios', '/#socios');
             setIsMenuOpen(false);
           }}
-          className="block px-3 py-2 rounded-md font-medium"
+          className="block px-4 py-3 rounded-lg mx-2 font-medium text-sm transition-colors duration-200"
         >
           Nossa Equipe
         </Link>
@@ -92,7 +92,7 @@ const MobileNavigation = ({
             handleNavigation('cliente', '/#cliente');
             setIsMenuOpen(false);
           }}
-          className="block px-3 py-2 rounded-md font-medium"
+          className="block px-4 py-3 rounded-lg mx-2 font-medium text-sm transition-colors duration-200"
         >
           Área do Cliente
         </Link>
@@ -104,7 +104,7 @@ const MobileNavigation = ({
             handleNavigation('contact', '/#contact');
             setIsMenuOpen(false);
           }}
-          className="block px-3 py-2 rounded-md font-medium"
+          className="block px-4 py-3 rounded-lg mx-2 font-medium text-sm transition-colors duration-200"
         >
           Contato
         </a>

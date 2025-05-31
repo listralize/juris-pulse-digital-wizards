@@ -83,9 +83,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 md:py-4 border-b ${isDark ? 'border-white' : 'border-gray-200'} sticky top-0 z-50 w-full transition-colors duration-300`}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="flex justify-center items-center relative h-12 md:h-auto">
+    <nav className={`${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} sticky top-0 z-50 w-full transition-colors duration-300 backdrop-blur-md`}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex justify-center items-center relative h-12">
           {/* Theme toggle - on the left for mobile */}
           <div className="md:hidden absolute left-0 flex">
             <ThemeToggle />

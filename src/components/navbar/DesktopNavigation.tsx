@@ -18,7 +18,7 @@ const DesktopNavigation = ({
 
   return (
     <div className="flex w-full justify-center items-center">
-      <div className="flex items-center space-x-8">
+      <div className="flex items-center space-x-6">
         <NavigationItem 
           to="/" 
           label="Home" 
@@ -71,7 +71,9 @@ const DesktopNavigation = ({
           }} 
         />
         
-        <ThemeToggle />
+        <div className="ml-4 pl-4 border-l border-white/20">
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );
