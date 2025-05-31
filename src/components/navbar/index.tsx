@@ -12,25 +12,26 @@ const Navbar = () => {
   const navigate = useNavigate();
   const isDark = theme === 'dark';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
+  const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
-    // Set active section based on path
+    // Set active section based on path and hash
     const path = location.pathname;
+    const hash = location.hash.substring(1);
+    
     if (path === '/') {
-      setActiveSection('home');
-    } else if (path.includes('sobre') || path === '/#about') {
-      setActiveSection('about');
-    } else if (path.includes('contato') || path === '/#contact') {
-      setActiveSection('contact');
+      // For home page, use hash to determine active section
+      if (hash && ['home', 'about', 'areas', 'socios', 'cliente', 'contact'].includes(hash)) {
+        setActiveSection(hash);
+      } else {
+        setActiveSection('home');
+      }
     } else if (['/familia', '/tributario', '/empresarial', '/trabalho', 
                '/constitucional', '/administrativo', '/previdenciario', 
-               '/consumidor'].includes(path)) {
+               '/consumidor', '/civil'].includes(path)) {
       setActiveSection('areas');
-    } else if (path.includes('socios')) {
-      setActiveSection('socios');
-    } else if (path.includes('cliente')) {
-      setActiveSection('cliente');
+    } else {
+      setActiveSection('');
     }
   }, [location]);
 
@@ -57,6 +58,11 @@ const Navbar = () => {
     const section = document.getElementById(sectionId);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth' });
+      // Update URL hash
+      if (history.pushState) {
+        history.pushState(null, '', `#${sectionId}`);
+      }
+      setActiveSection(sectionId);
     }
   };
   
@@ -73,7 +79,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 md:py-4 border-b ${isDark ? 'border-white' : 'border-gray-200'} sticky top-0 z-50 w-full transition-colors duration-500`}>
+    <nav className={`${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 md:py-4 border-b ${isDark ? 'border-white' : 'border-gray-200'} sticky top-0 z-50 w-full transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="flex justify-center items-center relative h-12 md:h-auto">
           {/* Theme toggle - on the left for mobile */}
@@ -99,15 +105,16 @@ const Navbar = () => {
             <div className="md:hidden">
               <button
                 onClick={toggleMenu}
-                className={isDark ? "p-2 rounded-md text-white" : "p-2 rounded-md text-black"}
+                className={`${isDark ? "p-2 rounded-md text-white hover:bg-white/10" : "p-2 rounded-md text-black hover:bg-black/10"} transition-colors duration-200`}
               >
                 <span className="sr-only">Open menu</span>
                 <svg
-                  className="h-6 w-6"
+                  className="h-6 w-6 transition-transform duration-200"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  style={{ transform: isMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
                 >
                   <path
                     strokeLinecap="round"

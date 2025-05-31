@@ -19,8 +19,8 @@ const SectionsContainer: React.FC = () => {
     { id: 'home', component: Hero },
     { id: 'about', component: About },
     { id: 'areas', component: PracticeAreas },
-    { id: 'partners', component: Partners }, 
-    { id: 'client', component: ClientArea },
+    { id: 'socios', component: Partners }, 
+    { id: 'cliente', component: ClientArea },
     { id: 'contact', component: Contact }
   ];
   

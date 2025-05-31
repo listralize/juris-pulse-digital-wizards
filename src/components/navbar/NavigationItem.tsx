@@ -18,10 +18,10 @@ const NavigationItem = ({ to, label, isActive, onClick }: NavigationItemProps) =
     <Link
       to={to}
       onClick={onClick}
-      className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+      className={`px-4 py-2 font-medium transition-all duration-300 border-b-2 hover:scale-105 ${
         isActive
           ? (isDark ? 'border-white text-white' : 'border-black text-black')
-          : (isDark ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-black/70 hover:text-black')
+          : (isDark ? 'border-transparent text-white/70 hover:text-white hover:border-white/50' : 'border-transparent text-black/70 hover:text-black hover:border-black/50')
       }`}
     >
       {label}

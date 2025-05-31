@@ -26,12 +26,12 @@ export const useSectionTransition = (sections: Section[]) => {
       setTimeout(() => {
         const section = document.getElementById(initialHash);
         if (section) {
-          section.scrollIntoView({ behavior: 'smooth' });
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 100);
     } else {
       // Scroll to top for home section
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [sections]);
   
@@ -43,7 +43,11 @@ export const useSectionTransition = (sections: Section[]) => {
     const targetSection = document.getElementById(id);
     if (targetSection) {
       // Smoother scroll with animation
-      targetSection.scrollIntoView({ behavior: 'smooth' });
+      targetSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start',
+        inline: 'nearest'
+      });
       
       // Update URL without reloading
       if (history.pushState) {
@@ -57,7 +61,7 @@ export const useSectionTransition = (sections: Section[]) => {
       // Reset transitioning state after animation completes
       setTimeout(() => {
         setIsTransitioning(false);
-      }, 1000);
+      }, 800);
     } else {
       setIsTransitioning(false);
     }
