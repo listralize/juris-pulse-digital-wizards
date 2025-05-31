@@ -74,18 +74,22 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 overflow-visible"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-visible"
         >
-          {/* Left side - Contact info and Map */}
-          <div className="space-y-6">
+          {/* Contact info */}
+          <div className="lg:col-span-1">
             <ContactInfo />
-            <div className="h-80 lg:h-96">
+          </div>
+          
+          {/* Map */}
+          <div className="lg:col-span-1">
+            <div className="h-96 lg:h-full min-h-[400px]">
               <LocationMap />
             </div>
           </div>
           
-          {/* Right side - Contact form */}
-          <div>
+          {/* Contact form */}
+          <div className="lg:col-span-1">
             <UnifiedContactForm />
           </div>
         </div>
