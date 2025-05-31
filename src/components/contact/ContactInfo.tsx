@@ -20,6 +20,7 @@ const ContactInfo: React.FC = () => {
             <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>Endereço</h4>
             <p className={`${isDark ? 'text-white/80' : 'text-gray-700'} font-satoshi`}>
               World Trade Center<br />
+              Torre Office e Corporate<br />
               Av. D, Av. 85 - St. Marista<br />
               Goiânia - GO, 74150-040
             </p>

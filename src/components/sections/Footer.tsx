@@ -34,9 +34,10 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = false }) => {
           <div>
             <h4 className={`text-lg font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Contato Rápido</h4>
             <div className="space-y-2">
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>World Trade Center, Av. D, Av. 85</p>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>St. Marista, Goiânia - GO</p>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>74150-040</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>World Trade Center</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>Torre Office e Corporate</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>Av. D, Av. 85 - St. Marista</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>Goiânia - GO, 74150-040</p>
               <a 
                 href="mailto:contato@stadv.com"
                 className={`${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} hover:underline font-satoshi block`}
