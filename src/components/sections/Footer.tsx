@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../ThemeProvider';
 
@@ -9,7 +8,7 @@ interface FooterProps {
 const Footer: React.FC<FooterProps> = ({ respectTheme = false }) => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
-  const isDark = respectTheme ? theme === 'dark' : true; // Always dark if respectTheme is false
+  const isDark = respectTheme ? theme === 'dark' : true; // Respeita o tema quando respectTheme é true
   
   return (
     <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
