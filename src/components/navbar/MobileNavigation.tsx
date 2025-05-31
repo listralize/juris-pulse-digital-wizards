@@ -33,7 +33,7 @@ const MobileNavigation = ({
             : ''} font-medium`}
           onClick={() => {
             setIsMenuOpen(false);
-            navigate('/');
+            handleNavigation('home', '/');
           }}
         >
           Home
@@ -70,7 +70,7 @@ const MobileNavigation = ({
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
-          Sobre
+          Sobre Nós
         </a>
         
         <Link
@@ -94,7 +94,7 @@ const MobileNavigation = ({
           }}
           className="block px-3 py-2 rounded-md font-medium"
         >
-          Cliente
+          Área do Cliente
         </Link>
         
         <a 

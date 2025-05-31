@@ -32,7 +32,7 @@ const DesktopNavigation = ({
         
         <NavigationItem 
           to="/#about" 
-          label="Sobre" 
+          label="Sobre Nós" 
           isActive={activeSection === 'about'} 
           onClick={e => {
             e.preventDefault();
@@ -52,7 +52,7 @@ const DesktopNavigation = ({
         
         <NavigationItem 
           to="/#cliente" 
-          label="Cliente" 
+          label="Área do Cliente" 
           isActive={activeSection === 'cliente'} 
           onClick={e => {
             e.preventDefault();
