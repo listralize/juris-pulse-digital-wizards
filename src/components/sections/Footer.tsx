@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../ThemeProvider';
 
@@ -17,7 +16,7 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <img 
-              src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" 
+              src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"}
               alt="Serafim & Trombela Advocacia Logo"
               className={`h-20 mb-4 object-contain ${isDark ? 'brightness-150' : 'brightness-90'}`}
               style={{
