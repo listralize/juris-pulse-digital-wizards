@@ -78,13 +78,13 @@ const Hero = () => {
       <div className="relative z-10 text-center max-w-4xl mt-[-80px]">
         <div 
           ref={logoRef} 
-          className="mb-6 w-full max-w-xs md:max-w-sm mx-auto relative"
+          className="mb-6 w-full max-w-lg md:max-w-xl mx-auto relative"
         >
           <div className="logo-container relative">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
-              className="w-full h-auto relative z-10 brightness-150"
+              className="w-full h-auto relative z-10"
               style={{
                 filter: 'drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
               }}
