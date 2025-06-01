@@ -30,14 +30,9 @@ export const useBlogAutomation = () => {
 
   const processWebhookData = (data: any) => {
     try {
-      console.log('Processando dados do webhook:', data);
-      
       const newPost = createPostFromWebhook(data);
       const updatedPosts = [newPost, ...blogPosts];
       saveBlogPosts(updatedPosts);
-      
-      console.log('Post criado com sucesso:', newPost);
-      
       return { success: true, post: newPost };
     } catch (error) {
       console.error('Erro ao processar webhook:', error);
@@ -45,43 +40,8 @@ export const useBlogAutomation = () => {
     }
   };
 
-  // Simula um endpoint real interceptando requisições
-  const initializeWebhookEndpoint = () => {
-    // Intercepta requisições para o endpoint
-    const originalFetch = window.fetch;
-    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === 'string' ? input : input.toString();
-      
-      // Se for uma requisição para o endpoint do webhook
-      if (url.includes('/api/blog/webhook')) {
-        console.log('Interceptando requisição webhook');
-        
-        try {
-          const body = init?.body ? JSON.parse(init.body.toString()) : {};
-          const result = processWebhookData(body);
-          
-          // Retorna uma resposta simulada
-          return new Response(JSON.stringify(result), {
-            status: result.success ? 200 : 400,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        } catch (error) {
-          console.error('Erro ao processar webhook:', error);
-          return new Response(JSON.stringify({ success: false, error: 'Erro interno' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-      }
-      
-      // Para outras requisições, usar fetch original
-      return originalFetch(input, init);
-    };
-  };
-
   return {
     processWebhookData,
-    createPostFromWebhook,
-    initializeWebhookEndpoint
+    createPostFromWebhook
   };
 };
