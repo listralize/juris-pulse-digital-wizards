@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, Users, FileText, Globe, User, Home } from 'lucide-react';
+import { ArrowLeft, Users, Home } from 'lucide-react';
 import { TeamManagement } from './TeamManagement';
 import { HomeContentManagement } from './HomeContentManagement';
-import { AreasTextsManagement } from './AreasTextsManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
 
 interface ContentManagementProps {
@@ -48,20 +47,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
       description: 'Gerenciar membros da equipe',
       icon: <Users className="w-8 h-8" />,
       color: 'bg-green-500'
-    },
-    {
-      id: 'areas-texts',
-      title: 'Textos das Áreas',
-      description: 'Editar textos das áreas de atuação',
-      icon: <Globe className="w-8 h-8" />,
-      color: 'bg-purple-500'
-    },
-    {
-      id: 'client-area',
-      title: 'Área do Cliente',
-      description: 'Configurar área do cliente',
-      icon: <User className="w-8 h-8" />,
-      color: 'bg-orange-500'
     }
   ];
 
@@ -102,22 +87,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
               onUpdateTeamMember={onUpdateTeamMember}
               onSave={onSaveTeamMembers}
             />
-          )}
-          
-          {selectedSection === 'areas-texts' && (
-            <AreasTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={onUpdatePageTexts}
-              onSave={onSavePageTexts}
-            />
-          )}
-          
-          {selectedSection === 'client-area' && (
-            <div className="text-center py-8">
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Configurações da área do cliente serão implementadas em breve.
-              </p>
-            </div>
           )}
         </CardContent>
       </Card>
