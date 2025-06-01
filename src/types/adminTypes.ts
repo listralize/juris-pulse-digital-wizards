@@ -48,6 +48,50 @@ export interface ServicePage {
   testimonials: Testimonial[];
 }
 
+export interface FormField {
+  id: string;
+  type: 'text' | 'email' | 'phone' | 'select' | 'textarea' | 'checkbox';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+}
+
+export interface FormStep {
+  id: string;
+  title: string;
+  description: string;
+  fields: FormField[];
+}
+
+export interface LandingPage {
+  id: string;
+  title: string;
+  slug: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImage: string;
+  ctaButtonText: string;
+  ctaButtonLink: string;
+  sections: LandingPageSection[];
+  hasForm: boolean;
+  formSteps: FormStep[];
+  webhookUrl?: string;
+  redirectUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface LandingPageSection {
+  id: string;
+  type: 'text' | 'image' | 'cta' | 'testimonial' | 'form';
+  title: string;
+  content: string;
+  image?: string;
+  buttonText?: string;
+  buttonLink?: string;
+}
+
 export interface PageTexts {
   heroTitle: string;
   heroSubtitle: string;

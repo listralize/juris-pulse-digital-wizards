@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts } from '../../../types/adminTypes';
 import { categories } from '../../../types/adminTypes';
@@ -131,17 +130,27 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     ? localPages.filter(page => page.category === selectedLawArea)
     : [];
 
+  // Melhor lógica para filtrar páginas por categoria
   const filteredPagesByCategory = selectedCategory 
     ? filteredPagesByLawArea.filter(page => {
+        // Buscar por ID direto
+        if (page.id.includes(selectedCategory)) return true;
+        
+        // Buscar por href
+        if (page.href && page.href.includes(selectedCategory)) return true;
+        
+        // Buscar pela categoria info
         const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
         if (!categoryInfo) return false;
         
-        const titleMatch = page.title?.toLowerCase().includes(categoryInfo.title.toLowerCase());
-        const descMatch = page.description?.toLowerCase().includes(categoryInfo.title.toLowerCase());
-        const hrefMatch = page.href?.includes(selectedCategory);
-        const idMatch = page.id?.includes(selectedCategory);
+        // Buscar por palavras-chave do título da categoria
+        const categoryKeywords = categoryInfo.title.toLowerCase().split(/\s+|[^\w]/g).filter(word => word.length > 2);
+        const pageTitle = page.title?.toLowerCase() || '';
+        const pageDesc = page.description?.toLowerCase() || '';
         
-        return titleMatch || descMatch || hrefMatch || idMatch;
+        return categoryKeywords.some(keyword => 
+          pageTitle.includes(keyword) || pageDesc.includes(keyword)
+        );
       })
     : [];
 
@@ -363,12 +372,20 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {availableCategories.map((category) => {
               const categoryPages = filteredPagesByLawArea.filter(page => {
-                const titleMatch = page.title?.toLowerCase().includes(category.title.toLowerCase());
-                const descMatch = page.description?.toLowerCase().includes(category.title.toLowerCase());
-                const hrefMatch = page.href?.includes(category.id);
-                const idMatch = page.id?.includes(category.id);
+                // ID direto
+                if (page.id.includes(category.id)) return true;
                 
-                return titleMatch || descMatch || hrefMatch || idMatch;
+                // Href
+                if (page.href && page.href.includes(category.id)) return true;
+                
+                // Palavras-chave
+                const categoryKeywords = category.title.toLowerCase().split(/\s+|[^\w]/g).filter(word => word.length > 2);
+                const pageTitle = page.title?.toLowerCase() || '';
+                const pageDesc = page.description?.toLowerCase() || '';
+                
+                return categoryKeywords.some(keyword => 
+                  pageTitle.includes(keyword) || pageDesc.includes(keyword)
+                );
               });
               
               return (
