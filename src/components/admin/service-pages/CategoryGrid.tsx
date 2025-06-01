@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '../../ui/card';
 import { categories } from '../../../types/adminTypes';
 import { ServicePage } from '../../../types/adminTypes';
+import { defaultServicePages } from '../../../data/defaultServicePages';
 import { useTheme } from '../../ThemeProvider';
 
 interface CategoryGridProps {
@@ -17,7 +18,11 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ servicePages, onCate
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => {
-        const categoryPages = servicePages.filter(page => page.category === category.value);
+        // Conta páginas dos dados padrão para mostrar quantas páginas deveriam existir
+        const defaultCategoryPages = defaultServicePages.filter(page => page.category === category.value);
+        // Conta páginas atuais que o usuário já tem
+        const currentCategoryPages = servicePages.filter(page => page.category === category.value);
+        
         return (
           <Card 
             key={category.value}
@@ -26,14 +31,19 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ servicePages, onCate
           >
             <CardContent className="p-6 text-center">
               <div className={`w-12 h-12 rounded-full ${category.color} mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl`}>
-                {categoryPages.length}
+                {defaultCategoryPages.length}
               </div>
               <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                 {category.label}
               </h3>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                {categoryPages.length} página{categoryPages.length !== 1 ? 's' : ''}
+                {defaultCategoryPages.length} página{defaultCategoryPages.length !== 1 ? 's' : ''}
               </p>
+              {currentCategoryPages.length !== defaultCategoryPages.length && (
+                <p className={`text-xs mt-1 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                  ({currentCategoryPages.length} carregadas)
+                </p>
+              )}
             </CardContent>
           </Card>
         );

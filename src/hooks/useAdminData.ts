@@ -45,13 +45,29 @@ export const useAdminData = () => {
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
-      // Carregar páginas de serviços
+      // Carregar páginas de serviços - SEMPRE usar as páginas padrão como base
       const savedServicePages = localStorage.getItem('adminServicePages');
       if (savedServicePages) {
-        const parsedServicePages = JSON.parse(savedServicePages);
-        if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
-          setServicePages(parsedServicePages);
-        } else {
+        try {
+          const parsedServicePages = JSON.parse(savedServicePages);
+          if (Array.isArray(parsedServicePages)) {
+            // Mesclar páginas salvas com páginas padrão (prioridade para as salvas)
+            const mergedPages = [...defaultServicePages];
+            parsedServicePages.forEach(savedPage => {
+              const index = mergedPages.findIndex(page => page.id === savedPage.id);
+              if (index >= 0) {
+                mergedPages[index] = savedPage;
+              } else {
+                mergedPages.push(savedPage);
+              }
+            });
+            setServicePages(mergedPages);
+          } else {
+            setServicePages(defaultServicePages);
+            localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
+          }
+        } catch (error) {
+          console.error('Erro ao parsear páginas salvas:', error);
           setServicePages(defaultServicePages);
           localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
         }
