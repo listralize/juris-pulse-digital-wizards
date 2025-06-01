@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Calendar, User, Search, ArrowRight, Filter } from 'lucide-react';
 import { useBlogData } from '../hooks/useBlogData';
+import { useBlogCategories } from '../hooks/useBlogCategories';
 import Navbar from '../components/navbar';
 
 const BlogPage = () => {
@@ -14,6 +15,7 @@ const BlogPage = () => {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const { blogPosts, isLoading } = useBlogData();
+  const { blogCategories } = useBlogCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
 
@@ -28,8 +30,10 @@ const BlogPage = () => {
     return matchesSearch && matchesTag;
   });
 
-  // Obter todas as tags únicas
-  const allTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
+  // Obter todas as tags únicas dos posts E das categorias salvas
+  const postTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
+  const categoryNames = blogCategories.map(cat => cat.name);
+  const allTags = Array.from(new Set([...postTags, ...categoryNames]));
 
   if (isLoading) {
     return (

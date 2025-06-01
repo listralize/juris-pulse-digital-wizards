@@ -1,15 +1,16 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/ThemeProvider';
-import Home from './pages/Home';
+import Home from './pages/Index';
 import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import Register from './pages/Login';
+import Dashboard from './pages/Admin';
 import Admin from './pages/Admin';
-import Blog from './components/sections/Blog';
+import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster"
 import CustomCursor from './components/CustomCursor';
 import WhatsAppButton from './components/WhatsAppButton';
