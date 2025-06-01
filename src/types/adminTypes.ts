@@ -1,4 +1,3 @@
-
 export interface TeamMember {
   id: string;
   name: string;
@@ -13,27 +12,9 @@ export interface SpecializedService {
   id: string;
   title: string;
   description: string;
+  category: string;
   href: string;
-  isActive: boolean;
-}
-
-export interface Benefit {
-  title: string;
-  description: string;
-  icon: string;
-}
-
-export interface ProcessStep {
-  step: number;
-  title: string;
-  description: string;
-}
-
-export interface Testimonial {
-  name: string;
-  text?: string;
-  quote?: string;
-  image?: string;
+  mainDescription?: string;
 }
 
 export interface ServicePage {
@@ -42,39 +23,31 @@ export interface ServicePage {
   description: string;
   category: string;
   href: string;
-  benefits: Benefit[];
-  process: ProcessStep[];
-  faq: { question: string; answer: string; }[];
-  testimonials: Testimonial[];
+  benefits: {
+    title: string;
+    description: string;
+    icon?: string;
+  }[];
+  process: {
+    title: string;
+    description: string;
+    step: number;
+  }[];
+  faq: {
+    question: string;
+    answer: string;
+  }[];
+  testimonials: {
+    name: string;
+    quote: string;
+    image?: string;
+  }[];
 }
 
-export interface CategoryText {
+export interface CategoryTexts {
   id: string;
   title: string;
   description: string;
-  image?: string;
-}
-
-export interface FooterTexts {
-  companyDescription: string;
-  address: string;
-  email: string;
-  phone: string;
-  whatsappUrl: string;
-  whatsappText: string;
-  schedule: string;
-  copyrightText: string;
-  privacyPolicyUrl?: string;
-  termsOfUseUrl?: string;
-}
-
-export interface ContactTexts {
-  address: string;
-  phone: string;
-  email: string;
-  mapEmbedUrl?: string;
-  whatsappUrl: string;
-  scheduleText: string;
 }
 
 export interface PageTexts {
@@ -88,44 +61,34 @@ export interface PageTexts {
   areasTitle: string;
   clientAreaTitle: string;
   clientAreaDescription: string;
-  clientAreaImage?: string;
-  clientAreaMainButtonLink?: string;
-  clientAreaMainButtonText?: string;
-  clientAreaWhatsAppLink?: string;
-  clientAreaWhatsAppText?: string;
   familiaTitle: string;
   familiaDescription: string;
-  familiaImage?: string;
   tributarioTitle: string;
   tributarioDescription: string;
-  tributarioImage?: string;
   empresarialTitle: string;
   empresarialDescription: string;
-  empresarialImage?: string;
   trabalhoTitle: string;
   trabalhoDescription: string;
-  trabalhoImage?: string;
   constitucionalTitle: string;
   constitucionalDescription: string;
-  constitucionalImage?: string;
   administrativoTitle: string;
   administrativoDescription: string;
-  administrativoImage?: string;
   previdenciarioTitle: string;
   previdenciarioDescription: string;
-  previdenciarioImage?: string;
   consumidorTitle: string;
   consumidorDescription: string;
-  consumidorImage?: string;
   civilTitle: string;
   civilDescription: string;
-  civilImage?: string;
-  categoryTexts: CategoryText[];
-  footerTexts: FooterTexts;
-  contactTexts: ContactTexts;
+  categoryTexts: CategoryTexts[];
 }
 
-export const categories = [
+export interface CategoryInfo {
+  value: string;
+  label: string;
+  color: string;
+}
+
+export const categories: CategoryInfo[] = [
   { value: 'familia', label: 'Direito de Família', color: 'bg-pink-500' },
   { value: 'tributario', label: 'Direito Tributário', color: 'bg-green-500' },
   { value: 'empresarial', label: 'Direito Empresarial', color: 'bg-blue-500' },
