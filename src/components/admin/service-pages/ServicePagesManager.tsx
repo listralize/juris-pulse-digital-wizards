@@ -83,7 +83,7 @@ const lawAreaCategories = {
     { id: 'recursos-extraordinario-especial', title: 'Recursos Extraordinário e Especial', description: 'Recursos para tribunais superiores' },
     { id: 'reclamacao-constitucional', title: 'Reclamação Constitucional', description: 'Preservação da competência e autoridade das decisões' },
     { id: 'atuacao-stf', title: 'Atuação no STF', description: 'Representação no Supremo Tribunal Federal' },
-    { id: 'atuacao-stj', title: 'Atuação no STJ', title: 'Atuação no STJ', description: 'Representação no Superior Tribunal de Justiça' },
+    { id: 'atuacao-stj', title: 'Atuação no STJ', description: 'Representação no Superior Tribunal de Justiça' },
     { id: 'igualdade-nao-discriminacao', title: 'Igualdade e Não Discriminação', description: 'Proteção contra discriminação' },
     { id: 'liberdade-expressao', title: 'Liberdade de Expressão', description: 'Defesa da liberdade de expressão' },
     { id: 'direitos-minorias', title: 'Direitos das Minorias', description: 'Proteção de grupos minoritários' },
@@ -98,17 +98,7 @@ const lawAreaCategories = {
     { id: 'improbidade-administrativa', title: 'Improbidade Administrativa', description: 'Defesa em ações de improbidade' },
     { id: 'direitos-servidores', title: 'Direitos de Servidores', description: 'Defesa dos direitos dos servidores públicos' },
     { id: 'desapropriacao', title: 'Desapropriação', description: 'Questões expropriatórias e indenizações' },
-    { id: 'direito-urbanistico', title: 'Direito Urbanístico', description: 'Regulamentação urbana e ambiental' },
-    { id: 'assessoria-licitacoes', title: 'Assessoria em Licitações', description: 'Consultoria completa em processos licitatórios' },
-    { id: 'defesa-licitacoes', title: 'Defesa em Licitações', description: 'Impugnações e recursos em licitações' },
-    { id: 'gestao-contratos-publicos', title: 'Gestão de Contratos Públicos', description: 'Administração de contratos administrativos' },
-    { id: 'pad-sindicancia', title: 'PAD e Sindicância', description: 'Defesa em processos administrativos disciplinares' },
-    { id: 'contestacao-atos-administrativos', title: 'Contestação de Atos Administrativos', description: 'Anulação de atos administrativos ilegais' },
-    { id: 'responsabilidade-civil-estado', title: 'Responsabilidade Civil do Estado', description: 'Indenizações por danos causados pelo Estado' },
-    { id: 'direito-ambiental-administrativo', title: 'Direito Ambiental Administrativo', description: 'Questões ambientais no âmbito administrativo' },
-    { id: 'tribunais-contas', title: 'Tribunais de Contas', description: 'Defesa perante Tribunais de Contas' },
-    { id: 'consultoria-administrativo', title: 'Consultoria Administrativo', description: 'Consultoria em direito administrativo' },
-    { id: 'regulacao-fiscalizacao', title: 'Regulação e Fiscalização', description: 'Assessoria em regulação e fiscalização' }
+    { id: 'direito-urbanistico', title: 'Direito Urbanístico', description: 'Regulamentação urbana e ambiental' }
   ],
   previdenciario: [
     { id: 'beneficios-previdenciarios', title: 'Benefícios Previdenciários', description: 'Concessão e revisão de benefícios' },
@@ -117,15 +107,7 @@ const lawAreaCategories = {
     { id: 'pensao-morte', title: 'Pensão por Morte', description: 'Concessão de pensão aos dependentes' },
     { id: 'bpc-loas', title: 'BPC/LOAS', description: 'Benefício de Prestação Continuada' },
     { id: 'revisao-beneficios', title: 'Revisão de Benefícios', description: 'Revisão da Vida Toda e outras revisões' },
-    { id: 'planejamento-previdenciario', title: 'Planejamento Previdenciário', description: 'Estratégias para maximizar benefícios' },
-    { id: 'aposentadoria-idade', title: 'Aposentadoria por Idade', description: 'Benefício por idade mínima' },
-    { id: 'aposentadoria-tempo-contribuicao', title: 'Aposentadoria por Tempo de Contribuição', description: 'Benefício por tempo de contribuição' },
-    { id: 'aposentadoria-especial', title: 'Aposentadoria Especial', description: 'Benefício para atividades especiais' },
-    { id: 'aposentadoria-invalidez', title: 'Aposentadoria por Invalidez', description: 'Benefício por incapacidade permanente' },
-    { id: 'auxilio-acidente', title: 'Auxílio-Acidente', description: 'Indenização por acidente de trabalho' },
-    { id: 'salario-maternidade', title: 'Salário-Maternidade', description: 'Benefício por maternidade' },
-    { id: 'revisao-vida-toda', title: 'Revisão da Vida Toda', description: 'Revisão incluindo contribuições pré-1994' },
-    { id: 'consultoria-previdenciaria', title: 'Consultoria Previdenciária', description: 'Orientação previdenciária especializada' }
+    { id: 'planejamento-previdenciario', title: 'Planejamento Previdenciário', description: 'Estratégias para maximizar benefícios' }
   ],
   consumidor: [
     { id: 'direitos-consumidor', title: 'Direitos do Consumidor', description: 'Proteção integral dos direitos consumeristas' },
@@ -143,14 +125,7 @@ const lawAreaCategories = {
     { id: 'direito-propriedade', title: 'Direito de Propriedade', description: 'Questões imobiliárias e possessórias' },
     { id: 'sucessoes-herancas', title: 'Sucessões e Heranças', description: 'Inventários e questões sucessórias' },
     { id: 'direitos-personalidade', title: 'Direitos da Personalidade', description: 'Proteção da honra, imagem e privacidade' },
-    { id: 'obrigacoes-contratos', title: 'Obrigações e Contratos', description: 'Cumprimento e execução de obrigações' },
-    { id: 'rescisao-contratual', title: 'Rescisão Contratual', description: 'Dissolução de contratos' },
-    { id: 'mandado-seguranca-civil', title: 'Mandado de Segurança Civil', description: 'Proteção de direitos em questões civis' },
-    { id: 'habeas-corpus-data-civil', title: 'Habeas Corpus e Data Civil', description: 'Remédios constitucionais em matéria civil' },
-    { id: 'defesa-direitos-fundamentais-civil', title: 'Defesa de Direitos Fundamentais Civil', description: 'Proteção de direitos fundamentais em questões civis' },
-    { id: 'acoes-improbidade-civil', title: 'Ações de Improbidade Civil', description: 'Combate à improbidade em relações civis' },
-    { id: 'defesa-pad-civil', title: 'Defesa em PAD Civil', description: 'Defesa em processos administrativos civis' },
-    { id: 'compliance-administrativo-civil', title: 'Compliance Administrativo Civil', description: 'Adequação normativa em questões civis' }
+    { id: 'obrigacoes-contratos', title: 'Obrigações e Contratos', description: 'Cumprimento e execução de obrigações' }
   ]
 };
 

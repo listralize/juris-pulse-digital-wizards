@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, Users, FileText, Globe, User } from 'lucide-react';
+import { ArrowLeft, Users, FileText, Globe, User, Home } from 'lucide-react';
 import { TeamManagement } from './TeamManagement';
-import { MainTextsManagement } from './MainTextsManagement';
+import { HomeContentManagement } from './HomeContentManagement';
 import { AreasTextsManagement } from './AreasTextsManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
 
@@ -36,17 +36,17 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
 
   const sections = [
     {
+      id: 'home-content',
+      title: 'Conteúdo da Home',
+      description: 'Editar todos os elementos da página inicial',
+      icon: <Home className="w-8 h-8" />,
+      color: 'bg-blue-500'
+    },
+    {
       id: 'team',
       title: 'Equipe',
       description: 'Gerenciar membros da equipe',
       icon: <Users className="w-8 h-8" />,
-      color: 'bg-blue-500'
-    },
-    {
-      id: 'main-texts',
-      title: 'Textos Principais',
-      description: 'Editar textos da página inicial',
-      icon: <FileText className="w-8 h-8" />,
       color: 'bg-green-500'
     },
     {
@@ -86,6 +86,14 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
           </div>
         </CardHeader>
         <CardContent>
+          {selectedSection === 'home-content' && (
+            <HomeContentManagement
+              pageTexts={pageTexts}
+              onUpdatePageTexts={onUpdatePageTexts}
+              onSave={onSavePageTexts}
+            />
+          )}
+          
           {selectedSection === 'team' && (
             <TeamManagement
               teamMembers={teamMembers}
@@ -93,14 +101,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
               onRemoveTeamMember={onRemoveTeamMember}
               onUpdateTeamMember={onUpdateTeamMember}
               onSave={onSaveTeamMembers}
-            />
-          )}
-          
-          {selectedSection === 'main-texts' && (
-            <MainTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={onUpdatePageTexts}
-              onSave={onSavePageTexts}
             />
           )}
           

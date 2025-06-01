@@ -1,0 +1,394 @@
+
+import React, { useState } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Plus, Edit, Trash2, Save, ArrowLeft } from 'lucide-react';
+import { useTheme } from '../ThemeProvider';
+
+interface LandingPage {
+  id: string;
+  title: string;
+  slug: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImage: string;
+  ctaButtonText: string;
+  ctaButtonLink: string;
+  sections: LandingPageSection[];
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface LandingPageSection {
+  id: string;
+  type: 'text' | 'image' | 'cta' | 'testimonial';
+  title: string;
+  content: string;
+  image?: string;
+  buttonText?: string;
+  buttonLink?: string;
+}
+
+interface LandingPagesManagerProps {
+  onSave: (pages: LandingPage[]) => void;
+}
+
+export const LandingPagesManager: React.FC<LandingPagesManagerProps> = ({ onSave }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
+  const [landingPages, setLandingPages] = useState<LandingPage[]>([]);
+  const [selectedPage, setSelectedPage] = useState<LandingPage | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const createNewPage = () => {
+    const newPage: LandingPage = {
+      id: Date.now().toString(),
+      title: 'Nova Landing Page',
+      slug: 'nova-landing-page',
+      heroTitle: 'Título Principal',
+      heroSubtitle: 'Subtítulo da página',
+      heroImage: '',
+      ctaButtonText: 'Entre em Contato',
+      ctaButtonLink: 'https://api.whatsapp.com/send?phone=5562994594496',
+      sections: [],
+      isActive: true,
+      createdAt: new Date().toISOString()
+    };
+    
+    setLandingPages(prev => [...prev, newPage]);
+    setSelectedPage(newPage);
+    setIsEditing(true);
+  };
+
+  const updatePage = (field: keyof LandingPage, value: any) => {
+    if (!selectedPage) return;
+    
+    const updatedPage = { ...selectedPage, [field]: value };
+    setSelectedPage(updatedPage);
+    
+    setLandingPages(prev => 
+      prev.map(page => page.id === selectedPage.id ? updatedPage : page)
+    );
+  };
+
+  const addSection = (type: LandingPageSection['type']) => {
+    if (!selectedPage) return;
+    
+    const newSection: LandingPageSection = {
+      id: Date.now().toString(),
+      type,
+      title: 'Título da Seção',
+      content: 'Conteúdo da seção...'
+    };
+    
+    const updatedSections = [...selectedPage.sections, newSection];
+    updatePage('sections', updatedSections);
+  };
+
+  const updateSection = (sectionId: string, field: keyof LandingPageSection, value: any) => {
+    if (!selectedPage) return;
+    
+    const updatedSections = selectedPage.sections.map(section =>
+      section.id === sectionId ? { ...section, [field]: value } : section
+    );
+    
+    updatePage('sections', updatedSections);
+  };
+
+  const removeSection = (sectionId: string) => {
+    if (!selectedPage) return;
+    
+    const updatedSections = selectedPage.sections.filter(section => section.id !== sectionId);
+    updatePage('sections', updatedSections);
+  };
+
+  const removePage = (pageId: string) => {
+    setLandingPages(prev => prev.filter(page => page.id !== pageId));
+    if (selectedPage?.id === pageId) {
+      setSelectedPage(null);
+      setIsEditing(false);
+    }
+  };
+
+  const handleSave = () => {
+    onSave(landingPages);
+    setIsEditing(false);
+  };
+
+  // Lista de páginas
+  if (!selectedPage) {
+    return (
+      <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+              Landing Pages de Marketing
+            </CardTitle>
+            <Button onClick={createNewPage}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Landing Page
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {landingPages.length === 0 ? (
+            <div className="text-center py-8">
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Nenhuma landing page criada ainda. Clique em "Nova Landing Page" para começar.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {landingPages.map((page) => (
+                <Card 
+                  key={page.id}
+                  className={`cursor-pointer transition-all hover:scale-105 ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
+                        {page.title}
+                      </h3>
+                      <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setSelectedPage(page)}
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => removePage(page.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      /{page.slug}
+                    </p>
+                    <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {page.sections.length} seções
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Editor da página
+  return (
+    <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => { setSelectedPage(null); setIsEditing(false); }}
+              variant="outline"
+              size="sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+            <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+              Editando: {selectedPage.title}
+            </CardTitle>
+          </div>
+          <Button onClick={handleSave}>
+            <Save className="w-4 h-4 mr-2" />
+            Salvar
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Configurações Básicas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className={`text-lg ${isDark ? 'text-white' : 'text-black'}`}>
+              Configurações Básicas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Título da Página</Label>
+                <Input
+                  value={selectedPage.title}
+                  onChange={(e) => updatePage('title', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              <div>
+                <Label>URL (slug)</Label>
+                <Input
+                  value={selectedPage.slug}
+                  onChange={(e) => updatePage('slug', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Hero Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className={`text-lg ${isDark ? 'text-white' : 'text-black'}`}>
+              Seção Hero
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Título Principal</Label>
+              <Input
+                value={selectedPage.heroTitle}
+                onChange={(e) => updatePage('heroTitle', e.target.value)}
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+              />
+            </div>
+            <div>
+              <Label>Subtítulo</Label>
+              <Textarea
+                value={selectedPage.heroSubtitle}
+                onChange={(e) => updatePage('heroSubtitle', e.target.value)}
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                rows={2}
+              />
+            </div>
+            <div>
+              <Label>URL da Imagem Hero</Label>
+              <Input
+                value={selectedPage.heroImage}
+                onChange={(e) => updatePage('heroImage', e.target.value)}
+                placeholder="URL da imagem"
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Texto do Botão CTA</Label>
+                <Input
+                  value={selectedPage.ctaButtonText}
+                  onChange={(e) => updatePage('ctaButtonText', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              <div>
+                <Label>Link do Botão CTA</Label>
+                <Input
+                  value={selectedPage.ctaButtonLink}
+                  onChange={(e) => updatePage('ctaButtonLink', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Seções */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className={`text-lg ${isDark ? 'text-white' : 'text-black'}`}>
+                Seções da Página
+              </CardTitle>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => addSection('text')}>Texto</Button>
+                <Button size="sm" onClick={() => addSection('image')}>Imagem</Button>
+                <Button size="sm" onClick={() => addSection('cta')}>CTA</Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {selectedPage.sections.length === 0 ? (
+              <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Nenhuma seção adicionada. Use os botões acima para adicionar seções.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {selectedPage.sections.map((section) => (
+                  <Card key={section.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                          Seção: {section.type}
+                        </span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => removeSection(section.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <Label>Título</Label>
+                          <Input
+                            value={section.title}
+                            onChange={(e) => updateSection(section.id, 'title', e.target.value)}
+                            className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          />
+                        </div>
+                        <div>
+                          <Label>Conteúdo</Label>
+                          <Textarea
+                            value={section.content}
+                            onChange={(e) => updateSection(section.id, 'content', e.target.value)}
+                            className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                            rows={3}
+                          />
+                        </div>
+                        {(section.type === 'image' || section.type === 'cta') && (
+                          <div>
+                            <Label>URL da Imagem</Label>
+                            <Input
+                              value={section.image || ''}
+                              onChange={(e) => updateSection(section.id, 'image', e.target.value)}
+                              placeholder="URL da imagem"
+                              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                            />
+                          </div>
+                        )}
+                        {section.type === 'cta' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <Label>Texto do Botão</Label>
+                              <Input
+                                value={section.buttonText || ''}
+                                onChange={(e) => updateSection(section.id, 'buttonText', e.target.value)}
+                                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                              />
+                            </div>
+                            <div>
+                              <Label>Link do Botão</Label>
+                              <Input
+                                value={section.buttonLink || ''}
+                                onChange={(e) => updateSection(section.id, 'buttonLink', e.target.value)}
+                                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
+  );
+};

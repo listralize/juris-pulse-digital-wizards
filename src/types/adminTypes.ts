@@ -1,3 +1,4 @@
+
 export interface TeamMember {
   id: string;
   name: string;
@@ -12,9 +13,8 @@ export interface SpecializedService {
   id: string;
   title: string;
   description: string;
-  category: string;
   href: string;
-  mainDescription?: string;
+  isActive: boolean;
 }
 
 export interface ServicePage {
@@ -23,31 +23,10 @@ export interface ServicePage {
   description: string;
   category: string;
   href: string;
-  benefits: {
-    title: string;
-    description: string;
-    icon?: string;
-  }[];
-  process: {
-    title: string;
-    description: string;
-    step: number;
-  }[];
-  faq: {
-    question: string;
-    answer: string;
-  }[];
-  testimonials: {
-    name: string;
-    quote: string;
-    image?: string;
-  }[];
-}
-
-export interface CategoryTexts {
-  id: string;
-  title: string;
-  description: string;
+  benefits: string[];
+  process: string[];
+  faq: { question: string; answer: string; }[];
+  testimonials: { name: string; text: string; }[];
 }
 
 export interface PageTexts {
@@ -61,6 +40,11 @@ export interface PageTexts {
   areasTitle: string;
   clientAreaTitle: string;
   clientAreaDescription: string;
+  clientAreaImage?: string;
+  clientAreaMainButtonLink?: string;
+  clientAreaMainButtonText?: string;
+  clientAreaWhatsAppLink?: string;
+  clientAreaWhatsAppText?: string;
   familiaTitle: string;
   familiaDescription: string;
   tributarioTitle: string;
@@ -79,16 +63,16 @@ export interface PageTexts {
   consumidorDescription: string;
   civilTitle: string;
   civilDescription: string;
-  categoryTexts: CategoryTexts[];
+  categoryTexts: CategoryText[];
 }
 
-export interface CategoryInfo {
-  value: string;
-  label: string;
-  color: string;
+export interface CategoryText {
+  id: string;
+  title: string;
+  description: string;
 }
 
-export const categories: CategoryInfo[] = [
+export const categories = [
   { value: 'familia', label: 'Direito de Família', color: 'bg-pink-500' },
   { value: 'tributario', label: 'Direito Tributário', color: 'bg-green-500' },
   { value: 'empresarial', label: 'Direito Empresarial', color: 'bg-blue-500' },

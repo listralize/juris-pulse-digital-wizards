@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { FileText, Briefcase, Globe, Edit } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit, Megaphone } from 'lucide-react';
 import { useAdminData } from '../hooks/useAdminData';
 import { useBlogData } from '../hooks/useBlogData';
 import { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';
@@ -11,6 +10,7 @@ import { ServicePagesManager } from '../components/admin/service-pages/ServicePa
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
+import { LandingPagesManager } from '../components/admin/LandingPagesManager';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -101,6 +101,11 @@ const Admin = () => {
     toast.success('Posts do blog salvos com sucesso!');
   };
 
+  const handleSaveLandingPages = (pages: any[]) => {
+    localStorage.setItem('landingPages', JSON.stringify(pages));
+    toast.success('Landing pages salvas com sucesso!');
+  };
+
   const addTeamMember = () => {
     const newMember: TeamMember = {
       id: Date.now().toString(),
@@ -138,7 +143,7 @@ const Admin = () => {
         <AdminHeader onLogout={logout} />
 
         <Tabs defaultValue="content" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-3 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Edit className="w-4 h-4" />
               Conteúdo Geral
@@ -146,6 +151,10 @@ const Admin = () => {
             <TabsTrigger value="service-pages" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
               Páginas de Serviços
+            </TabsTrigger>
+            <TabsTrigger value="landing-pages" className="flex items-center gap-2">
+              <Megaphone className="w-4 h-4" />
+              Landing Pages
             </TabsTrigger>
             <TabsTrigger value="blog" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -174,6 +183,10 @@ const Admin = () => {
               onSavePageTexts={handleSavePageTexts}
               onUpdatePageTexts={setPageTexts}
             />
+          </TabsContent>
+
+          <TabsContent value="landing-pages">
+            <LandingPagesManager onSave={handleSaveLandingPages} />
           </TabsContent>
 
           <TabsContent value="blog">
