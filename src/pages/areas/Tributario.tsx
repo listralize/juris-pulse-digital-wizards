@@ -5,75 +5,78 @@ import PracticeAreaLayout from '../../components/PracticeAreaLayout';
 import { Card, CardContent } from '../../components/ui/card';
 import { useTheme } from '../../components/ThemeProvider';
 import { Calculator, FileText, Shield, TrendingUp, Search, AlertTriangle } from 'lucide-react';
+import { useServicePageData } from '../../hooks/useServicePageData';
 
 const TributarioPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const { servicePages, isLoading } = useServicePageData();
   
+  // Filtrar apenas páginas da categoria tributário
+  const tributarioPages = servicePages.filter(page => page.category === 'tributario');
+  
+  // Agrupar páginas por categoria de serviço
   const serviceCategories = [
     {
       title: "Planejamento e Otimização Tributária",
       icon: <TrendingUp className="w-8 h-8" />,
       description: "Estratégias legais para redução da carga tributária e otimização fiscal de pessoas físicas e jurídicas.",
-      services: [
-        {
-          name: "Planejamento Tributário",
-          description: "Estruturação de estratégias legais para otimizar a carga tributária de pessoas físicas e jurídicas.",
-          path: "/servicos/planejamento-tributario"
-        },
-        {
-          name: "Elisão Fiscal",
-          description: "Estratégias legais para redução da carga tributária através de planejamento estruturado.",
-          path: "/servicos/elisao-fiscal"
-        },
-        {
-          name: "Consultoria em Impostos",
-          description: "Orientação especializada sobre a aplicação de impostos federais, estaduais e municipais.",
-          path: "/servicos/consultoria-impostos"
-        }
-      ]
+      services: tributarioPages.filter(page => 
+        page.title?.toLowerCase().includes('planejamento') || 
+        page.title?.toLowerCase().includes('elisão') ||
+        page.title?.toLowerCase().includes('consultoria')
+      )
     },
     {
       title: "Contencioso e Defesa Fiscal",
       icon: <Shield className="w-8 h-8" />,
       description: "Representação em processos fiscais e defesa contra autuações e cobranças tributárias.",
-      services: [
-        {
-          name: "Contencioso Administrativo e Judicial",
-          description: "Defesa em processos fiscais junto aos órgãos administrativos e Poder Judiciário.",
-          path: "/servicos/contencioso-tributario"
-        },
-        {
-          name: "Recuperação de Créditos Tributários",
-          description: "Identificação e recuperação de créditos fiscais pagos indevidamente ou a maior.",
-          path: "/servicos/recuperacao-creditos"
-        },
-        {
-          name: "Parcelamento de Débitos",
-          description: "Negociação e estruturação de parcelamentos fiscais junto aos órgãos competentes.",
-          path: "/servicos/parcelamento-debitos"
-        }
-      ]
+      services: tributarioPages.filter(page => 
+        page.title?.toLowerCase().includes('contencioso') || 
+        page.title?.toLowerCase().includes('recuperação') ||
+        page.title?.toLowerCase().includes('parcelamento')
+      )
     },
     {
       title: "Auditoria e Compliance Fiscal",
       icon: <Search className="w-8 h-8" />,
       description: "Revisão, auditoria e implementação de controles para garantir conformidade tributária.",
-      services: [
-        {
-          name: "Auditoria Tributária",
-          description: "Revisão completa da situação fiscal para identificar riscos e oportunidades de otimização.",
-          path: "/servicos/auditoria-tributaria"
-        },
-        {
-          name: "Compliance Tributário",
-          description: "Implementação de rotinas e controles para garantir conformidade com as obrigações fiscais.",
-          path: "/servicos/compliance-tributario"
-        }
-      ]
+      services: tributarioPages.filter(page => 
+        page.title?.toLowerCase().includes('auditoria') || 
+        page.title?.toLowerCase().includes('compliance')
+      )
+    },
+    {
+      title: "Outros Serviços Tributários",
+      icon: <Calculator className="w-8 h-8" />,
+      description: "Demais serviços especializados em Direito Tributário.",
+      services: tributarioPages.filter(page => 
+        !page.title?.toLowerCase().includes('planejamento') && 
+        !page.title?.toLowerCase().includes('elisão') &&
+        !page.title?.toLowerCase().includes('consultoria') &&
+        !page.title?.toLowerCase().includes('contencioso') && 
+        !page.title?.toLowerCase().includes('recuperação') &&
+        !page.title?.toLowerCase().includes('parcelamento') &&
+        !page.title?.toLowerCase().includes('auditoria') && 
+        !page.title?.toLowerCase().includes('compliance')
+      )
     }
   ];
+
+  if (isLoading) {
+    return (
+      <PracticeAreaLayout
+        title="Direito Tributário"
+        description="Carregando serviços..."
+        currentArea="tributario"
+      >
+        <div className="flex justify-center items-center py-12">
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+        </div>
+      </PracticeAreaLayout>
+    );
+  }
 
   return (
     <PracticeAreaLayout
@@ -91,45 +94,60 @@ const TributarioPage = () => {
           </p>
         </div>
 
-        {serviceCategories.map((category, categoryIndex) => (
-          <div key={categoryIndex} className="space-y-8">
-            <div className="flex items-center gap-4 mb-8">
-              <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
-                {category.icon}
+        {serviceCategories.map((category, categoryIndex) => {
+          // Só mostra a categoria se ela tiver serviços
+          if (category.services.length === 0) return null;
+          
+          return (
+            <div key={categoryIndex} className="space-y-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
+                  {category.icon}
+                </div>
+                <div>
+                  <h3 className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                    {category.title}
+                  </h3>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {category.description}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-                  {category.title}
-                </h3>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {category.description}
-                </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.services.map((service, serviceIndex) => (
+                  <Card 
+                    key={serviceIndex}
+                    className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
+                    onClick={() => navigate(service.href || `/servicos/${service.id}`)}
+                  >
+                    <CardContent className="p-6">
+                      <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                        {service.title || 'Título não definido'}
+                      </h4>
+                      <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
+                        {service.description || 'Descrição não definida'}
+                      </p>
+                      <p className={`text-sm font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                        Saiba mais →
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.services.map((service, serviceIndex) => (
-                <Card 
-                  key={serviceIndex}
-                  className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
-                  onClick={() => navigate(service.path)}
-                >
-                  <CardContent className="p-6">
-                    <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
-                      {service.name}
-                    </h4>
-                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
-                      {service.description}
-                    </p>
-                    <p className={`text-sm font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
-                      Saiba mais →
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          );
+        })}
+
+        {tributarioPages.length === 0 && (
+          <div className="text-center py-12">
+            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Nenhuma página de serviço foi criada ainda para Direito Tributário.
+              <br />
+              Acesse o painel administrativo para criar novas páginas de serviços.
+            </p>
           </div>
-        ))}
+        )}
       </div>
     </PracticeAreaLayout>
   );
