@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import Navbar from './navbar';
 import PageBanner from './PageBanner';
-import WhatsAppButton from './WhatsAppButton';
 import Footer from './sections/Footer';
 import { useTheme } from './ThemeProvider';
 import CtaSection from './serviceLanding/CtaSection';
@@ -46,7 +45,6 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       
       {currentArea && <CtaSection serviceArea={title} respectTheme={true} />}
       
-      <WhatsAppButton />
       <Footer respectTheme={true} />
     </div>
   );

@@ -4,7 +4,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
-import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
@@ -50,7 +49,6 @@ const Index = () => {
   
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500`}>
-      <CustomCursor />
       <Navbar />
       <WhatsAppButton />
       

@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Calendar, User, Search, ArrowRight, Filter } from 'lucide-react';
 import { useBlogData } from '../hooks/useBlogData';
+import { useBlogCategories } from '../hooks/useBlogCategories';
 import Navbar from '../components/navbar';
 
 const BlogPage = () => {
@@ -14,6 +15,7 @@ const BlogPage = () => {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const { blogPosts, isLoading } = useBlogData();
+  const { blogCategories } = useBlogCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
 
@@ -28,8 +30,10 @@ const BlogPage = () => {
     return matchesSearch && matchesTag;
   });
 
-  // Obter todas as tags únicas
-  const allTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
+  // Obter todas as tags únicas dos posts E das categorias salvas
+  const postTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
+  const categoryNames = blogCategories.map(cat => cat.name);
+  const allTags = Array.from(new Set([...postTags, ...categoryNames]));
 
   if (isLoading) {
     return (
@@ -50,7 +54,7 @@ const BlogPage = () => {
       
       <div className="container mx-auto px-4 py-20">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <h1 className={`text-5xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h1>
@@ -59,38 +63,39 @@ const BlogPage = () => {
             mantendo você sempre atualizado com as novidades jurídicas
           </p>
           
-          {/* Filtros movidos para baixo da descrição */}
+          {/* Barra de pesquisa embaixo da descrição e maior */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                placeholder="Buscar artigos, autores ou assuntos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 h-14 text-lg"
+              />
+            </div>
+          </div>
+          
+          {/* Filtros de categorias */}
           <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar artigos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              <div className="flex gap-2 flex-wrap justify-center">
+            <div className="flex gap-2 flex-wrap justify-center">
+              <Button
+                variant={selectedTag === '' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedTag('')}
+              >
+                Todos
+              </Button>
+              {allTags.map((tag) => (
                 <Button
-                  variant={selectedTag === '' ? 'default' : 'outline'}
+                  key={tag}
+                  variant={selectedTag === tag ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedTag('')}
+                  onClick={() => setSelectedTag(tag)}
                 >
-                  Todos
+                  {tag}
                 </Button>
-                {allTags.map((tag) => (
-                  <Button
-                    key={tag}
-                    variant={selectedTag === tag ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedTag(tag)}
-                  >
-                    {tag}
-                  </Button>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </div>

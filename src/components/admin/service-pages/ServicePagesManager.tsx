@@ -6,13 +6,10 @@ import { Button } from '../../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Plus, ArrowLeft, Save, Settings } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
+import { CategoryGrid } from './CategoryGrid';
 import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoryTextsManagement } from '../CategoryTextsManagement';
-import { NewLawAreaModal } from './NewLawAreaModal';
-import { NewCategoryModal } from './NewCategoryModal';
-import { lawAreaCategories } from './lawAreaCategories';
-import { filterPagesByLawArea, filterPagesByCategory } from './pageFilterUtils';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
@@ -36,11 +33,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
-  const [showNewLawAreaModal, setShowNewLawAreaModal] = useState(false);
-  const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
-  const [localLawAreaCategories, setLocalLawAreaCategories] = useState(lawAreaCategories);
 
+  // Sincronizar páginas locais com as páginas recebidas apenas quando necessário
   useEffect(() => {
     if (servicePages && servicePages.length > 0) {
       console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
@@ -48,8 +43,17 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     }
   }, [servicePages]);
 
-  const filteredPagesByLawArea = filterPagesByLawArea(localPages, selectedLawArea);
-  const filteredPagesByCategory = filterPagesByCategory(localPages, selectedLawArea, selectedCategory);
+  const filteredPagesByLawArea = selectedLawArea 
+    ? localPages.filter(page => page.category === selectedLawArea)
+    : [];
+
+  const filteredPagesByCategory = selectedCategory 
+    ? filteredPagesByLawArea.filter(page => {
+        // Filtrar por categoria de serviço dentro da área do direito
+        const categoryTexts = pageTexts.categoryTexts?.find(cat => cat.id === selectedCategory);
+        return categoryTexts;
+      })
+    : [];
 
   const selectedPage = selectedPageId 
     ? localPages.find(page => page.id === selectedPageId)
@@ -69,17 +73,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const addNewServicePage = () => {
     if (!selectedLawArea || !selectedCategory) return;
     
-    const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(
-      cat => cat.id === selectedCategory
-    );
-    
     const newId = `${selectedLawArea}-${selectedCategory}-${Date.now()}`;
     const newServicePage: ServicePage = {
       id: newId,
-      title: categoryInfo?.title || '',
-      description: categoryInfo?.description || '',
+      title: '',
+      description: '',
       category: selectedLawArea,
-      href: `/servicos/${selectedCategory}`,
+      href: '',
       benefits: [],
       process: [],
       faq: [],
@@ -99,7 +99,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     }
   };
 
-  // Handlers para navegação
   const handleBackToLawAreas = () => {
     setSelectedLawArea(null);
     setSelectedCategory(null);
@@ -114,29 +113,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const handleBackToPages = () => {
     setSelectedPageId(null);
-  };
-
-  const addNewLawArea = (newArea: { id: string; title: string; description: string; color: string }) => {
-    setLocalLawAreaCategories(prev => ({
-      ...prev,
-      [newArea.id]: []
-    }));
-    
-    console.log('Nova área de direito criada:', newArea);
-  };
-
-  const addNewCategory = (categoryData: { id: string; title: string; description: string }) => {
-    if (!selectedLawArea) return;
-    
-    setLocalLawAreaCategories(prev => ({
-      ...prev,
-      [selectedLawArea]: [
-        ...(prev[selectedLawArea as keyof typeof prev] || []),
-        categoryData
-      ]
-    }));
-    
-    console.log('Nova categoria criada para', selectedLawArea, ':', categoryData);
   };
 
   // Se está editando categorias
@@ -181,10 +157,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               Selecione a Área do Direito
             </CardTitle>
             <div className="flex gap-2">
-              <Button onClick={() => setShowNewLawAreaModal(true)} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Área
-              </Button>
               <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
                 <Settings className="w-4 h-4 mr-2" />
                 Editar Categorias
@@ -223,12 +195,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             })}
           </div>
         </CardContent>
-
-        <NewLawAreaModal
-          isOpen={showNewLawAreaModal}
-          onClose={() => setShowNewLawAreaModal(false)}
-          onSave={addNewLawArea}
-        />
       </Card>
     );
   }
@@ -236,7 +202,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Nível 2: Seleção da Categoria de Serviço dentro da Área
   if (selectedLawArea && !selectedCategory) {
     const lawAreaInfo = categories.find(c => c.value === selectedLawArea);
-    const availableCategories = localLawAreaCategories[selectedLawArea as keyof typeof localLawAreaCategories] || [];
+    const availableCategories = pageTexts.categoryTexts || [];
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -256,9 +222,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               </CardTitle>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setShowNewCategoryModal(true)} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Categoria
+              <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
+                <Settings className="w-4 h-4 mr-2" />
+                Gerenciar Categorias
               </Button>
               <Button onClick={handleSave} size="sm" variant="outline">
                 <Save className="w-4 h-4 mr-2" />
@@ -268,45 +234,50 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableCategories.map((category) => {
-              const categoryPageCount = filterPagesByCategory(
-                localPages, 
-                selectedLawArea, 
-                category.id
-              ).length;
-              
-              return (
-                <Card 
-                  key={category.id}
-                  className={`cursor-pointer transition-all hover:scale-105 ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-12 h-12 rounded-full ${lawAreaInfo?.color} mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl`}>
-                      {categoryPageCount}
-                    </div>
-                    <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                      {category.title}
-                    </h3>
-                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {category.description}
-                    </p>
-                    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                      {categoryPageCount} página{categoryPageCount !== 1 ? 's' : ''}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+          {availableCategories.length === 0 ? (
+            <div className="text-center py-8">
+              <p className={`text-lg mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Nenhuma categoria de serviço criada ainda.
+              </p>
+              <Button onClick={() => setShowCategoryEditor(true)} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Primeira Categoria
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {availableCategories.map((category) => {
+                const categoryPages = filteredPagesByLawArea.filter(page => 
+                  page.title?.toLowerCase().includes(category.title.toLowerCase()) ||
+                  page.description?.toLowerCase().includes(category.title.toLowerCase())
+                );
+                
+                return (
+                  <Card 
+                    key={category.id}
+                    className={`cursor-pointer transition-all hover:scale-105 ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className={`w-12 h-12 rounded-full ${lawAreaInfo?.color} mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl`}>
+                        {categoryPages.length}
+                      </div>
+                      <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                        {category.title}
+                      </h3>
+                      <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {category.description}
+                      </p>
+                      <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {categoryPages.length} página{categoryPages.length !== 1 ? 's' : ''}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
-
-        <NewCategoryModal
-          isOpen={showNewCategoryModal}
-          onClose={() => setShowNewCategoryModal(false)}
-          onSave={addNewCategory}
-        />
       </Card>
     );
   }
@@ -314,7 +285,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Nível 3: Lista de Páginas dentro da Categoria
   if (selectedLawArea && selectedCategory && !selectedPageId) {
     const lawAreaInfo = categories.find(c => c.value === selectedLawArea);
-    const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
+    const categoryInfo = pageTexts.categoryTexts?.find(cat => cat.id === selectedCategory);
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -360,7 +331,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Nível 4: Editor da Página
   if (selectedPage) {
     const lawAreaInfo = categories.find(c => c.value === selectedLawArea);
-    const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
+    const categoryInfo = pageTexts.categoryTexts?.find(cat => cat.id === selectedCategory);
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
