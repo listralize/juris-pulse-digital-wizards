@@ -65,13 +65,23 @@ export const useServicePageData = (serviceId?: string) => {
 
   // Se um serviceId específico foi fornecido, retornar apenas essa página
   if (serviceId) {
-    const specificPage = servicePages.find(page => 
-      page.id === serviceId || 
-      page.href === serviceId || 
-      page.href === `/servicos/${serviceId}` ||
-      page.id === serviceId.replace('/servicos/', '')
-    );
+    const specificPage = servicePages.find(page => {
+      // Tentar várias formas de match
+      if (page.id === serviceId) return true;
+      if (page.href === serviceId) return true;
+      if (page.href === `/servicos/${serviceId}`) return true;
+      if (page.id === serviceId.replace('/servicos/', '')) return true;
+      
+      // Tentar match por título normalizado
+      const normalizedTitle = page.title?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
+      const normalizedServiceId = serviceId.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
+      if (normalizedTitle === normalizedServiceId) return true;
+      
+      return false;
+    });
+    
     console.log('useServicePageData: Página específica encontrada:', specificPage ? 'sim' : 'não', 'para ID:', serviceId);
+    console.log('useServicePageData: Dados da página encontrada:', specificPage);
     return { servicePage: specificPage, isLoading };
   }
 

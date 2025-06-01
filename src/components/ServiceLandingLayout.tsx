@@ -77,12 +77,17 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const ctaRef = useRef<HTMLDivElement>(null);
   
   // Usar dados do admin se disponíveis, senão usar os padrão
-  const finalTitle = servicePage?.title || serviceName;
-  const finalDescription = servicePage?.description || serviceDescription;
-  const finalBenefits = servicePage?.benefits?.length ? servicePage.benefits : defaultBenefits;
-  const finalProcess = servicePage?.process?.length ? servicePage.process : defaultProcess;
-  const finalTestimonials = servicePage?.testimonials?.length ? servicePage.testimonials : defaultTestimonials;
-  const finalFaq = servicePage?.faq?.length ? servicePage.faq : defaultFaq;
+  const finalTitle = (servicePage?.title && servicePage.title.trim() !== '') ? servicePage.title : serviceName;
+  const finalDescription = (servicePage?.description && servicePage.description.trim() !== '') ? servicePage.description : serviceDescription;
+  const finalBenefits = (servicePage?.benefits && servicePage.benefits.length > 0) ? servicePage.benefits : defaultBenefits;
+  const finalProcess = (servicePage?.process && servicePage.process.length > 0) ? servicePage.process : defaultProcess;
+  const finalTestimonials = (servicePage?.testimonials && servicePage.testimonials.length > 0) ? servicePage.testimonials : defaultTestimonials;
+  const finalFaq = (servicePage?.faq && servicePage.faq.length > 0) ? servicePage.faq : defaultFaq;
+  
+  console.log('ServiceLandingLayout: serviceId recebido:', serviceId);
+  console.log('ServiceLandingLayout: servicePage encontrada:', servicePage);
+  console.log('ServiceLandingLayout: Título final:', finalTitle);
+  console.log('ServiceLandingLayout: Benefícios finais:', finalBenefits.length);
   
   useEffect(() => {
     // Scroll to top when component mounts
