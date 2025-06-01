@@ -68,7 +68,18 @@ const Admin = () => {
     consumidorDescription: '',
     civilTitle: '',
     civilDescription: '',
-    categoryTexts: []
+    categoryTexts: [],
+    contactTexts: {
+      phone: '',
+      email: '',
+      address: '',
+      whatsapp: ''
+    },
+    footerTexts: {
+      companyName: '',
+      description: '',
+      copyright: ''
+    }
   });
 
   useEffect(() => {
