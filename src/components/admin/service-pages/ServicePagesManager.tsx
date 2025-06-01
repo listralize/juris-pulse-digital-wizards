@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts } from '../../../types/adminTypes';
 import { categories } from '../../../types/adminTypes';
@@ -72,60 +73,31 @@ const lawAreaCategories = {
     { id: 'atuacao-tribunais-superiores', title: 'Atuação nos Tribunais Superiores', description: 'Representação no STF e STJ' },
     { id: 'direitos-fundamentais', title: 'Direitos Fundamentais', description: 'Defesa de direitos e garantias constitucionais' },
     { id: 'liberdades-publicas', title: 'Liberdades Públicas', description: 'Proteção das liberdades individuais e coletivas' },
-    { id: 'consultoria-constitucional', title: 'Consultoria Constitucional', description: 'Análise de constitucionalidade e pareceres' },
-    { id: 'mandado-seguranca', title: 'Mandado de Segurança', description: 'Proteção de direitos líquidos e certos' },
-    { id: 'habeas-corpus', title: 'Habeas Corpus', description: 'Proteção da liberdade de locomoção' },
-    { id: 'habeas-data', title: 'Habeas Data', description: 'Acesso e retificação de informações pessoais' },
-    { id: 'mandado-injuncao', title: 'Mandado de Injunção', description: 'Suprimento de omissão legislativa' },
-    { id: 'adi', title: 'ADI - Ação Direta de Inconstitucionalidade', description: 'Controle concentrado de constitucionalidade' },
-    { id: 'adc', title: 'ADC - Ação Declaratória de Constitucionalidade', description: 'Declaração de constitucionalidade' },
-    { id: 'adpf', title: 'ADPF - Arguição de Descumprimento de Preceito Fundamental', description: 'Proteção de preceitos fundamentais' },
-    { id: 'recursos-extraordinario-especial', title: 'Recursos Extraordinário e Especial', description: 'Recursos para tribunais superiores' },
-    { id: 'reclamacao-constitucional', title: 'Reclamação Constitucional', description: 'Preservação da competência e autoridade das decisões' },
-    { id: 'atuacao-stf', title: 'Atuação no STF', description: 'Representação no Supremo Tribunal Federal' },
-    { id: 'atuacao-stj', title: 'Atuação no STJ', description: 'Representação no Superior Tribunal de Justiça' },
-    { id: 'igualdade-nao-discriminacao', title: 'Igualdade e Não Discriminação', description: 'Proteção contra discriminação' },
-    { id: 'liberdade-expressao', title: 'Liberdade de Expressão', description: 'Defesa da liberdade de expressão' },
-    { id: 'direitos-minorias', title: 'Direitos das Minorias', description: 'Proteção de grupos minoritários' },
-    { id: 'direitos-sociais', title: 'Direitos Sociais', description: 'Efetivação de direitos sociais' },
-    { id: 'analise-constitucionalidade', title: 'Análise de Constitucionalidade', description: 'Pareceres e consultorias constitucionais' }
+    { id: 'consultoria-constitucional', title: 'Consultoria Constitucional', description: 'Análise de constitucionalidade e pareceres' }
   ],
   administrativo: [
     { id: 'licitacoes-contratos', title: 'Licitações e Contratos', description: 'Assessoria em processos licitatórios' },
     { id: 'processos-administrativos', title: 'Processos Administrativos', description: 'Defesa em PAD e sindicâncias' },
     { id: 'atos-administrativos', title: 'Atos Administrativos', description: 'Contestação e anulação de atos administrativos' },
-    { id: 'responsabilidade-estado', title: 'Responsabilidade do Estado', description: 'Ações indenizatórias contra o poder público' },
-    { id: 'improbidade-administrativa', title: 'Improbidade Administrativa', description: 'Defesa em ações de improbidade' },
-    { id: 'direitos-servidores', title: 'Direitos de Servidores', description: 'Defesa dos direitos dos servidores públicos' },
-    { id: 'desapropriacao', title: 'Desapropriação', description: 'Questões expropriatórias e indenizações' },
-    { id: 'direito-urbanistico', title: 'Direito Urbanístico', description: 'Regulamentação urbana e ambiental' }
+    { id: 'responsabilidade-estado', title: 'Responsabilidade do Estado', description: 'Ações indenizatórias contra o poder público' }
   ],
   previdenciario: [
     { id: 'beneficios-previdenciarios', title: 'Benefícios Previdenciários', description: 'Concessão e revisão de benefícios' },
     { id: 'aposentadorias', title: 'Aposentadorias', description: 'Aposentadoria por idade, tempo e especial' },
     { id: 'auxilio-doenca', title: 'Auxílio-Doença', description: 'Concessão e manutenção do benefício' },
-    { id: 'pensao-morte', title: 'Pensão por Morte', description: 'Concessão de pensão aos dependentes' },
-    { id: 'bpc-loas', title: 'BPC/LOAS', description: 'Benefício de Prestação Continuada' },
-    { id: 'revisao-beneficios', title: 'Revisão de Benefícios', description: 'Revisão da Vida Toda e outras revisões' },
-    { id: 'planejamento-previdenciario', title: 'Planejamento Previdenciário', description: 'Estratégias para maximizar benefícios' }
+    { id: 'pensao-morte', title: 'Pensão por Morte', description: 'Concessão de pensão aos dependentes' }
   ],
   consumidor: [
     { id: 'direitos-consumidor', title: 'Direitos do Consumidor', description: 'Proteção integral dos direitos consumeristas' },
     { id: 'contratos-consumo', title: 'Contratos de Consumo', description: 'Revisão e contestação de contratos' },
     { id: 'praticas-abusivas', title: 'Práticas Abusivas', description: 'Combate a práticas comerciais abusivas' },
-    { id: 'publicidade-enganosa', title: 'Publicidade Enganosa', description: 'Ações contra propaganda enganosa' },
-    { id: 'responsabilidade-produtos', title: 'Responsabilidade por Produtos', description: 'Defeitos e vícios de produtos e serviços' },
-    { id: 'defesa-coletiva', title: 'Defesa Coletiva', description: 'Ações coletivas de consumidores' },
-    { id: 'indenizacao-danos', title: 'Indenização por Danos', description: 'Reparação de danos morais e materiais' },
-    { id: 'recalls-seguranca', title: 'Recalls e Segurança', description: 'Questões de segurança e recalls' }
+    { id: 'publicidade-enganosa', title: 'Publicidade Enganosa', description: 'Ações contra propaganda enganosa' }
   ],
   civil: [
     { id: 'contratos-civil', title: 'Contratos', description: 'Elaboração, revisão e rescisão contratual' },
     { id: 'responsabilidade-civil', title: 'Responsabilidade Civil', description: 'Ações de indenização por danos' },
     { id: 'direito-propriedade', title: 'Direito de Propriedade', description: 'Questões imobiliárias e possessórias' },
-    { id: 'sucessoes-herancas', title: 'Sucessões e Heranças', description: 'Inventários e questões sucessórias' },
-    { id: 'direitos-personalidade', title: 'Direitos da Personalidade', description: 'Proteção da honra, imagem e privacidade' },
-    { id: 'obrigacoes-contratos', title: 'Obrigações e Contratos', description: 'Cumprimento e execução de obrigações' }
+    { id: 'sucessoes-herancas', title: 'Sucessões e Heranças', description: 'Inventários e questões sucessórias' }
   ]
 };
 
@@ -148,7 +120,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
   const [localLawAreaCategories, setLocalLawAreaCategories] = useState(lawAreaCategories);
 
-  // Sincronizar páginas locais com as páginas recebidas apenas quando necessário
   useEffect(() => {
     if (servicePages && servicePages.length > 0) {
       console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
@@ -162,11 +133,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const filteredPagesByCategory = selectedCategory 
     ? filteredPagesByLawArea.filter(page => {
-        // Melhor mapeamento baseado no ID da categoria e conteúdo da página
         const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
         if (!categoryInfo) return false;
         
-        // Verificar múltiplos critérios para uma melhor correspondência
         const titleMatch = page.title?.toLowerCase().includes(categoryInfo.title.toLowerCase());
         const descMatch = page.description?.toLowerCase().includes(categoryInfo.title.toLowerCase());
         const hrefMatch = page.href?.includes(selectedCategory);
@@ -222,6 +191,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     }
   };
 
+  // Handlers para navegação
   const handleBackToLawAreas = () => {
     setSelectedLawArea(null);
     setSelectedCategory(null);
@@ -239,13 +209,11 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   };
 
   const addNewLawArea = (newArea: { id: string; title: string; description: string; color: string }) => {
-    // Adicionar nova área às categorias locais
     setLocalLawAreaCategories(prev => ({
       ...prev,
       [newArea.id]: []
     }));
     
-    // Aqui você pode salvar no localStorage ou fazer outras ações necessárias
     console.log('Nova área de direito criada:', newArea);
   };
 

@@ -17,16 +17,35 @@ export interface SpecializedService {
   isActive: boolean;
 }
 
+export interface Benefit {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface ProcessStep {
+  step: number;
+  title: string;
+  description: string;
+}
+
+export interface Testimonial {
+  name: string;
+  text: string;
+  image?: string;
+  quote?: string;
+}
+
 export interface ServicePage {
   id: string;
   title: string;
   description: string;
   category: string;
   href: string;
-  benefits: string[];
-  process: string[];
+  benefits: Benefit[];
+  process: ProcessStep[];
   faq: { question: string; answer: string; }[];
-  testimonials: { name: string; text: string; }[];
+  testimonials: Testimonial[];
 }
 
 export interface PageTexts {
