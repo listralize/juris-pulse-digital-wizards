@@ -32,8 +32,8 @@ export interface ProcessStep {
 export interface Testimonial {
   name: string;
   text: string;
+  quote: string;
   image?: string;
-  quote?: string;
 }
 
 export interface ServicePage {
@@ -92,6 +92,35 @@ export interface LandingPageSection {
   buttonLink?: string;
 }
 
+export interface CategoryText {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+}
+
+export interface FooterTexts {
+  companyDescription: string;
+  address: string;
+  email: string;
+  phone: string;
+  whatsappUrl: string;
+  whatsappText: string;
+  schedule: string;
+  copyrightText: string;
+  privacyPolicyUrl?: string;
+  termsOfUseUrl?: string;
+}
+
+export interface ContactTexts {
+  address: string;
+  phone: string;
+  email: string;
+  mapEmbedUrl?: string;
+  whatsappUrl: string;
+  scheduleText: string;
+}
+
 export interface PageTexts {
   heroTitle: string;
   heroSubtitle: string;
@@ -110,29 +139,34 @@ export interface PageTexts {
   clientAreaWhatsAppText?: string;
   familiaTitle: string;
   familiaDescription: string;
+  familiaImage?: string;
   tributarioTitle: string;
   tributarioDescription: string;
+  tributarioImage?: string;
   empresarialTitle: string;
   empresarialDescription: string;
+  empresarialImage?: string;
   trabalhoTitle: string;
   trabalhoDescription: string;
+  trabalhoImage?: string;
   constitucionalTitle: string;
   constitucionalDescription: string;
+  constitucionalImage?: string;
   administrativoTitle: string;
   administrativoDescription: string;
+  administrativoImage?: string;
   previdenciarioTitle: string;
   previdenciarioDescription: string;
+  previdenciarioImage?: string;
   consumidorTitle: string;
   consumidorDescription: string;
+  consumidorImage?: string;
   civilTitle: string;
   civilDescription: string;
+  civilImage?: string;
   categoryTexts: CategoryText[];
-}
-
-export interface CategoryText {
-  id: string;
-  title: string;
-  description: string;
+  footerTexts: FooterTexts;
+  contactTexts: ContactTexts;
 }
 
 export const categories = [

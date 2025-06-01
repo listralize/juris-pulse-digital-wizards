@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { CategoryTexts, PageTexts } from '../../types/adminTypes';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
+import { CategoryText, PageTexts } from '../../types/adminTypes';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
@@ -23,7 +22,7 @@ export const CategoryTextsManagement: React.FC<CategoryTextsManagementProps> = (
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const updateCategoryText = (id: string, field: keyof CategoryTexts, value: string) => {
+  const updateCategoryText = (id: string, field: keyof CategoryText, value: string) => {
     const updatedCategoryTexts = pageTexts.categoryTexts.map(category =>
       category.id === id ? { ...category, [field]: value } : category
     );
@@ -35,7 +34,7 @@ export const CategoryTextsManagement: React.FC<CategoryTextsManagementProps> = (
   };
 
   const addCategoryText = () => {
-    const newCategory: CategoryTexts = {
+    const newCategory: CategoryText = {
       id: `categoria-${Date.now()}`,
       title: '',
       description: ''

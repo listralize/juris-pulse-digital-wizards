@@ -4,7 +4,7 @@ import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { Label } from '../../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { PageTexts } from '../../../types/adminTypes';
+import { PageTexts, ContactTexts } from '../../../types/adminTypes';
 import { useTheme } from '../../ThemeProvider';
 
 interface ContactSectionProps {
@@ -19,10 +19,21 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const updateContactTexts = (field: string, value: string) => {
+  const updateContactTexts = (field: keyof ContactTexts, value: string) => {
+    const contactTexts = pageTexts.contactTexts || {
+      address: '',
+      phone: '',
+      email: '',
+      whatsappUrl: '',
+      scheduleText: ''
+    };
+    
     onUpdatePageTexts({
       ...pageTexts,
-      contactTexts: { ...pageTexts.contactTexts, [field]: value }
+      contactTexts: {
+        ...contactTexts,
+        [field]: value
+      }
     });
   };
 

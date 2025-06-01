@@ -49,7 +49,7 @@ export const useAdminData = () => {
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
-      // Carregar páginas de serviços - LÓGICA MELHORADA
+      // Carregar páginas de serviços - GARANTINDO QUE NENHUMA SEJA PERDIDA
       console.log('Carregando páginas de serviço...');
       console.log('Páginas padrão disponíveis:', defaultServicePages.length);
       
@@ -62,17 +62,20 @@ export const useAdminData = () => {
           console.log('Páginas salvas encontradas:', parsedServicePages.length);
           
           if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
-            // Se há páginas salvas, usar elas como base
-            finalPages = [...parsedServicePages];
+            // SEMPRE usar as páginas padrão como base e adicionar as customizadas
+            finalPages = [...defaultServicePages];
             
-            // Verificar se faltam páginas padrão que não foram salvas
-            const savedIds = new Set(parsedServicePages.map((page: ServicePage) => page.id));
-            const missingDefaultPages = defaultServicePages.filter(defaultPage => !savedIds.has(defaultPage.id));
-            
-            if (missingDefaultPages.length > 0) {
-              console.log('Adicionando páginas padrão que faltavam:', missingDefaultPages.length);
-              finalPages = [...parsedServicePages, ...missingDefaultPages];
-            }
+            // Adicionar ou atualizar páginas customizadas
+            parsedServicePages.forEach((savedPage: ServicePage) => {
+              const existingIndex = finalPages.findIndex(page => page.id === savedPage.id);
+              if (existingIndex >= 0) {
+                // Atualizar página existente
+                finalPages[existingIndex] = savedPage;
+              } else {
+                // Adicionar nova página customizada
+                finalPages.push(savedPage);
+              }
+            });
           } else {
             // Se não há páginas válidas salvas, usar as padrão
             finalPages = [...defaultServicePages];
@@ -108,7 +111,7 @@ export const useAdminData = () => {
       console.error('Erro ao carregar dados do admin:', error);
       setTeamMembers(defaultTeamMembers);
       setSpecializedServices(defaultSpecializedServices);
-      setServicePages([...defaultServicePages]);
+      setServicePages([...defaultServicePages]); // SEMPRE garantir páginas padrão
       setPageTexts(defaultPageTexts);
     }
     

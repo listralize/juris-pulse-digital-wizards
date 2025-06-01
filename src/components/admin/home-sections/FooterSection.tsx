@@ -4,7 +4,7 @@ import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { Label } from '../../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { PageTexts } from '../../../types/adminTypes';
+import { PageTexts, FooterTexts } from '../../../types/adminTypes';
 import { useTheme } from '../../ThemeProvider';
 
 interface FooterSectionProps {
@@ -19,10 +19,24 @@ export const FooterSection: React.FC<FooterSectionProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const updateFooterTexts = (field: string, value: string) => {
+  const updateFooterTexts = (field: keyof FooterTexts, value: string) => {
+    const footerTexts = pageTexts.footerTexts || {
+      companyDescription: '',
+      address: '',
+      email: '',
+      phone: '',
+      whatsappUrl: '',
+      whatsappText: '',
+      schedule: '',
+      copyrightText: ''
+    };
+    
     onUpdatePageTexts({
       ...pageTexts,
-      footerTexts: { ...pageTexts.footerTexts, [field]: value }
+      footerTexts: {
+        ...footerTexts,
+        [field]: value
+      }
     });
   };
 
