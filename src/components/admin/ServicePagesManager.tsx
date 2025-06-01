@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ServicePage } from '../../types/adminTypes';
 import { categories } from '../../types/adminTypes';
 import { Button } from '../ui/button';
@@ -21,7 +21,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
-  const [localPages, setLocalPages] = useState<ServicePage[]>(servicePages);
+  const [localPages, setLocalPages] = useState<ServicePage[]>([]);
+
+  // Sincronizar páginas locais com as páginas recebidas
+  useEffect(() => {
+    console.log('ServicePagesManager: páginas recebidas:', servicePages.length);
+    setLocalPages(servicePages);
+  }, [servicePages]);
 
   const filteredPages = selectedCategory 
     ? localPages.filter(page => page.category === selectedCategory)
@@ -38,14 +44,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
   };
 
   const handleSave = () => {
+    console.log('Salvando páginas locais:', localPages.length);
     onSave(localPages);
   };
 
   const addNewServicePage = () => {
     if (!selectedCategory) return;
     
+    const newId = `${selectedCategory}-${Date.now()}`;
     const newServicePage: ServicePage = {
-      id: `${selectedCategory}-${Date.now()}`,
+      id: newId,
       title: '',
       description: '',
       category: selectedCategory,
@@ -55,14 +63,27 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
       faq: [],
       testimonials: []
     };
-    setLocalPages([...localPages, newServicePage]);
+    
+    console.log('Adicionando nova página:', newId);
+    setLocalPages(prev => [...prev, newServicePage]);
+    setSelectedPageId(newId);
   };
 
   const removeServicePage = (pageId: string) => {
+    console.log('Removendo página:', pageId);
     setLocalPages(pages => pages.filter(page => page.id !== pageId));
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
     }
+  };
+
+  const handleBackToCategories = () => {
+    setSelectedCategory(null);
+    setSelectedPageId(null);
+  };
+
+  const handleBackToPages = () => {
+    setSelectedPageId(null);
   };
 
   // Se nenhuma categoria selecionada, mostra grid de categorias
@@ -70,9 +91,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
-          <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            Gerenciar Páginas por Área do Direito
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+              Gerenciar Páginas por Área do Direito
+            </CardTitle>
+            <Button onClick={handleSave} size="sm" variant="outline">
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Tudo
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <CategoryGrid 
@@ -94,7 +121,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button 
-                onClick={() => setSelectedCategory(null)}
+                onClick={handleBackToCategories}
                 variant="outline"
                 size="sm"
               >
@@ -102,7 +129,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
                 Voltar
               </Button>
               <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-                {categoryInfo?.label}
+                {categoryInfo?.label} ({filteredPages.length} páginas)
               </CardTitle>
             </div>
             <div className="flex gap-2">
@@ -137,12 +164,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button 
-                onClick={() => setSelectedPageId(null)}
+                onClick={handleBackToPages}
                 variant="outline"
                 size="sm"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
+                Voltar à Lista
               </Button>
               <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
                 Editando: {selectedPage.title || 'Nova Página'}

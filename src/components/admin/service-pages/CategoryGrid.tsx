@@ -15,13 +15,17 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ servicePages, onCate
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  console.log('CategoryGrid: Total de páginas recebidas:', servicePages.length);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => {
-        // Conta páginas dos dados padrão para mostrar quantas páginas deveriam existir
+        // Conta páginas padrão para mostrar o total esperado
         const defaultCategoryPages = defaultServicePages.filter(page => page.category === category.value);
-        // Conta páginas atuais que o usuário já tem
+        // Conta páginas atuais que estão carregadas
         const currentCategoryPages = servicePages.filter(page => page.category === category.value);
+        
+        console.log(`${category.label}: padrão=${defaultCategoryPages.length}, atual=${currentCategoryPages.length}`);
         
         return (
           <Card 
@@ -31,17 +35,17 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ servicePages, onCate
           >
             <CardContent className="p-6 text-center">
               <div className={`w-12 h-12 rounded-full ${category.color} mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl`}>
-                {defaultCategoryPages.length}
+                {currentCategoryPages.length}
               </div>
               <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                 {category.label}
               </h3>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                {defaultCategoryPages.length} página{defaultCategoryPages.length !== 1 ? 's' : ''}
+                {currentCategoryPages.length} página{currentCategoryPages.length !== 1 ? 's' : ''} disponível{currentCategoryPages.length !== 1 ? 'eis' : ''}
               </p>
-              {currentCategoryPages.length !== defaultCategoryPages.length && (
+              {defaultCategoryPages.length !== currentCategoryPages.length && (
                 <p className={`text-xs mt-1 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                  ({currentCategoryPages.length} carregadas)
+                  (de {defaultCategoryPages.length} padrão)
                 </p>
               )}
             </CardContent>
