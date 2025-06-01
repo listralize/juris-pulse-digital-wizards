@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -11,47 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { LogOut, Save, Plus, Trash2, Users, FileText, Briefcase, Settings } from 'lucide-react';
 import { useAdminData, TeamMember, SpecializedService, PageTexts } from '../hooks/useAdminData';
 import { toast } from 'sonner';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  title: string;
-  oab: string;
-  email: string;
-  image: string;
-  description: string;
-}
-
-interface PageTexts {
-  heroTitle: string;
-  heroSubtitle: string;
-  aboutTitle: string;
-  aboutDescription: string;
-  contactTitle: string;
-  contactSubtitle: string;
-  teamTitle: string;
-  areasTitle: string;
-  clientAreaTitle: string;
-  clientAreaDescription: string;
-  familiaTitle: string;
-  familiaDescription: string;
-  tributarioTitle: string;
-  tributarioDescription: string;
-  empresarialTitle: string;
-  empresarialDescription: string;
-  trabalhoTitle: string;
-  trabalhoDescription: string;
-  constitucionalTitle: string;
-  constitucionalDescription: string;
-  administrativoTitle: string;
-  administrativoDescription: string;
-  previdenciarioTitle: string;
-  previdenciarioDescription: string;
-  consumidorTitle: string;
-  consumidorDescription: string;
-  civilTitle: string;
-  civilDescription: string;
-}
 
 const Admin = () => {
   const { logout } = useAuth();
