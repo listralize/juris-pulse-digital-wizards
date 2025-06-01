@@ -62,7 +62,8 @@ const Admin = () => {
     consumidorTitle: '',
     consumidorDescription: '',
     civilTitle: '',
-    civilDescription: ''
+    civilDescription: '',
+    categoryTexts: []
   });
 
   useEffect(() => {
@@ -153,7 +154,7 @@ const Admin = () => {
         <AdminHeader onLogout={logout} />
 
         <Tabs defaultValue="service-pages" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-6 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="service-pages" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
               Páginas de Serviços
@@ -161,10 +162,6 @@ const Admin = () => {
             <TabsTrigger value="team" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Equipe
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4" />
-              Categorias
             </TabsTrigger>
             <TabsTrigger value="texts" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -179,7 +176,10 @@ const Admin = () => {
           <TabsContent value="service-pages">
             <ServicePagesManager 
               servicePages={servicePages}
+              pageTexts={pageTexts}
               onSave={handleSaveServicePages}
+              onSavePageTexts={handleSavePageTexts}
+              onUpdatePageTexts={setPageTexts}
             />
           </TabsContent>
 
@@ -190,14 +190,6 @@ const Admin = () => {
               onRemoveTeamMember={removeTeamMember}
               onUpdateTeamMember={updateTeamMember}
               onSave={handleSaveTeamMembers}
-            />
-          </TabsContent>
-
-          <TabsContent value="categories">
-            <CategoryTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={setPageTexts}
-              onSave={handleSavePageTexts}
             />
           </TabsContent>
 

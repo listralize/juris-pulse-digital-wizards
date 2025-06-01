@@ -1,26 +1,37 @@
 
 import React, { useState, useEffect } from 'react';
-import { ServicePage } from '../../types/adminTypes';
+import { ServicePage, PageTexts } from '../../types/adminTypes';
 import { categories } from '../../types/adminTypes';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Plus, ArrowLeft, Save } from 'lucide-react';
+import { Plus, ArrowLeft, Save, Settings } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { CategoryGrid } from './service-pages/CategoryGrid';
 import { PagesList } from './service-pages/PagesList';
 import { PageEditor } from './service-pages/PageEditor';
+import { CategoryTextsManagement } from './CategoryTextsManagement';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
+  pageTexts: PageTexts;
   onSave: (pages: ServicePage[]) => void;
+  onSavePageTexts: () => void;
+  onUpdatePageTexts: (texts: PageTexts) => void;
 }
 
-export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servicePages, onSave }) => {
+export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ 
+  servicePages, 
+  pageTexts,
+  onSave, 
+  onSavePageTexts,
+  onUpdatePageTexts 
+}) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [showCategoryEditor, setShowCategoryEditor] = useState(false);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
 
   // Sincronizar páginas locais com as páginas recebidas apenas quando necessário
@@ -82,11 +93,44 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
   const handleBackToCategories = () => {
     setSelectedCategory(null);
     setSelectedPageId(null);
+    setShowCategoryEditor(false);
   };
 
   const handleBackToPages = () => {
     setSelectedPageId(null);
   };
+
+  // Se está editando categorias
+  if (showCategoryEditor) {
+    return (
+      <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button 
+                onClick={() => setShowCategoryEditor(false)}
+                variant="outline"
+                size="sm"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+                Editar Categorias de Serviços
+              </CardTitle>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <CategoryTextsManagement
+            pageTexts={pageTexts}
+            onUpdatePageTexts={onUpdatePageTexts}
+            onSave={onSavePageTexts}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Se nenhuma categoria selecionada, mostra grid de categorias
   if (!selectedCategory) {
@@ -97,10 +141,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
             <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
               Gerenciar Páginas por Área do Direito
             </CardTitle>
-            <Button onClick={handleSave} size="sm" variant="outline">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Tudo
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
+                <Settings className="w-4 h-4 mr-2" />
+                Editar Categorias
+              </Button>
+              <Button onClick={handleSave} size="sm" variant="outline">
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Tudo
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
@@ -5,21 +6,21 @@ import { Card, CardContent } from '../../components/ui/card';
 import { useTheme } from '../../components/ThemeProvider';
 import { Calculator, FileText, Shield, TrendingUp, Search, AlertTriangle } from 'lucide-react';
 import { useServicePageData } from '../../hooks/useServicePageData';
-import { useCategoryTexts } from '../../hooks/useCategoryTexts';
+import { useAdminData } from '../../hooks/useAdminData';
 
 const TributarioPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const { servicePages, isLoading } = useServicePageData();
-  const { getCategoryText, isLoading: categoryTextsLoading } = useCategoryTexts();
+  const { pageTexts, isLoading: pageTextsLoading } = useAdminData();
   
   // Filtrar apenas páginas da categoria tributário
   const tributarioPages = servicePages.filter(page => page.category === 'tributario');
   
-  // Função para obter título e descrição da categoria
+  // Função para obter título e descrição da categoria dos textos salvos
   const getCategoryInfo = (categoryId: string) => {
-    const categoryText = getCategoryText(categoryId);
+    const categoryText = pageTexts.categoryTexts?.find(cat => cat.id === categoryId);
     return {
       title: categoryText?.title || categoryId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
       description: categoryText?.description || 'Descrição não definida'
@@ -70,7 +71,7 @@ const TributarioPage = () => {
     }
   ];
 
-  if (isLoading || categoryTextsLoading) {
+  if (isLoading || pageTextsLoading) {
     return (
       <PracticeAreaLayout
         title="Direito Tributário"
