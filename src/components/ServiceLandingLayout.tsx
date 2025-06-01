@@ -21,7 +21,7 @@ import { useServicePageData } from '../hooks/useServicePageData';
 gsap.registerPlugin(ScrollTrigger);
 
 interface ServiceLandingLayoutProps {
-  serviceId: string; // ID da página de serviço
+  serviceId?: string; // ID da página de serviço - opcional para compatibilidade
   serviceArea: string;
   serviceName: string;
   serviceDescription: string;
@@ -69,7 +69,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   
-  // Buscar dados editados do admin
+  // Buscar dados editados do admin apenas se serviceId for fornecido
   const { servicePage, isLoading } = useServicePageData(serviceId);
   
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -113,7 +113,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
     };
   }, []);
 
-  if (isLoading) {
+  if (isLoading && serviceId) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-white'}`}>
         <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
@@ -280,8 +280,8 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
                         </p>
                       </div>
                     </div>
+                  </div>
                 </div>
-              </div>
               ))}
             </div>
           </div>
