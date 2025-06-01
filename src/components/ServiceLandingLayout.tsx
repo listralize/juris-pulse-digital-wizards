@@ -16,10 +16,12 @@ import {
   AccordionTrigger,
 } from './ui/accordion';
 import UnifiedContactForm from './contact/UnifiedContactForm';
+import { useServicePageData } from '../hooks/useServicePageData';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ServiceLandingLayoutProps {
+  serviceId: string; // ID da página de serviço
   serviceArea: string;
   serviceName: string;
   serviceDescription: string;
@@ -51,14 +53,15 @@ interface ServiceLandingLayoutProps {
 }
 
 const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
+  serviceId,
   serviceArea,
   serviceName,
   serviceDescription,
   mainImage,
-  benefits,
-  process,
-  testimonials,
-  faq,
+  benefits: defaultBenefits,
+  process: defaultProcess,
+  testimonials: defaultTestimonials,
+  faq: defaultFaq,
   relatedServices,
   mainAreaPath
 }) => {
@@ -66,9 +69,20 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   
+  // Buscar dados editados do admin
+  const { servicePage, isLoading } = useServicePageData(serviceId);
+  
   const titleRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  
+  // Usar dados do admin se disponíveis, senão usar os padrão
+  const finalTitle = servicePage?.title || serviceName;
+  const finalDescription = servicePage?.description || serviceDescription;
+  const finalBenefits = servicePage?.benefits?.length ? servicePage.benefits : defaultBenefits;
+  const finalProcess = servicePage?.process?.length ? servicePage.process : defaultProcess;
+  const finalTestimonials = servicePage?.testimonials?.length ? servicePage.testimonials : defaultTestimonials;
+  const finalFaq = servicePage?.faq?.length ? servicePage.faq : defaultFaq;
   
   useEffect(() => {
     // Scroll to top when component mounts
@@ -99,6 +113,14 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
     };
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-white'}`}>
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <Navbar />
@@ -110,11 +132,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           <span className="mx-2">/</span>
           <Link to={mainAreaPath} className="hover:underline">{serviceArea}</Link>
           <span className="mx-2">/</span>
-          <span>{serviceName}</span>
+          <span>{finalTitle}</span>
         </div>
       </div>
 
-      {/* Hero Section - Now with form instead of image */}
+      {/* Hero Section */}
       <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f9f9f9]'}`}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -123,11 +145,11 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
             </div>
             
             <h1 ref={titleRef} className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
-              {serviceName}
+              {finalTitle}
             </h1>
             
             <p ref={descriptionRef} className={`text-lg md:text-xl mb-8 font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              {serviceDescription}
+              {finalDescription}
             </p>
             
             <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4">
@@ -172,7 +194,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => (
+            {finalBenefits.map((benefit, index) => (
               <div 
                 key={index}
                 className={`p-8 rounded-xl ${isDark 
@@ -222,7 +244,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
             <div className="absolute left-[26px] md:left-1/2 top-10 bottom-10 w-1 bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-20 hidden md:block"></div>
             
             <div className="space-y-16">
-              {process.map((step, index) => (
+              {finalProcess.map((step, index) => (
                 <div 
                   key={index}
                   className="relative"
@@ -278,7 +300,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
+            {finalTestimonials.map((testimonial, index) => (
               <div 
                 key={index}
                 className={`p-8 rounded-xl ${isDark 
@@ -325,7 +347,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           </p>
           
           <Accordion type="single" collapsible className="space-y-4">
-            {faq.map((item, index) => (
+            {finalFaq.map((item, index) => (
               <AccordionItem 
                 key={index} 
                 value={`faq-${index}`}
