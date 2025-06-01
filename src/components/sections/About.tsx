@@ -130,6 +130,13 @@ const About = () => {
     );
   }
 
+  // Split description into two paragraphs for layout
+  const description = pageTexts.aboutDescription;
+  const midPoint = Math.floor(description.length / 2);
+  const breakPoint = description.indexOf(' ', midPoint);
+  const firstPart = description.substring(0, breakPoint);
+  const secondPart = description.substring(breakPoint + 1);
+
   return (
     <section id="about" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
       <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
@@ -138,11 +145,11 @@ const About = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         <p ref={textRef1} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi`}>
-          A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.
+          {firstPart}
         </p>
         
         <p ref={textRef2} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi`}>
-          Nossa equipe é formada por advogados experientes e apaixonados, que compreendem a fundo os desafios enfrentados por cada cliente. Buscamos soluções inovadoras, eficazes e com foco em resultados reais.
+          {secondPart}
         </p>
       </div>
       

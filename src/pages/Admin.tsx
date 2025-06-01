@@ -27,6 +27,28 @@ interface PageTexts {
   aboutDescription: string;
   contactTitle: string;
   contactSubtitle: string;
+  teamTitle: string;
+  areasTitle: string;
+  clientAreaTitle: string;
+  clientAreaDescription: string;
+  familiaTitle: string;
+  familiaDescription: string;
+  tributarioTitle: string;
+  tributarioDescription: string;
+  empresarialTitle: string;
+  empresarialDescription: string;
+  trabalhoTitle: string;
+  trabalhoDescription: string;
+  constitucionalTitle: string;
+  constitucionalDescription: string;
+  administrativoTitle: string;
+  administrativoDescription: string;
+  previdenciarioTitle: string;
+  previdenciarioDescription: string;
+  consumidorTitle: string;
+  consumidorDescription: string;
+  civilTitle: string;
+  civilDescription: string;
 }
 
 const Admin = () => {
@@ -41,7 +63,29 @@ const Admin = () => {
     aboutTitle: '',
     aboutDescription: '',
     contactTitle: '',
-    contactSubtitle: ''
+    contactSubtitle: '',
+    teamTitle: '',
+    areasTitle: '',
+    clientAreaTitle: '',
+    clientAreaDescription: '',
+    familiaTitle: '',
+    familiaDescription: '',
+    tributarioTitle: '',
+    tributarioDescription: '',
+    empresarialTitle: '',
+    empresarialDescription: '',
+    trabalhoTitle: '',
+    trabalhoDescription: '',
+    constitucionalTitle: '',
+    constitucionalDescription: '',
+    administrativoTitle: '',
+    administrativoDescription: '',
+    previdenciarioTitle: '',
+    previdenciarioDescription: '',
+    consumidorTitle: '',
+    consumidorDescription: '',
+    civilTitle: '',
+    civilDescription: ''
   });
 
   useEffect(() => {
@@ -52,7 +96,7 @@ const Admin = () => {
     if (savedTeam) {
       setTeamMembers(JSON.parse(savedTeam));
     } else {
-      // Dados iniciais da equipe
+      // Dados iniciais da equipe - TODOS os 4 advogados
       setTeamMembers([
         {
           id: 'trombela',
@@ -71,6 +115,24 @@ const Admin = () => {
           email: 'serafim@stadv.com',
           image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
           description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
+        },
+        {
+          id: 'lanzana',
+          name: 'Dr. João Victor Lanzana',
+          title: 'Advogado Associado',
+          oab: 'OAB/GO: 71.163',
+          email: 'lanzana@stadv.com',
+          image: '/lovable-uploads/d11e57cf-ddb3-4377-9caf-91e75503165b.png',
+          description: 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Pós-graduado em Direito Penal e Processo Penal pelo Gran Centro Universitário.'
+        },
+        {
+          id: 'rafaella',
+          name: 'Dra. Rafaella Alves Da Silva',
+          title: 'Advogada Associada',
+          oab: 'OAB/GO: 72.342',
+          email: 'rafaella@stadv.com',
+          image: '/lovable-uploads/7dbb1fd3-c3ce-4f91-a88d-95a969448804.png',
+          description: 'Graduada pelo Centro Universitário de Goiás (UniGoiás). Advogada Associada do escritório Serafim & Trombela Advogados.'
         }
       ]);
     }
@@ -83,9 +145,31 @@ const Admin = () => {
         heroTitle: 'Excelência jurídica que transforma desafios em vitórias',
         heroSubtitle: 'Soluções jurídicas estratégicas com foco em resultados excepcionais',
         aboutTitle: 'Sobre Nós',
-        aboutDescription: 'Somos um escritório de advocacia moderno e inovador...',
+        aboutDescription: 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes. Nossa equipe é formada por advogados experientes e apaixonados, que compreendem a fundo os desafios enfrentados por cada cliente. Buscamos soluções inovadoras, eficazes e com foco em resultados reais.',
         contactTitle: 'Precisa de ajuda jurídica?',
-        contactSubtitle: 'Entre em contato para uma consulta personalizada'
+        contactSubtitle: 'Entre em contato para uma consulta personalizada',
+        teamTitle: 'Nossa Equipe',
+        areasTitle: 'Áreas de Atuação',
+        clientAreaTitle: 'Área Exclusiva do Cliente',
+        clientAreaDescription: 'Acompanhe seus processos com total segurança e transparência. Acesse documentos, atualizações e comunicações com seu advogado em um só lugar.',
+        familiaTitle: 'Direito de Família',
+        familiaDescription: 'Soluções em divórcios, união estável, guarda de filhos e pensão alimentícia.',
+        tributarioTitle: 'Direito Tributário',
+        tributarioDescription: 'Planejamento tributário, contencioso fiscal e recuperação de créditos.',
+        empresarialTitle: 'Direito Empresarial',
+        empresarialDescription: 'Constituição de empresas, contratos e reestruturação societária.',
+        trabalhoTitle: 'Direito do Trabalho',
+        trabalhoDescription: 'Defesa dos direitos trabalhistas e assessoria empresarial.',
+        constitucionalTitle: 'Direito Constitucional',
+        constitucionalDescription: 'Defesa de direitos fundamentais e ações constitucionais.',
+        administrativoTitle: 'Direito Administrativo',
+        administrativoDescription: 'Licitações, contratos públicos e processos administrativos.',
+        previdenciarioTitle: 'Direito Previdenciário',
+        previdenciarioDescription: 'Aposentadorias, benefícios e planejamento previdenciário.',
+        consumidorTitle: 'Direito do Consumidor',
+        consumidorDescription: 'Defesa dos direitos dos consumidores e práticas abusivas.',
+        civilTitle: 'Direito Civil',
+        civilDescription: 'Contratos, responsabilidade civil e direitos patrimoniais.'
       });
     }
   }, []);
@@ -143,7 +227,8 @@ const Admin = () => {
         <Tabs defaultValue="team" className="space-y-6">
           <TabsList className={`${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="team">Equipe</TabsTrigger>
-            <TabsTrigger value="texts">Textos das Páginas</TabsTrigger>
+            <TabsTrigger value="texts">Textos Principais</TabsTrigger>
+            <TabsTrigger value="areas">Textos das Áreas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="team">
@@ -241,7 +326,7 @@ const Admin = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-                    Textos das Páginas
+                    Textos Principais das Páginas
                   </CardTitle>
                   <Button onClick={savePageTexts} size="sm" variant="outline">
                     <Save className="w-4 h-4 mr-2" />
@@ -285,6 +370,39 @@ const Admin = () => {
                     />
                   </div>
                   <div>
+                    <Label>Título Nossa Equipe</Label>
+                    <Input
+                      value={pageTexts.teamTitle}
+                      onChange={(e) => setPageTexts({...pageTexts, teamTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Título Áreas de Atuação</Label>
+                    <Input
+                      value={pageTexts.areasTitle}
+                      onChange={(e) => setPageTexts({...pageTexts, areasTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Título Área do Cliente</Label>
+                    <Input
+                      value={pageTexts.clientAreaTitle}
+                      onChange={(e) => setPageTexts({...pageTexts, clientAreaTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Descrição Área do Cliente</Label>
+                    <Textarea
+                      value={pageTexts.clientAreaDescription}
+                      onChange={(e) => setPageTexts({...pageTexts, clientAreaDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={3}
+                    />
+                  </div>
+                  <div>
                     <Label>Título Contato</Label>
                     <Input
                       value={pageTexts.contactTitle}
@@ -299,6 +417,205 @@ const Admin = () => {
                       onChange={(e) => setPageTexts({...pageTexts, contactSubtitle: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="areas">
+            <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+                    Textos das Áreas de Atuação
+                  </CardTitle>
+                  <Button onClick={savePageTexts} size="sm" variant="outline">
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Direito de Família */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito de Família</Label>
+                      <Input
+                        value={pageTexts.familiaTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, familiaTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito de Família</Label>
+                      <Input
+                        value={pageTexts.familiaDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, familiaDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito Tributário */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito Tributário</Label>
+                      <Input
+                        value={pageTexts.tributarioTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, tributarioTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito Tributário</Label>
+                      <Input
+                        value={pageTexts.tributarioDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, tributarioDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito Empresarial */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito Empresarial</Label>
+                      <Input
+                        value={pageTexts.empresarialTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, empresarialTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito Empresarial</Label>
+                      <Input
+                        value={pageTexts.empresarialDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, empresarialDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito do Trabalho */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito do Trabalho</Label>
+                      <Input
+                        value={pageTexts.trabalhoTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, trabalhoTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito do Trabalho</Label>
+                      <Input
+                        value={pageTexts.trabalhoDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, trabalhoDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito Constitucional */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito Constitucional</Label>
+                      <Input
+                        value={pageTexts.constitucionalTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, constitucionalTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito Constitucional</Label>
+                      <Input
+                        value={pageTexts.constitucionalDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, constitucionalDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito Administrativo */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito Administrativo</Label>
+                      <Input
+                        value={pageTexts.administrativoTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, administrativoTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito Administrativo</Label>
+                      <Input
+                        value={pageTexts.administrativoDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, administrativoDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito Previdenciário */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito Previdenciário</Label>
+                      <Input
+                        value={pageTexts.previdenciarioTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, previdenciarioTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito Previdenciário</Label>
+                      <Input
+                        value={pageTexts.previdenciarioDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, previdenciarioDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito do Consumidor */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito do Consumidor</Label>
+                      <Input
+                        value={pageTexts.consumidorTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, consumidorTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito do Consumidor</Label>
+                      <Input
+                        value={pageTexts.consumidorDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, consumidorDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direito Civil */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Título - Direito Civil</Label>
+                      <Input
+                        value={pageTexts.civilTitle}
+                        onChange={(e) => setPageTexts({...pageTexts, civilTitle: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição - Direito Civil</Label>
+                      <Input
+                        value={pageTexts.civilDescription}
+                        onChange={(e) => setPageTexts({...pageTexts, civilDescription: e.target.value})}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>

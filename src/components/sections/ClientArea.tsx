@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
+import { useAdminData } from '../../hooks/useAdminData';
 import { Lock, ArrowRight, MessageSquare } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -14,9 +15,12 @@ const ClientArea = () => {
   const button1Ref = useRef<HTMLAnchorElement>(null);
   const button2Ref = useRef<HTMLAnchorElement>(null);
   const { theme } = useTheme();
+  const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
   
   useEffect(() => {
+    if (isLoading) return;
+
     gsap.fromTo(
       imageRef.current,
       { opacity: 0, y: -20 },
@@ -97,7 +101,17 @@ const ClientArea = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
     };
-  }, []);
+  }, [isLoading]);
+
+  if (isLoading) {
+    return (
+      <section id="cliente" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+        <div className="flex justify-center items-center">
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section 
@@ -106,7 +120,6 @@ const ClientArea = () => {
     >
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-          {/* Mobile Image Column */}
           <div className="w-full md:w-2/5">
             <div className="relative mb-8 md:mb-0 bg-black p-8 rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105">
               <div className="absolute -top-3 -right-3 w-24 h-24 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-xl"></div>
@@ -120,20 +133,19 @@ const ClientArea = () => {
             </div>
           </div>
           
-          {/* Content Column */}
           <div className="w-full md:w-3/5 text-center md:text-left">
             <h2 
               ref={titleRef} 
               className={`text-3xl md:text-4xl lg:text-5xl mb-6 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
-              Área Exclusiva do Cliente
+              {pageTexts.clientAreaTitle}
             </h2>
             
             <p 
               ref={textRef} 
               className={`text-lg md:text-xl mb-8 font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
             >
-              Acompanhe seus processos com total segurança e transparência. Acesse documentos, atualizações e comunicações com seu advogado em um só lugar.
+              {pageTexts.clientAreaDescription}
             </p>
             
             <div className="flex flex-col space-y-4">
