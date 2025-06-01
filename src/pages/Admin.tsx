@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -12,6 +11,7 @@ import { TeamManagement } from '../components/admin/TeamManagement';
 import { ServicesManagement } from '../components/admin/ServicesManagement';
 import { MainTextsManagement } from '../components/admin/MainTextsManagement';
 import { AreasTextsManagement } from '../components/admin/AreasTextsManagement';
+import { CategoryTextsManagement } from '../components/admin/CategoryTextsManagement';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -153,7 +153,7 @@ const Admin = () => {
         <AdminHeader onLogout={logout} />
 
         <Tabs defaultValue="service-pages" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+          <TabsList className={`grid w-full grid-cols-6 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="service-pages" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
               Páginas de Serviços
@@ -162,9 +162,9 @@ const Admin = () => {
               <Users className="w-4 h-4" />
               Equipe
             </TabsTrigger>
-            <TabsTrigger value="services" className="flex items-center gap-2">
+            <TabsTrigger value="categories" className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
-              Serviços
+              Categorias
             </TabsTrigger>
             <TabsTrigger value="texts" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -193,13 +193,11 @@ const Admin = () => {
             />
           </TabsContent>
 
-          <TabsContent value="services">
-            <ServicesManagement
-              specializedServices={specializedServices}
-              onAddSpecializedService={addSpecializedService}
-              onRemoveSpecializedService={removeSpecializedService}
-              onUpdateSpecializedService={updateSpecializedService}
-              onSave={handleSaveSpecializedServices}
+          <TabsContent value="categories">
+            <CategoryTextsManagement
+              pageTexts={pageTexts}
+              onUpdatePageTexts={setPageTexts}
+              onSave={handleSavePageTexts}
             />
           </TabsContent>
 

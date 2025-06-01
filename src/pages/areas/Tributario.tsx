@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../../components/PracticeAreaLayout';
@@ -6,22 +5,32 @@ import { Card, CardContent } from '../../components/ui/card';
 import { useTheme } from '../../components/ThemeProvider';
 import { Calculator, FileText, Shield, TrendingUp, Search, AlertTriangle } from 'lucide-react';
 import { useServicePageData } from '../../hooks/useServicePageData';
+import { useCategoryTexts } from '../../hooks/useCategoryTexts';
 
 const TributarioPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const { servicePages, isLoading } = useServicePageData();
+  const { getCategoryText, isLoading: categoryTextsLoading } = useCategoryTexts();
   
   // Filtrar apenas páginas da categoria tributário
   const tributarioPages = servicePages.filter(page => page.category === 'tributario');
   
+  // Função para obter título e descrição da categoria
+  const getCategoryInfo = (categoryId: string) => {
+    const categoryText = getCategoryText(categoryId);
+    return {
+      title: categoryText?.title || categoryId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: categoryText?.description || 'Descrição não definida'
+    };
+  };
+  
   // Agrupar páginas por categoria de serviço
   const serviceCategories = [
     {
-      title: "Planejamento e Otimização Tributária",
+      id: "planejamento-otimizacao",
       icon: <TrendingUp className="w-8 h-8" />,
-      description: "Estratégias legais para redução da carga tributária e otimização fiscal de pessoas físicas e jurídicas.",
       services: tributarioPages.filter(page => 
         page.title?.toLowerCase().includes('planejamento') || 
         page.title?.toLowerCase().includes('elisão') ||
@@ -29,9 +38,8 @@ const TributarioPage = () => {
       )
     },
     {
-      title: "Contencioso e Defesa Fiscal",
+      id: "contencioso-defesa",
       icon: <Shield className="w-8 h-8" />,
-      description: "Representação em processos fiscais e defesa contra autuações e cobranças tributárias.",
       services: tributarioPages.filter(page => 
         page.title?.toLowerCase().includes('contencioso') || 
         page.title?.toLowerCase().includes('recuperação') ||
@@ -39,18 +47,16 @@ const TributarioPage = () => {
       )
     },
     {
-      title: "Auditoria e Compliance Fiscal",
+      id: "auditoria-compliance",
       icon: <Search className="w-8 h-8" />,
-      description: "Revisão, auditoria e implementação de controles para garantir conformidade tributária.",
       services: tributarioPages.filter(page => 
         page.title?.toLowerCase().includes('auditoria') || 
         page.title?.toLowerCase().includes('compliance')
       )
     },
     {
-      title: "Outros Serviços Tributários",
+      id: "outros-servicos",
       icon: <Calculator className="w-8 h-8" />,
-      description: "Demais serviços especializados em Direito Tributário.",
       services: tributarioPages.filter(page => 
         !page.title?.toLowerCase().includes('planejamento') && 
         !page.title?.toLowerCase().includes('elisão') &&
@@ -64,7 +70,7 @@ const TributarioPage = () => {
     }
   ];
 
-  if (isLoading) {
+  if (isLoading || categoryTextsLoading) {
     return (
       <PracticeAreaLayout
         title="Direito Tributário"
@@ -98,6 +104,8 @@ const TributarioPage = () => {
           // Só mostra a categoria se ela tiver serviços
           if (category.services.length === 0) return null;
           
+          const categoryInfo = getCategoryInfo(category.id);
+          
           return (
             <div key={categoryIndex} className="space-y-8">
               <div className="flex items-center gap-4 mb-8">
@@ -106,10 +114,10 @@ const TributarioPage = () => {
                 </div>
                 <div>
                   <h3 className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-                    {category.title}
+                    {categoryInfo.title}
                   </h3>
                   <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {category.description}
+                    {categoryInfo.description}
                   </p>
                 </div>
               </div>

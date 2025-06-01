@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TeamMember, SpecializedService, PageTexts, ServicePage } from '../types/adminTypes';
 import { defaultTeamMembers } from '../data/defaultTeamMembers';
@@ -10,7 +9,10 @@ export const useAdminData = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
-  const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
+  const [pageTexts, setPageTexts] = useState<PageTexts>({
+    ...defaultPageTexts,
+    categoryTexts: []
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -91,7 +93,13 @@ export const useAdminData = () => {
       const savedTexts = localStorage.getItem('adminPageTexts');
       if (savedTexts) {
         const parsedTexts = JSON.parse(savedTexts);
-        setPageTexts({ ...defaultPageTexts, ...parsedTexts });
+        // Garantir que categoryTexts existe
+        const textsWithCategories = {
+          ...defaultPageTexts,
+          ...parsedTexts,
+          categoryTexts: parsedTexts.categoryTexts || defaultPageTexts.categoryTexts
+        };
+        setPageTexts(textsWithCategories);
       } else {
         setPageTexts(defaultPageTexts);
         localStorage.setItem('adminPageTexts', JSON.stringify(defaultPageTexts));

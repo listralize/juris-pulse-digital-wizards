@@ -2,32 +2,54 @@
 import { PageTexts } from '../types/adminTypes';
 
 export const defaultPageTexts: PageTexts = {
-  heroTitle: 'Excelência jurídica que transforma desafios em vitórias',
-  heroSubtitle: 'Soluções jurídicas estratégicas com foco em resultados excepcionais',
-  aboutTitle: 'Sobre Nós',
-  aboutDescription: 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes. Nossa equipe é formada por advogados experientes e apaixonados, que compreendem a fundo os desafios enfrentados por cada cliente. Buscamos soluções inovadoras, eficazes e com foco em resultados reais.',
-  contactTitle: 'Precisa de ajuda jurídica?',
-  contactSubtitle: 'Entre em contato para uma consulta personalizada',
-  teamTitle: 'Nossa Equipe',
-  areasTitle: 'Áreas de Atuação',
-  clientAreaTitle: 'Área Exclusiva do Cliente',
-  clientAreaDescription: 'Acompanhe seus processos com total segurança e transparência. Acesse documentos, atualizações e comunicações com seu advogado em um só lugar.',
-  familiaTitle: 'Direito de Família',
-  familiaDescription: 'Soluções em divórcios, união estável, guarda de filhos e pensão alimentícia.',
-  tributarioTitle: 'Direito Tributário',
-  tributarioDescription: 'Planejamento tributário, contencioso fiscal e recuperação de créditos.',
-  empresarialTitle: 'Direito Empresarial',
-  empresarialDescription: 'Constituição de empresas, contratos e reestruturação societária.',
-  trabalhoTitle: 'Direito do Trabalho',
-  trabalhoDescription: 'Defesa dos direitos trabalhistas e assessoria empresarial.',
-  constitucionalTitle: 'Direito Constitucional',
-  constitucionalDescription: 'Defesa de direitos fundamentais e ações constitucionais.',
-  administrativoTitle: 'Direito Administrativo',
-  administrativoDescription: 'Licitações, contratos públicos e processos administrativos.',
-  previdenciarioTitle: 'Direito Previdenciário',
-  previdenciarioDescription: 'Aposentadorias, benefícios e planejamento previdenciário.',
-  consumidorTitle: 'Direito do Consumidor',
-  consumidorDescription: 'Defesa dos direitos dos consumidores e práticas abusivas.',
-  civilTitle: 'Direito Civil',
-  civilDescription: 'Contratos, responsabilidade civil e direitos patrimoniais.'
+  heroTitle: "Excelência em Advocacia",
+  heroSubtitle: "Defendemos seus direitos com dedicação e expertise",
+  aboutTitle: "Sobre Nós",
+  aboutDescription: "Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.",
+  contactTitle: "Entre em Contato",
+  contactSubtitle: "Estamos prontos para ajudar você",
+  teamTitle: "Nossa Equipe",
+  areasTitle: "Áreas de Atuação",
+  clientAreaTitle: "Área do Cliente",
+  clientAreaDescription: "Acesse informações exclusivas e acompanhe seus processos",
+  familiaTitle: "Direito de Família",
+  familiaDescription: "Assessoria completa em questões familiares",
+  tributarioTitle: "Direito Tributário",
+  tributarioDescription: "Consultoria e defesa em questões fiscais",
+  empresarialTitle: "Direito Empresarial",
+  empresarialDescription: "Soluções jurídicas para empresas",
+  trabalhoTitle: "Direito do Trabalho",
+  trabalhoDescription: "Defesa dos direitos trabalhistas",
+  constitucionalTitle: "Direito Constitucional",
+  constitucionalDescription: "Proteção dos direitos fundamentais",
+  administrativoTitle: "Direito Administrativo",
+  administrativoDescription: "Atuação junto ao poder público",
+  previdenciarioTitle: "Direito Previdenciário",
+  previdenciarioDescription: "Benefícios e aposentadorias",
+  consumidorTitle: "Direito do Consumidor",
+  consumidorDescription: "Defesa dos direitos do consumidor",
+  civilTitle: "Direito Civil",
+  civilDescription: "Questões cíveis em geral",
+  categoryTexts: [
+    {
+      id: "patrimonio-sucessoes",
+      title: "Patrimônio e Sucessões",
+      description: "Gestão patrimonial familiar, planejamento sucessório e resolução de questões hereditárias."
+    },
+    {
+      id: "divorcio-separacao",
+      title: "Divórcio e Separação",
+      description: "Assessoria completa em processos de divórcio consensual e litigioso."
+    },
+    {
+      id: "guarda-filhos",
+      title: "Guarda de Filhos",
+      description: "Definição de guarda, visitação e questões relacionadas aos filhos."
+    },
+    {
+      id: "pensao-alimenticia",
+      title: "Pensão Alimentícia",
+      description: "Fixação, revisão e execução de pensão alimentícia."
+    }
+  ]
 };
