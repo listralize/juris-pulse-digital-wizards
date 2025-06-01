@@ -10,7 +10,7 @@ const CasamentoUniaoService = () => {
 
   return (
     <ServiceLandingLayout
-      serviceArea="Direito da Família"
+      serviceArea="Direito de Família"
       serviceName="Casamento e União Estável"
       serviceDescription="Assessoria jurídica completa para formalização e regularização de casamentos e uniões estáveis, incluindo contratos e acordos pré-nupciais."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
@@ -86,14 +86,14 @@ const CasamentoUniaoService = () => {
       relatedServices={[
         {
           name: "Divórcio e Separação",
-          path: "/servicos/divorcio-separacao"
+          path: "/servicos/divorcio"
         },
         {
           name: "Inventário e Partilha",
           path: "/servicos/inventario-partilha"
         }
       ]}
-      mainAreaPath="/familia"
+      mainAreaPath="/areas/familia"
     />
   );
 };

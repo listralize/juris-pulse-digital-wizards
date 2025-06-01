@@ -21,7 +21,7 @@ import { useServicePageData } from '../hooks/useServicePageData';
 gsap.registerPlugin(ScrollTrigger);
 
 interface ServiceLandingLayoutProps {
-  serviceId?: string; // ID da página de serviço - opcional para compatibilidade
+  serviceId?: string;
   serviceArea: string;
   serviceName: string;
   serviceDescription: string;
@@ -69,7 +69,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   
-  // Buscar dados editados do admin apenas se serviceId for fornecido
   const { servicePage, isLoading } = useServicePageData(serviceId);
   
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -84,13 +83,24 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   const finalTestimonials = (servicePage?.testimonials && servicePage.testimonials.length > 0) ? servicePage.testimonials : defaultTestimonials;
   const finalFaq = (servicePage?.faq && servicePage.faq.length > 0) ? servicePage.faq : defaultFaq;
   
-  console.log('ServiceLandingLayout: serviceId recebido:', serviceId);
-  console.log('ServiceLandingLayout: servicePage encontrada:', servicePage);
-  console.log('ServiceLandingLayout: Título final:', finalTitle);
-  console.log('ServiceLandingLayout: Benefícios finais:', finalBenefits.length);
-  
+  // Mapear corretamente o caminho da área principal baseado no serviceArea
+  const getCorrectAreaPath = (area: string) => {
+    const areaLower = area.toLowerCase();
+    if (areaLower.includes('família') || areaLower.includes('familia')) return '/areas/familia';
+    if (areaLower.includes('tributário') || areaLower.includes('tributario')) return '/areas/tributario';
+    if (areaLower.includes('empresarial')) return '/areas/empresarial';
+    if (areaLower.includes('trabalho')) return '/areas/trabalho';
+    if (areaLower.includes('constitucional')) return '/areas/constitucional';
+    if (areaLower.includes('administrativo')) return '/areas/administrativo';
+    if (areaLower.includes('previdenciário') || areaLower.includes('previdenciario')) return '/areas/previdenciario';
+    if (areaLower.includes('consumidor')) return '/areas/consumidor';
+    if (areaLower.includes('civil')) return '/areas/civil';
+    return mainAreaPath; // fallback para o path fornecido
+  };
+
+  const correctAreaPath = getCorrectAreaPath(serviceArea);
+
   useEffect(() => {
-    // Scroll to top when component mounts
     window.scrollTo(0, 0);
     
     // Hero section animations
@@ -112,7 +122,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       { opacity: 1, y: 0, duration: 0.8, delay: 0.6 }
     );
     
-    // Clean up animations
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
     };
@@ -135,7 +144,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
         <div className="max-w-6xl mx-auto flex items-center text-sm">
           <Link to="/" className="hover:underline">Home</Link>
           <span className="mx-2">/</span>
-          <Link to={mainAreaPath} className="hover:underline">{serviceArea}</Link>
+          <Link to={correctAreaPath} className="hover:underline">{serviceArea}</Link>
           <span className="mx-2">/</span>
           <span>{finalTitle}</span>
         </div>
@@ -160,7 +169,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
             <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4">
               <Button 
                 variant="outline"
-                onClick={() => navigate(mainAreaPath)}
+                onClick={() => navigate(correctAreaPath)}
                 className={`px-5 py-5 text-base ${isDark 
                   ? 'border-white/20 text-white hover:bg-white/10' 
                   : 'border-black/20 text-black hover:bg-black/10'} transition-all`}
@@ -245,7 +254,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
           </p>
           
           <div className="relative">
-            {/* Connection line */}
             <div className="absolute left-[26px] md:left-1/2 top-10 bottom-10 w-1 bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-20 hidden md:block"></div>
             
             <div className="space-y-16">
