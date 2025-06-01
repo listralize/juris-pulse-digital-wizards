@@ -1,13 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { TeamMember, SpecializedService, PageTexts } from '../types/adminTypes';
+import { TeamMember, SpecializedService, PageTexts, ServicePage } from '../types/adminTypes';
 import { defaultTeamMembers } from '../data/defaultTeamMembers';
 import { defaultSpecializedServices } from '../data/defaultSpecializedServices';
 import { defaultPageTexts } from '../data/defaultPageTexts';
+import { defaultServicePages } from '../data/defaultServicePages';
 
 export const useAdminData = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
+  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,6 +45,21 @@ export const useAdminData = () => {
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
+      // Carregar páginas de serviços
+      const savedServicePages = localStorage.getItem('adminServicePages');
+      if (savedServicePages) {
+        const parsedServicePages = JSON.parse(savedServicePages);
+        if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
+          setServicePages(parsedServicePages);
+        } else {
+          setServicePages(defaultServicePages);
+          localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
+        }
+      } else {
+        setServicePages(defaultServicePages);
+        localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
+      }
+
       // Carregar textos das páginas
       const savedTexts = localStorage.getItem('adminPageTexts');
       if (savedTexts) {
@@ -56,6 +73,7 @@ export const useAdminData = () => {
       console.error('Erro ao carregar dados do admin:', error);
       setTeamMembers(defaultTeamMembers);
       setSpecializedServices(defaultSpecializedServices);
+      setServicePages(defaultServicePages);
       setPageTexts(defaultPageTexts);
     }
     
@@ -72,6 +90,11 @@ export const useAdminData = () => {
     localStorage.setItem('adminSpecializedServices', JSON.stringify(services));
   };
 
+  const saveServicePages = (pages: ServicePage[]) => {
+    setServicePages(pages);
+    localStorage.setItem('adminServicePages', JSON.stringify(pages));
+  };
+
   const savePageTexts = (texts: PageTexts) => {
     setPageTexts(texts);
     localStorage.setItem('adminPageTexts', JSON.stringify(texts));
@@ -80,13 +103,15 @@ export const useAdminData = () => {
   return { 
     teamMembers, 
     specializedServices, 
+    servicePages,
     pageTexts, 
     isLoading, 
     saveTeamMembers, 
     saveSpecializedServices, 
+    saveServicePages,
     savePageTexts 
   };
 };
 
 // Re-export types for backward compatibility
-export type { TeamMember, SpecializedService, PageTexts } from '../types/adminTypes';
+export type { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';

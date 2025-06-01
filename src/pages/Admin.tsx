@@ -8,9 +8,9 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { LogOut, Save, Plus, Trash2, Users, FileText, Briefcase, Settings } from 'lucide-react';
+import { LogOut, Save, Plus, Trash2, Users, FileText, Briefcase, Settings, Globe } from 'lucide-react';
 import { useAdminData } from '../hooks/useAdminData';
-import { TeamMember, SpecializedService, PageTexts } from '../types/adminTypes';
+import { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -20,16 +20,19 @@ const Admin = () => {
   
   const { 
     teamMembers: initialTeamMembers, 
-    specializedServices: initialSpecializedServices, 
+    specializedServices: initialSpecializedServices,
+    servicePages: initialServicePages,
     pageTexts: initialPageTexts, 
     isLoading,
     saveTeamMembers,
     saveSpecializedServices,
+    saveServicePages,
     savePageTexts
   } = useAdminData();
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
+  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [pageTexts, setPageTexts] = useState<PageTexts>({
     heroTitle: '',
     heroSubtitle: '',
@@ -65,9 +68,10 @@ const Admin = () => {
     if (!isLoading) {
       setTeamMembers(initialTeamMembers);
       setSpecializedServices(initialSpecializedServices);
+      setServicePages(initialServicePages);
       setPageTexts(initialPageTexts);
     }
-  }, [isLoading, initialTeamMembers, initialSpecializedServices, initialPageTexts]);
+  }, [isLoading, initialTeamMembers, initialSpecializedServices, initialServicePages, initialPageTexts]);
 
   const handleSaveTeamMembers = () => {
     saveTeamMembers(teamMembers);
@@ -77,6 +81,11 @@ const Admin = () => {
   const handleSaveSpecializedServices = () => {
     saveSpecializedServices(specializedServices);
     toast.success('Serviços especializados salvos com sucesso!');
+  };
+
+  const handleSaveServicePages = () => {
+    saveServicePages(servicePages);
+    toast.success('Páginas de serviços salvas com sucesso!');
   };
 
   const handleSavePageTexts = () => {
@@ -128,6 +137,58 @@ const Admin = () => {
     ));
   };
 
+  const addServicePage = () => {
+    const newServicePage: ServicePage = {
+      id: Date.now().toString(),
+      title: '',
+      description: '',
+      category: 'familia',
+      href: '',
+      benefits: [],
+      process: [],
+      faq: [],
+      testimonials: []
+    };
+    setServicePages([...servicePages, newServicePage]);
+  };
+
+  const removeServicePage = (id: string) => {
+    setServicePages(servicePages.filter(page => page.id !== id));
+  };
+
+  const updateServicePage = (id: string, field: keyof ServicePage, value: any) => {
+    setServicePages(servicePages.map(page => 
+      page.id === id ? { ...page, [field]: value } : page
+    ));
+  };
+
+  const addBenefit = (pageId: string) => {
+    const newBenefit = { title: '', description: '', icon: '' };
+    setServicePages(servicePages.map(page => 
+      page.id === pageId ? { ...page, benefits: [...page.benefits, newBenefit] } : page
+    ));
+  };
+
+  const removeBenefit = (pageId: string, index: number) => {
+    setServicePages(servicePages.map(page => 
+      page.id === pageId ? { 
+        ...page, 
+        benefits: page.benefits.filter((_, i) => i !== index) 
+      } : page
+    ));
+  };
+
+  const updateBenefit = (pageId: string, index: number, field: string, value: string) => {
+    setServicePages(servicePages.map(page => 
+      page.id === pageId ? {
+        ...page,
+        benefits: page.benefits.map((benefit, i) => 
+          i === index ? { ...benefit, [field]: value } : benefit
+        )
+      } : page
+    ));
+  };
+
   const categories = [
     { value: 'familia', label: 'Direito de Família' },
     { value: 'tributario', label: 'Direito Tributário' },
@@ -169,7 +230,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="team" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+          <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="team" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Equipe
@@ -177,6 +238,10 @@ const Admin = () => {
             <TabsTrigger value="services" className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
               Serviços
+            </TabsTrigger>
+            <TabsTrigger value="service-pages" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Páginas de Serviços
             </TabsTrigger>
             <TabsTrigger value="texts" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -368,6 +433,158 @@ const Admin = () => {
                           rows={3}
                           className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="service-pages">
+            <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                    <Globe className="w-5 h-5" />
+                    Páginas de Serviços ({servicePages.length} páginas)
+                  </CardTitle>
+                  <div className="space-x-2">
+                    <Button onClick={addServicePage} size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar
+                    </Button>
+                    <Button onClick={handleSaveServicePages} size="sm" variant="outline">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {servicePages.map((page) => (
+                  <div key={page.id} className={`p-6 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+                    <div className="flex justify-between items-start mb-6">
+                      <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-black'}`}>
+                        {page.title || 'Nova Página de Serviço'}
+                      </h3>
+                      <Button 
+                        onClick={() => removeServicePage(page.id)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Informações básicas */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <Label className="text-sm font-medium">Título da Página</Label>
+                        <Input
+                          value={page.title}
+                          onChange={(e) => updateServicePage(page.id, 'title', e.target.value)}
+                          placeholder="Ex: Divórcio e Separação"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Categoria</Label>
+                        <Select 
+                          value={page.category} 
+                          onValueChange={(value) => updateServicePage(page.id, 'category', value)}
+                        >
+                          <SelectTrigger className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}>
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category.value} value={category.value}>
+                                {category.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Link da Página</Label>
+                        <Input
+                          value={page.href}
+                          onChange={(e) => updateServicePage(page.id, 'href', e.target.value)}
+                          placeholder="Ex: /services/divorcio"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-sm font-medium">Descrição Principal</Label>
+                        <Textarea
+                          value={page.description}
+                          onChange={(e) => updateServicePage(page.id, 'description', e.target.value)}
+                          placeholder="Descrição principal do serviço..."
+                          rows={3}
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Benefícios */}
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <Label className="text-lg font-medium">Benefícios</Label>
+                        <Button 
+                          onClick={() => addBenefit(page.id)}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Adicionar Benefício
+                        </Button>
+                      </div>
+                      <div className="space-y-4">
+                        {page.benefits.map((benefit, index) => (
+                          <div key={index} className={`p-4 border rounded ${isDark ? 'border-white/10 bg-black/30' : 'border-gray-200 bg-white'}`}>
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="text-sm font-medium">Benefício {index + 1}</span>
+                              <Button 
+                                onClick={() => removeBenefit(page.id, index)}
+                                size="sm"
+                                variant="destructive"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <Label className="text-xs">Título</Label>
+                                <Input
+                                  value={benefit.title}
+                                  onChange={(e) => updateBenefit(page.id, index, 'title', e.target.value)}
+                                  placeholder="Título do benefício"
+                                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Ícone</Label>
+                                <Input
+                                  value={benefit.icon || ''}
+                                  onChange={(e) => updateBenefit(page.id, index, 'icon', e.target.value)}
+                                  placeholder="Ex: ⚖️"
+                                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Descrição</Label>
+                                <Textarea
+                                  value={benefit.description}
+                                  onChange={(e) => updateBenefit(page.id, index, 'description', e.target.value)}
+                                  placeholder="Descrição do benefício"
+                                  rows={2}
+                                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

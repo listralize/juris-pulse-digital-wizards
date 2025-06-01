@@ -15,7 +15,34 @@ export interface SpecializedService {
   description: string;
   category: string;
   href: string;
-  mainDescription?: string; // Descrição principal da página do serviço
+  mainDescription?: string;
+}
+
+export interface ServicePage {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  href: string;
+  benefits: {
+    title: string;
+    description: string;
+    icon?: string;
+  }[];
+  process: {
+    title: string;
+    description: string;
+    step: number;
+  }[];
+  faq: {
+    question: string;
+    answer: string;
+  }[];
+  testimonials: {
+    name: string;
+    quote: string;
+    image?: string;
+  }[];
 }
 
 export interface PageTexts {
