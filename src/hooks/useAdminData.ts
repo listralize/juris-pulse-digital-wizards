@@ -11,6 +11,14 @@ export interface TeamMember {
   description: string;
 }
 
+export interface SpecializedService {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  href: string;
+}
+
 export interface PageTexts {
   heroTitle: string;
   heroSubtitle: string;
@@ -81,6 +89,51 @@ const defaultTeamMembers: TeamMember[] = [
   }
 ];
 
+const defaultSpecializedServices: SpecializedService[] = [
+  {
+    id: 'divorcio',
+    title: 'Divórcio e Separação',
+    description: 'Assessoria completa em processos de divórcio consensual e litigioso, com foco na proteção dos direitos dos clientes.',
+    category: 'familia',
+    href: '/services/divorcio'
+  },
+  {
+    id: 'guarda-filhos',
+    title: 'Guarda de Filhos',
+    description: 'Defesa dos melhores interesses das crianças em disputas de guarda, visitação e regulamentação de convivência.',
+    category: 'familia',
+    href: '/services/guarda-filhos'
+  },
+  {
+    id: 'planejamento-tributario',
+    title: 'Planejamento Tributário',
+    description: 'Estratégias legais para otimização da carga tributária empresarial e pessoal.',
+    category: 'tributario',
+    href: '/services/planejamento-tributario'
+  },
+  {
+    id: 'recuperacao-creditos',
+    title: 'Recuperação de Créditos Tributários',
+    description: 'Recuperação de valores pagos indevidamente ao fisco através de ações específicas.',
+    category: 'tributario',
+    href: '/services/recuperacao-creditos'
+  },
+  {
+    id: 'constituicao-empresas',
+    title: 'Constituição de Empresas',
+    description: 'Assessoria completa na abertura e estruturação de empresas de todos os portes.',
+    category: 'empresarial',
+    href: '/services/constituicao-empresas'
+  },
+  {
+    id: 'contratos-empresariais',
+    title: 'Contratos Empresariais',
+    description: 'Elaboração e revisão de contratos comerciais, societários e de prestação de serviços.',
+    category: 'empresarial',
+    href: '/services/contratos-empresariais'
+  }
+];
+
 const defaultPageTexts: PageTexts = {
   heroTitle: 'Excelência jurídica que transforma desafios em vitórias',
   heroSubtitle: 'Soluções jurídicas estratégicas com foco em resultados excepcionais',
@@ -114,6 +167,7 @@ const defaultPageTexts: PageTexts = {
 
 export const useAdminData = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
   const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -127,9 +181,26 @@ export const useAdminData = () => {
           setTeamMembers(parsedTeam);
         } else {
           setTeamMembers(defaultTeamMembers);
+          localStorage.setItem('adminTeamMembers', JSON.stringify(defaultTeamMembers));
         }
       } else {
         setTeamMembers(defaultTeamMembers);
+        localStorage.setItem('adminTeamMembers', JSON.stringify(defaultTeamMembers));
+      }
+
+      // Carregar serviços especializados
+      const savedServices = localStorage.getItem('adminSpecializedServices');
+      if (savedServices) {
+        const parsedServices = JSON.parse(savedServices);
+        if (Array.isArray(parsedServices) && parsedServices.length > 0) {
+          setSpecializedServices(parsedServices);
+        } else {
+          setSpecializedServices(defaultSpecializedServices);
+          localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
+        }
+      } else {
+        setSpecializedServices(defaultSpecializedServices);
+        localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
       // Carregar textos das páginas
@@ -139,15 +210,40 @@ export const useAdminData = () => {
         setPageTexts({ ...defaultPageTexts, ...parsedTexts });
       } else {
         setPageTexts(defaultPageTexts);
+        localStorage.setItem('adminPageTexts', JSON.stringify(defaultPageTexts));
       }
     } catch (error) {
       console.error('Erro ao carregar dados do admin:', error);
       setTeamMembers(defaultTeamMembers);
+      setSpecializedServices(defaultSpecializedServices);
       setPageTexts(defaultPageTexts);
     }
     
     setIsLoading(false);
   }, []);
 
-  return { teamMembers, pageTexts, isLoading };
+  const saveTeamMembers = (members: TeamMember[]) => {
+    setTeamMembers(members);
+    localStorage.setItem('adminTeamMembers', JSON.stringify(members));
+  };
+
+  const saveSpecializedServices = (services: SpecializedService[]) => {
+    setSpecializedServices(services);
+    localStorage.setItem('adminSpecializedServices', JSON.stringify(services));
+  };
+
+  const savePageTexts = (texts: PageTexts) => {
+    setPageTexts(texts);
+    localStorage.setItem('adminPageTexts', JSON.stringify(texts));
+  };
+
+  return { 
+    teamMembers, 
+    specializedServices, 
+    pageTexts, 
+    isLoading, 
+    saveTeamMembers, 
+    saveSpecializedServices, 
+    savePageTexts 
+  };
 };

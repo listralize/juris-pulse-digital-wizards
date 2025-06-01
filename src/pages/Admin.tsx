@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -8,7 +7,10 @@ import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { LogOut, Save, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { LogOut, Save, Plus, Trash2, Users, FileText, Briefcase, Settings } from 'lucide-react';
+import { useAdminData, TeamMember, SpecializedService, PageTexts } from '../hooks/useAdminData';
+import { toast } from 'sonner';
 
 interface TeamMember {
   id: string;
@@ -56,7 +58,18 @@ const Admin = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
+  const { 
+    teamMembers: initialTeamMembers, 
+    specializedServices: initialSpecializedServices, 
+    pageTexts: initialPageTexts, 
+    isLoading,
+    saveTeamMembers,
+    saveSpecializedServices,
+    savePageTexts
+  } = useAdminData();
+
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
   const [pageTexts, setPageTexts] = useState<PageTexts>({
     heroTitle: '',
     heroSubtitle: '',
@@ -89,99 +102,26 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    // Carregar dados salvos do localStorage
-    const savedTeam = localStorage.getItem('adminTeamMembers');
-    const savedTexts = localStorage.getItem('adminPageTexts');
-    
-    if (savedTeam) {
-      setTeamMembers(JSON.parse(savedTeam));
-    } else {
-      // Dados iniciais da equipe - TODOS os 4 advogados
-      setTeamMembers([
-        {
-          id: 'trombela',
-          name: 'Dr. Enzo Trombela',
-          title: 'Advogado Sócio',
-          oab: 'OAB/GO: 67.754 | OAB/SP: 521.263',
-          email: 'trombela@stadv.com',
-          image: '/lovable-uploads/dbdc43db-9dcc-4838-8f80-8298be65169a.png',
-          description: 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Pós-graduado em Direito Civil e Processo Civil pelo Instituto Goiano de Direito.'
-        },
-        {
-          id: 'serafim',
-          name: 'Dr. Vinicius Serafim',
-          title: 'Advogado Sócio',
-          oab: 'OAB/GO: 67.790',
-          email: 'serafim@stadv.com',
-          image: '/lovable-uploads/07094fad-fd21-4696-9f5e-6cf1024149a2.png',
-          description: 'Especializado em Direito Empresarial e Tributário, com vasta experiência em consultorias e contencioso estratégico.'
-        },
-        {
-          id: 'lanzana',
-          name: 'Dr. João Victor Lanzana',
-          title: 'Advogado Associado',
-          oab: 'OAB/GO: 71.163',
-          email: 'lanzana@stadv.com',
-          image: '/lovable-uploads/d11e57cf-ddb3-4377-9caf-91e75503165b.png',
-          description: 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Pós-graduado em Direito Penal e Processo Penal pelo Gran Centro Universitário.'
-        },
-        {
-          id: 'rafaella',
-          name: 'Dra. Rafaella Alves Da Silva',
-          title: 'Advogada Associada',
-          oab: 'OAB/GO: 72.342',
-          email: 'rafaella@stadv.com',
-          image: '/lovable-uploads/7dbb1fd3-c3ce-4f91-a88d-95a969448804.png',
-          description: 'Graduada pelo Centro Universitário de Goiás (UniGoiás). Advogada Associada do escritório Serafim & Trombela Advogados.'
-        }
-      ]);
+    if (!isLoading) {
+      setTeamMembers(initialTeamMembers);
+      setSpecializedServices(initialSpecializedServices);
+      setPageTexts(initialPageTexts);
     }
-    
-    if (savedTexts) {
-      setPageTexts(JSON.parse(savedTexts));
-    } else {
-      // Textos iniciais
-      setPageTexts({
-        heroTitle: 'Excelência jurídica que transforma desafios em vitórias',
-        heroSubtitle: 'Soluções jurídicas estratégicas com foco em resultados excepcionais',
-        aboutTitle: 'Sobre Nós',
-        aboutDescription: 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes. Nossa equipe é formada por advogados experientes e apaixonados, que compreendem a fundo os desafios enfrentados por cada cliente. Buscamos soluções inovadoras, eficazes e com foco em resultados reais.',
-        contactTitle: 'Precisa de ajuda jurídica?',
-        contactSubtitle: 'Entre em contato para uma consulta personalizada',
-        teamTitle: 'Nossa Equipe',
-        areasTitle: 'Áreas de Atuação',
-        clientAreaTitle: 'Área Exclusiva do Cliente',
-        clientAreaDescription: 'Acompanhe seus processos com total segurança e transparência. Acesse documentos, atualizações e comunicações com seu advogado em um só lugar.',
-        familiaTitle: 'Direito de Família',
-        familiaDescription: 'Soluções em divórcios, união estável, guarda de filhos e pensão alimentícia.',
-        tributarioTitle: 'Direito Tributário',
-        tributarioDescription: 'Planejamento tributário, contencioso fiscal e recuperação de créditos.',
-        empresarialTitle: 'Direito Empresarial',
-        empresarialDescription: 'Constituição de empresas, contratos e reestruturação societária.',
-        trabalhoTitle: 'Direito do Trabalho',
-        trabalhoDescription: 'Defesa dos direitos trabalhistas e assessoria empresarial.',
-        constitucionalTitle: 'Direito Constitucional',
-        constitucionalDescription: 'Defesa de direitos fundamentais e ações constitucionais.',
-        administrativoTitle: 'Direito Administrativo',
-        administrativoDescription: 'Licitações, contratos públicos e processos administrativos.',
-        previdenciarioTitle: 'Direito Previdenciário',
-        previdenciarioDescription: 'Aposentadorias, benefícios e planejamento previdenciário.',
-        consumidorTitle: 'Direito do Consumidor',
-        consumidorDescription: 'Defesa dos direitos dos consumidores e práticas abusivas.',
-        civilTitle: 'Direito Civil',
-        civilDescription: 'Contratos, responsabilidade civil e direitos patrimoniais.'
-      });
-    }
-  }, []);
+  }, [isLoading, initialTeamMembers, initialSpecializedServices, initialPageTexts]);
 
-  const saveTeamMembers = () => {
-    localStorage.setItem('adminTeamMembers', JSON.stringify(teamMembers));
-    alert('Equipe salva com sucesso!');
+  const handleSaveTeamMembers = () => {
+    saveTeamMembers(teamMembers);
+    toast.success('Equipe salva com sucesso!');
   };
 
-  const savePageTexts = () => {
-    localStorage.setItem('adminPageTexts', JSON.stringify(pageTexts));
-    alert('Textos salvos com sucesso!');
+  const handleSaveSpecializedServices = () => {
+    saveSpecializedServices(specializedServices);
+    toast.success('Serviços especializados salvos com sucesso!');
+  };
+
+  const handleSavePageTexts = () => {
+    savePageTexts(pageTexts);
+    toast.success('Textos das páginas salvos com sucesso!');
   };
 
   const addTeamMember = () => {
@@ -207,13 +147,57 @@ const Admin = () => {
     ));
   };
 
+  const addSpecializedService = () => {
+    const newService: SpecializedService = {
+      id: Date.now().toString(),
+      title: '',
+      description: '',
+      category: 'familia',
+      href: ''
+    };
+    setSpecializedServices([...specializedServices, newService]);
+  };
+
+  const removeSpecializedService = (id: string) => {
+    setSpecializedServices(specializedServices.filter(service => service.id !== id));
+  };
+
+  const updateSpecializedService = (id: string, field: keyof SpecializedService, value: string) => {
+    setSpecializedServices(specializedServices.map(service => 
+      service.id === id ? { ...service, [field]: value } : service
+    ));
+  };
+
+  const categories = [
+    { value: 'familia', label: 'Direito de Família' },
+    { value: 'tributario', label: 'Direito Tributário' },
+    { value: 'empresarial', label: 'Direito Empresarial' },
+    { value: 'trabalho', label: 'Direito do Trabalho' },
+    { value: 'constitucional', label: 'Direito Constitucional' },
+    { value: 'administrativo', label: 'Direito Administrativo' },
+    { value: 'previdenciario', label: 'Direito Previdenciário' },
+    { value: 'consumidor', label: 'Direito do Consumidor' },
+    { value: 'civil', label: 'Direito Civil' }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen p-6 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className={`text-3xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            Painel Administrativo
-          </h1>
+          <div className="flex items-center gap-3">
+            <Settings className="w-8 h-8" />
+            <h1 className={`text-3xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+              Painel Administrativo
+            </h1>
+          </div>
           <Button 
             onClick={logout}
             variant="outline"
@@ -225,25 +209,39 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="team" className="space-y-6">
-          <TabsList className={`${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
-            <TabsTrigger value="team">Equipe</TabsTrigger>
-            <TabsTrigger value="texts">Textos Principais</TabsTrigger>
-            <TabsTrigger value="areas">Textos das Áreas</TabsTrigger>
+          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+            <TabsTrigger value="team" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Equipe
+            </TabsTrigger>
+            <TabsTrigger value="services" className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              Serviços
+            </TabsTrigger>
+            <TabsTrigger value="texts" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Textos Principais
+            </TabsTrigger>
+            <TabsTrigger value="areas" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Textos das Áreas
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="team">
             <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-                    Gerenciar Equipe
+                  <CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                    <Users className="w-5 h-5" />
+                    Gerenciar Equipe ({teamMembers.length} membros)
                   </CardTitle>
                   <div className="space-x-2">
                     <Button onClick={addTeamMember} size="sm">
                       <Plus className="w-4 h-4 mr-2" />
                       Adicionar
                     </Button>
-                    <Button onClick={saveTeamMembers} size="sm" variant="outline">
+                    <Button onClick={handleSaveTeamMembers} size="sm" variant="outline">
                       <Save className="w-4 h-4 mr-2" />
                       Salvar
                     </Button>
@@ -252,9 +250,9 @@ const Admin = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {teamMembers.map((member) => (
-                  <div key={member.id} className={`p-4 border rounded-lg ${isDark ? 'border-white/20' : 'border-gray-200'}`}>
+                  <div key={member.id} className={`p-6 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-black'}`}>
                         {member.name || 'Novo Membro'}
                       </h3>
                       <Button 
@@ -265,53 +263,150 @@ const Admin = () => {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Nome</Label>
+                        <Label className="text-sm font-medium">Nome Completo</Label>
                         <Input
                           value={member.name}
                           onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
-                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          placeholder="Ex: Dr. João Silva"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
                       </div>
                       <div>
-                        <Label>Cargo</Label>
+                        <Label className="text-sm font-medium">Cargo</Label>
                         <Input
                           value={member.title}
                           onChange={(e) => updateTeamMember(member.id, 'title', e.target.value)}
-                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          placeholder="Ex: Advogado Sócio"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
                       </div>
                       <div>
-                        <Label>OAB</Label>
+                        <Label className="text-sm font-medium">Registro OAB</Label>
                         <Input
                           value={member.oab}
                           onChange={(e) => updateTeamMember(member.id, 'oab', e.target.value)}
-                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          placeholder="Ex: OAB/GO: 12345"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
                       </div>
                       <div>
-                        <Label>Email</Label>
+                        <Label className="text-sm font-medium">Email</Label>
                         <Input
                           value={member.email}
                           onChange={(e) => updateTeamMember(member.id, 'email', e.target.value)}
-                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          placeholder="Ex: joao@stadv.com"
+                          type="email"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
                       </div>
-                      <div className="col-span-2">
-                        <Label>URL da Imagem</Label>
+                      <div className="md:col-span-2">
+                        <Label className="text-sm font-medium">URL da Foto</Label>
                         <Input
                           value={member.image}
                           onChange={(e) => updateTeamMember(member.id, 'image', e.target.value)}
-                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          placeholder="Ex: /lovable-uploads/foto.png"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
                       </div>
-                      <div className="col-span-2">
-                        <Label>Descrição</Label>
+                      <div className="md:col-span-2">
+                        <Label className="text-sm font-medium">Biografia</Label>
                         <Textarea
                           value={member.description}
                           onChange={(e) => updateTeamMember(member.id, 'description', e.target.value)}
-                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                          placeholder="Descreva a experiência e qualificações do advogado..."
+                          rows={4}
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="services">
+            <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                    <Briefcase className="w-5 h-5" />
+                    Serviços Especializados ({specializedServices.length} serviços)
+                  </CardTitle>
+                  <div className="space-x-2">
+                    <Button onClick={addSpecializedService} size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar
+                    </Button>
+                    <Button onClick={handleSaveSpecializedServices} size="sm" variant="outline">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {specializedServices.map((service) => (
+                  <div key={service.id} className={`p-6 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-black'}`}>
+                        {service.title || 'Novo Serviço'}
+                      </h3>
+                      <Button 
+                        onClick={() => removeSpecializedService(service.id)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Título do Serviço</Label>
+                        <Input
+                          value={service.title}
+                          onChange={(e) => updateSpecializedService(service.id, 'title', e.target.value)}
+                          placeholder="Ex: Divórcio Consensual"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Categoria</Label>
+                        <Select 
+                          value={service.category} 
+                          onValueChange={(value) => updateSpecializedService(service.id, 'category', value)}
+                        >
+                          <SelectTrigger className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}>
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category.value} value={category.value}>
+                                {category.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Link do Serviço</Label>
+                        <Input
+                          value={service.href}
+                          onChange={(e) => updateSpecializedService(service.id, 'href', e.target.value)}
+                          placeholder="Ex: /services/divorcio"
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-sm font-medium">Descrição</Label>
+                        <Textarea
+                          value={service.description}
+                          onChange={(e) => updateSpecializedService(service.id, 'description', e.target.value)}
+                          placeholder="Descreva o serviço oferecido..."
+                          rows={3}
+                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         />
                       </div>
                     </div>
@@ -328,7 +423,7 @@ const Admin = () => {
                   <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
                     Textos Principais das Páginas
                   </CardTitle>
-                  <Button onClick={savePageTexts} size="sm" variant="outline">
+                  <Button onClick={handleSavePageTexts} size="sm" variant="outline">
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
@@ -430,7 +525,7 @@ const Admin = () => {
                   <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
                     Textos das Áreas de Atuação
                   </CardTitle>
-                  <Button onClick={savePageTexts} size="sm" variant="outline">
+                  <Button onClick={handleSavePageTexts} size="sm" variant="outline">
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
