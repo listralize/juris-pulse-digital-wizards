@@ -25,8 +25,8 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
 
   // Sincronizar páginas locais com as páginas recebidas
   useEffect(() => {
-    console.log('ServicePagesManager: páginas recebidas:', servicePages.length);
-    setLocalPages(servicePages);
+    console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
+    setLocalPages([...servicePages]); // Criar uma nova array para evitar referências
   }, [servicePages]);
 
   const filteredPages = selectedCategory 
@@ -45,7 +45,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
 
   const handleSave = () => {
     console.log('Salvando páginas locais:', localPages.length);
-    onSave(localPages);
+    onSave([...localPages]); // Enviar uma cópia
   };
 
   const addNewServicePage = () => {
@@ -121,7 +121,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button 
-                onClick={handleBackToCategories}
+                onClick={() => setSelectedCategory(null)}
                 variant="outline"
                 size="sm"
               >
@@ -164,7 +164,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button 
-                onClick={handleBackToPages}
+                onClick={() => setSelectedPageId(null)}
                 variant="outline"
                 size="sm"
               >
