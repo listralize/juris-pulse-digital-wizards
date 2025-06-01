@@ -44,6 +44,12 @@ const defaultCategories: BlogCategory[] = [
     name: 'Planejamento',
     description: 'Planejamento patrimonial e sucessório',
     color: '#06B6D4'
+  },
+  {
+    id: '8',
+    name: 'Sucessão',
+    description: 'Direito sucessório e heranças',
+    color: '#84CC16'
   }
 ];
 
@@ -75,12 +81,8 @@ export const useBlogCategories = () => {
   }, []);
 
   const saveBlogCategories = (categories: BlogCategory[]) => {
-    console.log('Salvando categorias:', categories);
     setBlogCategories(categories);
     localStorage.setItem('adminBlogCategories', JSON.stringify(categories));
-    
-    // Força um refresh do estado
-    window.dispatchEvent(new Event('storage'));
   };
 
   return { 
