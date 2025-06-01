@@ -297,14 +297,6 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
           </CardTitle>
           <div className="flex gap-2">
             <Button 
-              onClick={() => window.open('/blog/automation', '_blank')} 
-              variant="outline" 
-              size="sm"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Automação
-            </Button>
-            <Button 
               onClick={() => setShowCategories(true)} 
               variant="outline" 
               size="sm"
