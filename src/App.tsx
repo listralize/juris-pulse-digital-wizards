@@ -201,6 +201,17 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Practice Areas */}
+            <Route path="/familia" element={<FamiliaPage />} />
+            <Route path="/tributario" element={<TributarioPage />} />
+            <Route path="/empresarial" element={<EmpresarialPage />} />
+            <Route path="/trabalho" element={<TrabalhoPage />} />
+            <Route path="/constitucional" element={<ConstitucionalPage />} />
+            <Route path="/administrativo" element={<AdministrativoPage />} />
+            <Route path="/previdenciario" element={<PrevidenciarioPage />} />
+            <Route path="/consumidor" element={<ConsumidorPage />} />
+            <Route path="/civil" element={<CivilPage />} />
+            
             {/* Família Services */}
             <Route path="/servicos/divorcio-separacao" element={<DivorceService />} />
             <Route path="/servicos/casamento-uniao-estavel" element={<CasamentoUniaoService />} />

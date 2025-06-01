@@ -101,7 +101,7 @@ const ClientArea = () => {
 
   return (
     <section 
-      id="client" 
+      id="cliente" 
       className={`min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
     >
       <div className="max-w-4xl mx-auto">
