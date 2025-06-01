@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -10,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { LogOut, Save, Plus, Trash2, Users, FileText, Briefcase, Settings } from 'lucide-react';
-import { useAdminData, TeamMember, SpecializedService, PageTexts } from '../hooks/useAdminData';
+import { useAdminData } from '../hooks/useAdminData';
+import { TeamMember, SpecializedService, PageTexts } from '../types/adminTypes';
 import { toast } from 'sonner';
 
 const Admin = () => {
