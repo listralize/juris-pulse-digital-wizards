@@ -2,7 +2,7 @@
 import { ServicePage } from '../types/adminTypes';
 
 export const defaultServicePages: ServicePage[] = [
-  // DIREITO DE FAMÍLIA (familia)
+  // DIREITO DE FAMÍLIA (familia) - 8 páginas
   {
     id: 'divorcio',
     title: 'Divórcio e Separação',
@@ -102,7 +102,7 @@ export const defaultServicePages: ServicePage[] = [
     testimonials: []
   },
 
-  // DIREITO TRIBUTÁRIO (tributario)
+  // DIREITO TRIBUTÁRIO (tributario) - 8 páginas
   {
     id: 'planejamento-tributario',
     title: 'Planejamento Tributário',
@@ -192,7 +192,7 @@ export const defaultServicePages: ServicePage[] = [
     testimonials: []
   },
 
-  // DIREITO EMPRESARIAL (empresarial)
+  // DIREITO EMPRESARIAL (empresarial) - 8 páginas
   {
     id: 'constituicao-empresas',
     title: 'Constituição de Empresas',
@@ -282,7 +282,7 @@ export const defaultServicePages: ServicePage[] = [
     testimonials: []
   },
 
-  // DIREITO DO TRABALHO (trabalho)
+  // DIREITO DO TRABALHO (trabalho) - 12 páginas
   {
     id: 'assessoria-trabalhista',
     title: 'Assessoria Trabalhista',
@@ -393,8 +393,30 @@ export const defaultServicePages: ServicePage[] = [
     faq: [],
     testimonials: []
   },
+  {
+    id: 'terceirizacao',
+    title: 'Terceirização',
+    description: 'Assessoria em processos de terceirização.',
+    category: 'trabalho',
+    href: '/services/terceirizacao',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'medicina-seguranca-trabalho',
+    title: 'Medicina e Segurança do Trabalho',
+    description: 'Consultoria em normas de segurança e medicina do trabalho.',
+    category: 'trabalho',
+    href: '/services/medicina-seguranca-trabalho',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
 
-  // DIREITO CONSTITUCIONAL (constitucional)
+  // DIREITO CONSTITUCIONAL (constitucional) - 22 páginas
   {
     id: 'direitos-fundamentais',
     title: 'Direitos Fundamentais',
@@ -483,8 +505,162 @@ export const defaultServicePages: ServicePage[] = [
     faq: [],
     testimonials: []
   },
+  {
+    id: 'controle-constitucionalidade',
+    title: 'Controle de Constitucionalidade',
+    description: 'Ações de controle de constitucionalidade.',
+    category: 'constitucional',
+    href: '/services/controle-constitucionalidade',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'acao-popular',
+    title: 'Ação Popular',
+    description: 'Impetração de ações populares.',
+    category: 'constitucional',
+    href: '/services/acao-popular',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'acao-civil-publica',
+    title: 'Ação Civil Pública',
+    description: 'Ações civis públicas em defesa de interesses coletivos.',
+    category: 'constitucional',
+    href: '/services/acao-civil-publica',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'arguicao-descumprimento',
+    title: 'Arguição de Descumprimento',
+    description: 'ADPF - Arguição de Descumprimento de Preceito Fundamental.',
+    category: 'constitucional',
+    href: '/services/arguicao-descumprimento',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'recursos-extraordinarios',
+    title: 'Recursos Extraordinários',
+    description: 'Recursos extraordinários ao STF.',
+    category: 'constitucional',
+    href: '/services/recursos-extraordinarios',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'liberdade-expressao',
+    title: 'Liberdade de Expressão',
+    description: 'Defesa da liberdade de expressão e imprensa.',
+    category: 'constitucional',
+    href: '/services/liberdade-expressao',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-vida-privada',
+    title: 'Direito à Vida Privada',
+    description: 'Proteção da vida privada e intimidade.',
+    category: 'constitucional',
+    href: '/services/direito-vida-privada',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'igualdade-nao-discriminacao',
+    title: 'Igualdade e Não Discriminação',
+    description: 'Defesa contra discriminação e pela igualdade.',
+    category: 'constitucional',
+    href: '/services/igualdade-nao-discriminacao',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-educacao',
+    title: 'Direito à Educação',
+    description: 'Defesa do direito fundamental à educação.',
+    category: 'constitucional',
+    href: '/services/direito-educacao',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-saude',
+    title: 'Direito à Saúde',
+    description: 'Defesa do direito fundamental à saúde.',
+    category: 'constitucional',
+    href: '/services/direito-saude',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'ampla-defesa-contraditorio',
+    title: 'Ampla Defesa e Contraditório',
+    description: 'Garantia da ampla defesa e contraditório.',
+    category: 'constitucional',
+    href: '/services/ampla-defesa-contraditorio',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'devido-processo-legal',
+    title: 'Devido Processo Legal',
+    description: 'Garantia do devido processo legal.',
+    category: 'constitucional',
+    href: '/services/devido-processo-legal',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'principio-legalidade',
+    title: 'Princípio da Legalidade',
+    description: 'Defesa do princípio da legalidade.',
+    category: 'constitucional',
+    href: '/services/principio-legalidade',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direitos-politicos',
+    title: 'Direitos Políticos',
+    description: 'Defesa de direitos políticos e eleitorais.',
+    category: 'constitucional',
+    href: '/services/direitos-politicos',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
 
-  // DIREITO ADMINISTRATIVO (administrativo)
+  // DIREITO ADMINISTRATIVO (administrativo) - 15 páginas
   {
     id: 'licitacoes-contratos',
     title: 'Licitações e Contratos',
@@ -573,8 +749,85 @@ export const defaultServicePages: ServicePage[] = [
     faq: [],
     testimonials: []
   },
+  {
+    id: 'atos-administrativos',
+    title: 'Atos Administrativos',
+    description: 'Contestação e anulação de atos administrativos.',
+    category: 'administrativo',
+    href: '/services/atos-administrativos',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'poder-policia',
+    title: 'Poder de Polícia',
+    description: 'Questões relacionadas ao poder de polícia administrativa.',
+    category: 'administrativo',
+    href: '/services/poder-policia',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'servicos-publicos',
+    title: 'Serviços Públicos',
+    description: 'Assessoria em prestação de serviços públicos.',
+    category: 'administrativo',
+    href: '/services/servicos-publicos',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'parcerias-publico-privadas',
+    title: 'Parcerias Público-Privadas',
+    description: 'Estruturação de PPPs e concessões.',
+    category: 'administrativo',
+    href: '/services/parcerias-publico-privadas',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'dominio-publico',
+    title: 'Domínio Público',
+    description: 'Questões sobre bens e domínio público.',
+    category: 'administrativo',
+    href: '/services/dominio-publico',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'agencias-reguladoras',
+    title: 'Agências Reguladoras',
+    description: 'Assessoria perante agências reguladoras.',
+    category: 'administrativo',
+    href: '/services/agencias-reguladoras',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'controle-administracao',
+    title: 'Controle da Administração',
+    description: 'Controle judicial e administrativo da Administração Pública.',
+    category: 'administrativo',
+    href: '/services/controle-administracao',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
 
-  // DIREITO PREVIDENCIÁRIO (previdenciario)
+  // DIREITO PREVIDENCIÁRIO (previdenciario) - 12 páginas
   {
     id: 'aposentadoria-idade',
     title: 'Aposentadoria por Idade',
@@ -696,8 +949,19 @@ export const defaultServicePages: ServicePage[] = [
     faq: [],
     testimonials: []
   },
+  {
+    id: 'previdencia-complementar',
+    title: 'Previdência Complementar',
+    description: 'Assessoria em previdência complementar privada.',
+    category: 'previdenciario',
+    href: '/services/previdencia-complementar',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
 
-  // DIREITO DO CONSUMIDOR (consumidor)
+  // DIREITO DO CONSUMIDOR (consumidor) - 8 páginas
   {
     id: 'direitos-consumidor',
     title: 'Direitos do Consumidor',
@@ -775,8 +1039,19 @@ export const defaultServicePages: ServicePage[] = [
     faq: [],
     testimonials: []
   },
+  {
+    id: 'superendividamento',
+    title: 'Superendividamento',
+    description: 'Tratamento de casos de superendividamento.',
+    category: 'consumidor',
+    href: '/services/superendividamento',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
 
-  // DIREITO CIVIL (civil)
+  // DIREITO CIVIL (civil) - 24 páginas
   {
     id: 'indenizacao-danos',
     title: 'Indenização por Danos',
@@ -805,6 +1080,237 @@ export const defaultServicePages: ServicePage[] = [
     description: 'Ações de responsabilidade civil em geral.',
     category: 'civil',
     href: '/services/responsabilidade-civil',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-propriedade',
+    title: 'Direito de Propriedade',
+    description: 'Defesa do direito de propriedade e posse.',
+    category: 'civil',
+    href: '/services/direito-propriedade',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'contratos-civis',
+    title: 'Contratos Civis',
+    description: 'Elaboração e revisão de contratos civis.',
+    category: 'civil',
+    href: '/services/contratos-civis',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-vizinhanca',
+    title: 'Direito de Vizinhança',
+    description: 'Conflitos de vizinhança e direitos reais.',
+    category: 'civil',
+    href: '/services/direito-vizinhanca',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'usucapiao',
+    title: 'Usucapião',
+    description: 'Ações de usucapião urbana e rural.',
+    category: 'civil',
+    href: '/services/usucapiao',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'cobranca-dividas',
+    title: 'Cobrança de Dívidas',
+    description: 'Ações de cobrança e execução de títulos.',
+    category: 'civil',
+    href: '/services/cobranca-dividas',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'locacao-imobiliaria',
+    title: 'Locação Imobiliária',
+    description: 'Assessoria em contratos de locação.',
+    category: 'civil',
+    href: '/services/locacao-imobiliaria',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'compra-venda-imoveis',
+    title: 'Compra e Venda de Imóveis',
+    description: 'Assessoria em transações imobiliárias.',
+    category: 'civil',
+    href: '/services/compra-venda-imoveis',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-autoral',
+    title: 'Direito Autoral',
+    description: 'Proteção de direitos autorais e conexos.',
+    category: 'civil',
+    href: '/services/direito-autoral',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-imagem',
+    title: 'Direito de Imagem',
+    description: 'Proteção do direito de imagem e personalidade.',
+    category: 'civil',
+    href: '/services/direito-imagem',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-privacidade',
+    title: 'Direito à Privacidade',
+    description: 'Proteção da privacidade e dados pessoais.',
+    category: 'civil',
+    href: '/services/direito-privacidade',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'responsabilidade-medica',
+    title: 'Responsabilidade Médica',
+    description: 'Ações por erro médico e hospitalar.',
+    category: 'civil',
+    href: '/services/responsabilidade-medica',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'acidentes-transito',
+    title: 'Acidentes de Trânsito',
+    description: 'Indenização por acidentes de trânsito.',
+    category: 'civil',
+    href: '/services/acidentes-transito',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-idoso',
+    title: 'Direito do Idoso',
+    description: 'Defesa dos direitos da pessoa idosa.',
+    category: 'civil',
+    href: '/services/direito-idoso',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-deficiente',
+    title: 'Direito da Pessoa com Deficiência',
+    description: 'Defesa dos direitos das pessoas com deficiência.',
+    category: 'civil',
+    href: '/services/direito-deficiente',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-sucessorio',
+    title: 'Direito Sucessório',
+    description: 'Questões de herança e sucessão.',
+    category: 'civil',
+    href: '/services/direito-sucessorio',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'registro-publico',
+    title: 'Registro Público',
+    description: 'Questões em cartórios e registros públicos.',
+    category: 'civil',
+    href: '/services/registro-publico',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'nome-estado-civil',
+    title: 'Nome e Estado Civil',
+    description: 'Alteração de nome e estado civil.',
+    category: 'civil',
+    href: '/services/nome-estado-civil',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-animais',
+    title: 'Direito dos Animais',
+    description: 'Proteção e defesa dos direitos dos animais.',
+    category: 'civil',
+    href: '/services/direito-animais',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'responsabilidade-moral',
+    title: 'Responsabilidade por Dano Moral',
+    description: 'Ações específicas por dano moral.',
+    category: 'civil',
+    href: '/services/responsabilidade-moral',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'direito-digital',
+    title: 'Direito Digital',
+    description: 'Questões jurídicas no ambiente digital.',
+    category: 'civil',
+    href: '/services/direito-digital',
+    benefits: [],
+    process: [],
+    faq: [],
+    testimonials: []
+  },
+  {
+    id: 'protecao-dados',
+    title: 'Proteção de Dados (LGPD)',
+    description: 'Conformidade com a Lei Geral de Proteção de Dados.',
+    category: 'civil',
+    href: '/services/protecao-dados',
     benefits: [],
     process: [],
     faq: [],
