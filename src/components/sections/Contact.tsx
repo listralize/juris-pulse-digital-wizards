@@ -8,6 +8,7 @@ import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
 import { useTheme } from '../ThemeProvider';
+import { useAdminData } from '../../hooks/useAdminData';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +19,7 @@ const Contact = () => {
   
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { pageTexts } = useAdminData();
   
   useEffect(() => {
     const tl = gsap.timeline({
@@ -64,11 +66,11 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="mb-12 relative z-10">
           <h2 className={`text-3xl md:text-4xl font-canela overflow-visible ${isDark ? 'text-white' : 'text-black'}`}>
-            Precisa de ajuda jurídica?
+            {pageTexts.contactTitle}
           </h2>
           <div className={`w-20 h-1 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
           <p className={`mt-2 text-base ${isDark ? 'text-white/60' : 'text-black/60'}`}>
-            Entre em contato para uma consulta personalizada
+            {pageTexts.contactSubtitle}
           </p>
         </div>
         
