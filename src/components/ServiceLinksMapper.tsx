@@ -36,7 +36,7 @@ const ServiceLinksMapper: React.FC<ServiceLinksMapperProps> = ({
         {categoryServices.map((service) => (
           <Link 
             key={service.id}
-            to={service.href.startsWith('/') ? service.href : `/servicos/${service.id}`}
+            to={`/servicos/${service.id}`}
             className={`p-4 rounded-lg border transition-all hover:shadow-md ${
               isDark 
                 ? 'bg-white/5 border-white/10 hover:bg-white/10' 

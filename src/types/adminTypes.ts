@@ -51,6 +51,12 @@ export interface CategoryText {
   description: string;
 }
 
+export interface CategoryTexts {
+  id: string;
+  title: string;
+  description: string;
+}
+
 export interface ContactTexts {
   phone: string;
   email: string;
