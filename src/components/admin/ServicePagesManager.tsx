@@ -152,13 +152,37 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
     onSave(localPages);
   };
 
+  const addNewServicePage = () => {
+    if (!selectedCategory) return;
+    
+    const newServicePage: ServicePage = {
+      id: `${selectedCategory}-${Date.now()}`,
+      title: '',
+      description: '',
+      category: selectedCategory,
+      href: '',
+      benefits: [],
+      process: [],
+      faq: [],
+      testimonials: []
+    };
+    setLocalPages([...localPages, newServicePage]);
+  };
+
+  const removeServicePage = (pageId: string) => {
+    setLocalPages(pages => pages.filter(page => page.id !== pageId));
+    if (selectedPageId === pageId) {
+      setSelectedPageId(null);
+    }
+  };
+
   // Se nenhuma categoria selecionada, mostra grid de categorias
   if (!selectedCategory) {
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            Escolha uma Categoria para Gerenciar ({localPages.length} páginas)
+            Gerenciar Páginas por Área do Direito
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -209,44 +233,76 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
                 Voltar
               </Button>
               <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-                {categoryInfo?.label} ({filteredPages.length} páginas)
+                {categoryInfo?.label}
               </CardTitle>
             </div>
-            <Button onClick={handleSave} size="sm" variant="outline">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Tudo
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={addNewServicePage} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Página
+              </Button>
+              <Button onClick={handleSave} size="sm" variant="outline">
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Tudo
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPages.map((page) => (
-              <Card 
-                key={page.id}
-                className={`cursor-pointer transition-all hover:scale-105 ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
-                onClick={() => setSelectedPageId(page.id)}
-              >
-                <CardContent className="p-4">
-                  <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                    {page.title}
-                  </h3>
-                  <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {page.description}
-                  </p>
-                  <div className="flex gap-2 text-xs">
-                    <span className={`px-2 py-1 rounded ${isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
-                      {page.benefits.length} benefício{page.benefits.length !== 1 ? 's' : ''}
-                    </span>
-                    <span className={`px-2 py-1 rounded ${isDark ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800'}`}>
-                      {page.process.length} etapa{page.process.length !== 1 ? 's' : ''}
-                    </span>
-                    <span className={`px-2 py-1 rounded ${isDark ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
-                      {page.faq.length} FAQ{page.faq.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-3">
+            {filteredPages.length === 0 ? (
+              <div className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Nenhuma página encontrada para esta categoria.
+                <br />
+                <Button onClick={addNewServicePage} className="mt-4" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar primeira página
+                </Button>
+              </div>
+            ) : (
+              filteredPages.map((page) => (
+                <Card 
+                  key={page.id}
+                  className={`cursor-pointer transition-all hover:scale-[1.02] ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
+                  onClick={() => setSelectedPageId(page.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                          {page.title || 'Título não definido'}
+                        </h3>
+                        <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {page.description || 'Descrição não definida'}
+                        </p>
+                        <div className="flex gap-2 text-xs">
+                          <span className={`px-2 py-1 rounded ${isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
+                            {page.benefits.length} benefício{page.benefits.length !== 1 ? 's' : ''}
+                          </span>
+                          <span className={`px-2 py-1 rounded ${isDark ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800'}`}>
+                            {page.process.length} etapa{page.process.length !== 1 ? 's' : ''}
+                          </span>
+                          <span className={`px-2 py-1 rounded ${isDark ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
+                            {page.faq.length} FAQ{page.faq.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeServicePage(page.id);
+                        }}
+                        size="sm"
+                        variant="destructive"
+                        className="ml-4"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
@@ -269,7 +325,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
                 Voltar
               </Button>
               <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-                Editando: {selectedPage.title}
+                Editando: {selectedPage.title || 'Nova Página'}
               </CardTitle>
             </div>
             <Button onClick={handleSave} size="sm" variant="outline">

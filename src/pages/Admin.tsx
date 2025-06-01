@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -139,70 +138,6 @@ const Admin = () => {
       service.id === id ? { ...service, [field]: value } : service
     ));
   };
-
-  const addServicePage = () => {
-    const newServicePage: ServicePage = {
-      id: Date.now().toString(),
-      title: '',
-      description: '',
-      category: 'familia',
-      href: '',
-      benefits: [],
-      process: [],
-      faq: [],
-      testimonials: []
-    };
-    setServicePages([...servicePages, newServicePage]);
-  };
-
-  const removeServicePage = (id: string) => {
-    setServicePages(servicePages.filter(page => page.id !== id));
-  };
-
-  const updateServicePage = (id: string, field: keyof ServicePage, value: any) => {
-    setServicePages(servicePages.map(page => 
-      page.id === id ? { ...page, [field]: value } : page
-    ));
-  };
-
-  const addBenefit = (pageId: string) => {
-    const newBenefit = { title: '', description: '', icon: '' };
-    setServicePages(servicePages.map(page => 
-      page.id === pageId ? { ...page, benefits: [...page.benefits, newBenefit] } : page
-    ));
-  };
-
-  const removeBenefit = (pageId: string, index: number) => {
-    setServicePages(servicePages.map(page => 
-      page.id === pageId ? { 
-        ...page, 
-        benefits: page.benefits.filter((_, i) => i !== index) 
-      } : page
-    ));
-  };
-
-  const updateBenefit = (pageId: string, index: number, field: string, value: string) => {
-    setServicePages(servicePages.map(page => 
-      page.id === pageId ? {
-        ...page,
-        benefits: page.benefits.map((benefit, i) => 
-          i === index ? { ...benefit, [field]: value } : benefit
-        )
-      } : page
-    ));
-  };
-
-  const categories = [
-    { value: 'familia', label: 'Direito de Família' },
-    { value: 'tributario', label: 'Direito Tributário' },
-    { value: 'empresarial', label: 'Direito Empresarial' },
-    { value: 'trabalho', label: 'Direito do Trabalho' },
-    { value: 'constitucional', label: 'Direito Constitucional' },
-    { value: 'administrativo', label: 'Direito Administrativo' },
-    { value: 'previdenciario', label: 'Direito Previdenciário' },
-    { value: 'consumidor', label: 'Direito do Consumidor' },
-    { value: 'civil', label: 'Direito Civil' }
-  ];
 
   if (isLoading) {
     return (
@@ -451,158 +386,6 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="service-pages">
-            <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                    <Globe className="w-5 h-5" />
-                    Páginas de Serviços ({servicePages.length} páginas)
-                  </CardTitle>
-                  <div className="space-x-2">
-                    <Button onClick={addServicePage} size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar
-                    </Button>
-                    <Button onClick={handleSaveServicePages} size="sm" variant="outline">
-                      <Save className="w-4 h-4 mr-2" />
-                      Salvar
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                {servicePages.map((page) => (
-                  <div key={page.id} className={`p-6 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
-                    <div className="flex justify-between items-start mb-6">
-                      <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-black'}`}>
-                        {page.title || 'Nova Página de Serviço'}
-                      </h3>
-                      <Button 
-                        onClick={() => removeServicePage(page.id)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    
-                    {/* Informações básicas */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div>
-                        <Label className="text-sm font-medium">Título da Página</Label>
-                        <Input
-                          value={page.title}
-                          onChange={(e) => updateServicePage(page.id, 'title', e.target.value)}
-                          placeholder="Ex: Divórcio e Separação"
-                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Categoria</Label>
-                        <Select 
-                          value={page.category} 
-                          onValueChange={(value) => updateServicePage(page.id, 'category', value)}
-                        >
-                          <SelectTrigger className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}>
-                            <SelectValue placeholder="Selecione uma categoria" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.map((category) => (
-                              <SelectItem key={category.value} value={category.value}>
-                                {category.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Link da Página</Label>
-                        <Input
-                          value={page.href}
-                          onChange={(e) => updateServicePage(page.id, 'href', e.target.value)}
-                          placeholder="Ex: /services/divorcio"
-                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label className="text-sm font-medium">Descrição Principal</Label>
-                        <Textarea
-                          value={page.description}
-                          onChange={(e) => updateServicePage(page.id, 'description', e.target.value)}
-                          placeholder="Descrição principal do serviço..."
-                          rows={3}
-                          className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Benefícios */}
-                    <div className="mb-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <Label className="text-lg font-medium">Benefícios</Label>
-                        <Button 
-                          onClick={() => addBenefit(page.id)}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Adicionar Benefício
-                        </Button>
-                      </div>
-                      <div className="space-y-4">
-                        {page.benefits.map((benefit, index) => (
-                          <div key={index} className={`p-4 border rounded ${isDark ? 'border-white/10 bg-black/30' : 'border-gray-200 bg-white'}`}>
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="text-sm font-medium">Benefício {index + 1}</span>
-                              <Button 
-                                onClick={() => removeBenefit(page.id, index)}
-                                size="sm"
-                                variant="destructive"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              <div>
-                                <Label className="text-xs">Título</Label>
-                                <Input
-                                  value={benefit.title}
-                                  onChange={(e) => updateBenefit(page.id, index, 'title', e.target.value)}
-                                  placeholder="Título do benefício"
-                                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Ícone</Label>
-                                <Input
-                                  value={benefit.icon || ''}
-                                  onChange={(e) => updateBenefit(page.id, index, 'icon', e.target.value)}
-                                  placeholder="Ex: ⚖️"
-                                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Descrição</Label>
-                                <Textarea
-                                  value={benefit.description}
-                                  onChange={(e) => updateBenefit(page.id, index, 'description', e.target.value)}
-                                  placeholder="Descrição do benefício"
-                                  rows={2}
-                                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="texts">
             <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
               <CardHeader>
@@ -617,6 +400,7 @@ const Admin = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
+                
                 <div className="grid grid-cols-1 gap-6">
                   <div>
                     <Label>Título Principal (Hero)</Label>
@@ -719,6 +503,7 @@ const Admin = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
+                
                 <div className="grid grid-cols-1 gap-6">
                   {/* Direito de Família */}
                   <div className="grid grid-cols-2 gap-4">
