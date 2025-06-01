@@ -50,47 +50,47 @@ const BlogPage = () => {
       
       <div className="container mx-auto px-4 py-20">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-16">
           <h1 className={`text-5xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h1>
-          <p className={`text-xl max-w-3xl mx-auto mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Artigos especializados sobre as mais diversas áreas do Direito, 
             mantendo você sempre atualizado com as novidades jurídicas
           </p>
-          
-          {/* Filtros movidos para baixo da descrição */}
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar artigos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              <div className="flex gap-2 flex-wrap justify-center">
+        </div>
+
+        {/* Filtros */}
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Buscar artigos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={selectedTag === '' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedTag('')}
+              >
+                Todos
+              </Button>
+              {allTags.map((tag) => (
                 <Button
-                  variant={selectedTag === '' ? 'default' : 'outline'}
+                  key={tag}
+                  variant={selectedTag === tag ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedTag('')}
+                  onClick={() => setSelectedTag(tag)}
                 >
-                  Todos
+                  {tag}
                 </Button>
-                {allTags.map((tag) => (
-                  <Button
-                    key={tag}
-                    variant={selectedTag === tag ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedTag(tag)}
-                  >
-                    {tag}
-                  </Button>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </div>
