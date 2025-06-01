@@ -45,11 +45,12 @@ export const useAdminData = () => {
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
-      // Carregar páginas de serviços - CORRIGIDO
+      // Carregar páginas de serviços - SEMPRE usar as páginas padrão como base
       console.log('Carregando páginas de serviço...');
       console.log('Páginas padrão disponíveis:', defaultServicePages.length);
       
       const savedServicePages = localStorage.getItem('adminServicePages');
+      let finalPages = [...defaultServicePages]; // Sempre começar com as páginas padrão
       
       if (savedServicePages) {
         try {
@@ -57,25 +58,36 @@ export const useAdminData = () => {
           console.log('Páginas salvas encontradas:', parsedServicePages.length);
           
           if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
-            // Se há páginas salvas válidas, usar elas
-            setServicePages(parsedServicePages);
-          } else {
-            // Se as páginas salvas estão vazias ou inválidas, usar as padrão
-            console.log('Páginas salvas inválidas, usando padrão');
-            setServicePages(defaultServicePages);
-            localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
+            // Mesclar as páginas salvas com as padrão (páginas salvas têm prioridade)
+            const savedIds = new Set(parsedServicePages.map((page: ServicePage) => page.id));
+            
+            // Manter páginas editadas salvas
+            const editedPages = parsedServicePages.filter((page: ServicePage) => 
+              defaultServicePages.some(defaultPage => defaultPage.id === page.id)
+            );
+            
+            // Manter páginas novas criadas
+            const newPages = parsedServicePages.filter((page: ServicePage) => 
+              !defaultServicePages.some(defaultPage => defaultPage.id === page.id)
+            );
+            
+            // Combinar: páginas padrão (atualizadas com as editadas) + páginas novas
+            finalPages = defaultServicePages.map(defaultPage => {
+              const editedVersion = editedPages.find(edited => edited.id === defaultPage.id);
+              return editedVersion || defaultPage;
+            }).concat(newPages);
           }
         } catch (error) {
           console.error('Erro ao parsear páginas salvas:', error);
-          setServicePages(defaultServicePages);
-          localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
+          finalPages = [...defaultServicePages];
         }
-      } else {
-        // Se não há páginas salvas, usar as padrão
-        console.log('Nenhuma página salva encontrada, usando padrão');
-        setServicePages(defaultServicePages);
-        localStorage.setItem('adminServicePages', JSON.stringify(defaultServicePages));
       }
+      
+      console.log('Total de páginas finais:', finalPages.length);
+      setServicePages(finalPages);
+      
+      // Salvar o estado final para garantir consistência
+      localStorage.setItem('adminServicePages', JSON.stringify(finalPages));
 
       // Carregar textos das páginas
       const savedTexts = localStorage.getItem('adminPageTexts');

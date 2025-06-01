@@ -23,10 +23,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
 
-  // Sincronizar páginas locais com as páginas recebidas
+  // Sincronizar páginas locais com as páginas recebidas apenas quando necessário
   useEffect(() => {
-    console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
-    setLocalPages([...servicePages]); // Criar uma nova array para evitar referências
+    if (servicePages && servicePages.length > 0) {
+      console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
+      setLocalPages([...servicePages]);
+    }
   }, [servicePages]);
 
   const filteredPages = selectedCategory 
@@ -45,7 +47,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ servic
 
   const handleSave = () => {
     console.log('Salvando páginas locais:', localPages.length);
-    onSave([...localPages]); // Enviar uma cópia
+    onSave([...localPages]);
   };
 
   const addNewServicePage = () => {
