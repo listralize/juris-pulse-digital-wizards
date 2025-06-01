@@ -7,8 +7,10 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
-import { ArrowLeft, Plus, Save, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Edit, Trash2, Tags, Settings } from 'lucide-react';
 import { BlogPost } from '../../types/blogTypes';
+import { BlogCategoriesManagement } from './BlogCategoriesManagement';
+import { useBlogCategories } from '../../hooks/useBlogCategories';
 
 interface BlogManagementProps {
   blogPosts: BlogPost[];
@@ -24,6 +26,10 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localPosts, setLocalPosts] = useState<BlogPost[]>(blogPosts);
+  const [showCategories, setShowCategories] = useState(false);
+  const [newTag, setNewTag] = useState('');
+  
+  const { blogCategories, saveBlogCategories } = useBlogCategories();
 
   const createNewPost = () => {
     const newPost: BlogPost = {
@@ -59,6 +65,21 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
     setSelectedPost(updatedPost);
   };
 
+  const addTag = () => {
+    if (!selectedPost || !newTag.trim()) return;
+    
+    const updatedTags = [...selectedPost.tags, newTag.trim()];
+    updatePost('tags', updatedTags);
+    setNewTag('');
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    if (!selectedPost) return;
+    
+    const updatedTags = selectedPost.tags.filter(tag => tag !== tagToRemove);
+    updatePost('tags', updatedTags);
+  };
+
   const savePost = () => {
     if (!selectedPost) return;
     
@@ -88,6 +109,17 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
       setIsEditing(false);
     }
   };
+
+  // Se está gerenciando categorias
+  if (showCategories) {
+    return (
+      <BlogCategoriesManagement
+        categories={blogCategories}
+        onSave={saveBlogCategories}
+        onBack={() => setShowCategories(false)}
+      />
+    );
+  }
 
   // Se está editando um post
   if (isEditing && selectedPost) {
@@ -179,6 +211,63 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                 />
                 <Label htmlFor="featured">Post em destaque</Label>
               </div>
+
+              {/* Tags/Categorias */}
+              <div>
+                <Label>Tags/Categorias</Label>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      placeholder="Nova tag"
+                      onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                    />
+                    <Button onClick={addTag} size="sm">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Tags disponíveis */}
+                  <div className="space-y-2">
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Categorias disponíveis (clique para adicionar):
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {blogCategories.map((category) => (
+                        <Button
+                          key={category.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (!selectedPost.tags.includes(category.name)) {
+                              updatePost('tags', [...selectedPost.tags, category.name]);
+                            }
+                          }}
+                          className="text-xs"
+                          disabled={selectedPost.tags.includes(category.name)}
+                        >
+                          {category.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Tags selecionadas */}
+                  <div className="flex flex-wrap gap-1">
+                    {selectedPost.tags.map((tag) => (
+                      <span 
+                        key={tag}
+                        className={`text-xs px-2 py-1 rounded-full cursor-pointer flex items-center gap-1 ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-700'}`}
+                        onClick={() => removeTag(tag)}
+                      >
+                        {tag}
+                        <span className="ml-1">×</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
             
             <div>
@@ -206,10 +295,20 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
             Gerenciar Posts do Blog
           </CardTitle>
-          <Button onClick={createNewPost} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Post
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setShowCategories(true)} 
+              variant="outline" 
+              size="sm"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Categorias
+            </Button>
+            <Button onClick={createNewPost} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Post
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -228,6 +327,18 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       Por {post.author} - {new Date(post.publishedAt).toLocaleDateString()}
                     </p>
+                    {post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {post.tags.map((tag) => (
+                          <span 
+                            key={tag}
+                            className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {post.featured && (
                       <span className="inline-block mt-1 text-xs bg-yellow-500 text-black px-2 py-1 rounded">
                         Destaque
