@@ -14,9 +14,16 @@ import CustomCursor from './components/CustomCursor';
 import WhatsAppButton from './components/WhatsAppButton';
 import BlogAutomation from './pages/BlogAutomation';
 
-// Importar páginas de áreas de direito
+// Importar TODAS as páginas de áreas de direito
 import Familia from './pages/areas/Familia';
 import Consumidor from './pages/areas/Consumidor';
+import Constitucional from './pages/areas/Constitucional';
+import Tributario from './pages/areas/Tributario';
+import Trabalho from './pages/areas/Trabalho';
+import Previdenciario from './pages/areas/Previdenciario';
+import Empresarial from './pages/areas/Empresarial';
+import Civil from './pages/areas/Civil';
+import Administrativo from './pages/areas/Administrativo';
 
 // Importar algumas páginas de serviços
 import DivorceService from './pages/services/DivorceService';
@@ -48,6 +55,10 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
+            {/* CustomCursor agora funciona em TODAS as páginas */}
+            <CustomCursor />
+            <WhatsAppButton />
+            
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
@@ -58,11 +69,25 @@ function App() {
               <Route path="/blog/automation" element={<BlogAutomation />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
               
-              {/* Rotas das áreas de direito */}
+              {/* Rotas das áreas de direito - TODAS as áreas */}
               <Route path="/familia" element={<Familia />} />
               <Route path="/areas/familia" element={<Familia />} />
               <Route path="/consumidor" element={<Consumidor />} />
               <Route path="/areas/consumidor" element={<Consumidor />} />
+              <Route path="/constitucional" element={<Constitucional />} />
+              <Route path="/areas/constitucional" element={<Constitucional />} />
+              <Route path="/tributario" element={<Tributario />} />
+              <Route path="/areas/tributario" element={<Tributario />} />
+              <Route path="/trabalho" element={<Trabalho />} />
+              <Route path="/areas/trabalho" element={<Trabalho />} />
+              <Route path="/previdenciario" element={<Previdenciario />} />
+              <Route path="/areas/previdenciario" element={<Previdenciario />} />
+              <Route path="/empresarial" element={<Empresarial />} />
+              <Route path="/areas/empresarial" element={<Empresarial />} />
+              <Route path="/civil" element={<Civil />} />
+              <Route path="/areas/civil" element={<Civil />} />
+              <Route path="/administrativo" element={<Administrativo />} />
+              <Route path="/areas/administrativo" element={<Administrativo />} />
               
               {/* Rotas dos serviços */}
               <Route path="/servicos/divorcio" element={<DivorceService />} />
@@ -87,9 +112,8 @@ function App() {
               <Route path="/servicos/assedio-moral-sexual" element={<AssedioMoralSexualService />} />
               <Route path="/servicos/acoes-inconstitucionalidade" element={<AcoesInconstitucionalidadeService />} />
             </Routes>
+            
             <Toaster />
-            <CustomCursor />
-            <WhatsAppButton />
           </QueryClientProvider>
         </ThemeProvider>
       </AuthProvider>
