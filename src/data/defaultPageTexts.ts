@@ -30,6 +30,17 @@ export const defaultPageTexts: PageTexts = {
   consumidorDescription: "Defesa dos direitos do consumidor",
   civilTitle: "Direito Civil",
   civilDescription: "Questões cíveis em geral",
+  contactTexts: {
+    phone: "(11) 9999-9999",
+    email: "contato@exemplo.com",
+    address: "Rua Exemplo, 123 - São Paulo, SP",
+    whatsapp: "5511999999999"
+  },
+  footerTexts: {
+    companyName: "Escritório de Advocacia",
+    description: "Excelência jurídica com mais de 20 anos de experiência",
+    copyright: "© 2024 Todos os direitos reservados"
+  },
   categoryTexts: [
     {
       id: "patrimonio-sucessoes",

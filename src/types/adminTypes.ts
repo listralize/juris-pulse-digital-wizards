@@ -1,3 +1,4 @@
+
 export interface TeamMember {
   id: string;
   name: string;
@@ -44,10 +45,23 @@ export interface ServicePage {
   }[];
 }
 
-export interface CategoryTexts {
+export interface CategoryText {
   id: string;
   title: string;
   description: string;
+}
+
+export interface ContactTexts {
+  phone: string;
+  email: string;
+  address: string;
+  whatsapp: string;
+}
+
+export interface FooterTexts {
+  companyName: string;
+  description: string;
+  copyright: string;
 }
 
 export interface PageTexts {
@@ -79,7 +93,9 @@ export interface PageTexts {
   consumidorDescription: string;
   civilTitle: string;
   civilDescription: string;
-  categoryTexts: CategoryTexts[];
+  categoryTexts: CategoryText[];
+  contactTexts: ContactTexts;
+  footerTexts: FooterTexts;
 }
 
 export interface CategoryInfo {

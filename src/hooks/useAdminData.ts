@@ -9,10 +9,7 @@ export const useAdminData = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
-  const [pageTexts, setPageTexts] = useState<PageTexts>({
-    ...defaultPageTexts,
-    categoryTexts: []
-  });
+  const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -49,32 +46,22 @@ export const useAdminData = () => {
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
-      // Carregar páginas de serviços - LÓGICA MELHORADA
-      console.log('Carregando páginas de serviço...');
-      console.log('Páginas padrão disponíveis:', defaultServicePages.length);
-      
+      // Carregar páginas de serviços
       const savedServicePages = localStorage.getItem('adminServicePages');
       let finalPages: ServicePage[] = [];
       
       if (savedServicePages) {
         try {
           const parsedServicePages = JSON.parse(savedServicePages);
-          console.log('Páginas salvas encontradas:', parsedServicePages.length);
-          
           if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
-            // Se há páginas salvas, usar elas como base
             finalPages = [...parsedServicePages];
-            
-            // Verificar se faltam páginas padrão que não foram salvas
             const savedIds = new Set(parsedServicePages.map((page: ServicePage) => page.id));
             const missingDefaultPages = defaultServicePages.filter(defaultPage => !savedIds.has(defaultPage.id));
             
             if (missingDefaultPages.length > 0) {
-              console.log('Adicionando páginas padrão que faltavam:', missingDefaultPages.length);
               finalPages = [...parsedServicePages, ...missingDefaultPages];
             }
           } else {
-            // Se não há páginas válidas salvas, usar as padrão
             finalPages = [...defaultServicePages];
           }
         } catch (error) {
@@ -82,24 +69,23 @@ export const useAdminData = () => {
           finalPages = [...defaultServicePages];
         }
       } else {
-        // Se não há páginas salvas, usar as padrão
         finalPages = [...defaultServicePages];
       }
       
-      console.log('Total de páginas finais carregadas:', finalPages.length);
       setServicePages(finalPages);
 
       // Carregar textos das páginas
       const savedTexts = localStorage.getItem('adminPageTexts');
       if (savedTexts) {
         const parsedTexts = JSON.parse(savedTexts);
-        // Garantir que categoryTexts existe
-        const textsWithCategories = {
+        const textsWithDefaults = {
           ...defaultPageTexts,
           ...parsedTexts,
-          categoryTexts: parsedTexts.categoryTexts || defaultPageTexts.categoryTexts
+          categoryTexts: parsedTexts.categoryTexts || defaultPageTexts.categoryTexts,
+          contactTexts: parsedTexts.contactTexts || defaultPageTexts.contactTexts,
+          footerTexts: parsedTexts.footerTexts || defaultPageTexts.footerTexts
         };
-        setPageTexts(textsWithCategories);
+        setPageTexts(textsWithDefaults);
       } else {
         setPageTexts(defaultPageTexts);
         localStorage.setItem('adminPageTexts', JSON.stringify(defaultPageTexts));

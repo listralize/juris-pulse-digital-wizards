@@ -22,55 +22,55 @@ const PracticeAreas = () => {
       id: 'familia',
       title: pageTexts.familiaTitle,
       description: pageTexts.familiaDescription,
-      href: '/familia'
+      href: '/areas/familia'
     },
     {
       id: 'tributario',
       title: pageTexts.tributarioTitle,
       description: pageTexts.tributarioDescription,
-      href: '/tributario'
+      href: '/areas/tributario'
     },
     {
       id: 'empresarial',
       title: pageTexts.empresarialTitle,
       description: pageTexts.empresarialDescription,
-      href: '/empresarial'
+      href: '/areas/empresarial'
     },
     {
       id: 'trabalho',
       title: pageTexts.trabalhoTitle,
       description: pageTexts.trabalhoDescription,
-      href: '/trabalho'
+      href: '/areas/trabalho'
     },
     {
       id: 'constitucional',
       title: pageTexts.constitucionalTitle,
       description: pageTexts.constitucionalDescription,
-      href: '/constitucional'
+      href: '/areas/constitucional'
     },
     {
       id: 'administrativo',
       title: pageTexts.administrativoTitle,
       description: pageTexts.administrativoDescription,
-      href: '/administrativo'
+      href: '/areas/administrativo'
     },
     {
       id: 'previdenciario',
       title: pageTexts.previdenciarioTitle,
       description: pageTexts.previdenciarioDescription,
-      href: '/previdenciario'
+      href: '/areas/previdenciario'
     },
     {
       id: 'consumidor',
       title: pageTexts.consumidorTitle,
       description: pageTexts.consumidorDescription,
-      href: '/consumidor'
+      href: '/areas/consumidor'
     },
     {
       id: 'civil',
       title: pageTexts.civilTitle,
       description: pageTexts.civilDescription,
-      href: '/civil'
+      href: '/areas/civil'
     }
   ];
 
