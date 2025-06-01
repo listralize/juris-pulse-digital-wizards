@@ -75,3 +75,21 @@ export interface PageTexts {
   civilTitle: string;
   civilDescription: string;
 }
+
+export interface CategoryInfo {
+  value: string;
+  label: string;
+  color: string;
+}
+
+export const categories: CategoryInfo[] = [
+  { value: 'familia', label: 'Direito de Família', color: 'bg-pink-500' },
+  { value: 'tributario', label: 'Direito Tributário', color: 'bg-green-500' },
+  { value: 'empresarial', label: 'Direito Empresarial', color: 'bg-blue-500' },
+  { value: 'trabalho', label: 'Direito do Trabalho', color: 'bg-purple-500' },
+  { value: 'constitucional', label: 'Direito Constitucional', color: 'bg-red-500' },
+  { value: 'administrativo', label: 'Direito Administrativo', color: 'bg-orange-500' },
+  { value: 'previdenciario', label: 'Direito Previdenciário', color: 'bg-indigo-500' },
+  { value: 'consumidor', label: 'Direito do Consumidor', color: 'bg-yellow-500' },
+  { value: 'civil', label: 'Direito Civil', color: 'bg-gray-500' }
+];

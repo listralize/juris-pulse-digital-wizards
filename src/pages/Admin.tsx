@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -10,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { LogOut, Save, Plus, Trash2, Users, FileText, Briefcase, Settings, Globe } from 'lucide-react';
 import { useAdminData } from '../hooks/useAdminData';
-import { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';
+import { TeamMember, SpecializedService, ServicePage, PageTexts, categories } from '../types/adminTypes';
+import { ServicePagesManager } from '../components/admin/ServicePagesManager';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -83,8 +85,9 @@ const Admin = () => {
     toast.success('Serviços especializados salvos com sucesso!');
   };
 
-  const handleSaveServicePages = () => {
-    saveServicePages(servicePages);
+  const handleSaveServicePages = (pages: ServicePage[]) => {
+    setServicePages(pages);
+    saveServicePages(pages);
     toast.success('Páginas de serviços salvas com sucesso!');
   };
 
@@ -229,8 +232,12 @@ const Admin = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="team" className="space-y-6">
+        <Tabs defaultValue="service-pages" className="space-y-6">
           <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+            <TabsTrigger value="service-pages" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Páginas de Serviços
+            </TabsTrigger>
             <TabsTrigger value="team" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Equipe
@@ -238,10 +245,6 @@ const Admin = () => {
             <TabsTrigger value="services" className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
               Serviços
-            </TabsTrigger>
-            <TabsTrigger value="service-pages" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Páginas de Serviços
             </TabsTrigger>
             <TabsTrigger value="texts" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -252,6 +255,13 @@ const Admin = () => {
               Textos das Áreas
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="service-pages">
+            <ServicePagesManager 
+              servicePages={servicePages}
+              onSave={handleSaveServicePages}
+            />
+          </TabsContent>
 
           <TabsContent value="team">
             <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
