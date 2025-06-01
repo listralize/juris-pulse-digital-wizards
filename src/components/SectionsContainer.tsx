@@ -9,6 +9,7 @@ import About from './sections/About';
 import PracticeAreas from './sections/PracticeAreas';
 import Partners from './sections/Partners';
 import ClientArea from './sections/ClientArea';
+import Blog from './sections/Blog';
 import Contact from './sections/Contact';
 import Footer from './sections/Footer';
 
@@ -21,6 +22,7 @@ const SectionsContainer: React.FC = () => {
     { id: 'areas', component: PracticeAreas },
     { id: 'socios', component: Partners }, 
     { id: 'cliente', component: ClientArea },
+    { id: 'blog', component: Blog },
     { id: 'contact', component: Contact }
   ];
   

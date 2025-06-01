@@ -1,17 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Users, FileText, Briefcase, Globe } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit } from 'lucide-react';
 import { useAdminData } from '../hooks/useAdminData';
+import { useBlogData } from '../hooks/useBlogData';
 import { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';
-import { ServicePagesManager } from '../components/admin/ServicePagesManager';
+import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
-import { TeamManagement } from '../components/admin/TeamManagement';
-import { ServicesManagement } from '../components/admin/ServicesManagement';
-import { MainTextsManagement } from '../components/admin/MainTextsManagement';
-import { AreasTextsManagement } from '../components/admin/AreasTextsManagement';
-import { CategoryTextsManagement } from '../components/admin/CategoryTextsManagement';
+import { ContentManagement } from '../components/admin/ContentManagement';
+import { BlogManagement } from '../components/admin/BlogManagement';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -30,6 +29,12 @@ const Admin = () => {
     saveServicePages,
     savePageTexts
   } = useAdminData();
+
+  const {
+    blogPosts: initialBlogPosts,
+    isLoading: blogLoading,
+    saveBlogPosts
+  } = useBlogData();
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
@@ -80,11 +85,6 @@ const Admin = () => {
     toast.success('Equipe salva com sucesso!');
   };
 
-  const handleSaveSpecializedServices = () => {
-    saveSpecializedServices(specializedServices);
-    toast.success('Serviços especializados salvos com sucesso!');
-  };
-
   const handleSaveServicePages = (pages: ServicePage[]) => {
     setServicePages(pages);
     saveServicePages(pages);
@@ -94,6 +94,11 @@ const Admin = () => {
   const handleSavePageTexts = () => {
     savePageTexts(pageTexts);
     toast.success('Textos das páginas salvos com sucesso!');
+  };
+
+  const handleSaveBlogPosts = (posts: typeof initialBlogPosts) => {
+    saveBlogPosts(posts);
+    toast.success('Posts do blog salvos com sucesso!');
   };
 
   const addTeamMember = () => {
@@ -119,28 +124,7 @@ const Admin = () => {
     ));
   };
 
-  const addSpecializedService = () => {
-    const newService: SpecializedService = {
-      id: Date.now().toString(),
-      title: '',
-      description: '',
-      category: 'familia',
-      href: ''
-    };
-    setSpecializedServices([...specializedServices, newService]);
-  };
-
-  const removeSpecializedService = (id: string) => {
-    setSpecializedServices(specializedServices.filter(service => service.id !== id));
-  };
-
-  const updateSpecializedService = (id: string, field: keyof SpecializedService, value: string) => {
-    setSpecializedServices(specializedServices.map(service => 
-      service.id === id ? { ...service, [field]: value } : service
-    ));
-  };
-
-  if (isLoading) {
+  if (isLoading || blogLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
@@ -153,25 +137,34 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto">
         <AdminHeader onLogout={logout} />
 
-        <Tabs defaultValue="service-pages" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList className={`grid w-full grid-cols-3 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+            <TabsTrigger value="content" className="flex items-center gap-2">
+              <Edit className="w-4 h-4" />
+              Conteúdo Geral
+            </TabsTrigger>
             <TabsTrigger value="service-pages" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
               Páginas de Serviços
             </TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Equipe
-            </TabsTrigger>
-            <TabsTrigger value="texts" className="flex items-center gap-2">
+            <TabsTrigger value="blog" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              Textos Principais
-            </TabsTrigger>
-            <TabsTrigger value="areas" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Textos das Áreas
+              Blog
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="content">
+            <ContentManagement
+              teamMembers={teamMembers}
+              pageTexts={pageTexts}
+              onAddTeamMember={addTeamMember}
+              onRemoveTeamMember={removeTeamMember}
+              onUpdateTeamMember={updateTeamMember}
+              onSaveTeamMembers={handleSaveTeamMembers}
+              onUpdatePageTexts={setPageTexts}
+              onSavePageTexts={handleSavePageTexts}
+            />
+          </TabsContent>
 
           <TabsContent value="service-pages">
             <ServicePagesManager 
@@ -183,29 +176,10 @@ const Admin = () => {
             />
           </TabsContent>
 
-          <TabsContent value="team">
-            <TeamManagement
-              teamMembers={teamMembers}
-              onAddTeamMember={addTeamMember}
-              onRemoveTeamMember={removeTeamMember}
-              onUpdateTeamMember={updateTeamMember}
-              onSave={handleSaveTeamMembers}
-            />
-          </TabsContent>
-
-          <TabsContent value="texts">
-            <MainTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={setPageTexts}
-              onSave={handleSavePageTexts}
-            />
-          </TabsContent>
-
-          <TabsContent value="areas">
-            <AreasTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={setPageTexts}
-              onSave={handleSavePageTexts}
+          <TabsContent value="blog">
+            <BlogManagement
+              blogPosts={initialBlogPosts}
+              onSave={handleSaveBlogPosts}
             />
           </TabsContent>
         </Tabs>
