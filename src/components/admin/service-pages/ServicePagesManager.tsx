@@ -19,6 +19,94 @@ interface ServicePagesManagerProps {
   onUpdatePageTexts: (texts: PageTexts) => void;
 }
 
+// Categorias específicas por área do direito
+const lawAreaCategories = {
+  familia: [
+    { id: 'casamento-uniao', title: 'Casamento e União Estável', description: 'Formalização e dissolução de relacionamentos' },
+    { id: 'divorcio-separacao', title: 'Divórcio e Separação', description: 'Assessoria completa em processos de divórcio consensual e litigioso' },
+    { id: 'guarda-filhos', title: 'Guarda de Filhos', description: 'Definição de guarda, visitação e questões relacionadas aos filhos' },
+    { id: 'pensao-alimenticia', title: 'Pensão Alimentícia', description: 'Fixação, revisão e execução de pensão alimentícia' },
+    { id: 'adocao', title: 'Adoção', description: 'Processo de adoção nacional e internacional' },
+    { id: 'protecao-menores', title: 'Proteção de Menores', description: 'Defesa dos direitos de crianças e adolescentes' },
+    { id: 'patrimonio-sucessoes', title: 'Patrimônio e Sucessões', description: 'Gestão patrimonial familiar, planejamento sucessório e resolução de questões hereditárias' },
+    { id: 'testamentos-sucessoes', title: 'Testamentos e Sucessões', description: 'Elaboração de testamentos e inventários' }
+  ],
+  tributario: [
+    { id: 'planejamento-tributario', title: 'Planejamento Tributário', description: 'Estratégias para redução legal da carga tributária' },
+    { id: 'elisao-fiscal', title: 'Elisão Fiscal', description: 'Técnicas legais de economia tributária' },
+    { id: 'consultoria-impostos', title: 'Consultoria em Impostos', description: 'Orientação especializada sobre tributação' },
+    { id: 'contencioso-tributario', title: 'Contencioso Tributário', description: 'Defesa em processos fiscais e administrativos' },
+    { id: 'recuperacao-creditos', title: 'Recuperação de Créditos', description: 'Recuperação de tributos pagos indevidamente' },
+    { id: 'parcelamento-debitos', title: 'Parcelamento de Débitos', description: 'Negociação e parcelamento de dívidas fiscais' },
+    { id: 'auditoria-tributaria', title: 'Auditoria Tributária', description: 'Revisão e conformidade fiscal' },
+    { id: 'compliance-tributario', title: 'Compliance Tributário', description: 'Adequação às normas tributárias' }
+  ],
+  empresarial: [
+    { id: 'constituicao-empresas', title: 'Constituição de Empresas', description: 'Abertura e estruturação societária' },
+    { id: 'contratos-empresariais', title: 'Contratos Empresariais', description: 'Elaboração e revisão de contratos comerciais' },
+    { id: 'fusoes-aquisicoes', title: 'Fusões e Aquisições', description: 'Assessoria em operações de M&A' },
+    { id: 'reestruturacao-societaria', title: 'Reestruturação Societária', description: 'Reorganização de estruturas empresariais' },
+    { id: 'governanca-corporativa', title: 'Governança Corporativa', description: 'Implementação de boas práticas de gestão' },
+    { id: 'compliance-empresarial', title: 'Compliance Empresarial', description: 'Conformidade regulatória e controles internos' },
+    { id: 'contencioso-empresarial', title: 'Contencioso Empresarial', description: 'Resolução de conflitos comerciais' },
+    { id: 'propriedade-intelectual', title: 'Propriedade Intelectual', description: 'Proteção de marcas, patentes e direitos autorais' }
+  ],
+  trabalho: [
+    { id: 'assessoria-trabalhista', title: 'Assessoria Trabalhista', description: 'Consultoria preventiva em relações de trabalho' },
+    { id: 'contencioso-trabalhista', title: 'Contencioso Trabalhista', description: 'Defesa em ações trabalhistas' },
+    { id: 'defesa-trabalhador', title: 'Defesa do Trabalhador', description: 'Proteção dos direitos dos empregados' },
+    { id: 'defesa-justa-causa', title: 'Defesa contra Justa Causa', description: 'Contestação de demissões por justa causa' },
+    { id: 'reconhecimento-vinculo', title: 'Reconhecimento de Vínculo', description: 'Formalização de relações de trabalho' },
+    { id: 'horas-extras', title: 'Horas Extras', description: 'Cobrança de horas extras e adicionais' },
+    { id: 'adicionais-insalubridade', title: 'Adicionais de Insalubridade', description: 'Cobrança de adicionais por condições insalubres' },
+    { id: 'acordos-coletivos', title: 'Acordos Coletivos', description: 'Negociação e implementação de acordos coletivos' }
+  ],
+  constitucional: [
+    { id: 'acoes-controle', title: 'Ações de Controle de Constitucionalidade', description: 'ADI, ADC, ADPF e outras ações constitucionais' },
+    { id: 'remedios-constitucionais', title: 'Remédios Constitucionais', description: 'Habeas Corpus, Mandado de Segurança, Habeas Data' },
+    { id: 'atuacao-tribunais-superiores', title: 'Atuação nos Tribunais Superiores', description: 'Representação no STF e STJ' },
+    { id: 'direitos-fundamentais', title: 'Direitos Fundamentais', description: 'Defesa de direitos e garantias constitucionais' },
+    { id: 'liberdades-publicas', title: 'Liberdades Públicas', description: 'Proteção das liberdades individuais e coletivas' },
+    { id: 'consultoria-constitucional', title: 'Consultoria Constitucional', description: 'Análise de constitucionalidade e pareceres' }
+  ],
+  administrativo: [
+    { id: 'licitacoes-contratos', title: 'Licitações e Contratos', description: 'Assessoria em processos licitatórios' },
+    { id: 'processos-administrativos', title: 'Processos Administrativos', description: 'Defesa em PAD e sindicâncias' },
+    { id: 'atos-administrativos', title: 'Atos Administrativos', description: 'Contestação e anulação de atos administrativos' },
+    { id: 'responsabilidade-estado', title: 'Responsabilidade do Estado', description: 'Ações indenizatórias contra o poder público' },
+    { id: 'improbidade-administrativa', title: 'Improbidade Administrativa', description: 'Defesa em ações de improbidade' },
+    { id: 'direitos-servidores', title: 'Direitos de Servidores', description: 'Defesa dos direitos dos servidores públicos' },
+    { id: 'desapropriacao', title: 'Desapropriação', description: 'Questões expropriatórias e indenizações' },
+    { id: 'direito-urbanistico', title: 'Direito Urbanístico', description: 'Regulamentação urbana e ambiental' }
+  ],
+  previdenciario: [
+    { id: 'beneficios-previdenciarios', title: 'Benefícios Previdenciários', description: 'Concessão e revisão de benefícios' },
+    { id: 'aposentadorias', title: 'Aposentadorias', description: 'Aposentadoria por idade, tempo e especial' },
+    { id: 'auxilio-doenca', title: 'Auxílio-Doença', description: 'Concessão e manutenção do benefício' },
+    { id: 'pensao-morte', title: 'Pensão por Morte', description: 'Concessão de pensão aos dependentes' },
+    { id: 'bpc-loas', title: 'BPC/LOAS', description: 'Benefício de Prestação Continuada' },
+    { id: 'revisao-beneficios', title: 'Revisão de Benefícios', description: 'Revisão da Vida Toda e outras revisões' },
+    { id: 'planejamento-previdenciario', title: 'Planejamento Previdenciário', description: 'Estratégias para maximizar benefícios' }
+  ],
+  consumidor: [
+    { id: 'direitos-consumidor', title: 'Direitos do Consumidor', description: 'Proteção integral dos direitos consumeristas' },
+    { id: 'contratos-consumo', title: 'Contratos de Consumo', description: 'Revisão e contestação de contratos' },
+    { id: 'praticas-abusivas', title: 'Práticas Abusivas', description: 'Combate a práticas comerciais abusivas' },
+    { id: 'publicidade-enganosa', title: 'Publicidade Enganosa', description: 'Ações contra propaganda enganosa' },
+    { id: 'responsabilidade-produtos', title: 'Responsabilidade por Produtos', description: 'Defeitos e vícios de produtos e serviços' },
+    { id: 'defesa-coletiva', title: 'Defesa Coletiva', description: 'Ações coletivas de consumidores' },
+    { id: 'indenizacao-danos', title: 'Indenização por Danos', description: 'Reparação de danos morais e materiais' }
+  ],
+  civil: [
+    { id: 'contratos-civil', title: 'Contratos', description: 'Elaboração, revisão e rescisão contratual' },
+    { id: 'responsabilidade-civil', title: 'Responsabilidade Civil', description: 'Ações de indenização por danos' },
+    { id: 'direito-propriedade', title: 'Direito de Propriedade', description: 'Questões imobiliárias e possessórias' },
+    { id: 'sucessoes-herancas', title: 'Sucessões e Heranças', description: 'Inventários e questões sucessórias' },
+    { id: 'direitos-personalidade', title: 'Direitos da Personalidade', description: 'Proteção da honra, imagem e privacidade' },
+    { id: 'obrigacoes-contratos', title: 'Obrigações e Contratos', description: 'Cumprimento e execução de obrigações' }
+  ]
+};
+
 export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ 
   servicePages, 
   pageTexts,
@@ -49,9 +137,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const filteredPagesByCategory = selectedCategory 
     ? filteredPagesByLawArea.filter(page => {
-        // Filtrar por categoria de serviço dentro da área do direito
-        const categoryTexts = pageTexts.categoryTexts?.find(cat => cat.id === selectedCategory);
-        return categoryTexts;
+        // Filtrar por categoria de serviço específica
+        return page.title?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+               page.description?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+               page.id?.includes(selectedCategory);
       })
     : [];
 
@@ -73,13 +162,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const addNewServicePage = () => {
     if (!selectedLawArea || !selectedCategory) return;
     
+    const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
+    
     const newId = `${selectedLawArea}-${selectedCategory}-${Date.now()}`;
     const newServicePage: ServicePage = {
       id: newId,
-      title: '',
-      description: '',
+      title: categoryInfo?.title || '',
+      description: categoryInfo?.description || '',
       category: selectedLawArea,
-      href: '',
+      href: `/servicos/${selectedCategory}`,
       benefits: [],
       process: [],
       faq: [],
@@ -202,7 +293,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Nível 2: Seleção da Categoria de Serviço dentro da Área
   if (selectedLawArea && !selectedCategory) {
     const lawAreaInfo = categories.find(c => c.value === selectedLawArea);
-    const availableCategories = pageTexts.categoryTexts || [];
+    const availableCategories = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories] || [];
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -222,10 +313,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               </CardTitle>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
-                Gerenciar Categorias
-              </Button>
               <Button onClick={handleSave} size="sm" variant="outline">
                 <Save className="w-4 h-4 mr-2" />
                 Salvar Tudo
@@ -234,49 +321,38 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          {availableCategories.length === 0 ? (
-            <div className="text-center py-8">
-              <p className={`text-lg mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Nenhuma categoria de serviço criada ainda.
-              </p>
-              <Button onClick={() => setShowCategoryEditor(true)} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Primeira Categoria
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {availableCategories.map((category) => {
-                const categoryPages = filteredPagesByLawArea.filter(page => 
-                  page.title?.toLowerCase().includes(category.title.toLowerCase()) ||
-                  page.description?.toLowerCase().includes(category.title.toLowerCase())
-                );
-                
-                return (
-                  <Card 
-                    key={category.id}
-                    className={`cursor-pointer transition-all hover:scale-105 ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
-                    onClick={() => setSelectedCategory(category.id)}
-                  >
-                    <CardContent className="p-6 text-center">
-                      <div className={`w-12 h-12 rounded-full ${lawAreaInfo?.color} mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl`}>
-                        {categoryPages.length}
-                      </div>
-                      <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                        {category.title}
-                      </h3>
-                      <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {category.description}
-                      </p>
-                      <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {categoryPages.length} página{categoryPages.length !== 1 ? 's' : ''}
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {availableCategories.map((category) => {
+              const categoryPages = filteredPagesByLawArea.filter(page => 
+                page.title?.toLowerCase().includes(category.title.toLowerCase()) ||
+                page.description?.toLowerCase().includes(category.title.toLowerCase()) ||
+                page.id?.includes(category.id)
+              );
+              
+              return (
+                <Card 
+                  key={category.id}
+                  className={`cursor-pointer transition-all hover:scale-105 ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-gray-50 border-gray-200 hover:border-gray-400'}`}
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className={`w-12 h-12 rounded-full ${lawAreaInfo?.color} mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl`}>
+                      {categoryPages.length}
+                    </div>
+                    <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                      {category.title}
+                    </h3>
+                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {category.description}
+                    </p>
+                    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {categoryPages.length} página{categoryPages.length !== 1 ? 's' : ''}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
     );
@@ -285,7 +361,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Nível 3: Lista de Páginas dentro da Categoria
   if (selectedLawArea && selectedCategory && !selectedPageId) {
     const lawAreaInfo = categories.find(c => c.value === selectedLawArea);
-    const categoryInfo = pageTexts.categoryTexts?.find(cat => cat.id === selectedCategory);
+    const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -331,7 +407,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Nível 4: Editor da Página
   if (selectedPage) {
     const lawAreaInfo = categories.find(c => c.value === selectedLawArea);
-    const categoryInfo = pageTexts.categoryTexts?.find(cat => cat.id === selectedCategory);
+    const categoryInfo = lawAreaCategories[selectedLawArea as keyof typeof lawAreaCategories]?.find(cat => cat.id === selectedCategory);
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
