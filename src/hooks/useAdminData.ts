@@ -6,6 +6,68 @@ import { defaultSpecializedServices } from '../data/defaultSpecializedServices';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { defaultServicePages } from '../data/defaultServicePages';
 
+// Função para popular páginas vazias com dados de exemplo
+const populateEmptyPages = (pages: ServicePage[]): ServicePage[] => {
+  return pages.map(page => {
+    // Se a página já tem dados, manter como está
+    if (page.benefits.length > 0 || page.process.length > 0 || page.faq.length > 0) {
+      return page;
+    }
+    
+    // Se está vazia, popular com dados de exemplo
+    return {
+      ...page,
+      benefits: page.benefits.length === 0 ? [
+        {
+          title: "Proteção de Direitos",
+          description: "Garantimos a proteção completa dos seus direitos legais."
+        },
+        {
+          title: "Assessoria Especializada",
+          description: "Nossa equipe oferece assessoria jurídica especializada na área."
+        },
+        {
+          title: "Acompanhamento Completo",
+          description: "Acompanhamos todo o processo do início ao fim."
+        }
+      ] : page.benefits,
+      process: page.process.length === 0 ? [
+        {
+          step: 1,
+          title: "Consulta Inicial",
+          description: "Avaliamos seu caso e definimos a melhor estratégia."
+        },
+        {
+          step: 2,
+          title: "Documentação",
+          description: "Preparamos toda a documentação necessária."
+        },
+        {
+          step: 3,
+          title: "Acompanhamento",
+          description: "Acompanhamos o processo até a conclusão."
+        }
+      ] : page.process,
+      faq: page.faq.length === 0 ? [
+        {
+          question: "Quanto tempo demora o processo?",
+          answer: "O tempo varia conforme a complexidade do caso, mas mantemos você informado a cada etapa."
+        },
+        {
+          question: "Quais documentos são necessários?",
+          answer: "Orientamos sobre todos os documentos necessários durante a consulta inicial."
+        }
+      ] : page.faq,
+      testimonials: page.testimonials.length === 0 ? [
+        {
+          name: "Cliente Satisfeito",
+          quote: "Excelente atendimento e resultado positivo no meu caso."
+        }
+      ] : page.testimonials
+    };
+  });
+};
+
 export const useAdminData = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
@@ -45,12 +107,12 @@ export const useAdminData = () => {
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
       }
 
-      // Carregar páginas de serviços - SEMPRE usar as páginas padrão como base
+      // Carregar páginas de serviços
       console.log('Carregando páginas de serviço...');
       console.log('Páginas padrão disponíveis:', defaultServicePages.length);
       
       const savedServicePages = localStorage.getItem('adminServicePages');
-      let finalPages = [...defaultServicePages]; // Sempre começar com as páginas padrão
+      let finalPages = [...defaultServicePages];
       
       if (savedServicePages) {
         try {
@@ -58,15 +120,15 @@ export const useAdminData = () => {
           console.log('Páginas salvas encontradas:', parsedServicePages.length);
           
           if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
-            // Mesclar as páginas salvas com as padrão (páginas salvas têm prioridade)
+            // Mesclar as páginas salvas com as padrão
             const savedIds = new Set(parsedServicePages.map((page: ServicePage) => page.id));
             
-            // Manter páginas editadas salvas
+            // Páginas editadas que existem nas padrão
             const editedPages = parsedServicePages.filter((page: ServicePage) => 
               defaultServicePages.some(defaultPage => defaultPage.id === page.id)
             );
             
-            // Manter páginas novas criadas
+            // Páginas novas criadas pelo usuário
             const newPages = parsedServicePages.filter((page: ServicePage) => 
               !defaultServicePages.some(defaultPage => defaultPage.id === page.id)
             );
@@ -82,6 +144,9 @@ export const useAdminData = () => {
           finalPages = [...defaultServicePages];
         }
       }
+      
+      // Popular páginas vazias com dados de exemplo
+      finalPages = populateEmptyPages(finalPages);
       
       console.log('Total de páginas finais:', finalPages.length);
       setServicePages(finalPages);
@@ -102,7 +167,9 @@ export const useAdminData = () => {
       console.error('Erro ao carregar dados do admin:', error);
       setTeamMembers(defaultTeamMembers);
       setSpecializedServices(defaultSpecializedServices);
-      setServicePages(defaultServicePages);
+      // Popular as páginas padrão com dados de exemplo em caso de erro
+      const populatedPages = populateEmptyPages([...defaultServicePages]);
+      setServicePages(populatedPages);
       setPageTexts(defaultPageTexts);
     }
     
