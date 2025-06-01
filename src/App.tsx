@@ -3,10 +3,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/ThemeProvider';
-import Home from './pages/Index';
+import Index from './pages/Index';
 import Login from './pages/Login';
-import Register from './pages/Login';
-import Dashboard from './pages/Admin';
 import Admin from './pages/Admin';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
@@ -25,10 +23,10 @@ function App() {
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/register" element={<Login />} />
+              <Route path="/dashboard" element={<Admin />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/automation" element={<BlogAutomation />} />
