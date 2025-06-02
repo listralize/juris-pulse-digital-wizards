@@ -41,7 +41,7 @@ export const useSectionTransition = (sections: Section[]) => {
       // Completely disable custom wheel handling for scrollable sections
       if (activeSection === 'contact' || activeSection === 'socios') {
         console.log('Allowing normal scroll for section:', activeSection);
-        return;
+        return; // Don't prevent default, allow normal scrolling
       }
       
       // Check if we're inside any scrollable container
@@ -54,7 +54,7 @@ export const useSectionTransition = (sections: Section[]) => {
       
       if (scrollableParent) {
         console.log('Found scrollable parent, allowing normal scroll');
-        return;
+        return; // Don't prevent default, allow normal scrolling
       }
       
       if (isScrolling || isTransitioning) return;
@@ -83,8 +83,10 @@ export const useSectionTransition = (sections: Section[]) => {
       }, 1000);
     };
 
-    // Add wheel event listener but allow it to be bypassed for scrollable sections
-    document.addEventListener('wheel', handleWheel, { passive: false });
+    // Only add wheel event listener for non-scrollable sections
+    if (activeSection !== 'contact' && activeSection !== 'socios') {
+      document.addEventListener('wheel', handleWheel, { passive: false });
+    }
     
     return () => {
       document.removeEventListener('wheel', handleWheel);
