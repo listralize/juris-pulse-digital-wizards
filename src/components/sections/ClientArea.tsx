@@ -113,6 +113,9 @@ const ClientArea = () => {
     );
   }
 
+  const whatsappNumber = pageTexts.contactTexts.whatsapp || '5562994594496';
+  const clientPortalLink = pageTexts.clientPortalLink || '#';
+
   return (
     <section 
       id="cliente" 
@@ -151,7 +154,7 @@ const ClientArea = () => {
             <div className="flex flex-col space-y-4">
               <a 
                 ref={button1Ref}
-                href="#" 
+                href={clientPortalLink} 
                 className={`group relative overflow-hidden rounded-xl ${isDark ? 'bg-white text-black' : 'bg-black text-white'} px-8 py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center`}
               >
                 <span className="absolute inset-0 w-0 bg-gradient-to-r from-gray-200 to-gray-300 transition-all duration-500 ease-out group-hover:w-full"></span>
@@ -162,7 +165,7 @@ const ClientArea = () => {
               
               <a 
                 ref={button2Ref}
-                href="https://api.whatsapp.com/send?phone=5562994594496" 
+                href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`group relative overflow-hidden rounded-xl border ${isDark 

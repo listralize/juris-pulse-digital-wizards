@@ -98,8 +98,10 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Imagem de Fundo do Hero</Label>
                 <Input
-                  placeholder="URL da imagem de fundo"
+                  value={pageTexts.heroBackgroundImage || ''}
+                  onChange={(e) => onUpdatePageTexts({...pageTexts, heroBackgroundImage: e.target.value})}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="URL da imagem de fundo"
                 />
                 <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Cole a URL da imagem ou faça upload para /lovable-uploads/
@@ -132,8 +134,10 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Imagem da Seção Sobre</Label>
                 <Input
-                  placeholder="URL da imagem"
+                  value={pageTexts.aboutImage || ''}
+                  onChange={(e) => onUpdatePageTexts({...pageTexts, aboutImage: e.target.value})}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="URL da imagem"
                 />
               </div>
             </div>
@@ -204,6 +208,114 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <Textarea
                       value={pageTexts.empresarialDescription}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, empresarialDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Direito Civil - Título</Label>
+                    <Input
+                      value={pageTexts.civilTitle || 'Direito Civil'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, civilTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito Civil - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.civilDescription || 'Proteção de direitos e interesses individuais'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, civilDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Direito Trabalhista - Título</Label>
+                    <Input
+                      value={pageTexts.trabalhistaTitle || 'Direito do Trabalho'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhistaTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito Trabalhista - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.trabalhistaDescription || 'Defesa dos direitos trabalhistas'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhistaDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Direito Previdenciário - Título</Label>
+                    <Input
+                      value={pageTexts.previdenciarioTitle || 'Direito Previdenciário'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, previdenciarioTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito Previdenciário - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.previdenciarioDescription || 'Benefícios e aposentadorias'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, previdenciarioDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Direito do Consumidor - Título</Label>
+                    <Input
+                      value={pageTexts.consumidorTitle || 'Direito do Consumidor'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, consumidorTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito do Consumidor - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.consumidorDescription || 'Proteção e defesa do consumidor'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, consumidorDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Direito Constitucional - Título</Label>
+                    <Input
+                      value={pageTexts.constitucionalTitle || 'Direito Constitucional'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, constitucionalTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito Constitucional - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.constitucionalDescription || 'Direitos fundamentais e constitucionalidade'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, constitucionalDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Direito Administrativo - Título</Label>
+                    <Input
+                      value={pageTexts.administrativoTitle || 'Direito Administrativo'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, administrativoTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito Administrativo - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.administrativoDescription || 'Relações com a administração pública'}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, administrativoDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       rows={2}
                     />
@@ -324,9 +436,26 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Link do Portal do Cliente</Label>
                 <Input
-                  placeholder="https://portal.escritorio.com"
+                  value={pageTexts.clientPortalLink || ''}
+                  onChange={(e) => onUpdatePageTexts({...pageTexts, clientPortalLink: e.target.value})}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="https://portal.escritorio.com"
                 />
+              </div>
+              <div>
+                <Label>Link do WhatsApp para Primeiro Acesso</Label>
+                <Input
+                  value={pageTexts.contactTexts.whatsapp}
+                  onChange={(e) => onUpdatePageTexts({
+                    ...pageTexts, 
+                    contactTexts: {...pageTexts.contactTexts, whatsapp: e.target.value}
+                  })}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="5562994594496"
+                />
+                <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Apenas números, sem espaços ou símbolos
+                </p>
               </div>
             </div>
           </TabsContent>
@@ -360,6 +489,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     contactTexts: {...pageTexts.contactTexts, phone: e.target.value}
                   })}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="(11) 9999-9999"
                 />
               </div>
               <div>
@@ -371,9 +501,10 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     contactTexts: {...pageTexts.contactTexts, email: e.target.value}
                   })}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="contato@exemplo.com"
                 />
               </div>
-              <div>
+              <div className="md:col-span-2">
                 <Label>Endereço</Label>
                 <Input
                   value={pageTexts.contactTexts.address}
@@ -382,10 +513,11 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     contactTexts: {...pageTexts.contactTexts, address: e.target.value}
                   })}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Rua Exemplo, 123 - São Paulo, SP"
                 />
               </div>
               <div>
-                <Label>WhatsApp</Label>
+                <Label>WhatsApp (números apenas)</Label>
                 <Input
                   value={pageTexts.contactTexts.whatsapp}
                   onChange={(e) => onUpdatePageTexts({
@@ -406,6 +538,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     footerTexts: {...pageTexts.footerTexts, companyName: e.target.value}
                   })}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Serafim & Trombela Advocacia"
                 />
               </div>
               
@@ -419,6 +552,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   })}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   rows={2}
+                  placeholder="Soluções jurídicas inovadoras com foco em resultados..."
                 />
               </div>
             </div>
