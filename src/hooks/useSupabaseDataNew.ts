@@ -410,18 +410,24 @@ export const useSupabaseDataNew = () => {
     }
   };
 
-  // Salvar categorias com sincronização automática - TOTALMENTE REFEITA E OTIMIZADO
+  // Salvar categorias com sincronização automática - CORRIGIDO PARA EVITAR CONFLITOS
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
-      console.log('💾 🔥 SALVANDO CATEGORIAS - VERSÃO DEFINITIVA:', cats.length);
+      console.log('💾 🔥 SALVANDO CATEGORIAS - VERSÃO ANTI-CONFLITO:', cats.length);
       
-      // 1. Desativar categorias existentes
-      await supabase
+      // 1. DELETAR TODAS as categorias existentes primeiro (não apenas desativar)
+      console.log('🗑️ Deletando todas as categorias existentes...');
+      const { error: deleteError } = await supabase
         .from('law_categories')
-        .update({ is_active: false })
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todas as categorias reais
 
-      console.log('✅ Categorias existentes desativadas');
+      if (deleteError) {
+        console.error('❌ Erro ao deletar categorias:', deleteError);
+        throw deleteError;
+      }
+
+      console.log('✅ Todas as categorias deletadas');
 
       // 2. Processar e validar cada categoria
       const categoryData = cats.map((cat, index) => {
@@ -456,24 +462,19 @@ export const useSupabaseDataNew = () => {
 
       console.log('📋 Dados das categorias processados:', categoryData);
 
-      // 3. Inserir categorias uma por uma para debug
-      for (let i = 0; i < categoryData.length; i++) {
-        const catData = categoryData[i];
-        console.log(`🔄 Inserindo categoria ${i + 1}/${categoryData.length}:`, catData);
-        
-        const { data: insertedCat, error: insertError } = await supabase
-          .from('law_categories')
-          .upsert(catData)
-          .select()
-          .single();
+      // 3. Inserir todas as categorias de uma vez
+      console.log('📥 Inserindo todas as categorias...');
+      const { data: insertedData, error: insertError } = await supabase
+        .from('law_categories')
+        .insert(categoryData)
+        .select();
 
-        if (insertError) {
-          console.error(`❌ Erro ao inserir categoria ${i + 1}:`, insertError);
-          console.error('❌ Dados da categoria problemática:', catData);
-        } else {
-          console.log(`✅ Categoria ${i + 1} inserida:`, insertedCat);
-        }
+      if (insertError) {
+        console.error('❌ Erro ao inserir categorias:', insertError);
+        throw insertError;
       }
+
+      console.log('✅ Todas as categorias inseridas:', insertedData?.length);
 
       // 4. Atualizar estado local com dados corretos
       const updatedCategories = categoryData.map(cat => ({
