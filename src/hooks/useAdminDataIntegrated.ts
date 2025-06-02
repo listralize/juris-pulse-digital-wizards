@@ -38,33 +38,55 @@ export const useAdminDataIntegrated = () => {
   // Auto-migração quando há dados locais mas Supabase está vazio
   useEffect(() => {
     const autoMigrate = async () => {
-      if (supabaseLoading || hasMigrated) return;
+      if (supabaseLoading || hasMigrated || isTransitioning) return;
       
-      const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0;
-      const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0;
+      const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
+      const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
+      
+      console.log('Verificando migração:', {
+        hasLocalData,
+        hasSupabaseData,
+        localPages: localServicePages.length,
+        supabasePages: supabaseServicePages.length,
+        localTeam: localTeamMembers.length,
+        supabaseTeam: supabaseTeamMembers.length
+      });
       
       if (hasLocalData && !hasSupabaseData) {
         console.log('Iniciando migração automática dos dados para Supabase...');
         setIsTransitioning(true);
         
         try {
-          // Migrar em sequência para evitar problemas
-          console.log('Migrando configurações...');
-          await saveSupabasePageTexts(localPageTexts);
+          // Migrar configurações primeiro
+          if (localPageTexts.heroTitle) {
+            console.log('Migrando configurações...');
+            await saveSupabasePageTexts(localPageTexts);
+          }
           
-          console.log('Migrando categorias...');
-          await saveSupabaseCategories(localCategories);
+          // Migrar categorias
+          if (localCategories.length > 0) {
+            console.log('Migrando categorias...', localCategories.length);
+            await saveSupabaseCategories(localCategories);
+          }
           
-          console.log('Migrando equipe...');
-          await saveSupabaseTeamMembers(localTeamMembers);
+          // Migrar equipe
+          if (localTeamMembers.length > 0) {
+            console.log('Migrando equipe...', localTeamMembers.length);
+            await saveSupabaseTeamMembers(localTeamMembers);
+          }
           
-          console.log('Migrando páginas de serviços...');
-          await saveSupabaseServicePages(localServicePages);
+          // Migrar páginas de serviços (mais importante)
+          if (localServicePages.length > 0) {
+            console.log('Migrando páginas de serviços...', localServicePages.length);
+            await saveSupabaseServicePages(localServicePages);
+          }
           
+          // Aguardar um pouco e recarregar
+          await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshData();
-          setHasMigrated(true);
           
-          toast.success('Dados migrados automaticamente para o Supabase!');
+          setHasMigrated(true);
+          toast.success(`Dados migrados com sucesso! ${localServicePages.length} páginas, ${localTeamMembers.length} membros da equipe e ${localCategories.length} categorias.`);
           console.log('Migração automática concluída com sucesso');
         } catch (error) {
           console.error('Erro na migração automática:', error);
@@ -72,23 +94,30 @@ export const useAdminDataIntegrated = () => {
         } finally {
           setIsTransitioning(false);
         }
+      } else if (hasSupabaseData) {
+        setHasMigrated(true);
       }
     };
 
-    autoMigrate();
+    // Delay para garantir que os dados estejam carregados
+    const timer = setTimeout(autoMigrate, 2000);
+    return () => clearTimeout(timer);
   }, [
     supabaseLoading, 
     localTeamMembers.length, 
     localServicePages.length, 
     localCategories.length,
+    localPageTexts.heroTitle,
     supabaseTeamMembers.length,
     supabaseServicePages.length,
     supabaseCategories.length,
-    hasMigrated
+    supabasePageTexts.heroTitle,
+    hasMigrated,
+    isTransitioning
   ]);
 
   // Determinar qual fonte de dados usar
-  const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0;
+  const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
   const useSupabaseData = hasSupabaseData;
 
   // Dados finais (Supabase tem prioridade se disponível)

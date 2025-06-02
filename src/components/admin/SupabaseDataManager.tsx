@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Database, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { Database, RefreshCw, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useAdminData } from '../../hooks/useAdminData';
@@ -28,8 +28,31 @@ export const SupabaseDataManager: React.FC = () => {
     refreshData
   } = useSupabaseDataNew();
 
-  const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0;
-  const hasSupabaseData = supabaseTeamMembers.length > 0 || supabaseServicePages.length > 0 || supabaseCategories.length > 0;
+  const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
+  const hasSupabaseData = supabaseTeamMembers.length > 0 || supabaseServicePages.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
+
+  // Status real da migração
+  const migrationStatus = () => {
+    if (hasSupabaseData && hasLocalData) {
+      // Verificar se os números batem
+      const localTotal = localServicePages.length + localTeamMembers.length + localCategories.length;
+      const supabaseTotal = supabaseServicePages.length + supabaseTeamMembers.length + supabaseCategories.length;
+      
+      if (supabaseTotal >= localTotal * 0.8) { // 80% ou mais migrado
+        return 'completed';
+      } else {
+        return 'partial';
+      }
+    } else if (hasSupabaseData && !hasLocalData) {
+      return 'completed';
+    } else if (hasLocalData && !hasSupabaseData) {
+      return 'pending';
+    } else {
+      return 'empty';
+    }
+  };
+
+  const status = migrationStatus();
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -40,7 +63,7 @@ export const SupabaseDataManager: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {hasSupabaseData ? (
+        {status === 'completed' ? (
           <div className={`p-4 rounded-lg border ${isDark ? 'border-green-500/20 bg-green-500/10' : 'border-green-500/20 bg-green-50'}`}>
             <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-700'}`}>
               <CheckCircle className="w-4 h-4" />
@@ -51,15 +74,26 @@ export const SupabaseDataManager: React.FC = () => {
               na estrutura hierárquica. Todas as edições são automaticamente sincronizadas.
             </p>
           </div>
-        ) : hasLocalData ? (
+        ) : status === 'partial' ? (
+          <div className={`p-4 rounded-lg border ${isDark ? 'border-orange-500/20 bg-orange-500/10' : 'border-orange-500/20 bg-orange-50'}`}>
+            <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-orange-400' : 'text-orange-700'}`}>
+              <Clock className="w-4 h-4" />
+              Migração Parcial
+            </h3>
+            <p className={`text-sm ${isDark ? 'text-orange-200' : 'text-orange-600'}`}>
+              Alguns dados foram migrados, mas ainda há inconsistências. 
+              Verifique os números abaixo e clique em "Recarregar Dados" se necessário.
+            </p>
+          </div>
+        ) : status === 'pending' ? (
           <div className={`p-4 rounded-lg border ${isDark ? 'border-yellow-500/20 bg-yellow-500/10' : 'border-yellow-500/20 bg-yellow-50'}`}>
             <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-yellow-400' : 'text-yellow-700'}`}>
               <AlertCircle className="w-4 h-4" />
-              Migração em Andamento
+              Migração Pendente
             </h3>
             <p className={`text-sm ${isDark ? 'text-yellow-200' : 'text-yellow-600'}`}>
-              Detectamos dados no localStorage que estão sendo migrados automaticamente para o Supabase. 
-              Este processo pode levar alguns segundos.
+              Detectamos dados no localStorage que precisam ser migrados para o Supabase. 
+              A migração deve ocorrer automaticamente em alguns segundos.
             </p>
           </div>
         ) : (
@@ -110,18 +144,29 @@ export const SupabaseDataManager: React.FC = () => {
               <li>• ✅ Sincronização automática entre sessões</li>
               <li>• ✅ Histórico de alterações e versionamento</li>
             </ul>
-            
-            <Button 
-              onClick={refreshData}
-              size="sm" 
-              variant="outline"
-              className="mt-3"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Recarregar Dados
-            </Button>
           </div>
         )}
+        
+        <div className="flex gap-2">
+          <Button 
+            onClick={refreshData}
+            size="sm" 
+            variant="outline"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Recarregar Dados
+          </Button>
+          
+          {status === 'pending' && (
+            <Button 
+              onClick={() => window.location.reload()}
+              size="sm" 
+              variant="default"
+            >
+              Forçar Migração
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
