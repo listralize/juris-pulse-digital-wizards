@@ -19,7 +19,7 @@ const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
 export function ThemeProvider({ 
   children, 
-  defaultTheme = 'dark',
+  defaultTheme = 'light',
   storageKey = 'theme' 
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -31,8 +31,8 @@ export function ThemeProvider({
       }
     }
     
-    // Always default to dark theme
-    return 'dark';
+    // Default to light theme instead of dark
+    return 'light';
   });
   
   // Update document class and localStorage when theme changes
@@ -42,17 +42,19 @@ export function ThemeProvider({
       
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
-        document.documentElement.style.backgroundColor = '#000000'; // Pure black background for dark mode
+        document.documentElement.classList.remove('light');
+        document.documentElement.style.backgroundColor = '#000000';
         document.documentElement.style.color = '#FFFFFF';
-        document.body.style.backgroundColor = '#000000'; // Pure black background for dark mode
+        document.body.style.backgroundColor = '#000000';
         document.body.style.color = '#FFFFFF';
         document.body.classList.add('dark');
         document.body.classList.remove('light');
       } else {
         document.documentElement.classList.remove('dark');
-        document.documentElement.style.backgroundColor = '#FFFFFF'; // White background for light mode
+        document.documentElement.classList.add('light');
+        document.documentElement.style.backgroundColor = '#f5f5f5';
         document.documentElement.style.color = '#000000';
-        document.body.style.backgroundColor = '#FFFFFF'; // White background for light mode
+        document.body.style.backgroundColor = '#f5f5f5';
         document.body.style.color = '#000000';
         document.body.classList.add('light');
         document.body.classList.remove('dark');
@@ -60,22 +62,17 @@ export function ThemeProvider({
     }
   }, [theme, storageKey]);
 
-  // Force dark theme on initial load
+  // Initialize with light theme on first load
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Set dark theme immediately
-      document.documentElement.classList.add('dark');
-      document.documentElement.style.backgroundColor = '#000000';
-      document.documentElement.style.color = '#FFFFFF';
-      document.body.style.backgroundColor = '#000000';
-      document.body.style.color = '#FFFFFF';
-      document.body.classList.add('dark');
-      document.body.classList.remove('light');
-      
-      // Save dark as default
-      localStorage.setItem(storageKey, 'dark');
+      // Set light theme by default
+      const savedTheme = localStorage.getItem(storageKey);
+      if (!savedTheme) {
+        setTheme('light');
+        localStorage.setItem(storageKey, 'light');
+      }
     }
-  }, []);
+  }, [storageKey]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');

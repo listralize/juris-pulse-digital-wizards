@@ -21,16 +21,18 @@ const Index = () => {
     if (isDark) {
       document.body.classList.add('dark');
       document.body.classList.remove('light');
+      document.documentElement.style.backgroundColor = '#000000';
+      document.documentElement.style.color = '#FFFFFF';
+      document.body.style.backgroundColor = '#000000';
+      document.body.style.color = '#FFFFFF';
     } else {
       document.body.classList.add('light');
       document.body.classList.remove('dark');
+      document.documentElement.style.backgroundColor = '#f5f5f5';
+      document.documentElement.style.color = '#000000';
+      document.body.style.backgroundColor = '#f5f5f5';
+      document.body.style.color = '#000000';
     }
-    
-    // Force reload theme colors on document
-    document.documentElement.style.backgroundColor = isDark ? '#000000' : '#ffffff';
-    document.documentElement.style.color = isDark ? '#FFFFFF' : '#000000';
-    document.body.style.backgroundColor = isDark ? '#000000' : '#ffffff';
-    document.body.style.color = isDark ? '#FFFFFF' : '#000000';
   }, [isDark]);
   
   // Disable default scroll and enable custom navigation
@@ -50,7 +52,7 @@ const Index = () => {
   }, []);
   
   return (
-    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500 overflow-hidden`}>
+    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500 overflow-hidden`}>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
