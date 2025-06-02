@@ -28,84 +28,51 @@ const SectionsContainer: React.FC = () => {
   
   const { transitionToSection, sectionsRef } = useSectionTransition(sections);
   
-  // Load home section on first render and handle navigation
+  // Handle hash changes for navigation
   useEffect(() => {
-    // Force scroll to top on initial load if no hash
-    const hash = window.location.hash.substring(1);
-    console.log('Initial hash:', hash);
-    
-    if (!hash || hash === 'home') {
-      window.scrollTo(0, 0);
-      setActiveSection('home');
-      
-      // Make sure URL has #home hash
-      if (history.pushState && hash !== 'home') {
-        history.pushState(null, '', '#home');
-      }
-    } else {
-      // Try to scroll to the section corresponding to the hash
-      const sectionElement = document.getElementById(hash);
-      console.log('Found section for hash:', hash, sectionElement);
-      if (sectionElement) {
-        setTimeout(() => {
-          sectionElement.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+    const handleHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && sections.find(s => s.id === hash)) {
         setActiveSection(hash);
+      } else {
+        setActiveSection('home');
       }
-    }
-  }, []);
-  
-  useEffect(() => {
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
-          const sectionId = entry.target.id;
-          console.log('Section intersecting:', sectionId);
-          setActiveSection(sectionId);
-          
-          // Update URL without reloading
-          if (history.pushState && window.location.hash !== `#${sectionId}`) {
-            history.pushState(null, '', `#${sectionId}`);
-          }
-        }
-      });
     };
     
-    const options = {
-      root: null,
-      rootMargin: '-20% 0px -20% 0px',
-      threshold: 0.3,
-    };
+    // Set initial section
+    handleHashChange();
     
-    const observer = new IntersectionObserver(handleIntersection, options);
-    
-    sectionsRef.current.forEach((section) => {
-      if (section) {
-        console.log('Observing section:', section.id);
-        observer.observe(section);
-      }
-    });
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
     
     return () => {
-      sectionsRef.current.forEach((section) => {
-        if (section) observer.unobserve(section);
-      });
+      window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [sectionsRef]);
+  }, []);
+
+  // Override body scroll
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    };
+  }, []);
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative w-full h-screen overflow-hidden">
       {sections.map((section, index) => {
         const Component = section.component;
         return (
           <Section 
             key={section.id} 
             id={section.id} 
-            isActive={true}
+            isActive={activeSection === section.id}
             ref={el => {
               if (el) {
                 sectionsRef.current[index] = el;
-                console.log('Section ref set:', section.id, el);
               }
             }}
             className={section.id === 'contact' ? 'pb-0' : ''}

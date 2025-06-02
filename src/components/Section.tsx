@@ -20,17 +20,22 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         ref={ref}
         className={`section-container w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
         style={{ 
-          opacity: 1, 
-          pointerEvents: 'auto', 
-          position: 'relative', 
-          transition: 'opacity 500ms ease, transform 500ms ease, background-color 500ms ease',
+          opacity: isActive ? 1 : 0,
+          pointerEvents: isActive ? 'auto' : 'none',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: isActive ? 10 : 1,
+          transition: 'opacity 500ms ease',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          height: '100vh', // Força altura total da tela
-          maxHeight: '100vh', // Limita altura máxima
-          overflow: 'hidden', // Evita scroll interno
-          padding: id === 'contact' ? '60px 0 20px 0' : '0' // Padding específico para contact
+          height: '100vh',
+          maxHeight: '100vh',
+          overflow: 'hidden',
+          padding: id === 'contact' ? '60px 0 20px 0' : '0'
         }}
       >
         {children}

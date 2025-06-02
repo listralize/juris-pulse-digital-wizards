@@ -2,7 +2,6 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronDown } from 'lucide-react';
 
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
@@ -22,50 +21,33 @@ const Contact = () => {
   const { pageTexts } = useAdminData();
   
   useEffect(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 80%",
-      }
-    });
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     tl.fromTo(
       titleRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6 }
+      { opacity: 1, y: 0, duration: 0.8 }
     ).fromTo(
       contentRef.current,
       { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.6 },
-      "-=0.3"
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.4"
     );
     
     return () => {
-      if (tl.scrollTrigger) {
-        tl.scrollTrigger.kill();
-      }
+      tl.kill();
     };
   }, []);
 
-  const scrollToNext = () => {
-    if (window) {
-      window.scrollBy({
-        top: window.innerHeight * 0.5,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   return (
-    <section 
-      id="contact" 
+    <div 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} pt-32 pb-24 transition-colors duration-500`}
-      style={{ paddingTop: '140px' }}
+      className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto`}
+      style={{ paddingTop: '80px', paddingBottom: '20px' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={titleRef} className="mb-12 relative z-10">
-          <h2 className={`text-3xl md:text-4xl font-canela overflow-visible ${isDark ? 'text-white' : 'text-black'}`}>
+        <div ref={titleRef} className="mb-8">
+          <h2 className={`text-3xl md:text-4xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             {pageTexts.contactTitle}
           </h2>
           <div className={`w-20 h-1 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
@@ -76,37 +58,28 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-8 overflow-visible"
+          className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8"
         >
-          {/* Map and Contact info stacked - left side (smaller) */}
           <div className="lg:col-span-2 space-y-4 flex flex-col">
-            {/* Map - smaller and horizontal */}
             <div className="w-full">
-              <div className="h-64 lg:h-72">
+              <div className="h-48 lg:h-56">
                 <LocationMap />
               </div>
             </div>
             
-            {/* Contact info - smaller and aligned with form */}
             <div className="w-full flex-1">
               <ContactInfo />
             </div>
           </div>
           
-          {/* Contact form - larger and more prominent */}
           <div className="lg:col-span-3 flex">
             <div className="w-full">
               <UnifiedContactForm />
             </div>
           </div>
         </div>
-        
-        {/* Scroll indicator */}
-        <div className="flex justify-center mt-8 mb-6 animate-bounce cursor-pointer" onClick={scrollToNext}>
-          <ChevronDown size={24} className={`${isDark ? 'text-white/50' : 'text-black/50'}`} />
-        </div>
       </div>
-    </section>
+    </div>
   );
 };
 
