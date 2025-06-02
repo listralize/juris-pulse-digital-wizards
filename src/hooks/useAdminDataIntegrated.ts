@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { TeamMember, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
 import { useSupabaseDataNew } from './useSupabaseDataNew';
@@ -79,25 +80,21 @@ export const useAdminDataIntegrated = () => {
         console.log('✅ Categorias migradas e dados recarregados');
       }
       
-      // ETAPA 2: MIGRAÇÃO FORÇADA DAS PÁGINAS - NOVA LÓGICA
+      // ETAPA 2: MIGRAÇÃO FORÇADA DAS PÁGINAS - NOVA LÓGICA CORRIGIDA
       if (localServicePages.length > 0) {
         console.log('📄 ETAPA 2: Migrando páginas de serviços...');
         console.log(`📄 Total de páginas a migrar: ${localServicePages.length}`);
         
-        // Buscar categorias atualizadas do Supabase para fazer a vinculação
-        const { categories: currentSupabaseCategories } = await new Promise(resolve => {
-          setTimeout(async () => {
-            await refreshData();
-            resolve({ categories: supabaseCategories });
-          }, 1000);
-        });
+        // Aguardar um pouco mais para garantir que as categorias foram carregadas
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await refreshData();
         
-        console.log('📂 Categorias disponíveis para vinculação:', currentSupabaseCategories?.length || 0);
+        console.log('📂 Categorias disponíveis no momento da migração:', supabaseCategories?.length || 0);
         
-        // Migrar páginas com vinculação correta
+        // Migrar páginas com vinculação correta usando as categorias atuais do state
         const pagesWithCorrectCategories = localServicePages.map(page => {
-          // Buscar categoria correspondente
-          const matchingCategory = currentSupabaseCategories?.find(cat => 
+          // Buscar categoria correspondente nas categorias do Supabase atual
+          const matchingCategory = supabaseCategories?.find(cat => 
             cat.value === page.category || 
             cat.name === page.category ||
             cat.label === page.category
