@@ -41,8 +41,7 @@ export const defaultPageTexts: PageTexts = {
   },
   footerTexts: {
     companyName: "Escritório de Advocacia",
-    description: "Excelência jurídica com mais de 20 anos de experiência",
-    copyright: "© 2024 Todos os direitos reservados"
+    description: "Excelência jurídica com mais de 20 anos de experiência"
   },
   categoryTexts: [
     {

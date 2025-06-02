@@ -4,7 +4,7 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { Label } from '../../ui/label';
-import { ServicePage } from '../../../types/adminTypes';
+import { ServicePage, ProcessStep } from '../../../types/adminTypes';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
 
@@ -17,19 +17,21 @@ export const ProcessEditor: React.FC<ProcessEditorProps> = ({ page, onUpdatePage
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const processSteps = page.process || [];
+
   const addProcess = () => {
-    const nextStep = page.process.length + 1;
-    const newProcess = { step: nextStep, title: '', description: '' };
-    onUpdatePage(page.id, 'process', [...page.process, newProcess]);
+    const nextStep = processSteps.length + 1;
+    const newProcess: ProcessStep = { step: nextStep, title: '', description: '' };
+    onUpdatePage(page.id, 'process', [...processSteps, newProcess]);
   };
 
   const removeProcess = (index: number) => {
-    const updatedProcess = page.process.filter((_, i) => i !== index).map((proc, i) => ({ ...proc, step: i + 1 }));
+    const updatedProcess = processSteps.filter((_, i) => i !== index).map((proc, i) => ({ ...proc, step: i + 1 }));
     onUpdatePage(page.id, 'process', updatedProcess);
   };
 
-  const updateProcess = (index: number, field: string, value: string) => {
-    const updatedProcess = page.process.map((proc, i) => 
+  const updateProcess = (index: number, field: keyof ProcessStep, value: string | number) => {
+    const updatedProcess = processSteps.map((proc, i) => 
       i === index ? { ...proc, [field]: value } : proc
     );
     onUpdatePage(page.id, 'process', updatedProcess);
@@ -39,7 +41,7 @@ export const ProcessEditor: React.FC<ProcessEditorProps> = ({ page, onUpdatePage
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-          Processo ({page.process.length} etapas)
+          Processo ({processSteps.length} etapas)
         </h3>
         <Button onClick={addProcess} size="sm">
           <Plus className="w-4 h-4 mr-2" />
@@ -47,7 +49,7 @@ export const ProcessEditor: React.FC<ProcessEditorProps> = ({ page, onUpdatePage
         </Button>
       </div>
       <div className="space-y-3">
-        {page.process.map((proc, index) => (
+        {processSteps.map((proc, index) => (
           <div key={index} className={`p-4 border rounded ${isDark ? 'border-white/20 bg-black/30' : 'border-gray-200 bg-gray-50'}`}>
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-medium">Etapa {proc.step}</span>

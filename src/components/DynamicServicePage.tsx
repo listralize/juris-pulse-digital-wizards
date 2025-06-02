@@ -39,8 +39,22 @@ const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categ
   // Transform testimonials to match ServiceLandingLayout expectations
   const transformedTestimonials = pageData.testimonials?.map(testimonial => ({
     name: testimonial.name,
-    quote: testimonial.text, // Map 'text' to 'quote'
+    quote: testimonial.text,
     image: testimonial.image
+  })) || [];
+
+  // Transform benefits with default values
+  const transformedBenefits = pageData.benefits?.map(benefit => ({
+    title: benefit.title,
+    description: benefit.description,
+    icon: benefit.icon
+  })) || [];
+
+  // Transform process with default values
+  const transformedProcess = pageData.process?.map(step => ({
+    step: step.step,
+    title: step.title,
+    description: step.description
   })) || [];
 
   return (
@@ -49,8 +63,8 @@ const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categ
       serviceName={pageData.title}
       serviceDescription={pageData.description}
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
-      benefits={pageData.benefits || []}
-      process={pageData.process || []}
+      benefits={transformedBenefits}
+      process={transformedProcess}
       testimonials={transformedTestimonials}
       faq={pageData.faq || []}
       relatedServices={getRelatedServices()}

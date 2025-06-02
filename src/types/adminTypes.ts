@@ -80,14 +80,26 @@ export interface Testimonial {
   image?: string;
 }
 
+export interface Benefit {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface ProcessStep {
+  step: number;
+  title: string;
+  description: string;
+}
+
 export interface ServicePage {
   id: string;
   title: string;
   description: string;
   category: string;
   href?: string;
-  benefits?: string[];
-  process?: string[];
+  benefits?: Benefit[];
+  process?: ProcessStep[];
   testimonials?: Testimonial[];
   faq?: Array<{ question: string; answer: string; }>;
 }

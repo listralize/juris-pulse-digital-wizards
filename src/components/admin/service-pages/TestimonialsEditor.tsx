@@ -4,7 +4,7 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { Label } from '../../ui/label';
-import { ServicePage } from '../../../types/adminTypes';
+import { ServicePage, Testimonial } from '../../../types/adminTypes';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
 
@@ -17,17 +17,19 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const testimonials = page.testimonials || [];
+
   const addTestimonial = () => {
-    const newTestimonial = { name: '', quote: '', image: '' };
-    onUpdatePage(page.id, 'testimonials', [...page.testimonials, newTestimonial]);
+    const newTestimonial: Testimonial = { name: '', text: '', image: '' };
+    onUpdatePage(page.id, 'testimonials', [...testimonials, newTestimonial]);
   };
 
   const removeTestimonial = (index: number) => {
-    onUpdatePage(page.id, 'testimonials', page.testimonials.filter((_, i) => i !== index));
+    onUpdatePage(page.id, 'testimonials', testimonials.filter((_, i) => i !== index));
   };
 
-  const updateTestimonial = (index: number, field: string, value: string) => {
-    const updatedTestimonials = page.testimonials.map((testimonial, i) => 
+  const updateTestimonial = (index: number, field: keyof Testimonial, value: string) => {
+    const updatedTestimonials = testimonials.map((testimonial, i) => 
       i === index ? { ...testimonial, [field]: value } : testimonial
     );
     onUpdatePage(page.id, 'testimonials', updatedTestimonials);
@@ -37,7 +39,7 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-          Depoimentos ({page.testimonials.length})
+          Depoimentos ({testimonials.length})
         </h3>
         <Button onClick={addTestimonial} size="sm">
           <Plus className="w-4 h-4 mr-2" />
@@ -45,7 +47,7 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
         </Button>
       </div>
       <div className="space-y-3">
-        {page.testimonials.map((testimonial, index) => (
+        {testimonials.map((testimonial, index) => (
           <div key={index} className={`p-4 border rounded ${isDark ? 'border-white/20 bg-black/30' : 'border-gray-200 bg-gray-50'}`}>
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-medium">Depoimento {index + 1}</span>
@@ -73,8 +75,8 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
               <div>
                 <Label className="text-xs">Depoimento</Label>
                 <Textarea
-                  value={testimonial.quote}
-                  onChange={(e) => updateTestimonial(index, 'quote', e.target.value)}
+                  value={testimonial.text}
+                  onChange={(e) => updateTestimonial(index, 'text', e.target.value)}
                   rows={2}
                   className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                 />

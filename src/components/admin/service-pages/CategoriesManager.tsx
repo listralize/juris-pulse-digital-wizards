@@ -38,8 +38,12 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
 
   const addCategory = () => {
     const newCategory: CategoryInfo = {
+      id: `categoria-${Date.now()}`,
       value: `categoria-${Date.now()}`,
       label: 'Nova Categoria',
+      name: 'Nova Categoria',
+      description: 'Descrição da nova categoria',
+      icon: 'FileText',
       color: colorOptions[Math.floor(Math.random() * colorOptions.length)]
     };
     setLocalCategories([...localCategories, newCategory]);
