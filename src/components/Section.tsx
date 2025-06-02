@@ -15,34 +15,6 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
-    // Special handling for scrollable sections - remove fixed positioning completely
-    if (allowScroll && (id === 'socios' || id === 'contact')) {
-      return (
-        <div 
-          id={id} 
-          ref={ref}
-          data-allow-scroll="true"
-          className={`section-container w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
-          style={{ 
-            opacity: isActive ? 1 : 0,
-            visibility: isActive ? 'visible' : 'hidden',
-            pointerEvents: isActive ? 'auto' : 'none',
-            position: isActive ? 'relative' : 'absolute',
-            top: isActive ? 0 : '-100vh',
-            left: 0,
-            right: 0,
-            zIndex: isActive ? 10 : 1,
-            transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
-            display: 'block',
-            height: 'auto',
-            minHeight: '100vh'
-          }}
-        >
-          {children}
-        </div>
-      );
-    }
-    
     return (
       <div 
         id={id} 
@@ -62,10 +34,11 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: allowScroll ? 'flex-start' : 'center',
           minHeight: '100vh',
           maxHeight: '100vh',
-          overflow: 'hidden'
+          overflow: allowScroll ? 'auto' : 'hidden',
+          WebkitOverflowScrolling: allowScroll ? 'touch' : 'auto'
         }}
       >
         {children}
