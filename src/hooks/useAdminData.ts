@@ -99,15 +99,27 @@ export const useAdminData = () => {
       // Carregar textos das páginas
       const savedTexts = localStorage.getItem('adminPageTexts');
       if (savedTexts) {
-        const parsedTexts = JSON.parse(savedTexts);
-        const textsWithDefaults = {
-          ...defaultPageTexts,
-          ...parsedTexts,
-          categoryTexts: parsedTexts.categoryTexts || defaultPageTexts.categoryTexts,
-          contactTexts: parsedTexts.contactTexts || defaultPageTexts.contactTexts,
-          footerTexts: parsedTexts.footerTexts || defaultPageTexts.footerTexts
-        };
-        setPageTexts(textsWithDefaults);
+        try {
+          const parsedTexts = JSON.parse(savedTexts);
+          const textsWithDefaults = {
+            ...defaultPageTexts,
+            ...parsedTexts,
+            categoryTexts: parsedTexts.categoryTexts || defaultPageTexts.categoryTexts,
+            contactTexts: {
+              ...defaultPageTexts.contactTexts,
+              ...(parsedTexts.contactTexts || {})
+            },
+            footerTexts: {
+              ...defaultPageTexts.footerTexts,
+              ...(parsedTexts.footerTexts || {})
+            }
+          };
+          setPageTexts(textsWithDefaults);
+        } catch (error) {
+          console.error('Erro ao parsear textos salvos:', error);
+          setPageTexts(defaultPageTexts);
+          localStorage.setItem('adminPageTexts', JSON.stringify(defaultPageTexts));
+        }
       } else {
         setPageTexts(defaultPageTexts);
         localStorage.setItem('adminPageTexts', JSON.stringify(defaultPageTexts));
