@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -7,8 +7,9 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
-import { ArrowLeft, Plus, Save, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Edit, Trash2, Eye } from 'lucide-react';
 import { BlogPost } from '../../types/blogTypes';
+import { toast } from 'sonner';
 
 interface BlogManagementProps {
   blogPosts: BlogPost[];
@@ -23,20 +24,25 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   const isDark = theme === 'dark';
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [localPosts, setLocalPosts] = useState<BlogPost[]>(blogPosts);
+  const [localPosts, setLocalPosts] = useState<BlogPost[]>([]);
+
+  useEffect(() => {
+    setLocalPosts(blogPosts);
+    console.log('BlogManagement - Posts loaded:', blogPosts.length);
+  }, [blogPosts]);
 
   const createNewPost = () => {
     const newPost: BlogPost = {
       id: Date.now().toString(),
-      title: '',
+      title: 'Novo Post',
       content: '',
       excerpt: '',
       banner: '',
-      author: '',
+      author: 'Autor',
       authorImage: '',
       publishedAt: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
-      slug: '',
+      slug: 'novo-post-' + Date.now(),
       tags: [],
       featured: false
     };
@@ -53,7 +59,9 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
     if (field === 'title') {
       updatedPost.slug = value.toLowerCase()
         .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-');
+        .replace(/\s+/g, '-')
+        .replace(/--+/g, '-')
+        .trim();
     }
     
     setSelectedPost(updatedPost);
@@ -62,15 +70,27 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   const savePost = () => {
     if (!selectedPost) return;
     
+    if (!selectedPost.title.trim()) {
+      toast.error('Título é obrigatório');
+      return;
+    }
+
+    if (!selectedPost.author.trim()) {
+      toast.error('Autor é obrigatório');
+      return;
+    }
+    
     const isNew = !localPosts.find(p => p.id === selectedPost.id);
     let updatedPosts;
     
     if (isNew) {
       updatedPosts = [...localPosts, selectedPost];
+      toast.success('Post criado com sucesso!');
     } else {
       updatedPosts = localPosts.map(p => 
         p.id === selectedPost.id ? selectedPost : p
       );
+      toast.success('Post atualizado com sucesso!');
     }
     
     setLocalPosts(updatedPosts);
@@ -80,14 +100,20 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   };
 
   const deletePost = (postId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este post?')) return;
+    
     const updatedPosts = localPosts.filter(p => p.id !== postId);
     setLocalPosts(updatedPosts);
     onSave(updatedPosts);
+    toast.success('Post excluído com sucesso!');
+    
     if (selectedPost?.id === postId) {
       setSelectedPost(null);
       setIsEditing(false);
     }
   };
+
+  const featuredCount = localPosts.filter(p => p.featured).length;
 
   // Se está editando um post
   if (isEditing && selectedPost) {
@@ -121,7 +147,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Título</Label>
+                <Label htmlFor="title">Título *</Label>
                 <Input
                   id="title"
                   value={selectedPost.title}
@@ -142,7 +168,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
               </div>
               
               <div>
-                <Label htmlFor="author">Autor</Label>
+                <Label htmlFor="author">Autor *</Label>
                 <Input
                   id="author"
                   value={selectedPost.author}
@@ -178,6 +204,21 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                   onCheckedChange={(checked) => updatePost('featured', checked)}
                 />
                 <Label htmlFor="featured">Post em destaque</Label>
+                {featuredCount >= 3 && !selectedPost.featured && (
+                  <span className="text-xs text-yellow-600">
+                    (Já há 3 posts em destaque)
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="slug">Slug (URL)</Label>
+                <Input
+                  id="slug"
+                  value={selectedPost.slug}
+                  onChange={(e) => updatePost('slug', e.target.value)}
+                  placeholder="url-do-post"
+                />
               </div>
             </div>
             
@@ -203,9 +244,14 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            Gerenciar Posts do Blog
-          </CardTitle>
+          <div>
+            <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+              Gerenciar Posts do Blog
+            </CardTitle>
+            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {localPosts.length} posts • {featuredCount} em destaque
+            </p>
+          </div>
           <Button onClick={createNewPost} size="sm">
             <Plus className="w-4 h-4 mr-2" />
             Novo Post
@@ -226,15 +272,33 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                       {post.title || 'Sem título'}
                     </h3>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Por {post.author} - {new Date(post.publishedAt).toLocaleDateString()}
+                      Por {post.author} - {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
                     </p>
-                    {post.featured && (
-                      <span className="inline-block mt-1 text-xs bg-yellow-500 text-black px-2 py-1 rounded">
-                        Destaque
-                      </span>
-                    )}
+                    <div className="flex gap-2 mt-2">
+                      {post.featured && (
+                        <span className="inline-block text-xs bg-yellow-500 text-black px-2 py-1 rounded">
+                          Destaque
+                        </span>
+                      )}
+                      {post.tags.map(tag => (
+                        <span 
+                          key={tag}
+                          className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                      title="Visualizar post"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -249,6 +313,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                       size="sm"
                       variant="outline"
                       onClick={() => deletePost(post.id)}
+                      className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

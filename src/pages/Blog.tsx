@@ -5,7 +5,7 @@ import { useTheme } from '../components/ThemeProvider';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Calendar, User, Search, ArrowRight, Filter } from 'lucide-react';
+import { Calendar, User, Search, ArrowRight } from 'lucide-react';
 import { useBlogData } from '../hooks/useBlogData';
 import Navbar from '../components/navbar';
 
@@ -16,6 +16,8 @@ const BlogPage = () => {
   const { blogPosts, isLoading } = useBlogData();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
+
+  console.log('BlogPage - Posts loaded:', blogPosts.length);
 
   // Filtrar posts por termo de busca e tag
   const filteredPosts = blogPosts.filter(post => {
@@ -111,6 +113,10 @@ const BlogPage = () => {
                         src={post.banner}
                         alt={post.title}
                         className="w-full h-48 object-cover"
+                        onError={(e) => {
+                          console.log('Image failed to load:', post.banner);
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                       {post.featured && (
                         <span className="absolute top-3 right-3 bg-yellow-500 text-black text-xs px-2 py-1 rounded">
@@ -163,9 +169,15 @@ const BlogPage = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-lg mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               {searchTerm || selectedTag ? 'Nenhum artigo encontrado com os filtros aplicados.' : 'Nenhum artigo publicado ainda.'}
             </p>
+            <Button 
+              onClick={() => navigate('/admin')}
+              variant="outline"
+            >
+              Gerenciar Posts no Admin
+            </Button>
           </div>
         )}
       </div>

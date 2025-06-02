@@ -14,12 +14,13 @@ const Blog = () => {
   const navigate = useNavigate();
   const { blogPosts, isLoading } = useBlogData();
 
-  // Mostrar apenas posts em destaque ou os 6 mais recentes
-  const featuredPosts = blogPosts
-    .filter(post => post.featured)
-    .slice(0, 6);
-  
-  const displayPosts = featuredPosts.length > 0 ? featuredPosts : blogPosts.slice(0, 6);
+  // Primeiro tenta pegar posts em destaque, senão pega os 6 mais recentes
+  const featuredPosts = blogPosts.filter(post => post.featured);
+  const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : blogPosts.slice(0, 6);
+
+  console.log('Blog posts loaded:', blogPosts.length);
+  console.log('Featured posts:', featuredPosts.length);
+  console.log('Display posts:', displayPosts.length);
 
   if (isLoading) {
     return (
@@ -68,6 +69,10 @@ const Blog = () => {
                               src={post.banner}
                               alt={post.title}
                               className="w-full h-48 object-cover"
+                              onError={(e) => {
+                                console.log('Image failed to load:', post.banner);
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
                             />
                             {post.featured && (
                               <span className="absolute top-3 right-3 bg-yellow-500 text-black text-xs px-2 py-1 rounded">
@@ -126,6 +131,13 @@ const Blog = () => {
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Em breve, novos artigos jurídicos serão publicados aqui.
             </p>
+            <Button 
+              onClick={() => navigate('/admin')}
+              variant="outline"
+              className="mt-4"
+            >
+              Adicionar Posts no Admin
+            </Button>
           </div>
         )}
       </div>
