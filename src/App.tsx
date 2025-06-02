@@ -26,8 +26,8 @@ import Previdenciario from './pages/areas/Previdenciario';
 import Consumidor from './pages/areas/Consumidor';
 import Civil from './pages/areas/Civil';
 
-// Dynamic Service Routes
-import DynamicServiceRoutes from './components/DynamicServiceRoutes';
+// Dynamic Service Routes Hook
+import { useDynamicServiceRoutes } from './components/DynamicServiceRoutes';
 
 import './App.css';
 
@@ -40,6 +40,38 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppRoutes() {
+  const dynamicServiceRoutes = useDynamicServiceRoutes();
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/obrigado" element={<Obrigado />} />
+      
+      {/* Practice Area Routes */}
+      <Route path="/familia" element={<Familia />} />
+      <Route path="/tributario" element={<Tributario />} />
+      <Route path="/empresarial" element={<Empresarial />} />
+      <Route path="/trabalho" element={<Trabalho />} />
+      <Route path="/constitucional" element={<Constitucional />} />
+      <Route path="/administrativo" element={<Administrativo />} />
+      <Route path="/previdenciario" element={<Previdenciario />} />
+      <Route path="/consumidor" element={<Consumidor />} />
+      <Route path="/civil" element={<Civil />} />
+      
+      {/* Dynamic Service Routes */}
+      {dynamicServiceRoutes}
+      
+      {/* 404 Route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -47,31 +79,7 @@ function App() {
         <AuthProvider>
           <Router>
             <div className="App">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/obrigado" element={<Obrigado />} />
-                
-                {/* Practice Area Routes */}
-                <Route path="/familia" element={<Familia />} />
-                <Route path="/tributario" element={<Tributario />} />
-                <Route path="/empresarial" element={<Empresarial />} />
-                <Route path="/trabalho" element={<Trabalho />} />
-                <Route path="/constitucional" element={<Constitucional />} />
-                <Route path="/administrativo" element={<Administrativo />} />
-                <Route path="/previdenciario" element={<Previdenciario />} />
-                <Route path="/consumidor" element={<Consumidor />} />
-                <Route path="/civil" element={<Civil />} />
-                
-                {/* Dynamic Service Routes */}
-                <DynamicServiceRoutes />
-                
-                {/* 404 Route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AppRoutes />
               <Toaster />
             </div>
           </Router>
