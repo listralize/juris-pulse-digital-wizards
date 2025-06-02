@@ -3,9 +3,8 @@ import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, Users, FileText, Globe, User } from 'lucide-react';
-import { TeamManagement } from './TeamManagement';
-import { MainTextsManagement } from './MainTextsManagement';
+import { ArrowLeft, Edit, Globe } from 'lucide-react';
+import { HomePageEditor } from './HomePageEditor';
 import { AreasTextsManagement } from './AreasTextsManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
 
@@ -36,34 +35,25 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
 
   const sections = [
     {
-      id: 'team',
-      title: 'Equipe',
-      description: 'Gerenciar membros da equipe',
-      icon: <Users className="w-8 h-8" />,
+      id: 'home-page',
+      title: 'Página Inicial Completa',
+      description: 'Editar todos os elementos da página inicial: textos, imagens, equipe, contatos',
+      icon: <Edit className="w-8 h-8" />,
       color: 'bg-blue-500'
     },
     {
-      id: 'main-texts',
-      title: 'Textos Principais',
-      description: 'Editar textos da página inicial',
-      icon: <FileText className="w-8 h-8" />,
-      color: 'bg-green-500'
-    },
-    {
       id: 'areas-texts',
-      title: 'Textos das Áreas',
-      description: 'Editar textos das áreas de atuação',
+      title: 'Textos das Áreas Específicas',
+      description: 'Editar textos detalhados das páginas de áreas de atuação',
       icon: <Globe className="w-8 h-8" />,
       color: 'bg-purple-500'
-    },
-    {
-      id: 'client-area',
-      title: 'Área do Cliente',
-      description: 'Configurar área do cliente',
-      icon: <User className="w-8 h-8" />,
-      color: 'bg-orange-500'
     }
   ];
+
+  const handleSaveAll = () => {
+    onSaveTeamMembers();
+    onSavePageTexts();
+  };
 
   if (selectedSection) {
     const section = sections.find(s => s.id === selectedSection);
@@ -86,21 +76,15 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          {selectedSection === 'team' && (
-            <TeamManagement
+          {selectedSection === 'home-page' && (
+            <HomePageEditor
+              pageTexts={pageTexts}
               teamMembers={teamMembers}
+              onUpdatePageTexts={onUpdatePageTexts}
               onAddTeamMember={onAddTeamMember}
               onRemoveTeamMember={onRemoveTeamMember}
               onUpdateTeamMember={onUpdateTeamMember}
-              onSave={onSaveTeamMembers}
-            />
-          )}
-          
-          {selectedSection === 'main-texts' && (
-            <MainTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={onUpdatePageTexts}
-              onSave={onSavePageTexts}
+              onSaveAll={handleSaveAll}
             />
           )}
           
@@ -110,14 +94,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
               onUpdatePageTexts={onUpdatePageTexts}
               onSave={onSavePageTexts}
             />
-          )}
-          
-          {selectedSection === 'client-area' && (
-            <div className="text-center py-8">
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Configurações da área do cliente serão implementadas em breve.
-              </p>
-            </div>
           )}
         </CardContent>
       </Card>
