@@ -3,14 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { FileText, Briefcase, Globe, Edit } from 'lucide-react';
-import { useAdminData } from '../hooks/useAdminData';
+import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
+import { useAdminDataIntegrated } from '../hooks/useAdminDataIntegrated';
 import { useBlogData } from '../hooks/useBlogData';
 import { TeamMember, SpecializedService, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
+import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -19,18 +20,20 @@ const Admin = () => {
   const isDark = theme === 'dark';
   
   const { 
-    teamMembers: initialTeamMembers, 
-    specializedServices: initialSpecializedServices,
-    servicePages: initialServicePages,
-    categories: initialCategories,
-    pageTexts: initialPageTexts, 
+    teamMembers,
+    servicePages,
+    categories,
+    pageTexts,
     isLoading,
-    saveTeamMembers,
-    saveSpecializedServices,
+    updatePageTexts,
+    updateTeamMember,
+    addTeamMember,
+    removeTeamMember,
     saveServicePages,
     saveCategories,
-    savePageTexts
-  } = useAdminData();
+    saveAll,
+    useSupabaseData
+  } = useAdminDataIntegrated();
 
   const {
     blogPosts: initialBlogPosts,
@@ -38,109 +41,29 @@ const Admin = () => {
     saveBlogPosts
   } = useBlogData();
 
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
-  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
-  const [categories, setCategories] = useState<CategoryInfo[]>([]);
-  const [pageTexts, setPageTexts] = useState<PageTexts>({
-    heroTitle: '',
-    heroSubtitle: '',
-    aboutTitle: '',
-    aboutDescription: '',
-    contactTitle: '',
-    contactSubtitle: '',
-    teamTitle: '',
-    areasTitle: '',
-    clientAreaTitle: '',
-    clientAreaDescription: '',
-    familiaTitle: '',
-    familiaDescription: '',
-    tributarioTitle: '',
-    tributarioDescription: '',
-    empresarialTitle: '',
-    empresarialDescription: '',
-    trabalhoTitle: '',
-    trabalhoDescription: '',
-    constitucionalTitle: '',
-    constitucionalDescription: '',
-    administrativoTitle: '',
-    administrativoDescription: '',
-    previdenciarioTitle: '',
-    previdenciarioDescription: '',
-    consumidorTitle: '',
-    consumidorDescription: '',
-    civilTitle: '',
-    civilDescription: '',
-    categoryTexts: [],
-    contactTexts: {
-      phone: '',
-      email: '',
-      address: '',
-      whatsapp: ''
-    },
-    footerTexts: {
-      companyName: '',
-      description: ''
-    }
-  });
-
-  useEffect(() => {
-    if (!isLoading) {
-      setTeamMembers(initialTeamMembers);
-      setSpecializedServices(initialSpecializedServices);
-      setServicePages(initialServicePages);
-      setCategories(initialCategories);
-      setPageTexts(initialPageTexts);
-    }
-  }, [isLoading, initialTeamMembers, initialSpecializedServices, initialServicePages, initialCategories, initialPageTexts]);
-
-  const handleSaveTeamMembers = () => {
-    saveTeamMembers(teamMembers);
+  const handleSaveTeamMembers = async () => {
+    await saveAll();
     toast.success('Equipe salva com sucesso!');
   };
 
   const handleSaveServicePages = (pages: ServicePage[]) => {
-    setServicePages(pages);
     saveServicePages(pages);
     toast.success('Páginas de serviços salvas com sucesso!');
   };
 
   const handleSaveCategories = (cats: CategoryInfo[]) => {
-    setCategories(cats);
     saveCategories(cats);
     toast.success('Categorias salvas com sucesso!');
   };
 
-  const handleSavePageTexts = () => {
-    savePageTexts(pageTexts);
+  const handleSavePageTexts = async () => {
+    await saveAll();
     toast.success('Textos das páginas salvos com sucesso!');
   };
 
   const handleSaveBlogPosts = (posts: typeof initialBlogPosts) => {
     saveBlogPosts(posts);
     toast.success('Posts do blog salvos com sucesso!');
-  };
-
-  const addTeamMember = () => {
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      name: '',
-      title: '',
-      oab: '',
-      email: '',
-      image: ''
-    };
-    setTeamMembers([...teamMembers, newMember]);
-  };
-
-  const removeTeamMember = (id: string) => {
-    setTeamMembers(teamMembers.filter(member => member.id !== id));
-  };
-
-  const updateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
-    setTeamMembers(teamMembers.map(member => 
-      member.id === id ? { ...member, [field]: value } : member
-    ));
   };
 
   if (isLoading || blogLoading) {
@@ -156,8 +79,12 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto">
         <AdminHeader onLogout={logout} />
 
-        <Tabs defaultValue="content" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-3 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+        <Tabs defaultValue="supabase" className="space-y-6">
+          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+            <TabsTrigger value="supabase" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Supabase
+            </TabsTrigger>
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Edit className="w-4 h-4" />
               Conteúdo Geral
@@ -172,6 +99,10 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="supabase">
+            <SupabaseDataManager />
+          </TabsContent>
+
           <TabsContent value="content">
             <ContentManagement
               teamMembers={teamMembers}
@@ -180,7 +111,7 @@ const Admin = () => {
               onRemoveTeamMember={removeTeamMember}
               onUpdateTeamMember={updateTeamMember}
               onSaveTeamMembers={handleSaveTeamMembers}
-              onUpdatePageTexts={setPageTexts}
+              onUpdatePageTexts={updatePageTexts}
               onSavePageTexts={handleSavePageTexts}
             />
           </TabsContent>
@@ -193,7 +124,7 @@ const Admin = () => {
               onSave={handleSaveServicePages}
               onSaveCategories={handleSaveCategories}
               onSavePageTexts={handleSavePageTexts}
-              onUpdatePageTexts={setPageTexts}
+              onUpdatePageTexts={updatePageTexts}
             />
           </TabsContent>
 

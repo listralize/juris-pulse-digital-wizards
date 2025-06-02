@@ -27,10 +27,8 @@ export const useAdminDataIntegrated = () => {
     pageTexts: localPageTexts,
     servicePages: localServicePages,
     categories: localCategories,
-    updatePageTexts: updateLocalPageTexts,
-    updateTeamMember: updateLocalTeamMember,
-    addTeamMember: addLocalTeamMember,
-    removeTeamMember: removeLocalTeamMember,
+    savePageTexts: saveLocalPageTexts,
+    saveTeamMembers: saveLocalTeamMembers,
     saveServicePages: saveLocalServicePages,
     saveCategories: saveLocalCategories
   } = useAdminData();
@@ -56,7 +54,7 @@ export const useAdminDataIntegrated = () => {
         setIsTransitioning(false);
       }
     } else {
-      updateLocalPageTexts(texts);
+      saveLocalPageTexts(texts);
     }
   };
 
@@ -68,6 +66,8 @@ export const useAdminDataIntegrated = () => {
       } finally {
         setIsTransitioning(false);
       }
+    } else {
+      saveLocalTeamMembers(members);
     }
   };
 
@@ -79,25 +79,31 @@ export const useAdminDataIntegrated = () => {
       );
       saveAllTeamMembers(updatedMembers);
     } else {
-      updateLocalTeamMember(id, field, value);
+      // Para localStorage, vamos atualizar diretamente e salvar
+      const updatedMembers = teamMembers.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      );
+      saveLocalTeamMembers(updatedMembers);
     }
   };
 
   const addTeamMember = () => {
+    const newMember: TeamMember = {
+      id: crypto.randomUUID(),
+      name: '',
+      title: '',
+      oab: '',
+      email: '',
+      image: '',
+      description: ''
+    };
+    
     if (useSupabaseData) {
-      const newMember: TeamMember = {
-        id: crypto.randomUUID(),
-        name: '',
-        title: '',
-        oab: '',
-        email: '',
-        image: '',
-        description: ''
-      };
       const updatedMembers = [...teamMembers, newMember];
       saveAllTeamMembers(updatedMembers);
     } else {
-      addLocalTeamMember();
+      const updatedMembers = [...teamMembers, newMember];
+      saveLocalTeamMembers(updatedMembers);
     }
   };
 
@@ -106,7 +112,8 @@ export const useAdminDataIntegrated = () => {
       const updatedMembers = teamMembers.filter(member => member.id !== id);
       saveAllTeamMembers(updatedMembers);
     } else {
-      removeLocalTeamMember(id);
+      const updatedMembers = teamMembers.filter(member => member.id !== id);
+      saveLocalTeamMembers(updatedMembers);
     }
   };
 
