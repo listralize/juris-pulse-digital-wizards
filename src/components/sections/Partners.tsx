@@ -52,17 +52,18 @@ const Partners = () => {
     <div 
       ref={sectionRef}
       data-allow-scroll="true"
-      className={`h-full w-full py-10 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto`}
+      className={`h-full w-full py-16 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto`}
       style={{ 
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
-        paddingBottom: '100px'
+        paddingBottom: '120px',
+        paddingTop: '80px'
       }}
     >
       <div className="max-w-6xl mx-auto w-full">
         <h2 
           ref={titleRef}
-          className={`text-4xl md:text-5xl lg:text-6xl mb-12 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-4xl md:text-5xl lg:text-6xl mb-16 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
           {pageTexts.teamTitle}
         </h2>
