@@ -15,7 +15,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
-    // Special handling for scrollable sections
+    // Special handling for scrollable sections - remove fixed positioning completely
     if (allowScroll && (id === 'socios' || id === 'contact')) {
       return (
         <div 
@@ -27,18 +27,15 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
             opacity: isActive ? 1 : 0,
             visibility: isActive ? 'visible' : 'hidden',
             pointerEvents: isActive ? 'auto' : 'none',
-            position: 'fixed',
-            top: 0,
+            position: isActive ? 'relative' : 'absolute',
+            top: isActive ? 0 : '-100vh',
             left: 0,
             right: 0,
-            bottom: 0,
             zIndex: isActive ? 10 : 1,
             transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            WebkitOverflowScrolling: 'touch'
+            display: 'block',
+            height: 'auto',
+            minHeight: '100vh'
           }}
         >
           {children}
@@ -65,11 +62,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: allowScroll ? 'flex-start' : 'center',
+          justifyContent: 'center',
           minHeight: '100vh',
           maxHeight: '100vh',
-          overflow: allowScroll ? 'auto' : 'hidden',
-          WebkitOverflowScrolling: allowScroll ? 'touch' : 'auto'
+          overflow: 'hidden'
         }}
       >
         {children}

@@ -33,14 +33,14 @@ export const useSectionTransition = (sections: Section[]) => {
     };
   }, [sections]);
 
-  // Add wheel event listener for scroll navigation, but completely skip for certain sections
+  // Add wheel event listener for scroll navigation - completely disable for scrollable sections
   useEffect(() => {
     let isScrolling = false;
     
     const handleWheel = (e: WheelEvent) => {
       // Completely disable custom wheel handling for scrollable sections
       if (activeSection === 'contact' || activeSection === 'socios') {
-        // Allow normal browser scroll behavior
+        console.log('Allowing normal scroll for section:', activeSection);
         return;
       }
       
@@ -53,6 +53,7 @@ export const useSectionTransition = (sections: Section[]) => {
                               target.closest('[data-radix-scroll-area-viewport]');
       
       if (scrollableParent) {
+        console.log('Found scrollable parent, allowing normal scroll');
         return;
       }
       
@@ -82,10 +83,8 @@ export const useSectionTransition = (sections: Section[]) => {
       }, 1000);
     };
 
-    // Only add wheel event listener for non-scrollable sections
-    if (activeSection !== 'contact' && activeSection !== 'socios') {
-      document.addEventListener('wheel', handleWheel, { passive: false });
-    }
+    // Add wheel event listener but allow it to be bypassed for scrollable sections
+    document.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
       document.removeEventListener('wheel', handleWheel);

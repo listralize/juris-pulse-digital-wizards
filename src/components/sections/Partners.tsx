@@ -51,12 +51,11 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      data-allow-scroll="true"
-      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-start overflow-auto`}
+      className={`w-full min-h-screen py-10 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto`}
       style={{ 
+        height: '100vh',
         overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch',
-        paddingBottom: '100px'
+        WebkitOverflowScrolling: 'touch'
       }}
     >
       <div className="max-w-6xl mx-auto w-full">
@@ -67,7 +66,7 @@ const Partners = () => {
           {pageTexts.teamTitle}
         </h2>
         
-        <div ref={carouselRef} className="px-12" data-allow-scroll="true">
+        <div ref={carouselRef} className="px-12">
           <Carousel
             opts={{
               align: "start",
