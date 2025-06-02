@@ -6,7 +6,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
-import { Button } from '../ui/button';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,23 +13,10 @@ const Partners = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
   
   const { theme } = useTheme();
   const { teamMembers, pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
-
-  // Navigation function to next section
-  const goToNextSection = () => {
-    // Navigate to cliente section
-    if (history.pushState) {
-      history.pushState(null, '', '#cliente');
-    } else {
-      window.location.hash = 'cliente';
-    }
-    // Trigger hash change event
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -47,44 +33,12 @@ const Partners = () => {
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8 },
       "-=0.5"
-    )
-    .fromTo(
-      buttonRef.current,
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.6 },
-      "-=0.3"
     );
     
     return () => {
       tl.kill();
     };
   }, [isLoading]);
-
-  // Add scroll event listener for section navigation
-  useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const scrollTop = target.scrollTop;
-      const scrollHeight = target.scrollHeight;
-      const clientHeight = target.clientHeight;
-      
-      // If scrolled to bottom, allow navigation to next section
-      if (scrollTop + clientHeight >= scrollHeight - 50) {
-        // Add a small buffer zone at the bottom for easier navigation
-        const nextButton = document.getElementById('next-section-button');
-        if (nextButton) {
-          nextButton.style.opacity = '1';
-          nextButton.style.transform = 'scale(1.05)';
-        }
-      }
-    };
-
-    const section = sectionRef.current;
-    if (section) {
-      section.addEventListener('scroll', handleScroll);
-      return () => section.removeEventListener('scroll', handleScroll);
-    }
-  }, []);
 
   if (isLoading) {
     return (
@@ -102,7 +56,7 @@ const Partners = () => {
       style={{ 
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
-        paddingBottom: '100px' // Extra space for navigation
+        paddingBottom: '100px'
       }}
     >
       <div className="max-w-6xl mx-auto w-full">
@@ -143,7 +97,7 @@ const Partners = () => {
                         {member.name}
                       </h3>
                       <p className={`text-sm mb-3 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                        {member.role || 'Advogado'}
+                        {member.title || 'Advogado'}
                       </p>
                       <p className={`text-sm leading-relaxed flex-1 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
                         {member.description}
@@ -156,22 +110,6 @@ const Partners = () => {
             <CarouselPrevious />
             <CarouselNext />
           </Carousel>
-        </div>
-
-        {/* Navigation button to next section */}
-        <div ref={buttonRef} className="flex justify-center mt-12">
-          <Button
-            id="next-section-button"
-            onClick={goToNextSection}
-            variant="outline"
-            className={`px-8 py-3 text-lg transition-all duration-300 ${
-              isDark 
-                ? 'bg-transparent border-white text-white hover:bg-white hover:text-black' 
-                : 'bg-transparent border-black text-black hover:bg-black hover:text-white'
-            }`}
-          >
-            Próxima Seção: Área do Cliente
-          </Button>
         </div>
       </div>
     </div>
