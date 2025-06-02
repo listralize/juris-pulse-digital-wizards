@@ -43,11 +43,10 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
   // Status real da migração
   const migrationStatus = () => {
     if (hasSupabaseData && hasLocalData) {
-      // Verificar se os números batem
       const localTotal = localServicePages.length + localTeamMembers.length + localCategories.length;
       const supabaseTotal = supabaseServicePages.length + supabaseTeamMembers.length + supabaseCategories.length;
       
-      if (supabaseTotal >= localTotal * 0.8) { // 80% ou mais migrado
+      if (supabaseTotal >= localTotal * 0.8) {
         return 'completed';
       } else {
         return 'partial';
@@ -64,13 +63,19 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
   const status = migrationStatus();
 
   const handleRefreshData = async () => {
+    console.log('🔄 Botão Recarregar Dados clicado');
     setIsProcessing(true);
     try {
       if (refreshData) {
+        console.log('Usando refreshData prop');
         await refreshData();
       } else {
+        console.log('Usando supabaseRefreshData');
         await supabaseRefreshData();
       }
+      console.log('✅ Dados recarregados');
+    } catch (error) {
+      console.error('❌ Erro ao recarregar dados:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -79,13 +84,36 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
   const handleForceMigration = async () => {
     if (!onForceMigration) return;
     
+    console.log('🚀 Botão Forçar Migração clicado');
     setIsProcessing(true);
     try {
       await onForceMigration();
+      console.log('✅ Migração forçada concluída');
+    } catch (error) {
+      console.error('❌ Erro na migração forçada:', error);
     } finally {
       setIsProcessing(false);
     }
   };
+
+  // Debug logs
+  console.log('SupabaseDataManager - Estado:', {
+    status,
+    hasLocalData,
+    hasSupabaseData,
+    localData: {
+      servicePages: localServicePages.length,
+      teamMembers: localTeamMembers.length,
+      categories: localCategories.length,
+      pageTexts: !!localPageTexts.heroTitle
+    },
+    supabaseData: {
+      servicePages: supabaseServicePages.length,
+      teamMembers: supabaseTeamMembers.length,
+      categories: supabaseCategories.length,
+      pageTexts: !!supabasePageTexts.heroTitle
+    }
+  });
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
