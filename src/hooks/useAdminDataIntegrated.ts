@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 import { TeamMember, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
 import { useSupabaseDataNew } from './useSupabaseDataNew';
 import { useAdminData } from './useAdminData';
+import { toast } from 'sonner';
 
 export const useAdminDataIntegrated = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [hasMigrated, setHasMigrated] = useState(false);
   
   // Dados do Supabase (prioritários)
   const {
@@ -33,6 +35,58 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
+  // Auto-migração quando há dados locais mas Supabase está vazio
+  useEffect(() => {
+    const autoMigrate = async () => {
+      if (supabaseLoading || hasMigrated) return;
+      
+      const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0;
+      const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0;
+      
+      if (hasLocalData && !hasSupabaseData) {
+        console.log('Iniciando migração automática dos dados para Supabase...');
+        setIsTransitioning(true);
+        
+        try {
+          // Migrar em sequência para evitar problemas
+          console.log('Migrando configurações...');
+          await saveSupabasePageTexts(localPageTexts);
+          
+          console.log('Migrando categorias...');
+          await saveSupabaseCategories(localCategories);
+          
+          console.log('Migrando equipe...');
+          await saveSupabaseTeamMembers(localTeamMembers);
+          
+          console.log('Migrando páginas de serviços...');
+          await saveSupabaseServicePages(localServicePages);
+          
+          await refreshData();
+          setHasMigrated(true);
+          
+          toast.success('Dados migrados automaticamente para o Supabase!');
+          console.log('Migração automática concluída com sucesso');
+        } catch (error) {
+          console.error('Erro na migração automática:', error);
+          toast.error('Erro na migração automática. Dados continuam disponíveis no localStorage.');
+        } finally {
+          setIsTransitioning(false);
+        }
+      }
+    };
+
+    autoMigrate();
+  }, [
+    supabaseLoading, 
+    localTeamMembers.length, 
+    localServicePages.length, 
+    localCategories.length,
+    supabaseTeamMembers.length,
+    supabaseServicePages.length,
+    supabaseCategories.length,
+    hasMigrated
+  ]);
+
   // Determinar qual fonte de dados usar
   const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0;
   const useSupabaseData = hasSupabaseData;
@@ -42,7 +96,7 @@ export const useAdminDataIntegrated = () => {
   const pageTexts = useSupabaseData ? supabasePageTexts : localPageTexts;
   const servicePages = useSupabaseData ? supabaseServicePages : localServicePages;
   const categories = useSupabaseData ? supabaseCategories : localCategories;
-  const isLoading = supabaseLoading;
+  const isLoading = supabaseLoading || isTransitioning;
 
   // Funções de salvamento (direcionam para Supabase se ativo)
   const updatePageTexts = async (texts: PageTexts) => {
@@ -166,9 +220,10 @@ export const useAdminDataIntegrated = () => {
       hasSupabaseData,
       supabasePages: supabaseServicePages.length,
       localPages: localServicePages.length,
-      finalPages: servicePages.length
+      finalPages: servicePages.length,
+      isTransitioning
     });
-  }, [useSupabaseData, hasSupabaseData, supabaseServicePages.length, localServicePages.length, servicePages.length]);
+  }, [useSupabaseData, hasSupabaseData, supabaseServicePages.length, localServicePages.length, servicePages.length, isTransitioning]);
 
   return {
     // Dados
@@ -176,7 +231,7 @@ export const useAdminDataIntegrated = () => {
     pageTexts,
     servicePages,
     categories,
-    isLoading: isLoading || isTransitioning,
+    isLoading,
     
     // Estado
     useSupabaseData,
