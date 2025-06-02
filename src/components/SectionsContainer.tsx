@@ -30,11 +30,14 @@ const SectionsContainer: React.FC = () => {
     <div className="relative w-full h-screen overflow-hidden">
       {sections.map((section, index) => {
         const Component = section.component;
+        const allowScroll = section.id === 'contact' || section.id === 'socios';
+        
         return (
           <Section 
             key={section.id} 
             id={section.id} 
             isActive={activeSection === section.id}
+            allowScroll={allowScroll}
             ref={el => {
               if (el) {
                 sectionsRef.current[index] = el;

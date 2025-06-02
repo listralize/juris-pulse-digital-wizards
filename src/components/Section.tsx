@@ -7,10 +7,11 @@ interface SectionProps {
   isActive: boolean;
   className?: string;
   children: React.ReactNode;
+  allowScroll?: boolean;
 }
 
 const Section = forwardRef<HTMLDivElement, SectionProps>(
-  ({ id, isActive, className = "", children }, ref) => {
+  ({ id, isActive, className = "", children, allowScroll = false }, ref) => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
@@ -32,10 +33,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: allowScroll ? 'flex-start' : 'center',
           minHeight: '100vh',
           maxHeight: '100vh',
-          overflow: 'hidden'
+          overflow: allowScroll ? 'auto' : 'hidden'
         }}
       >
         {children}

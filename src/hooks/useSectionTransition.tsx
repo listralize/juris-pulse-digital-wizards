@@ -33,11 +33,16 @@ export const useSectionTransition = (sections: Section[]) => {
     };
   }, [sections]);
 
-  // Add wheel event listener for scroll navigation
+  // Add wheel event listener for scroll navigation only for non-scrollable sections
   useEffect(() => {
     let isScrolling = false;
     
     const handleWheel = (e: WheelEvent) => {
+      // Allow normal scroll for contact and socios sections
+      if (activeSection === 'contact' || activeSection === 'socios') {
+        return;
+      }
+      
       if (isScrolling || isTransitioning) return;
       
       e.preventDefault();
