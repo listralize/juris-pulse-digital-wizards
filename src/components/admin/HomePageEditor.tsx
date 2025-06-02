@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Save, Upload, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
+import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
 import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 
@@ -433,6 +433,16 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         size="sm"
                         placeholder="/lovable-uploads/foto.png"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-sm">Descrição</Label>
+                      <Textarea
+                        value={member.description || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'description', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        rows={3}
+                        placeholder="Descrição profissional do membro da equipe..."
                       />
                     </div>
                   </div>

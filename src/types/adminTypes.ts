@@ -6,6 +6,7 @@ export interface TeamMember {
   oab: string;
   email: string;
   image: string;
+  description?: string;
 }
 
 export interface CategoryTexts {
@@ -34,6 +35,7 @@ export interface ContactTexts {
 export interface FooterTexts {
   companyName: string;
   description: string;
+  copyright?: string;
 }
 
 export interface PageTexts {

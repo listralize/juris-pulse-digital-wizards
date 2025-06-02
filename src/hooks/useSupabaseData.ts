@@ -34,11 +34,11 @@ export const useSupabaseData = () => {
 
       if (supabaseData) {
         console.log('Data loaded from Supabase');
-        setTeamMembers((supabaseData.team_members as TeamMember[]) || defaultTeamMembers);
-        setPageTexts((supabaseData.page_texts as PageTexts) || defaultPageTexts);
-        setServicePages((supabaseData.service_pages as ServicePage[]) || defaultServicePages);
-        setCategories((supabaseData.categories as CategoryInfo[]) || defaultCategories);
-        setSpecializedServices((supabaseData.specialized_services as SpecializedService[]) || defaultSpecializedServices);
+        setTeamMembers((supabaseData.team_members as unknown as TeamMember[]) || defaultTeamMembers);
+        setPageTexts((supabaseData.page_texts as unknown as PageTexts) || defaultPageTexts);
+        setServicePages((supabaseData.service_pages as unknown as ServicePage[]) || defaultServicePages);
+        setCategories((supabaseData.categories as unknown as CategoryInfo[]) || defaultCategories);
+        setSpecializedServices((supabaseData.specialized_services as unknown as SpecializedService[]) || defaultSpecializedServices);
       } else {
         console.log('No data in Supabase, loading from localStorage or defaults');
         // Fallback to localStorage

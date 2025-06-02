@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -79,8 +80,7 @@ const Admin = () => {
     },
     footerTexts: {
       companyName: '',
-      description: '',
-      copyright: ''
+      description: ''
     }
   });
 
@@ -128,8 +128,7 @@ const Admin = () => {
       title: '',
       oab: '',
       email: '',
-      image: '',
-      description: ''
+      image: ''
     };
     setTeamMembers([...teamMembers, newMember]);
   };

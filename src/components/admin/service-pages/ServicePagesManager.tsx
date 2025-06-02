@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -99,7 +98,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       testimonials: [
         {
           name: "Cliente Satisfeito",
-          quote: "Excelente atendimento e resultado"
+          text: "Excelente atendimento e resultado"
         }
       ]
     };
