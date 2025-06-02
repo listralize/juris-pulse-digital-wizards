@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-import { useAdminData } from '../hooks/useAdminData';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 
 const WhatsAppButton = () => {
-  const { pageTexts } = useAdminData();
+  const { pageTexts } = useSupabaseData();
   const whatsappNumber = pageTexts.contactTexts.whatsapp || '5562994594496';
   
   return (

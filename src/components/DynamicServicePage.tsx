@@ -27,7 +27,7 @@ const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categ
           .slice(0, 3)
           .map(page => ({
             name: page.title,
-            path: page.href.startsWith('/') ? page.href : `/servicos/${page.href}`
+            path: page.href?.startsWith('/') ? page.href : `/servicos/${page.href}`
           }));
       }
     } catch (error) {
@@ -35,6 +35,13 @@ const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categ
     }
     return [];
   };
+
+  // Transform testimonials to match ServiceLandingLayout expectations
+  const transformedTestimonials = pageData.testimonials?.map(testimonial => ({
+    name: testimonial.name,
+    quote: testimonial.text, // Map 'text' to 'quote'
+    image: testimonial.image
+  })) || [];
 
   return (
     <ServiceLandingLayout
@@ -44,7 +51,7 @@ const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categ
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={pageData.benefits || []}
       process={pageData.process || []}
-      testimonials={pageData.testimonials || []}
+      testimonials={transformedTestimonials}
       faq={pageData.faq || []}
       relatedServices={getRelatedServices()}
       mainAreaPath={mainAreaPath}
