@@ -15,6 +15,37 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
+    // Special handling for scrollable sections
+    if (allowScroll && (id === 'socios' || id === 'contact')) {
+      return (
+        <div 
+          id={id} 
+          ref={ref}
+          data-allow-scroll="true"
+          className={`section-container w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
+          style={{ 
+            opacity: isActive ? 1 : 0,
+            visibility: isActive ? 'visible' : 'hidden',
+            pointerEvents: isActive ? 'auto' : 'none',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: isActive ? 10 : 1,
+            transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
+          {children}
+        </div>
+      );
+    }
+    
     return (
       <div 
         id={id} 

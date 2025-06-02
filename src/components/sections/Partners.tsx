@@ -1,136 +1,176 @@
-
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
+
 import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "../ui/carousel";
+import { Button } from '../ui/button';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Partners = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
   const { teamMembers, pageTexts, isLoading } = useAdminData();
+  const isDark = theme === 'dark';
+
+  // Navigation function to next section
+  const goToNextSection = () => {
+    // Navigate to cliente section
+    if (history.pushState) {
+      history.pushState(null, '', '#cliente');
+    } else {
+      window.location.hash = 'cliente';
+    }
+    // Trigger hash change event
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  };
 
   useEffect(() => {
-    if (isLoading || !teamMembers.length) return;
+    if (isLoading) return;
 
-    const tl = gsap.timeline({
-      defaults: { ease: 'power3.out' }
-    });
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     tl.fromTo(
       titleRef.current,
-      {
-        opacity: 0,
-        y: 20
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6
-      }
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 1 }
+    )
+    .fromTo(
+      carouselRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.5"
+    )
+    .fromTo(
+      buttonRef.current,
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.3"
     );
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      tl.kill();
     };
-  }, [teamMembers, isLoading]);
+  }, [isLoading]);
+
+  // Add scroll event listener for section navigation
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const scrollTop = target.scrollTop;
+      const scrollHeight = target.scrollHeight;
+      const clientHeight = target.clientHeight;
+      
+      // If scrolled to bottom, allow navigation to next section
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        // Add a small buffer zone at the bottom for easier navigation
+        const nextButton = document.getElementById('next-section-button');
+        if (nextButton) {
+          nextButton.style.opacity = '1';
+          nextButton.style.transform = 'scale(1.05)';
+        }
+      }
+    };
+
+    const section = sectionRef.current;
+    if (section) {
+      section.addEventListener('scroll', handleScroll);
+      return () => section.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   if (isLoading) {
     return (
-      <section className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
-        <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-        </div>
-      </section>
+      <div className="flex justify-center items-center h-full">
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
     );
   }
 
-  // Resumir o texto do Dr. Enzo Trombela
-  const getTeamMemberDescription = (member: any) => {
-    if (member.name === 'Dr. Enzo Trombela') {
-      return 'Graduado com Mérito Acadêmico (Summa Cum Laude) pela PUC Goiás. Vice-Presidente Jovem da CEDPC – OAB/GO. Presidente Científico da Força da Advocacia. Sócio fundador especializado em direito civil, empresarial e contratual.';
-    }
-    return member.description;
-  };
-
   return (
     <div 
-      id="socios"
       ref={sectionRef}
       data-allow-scroll="true"
-      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-center overflow-auto`}
+      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-start overflow-auto`}
       style={{ 
         overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch'
+        WebkitOverflowScrolling: 'touch',
+        paddingBottom: '100px' // Extra space for navigation
       }}
     >
       <div className="max-w-6xl mx-auto w-full">
         <h2 
           ref={titleRef}
-          className={`text-3xl md:text-4xl lg:text-5xl mb-8 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-4xl md:text-5xl lg:text-6xl mb-12 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
           {pageTexts.teamTitle}
         </h2>
         
-        <div className="px-12" data-allow-scroll="true">
+        <div ref={carouselRef} className="px-12" data-allow-scroll="true">
           <Carousel
             opts={{
               align: "start",
-              loop: true,
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {teamMembers.map((partner) => (
-                <CarouselItem key={partner.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <div className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 h-full`}>
-                    <div className="p-4 md:p-6">
-                      <div className="flex flex-col items-center text-center gap-4">
-                        <div className="w-20 h-20 md:w-24 md:h-24 overflow-hidden flex-shrink-0 border-2 border-white/20">
-                          <img 
-                            src={partner.image} 
-                            alt={partner.name}
-                            className="w-full h-full object-cover"
-                          />
+            <CarouselContent>
+              {teamMembers.map((member, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <div className={`p-6 h-full ${isDark ? 'bg-white/5' : 'bg-white'} rounded-lg shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col`}>
+                    <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200">
+                      {member.image ? (
+                        <img 
+                          src={member.image} 
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className={`w-full h-full flex items-center justify-center text-4xl ${isDark ? 'bg-white/10' : 'bg-gray-300'}`}>
+                          👤
                         </div>
-                        <div className="flex-grow">
-                          <h3 className={`text-lg md:text-xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                            {partner.name}
-                          </h3>
-                          <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                            {partner.title} - {partner.oab}
-                          </p>
-                          <a 
-                            href={`mailto:${partner.email}`} 
-                            className={`text-xs hover:underline ${isDark ? 'text-white' : 'text-black'} block mb-3`}
-                          >
-                            {partner.email}
-                          </a>
-                          <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
-                            {getTeamMemberDescription(partner)}
-                          </p>
-                        </div>
-                      </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-center flex-1 flex flex-col">
+                      <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                        {member.name}
+                      </h3>
+                      <p className={`text-sm mb-3 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                        {member.position}
+                      </p>
+                      <p className={`text-sm leading-relaxed flex-1 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                        {member.description}
+                      </p>
                     </div>
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className={`${isDark ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-800'}`} />
-            <CarouselNext className={`${isDark ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-800'}`} />
+            <CarouselPrevious />
+            <CarouselNext />
           </Carousel>
+        </div>
+
+        {/* Navigation button to next section */}
+        <div ref={buttonRef} className="flex justify-center mt-12">
+          <Button
+            id="next-section-button"
+            onClick={goToNextSection}
+            variant="outline"
+            className={`px-8 py-3 text-lg transition-all duration-300 ${
+              isDark 
+                ? 'bg-transparent border-white text-white hover:bg-white hover:text-black' 
+                : 'bg-transparent border-black text-black hover:bg-black hover:text-white'
+            }`}
+          >
+            Próxima Seção: Área do Cliente
+          </Button>
         </div>
       </div>
     </div>

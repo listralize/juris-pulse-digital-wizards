@@ -33,13 +33,14 @@ export const useSectionTransition = (sections: Section[]) => {
     };
   }, [sections]);
 
-  // Add wheel event listener for scroll navigation, but skip for scrollable sections
+  // Add wheel event listener for scroll navigation, but completely skip for certain sections
   useEffect(() => {
     let isScrolling = false;
     
     const handleWheel = (e: WheelEvent) => {
-      // Always allow normal scroll for contact and socios sections
+      // Completely disable custom wheel handling for scrollable sections
       if (activeSection === 'contact' || activeSection === 'socios') {
+        // Allow normal browser scroll behavior
         return;
       }
       
@@ -81,8 +82,10 @@ export const useSectionTransition = (sections: Section[]) => {
       }, 1000);
     };
 
-    // Add wheel event listener to document
-    document.addEventListener('wheel', handleWheel, { passive: false });
+    // Only add wheel event listener for non-scrollable sections
+    if (activeSection !== 'contact' && activeSection !== 'socios') {
+      document.addEventListener('wheel', handleWheel, { passive: false });
+    }
     
     return () => {
       document.removeEventListener('wheel', handleWheel);
