@@ -1,11 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { Route } from 'react-router-dom';
-import { ServicePage } from '../types/adminTypes';
+import { ServicePage, CategoryInfo } from '../types/adminTypes';
+import { categories as defaultCategories } from '../types/adminTypes';
 import DynamicServicePage from './DynamicServicePage';
 
 export const useDynamicServiceRoutes = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
+  const [categories, setCategories] = useState<CategoryInfo[]>(defaultCategories);
 
   useEffect(() => {
     const loadServicePages = () => {
@@ -22,17 +24,37 @@ export const useDynamicServiceRoutes = () => {
       }
     };
 
-    loadServicePages();
+    const loadCategories = () => {
+      try {
+        const savedCategories = localStorage.getItem('adminCategories');
+        if (savedCategories) {
+          const parsedCategories = JSON.parse(savedCategories);
+          if (Array.isArray(parsedCategories)) {
+            setCategories(parsedCategories);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+      }
+    };
 
-    // Escutar atualizações das páginas de serviços
+    loadServicePages();
+    loadCategories();
+
     const handleServicePagesUpdate = (event: CustomEvent) => {
       setServicePages(event.detail);
     };
 
+    const handleCategoriesUpdate = (event: CustomEvent) => {
+      setCategories(event.detail);
+    };
+
     window.addEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
+    window.addEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
 
     return () => {
       window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
+      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
     };
   }, []);
 
@@ -45,7 +67,7 @@ export const useDynamicServiceRoutes = () => {
       <Route 
         key={page.id} 
         path={path} 
-        element={<DynamicServicePage pageData={page} />} 
+        element={<DynamicServicePage pageData={page} categories={categories} />} 
       />
     );
   }).filter(Boolean);

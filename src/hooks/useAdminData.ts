@@ -1,15 +1,18 @@
+
 import { useState, useEffect } from 'react';
-import { TeamMember, SpecializedService, PageTexts, ServicePage } from '../types/adminTypes';
+import { TeamMember, SpecializedService, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
 import { defaultTeamMembers } from '../data/defaultTeamMembers';
 import { defaultSpecializedServices } from '../data/defaultSpecializedServices';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { defaultServicePages } from '../data/defaultServicePages';
+import { categories as defaultCategories } from '../types/adminTypes';
 
 export const useAdminData = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
+  const [categories, setCategories] = useState<CategoryInfo[]>(defaultCategories);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +34,6 @@ export const useAdminData = () => {
         localStorage.setItem('adminTeamMembers', JSON.stringify(defaultTeamMembers));
       }
 
-      // Carregar serviços especializados
       const savedServices = localStorage.getItem('adminSpecializedServices');
       if (savedServices) {
         const parsedServices = JSON.parse(savedServices);
@@ -44,6 +46,26 @@ export const useAdminData = () => {
       } else {
         setSpecializedServices(defaultSpecializedServices);
         localStorage.setItem('adminSpecializedServices', JSON.stringify(defaultSpecializedServices));
+      }
+
+      // Carregar categorias personalizadas
+      const savedCategories = localStorage.getItem('adminCategories');
+      if (savedCategories) {
+        try {
+          const parsedCategories = JSON.parse(savedCategories);
+          if (Array.isArray(parsedCategories) && parsedCategories.length > 0) {
+            setCategories(parsedCategories);
+          } else {
+            setCategories(defaultCategories);
+            localStorage.setItem('adminCategories', JSON.stringify(defaultCategories));
+          }
+        } catch (error) {
+          console.error('Erro ao parsear categorias salvas:', error);
+          setCategories(defaultCategories);
+        }
+      } else {
+        setCategories(defaultCategories);
+        localStorage.setItem('adminCategories', JSON.stringify(defaultCategories));
       }
 
       // Carregar páginas de serviços
@@ -96,6 +118,7 @@ export const useAdminData = () => {
       setSpecializedServices(defaultSpecializedServices);
       setServicePages([...defaultServicePages]);
       setPageTexts(defaultPageTexts);
+      setCategories(defaultCategories);
     }
     
     setIsLoading(false);
@@ -118,7 +141,6 @@ export const useAdminData = () => {
     setServicePages(pages);
     localStorage.setItem('adminServicePages', JSON.stringify(pages));
     
-    // Disparar evento customizado para que outras partes da aplicação saibam que os dados foram atualizados
     window.dispatchEvent(new CustomEvent('servicePagesUpdated', { detail: pages }));
   };
 
@@ -128,18 +150,27 @@ export const useAdminData = () => {
     localStorage.setItem('adminPageTexts', JSON.stringify(texts));
   };
 
+  const saveCategories = (cats: CategoryInfo[]) => {
+    console.log('Salvando categorias:', cats.length);
+    setCategories(cats);
+    localStorage.setItem('adminCategories', JSON.stringify(cats));
+    
+    window.dispatchEvent(new CustomEvent('categoriesUpdated', { detail: cats }));
+  };
+
   return { 
     teamMembers, 
     specializedServices, 
     servicePages,
     pageTexts, 
+    categories,
     isLoading, 
     saveTeamMembers, 
     saveSpecializedServices, 
     saveServicePages,
-    savePageTexts 
+    savePageTexts,
+    saveCategories
   };
 };
 
-// Re-export types for backward compatibility
 export type { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';

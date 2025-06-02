@@ -1,25 +1,25 @@
 
 import React from 'react';
 import { Card, CardContent } from '../../ui/card';
-import { categories } from '../../../types/adminTypes';
-import { ServicePage } from '../../../types/adminTypes';
+import { CategoryInfo, ServicePage } from '../../../types/adminTypes';
 import { useTheme } from '../../ThemeProvider';
 
 interface CategoryGridProps {
+  categories: CategoryInfo[];
   servicePages: ServicePage[];
   onCategorySelect: (category: string) => void;
 }
 
-export const CategoryGrid: React.FC<CategoryGridProps> = ({ servicePages, onCategorySelect }) => {
+export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, servicePages, onCategorySelect }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   console.log('CategoryGrid: Total de páginas recebidas:', servicePages.length);
+  console.log('CategoryGrid: Categorias disponíveis:', categories.length);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => {
-        // Conta páginas atuais que estão carregadas
         const currentCategoryPages = servicePages.filter(page => page.category === category.value);
         
         console.log(`${category.label}: páginas encontradas=${currentCategoryPages.length}`);

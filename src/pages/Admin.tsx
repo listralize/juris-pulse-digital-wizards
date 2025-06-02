@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { FileText, Briefcase, Globe, Edit } from 'lucide-react';
 import { useAdminData } from '../hooks/useAdminData';
 import { useBlogData } from '../hooks/useBlogData';
-import { TeamMember, SpecializedService, ServicePage, PageTexts } from '../types/adminTypes';
+import { TeamMember, SpecializedService, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
@@ -22,11 +21,13 @@ const Admin = () => {
     teamMembers: initialTeamMembers, 
     specializedServices: initialSpecializedServices,
     servicePages: initialServicePages,
+    categories: initialCategories,
     pageTexts: initialPageTexts, 
     isLoading,
     saveTeamMembers,
     saveSpecializedServices,
     saveServicePages,
+    saveCategories,
     savePageTexts
   } = useAdminData();
 
@@ -39,6 +40,7 @@ const Admin = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [specializedServices, setSpecializedServices] = useState<SpecializedService[]>([]);
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [pageTexts, setPageTexts] = useState<PageTexts>({
     heroTitle: '',
     heroSubtitle: '',
@@ -87,9 +89,10 @@ const Admin = () => {
       setTeamMembers(initialTeamMembers);
       setSpecializedServices(initialSpecializedServices);
       setServicePages(initialServicePages);
+      setCategories(initialCategories);
       setPageTexts(initialPageTexts);
     }
-  }, [isLoading, initialTeamMembers, initialSpecializedServices, initialServicePages, initialPageTexts]);
+  }, [isLoading, initialTeamMembers, initialSpecializedServices, initialServicePages, initialCategories, initialPageTexts]);
 
   const handleSaveTeamMembers = () => {
     saveTeamMembers(teamMembers);
@@ -100,6 +103,12 @@ const Admin = () => {
     setServicePages(pages);
     saveServicePages(pages);
     toast.success('Páginas de serviços salvas com sucesso!');
+  };
+
+  const handleSaveCategories = (cats: CategoryInfo[]) => {
+    setCategories(cats);
+    saveCategories(cats);
+    toast.success('Categorias salvas com sucesso!');
   };
 
   const handleSavePageTexts = () => {
@@ -180,8 +189,10 @@ const Admin = () => {
           <TabsContent value="service-pages">
             <ServicePagesManager 
               servicePages={servicePages}
+              categories={categories}
               pageTexts={pageTexts}
               onSave={handleSaveServicePages}
+              onSaveCategories={handleSaveCategories}
               onSavePageTexts={handleSavePageTexts}
               onUpdatePageTexts={setPageTexts}
             />

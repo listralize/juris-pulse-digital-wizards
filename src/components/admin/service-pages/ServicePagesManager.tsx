@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ServicePage, PageTexts } from '../../../types/adminTypes';
-import { categories } from '../../../types/adminTypes';
+import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Plus, ArrowLeft, Save, Settings } from 'lucide-react';
@@ -9,20 +8,24 @@ import { useTheme } from '../../ThemeProvider';
 import { CategoryGrid } from './CategoryGrid';
 import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
-import { CategoryTextsManagement } from '../CategoryTextsManagement';
+import { CategoriesManager } from './CategoriesManager';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
+  categories: CategoryInfo[];
   pageTexts: PageTexts;
   onSave: (pages: ServicePage[]) => void;
+  onSaveCategories: (categories: CategoryInfo[]) => void;
   onSavePageTexts: () => void;
   onUpdatePageTexts: (texts: PageTexts) => void;
 }
 
 export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ 
   servicePages, 
+  categories,
   pageTexts,
-  onSave, 
+  onSave,
+  onSaveCategories, 
   onSavePageTexts,
   onUpdatePageTexts 
 }) => {
@@ -34,7 +37,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
 
-  // Sincronizar páginas locais com as páginas recebidas
   useEffect(() => {
     if (servicePages && servicePages.length >= 0) {
       console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
@@ -128,32 +130,25 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Se está editando categorias
   if (showCategoryEditor) {
     return (
-      <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button 
-                onClick={() => setShowCategoryEditor(false)}
-                variant="outline"
-                size="sm"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Button>
-              <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-                Editar Categorias de Serviços
-              </CardTitle>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <CategoryTextsManagement
-            pageTexts={pageTexts}
-            onUpdatePageTexts={onUpdatePageTexts}
-            onSave={onSavePageTexts}
-          />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowCategoryEditor(false)}
+            variant="outline"
+            size="sm"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
+            Editar Categorias
+          </h2>
+        </div>
+        <CategoriesManager 
+          categories={categories}
+          onSave={onSaveCategories}
+        />
+      </div>
     );
   }
 
@@ -180,6 +175,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         </CardHeader>
         <CardContent>
           <CategoryGrid 
+            categories={categories}
             servicePages={localPages} 
             onCategorySelect={setSelectedCategory} 
           />
