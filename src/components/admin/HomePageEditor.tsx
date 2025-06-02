@@ -214,6 +214,24 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   </div>
 
                   <div>
+                    <Label>Direito do Trabalho - Título</Label>
+                    <Input
+                      value={pageTexts.trabalhoTitle}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhoTitle: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Direito do Trabalho - Descrição</Label>
+                    <Textarea
+                      value={pageTexts.trabalhoDescription}
+                      onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhoDescription: e.target.value})}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
                     <Label>Direito Civil - Título</Label>
                     <Input
                       value={pageTexts.civilTitle || 'Direito Civil'}
@@ -226,24 +244,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <Textarea
                       value={pageTexts.civilDescription || 'Proteção de direitos e interesses individuais'}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, civilDescription: e.target.value})}
-                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Direito Trabalhista - Título</Label>
-                    <Input
-                      value={pageTexts.trabalhistaTitle || 'Direito do Trabalho'}
-                      onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhistaTitle: e.target.value})}
-                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    />
-                  </div>
-                  <div>
-                    <Label>Direito Trabalhista - Descrição</Label>
-                    <Textarea
-                      value={pageTexts.trabalhistaDescription || 'Defesa dos direitos trabalhistas'}
-                      onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhistaDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       rows={2}
                     />
@@ -320,6 +320,45 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       rows={2}
                     />
                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>Textos das Áreas Específicas (Categoria):</h4>
+                
+                <div className="grid grid-cols-1 gap-4">
+                  {pageTexts.categoryTexts.map((category, index) => (
+                    <div key={category.id} className={`p-4 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-sm">Título - {category.id}</Label>
+                          <Input
+                            value={category.title}
+                            onChange={(e) => {
+                              const updatedCategories = [...pageTexts.categoryTexts];
+                              updatedCategories[index] = { ...category, title: e.target.value };
+                              onUpdatePageTexts({...pageTexts, categoryTexts: updatedCategories});
+                            }}
+                            className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                            size="sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm">Descrição - {category.id}</Label>
+                          <Textarea
+                            value={category.description}
+                            onChange={(e) => {
+                              const updatedCategories = [...pageTexts.categoryTexts];
+                              updatedCategories[index] = { ...category, description: e.target.value };
+                              onUpdatePageTexts({...pageTexts, categoryTexts: updatedCategories});
+                            }}
+                            className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
