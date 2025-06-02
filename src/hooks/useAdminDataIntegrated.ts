@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TeamMember, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
 import { useSupabaseDataNew } from './useSupabaseDataNew';
@@ -36,32 +35,62 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
-  // Função para executar migração manual (SEM LOOPS)
+  // MIGRAÇÃO FORÇADA DAS CATEGORIAS - FUNÇÃO ESPECIAL
+  const forceCategoryMigration = async () => {
+    if (localCategories.length === 0) {
+      console.log('⚠️ Nenhuma categoria local para migrar');
+      return;
+    }
+
+    console.log('🔥 MIGRAÇÃO FORÇADA DE CATEGORIAS INICIADA:', localCategories.length);
+    setIsTransitioning(true);
+    
+    try {
+      // Forçar migração das categorias locais
+      await saveSupabaseCategories(localCategories);
+      console.log('✅ Categorias migradas com sucesso');
+      
+      // Aguardar e recarregar
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await refreshData();
+      
+      toast.success('🎉 Categorias migradas com sucesso!');
+      setHasMigrated(true);
+    } catch (error) {
+      console.error('❌ Erro na migração de categorias:', error);
+      toast.error('❌ Erro na migração de categorias');
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
+  // Função para executar migração manual completa
   const executeMigration = async () => {
     if (isTransitioning) {
       console.log('⏸️ Migração já em andamento, ignorando nova tentativa');
       return;
     }
 
-    console.log('🚀 INICIANDO MIGRAÇÃO MANUAL');
+    console.log('🚀 INICIANDO MIGRAÇÃO MANUAL COMPLETA');
     setIsTransitioning(true);
     
     try {
       let migrationCount = 0;
       
-      // 1. Migrar categorias PRIMEIRO (dependência para service pages)
-      if (localCategories.length > 0 && supabaseCategories.length === 0) {
-        console.log('📂 Migrando categorias...', localCategories.length);
+      // 1. PRIORIDADE MÁXIMA: Migrar categorias PRIMEIRO
+      if (localCategories.length > 0) {
+        console.log('📂 🔥 MIGRANDO CATEGORIAS COM PRIORIDADE MÁXIMA...', localCategories.length);
         await saveSupabaseCategories(localCategories);
         migrationCount++;
-        console.log('✅ Categorias migradas');
+        console.log('✅ Categorias migradas com sucesso');
         
         // Aguardar para garantir que as categorias estão salvas
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
         await refreshData();
       }
       
-      // 2. Migrar configurações
+      // ... keep existing code (migrar outras partes)
+      
       if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
         console.log('⚙️ Migrando configurações...');
         await saveSupabasePageTexts(localPageTexts);
@@ -69,7 +98,6 @@ export const useAdminDataIntegrated = () => {
         console.log('✅ Configurações migradas');
       }
       
-      // 3. Migrar equipe
       if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
         console.log('👥 Migrando equipe...', localTeamMembers.length);
         await saveSupabaseTeamMembers(localTeamMembers);
@@ -77,7 +105,6 @@ export const useAdminDataIntegrated = () => {
         console.log('✅ Equipe migrada');
       }
       
-      // 4. Migrar páginas de serviços (depois das categorias)
       if (localServicePages.length > 0 && supabaseServicePages.length === 0) {
         console.log('📄 Migrando páginas de serviços...', localServicePages.length);
         await saveSupabaseServicePages(localServicePages);
@@ -104,22 +131,34 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
-  // Auto-migração inteligente (SEM LOOPS INFINITOS)
+  // Auto-migração inteligente - SEM LOOPS, COM FOCO EM CATEGORIAS
   useEffect(() => {
     if (supabaseLoading || hasMigrated || isTransitioning) return;
     
     const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
     const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
     
+    // VERIFICAÇÃO ESPECIAL PARA CATEGORIAS
+    const categoriesMissing = localCategories.length > 0 && supabaseCategories.length === 0;
+    
     console.log('🔍 VERIFICAÇÃO AUTO-MIGRAÇÃO:', {
       hasLocalData,
       hasSupabaseData,
-      categoriesNeedMigration: localCategories.length > 0 && supabaseCategories.length === 0
+      categoriesMissing,
+      localCategories: localCategories.length,
+      supabaseCategories: supabaseCategories.length
     });
+    
+    // Se há categorias locais mas não no Supabase, forçar migração
+    if (categoriesMissing) {
+      console.log('🔥 DETECTADO: Categorias locais não migradas - iniciando migração forçada');
+      forceCategoryMigration();
+      return;
+    }
     
     // MIGRAR apenas se há dados locais e NADA no Supabase (primeira vez)
     if (hasLocalData && !hasSupabaseData) {
-      console.log('🔄 Iniciando migração automática...');
+      console.log('🔄 Iniciando migração automática completa...');
       executeMigration();
     } else if (hasSupabaseData) {
       setHasMigrated(true);
@@ -127,11 +166,7 @@ export const useAdminDataIntegrated = () => {
     }
   }, [
     supabaseLoading, 
-    localTeamMembers.length, 
-    localServicePages.length, 
     localCategories.length,
-    supabaseTeamMembers.length,
-    supabaseServicePages.length,
     supabaseCategories.length,
     hasMigrated,
     isTransitioning
@@ -226,7 +261,9 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
+  // SALVAMENTO DE CATEGORIAS - AGORA COM SINCRONIZAÇÃO INSTANTÂNEA
   const saveCategoriesData = async (cats: CategoryInfo[]) => {
+    console.log('🔥 saveCategoriesData chamado com', cats.length, 'categorias');
     if (useSupabaseData) {
       await instantSyncWrapper(async () => {
         await saveSupabaseCategories(cats);
@@ -292,6 +329,9 @@ export const useAdminDataIntegrated = () => {
     
     // Função para migração manual
     executeMigration,
+    
+    // Função especial para migração de categorias
+    forceCategoryMigration,
     
     // Controle de sync automático
     autoSyncEnabled,

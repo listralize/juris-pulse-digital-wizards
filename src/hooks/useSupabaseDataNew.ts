@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { TeamMember, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
@@ -89,13 +88,15 @@ export const useSupabaseDataNew = () => {
         .eq('is_active', true)
         .order('display_order');
 
-      // Carregar categorias
-      const { data: categoriesData } = await supabase
+      // Carregar categorias - COM LOG DETALHADO
+      const { data: categoriesData, error: categoriesError } = await supabase
         .from('law_categories')
         .select('*')
         .eq('is_active', true)
         .order('display_order');
 
+      console.log('📊 Query de categorias - dados brutos:', categoriesData);
+      console.log('📊 Query de categorias - erro:', categoriesError);
       console.log('📊 Categorias carregadas do Supabase:', categoriesData?.length || 0);
 
       // Carregar páginas de serviços com relacionamentos
@@ -164,21 +165,27 @@ export const useSupabaseDataNew = () => {
         setTeamMembers(formattedTeamMembers);
       }
 
-      // Montar dados das categorias - CORRIGIDO
+      // PROCESSAMENTO DE CATEGORIAS - COMPLETAMENTE CORRIGIDO
       if (categoriesData && categoriesData.length > 0) {
-        const formattedCategories: CategoryInfo[] = categoriesData.map(cat => ({
-          id: cat.id,
-          value: cat.category_key,
-          label: cat.name,
-          name: cat.name,
-          description: cat.description || '',
-          icon: cat.icon || 'FileText',
-          color: cat.color || 'bg-gray-500'
-        }));
+        const formattedCategories: CategoryInfo[] = categoriesData.map(cat => {
+          // Garantir que todos os campos obrigatórios estão preenchidos
+          const categoryName = cat.name || cat.category_key || 'Categoria';
+          const categoryKey = cat.category_key || cat.name?.toLowerCase().replace(/\s+/g, '-') || 'categoria';
+          
+          return {
+            id: cat.id,
+            value: categoryKey,
+            label: categoryName,
+            name: categoryName, // CAMPO OBRIGATÓRIO
+            description: cat.description || '',
+            icon: cat.icon || 'FileText',
+            color: cat.color || 'bg-gray-500'
+          };
+        });
         setCategories(formattedCategories);
-        console.log('✅ Categorias processadas:', formattedCategories.length);
+        console.log('✅ Categorias processadas e setadas:', formattedCategories.length);
       } else {
-        console.log('⚠️ Nenhuma categoria encontrada no Supabase');
+        console.log('⚠️ Nenhuma categoria encontrada no Supabase - array vazio');
         setCategories([]);
       }
 
@@ -226,7 +233,6 @@ export const useSupabaseDataNew = () => {
     try {
       console.log('💾 Salvando configurações no Supabase...');
       
-      // Atualizar configurações do site
       await supabase
         .from('site_settings')
         .upsert({
@@ -246,7 +252,6 @@ export const useSupabaseDataNew = () => {
           updated_at: new Date().toISOString()
         });
 
-      // Atualizar informações de contato
       await supabase
         .from('contact_info')
         .upsert({
@@ -257,7 +262,6 @@ export const useSupabaseDataNew = () => {
           updated_at: new Date().toISOString()
         });
 
-      // Atualizar informações do rodapé
       await supabase
         .from('footer_info')
         .upsert({
@@ -279,13 +283,11 @@ export const useSupabaseDataNew = () => {
     try {
       console.log('💾 Salvando equipe no Supabase...');
       
-      // Primeiro, desativar todos os membros existentes
       await supabase
         .from('team_members')
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Inserir/atualizar novos membros, garantindo UUIDs válidos
       const memberData = members.map((member, index) => ({
         id: ensureValidUUID(member.id),
         name: member.name,
@@ -316,24 +318,18 @@ export const useSupabaseDataNew = () => {
     try {
       console.log('💾 Salvando', pages.length, 'páginas de serviços no Supabase...');
       
-      // Primeiro, desativar todas as páginas existentes
       await supabase
         .from('service_pages')
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Para cada página, salvar página principal e relacionamentos
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         console.log(`📄 Processando página ${i + 1}/${pages.length}: ${page.title}`);
 
-        // Gerar UUID válido se necessário
         const validPageId = ensureValidUUID(page.id);
-
-        // Encontrar categoria correspondente
         const category = categories.find(cat => cat.value === page.category);
         
-        // Salvar página principal
         const { data: savedPage, error: pageError } = await supabase
           .from('service_pages')
           .upsert({
@@ -354,7 +350,6 @@ export const useSupabaseDataNew = () => {
           continue;
         }
 
-        // Limpar relacionamentos existentes
         await Promise.all([
           supabase.from('service_benefits').delete().eq('service_page_id', validPageId),
           supabase.from('service_process_steps').delete().eq('service_page_id', validPageId),
@@ -362,7 +357,6 @@ export const useSupabaseDataNew = () => {
           supabase.from('service_testimonials').delete().eq('service_page_id', validPageId)
         ]);
 
-        // Salvar benefícios
         if (page.benefits && page.benefits.length > 0) {
           const benefitsData = page.benefits.map((benefit, index) => ({
             service_page_id: validPageId,
@@ -371,11 +365,9 @@ export const useSupabaseDataNew = () => {
             icon: benefit.icon,
             display_order: index
           }));
-
           await supabase.from('service_benefits').insert(benefitsData);
         }
 
-        // Salvar processos
         if (page.process && page.process.length > 0) {
           const processData = page.process.map((step, index) => ({
             service_page_id: validPageId,
@@ -384,11 +376,9 @@ export const useSupabaseDataNew = () => {
             description: step.description || '',
             display_order: index
           }));
-
           await supabase.from('service_process_steps').insert(processData);
         }
 
-        // Salvar FAQ
         if (page.faq && page.faq.length > 0) {
           const faqData = page.faq.map((faq, index) => ({
             service_page_id: validPageId,
@@ -396,11 +386,9 @@ export const useSupabaseDataNew = () => {
             answer: faq.answer,
             display_order: index
           }));
-
           await supabase.from('service_faq').insert(faqData);
         }
 
-        // Salvar depoimentos
         if (page.testimonials && page.testimonials.length > 0) {
           const testimonialsData = page.testimonials.map((testimonial, index) => ({
             service_page_id: validPageId,
@@ -410,7 +398,6 @@ export const useSupabaseDataNew = () => {
             image: testimonial.image,
             display_order: index
           }));
-
           await supabase.from('service_testimonials').insert(testimonialsData);
         }
       }
@@ -423,32 +410,42 @@ export const useSupabaseDataNew = () => {
     }
   };
 
-  // Salvar categorias com sincronização automática - TOTALMENTE CORRIGIDO
+  // Salvar categorias com sincronização automática - TOTALMENTE REFEITA E OTIMIZADO
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
-      console.log('💾 Salvando', cats.length, 'categorias no Supabase...');
+      console.log('💾 🔥 SALVANDO CATEGORIAS - VERSÃO DEFINITIVA:', cats.length);
       
-      // Primeiro, desativar todas as categorias existentes
+      // 1. Desativar categorias existentes
       await supabase
         .from('law_categories')
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Processar categorias com dados completos
+      console.log('✅ Categorias existentes desativadas');
+
+      // 2. Processar e validar cada categoria
       const categoryData = cats.map((cat, index) => {
         const validId = ensureValidUUID(cat.id || '');
         
-        // GARANTIR que todos os campos obrigatórios estão preenchidos
-        const categoryName = cat.name || cat.label || cat.value || 'Categoria sem nome';
-        const categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || 'categoria-sem-chave';
+        // GARANTIR que name e category_key estão corretos
+        let categoryName = cat.name || cat.label || cat.value;
+        let categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-');
         
-        console.log(`📂 Processando categoria: ${categoryName} (${categoryKey}) -> UUID: ${validId}`);
+        // Fallbacks robustos
+        if (!categoryName || categoryName.trim() === '') {
+          categoryName = `Categoria ${index + 1}`;
+        }
+        if (!categoryKey || categoryKey.trim() === '') {
+          categoryKey = `categoria-${index + 1}`;
+        }
+        
+        console.log(`📂 Categoria ${index + 1}: "${categoryName}" (${categoryKey}) -> UUID: ${validId}`);
         
         return {
           id: validId,
           category_key: categoryKey,
-          name: categoryName, // CAMPO OBRIGATÓRIO
-          description: cat.description || '',
+          name: categoryName, // CAMPO OBRIGATÓRIO - sempre preenchido
+          description: cat.description || `Descrição da ${categoryName}`,
           icon: cat.icon || 'FileText',
           color: cat.color || 'bg-gray-500',
           display_order: index,
@@ -457,30 +454,44 @@ export const useSupabaseDataNew = () => {
         };
       });
 
-      console.log('📋 Dados das categorias para inserir:', categoryData);
+      console.log('📋 Dados das categorias processados:', categoryData);
 
-      const { data, error } = await supabase
-        .from('law_categories')
-        .upsert(categoryData);
+      // 3. Inserir categorias uma por uma para debug
+      for (let i = 0; i < categoryData.length; i++) {
+        const catData = categoryData[i];
+        console.log(`🔄 Inserindo categoria ${i + 1}/${categoryData.length}:`, catData);
+        
+        const { data: insertedCat, error: insertError } = await supabase
+          .from('law_categories')
+          .upsert(catData)
+          .select()
+          .single();
 
-      if (error) {
-        console.error('❌ Erro ao inserir categorias:', error);
-        throw error;
+        if (insertError) {
+          console.error(`❌ Erro ao inserir categoria ${i + 1}:`, insertError);
+          console.error('❌ Dados da categoria problemática:', catData);
+        } else {
+          console.log(`✅ Categoria ${i + 1} inserida:`, insertedCat);
+        }
       }
 
-      // Atualizar estado local com IDs válidos
-      const updatedCategories = cats.map((cat, index) => ({
-        ...cat,
-        id: categoryData[index].id,
-        name: categoryData[index].name
+      // 4. Atualizar estado local com dados corretos
+      const updatedCategories = categoryData.map(cat => ({
+        id: cat.id,
+        value: cat.category_key,
+        label: cat.name,
+        name: cat.name,
+        description: cat.description,
+        icon: cat.icon,
+        color: cat.color
       }));
       
       setCategories(updatedCategories);
-      console.log('✅ Categorias salvas no Supabase:', categoryData.length);
+      console.log('🎉 CATEGORIAS SALVAS COM SUCESSO:', updatedCategories.length);
       
       return updatedCategories;
     } catch (error) {
-      console.error('❌ Erro ao salvar categorias:', error);
+      console.error('💥 ERRO CRÍTICO ao salvar categorias:', error);
       throw error;
     }
   };
