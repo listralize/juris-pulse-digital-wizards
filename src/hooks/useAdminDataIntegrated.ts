@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TeamMember, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
 import { useSupabaseDataNew } from './useSupabaseDataNew';
@@ -36,7 +35,83 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
-  // MIGRAÇÃO FORÇADA ESPECÍFICA PARA CATEGORIAS - VERSÃO FINAL
+  // MIGRAÇÃO SEQUENCIAL - Categorias primeiro, depois páginas
+  const executeMigration = async () => {
+    if (isTransitioning) return;
+
+    console.log('🚀 EXECUTANDO MIGRAÇÃO SEQUENCIAL');
+    setIsTransitioning(true);
+    
+    try {
+      let migrationCount = 0;
+      
+      // 1. MIGRAR CATEGORIAS PRIMEIRO (obrigatório)
+      if (localCategories.length > 0) {
+        console.log('🔥 Migrando categorias primeiro...');
+        
+        const categoriesForMigration = localCategories.map((cat, index) => {
+          const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
+          const categoryValue = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
+          
+          return {
+            id: cat.id || crypto.randomUUID(),
+            value: categoryValue,
+            label: categoryName,
+            name: categoryName,
+            description: cat.description || `Descrição da ${categoryName}`,
+            icon: cat.icon || 'FileText',
+            color: cat.color || 'bg-blue-500'
+          };
+        });
+
+        await saveSupabaseCategories(categoriesForMigration);
+        migrationCount++;
+        
+        // Aguardar para garantir que as categorias foram salvas
+        console.log('⏳ Aguardando categorias serem processadas...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Recarregar dados para pegar as categorias com IDs corretos
+        await refreshData();
+        console.log('✅ Categorias migradas e dados recarregados');
+      }
+      
+      // 2. MIGRAR PÁGINAS DE SERVIÇOS (após categorias estarem no Supabase)
+      if (localServicePages.length > 0) {
+        console.log('📄 Migrando páginas de serviços...');
+        await saveSupabaseServicePages(localServicePages);
+        migrationCount++;
+      }
+      
+      // 3. Migrar outros dados
+      if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
+        console.log('⚙️ Migrando configurações...');
+        await saveSupabasePageTexts(localPageTexts);
+        migrationCount++;
+      }
+      
+      if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
+        console.log('👥 Migrando equipe...');
+        await saveSupabaseTeamMembers(localTeamMembers);
+        migrationCount++;
+      }
+      
+      if (migrationCount > 0) {
+        setHasMigrated(true);
+        toast.success(`🎉 Migração concluída! ${migrationCount} tipos de dados migrados.`);
+        
+        // Recarregar dados finais
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('❌ ERRO NA MIGRAÇÃO:', error);
+      toast.error('❌ Erro na migração completa');
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
+  // MIGRAÇÃO FORÇADA ESPECÍFICA PARA CATEGORIAS
   const forceCategoryMigration = async () => {
     if (localCategories.length === 0) {
       console.log('⚠️ Nenhuma categoria local para migrar');
@@ -48,9 +123,7 @@ export const useAdminDataIntegrated = () => {
     setIsTransitioning(true);
     
     try {
-      // Preparar categorias com todos os campos obrigatórios CORRETAMENTE
       const categoriesForMigration = localCategories.map((cat, index) => {
-        // GARANTIR que todos os campos estão corretos
         const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
         const categoryValue = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
         
@@ -58,7 +131,7 @@ export const useAdminDataIntegrated = () => {
           id: cat.id || crypto.randomUUID(),
           value: categoryValue,
           label: categoryName,
-          name: categoryName, // CAMPO OBRIGATÓRIO NO SUPABASE
+          name: categoryName,
           description: cat.description || `Descrição da ${categoryName}`,
           icon: cat.icon || 'FileText',
           color: cat.color || 'bg-blue-500'
@@ -69,7 +142,7 @@ export const useAdminDataIntegrated = () => {
       
       await saveSupabaseCategories(categoriesForMigration);
       
-      // Aguardar e recarregar FORÇADAMENTE
+      // Aguardar e recarregar
       await new Promise(resolve => setTimeout(resolve, 3000));
       await refreshData();
       
@@ -83,79 +156,33 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
-  // MIGRAÇÃO COMPLETA - SIMPLIFICADA
-  const executeMigration = async () => {
-    if (isTransitioning) return;
-
-    console.log('🚀 EXECUTANDO MIGRAÇÃO COMPLETA');
-    setIsTransitioning(true);
-    
-    try {
-      let migrationCount = 0;
-      
-      // 1. MIGRAR CATEGORIAS PRIMEIRO SE NECESSÁRIO
-      if (localCategories.length > 0 && supabaseCategories.length === 0) {
-        console.log('🔥 Migrando categorias...');
-        await forceCategoryMigration();
-        migrationCount++;
-        return; // Retornar aqui para focar só nas categorias
-      }
-      
-      // 2. Migrar outros dados apenas se categorias já estiverem ok
-      if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
-        console.log('⚙️ Migrando configurações...');
-        await saveSupabasePageTexts(localPageTexts);
-        migrationCount++;
-      }
-      
-      if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
-        console.log('👥 Migrando equipe...');
-        await saveSupabaseTeamMembers(localTeamMembers);
-        migrationCount++;
-      }
-      
-      if (localServicePages.length > 0 && supabaseServicePages.length === 0) {
-        console.log('📄 Migrando páginas de serviços...');
-        await saveSupabaseServicePages(localServicePages);
-        migrationCount++;
-      }
-      
-      if (migrationCount > 0) {
-        setHasMigrated(true);
-        toast.success(`🎉 Migração concluída! ${migrationCount} tipos de dados migrados.`);
-      }
-    } catch (error) {
-      console.error('❌ ERRO NA MIGRAÇÃO:', error);
-      toast.error('❌ Erro na migração completa');
-    } finally {
-      setIsTransitioning(false);
-    }
-  };
-
-  // Determinar qual fonte de dados usar - LÓGICA CORRIGIDA
-  const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
-  const useSupabaseData = hasSupabaseData || supabaseCategories.length > 0; // Priorizar Supabase se tem categorias
+  // Determinar qual fonte de dados usar - CORRIGIDO
+  const hasSupabaseData = supabaseCategories.length > 0 || supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabasePageTexts.heroTitle;
+  const useSupabaseData = hasSupabaseData;
 
   console.log('🔍 DECISÃO DE FONTE DE DADOS:', {
     supabaseCategories: supabaseCategories.length,
+    supabaseServicePages: supabaseServicePages.length,
     localCategories: localCategories.length,
+    localServicePages: localServicePages.length,
     hasSupabaseData,
     useSupabaseData
   });
 
-  // Dados finais - GARANTIR QUE CATEGORIAS SEJAM SEMPRE REPASSADAS
+  // Dados finais
   const teamMembers = useSupabaseData ? supabaseTeamMembers : localTeamMembers;
   const pageTexts = useSupabaseData ? supabasePageTexts : localPageTexts;
   const servicePages = useSupabaseData ? supabaseServicePages : localServicePages;
   const categories = useSupabaseData ? supabaseCategories : localCategories;
   const isLoading = supabaseLoading || isTransitioning;
 
-  // DEBUG: Log dos dados finais
   console.log('📊 DADOS FINAIS SENDO RETORNADOS:', {
     categories: categories.length,
     servicePages: servicePages.length,
     teamMembers: teamMembers.length,
-    useSupabaseData
+    useSupabaseData,
+    categoriesData: categories,
+    servicePagesData: servicePages
   });
 
   // WRAPPER PARA SINCRONIZAÇÃO AUTOMÁTICA

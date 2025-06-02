@@ -99,12 +99,12 @@ export const useSupabaseDataNew = () => {
       console.log('📊 Query de categorias - erro:', categoriesError);
       console.log('📊 Categorias carregadas do Supabase:', categoriesData?.length || 0);
 
-      // Carregar páginas de serviços com relacionamentos
+      // Carregar páginas de serviços com relacionamentos CORRIGIDOS
       const { data: servicePagesData } = await supabase
         .from('service_pages')
         .select(`
           *,
-          law_categories(category_key, name),
+          law_categories!service_pages_category_id_fkey(category_key, name),
           service_benefits(*),
           service_process_steps(*),
           service_faq(*),
@@ -112,6 +112,9 @@ export const useSupabaseDataNew = () => {
         `)
         .eq('is_active', true)
         .order('display_order');
+
+      console.log('📄 Páginas de serviços carregadas:', servicePagesData?.length || 0);
+      console.log('📄 Dados das páginas:', servicePagesData);
 
       // Montar dados das páginas de texto
       if (siteSettings && contactInfo && footerInfo) {
@@ -168,7 +171,6 @@ export const useSupabaseDataNew = () => {
       // PROCESSAMENTO DE CATEGORIAS - COMPLETAMENTE CORRIGIDO
       if (categoriesData && categoriesData.length > 0) {
         const formattedCategories: CategoryInfo[] = categoriesData.map(cat => {
-          // Garantir que todos os campos obrigatórios estão preenchidos
           const categoryName = cat.name || cat.category_key || 'Categoria';
           const categoryKey = cat.category_key || cat.name?.toLowerCase().replace(/\s+/g, '-') || 'categoria';
           
@@ -176,7 +178,7 @@ export const useSupabaseDataNew = () => {
             id: cat.id,
             value: categoryKey,
             label: categoryName,
-            name: categoryName, // CAMPO OBRIGATÓRIO
+            name: categoryName,
             description: cat.description || '',
             icon: cat.icon || 'FileText',
             color: cat.color || 'bg-gray-500'
@@ -184,41 +186,52 @@ export const useSupabaseDataNew = () => {
         });
         setCategories(formattedCategories);
         console.log('✅ Categorias processadas e setadas:', formattedCategories.length);
+        console.log('✅ Categorias:', formattedCategories);
       } else {
         console.log('⚠️ Nenhuma categoria encontrada no Supabase - array vazio');
         setCategories([]);
       }
 
-      // Montar dados das páginas de serviços
-      if (servicePagesData) {
-        const formattedServicePages: ServicePage[] = servicePagesData.map(page => ({
-          id: page.id,
-          title: page.title,
-          description: page.description || '',
-          category: page.law_categories?.category_key || '',
-          href: page.href || '',
-          benefits: page.service_benefits?.map((benefit: any) => ({
-            title: benefit.title,
-            description: benefit.description || '',
-            icon: benefit.icon
-          })) || [],
-          process: page.service_process_steps?.map((step: any) => ({
-            step: step.step_number,
-            title: step.title,
-            description: step.description || ''
-          })) || [],
-          faq: page.service_faq?.map((faq: any) => ({
-            question: faq.question,
-            answer: faq.answer
-          })) || [],
-          testimonials: page.service_testimonials?.map((testimonial: any) => ({
-            name: testimonial.name,
-            text: testimonial.text,
-            role: testimonial.role,
-            image: testimonial.image
-          })) || []
-        }));
+      // Montar dados das páginas de serviços COM CORREÇÃO DA VINCULAÇÃO
+      if (servicePagesData && servicePagesData.length > 0) {
+        const formattedServicePages: ServicePage[] = servicePagesData.map(page => {
+          const categoryKey = page.law_categories?.category_key || '';
+          console.log(`📄 Página "${page.title}" vinculada à categoria: ${categoryKey}`);
+          
+          return {
+            id: page.id,
+            title: page.title,
+            description: page.description || '',
+            category: categoryKey, // Usar o category_key da categoria vinculada
+            href: page.href || '',
+            benefits: page.service_benefits?.map((benefit: any) => ({
+              title: benefit.title,
+              description: benefit.description || '',
+              icon: benefit.icon
+            })) || [],
+            process: page.service_process_steps?.map((step: any) => ({
+              step: step.step_number,
+              title: step.title,
+              description: step.description || ''
+            })) || [],
+            faq: page.service_faq?.map((faq: any) => ({
+              question: faq.question,
+              answer: faq.answer
+            })) || [],
+            testimonials: page.service_testimonials?.map((testimonial: any) => ({
+              name: testimonial.name,
+              text: testimonial.text,
+              role: testimonial.role,
+              image: testimonial.image
+            })) || []
+          };
+        });
         setServicePages(formattedServicePages);
+        console.log('✅ Páginas de serviços processadas:', formattedServicePages.length);
+        console.log('✅ Páginas:', formattedServicePages);
+      } else {
+        console.log('⚠️ Nenhuma página de serviço encontrada');
+        setServicePages([]);
       }
 
     } catch (error) {
@@ -313,10 +326,18 @@ export const useSupabaseDataNew = () => {
     }
   };
 
-  // Salvar páginas de serviços com sincronização automática
+  // Salvar páginas de serviços com sincronização automática - CORRIGIDO
   const saveServicePages = async (pages: ServicePage[]) => {
     try {
       console.log('💾 Salvando', pages.length, 'páginas de serviços no Supabase...');
+      
+      // Primeiro, carregar categorias atualizadas para garantir vinculação correta
+      const { data: currentCategories } = await supabase
+        .from('law_categories')
+        .select('id, category_key')
+        .eq('is_active', true);
+
+      console.log('📂 Categorias disponíveis para vinculação:', currentCategories);
       
       await supabase
         .from('service_pages')
@@ -328,7 +349,16 @@ export const useSupabaseDataNew = () => {
         console.log(`📄 Processando página ${i + 1}/${pages.length}: ${page.title}`);
 
         const validPageId = ensureValidUUID(page.id);
-        const category = categories.find(cat => cat.value === page.category);
+        
+        // CORREÇÃO: Encontrar categoria pelo category_key, não pelo value
+        const category = currentCategories?.find(cat => cat.category_key === page.category);
+        
+        if (!category) {
+          console.warn(`⚠️ Categoria não encontrada para: ${page.category}`);
+          continue;
+        }
+
+        console.log(`🔗 Vinculando página "${page.title}" à categoria ID: ${category.id}`);
         
         const { data: savedPage, error: pageError } = await supabase
           .from('service_pages')
@@ -337,7 +367,7 @@ export const useSupabaseDataNew = () => {
             title: page.title,
             description: page.description,
             href: page.href,
-            category_id: category?.id,
+            category_id: category.id, // Usar o ID da categoria
             display_order: i,
             is_active: true,
             updated_at: new Date().toISOString()
@@ -349,6 +379,8 @@ export const useSupabaseDataNew = () => {
           console.error('❌ Erro ao salvar página:', pageError);
           continue;
         }
+
+        console.log('✅ Página salva com sucesso:', savedPage);
 
         await Promise.all([
           supabase.from('service_benefits').delete().eq('service_page_id', validPageId),
@@ -415,12 +447,12 @@ export const useSupabaseDataNew = () => {
     try {
       console.log('💾 🔥 SALVANDO CATEGORIAS - VERSÃO ANTI-CONFLITO:', cats.length);
       
-      // 1. DELETAR TODAS as categorias existentes primeiro (não apenas desativar)
+      // 1. DELETAR TODAS as categorias existentes primeiro
       console.log('🗑️ Deletando todas as categorias existentes...');
       const { error: deleteError } = await supabase
         .from('law_categories')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todas as categorias reais
+        .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (deleteError) {
         console.error('❌ Erro ao deletar categorias:', deleteError);
@@ -433,11 +465,9 @@ export const useSupabaseDataNew = () => {
       const categoryData = cats.map((cat, index) => {
         const validId = ensureValidUUID(cat.id || '');
         
-        // GARANTIR que name e category_key estão corretos
         let categoryName = cat.name || cat.label || cat.value;
         let categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-');
         
-        // Fallbacks robustos
         if (!categoryName || categoryName.trim() === '') {
           categoryName = `Categoria ${index + 1}`;
         }
@@ -450,7 +480,7 @@ export const useSupabaseDataNew = () => {
         return {
           id: validId,
           category_key: categoryKey,
-          name: categoryName, // CAMPO OBRIGATÓRIO - sempre preenchido
+          name: categoryName,
           description: cat.description || `Descrição da ${categoryName}`,
           icon: cat.icon || 'FileText',
           color: cat.color || 'bg-gray-500',
