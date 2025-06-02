@@ -93,9 +93,15 @@ export const useSupabaseServicePages = () => {
 
   const saveServicePages = async (pages: ServicePage[]) => {
     try {
-      console.log('💾 🔥 SALVANDO PÁGINAS DE SERVIÇOS - VERSÃO CORRIGIDA');
+      console.log('💾 🔥 SALVANDO PÁGINAS DE SERVIÇOS - VERSÃO FINAL CORRIGIDA');
       console.log('📄 Páginas recebidas:', pages.length);
       
+      if (!pages || pages.length === 0) {
+        console.log('⚠️ Nenhuma página para salvar');
+        setServicePages([]);
+        return;
+      }
+
       // 1. BUSCAR CATEGORIAS ATUALIZADAS DO SUPABASE
       console.log('📂 Buscando categorias atualizadas...');
       const { data: currentCategories, error: catError } = await supabase
@@ -122,7 +128,18 @@ export const useSupabaseServicePages = () => {
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // 3. PROCESSAR E SALVAR CADA PÁGINA
+      // 3. DELETAR DADOS RELACIONADOS EXISTENTES
+      console.log('🗑️ Limpando dados relacionados...');
+      await Promise.all([
+        supabase.from('service_benefits').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('service_process_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('service_faq').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('service_testimonials').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      ]);
+
+      // 4. PROCESSAR E SALVAR CADA PÁGINA
+      const savedPages: ServicePage[] = [];
+      
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         console.log(`📄 Processando página ${i + 1}/${pages.length}: "${page.title}"`);
@@ -130,20 +147,27 @@ export const useSupabaseServicePages = () => {
 
         const validPageId = ensureValidUUID(page.id);
         
-        // ENCONTRAR CATEGORIA CORRESPONDENTE
-        const matchingCategory = currentCategories.find(cat => 
-          cat.category_key === page.category || 
-          cat.name === page.category ||
-          cat.category_key === page.category?.toLowerCase().replace(/\s+/g, '-')
-        );
+        // ENCONTRAR CATEGORIA CORRESPONDENTE COM MATCH MAIS FLEXÍVEL
+        const matchingCategory = currentCategories.find(cat => {
+          const categoryMatch = cat.category_key === page.category || 
+                               cat.name === page.category ||
+                               cat.category_key === page.category?.toLowerCase().replace(/\s+/g, '-') ||
+                               cat.name?.toLowerCase().replace(/\s+/g, '-') === page.category?.toLowerCase().replace(/\s+/g, '-');
+          
+          if (categoryMatch) {
+            console.log(`✅ MATCH encontrado: "${cat.name}" (${cat.category_key}) para "${page.category}"`);
+          }
+          
+          return categoryMatch;
+        });
         
         if (!matchingCategory) {
           console.warn(`⚠️ CATEGORIA NÃO ENCONTRADA PARA "${page.category}" - PÁGINA: "${page.title}"`);
-          console.warn('📂 Categorias disponíveis:', currentCategories.map(c => c.category_key));
+          console.warn('📂 Categorias disponíveis:', currentCategories.map(c => `${c.name} (${c.category_key})`));
           continue; // Pular esta página se a categoria não for encontrada
         }
 
-        console.log(`✅ CATEGORIA ENCONTRADA: "${matchingCategory.name}" (ID: ${matchingCategory.id})`);
+        console.log(`✅ CATEGORIA VINCULADA: "${matchingCategory.name}" (ID: ${matchingCategory.id})`);
         
         // SALVAR PÁGINA COM CATEGORIA VINCULADA
         console.log(`💾 Salvando página "${page.title}" com categoria ID: ${matchingCategory.id}`);
@@ -154,7 +178,7 @@ export const useSupabaseServicePages = () => {
             title: page.title,
             description: page.description,
             href: page.href,
-            category_id: matchingCategory.id, // USAR O ID DA CATEGORIA
+            category_id: matchingCategory.id, // VINCULAÇÃO CORRETA
             display_order: i,
             is_active: true,
             updated_at: new Date().toISOString()
@@ -169,14 +193,6 @@ export const useSupabaseServicePages = () => {
 
         console.log(`✅ Página "${page.title}" salva com sucesso`);
 
-        // LIMPAR DADOS RELACIONADOS EXISTENTES
-        await Promise.all([
-          supabase.from('service_benefits').delete().eq('service_page_id', validPageId),
-          supabase.from('service_process_steps').delete().eq('service_page_id', validPageId),
-          supabase.from('service_faq').delete().eq('service_page_id', validPageId),
-          supabase.from('service_testimonials').delete().eq('service_page_id', validPageId)
-        ]);
-
         // SALVAR DADOS RELACIONADOS
         if (page.benefits && page.benefits.length > 0) {
           const benefitsData = page.benefits.map((benefit, index) => ({
@@ -186,7 +202,8 @@ export const useSupabaseServicePages = () => {
             icon: benefit.icon,
             display_order: index
           }));
-          await supabase.from('service_benefits').insert(benefitsData);
+          const { error: benefitsError } = await supabase.from('service_benefits').insert(benefitsData);
+          if (benefitsError) console.error('❌ Erro ao salvar benefits:', benefitsError);
         }
 
         if (page.process && page.process.length > 0) {
@@ -197,7 +214,8 @@ export const useSupabaseServicePages = () => {
             description: step.description || '',
             display_order: index
           }));
-          await supabase.from('service_process_steps').insert(processData);
+          const { error: processError } = await supabase.from('service_process_steps').insert(processData);
+          if (processError) console.error('❌ Erro ao salvar process:', processError);
         }
 
         if (page.faq && page.faq.length > 0) {
@@ -207,7 +225,8 @@ export const useSupabaseServicePages = () => {
             answer: faq.answer,
             display_order: index
           }));
-          await supabase.from('service_faq').insert(faqData);
+          const { error: faqError } = await supabase.from('service_faq').insert(faqData);
+          if (faqError) console.error('❌ Erro ao salvar FAQ:', faqError);
         }
 
         if (page.testimonials && page.testimonials.length > 0) {
@@ -219,12 +238,22 @@ export const useSupabaseServicePages = () => {
             image: testimonial.image,
             display_order: index
           }));
-          await supabase.from('service_testimonials').insert(testimonialsData);
+          const { error: testimonialsError } = await supabase.from('service_testimonials').insert(testimonialsData);
+          if (testimonialsError) console.error('❌ Erro ao salvar testimonials:', testimonialsError);
         }
+
+        // Adicionar à lista de páginas salvas com a categoria correta
+        savedPages.push({
+          ...page,
+          id: validPageId,
+          category: matchingCategory.category_key
+        });
       }
 
-      setServicePages(pages);
-      console.log('🎉 TODAS AS PÁGINAS SALVAS COM SUCESSO');
+      setServicePages(savedPages);
+      console.log('🎉 PÁGINAS SALVAS COM VINCULAÇÃO CORRETA:', savedPages.length);
+      
+      return savedPages;
     } catch (error) {
       console.error('💥 ERRO CRÍTICO AO SALVAR PÁGINAS:', error);
       throw error;
