@@ -33,31 +33,43 @@ export const useSectionTransition = (sections: Section[]) => {
     };
   }, [sections]);
 
-  // Add wheel event listener for scroll navigation - completely disable for scrollable sections
+  // Add wheel event listener for scroll navigation
   useEffect(() => {
     let isScrolling = false;
     
     const handleWheel = (e: WheelEvent) => {
-      // Completely disable custom wheel handling for scrollable sections
-      if (activeSection === 'contact' || activeSection === 'socios') {
-        console.log('Allowing normal scroll for section:', activeSection);
-        return; // Don't prevent default, allow normal scrolling
-      }
-      
-      // Check if we're inside any scrollable container
-      const target = e.target as HTMLElement;
-      const scrollableParent = target.closest('[data-allow-scroll="true"]') || 
-                              target.closest('#socios') || 
-                              target.closest('#contact') ||
-                              target.closest('.scroll-area') ||
-                              target.closest('[data-radix-scroll-area-viewport]');
-      
-      if (scrollableParent) {
-        console.log('Found scrollable parent, allowing normal scroll');
-        return; // Don't prevent default, allow normal scrolling
-      }
-      
       if (isScrolling || isTransitioning) return;
+      
+      // For scrollable sections, check if we're at boundaries
+      if (activeSection === 'contact' || activeSection === 'socios') {
+        const target = e.target as HTMLElement;
+        const scrollContainer = target.closest('[data-allow-scroll="true"]') || 
+                               target.closest('.section-container');
+        
+        if (scrollContainer) {
+          const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+          const isAtTop = scrollTop <= 1;
+          const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+          
+          // Only allow section transition if at boundaries
+          if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
+            console.log('Allowing internal scroll, not at boundary');
+            return; // Allow normal scrolling within the section
+          }
+          
+          console.log('At boundary, allowing section transition');
+        }
+      }
+      
+      // Check if we're inside any other scrollable container that shouldn't trigger transitions
+      const target = e.target as HTMLElement;
+      const scrollableParent = target.closest('[data-radix-scroll-area-viewport]') ||
+                              target.closest('.scroll-area:not(.section-container)');
+      
+      if (scrollableParent && activeSection !== 'contact' && activeSection !== 'socios') {
+        console.log('Found other scrollable parent, allowing normal scroll');
+        return;
+      }
       
       e.preventDefault();
       isScrolling = true;
@@ -83,10 +95,7 @@ export const useSectionTransition = (sections: Section[]) => {
       }, 1000);
     };
 
-    // Only add wheel event listener for non-scrollable sections
-    if (activeSection !== 'contact' && activeSection !== 'socios') {
-      document.addEventListener('wheel', handleWheel, { passive: false });
-    }
+    document.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
       document.removeEventListener('wheel', handleWheel);
