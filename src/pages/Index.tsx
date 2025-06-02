@@ -33,19 +33,15 @@ const Index = () => {
     document.body.style.color = isDark ? '#FFFFFF' : '#000000';
   }, [isDark]);
   
-  // Scroll to home section when component mounts
+  // Disable scroll for page-like navigation
   useEffect(() => {
-    setTimeout(() => {
-      const hash = window.location.hash;
-      if (!hash || hash === '#' || hash === '#home') {
-        window.scrollTo(0, 0);
-      } else if (hash) {
-        const targetElement = document.getElementById(hash.substring(1));
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
-    }, 100);
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    };
   }, []);
   
   return (

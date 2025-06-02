@@ -11,27 +11,33 @@ export const useSectionTransition = (sections: Section[]) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
   
-  // Handle initial load
+  // Handle initial load and hash changes
   useEffect(() => {
-    const initialHash = window.location.hash.substring(1);
-    const validIds = sections.map(section => section.id);
-    const initialSection = initialHash && validIds.includes(initialHash) ? initialHash : 'home';
+    const handleHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      const validIds = sections.map(section => section.id);
+      const newSection = hash && validIds.includes(hash) ? hash : 'home';
+      
+      console.log('Hash change detected:', hash, 'Setting section to:', newSection);
+      setActiveSection(newSection);
+    };
+
+    // Set initial section
+    handleHashChange();
     
-    setActiveSection(initialSection);
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
     
-    // Update URL if needed
-    if (window.location.hash !== `#${initialSection}`) {
-      if (history.pushState) {
-        history.pushState(null, '', `#${initialSection}`);
-      } else {
-        window.location.hash = initialSection;
-      }
-    }
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, [sections]);
   
   // Function to transition to a section
   const transitionToSection = (id: string) => {
     if (isTransitioning || id === activeSection) return;
+    
+    console.log('Transitioning to section:', id);
     setIsTransitioning(true);
     
     // Update URL
@@ -52,7 +58,8 @@ export const useSectionTransition = (sections: Section[]) => {
   return {
     activeSection,
     transitionToSection,
-    sectionsRef
+    sectionsRef,
+    isTransitioning
   };
 };
 

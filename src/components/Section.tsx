@@ -18,9 +18,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
       <div 
         id={id} 
         ref={ref}
-        className={`section-container w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
+        className={`section-container w-full h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
         style={{ 
           opacity: isActive ? 1 : 0,
+          visibility: isActive ? 'visible' : 'hidden',
           pointerEvents: isActive ? 'auto' : 'none',
           position: 'fixed',
           top: 0,
@@ -28,14 +29,12 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           right: 0,
           bottom: 0,
           zIndex: isActive ? 10 : 1,
-          transition: 'opacity 500ms ease',
+          transition: 'opacity 500ms ease, visibility 500ms ease',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          height: '100vh',
           maxHeight: '100vh',
-          overflow: 'hidden',
-          padding: id === 'contact' ? '60px 0 20px 0' : '0'
+          overflow: 'hidden'
         }}
       >
         {children}
