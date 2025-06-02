@@ -7,75 +7,83 @@ const AuxilioDoencaService = () => {
     <ServiceLandingLayout
       serviceArea="Direito Previdenciário"
       serviceName="Auxílio-Doença"
-      serviceDescription="Representação especializada para obtenção e manutenção do auxílio-doença, garantindo suporte financeiro durante períodos de incapacidade temporária para o trabalho."
+      serviceDescription="Assessoria completa para obtenção do auxílio-doença, garantindo que segurados incapacitados temporariamente para o trabalho recebam o benefício devido."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Perícia Médica Assistida",
-          description: "Acompanhamento em perícias médicas do INSS para garantir avaliação justa da incapacidade."
+          title: "Análise Médica Especializada",
+          description: "Avaliação criteriosa da documentação médica para fundamentar o pedido de auxílio-doença."
         },
         {
-          title: "Documentação Médica Completa",
-          description: "Organização de laudos, exames e relatórios médicos para fundamentar o pedido."
+          title: "Acompanhamento Pericial",
+          description: "Orientação e preparação para a perícia médica do INSS, maximizando as chances de deferimento."
         },
         {
           title: "Recursos e Contestações",
-          description: "Interposição de recursos em caso de negativa indevida do benefício pelo INSS."
+          description: "Interposição de recursos em caso de indeferimento, com fundamentação técnica robusta."
         },
         {
-          title: "Prorrogação do Benefício",
-          description: "Acompanhamento para renovação do auxílio-doença quando necessário."
+          title: "Análise de Carência",
+          description: "Verificação dos requisitos de carência e qualidade de segurado para garantir elegibilidade."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Avaliação Médica",
-          description: "Análise da documentação médica para verificar a caracterização da incapacidade temporária."
+          title: "Avaliação Inicial",
+          description: "Análise da situação médica, documentação disponível e histórico contributivo do segurado."
         },
         {
           step: 2,
-          title: "Verificação de Carência",
-          description: "Confirmação do cumprimento da carência de 12 contribuições mensais para o auxílio-doença."
+          title: "Organização Documental",
+          description: "Compilação de laudos médicos, exames e relatórios necessários para fundamentar o pedido."
         },
         {
           step: 3,
-          title: "Agendamento da Perícia",
-          description: "Agendamento e preparação para a perícia médica do INSS com orientações estratégicas."
+          title: "Protocolo do Pedido",
+          description: "Requerimento do auxílio-doença junto ao INSS com toda documentação organizada."
         },
         {
           step: 4,
-          title: "Acompanhamento Pericial",
-          description: "Assistência durante a perícia médica para garantir avaliação adequada da incapacidade."
+          title: "Preparação para Perícia",
+          description: "Orientação detalhada sobre o procedimento pericial e documentos a serem apresentados."
         },
         {
           step: 5,
-          title: "Recursos se Necessário",
-          description: "Interposição de recursos administrativos ou judiciais em caso de indeferimento indevido."
+          title: "Acompanhamento e Recursos",
+          description: "Monitoramento do processo e interposição de recursos se necessário."
         }
       ]}
       testimonials={[
         {
-          name: "Roberto L., Beneficiário",
-          quote: "Após negativa inicial, consegui o auxílio-doença com o acompanhamento jurídico. A orientação para a perícia foi fundamental."
+          name: "Maria S., Segurada",
+          quote: "Após três negativas, consegui o auxílio-doença com a assessoria especializada. A diferença foi fundamental."
         },
         {
-          name: "Fernanda P., Segurada",
-          quote: "O auxílio-doença foi concedido rapidamente com a documentação médica bem organizada pela equipe."
+          name: "João P., Aposentado",
+          quote: "O acompanhamento durante todo o processo me deu segurança e o benefício foi aprovado rapidamente."
+        },
+        {
+          name: "Ana L., Servidora",
+          quote: "Excelente orientação para a perícia médica. O profissionalismo fez toda a diferença no resultado."
         }
       ]}
       faq={[
         {
-          question: "Qual é a carência necessária para o auxílio-doença?",
-          answer: "Para doenças em geral, é necessária carência de 12 contribuições mensais. Para acidentes de trabalho ou doenças profissionais/ocupacionais, não há carência. Algumas doenças graves também são isentas de carência."
+          question: "Quem tem direito ao auxílio-doença?",
+          answer: "Segurados da Previdência Social que estejam temporariamente incapacitados para o trabalho por mais de 15 dias, com qualidade de segurado e carência mínima de 12 contribuições (exceto em casos de acidente)."
         },
         {
-          question: "Como funciona a perícia médica do INSS?",
-          answer: "A perícia médica avalia a incapacidade para o trabalho através de exame clínico e análise da documentação médica. É importante apresentar todos os exames, laudos e relatórios médicos atualizados que comprovem a incapacidade."
+          question: "Qual o valor do auxílio-doença?",
+          answer: "91% do salário-de-benefício, calculado pela média das maiores contribuições do segurado, respeitando o teto previdenciário."
         },
         {
-          question: "Por quanto tempo posso receber auxílio-doença?",
-          answer: "O auxílio-doença pode ser concedido por até 120 dias inicialmente, podendo ser prorrogado mediante nova perícia médica. O benefício se mantém enquanto persistir a incapacidade para o trabalho."
+          question: "Como funciona a perícia médica?",
+          answer: "É realizada por médico perito do INSS que avalia a incapacidade através de exame clínico e análise da documentação médica apresentada."
+        },
+        {
+          question: "Posso trabalhar recebendo auxílio-doença?",
+          answer: "Não. O auxílio-doença é incompatível com o exercício de atividade remunerada, exceto como reabilitado profissional."
         }
       ]}
       relatedServices={[
@@ -84,11 +92,15 @@ const AuxilioDoencaService = () => {
           path: "/servicos/aposentadoria-invalidez"
         },
         {
-          name: "Auxílio-Acidente",
-          path: "/servicos/auxilio-acidente"
+          name: "Benefícios Previdenciários",
+          path: "/servicos/beneficios-previdenciarios"
+        },
+        {
+          name: "Revisão de Benefícios",
+          path: "/servicos/revisao-beneficios"
         }
       ]}
-      mainAreaPath="/previdenciario"
+      mainAreaPath="/areas/previdenciario"
     />
   );
 };

@@ -5,90 +5,102 @@ import ServiceLandingLayout from '../../components/ServiceLandingLayout';
 const PensaoAlimenticiaService = () => {
   return (
     <ServiceLandingLayout
-      serviceArea="Direito da Família"
+      serviceArea="Direito de Família"
       serviceName="Pensão Alimentícia"
-      serviceDescription="Assessoria jurídica especializada em ações de fixação, revisão e execução de pensão alimentícia para filhos e ex-cônjuges, garantindo que as necessidades básicas sejam atendidas e os direitos respeitados."
+      serviceDescription="Assessoria completa em ações de alimentos, desde a fixação até execução e revisão, garantindo sustento adequado para filhos e cônjuges necessitados."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Cálculos Justos",
-          description: "Determinação de valores que consideram tanto as necessidades de quem recebe quanto as possibilidades de quem paga."
+          title: "Cálculo Adequado",
+          description: "Determinação de valor justo baseado na capacidade do alimentante e necessidade do alimentado."
+        },
+        {
+          title: "Procedimento Rápido",
+          description: "Utilização de procedimentos especiais que garantem tramitação mais ágil dos processos de alimentos."
         },
         {
           title: "Execução Eficiente",
-          description: "Estratégias eficazes para garantir o pagamento em casos de inadimplência, utilizando todos os mecanismos legais disponíveis."
+          description: "Cobrança judicial de pensões em atraso com uso de todos os meios executivos disponíveis."
         },
         {
-          title: "Revisões Fundamentadas",
-          description: "Acompanhamento para revisão de valores em caso de mudanças significativas na situação financeira de qualquer das partes."
+          title: "Revisão e Exoneração",
+          description: "Acompanhamento de pedidos de aumento, diminuição ou extinção conforme mudanças na situação."
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Consulta Inicial Gratuita",
-          description: "Realizamos uma análise preliminar do seu caso, entendemos suas necessidades e explicamos as opções disponíveis. Esta primeira consulta é sem compromisso e gratuita."
+          title: "Análise da Situação",
+          description: "Avaliação da capacidade financeira do alimentante e necessidades do alimentado."
         },
         {
           step: 2,
-          title: "Planejamento Estratégico",
-          description: "Desenvolvemos uma estratégia personalizada para seu caso, considerando aspectos como renda, necessidades do alimentando e capacidade do alimentante."
+          title: "Documentação Probatória",
+          description: "Coleta de documentos que comprovem renda, gastos e necessidades das partes envolvidas."
         },
         {
           step: 3,
-          title: "Documentação e Preparação",
-          description: "Preparamos toda a documentação necessária para dar entrada no processo, reunindo provas e elementos que fortaleçam sua posição."
+          title: "Ação de Alimentos",
+          description: "Ajuizamento da ação com pedido de fixação de pensão alimentícia e antecipação de tutela."
         },
         {
           step: 4,
-          title: "Negociação ou Litígio",
-          description: "Dependendo do seu caso, podemos optar pela via consensual (mais rápida e menos desgastante) ou litigiosa (quando não há acordo possível)."
+          title: "Audiência de Conciliação",
+          description: "Tentativa de acordo judicial para fixação consensual do valor da pensão."
         },
         {
           step: 5,
-          title: "Finalização e Homologação",
-          description: "Cuidamos de todos os detalhes para a conclusão do processo, incluindo a homologação judicial e registros necessários."
+          title: "Execução e Acompanhamento",
+          description: "Cobrança judicial em caso de inadimplemento e acompanhamento do cumprimento."
         }
       ]}
       testimonials={[
         {
-          name: "Mariana S.",
-          quote: "A revisão da pensão alimentícia garantiu que meus filhos continuassem tendo suas necessidades atendidas mesmo após mudanças na situação financeira do pai."
+          name: "Sandra M., Mãe",
+          quote: "Consegui garantir pensão adequada para meus filhos de forma rápida e sem complicações."
         },
         {
-          name: "Paulo R.",
-          quote: "O acordo de pensão foi estabelecido de forma justa, considerando minha real capacidade financeira e as necessidades dos meus filhos."
+          name: "Carlos P., Pai",
+          quote: "A revisão da pensão foi justa, considerando minha nova situação financeira após desemprego."
         },
         {
-          name: "Lucia T.",
-          quote: "Após meses de inadimplência, a execução da pensão alimentícia foi conduzida com eficiência e finalmente garantiu o pagamento em dia."
+          name: "Ana L., Responsável",
+          quote: "Execução eficiente que garantiu o pagamento das pensões em atraso para sustento dos netos."
         }
       ]}
       faq={[
         {
-          question: "Como é calculado o valor da pensão alimentícia?",
-          answer: "O cálculo considera três fatores principais: as necessidades de quem recebe, as possibilidades de quem paga e a proporcionalidade. Não existe um percentual fixo por lei, embora frequentemente se mencione entre 15% a 30% dos rendimentos, isso varia caso a caso."
+          question: "Qual o valor mínimo da pensão alimentícia?",
+          answer: "Não há valor mínimo legal, mas a jurisprudência considera como parâmetro inicial 30% do salário mínimo para um filho."
         },
         {
-          question: "Posso ser preso por não pagar pensão alimentícia?",
-          answer: "Sim. A prisão civil por dívida alimentar é prevista na Constituição Federal e pode ser decretada em caso de inadimplência voluntária e inescusável das três últimas parcelas devidas."
+          question: "Até quando deve ser paga pensão alimentícia?",
+          answer: "Para filhos, até os 18 anos ou 24 anos se cursando ensino superior. Para ex-cônjuge, conforme situação específica avaliada pelo juiz."
         },
         {
-          question: "A pensão alimentícia termina quando o filho completa 18 anos?",
-          answer: "Não necessariamente. Embora a maioridade civil ocorra aos 18 anos, a jurisprudência reconhece que a pensão pode se estender enquanto o filho estiver cursando ensino superior ou técnico, normalmente até os 24 anos, desde que comprovada a necessidade."
+          question: "Posso ser preso por não pagar pensão?",
+          answer: "Sim, o inadimplemento de pensão alimentícia pode resultar em prisão civil por até 3 meses, renovável."
+        },
+        {
+          question: "Como funciona a pensão para filho de união estável?",
+          answer: "Filhos de união estável têm os mesmos direitos dos filhos de casamento, incluindo direito à pensão alimentícia."
         }
       ]}
       relatedServices={[
+        {
+          name: "Divórcio",
+          path: "/servicos/divorcio"
+        },
         {
           name: "Guarda de Filhos",
           path: "/servicos/guarda-filhos"
         },
         {
-          name: "Divórcio e Separação",
-          path: "/servicos/divorcio-separacao"
+          name: "Investigação de Paternidade",
+          path: "/servicos/investigacao-paternidade"
         }
       ]}
-      mainAreaPath="/familia"
+      mainAreaPath="/areas/familia"
     />
   );
 };
