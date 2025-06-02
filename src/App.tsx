@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
+import { DynamicServiceRoutes } from './components/DynamicServiceRoutes';
 
 // Pages
 import Index from './pages/Index';
@@ -26,7 +27,7 @@ import PrevidenciarioPage from './pages/areas/Previdenciario';
 import ConsumidorPage from './pages/areas/Consumidor';
 import CivilPage from './pages/areas/Civil';
 
-// Service Pages
+// Service Pages - Mantidas para compatibilidade
 import ADIService from './pages/services/ADIService';
 import ADCService from './pages/services/ADCService';
 import ADPFService from './pages/services/ADPFService';
@@ -184,7 +185,10 @@ function App() {
               <Route path="/areas/consumidor" element={<ConsumidorPage />} />
               <Route path="/areas/civil" element={<CivilPage />} />
               
-              {/* Service Pages */}
+              {/* Rotas dinâmicas para páginas criadas no admin */}
+              <DynamicServiceRoutes />
+              
+              {/* Service Pages estáticas - Mantidas para compatibilidade */}
               <Route path="/servicos/adi" element={<ADIService />} />
               <Route path="/servicos/adc" element={<ADCService />} />
               <Route path="/servicos/adpf" element={<ADPFService />} />
@@ -282,7 +286,7 @@ function App() {
               <Route path="/servicos/monitoramento-legislativo" element={<MonitoramentoLegislativoService />} />
               <Route path="/servicos/lobby-legislativo" element={<LobbyLegislativoService />} />
               <Route path="/servicos/pareceres-tecnicos" element={<PareceresTecnicosService />} />
-               <Route path="/servicos/acoes-improbidade-civil" element={<AcoesImprobidadeCivilService />} />
+              <Route path="/servicos/acoes-improbidade-civil" element={<AcoesImprobidadeCivilService />} />
               <Route path="/servicos/beneficios-previdenciarios" element={<BeneficiosPrevidenciariosService />} />
               <Route path="/servicos/aposentadoria-idade" element={<AposentadoriaIdadeService />} />
               <Route path="/servicos/aposentadoria-tempo-contribuicao" element={<AposentadoriaTempoContribuicaoService />} />
