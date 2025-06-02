@@ -2,14 +2,23 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Database, RefreshCw, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Database, RefreshCw, CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useAdminData } from '../../hooks/useAdminData';
 
-export const SupabaseDataManager: React.FC = () => {
+interface SupabaseDataManagerProps {
+  onForceMigration?: () => Promise<void>;
+  refreshData?: () => Promise<void>;
+}
+
+export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({ 
+  onForceMigration, 
+  refreshData 
+}) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [isProcessing, setIsProcessing] = useState(false);
   
   // Hook atual (localStorage)
   const {
@@ -25,7 +34,7 @@ export const SupabaseDataManager: React.FC = () => {
     pageTexts: supabasePageTexts,
     categories: supabaseCategories,
     servicePages: supabaseServicePages,
-    refreshData
+    refreshData: supabaseRefreshData
   } = useSupabaseDataNew();
 
   const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
@@ -53,6 +62,30 @@ export const SupabaseDataManager: React.FC = () => {
   };
 
   const status = migrationStatus();
+
+  const handleRefreshData = async () => {
+    setIsProcessing(true);
+    try {
+      if (refreshData) {
+        await refreshData();
+      } else {
+        await supabaseRefreshData();
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleForceMigration = async () => {
+    if (!onForceMigration) return;
+    
+    setIsProcessing(true);
+    try {
+      await onForceMigration();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -82,7 +115,7 @@ export const SupabaseDataManager: React.FC = () => {
             </h3>
             <p className={`text-sm ${isDark ? 'text-orange-200' : 'text-orange-600'}`}>
               Alguns dados foram migrados, mas ainda há inconsistências. 
-              Verifique os números abaixo e clique em "Recarregar Dados" se necessário.
+              Clique em "Forçar Migração" para completar o processo.
             </p>
           </div>
         ) : status === 'pending' ? (
@@ -93,7 +126,7 @@ export const SupabaseDataManager: React.FC = () => {
             </h3>
             <p className={`text-sm ${isDark ? 'text-yellow-200' : 'text-yellow-600'}`}>
               Detectamos dados no localStorage que precisam ser migrados para o Supabase. 
-              A migração deve ocorrer automaticamente em alguns segundos.
+              Clique em "Forçar Migração" para iniciar o processo.
             </p>
           </div>
         ) : (
@@ -149,20 +182,23 @@ export const SupabaseDataManager: React.FC = () => {
         
         <div className="flex gap-2">
           <Button 
-            onClick={refreshData}
+            onClick={handleRefreshData}
             size="sm" 
             variant="outline"
+            disabled={isProcessing}
           >
-            <RefreshCw className="w-4 h-4 mr-2" />
+            <RefreshCw className={`w-4 h-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
             Recarregar Dados
           </Button>
           
-          {status === 'pending' && (
+          {(status === 'pending' || status === 'partial') && onForceMigration && (
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={handleForceMigration}
               size="sm" 
               variant="default"
+              disabled={isProcessing}
             >
+              <Upload className="w-4 h-4 mr-2" />
               Forçar Migração
             </Button>
           )}

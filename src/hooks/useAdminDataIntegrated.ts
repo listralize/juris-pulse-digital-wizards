@@ -35,6 +35,61 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
+  // Função para executar migração manual
+  const executeMigration = async () => {
+    console.log('Iniciando migração manual...');
+    setIsTransitioning(true);
+    
+    try {
+      let migrationCount = 0;
+      
+      // Migrar configurações primeiro
+      if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
+        console.log('Migrando configurações...', localPageTexts);
+        await saveSupabasePageTexts(localPageTexts);
+        migrationCount++;
+      }
+      
+      // Migrar categorias
+      if (localCategories.length > 0 && supabaseCategories.length === 0) {
+        console.log('Migrando categorias...', localCategories.length);
+        await saveSupabaseCategories(localCategories);
+        migrationCount++;
+      }
+      
+      // Migrar equipe
+      if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
+        console.log('Migrando equipe...', localTeamMembers.length);
+        await saveSupabaseTeamMembers(localTeamMembers);
+        migrationCount++;
+      }
+      
+      // Migrar páginas de serviços (mais importante)
+      if (localServicePages.length > 0 && supabaseServicePages.length === 0) {
+        console.log('Migrando páginas de serviços...', localServicePages.length);
+        await saveSupabaseServicePages(localServicePages);
+        migrationCount++;
+      }
+      
+      if (migrationCount > 0) {
+        // Aguardar um pouco e recarregar
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await refreshData();
+        
+        setHasMigrated(true);
+        toast.success(`Migração concluída! ${localServicePages.length} páginas, ${localTeamMembers.length} membros da equipe e ${localCategories.length} categorias foram migrados.`);
+        console.log('Migração manual concluída com sucesso');
+      } else {
+        toast.info('Nenhum dado novo para migrar.');
+      }
+    } catch (error) {
+      console.error('Erro na migração manual:', error);
+      toast.error('Erro na migração. Verifique o console para mais detalhes.');
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
   // Auto-migração quando há dados locais mas Supabase está vazio
   useEffect(() => {
     const autoMigrate = async () => {
@@ -43,7 +98,7 @@ export const useAdminDataIntegrated = () => {
       const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
       const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
       
-      console.log('Verificando migração:', {
+      console.log('Verificando migração automática:', {
         hasLocalData,
         hasSupabaseData,
         localPages: localServicePages.length,
@@ -53,54 +108,15 @@ export const useAdminDataIntegrated = () => {
       });
       
       if (hasLocalData && !hasSupabaseData) {
-        console.log('Iniciando migração automática dos dados para Supabase...');
-        setIsTransitioning(true);
-        
-        try {
-          // Migrar configurações primeiro
-          if (localPageTexts.heroTitle) {
-            console.log('Migrando configurações...');
-            await saveSupabasePageTexts(localPageTexts);
-          }
-          
-          // Migrar categorias
-          if (localCategories.length > 0) {
-            console.log('Migrando categorias...', localCategories.length);
-            await saveSupabaseCategories(localCategories);
-          }
-          
-          // Migrar equipe
-          if (localTeamMembers.length > 0) {
-            console.log('Migrando equipe...', localTeamMembers.length);
-            await saveSupabaseTeamMembers(localTeamMembers);
-          }
-          
-          // Migrar páginas de serviços (mais importante)
-          if (localServicePages.length > 0) {
-            console.log('Migrando páginas de serviços...', localServicePages.length);
-            await saveSupabaseServicePages(localServicePages);
-          }
-          
-          // Aguardar um pouco e recarregar
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          await refreshData();
-          
-          setHasMigrated(true);
-          toast.success(`Dados migrados com sucesso! ${localServicePages.length} páginas, ${localTeamMembers.length} membros da equipe e ${localCategories.length} categorias.`);
-          console.log('Migração automática concluída com sucesso');
-        } catch (error) {
-          console.error('Erro na migração automática:', error);
-          toast.error('Erro na migração automática. Dados continuam disponíveis no localStorage.');
-        } finally {
-          setIsTransitioning(false);
-        }
+        console.log('Iniciando migração automática...');
+        await executeMigration();
       } else if (hasSupabaseData) {
         setHasMigrated(true);
       }
     };
 
     // Delay para garantir que os dados estejam carregados
-    const timer = setTimeout(autoMigrate, 2000);
+    const timer = setTimeout(autoMigrate, 3000);
     return () => clearTimeout(timer);
   }, [
     supabaseLoading, 
@@ -243,6 +259,22 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
+  // Função para recarregar dados com migração forçada
+  const refreshDataWithMigration = async () => {
+    console.log('Recarregando dados e verificando migração...');
+    await refreshData();
+    
+    // Forçar nova verificação de migração após recarregar
+    setTimeout(async () => {
+      const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
+      const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
+      
+      if (hasLocalData && !hasSupabaseData) {
+        await executeMigration();
+      }
+    }, 1000);
+  };
+
   useEffect(() => {
     console.log('useAdminDataIntegrated - Estado atual:', {
       useSupabaseData,
@@ -274,6 +306,9 @@ export const useAdminDataIntegrated = () => {
     saveServicePages: saveServicePagesData,
     saveCategories: saveCategoriesData,
     saveAll,
-    refreshData
+    refreshData: refreshDataWithMigration,
+    
+    // Função para migração manual
+    executeMigration
   };
 };
