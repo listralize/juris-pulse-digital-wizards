@@ -19,6 +19,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
       <div 
         id={id} 
         ref={ref}
+        data-allow-scroll={allowScroll ? "true" : "false"}
         className={`section-container w-full h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
         style={{ 
           opacity: isActive ? 1 : 0,
@@ -36,7 +37,8 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           justifyContent: allowScroll ? 'flex-start' : 'center',
           minHeight: '100vh',
           maxHeight: '100vh',
-          overflow: allowScroll ? 'auto' : 'hidden'
+          overflow: allowScroll ? 'auto' : 'hidden',
+          WebkitOverflowScrolling: allowScroll ? 'touch' : 'auto'
         }}
       >
         {children}

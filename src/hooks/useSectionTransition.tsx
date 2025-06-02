@@ -33,19 +33,25 @@ export const useSectionTransition = (sections: Section[]) => {
     };
   }, [sections]);
 
-  // Add wheel event listener for scroll navigation only for non-scrollable sections
+  // Add wheel event listener for scroll navigation, but skip for scrollable sections
   useEffect(() => {
     let isScrolling = false;
     
     const handleWheel = (e: WheelEvent) => {
-      // Allow normal scroll for contact and socios sections
+      // Always allow normal scroll for contact and socios sections
       if (activeSection === 'contact' || activeSection === 'socios') {
         return;
       }
       
-      // Check if we're inside a scrollable element within socios section
+      // Check if we're inside any scrollable container
       const target = e.target as HTMLElement;
-      if (target.closest('#socios')) {
+      const scrollableParent = target.closest('[data-allow-scroll="true"]') || 
+                              target.closest('#socios') || 
+                              target.closest('#contact') ||
+                              target.closest('.scroll-area') ||
+                              target.closest('[data-radix-scroll-area-viewport]');
+      
+      if (scrollableParent) {
         return;
       }
       

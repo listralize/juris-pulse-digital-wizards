@@ -69,7 +69,12 @@ const Partners = () => {
     <div 
       id="socios"
       ref={sectionRef}
-      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-center overflow-y-auto`}
+      data-allow-scroll="true"
+      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-center overflow-auto`}
+      style={{ 
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch'
+      }}
     >
       <div className="max-w-6xl mx-auto w-full">
         <h2 
@@ -79,7 +84,7 @@ const Partners = () => {
           {pageTexts.teamTitle}
         </h2>
         
-        <div className="px-12">
+        <div className="px-12" data-allow-scroll="true">
           <Carousel
             opts={{
               align: "start",
