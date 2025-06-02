@@ -61,8 +61,6 @@ export const useAdminDataIntegrated = () => {
         await saveSupabasePageTexts(localPageTexts);
         migrationCount++;
         console.log('✅ Configurações migradas');
-      } else {
-        console.log('❌ Configurações não precisam ser migradas');
       }
       
       // Migrar categorias
@@ -71,8 +69,6 @@ export const useAdminDataIntegrated = () => {
         await saveSupabaseCategories(localCategories);
         migrationCount++;
         console.log('✅ Categorias migradas');
-      } else {
-        console.log('❌ Sem categorias para migrar');
       }
       
       // Migrar equipe
@@ -81,23 +77,18 @@ export const useAdminDataIntegrated = () => {
         await saveSupabaseTeamMembers(localTeamMembers);
         migrationCount++;
         console.log('✅ Equipe migrada');
-      } else {
-        console.log('❌ Sem equipe para migrar');
       }
       
       // Migrar páginas de serviços (mais importante)
       if (localServicePages.length > 0) {
         console.log('Migrando páginas de serviços...', localServicePages.length);
-        console.log('Páginas a migrar:', localServicePages.map(p => p.title));
         await saveSupabaseServicePages(localServicePages);
         migrationCount++;
         console.log('✅ Páginas de serviços migradas');
-      } else {
-        console.log('❌ Sem páginas de serviços para migrar');
       }
       
       if (migrationCount > 0) {
-        console.log(`Aguardando 3 segundos antes de recarregar...`);
+        console.log('Aguardando 3 segundos antes de recarregar...');
         await new Promise(resolve => setTimeout(resolve, 3000));
         console.log('Recarregando dados...');
         await refreshData();
@@ -117,7 +108,7 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
-  // Auto-migração quando há dados locais mas Supabase está vazio
+  // Auto-migração quando há dados locais mas Supabase está vazio ou com poucos dados
   useEffect(() => {
     const autoMigrate = async () => {
       if (supabaseLoading || hasMigrated || isTransitioning) return;
@@ -134,7 +125,8 @@ export const useAdminDataIntegrated = () => {
         supabaseTeam: supabaseTeamMembers.length
       });
       
-      if (hasLocalData && !hasSupabaseData) {
+      // Se há dados locais e poucos ou nenhum dado no Supabase, executar migração
+      if (hasLocalData && (!hasSupabaseData || supabaseServicePages.length < localServicePages.length * 0.5)) {
         console.log('Iniciando migração automática...');
         await executeMigration();
       } else if (hasSupabaseData) {

@@ -230,7 +230,7 @@ function AppRoutes() {
       <Route path="/servicos/horas-extras" element={<HorasExtrasService />} />
       <Route path="/servicos/adicionais-insalubridade" element={<AdicionaisInsalubridadeService />} />
       <Route path="/servicos/desvio-funcao" element={<DesvioFuncaoService />} />
-      <Route path="/servicos/verba-rescisoria" element={<VerbaRescissoriaService />} />
+      <Route path="/servicos/verba-rescissoria" element={<VerbaRescissoriaService />} />
       <Route path="/servicos/assedio-moral-sexual" element={<AssedioMoralSexualService />} />
       <Route path="/servicos/acidentes-doencas" element={<AcidentesDoencasService />} />
       <Route path="/servicos/direitos-gestante" element={<DireitosGestanteService />} />

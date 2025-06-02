@@ -40,6 +40,17 @@ export const useSupabaseDataNew = () => {
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Função para gerar UUID válido
+  const generateValidUUID = () => {
+    return crypto.randomUUID();
+  };
+
+  // Função para validar se uma string é um UUID válido
+  const isValidUUID = (str: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
   // Carregar dados do Supabase
   const loadData = async () => {
     try {
@@ -256,9 +267,9 @@ export const useSupabaseDataNew = () => {
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Inserir/atualizar novos membros
+      // Inserir/atualizar novos membros, garantindo UUIDs válidos
       const memberData = members.map((member, index) => ({
-        id: member.id,
+        id: isValidUUID(member.id) ? member.id : generateValidUUID(),
         name: member.name,
         title: member.title,
         oab: member.oab,
@@ -282,7 +293,7 @@ export const useSupabaseDataNew = () => {
     }
   };
 
-  // Salvar páginas de serviços - versão completa
+  // Salvar páginas de serviços - versão corrigida com UUIDs válidos
   const saveServicePages = async (pages: ServicePage[]) => {
     try {
       console.log('Iniciando salvamento das páginas de serviços...', pages.length);
@@ -298,6 +309,9 @@ export const useSupabaseDataNew = () => {
         const page = pages[i];
         console.log(`Salvando página ${i + 1}/${pages.length}: ${page.title}`);
 
+        // Gerar UUID válido se necessário
+        const validPageId = isValidUUID(page.id) ? page.id : generateValidUUID();
+
         // Encontrar categoria correspondente
         const category = categories.find(cat => cat.value === page.category);
         
@@ -305,7 +319,7 @@ export const useSupabaseDataNew = () => {
         const { data: savedPage, error: pageError } = await supabase
           .from('service_pages')
           .upsert({
-            id: page.id,
+            id: validPageId,
             title: page.title,
             description: page.description,
             href: page.href,
@@ -326,16 +340,16 @@ export const useSupabaseDataNew = () => {
 
         // Limpar relacionamentos existentes
         await Promise.all([
-          supabase.from('service_benefits').delete().eq('service_page_id', page.id),
-          supabase.from('service_process_steps').delete().eq('service_page_id', page.id),
-          supabase.from('service_faq').delete().eq('service_page_id', page.id),
-          supabase.from('service_testimonials').delete().eq('service_page_id', page.id)
+          supabase.from('service_benefits').delete().eq('service_page_id', validPageId),
+          supabase.from('service_process_steps').delete().eq('service_page_id', validPageId),
+          supabase.from('service_faq').delete().eq('service_page_id', validPageId),
+          supabase.from('service_testimonials').delete().eq('service_page_id', validPageId)
         ]);
 
         // Salvar benefícios
         if (page.benefits && page.benefits.length > 0) {
           const benefitsData = page.benefits.map((benefit, index) => ({
-            service_page_id: page.id,
+            service_page_id: validPageId,
             title: benefit.title,
             description: benefit.description || '',
             icon: benefit.icon,
@@ -349,7 +363,7 @@ export const useSupabaseDataNew = () => {
         // Salvar processos
         if (page.process && page.process.length > 0) {
           const processData = page.process.map((step, index) => ({
-            service_page_id: page.id,
+            service_page_id: validPageId,
             step_number: step.step,
             title: step.title,
             description: step.description || '',
@@ -363,7 +377,7 @@ export const useSupabaseDataNew = () => {
         // Salvar FAQ
         if (page.faq && page.faq.length > 0) {
           const faqData = page.faq.map((faq, index) => ({
-            service_page_id: page.id,
+            service_page_id: validPageId,
             question: faq.question,
             answer: faq.answer,
             display_order: index
@@ -376,7 +390,7 @@ export const useSupabaseDataNew = () => {
         // Salvar depoimentos
         if (page.testimonials && page.testimonials.length > 0) {
           const testimonialsData = page.testimonials.map((testimonial, index) => ({
-            service_page_id: page.id,
+            service_page_id: validPageId,
             name: testimonial.name,
             text: testimonial.text,
             role: testimonial.role,
@@ -407,7 +421,7 @@ export const useSupabaseDataNew = () => {
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
       const categoryData = cats.map((cat, index) => ({
-        id: cat.id,
+        id: isValidUUID(cat.id || '') ? cat.id : generateValidUUID(),
         category_key: cat.value,
         name: cat.name,
         description: cat.description,
