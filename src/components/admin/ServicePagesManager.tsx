@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ServicePage, PageTexts } from '../../types/adminTypes';
-import { categories } from '../../types/adminTypes';
+import { ServicePage, PageTexts, CategoryInfo } from '../../types/adminTypes';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, ArrowLeft, Save, Settings } from 'lucide-react';
@@ -13,6 +12,7 @@ import { CategoryTextsManagement } from './CategoryTextsManagement';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
+  categories: CategoryInfo[];
   pageTexts: PageTexts;
   onSave: (pages: ServicePage[]) => void;
   onSavePageTexts: () => void;
@@ -21,6 +21,7 @@ interface ServicePagesManagerProps {
 
 export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ 
   servicePages, 
+  categories,
   pageTexts,
   onSave, 
   onSavePageTexts,
@@ -155,6 +156,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         </CardHeader>
         <CardContent>
           <CategoryGrid 
+            categories={categories}
             servicePages={localPages} 
             onCategorySelect={setSelectedCategory} 
           />
