@@ -12,7 +12,7 @@ import { useAdminData } from '../../hooks/useAdminData';
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   
@@ -42,15 +42,15 @@ const Contact = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto`}
-      style={{ paddingTop: '80px', paddingBottom: '20px' }}
+      className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto flex flex-col justify-center`}
+      style={{ paddingTop: '20px', paddingBottom: '20px', minHeight: '100vh' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={titleRef} className="mb-8">
+        <div ref={titleRef} className="mb-6 text-center">
           <h2 className={`text-3xl md:text-4xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             {pageTexts.contactTitle}
           </h2>
-          <div className={`w-20 h-1 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+          <div className={`w-20 h-1 mx-auto mt-2 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
           <p className={`mt-2 text-base ${isDark ? 'text-white/60' : 'text-black/60'}`}>
             {pageTexts.contactSubtitle}
           </p>
@@ -58,7 +58,7 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8"
+          className="grid grid-cols-1 lg:grid-cols-5 gap-6"
         >
           <div className="lg:col-span-2 space-y-4 flex flex-col">
             <div className="w-full">
