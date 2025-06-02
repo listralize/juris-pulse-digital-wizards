@@ -8,7 +8,7 @@ import { useAdminData } from '../../hooks/useAdminData';
 import { Calculator, TrendingUp, Shield, FileText, AlertTriangle } from 'lucide-react';
 
 const Tributario = () => {
-  const { pageTexts, isLoading } = useAdminData();
+  const { pageTexts, servicePages, isLoading } = useAdminData();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
@@ -21,54 +21,68 @@ const Tributario = () => {
     );
   }
 
+  // Filtrar serviços da categoria tributário
+  const tributarioServices = servicePages.filter(page => page.category === 'tributario');
+
+  // Agrupar serviços por categorias baseado nos títulos similares
   const serviceCategories = [
     {
       title: "Planejamento e Estratégia",
       icon: <Calculator className="w-8 h-8" />,
       description: "Estratégias avançadas para otimização tributária legal e eficiente.",
-      services: [
-        {
-          name: "Planejamento Tributário",
-          description: "Estratégias legais para otimização da carga tributária empresarial e pessoal.",
-          path: "/servicos/planejamento-tributario"
-        },
-        {
-          name: "Elisão Fiscal",
-          description: "Estratégias legais para redução lícita da carga tributária.",
-          path: "/servicos/elisao-fiscal"
-        }
-      ]
+      services: tributarioServices.filter(service => 
+        service.title.toLowerCase().includes('planejamento') ||
+        service.title.toLowerCase().includes('elisão') ||
+        service.title.toLowerCase().includes('estratégia')
+      )
     },
     {
       title: "Recuperação e Créditos",
       icon: <TrendingUp className="w-8 h-8" />,
       description: "Recuperação de valores pagos indevidamente e gestão de créditos tributários.",
-      services: [
-        {
-          name: "Recuperação de Créditos Tributários",
-          description: "Recuperação de valores pagos indevidamente ao fisco através de ações específicas.",
-          path: "/servicos/recuperacao-creditos"
-        },
-        {
-          name: "Parcelamento de Débitos",
-          description: "Negociação e formalização de parcelamentos fiscais favoráveis.",
-          path: "/servicos/parcelamento-debitos"
-        }
-      ]
+      services: tributarioServices.filter(service => 
+        service.title.toLowerCase().includes('recuperação') ||
+        service.title.toLowerCase().includes('crédito') ||
+        service.title.toLowerCase().includes('parcelamento')
+      )
     },
     {
       title: "Contencioso e Defesa",
       icon: <Shield className="w-8 h-8" />,
       description: "Defesa robusta em processos administrativos e judiciais tributários.",
-      services: [
-        {
-          name: "Contencioso Tributário",
-          description: "Defesa em processos administrativos e judiciais tributários.",
-          path: "/servicos/contencioso-tributario"
-        }
-      ]
+      services: tributarioServices.filter(service => 
+        service.title.toLowerCase().includes('contencioso') ||
+        service.title.toLowerCase().includes('defesa')
+      )
+    },
+    {
+      title: "Consultoria e Compliance",
+      icon: <FileText className="w-8 h-8" />,
+      description: "Consultoria especializada e programas de conformidade tributária.",
+      services: tributarioServices.filter(service => 
+        service.title.toLowerCase().includes('consultoria') ||
+        service.title.toLowerCase().includes('compliance') ||
+        service.title.toLowerCase().includes('auditoria')
+      )
     }
   ];
+
+  // Adicionar serviços que não se encaixam em nenhuma categoria à primeira categoria
+  const categorizedServiceIds = new Set();
+  serviceCategories.forEach(category => {
+    category.services.forEach(service => categorizedServiceIds.add(service.id));
+  });
+
+  const uncategorizedServices = tributarioServices.filter(service => 
+    !categorizedServiceIds.has(service.id)
+  );
+
+  if (uncategorizedServices.length > 0) {
+    serviceCategories[0].services.push(...uncategorizedServices);
+  }
+
+  // Filtrar categorias que têm serviços
+  const categoriesWithServices = serviceCategories.filter(category => category.services.length > 0);
 
   return (
     <PracticeAreaLayout
@@ -102,7 +116,7 @@ const Tributario = () => {
           </p>
         </div>
 
-        {serviceCategories.map((category, categoryIndex) => (
+        {categoriesWithServices.map((category, categoryIndex) => (
           <div key={categoryIndex} className="space-y-8">
             <div className="flex items-center gap-4 mb-8">
               <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
@@ -123,11 +137,14 @@ const Tributario = () => {
                 <Card 
                   key={serviceIndex}
                   className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
-                  onClick={() => navigate(service.path)}
+                  onClick={() => {
+                    const servicePath = service.href.startsWith('/') ? service.href : `/servicos/${service.href}`;
+                    navigate(servicePath);
+                  }}
                 >
                   <CardContent className="p-6">
                     <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
-                      {service.name}
+                      {service.title}
                     </h4>
                     <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
                       {service.description}
@@ -141,6 +158,14 @@ const Tributario = () => {
             </div>
           </div>
         ))}
+
+        {tributarioServices.length === 0 && (
+          <div className="text-center py-16">
+            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Nenhum serviço cadastrado para esta área ainda.
+            </p>
+          </div>
+        )}
       </div>
     </PracticeAreaLayout>
   );
