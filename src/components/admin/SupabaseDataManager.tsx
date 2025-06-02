@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Database, RefreshCw, CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
+import { Database, RefreshCw, CheckCircle, AlertCircle, Clock, Upload, Zap } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useAdminData } from '../../hooks/useAdminData';
@@ -34,14 +34,61 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
     pageTexts: supabasePageTexts,
     categories: supabaseCategories,
     servicePages: supabaseServicePages,
-    refreshData: supabaseRefreshData
+    refreshData: supabaseRefreshData,
+    saveCategories: saveSupabaseCategories
   } = useSupabaseDataNew();
 
   const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
   const hasSupabaseData = supabaseTeamMembers.length > 0 || supabaseServicePages.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
 
-  // Status real da migração
+  // NOVA FUNÇÃO: MIGRAÇÃO FORÇADA SÓ DE CATEGORIAS
+  const forceCategoriesMigration = async () => {
+    if (localCategories.length === 0) {
+      alert('Nenhuma categoria local para migrar');
+      return;
+    }
+
+    console.log('🔥 FORÇANDO MIGRAÇÃO APENAS DE CATEGORIAS');
+    setIsProcessing(true);
+    
+    try {
+      // Preparar categorias com campos obrigatórios
+      const categoriesForMigration = localCategories.map((cat, index) => ({
+        ...cat,
+        name: cat.name || cat.label || `Categoria ${index + 1}`,
+        value: cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`,
+        label: cat.label || cat.name || `Categoria ${index + 1}`,
+        description: cat.description || `Descrição da categoria`,
+        icon: cat.icon || 'FileText',
+        color: cat.color || 'bg-blue-500'
+      }));
+
+      console.log('📋 Migrando categorias:', categoriesForMigration);
+      
+      await saveSupabaseCategories(categoriesForMigration);
+      
+      // Aguardar e recarregar
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await supabaseRefreshData();
+      
+      alert(`✅ ${categoriesForMigration.length} categorias migradas com sucesso!`);
+    } catch (error) {
+      console.error('❌ Erro na migração de categorias:', error);
+      alert(`❌ Erro: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Status da migração
   const migrationStatus = () => {
+    // Verificação específica de categorias
+    const categoriesMissing = localCategories.length > 0 && supabaseCategories.length === 0;
+    
+    if (categoriesMissing) {
+      return 'categories_pending';
+    }
+    
     if (hasSupabaseData && hasLocalData) {
       const localTotal = localServicePages.length + localTeamMembers.length + localCategories.length;
       const supabaseTotal = supabaseServicePages.length + supabaseTeamMembers.length + supabaseCategories.length;
@@ -67,10 +114,8 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
     setIsProcessing(true);
     try {
       if (refreshData) {
-        console.log('Usando refreshData prop');
         await refreshData();
       } else {
-        console.log('Usando supabaseRefreshData');
         await supabaseRefreshData();
       }
       console.log('✅ Dados recarregados');
@@ -96,25 +141,6 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
     }
   };
 
-  // Debug logs
-  console.log('SupabaseDataManager - Estado:', {
-    status,
-    hasLocalData,
-    hasSupabaseData,
-    localData: {
-      servicePages: localServicePages.length,
-      teamMembers: localTeamMembers.length,
-      categories: localCategories.length,
-      pageTexts: !!localPageTexts.heroTitle
-    },
-    supabaseData: {
-      servicePages: supabaseServicePages.length,
-      teamMembers: supabaseTeamMembers.length,
-      categories: supabaseCategories.length,
-      pageTexts: !!supabasePageTexts.heroTitle
-    }
-  });
-
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
       <CardHeader>
@@ -124,6 +150,27 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {status === 'categories_pending' && (
+          <div className={`p-4 rounded-lg border ${isDark ? 'border-red-500/20 bg-red-500/10' : 'border-red-500/20 bg-red-50'}`}>
+            <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-red-400' : 'text-red-700'}`}>
+              <AlertCircle className="w-4 h-4" />
+              CATEGORIAS NÃO MIGRADAS!
+            </h3>
+            <p className={`text-sm mb-3 ${isDark ? 'text-red-200' : 'text-red-600'}`}>
+              Detectamos {localCategories.length} categorias no localStorage que não foram migradas para o Supabase.
+              Isso está causando problemas de sincronização.
+            </p>
+            <Button 
+              onClick={forceCategoriesMigration}
+              disabled={isProcessing}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              MIGRAR CATEGORIAS AGORA
+            </Button>
+          </div>
+        )}
+
         {status === 'completed' ? (
           <div className={`p-4 rounded-lg border ${isDark ? 'border-green-500/20 bg-green-500/10' : 'border-green-500/20 bg-green-50'}`}>
             <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-700'}`}>
@@ -131,8 +178,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               Migração Concluída
             </h3>
             <p className={`text-sm ${isDark ? 'text-green-200' : 'text-green-600'}`}>
-              Seus dados foram migrados com sucesso para o Supabase e agora estão organizados 
-              na estrutura hierárquica. Todas as edições são automaticamente sincronizadas.
+              Todos os dados estão sincronizados com o Supabase.
             </p>
           </div>
         ) : status === 'partial' ? (
@@ -142,8 +188,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               Migração Parcial
             </h3>
             <p className={`text-sm ${isDark ? 'text-orange-200' : 'text-orange-600'}`}>
-              Alguns dados foram migrados, mas ainda há inconsistências. 
-              Clique em "Forçar Migração" para completar o processo.
+              Alguns dados foram migrados, mas ainda há inconsistências.
             </p>
           </div>
         ) : status === 'pending' ? (
@@ -153,8 +198,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               Migração Pendente
             </h3>
             <p className={`text-sm ${isDark ? 'text-yellow-200' : 'text-yellow-600'}`}>
-              Detectamos dados no localStorage que precisam ser migrados para o Supabase. 
-              Clique em "Forçar Migração" para iniciar o processo.
+              Dados no localStorage precisam ser migrados.
             </p>
           </div>
         ) : (
@@ -163,7 +207,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               Sistema Pronto
             </h3>
             <p className={`text-sm ${isDark ? 'text-blue-200' : 'text-blue-600'}`}>
-              O sistema está configurado e pronto para uso. Todos os dados serão armazenados no Supabase.
+              Sistema configurado e pronto para uso.
             </p>
           </div>
         )}
@@ -171,44 +215,30 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-white/5' : 'border-gray-200 bg-gray-50'}`}>
             <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-              Dados Locais (localStorage)
+              Local (localStorage)
             </h4>
             <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              <li>• Páginas de Serviços: {localServicePages.length}</li>
-              <li>• Membros da Equipe: {localTeamMembers.length}</li>
-              <li>• Categorias: {localCategories.length}</li>
-              <li>• Configurações: {localPageTexts.heroTitle ? 'Configurado' : 'Não configurado'}</li>
+              <li>• Categorias: <strong className="text-blue-500">{localCategories.length}</strong></li>
+              <li>• Páginas: {localServicePages.length}</li>
+              <li>• Equipe: {localTeamMembers.length}</li>
+              <li>• Configurações: {localPageTexts.heroTitle ? 'Sim' : 'Não'}</li>
             </ul>
           </div>
 
           <div className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-white/5' : 'border-gray-200 bg-gray-50'}`}>
             <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-              Dados Supabase (Sistema Ativo)
+              Supabase (Ativo)
             </h4>
             <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              <li>• Páginas de Serviços: {supabaseServicePages.length}</li>
-              <li>• Membros da Equipe: {supabaseTeamMembers.length}</li>
-              <li>• Categorias: {supabaseCategories.length}</li>
-              <li>• Configurações: {supabasePageTexts.heroTitle ? 'Configurado' : 'Não configurado'}</li>
+              <li>• Categorias: <strong className={supabaseCategories.length === 0 ? 'text-red-500' : 'text-green-500'}>{supabaseCategories.length}</strong></li>
+              <li>• Páginas: {supabaseServicePages.length}</li>
+              <li>• Equipe: {supabaseTeamMembers.length}</li>
+              <li>• Configurações: {supabasePageTexts.heroTitle ? 'Sim' : 'Não'}</li>
             </ul>
           </div>
         </div>
-
-        {hasSupabaseData && (
-          <div className={`p-4 rounded-lg border ${isDark ? 'border-blue-500/20 bg-blue-500/10' : 'border-blue-500/20 bg-blue-50'}`}>
-            <h3 className={`font-semibold mb-2 ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
-              Estrutura Hierárquica Ativa
-            </h3>
-            <ul className={`text-sm space-y-1 ${isDark ? 'text-blue-200' : 'text-blue-600'}`}>
-              <li>• ✅ Tabelas especializadas por tipo de conteúdo</li>
-              <li>• ✅ Relacionamentos entre páginas, benefícios, processos e FAQs</li>
-              <li>• ✅ Sincronização automática entre sessões</li>
-              <li>• ✅ Histórico de alterações e versionamento</li>
-            </ul>
-          </div>
-        )}
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button 
             onClick={handleRefreshData}
             size="sm" 
@@ -216,8 +246,21 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
             disabled={isProcessing}
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
-            Recarregar Dados
+            Recarregar
           </Button>
+          
+          {status === 'categories_pending' && (
+            <Button 
+              onClick={forceCategoriesMigration}
+              size="sm" 
+              variant="default"
+              disabled={isProcessing}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Migrar Categorias
+            </Button>
+          )}
           
           {(status === 'pending' || status === 'partial') && onForceMigration && (
             <Button 
@@ -227,7 +270,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               disabled={isProcessing}
             >
               <Upload className="w-4 h-4 mr-2" />
-              Forçar Migração
+              Migração Completa
             </Button>
           )}
         </div>
