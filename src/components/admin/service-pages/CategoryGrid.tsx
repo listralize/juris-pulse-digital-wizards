@@ -14,15 +14,32 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('CategoryGrid: Total de páginas recebidas:', servicePages.length);
-  console.log('CategoryGrid: Categorias disponíveis:', categories.length);
+  console.log('🎯 CategoryGrid RENDER:', {
+    categoriesReceived: categories?.length || 0,
+    servicePagesReceived: servicePages?.length || 0,
+    categoriesData: categories
+  });
+
+  // Se não há categorias, mostrar mensagem
+  if (!categories || categories.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className={`text-lg ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+          Nenhuma categoria encontrada.
+        </p>
+        <p className={`text-sm mt-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          As categorias precisam ser migradas do localStorage para o Supabase.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => {
         const currentCategoryPages = servicePages.filter(page => page.category === category.value);
         
-        console.log(`${category.label}: páginas encontradas=${currentCategoryPages.length}`);
+        console.log(`📂 ${category.label}: páginas encontradas=${currentCategoryPages.length}`);
         
         return (
           <Card 

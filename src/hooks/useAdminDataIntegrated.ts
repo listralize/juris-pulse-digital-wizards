@@ -36,7 +36,7 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
-  // MIGRAÇÃO FORÇADA ESPECÍFICA PARA CATEGORIAS
+  // MIGRAÇÃO FORÇADA ESPECÍFICA PARA CATEGORIAS - VERSÃO FINAL
   const forceCategoryMigration = async () => {
     if (localCategories.length === 0) {
       console.log('⚠️ Nenhuma categoria local para migrar');
@@ -48,22 +48,28 @@ export const useAdminDataIntegrated = () => {
     setIsTransitioning(true);
     
     try {
-      // Preparar categorias com todos os campos obrigatórios
-      const categoriesForMigration = localCategories.map((cat, index) => ({
-        ...cat,
-        name: cat.name || cat.label || `Categoria ${index + 1}`,
-        value: cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`,
-        label: cat.label || cat.name || `Categoria ${index + 1}`,
-        description: cat.description || `Descrição da categoria ${cat.name || index + 1}`,
-        icon: cat.icon || 'FileText',
-        color: cat.color || 'bg-blue-500'
-      }));
+      // Preparar categorias com todos os campos obrigatórios CORRETAMENTE
+      const categoriesForMigration = localCategories.map((cat, index) => {
+        // GARANTIR que todos os campos estão corretos
+        const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
+        const categoryValue = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
+        
+        return {
+          id: cat.id || crypto.randomUUID(),
+          value: categoryValue,
+          label: categoryName,
+          name: categoryName, // CAMPO OBRIGATÓRIO NO SUPABASE
+          description: cat.description || `Descrição da ${categoryName}`,
+          icon: cat.icon || 'FileText',
+          color: cat.color || 'bg-blue-500'
+        };
+      });
 
       console.log('📋 Categorias preparadas para migração:', categoriesForMigration);
       
       await saveSupabaseCategories(categoriesForMigration);
       
-      // Aguardar e recarregar
+      // Aguardar e recarregar FORÇADAMENTE
       await new Promise(resolve => setTimeout(resolve, 3000));
       await refreshData();
       
@@ -77,7 +83,7 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
-  // MIGRAÇÃO COMPLETA MAIS ROBUSTA
+  // MIGRAÇÃO COMPLETA - SIMPLIFICADA
   const executeMigration = async () => {
     if (isTransitioning) return;
 
@@ -87,18 +93,15 @@ export const useAdminDataIntegrated = () => {
     try {
       let migrationCount = 0;
       
-      // 1. MIGRAR CATEGORIAS PRIMEIRO (PRIORIDADE MÁXIMA)
-      if (localCategories.length > 0) {
-        console.log('🔥 Migrando categorias primeiro...');
+      // 1. MIGRAR CATEGORIAS PRIMEIRO SE NECESSÁRIO
+      if (localCategories.length > 0 && supabaseCategories.length === 0) {
+        console.log('🔥 Migrando categorias...');
         await forceCategoryMigration();
         migrationCount++;
+        return; // Retornar aqui para focar só nas categorias
       }
       
-      // 2. Aguardar e verificar se categorias foram salvas
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await refreshData();
-      
-      // 3. Migrar outros dados
+      // 2. Migrar outros dados apenas se categorias já estiverem ok
       if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
         console.log('⚙️ Migrando configurações...');
         await saveSupabasePageTexts(localPageTexts);
@@ -117,10 +120,6 @@ export const useAdminDataIntegrated = () => {
         migrationCount++;
       }
       
-      // Recarregar final
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      await refreshData();
-      
       if (migrationCount > 0) {
         setHasMigrated(true);
         toast.success(`🎉 Migração concluída! ${migrationCount} tipos de dados migrados.`);
@@ -133,38 +132,31 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
-  // VERIFICAÇÃO E AUTO-MIGRAÇÃO MELHORADA
-  useEffect(() => {
-    if (supabaseLoading || isTransitioning) return;
-    
-    // Verificar especificamente se categorias precisam ser migradas
-    const needsCategoryMigration = localCategories.length > 0 && supabaseCategories.length === 0;
-    
-    console.log('🔍 VERIFICAÇÃO AUTO-MIGRAÇÃO:', {
-      localCategories: localCategories.length,
-      supabaseCategories: supabaseCategories.length,
-      needsCategoryMigration,
-      hasMigrated
-    });
-    
-    if (needsCategoryMigration && !hasMigrated) {
-      console.log('🔄 Iniciando migração automática de categorias...');
-      setTimeout(() => {
-        forceCategoryMigration();
-      }, 1000);
-    }
-  }, [localCategories.length, supabaseCategories.length, supabaseLoading, isTransitioning, hasMigrated]);
-
-  // Determinar qual fonte de dados usar
+  // Determinar qual fonte de dados usar - LÓGICA CORRIGIDA
   const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
-  const useSupabaseData = hasSupabaseData;
+  const useSupabaseData = hasSupabaseData || supabaseCategories.length > 0; // Priorizar Supabase se tem categorias
 
-  // Dados finais
+  console.log('🔍 DECISÃO DE FONTE DE DADOS:', {
+    supabaseCategories: supabaseCategories.length,
+    localCategories: localCategories.length,
+    hasSupabaseData,
+    useSupabaseData
+  });
+
+  // Dados finais - GARANTIR QUE CATEGORIAS SEJAM SEMPRE REPASSADAS
   const teamMembers = useSupabaseData ? supabaseTeamMembers : localTeamMembers;
   const pageTexts = useSupabaseData ? supabasePageTexts : localPageTexts;
   const servicePages = useSupabaseData ? supabaseServicePages : localServicePages;
   const categories = useSupabaseData ? supabaseCategories : localCategories;
   const isLoading = supabaseLoading || isTransitioning;
+
+  // DEBUG: Log dos dados finais
+  console.log('📊 DADOS FINAIS SENDO RETORNADOS:', {
+    categories: categories.length,
+    servicePages: servicePages.length,
+    teamMembers: teamMembers.length,
+    useSupabaseData
+  });
 
   // WRAPPER PARA SINCRONIZAÇÃO AUTOMÁTICA
   const autoSyncWrapper = async (operation: () => Promise<void>, successMessage: string) => {
