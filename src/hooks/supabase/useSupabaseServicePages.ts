@@ -93,7 +93,7 @@ export const useSupabaseServicePages = () => {
 
   const saveServicePages = async (pages: ServicePage[]) => {
     try {
-      console.log('💾 🔥 SALVANDO PÁGINAS DE SERVIÇOS - VERSÃO FINAL CORRIGIDA');
+      console.log('💾 🔥 SALVANDO PÁGINAS DE SERVIÇOS - VERSÃO MEGA ROBUSTA');
       console.log('📄 Páginas recebidas:', pages.length);
       
       if (!pages || pages.length === 0) {
@@ -121,15 +121,16 @@ export const useSupabaseServicePages = () => {
         throw new Error('Nenhuma categoria encontrada. Execute a migração de categorias primeiro.');
       }
 
-      // 2. DESATIVAR PÁGINAS EXISTENTES
-      console.log('🗑️ Desativando páginas existentes...');
+      // 2. LIMPAR DADOS EXISTENTES COMPLETAMENTE
+      console.log('🗑️ Limpando TODOS os dados existentes...');
+      
+      // Desativar páginas existentes
       await supabase
         .from('service_pages')
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // 3. DELETAR DADOS RELACIONADOS EXISTENTES
-      console.log('🗑️ Limpando dados relacionados...');
+      // Deletar dados relacionados existentes
       await Promise.all([
         supabase.from('service_benefits').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
         supabase.from('service_process_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
@@ -137,7 +138,7 @@ export const useSupabaseServicePages = () => {
         supabase.from('service_testimonials').delete().neq('id', '00000000-0000-0000-0000-000000000000')
       ]);
 
-      // 4. PROCESSAR E SALVAR CADA PÁGINA
+      // 3. PROCESSAR E SALVAR CADA PÁGINA COM MÁXIMA COMPATIBILIDADE
       const savedPages: ServicePage[] = [];
       
       for (let i = 0; i < pages.length; i++) {
@@ -147,24 +148,65 @@ export const useSupabaseServicePages = () => {
 
         const validPageId = ensureValidUUID(page.id);
         
-        // ENCONTRAR CATEGORIA CORRESPONDENTE COM MATCH MAIS FLEXÍVEL
+        // ENCONTRAR CATEGORIA CORRESPONDENTE COM MÁXIMA FLEXIBILIDADE
         const matchingCategory = currentCategories.find(cat => {
-          const categoryMatch = cat.category_key === page.category || 
-                               cat.name === page.category ||
-                               cat.category_key === page.category?.toLowerCase().replace(/\s+/g, '-') ||
-                               cat.name?.toLowerCase().replace(/\s+/g, '-') === page.category?.toLowerCase().replace(/\s+/g, '-');
+          const pageCategory = page.category?.toLowerCase().trim();
+          const catKey = cat.category_key?.toLowerCase().trim();
+          const catName = cat.name?.toLowerCase().trim();
           
-          if (categoryMatch) {
+          // Múltiplos tipos de match
+          const directMatch = catKey === pageCategory || catName === pageCategory;
+          const slugMatch = catKey === pageCategory?.replace(/\s+/g, '-') || 
+                           catName?.replace(/\s+/g, '-') === pageCategory;
+          const partialMatch = catKey?.includes(pageCategory) || 
+                              catName?.includes(pageCategory) ||
+                              pageCategory?.includes(catKey) ||
+                              pageCategory?.includes(catName);
+          
+          const isMatch = directMatch || slugMatch || partialMatch;
+          
+          if (isMatch) {
             console.log(`✅ MATCH encontrado: "${cat.name}" (${cat.category_key}) para "${page.category}"`);
           }
           
-          return categoryMatch;
+          return isMatch;
         });
         
         if (!matchingCategory) {
           console.warn(`⚠️ CATEGORIA NÃO ENCONTRADA PARA "${page.category}" - PÁGINA: "${page.title}"`);
           console.warn('📂 Categorias disponíveis:', currentCategories.map(c => `${c.name} (${c.category_key})`));
-          continue; // Pular esta página se a categoria não for encontrada
+          
+          // Tentar usar a primeira categoria como fallback
+          const fallbackCategory = currentCategories[0];
+          console.warn(`🔄 Usando categoria fallback: "${fallbackCategory.name}"`);
+          
+          const { data: savedPage, error: pageError } = await supabase
+            .from('service_pages')
+            .upsert({
+              id: validPageId,
+              title: page.title,
+              description: page.description,
+              href: page.href || `servico-${validPageId.slice(0, 8)}`,
+              category_id: fallbackCategory.id,
+              display_order: i,
+              is_active: true,
+              updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          if (pageError) {
+            console.error(`❌ Erro ao salvar página "${page.title}":`, pageError);
+            continue;
+          }
+
+          savedPages.push({
+            ...page,
+            id: validPageId,
+            category: fallbackCategory.category_key
+          });
+          
+          continue;
         }
 
         console.log(`✅ CATEGORIA VINCULADA: "${matchingCategory.name}" (ID: ${matchingCategory.id})`);
@@ -177,8 +219,8 @@ export const useSupabaseServicePages = () => {
             id: validPageId,
             title: page.title,
             description: page.description,
-            href: page.href,
-            category_id: matchingCategory.id, // VINCULAÇÃO CORRETA
+            href: page.href || `servico-${validPageId.slice(0, 8)}`,
+            category_id: matchingCategory.id,
             display_order: i,
             is_active: true,
             updated_at: new Date().toISOString()

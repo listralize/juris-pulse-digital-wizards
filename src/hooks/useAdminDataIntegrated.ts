@@ -35,11 +35,11 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
-  // MIGRAÇÃO COMPLETA E SEQUENCIAL
+  // MIGRAÇÃO COMPLETA E SEQUENCIAL - CORRIGIDA
   const executeMigration = async () => {
     if (isTransitioning) return;
 
-    console.log('🚀 INICIANDO MIGRAÇÃO COMPLETA SEQUENCIAL');
+    console.log('🚀 INICIANDO MIGRAÇÃO COMPLETA SEQUENCIAL - VERSÃO CORRIGIDA');
     setIsTransitioning(true);
     
     try {
@@ -77,64 +77,54 @@ export const useAdminDataIntegrated = () => {
         // Recarregar dados para garantir que as categorias estão no Supabase
         await refreshData();
         console.log('✅ Categorias migradas e dados recarregados');
-      } else {
-        console.log('⚠️ Nenhuma categoria local encontrada para migrar');
-        // Se não há categorias locais, usar as padrão
-        const defaultCategories = [
-          {
-            id: crypto.randomUUID(),
-            value: 'familia',
-            label: 'Direito de Família',
-            name: 'Direito de Família',
-            description: 'Proteção e orientação em questões familiares',
-            icon: 'Heart',
-            color: 'bg-rose-500'
-          },
-          {
-            id: crypto.randomUUID(),
-            value: 'tributario',
-            label: 'Direito Tributário', 
-            name: 'Direito Tributário',
-            description: 'Consultoria e planejamento tributário',
-            icon: 'Calculator',
-            color: 'bg-blue-500'
-          },
-          {
-            id: crypto.randomUUID(),
-            value: 'empresarial',
-            label: 'Direito Empresarial',
-            name: 'Direito Empresarial', 
-            description: 'Suporte jurídico para empresas',
-            icon: 'Building2',
-            color: 'bg-green-500'
-          },
-          {
-            id: crypto.randomUUID(),
-            value: 'trabalho',
-            label: 'Direito do Trabalho',
-            name: 'Direito do Trabalho',
-            description: 'Defesa dos direitos trabalhistas', 
-            icon: 'Users',
-            color: 'bg-orange-500'
-          }
-        ];
-        
-        console.log('📋 Criando categorias padrão:', defaultCategories);
-        await saveSupabaseCategories(defaultCategories);
-        migrationCount++;
-        
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        await refreshData();
       }
       
-      // ETAPA 2: Migrar páginas de serviços (após categorias estarem no Supabase)
+      // ETAPA 2: MIGRAÇÃO FORÇADA DAS PÁGINAS - NOVA LÓGICA
       if (localServicePages.length > 0) {
         console.log('📄 ETAPA 2: Migrando páginas de serviços...');
-        await saveSupabaseServicePages(localServicePages);
-        migrationCount++;
+        console.log(`📄 Total de páginas a migrar: ${localServicePages.length}`);
         
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await refreshData();
+        // Buscar categorias atualizadas do Supabase para fazer a vinculação
+        const { categories: currentSupabaseCategories } = await new Promise(resolve => {
+          setTimeout(async () => {
+            await refreshData();
+            resolve({ categories: supabaseCategories });
+          }, 1000);
+        });
+        
+        console.log('📂 Categorias disponíveis para vinculação:', currentSupabaseCategories?.length || 0);
+        
+        // Migrar páginas com vinculação correta
+        const pagesWithCorrectCategories = localServicePages.map(page => {
+          // Buscar categoria correspondente
+          const matchingCategory = currentSupabaseCategories?.find(cat => 
+            cat.value === page.category || 
+            cat.name === page.category ||
+            cat.label === page.category
+          );
+          
+          if (matchingCategory) {
+            console.log(`📄 Página "${page.title}" vinculada à categoria "${matchingCategory.name}"`);
+            return {
+              ...page,
+              category: matchingCategory.value,
+              id: page.id || crypto.randomUUID()
+            };
+          } else {
+            console.warn(`⚠️ Categoria "${page.category}" não encontrada para página "${page.title}"`);
+            return null;
+          }
+        }).filter(Boolean);
+        
+        console.log(`📄 Páginas válidas para migração: ${pagesWithCorrectCategories.length}`);
+        
+        if (pagesWithCorrectCategories.length > 0) {
+          await saveSupabaseServicePages(pagesWithCorrectCategories);
+          migrationCount++;
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await refreshData();
+        }
       }
       
       // ETAPA 3: Migrar outros dados
