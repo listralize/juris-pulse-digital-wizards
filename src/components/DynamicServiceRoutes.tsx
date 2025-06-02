@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { ServicePage } from '../types/adminTypes';
 import DynamicServicePage from './DynamicServicePage';
 
-export const DynamicServiceRoutes: React.FC = () => {
+export const useDynamicServiceRoutes = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
 
   useEffect(() => {
@@ -36,21 +36,17 @@ export const DynamicServiceRoutes: React.FC = () => {
     };
   }, []);
 
-  return (
-    <>
-      {servicePages.map((page) => {
-        if (!page.href) return null;
-        
-        const path = page.href.startsWith('/') ? page.href : `/servicos/${page.href}`;
-        
-        return (
-          <Route 
-            key={page.id} 
-            path={path} 
-            element={<DynamicServicePage pageData={page} />} 
-          />
-        );
-      })}
-    </>
-  );
+  return servicePages.map((page) => {
+    if (!page.href) return null;
+    
+    const path = page.href.startsWith('/') ? page.href : `/servicos/${page.href}`;
+    
+    return (
+      <Route 
+        key={page.id} 
+        path={path} 
+        element={<DynamicServicePage pageData={page} />} 
+      />
+    );
+  }).filter(Boolean);
 };
