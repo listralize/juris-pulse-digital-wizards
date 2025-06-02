@@ -35,27 +35,29 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
-  // MIGRAÇÃO SEQUENCIAL - Categorias primeiro, depois páginas
+  // MIGRAÇÃO COMPLETA E SEQUENCIAL
   const executeMigration = async () => {
     if (isTransitioning) return;
 
-    console.log('🚀 EXECUTANDO MIGRAÇÃO SEQUENCIAL');
+    console.log('🚀 INICIANDO MIGRAÇÃO COMPLETA SEQUENCIAL');
     setIsTransitioning(true);
     
     try {
       let migrationCount = 0;
       
-      // 1. MIGRAR CATEGORIAS PRIMEIRO (obrigatório)
+      // ETAPA 1: SEMPRE migrar categorias primeiro (obrigatório para funcionar)
+      console.log('📂 ETAPA 1: Migrando categorias...');
+      
       if (localCategories.length > 0) {
-        console.log('🔥 Migrando categorias primeiro...');
+        console.log('📋 Categorias locais encontradas:', localCategories.length);
         
         const categoriesForMigration = localCategories.map((cat, index) => {
           const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
-          const categoryValue = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
+          const categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
           
           return {
             id: cat.id || crypto.randomUUID(),
-            value: categoryValue,
+            value: categoryKey,
             label: categoryName,
             name: categoryName,
             description: cat.description || `Descrição da ${categoryName}`,
@@ -64,48 +66,104 @@ export const useAdminDataIntegrated = () => {
           };
         });
 
+        console.log('📋 Categorias preparadas:', categoriesForMigration);
         await saveSupabaseCategories(categoriesForMigration);
         migrationCount++;
         
-        // Aguardar para garantir que as categorias foram salvas
+        // Aguardar processamento das categorias
         console.log('⏳ Aguardando categorias serem processadas...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
-        // Recarregar dados para pegar as categorias com IDs corretos
+        // Recarregar dados para garantir que as categorias estão no Supabase
         await refreshData();
         console.log('✅ Categorias migradas e dados recarregados');
+      } else {
+        console.log('⚠️ Nenhuma categoria local encontrada para migrar');
+        // Se não há categorias locais, usar as padrão
+        const defaultCategories = [
+          {
+            id: crypto.randomUUID(),
+            value: 'familia',
+            label: 'Direito de Família',
+            name: 'Direito de Família',
+            description: 'Proteção e orientação em questões familiares',
+            icon: 'Heart',
+            color: 'bg-rose-500'
+          },
+          {
+            id: crypto.randomUUID(),
+            value: 'tributario',
+            label: 'Direito Tributário', 
+            name: 'Direito Tributário',
+            description: 'Consultoria e planejamento tributário',
+            icon: 'Calculator',
+            color: 'bg-blue-500'
+          },
+          {
+            id: crypto.randomUUID(),
+            value: 'empresarial',
+            label: 'Direito Empresarial',
+            name: 'Direito Empresarial', 
+            description: 'Suporte jurídico para empresas',
+            icon: 'Building2',
+            color: 'bg-green-500'
+          },
+          {
+            id: crypto.randomUUID(),
+            value: 'trabalho',
+            label: 'Direito do Trabalho',
+            name: 'Direito do Trabalho',
+            description: 'Defesa dos direitos trabalhistas', 
+            icon: 'Users',
+            color: 'bg-orange-500'
+          }
+        ];
+        
+        console.log('📋 Criando categorias padrão:', defaultCategories);
+        await saveSupabaseCategories(defaultCategories);
+        migrationCount++;
+        
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        await refreshData();
       }
       
-      // 2. MIGRAR PÁGINAS DE SERVIÇOS (após categorias estarem no Supabase)
+      // ETAPA 2: Migrar páginas de serviços (após categorias estarem no Supabase)
       if (localServicePages.length > 0) {
-        console.log('📄 Migrando páginas de serviços...');
+        console.log('📄 ETAPA 2: Migrando páginas de serviços...');
         await saveSupabaseServicePages(localServicePages);
         migrationCount++;
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await refreshData();
       }
       
-      // 3. Migrar outros dados
+      // ETAPA 3: Migrar outros dados
       if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
-        console.log('⚙️ Migrando configurações...');
+        console.log('⚙️ ETAPA 3: Migrando configurações...');
         await saveSupabasePageTexts(localPageTexts);
         migrationCount++;
       }
       
       if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
-        console.log('👥 Migrando equipe...');
+        console.log('👥 ETAPA 4: Migrando equipe...');
         await saveSupabaseTeamMembers(localTeamMembers);
         migrationCount++;
       }
       
+      // Recarregamento final para garantir que tudo está sincronizado
+      console.log('🔄 Recarregamento final...');
+      await refreshData();
+      
       if (migrationCount > 0) {
         setHasMigrated(true);
         toast.success(`🎉 Migração concluída! ${migrationCount} tipos de dados migrados.`);
-        
-        // Recarregar dados finais
-        await refreshData();
+      } else {
+        toast.info('ℹ️ Nenhum dado novo para migrar');
       }
+      
     } catch (error) {
       console.error('❌ ERRO NA MIGRAÇÃO:', error);
-      toast.error('❌ Erro na migração completa');
+      toast.error(`❌ Erro na migração: ${error.message}`);
     } finally {
       setIsTransitioning(false);
     }
@@ -113,23 +171,62 @@ export const useAdminDataIntegrated = () => {
 
   // MIGRAÇÃO FORÇADA ESPECÍFICA PARA CATEGORIAS
   const forceCategoryMigration = async () => {
-    if (localCategories.length === 0) {
-      console.log('⚠️ Nenhuma categoria local para migrar');
-      toast.error('Nenhuma categoria local encontrada');
-      return;
-    }
-
-    console.log('🔥 INICIANDO MIGRAÇÃO FORÇADA DE CATEGORIAS:', localCategories);
+    console.log('🔥 INICIANDO MIGRAÇÃO FORÇADA DE CATEGORIAS');
     setIsTransitioning(true);
     
     try {
-      const categoriesForMigration = localCategories.map((cat, index) => {
+      // Usar categorias locais ou padrão
+      let categoriesToMigrate = localCategories;
+      
+      if (categoriesToMigrate.length === 0) {
+        console.log('📋 Usando categorias padrão...');
+        categoriesToMigrate = [
+          {
+            id: 'familia-' + Date.now(),
+            value: 'familia',
+            label: 'Direito de Família',
+            name: 'Direito de Família',
+            description: 'Proteção e orientação em questões familiares',
+            icon: 'Heart',
+            color: 'bg-rose-500'
+          },
+          {
+            id: 'tributario-' + Date.now(),
+            value: 'tributario',
+            label: 'Direito Tributário',
+            name: 'Direito Tributário',
+            description: 'Consultoria e planejamento tributário',
+            icon: 'Calculator',
+            color: 'bg-blue-500'
+          },
+          {
+            id: 'empresarial-' + Date.now(),
+            value: 'empresarial',
+            label: 'Direito Empresarial',
+            name: 'Direito Empresarial',
+            description: 'Suporte jurídico para empresas',
+            icon: 'Building2',
+            color: 'bg-green-500'
+          },
+          {
+            id: 'trabalho-' + Date.now(),
+            value: 'trabalho',
+            label: 'Direito do Trabalho',
+            name: 'Direito do Trabalho',
+            description: 'Defesa dos direitos trabalhistas',
+            icon: 'Users',
+            color: 'bg-orange-500'
+          }
+        ];
+      }
+
+      const categoriesForMigration = categoriesToMigrate.map((cat, index) => {
         const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
-        const categoryValue = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
+        const categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
         
         return {
           id: cat.id || crypto.randomUUID(),
-          value: categoryValue,
+          value: categoryKey,
           label: categoryName,
           name: categoryName,
           description: cat.description || `Descrição da ${categoryName}`,
@@ -142,8 +239,10 @@ export const useAdminDataIntegrated = () => {
       
       await saveSupabaseCategories(categoriesForMigration);
       
-      // Aguardar e recarregar
+      // Aguardar e recarregar múltiplas vezes para garantir sincronia
       await new Promise(resolve => setTimeout(resolve, 3000));
+      await refreshData();
+      await new Promise(resolve => setTimeout(resolve, 1000));
       await refreshData();
       
       toast.success(`🎉 ${categoriesForMigration.length} categorias migradas com sucesso!`);
@@ -156,33 +255,44 @@ export const useAdminDataIntegrated = () => {
     }
   };
 
-  // Determinar qual fonte de dados usar - CORRIGIDO
-  const hasSupabaseData = supabaseCategories.length > 0 || supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabasePageTexts.heroTitle;
-  const useSupabaseData = hasSupabaseData;
-
-  console.log('🔍 DECISÃO DE FONTE DE DADOS:', {
-    supabaseCategories: supabaseCategories.length,
-    supabaseServicePages: supabaseServicePages.length,
-    localCategories: localCategories.length,
-    localServicePages: localServicePages.length,
-    hasSupabaseData,
-    useSupabaseData
+  // Lógica de determinação da fonte de dados - CORRIGIDA
+  console.log('🔍 ESTADO ATUAL DOS DADOS:', {
+    supabaseCategories: supabaseCategories?.length || 0,
+    supabaseServicePages: supabaseServicePages?.length || 0,
+    supabaseTeamMembers: supabaseTeamMembers?.length || 0,
+    localCategories: localCategories?.length || 0,
+    localServicePages: localServicePages?.length || 0,
+    localTeamMembers: localTeamMembers?.length || 0,
+    supabasePageTexts: !!supabasePageTexts?.heroTitle
   });
 
-  // Dados finais
-  const teamMembers = useSupabaseData ? supabaseTeamMembers : localTeamMembers;
-  const pageTexts = useSupabaseData ? supabasePageTexts : localPageTexts;
-  const servicePages = useSupabaseData ? supabaseServicePages : localServicePages;
-  const categories = useSupabaseData ? supabaseCategories : localCategories;
+  // Usar Supabase se houver qualquer dado lá, senão usar localStorage
+  const hasSupabaseData = (supabaseCategories?.length > 0) || 
+                         (supabaseServicePages?.length > 0) || 
+                         (supabaseTeamMembers?.length > 0) || 
+                         !!supabasePageTexts?.heroTitle;
+
+  const useSupabaseData = hasSupabaseData;
+
+  console.log('🎯 FONTE DE DADOS ESCOLHIDA:', {
+    hasSupabaseData,
+    useSupabaseData,
+    reason: hasSupabaseData ? 'Dados encontrados no Supabase' : 'Usando localStorage como fallback'
+  });
+
+  // Dados finais retornados
+  const teamMembers = useSupabaseData ? (supabaseTeamMembers || []) : (localTeamMembers || []);
+  const pageTexts = useSupabaseData ? (supabasePageTexts || localPageTexts) : localPageTexts;
+  const servicePages = useSupabaseData ? (supabaseServicePages || []) : (localServicePages || []);
+  const categories = useSupabaseData ? (supabaseCategories || []) : (localCategories || []);
   const isLoading = supabaseLoading || isTransitioning;
 
-  console.log('📊 DADOS FINAIS SENDO RETORNADOS:', {
-    categories: categories.length,
-    servicePages: servicePages.length,
-    teamMembers: teamMembers.length,
+  console.log('📊 DADOS FINAIS RETORNADOS:', {
+    categories: categories?.length || 0,
+    servicePages: servicePages?.length || 0,
+    teamMembers: teamMembers?.length || 0,
     useSupabaseData,
-    categoriesData: categories,
-    servicePagesData: servicePages
+    isLoading
   });
 
   // WRAPPER PARA SINCRONIZAÇÃO AUTOMÁTICA
@@ -192,7 +302,6 @@ export const useAdminDataIntegrated = () => {
     try {
       await operation();
       console.log('✅', successMessage);
-      // Refresh automático em background
       setTimeout(async () => {
         await refreshData();
       }, 500);
