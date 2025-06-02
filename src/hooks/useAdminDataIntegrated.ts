@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 export const useAdminDataIntegrated = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [hasMigrated, setHasMigrated] = useState(false);
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   
   // Dados do Supabase (prioritários)
   const {
@@ -35,29 +36,21 @@ export const useAdminDataIntegrated = () => {
     saveCategories: saveLocalCategories
   } = useAdminData();
 
-  // Função para executar migração manual
+  // Função para executar migração manual (SEM LOOPS)
   const executeMigration = async () => {
+    if (isTransitioning) {
+      console.log('⏸️ Migração já em andamento, ignorando nova tentativa');
+      return;
+    }
+
     console.log('🚀 INICIANDO MIGRAÇÃO MANUAL');
-    console.log('📊 Dados localStorage:', {
-      servicePages: localServicePages.length,
-      teamMembers: localTeamMembers.length,
-      categories: localCategories.length,
-      pageTexts: !!localPageTexts.heroTitle
-    });
-    console.log('📊 Dados Supabase:', {
-      servicePages: supabaseServicePages.length,
-      teamMembers: supabaseTeamMembers.length,
-      categories: supabaseCategories.length,
-      pageTexts: !!supabasePageTexts.heroTitle
-    });
-    
     setIsTransitioning(true);
     
     try {
       let migrationCount = 0;
       
       // 1. Migrar categorias PRIMEIRO (dependência para service pages)
-      if (localCategories.length > 0) {
+      if (localCategories.length > 0 && supabaseCategories.length === 0) {
         console.log('📂 Migrando categorias...', localCategories.length);
         await saveSupabaseCategories(localCategories);
         migrationCount++;
@@ -65,6 +58,7 @@ export const useAdminDataIntegrated = () => {
         
         // Aguardar para garantir que as categorias estão salvas
         await new Promise(resolve => setTimeout(resolve, 2000));
+        await refreshData();
       }
       
       // 2. Migrar configurações
@@ -76,7 +70,7 @@ export const useAdminDataIntegrated = () => {
       }
       
       // 3. Migrar equipe
-      if (localTeamMembers.length > 0) {
+      if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
         console.log('👥 Migrando equipe...', localTeamMembers.length);
         await saveSupabaseTeamMembers(localTeamMembers);
         migrationCount++;
@@ -84,7 +78,7 @@ export const useAdminDataIntegrated = () => {
       }
       
       // 4. Migrar páginas de serviços (depois das categorias)
-      if (localServicePages.length > 0) {
+      if (localServicePages.length > 0 && supabaseServicePages.length === 0) {
         console.log('📄 Migrando páginas de serviços...', localServicePages.length);
         await saveSupabaseServicePages(localServicePages);
         migrationCount++;
@@ -100,60 +94,45 @@ export const useAdminDataIntegrated = () => {
         toast.success(`🎉 Migração concluída! ${migrationCount} tipos de dados migrados.`);
         console.log('🎉 MIGRAÇÃO CONCLUÍDA COM SUCESSO');
       } else {
-        toast.info('ℹ️ Nenhum dado novo para migrar.');
         console.log('ℹ️ NENHUM DADO PARA MIGRAR');
       }
     } catch (error) {
       console.error('❌ ERRO NA MIGRAÇÃO:', error);
-      toast.error('❌ Erro na migração. Verifique o console.');
+      toast.error('❌ Erro na migração. Dados serão usados do localStorage.');
     } finally {
       setIsTransitioning(false);
     }
   };
 
-  // Auto-migração inteligente
+  // Auto-migração inteligente (SEM LOOPS INFINITOS)
   useEffect(() => {
-    const autoMigrate = async () => {
-      if (supabaseLoading || hasMigrated || isTransitioning) return;
-      
-      const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
-      const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
-      
-      console.log('🔍 VERIFICAÇÃO AUTO-MIGRAÇÃO:', {
-        hasLocalData,
-        hasSupabaseData,
-        localPages: localServicePages.length,
-        supabasePages: supabaseServicePages.length,
-        localTeam: localTeamMembers.length,
-        supabaseTeam: supabaseTeamMembers.length,
-        localCategories: localCategories.length,
-        supabaseCategories: supabaseCategories.length
-      });
-      
-      // FORÇAR migração se há dados locais significativos e poucos ou nenhum dado no Supabase
-      if (hasLocalData && (!hasSupabaseData || 
-          supabaseServicePages.length < localServicePages.length * 0.8 ||
-          supabaseCategories.length < localCategories.length * 0.8)) {
-        console.log('🔄 Iniciando migração automática...');
-        await executeMigration();
-      } else if (hasSupabaseData) {
-        setHasMigrated(true);
-        console.log('✅ Dados já existem no Supabase');
-      }
-    };
-
-    const timer = setTimeout(autoMigrate, 2000);
-    return () => clearTimeout(timer);
+    if (supabaseLoading || hasMigrated || isTransitioning) return;
+    
+    const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
+    const hasSupabaseData = supabaseServicePages.length > 0 || supabaseTeamMembers.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
+    
+    console.log('🔍 VERIFICAÇÃO AUTO-MIGRAÇÃO:', {
+      hasLocalData,
+      hasSupabaseData,
+      categoriesNeedMigration: localCategories.length > 0 && supabaseCategories.length === 0
+    });
+    
+    // MIGRAR apenas se há dados locais e NADA no Supabase (primeira vez)
+    if (hasLocalData && !hasSupabaseData) {
+      console.log('🔄 Iniciando migração automática...');
+      executeMigration();
+    } else if (hasSupabaseData) {
+      setHasMigrated(true);
+      console.log('✅ Dados já existem no Supabase');
+    }
   }, [
     supabaseLoading, 
     localTeamMembers.length, 
     localServicePages.length, 
     localCategories.length,
-    localPageTexts.heroTitle,
     supabaseTeamMembers.length,
     supabaseServicePages.length,
     supabaseCategories.length,
-    supabasePageTexts.heroTitle,
     hasMigrated,
     isTransitioning
   ]);
@@ -169,27 +148,32 @@ export const useAdminDataIntegrated = () => {
   const categories = useSupabaseData ? supabaseCategories : localCategories;
   const isLoading = supabaseLoading || isTransitioning;
 
-  // SISTEMA DE SINCRONIZAÇÃO AUTOMÁTICA - MAIS AVANÇADO
-  const autoSyncWrapper = async (operation: () => Promise<void>) => {
+  // SISTEMA DE SINCRONIZAÇÃO AUTOMÁTICA INSTANTÂNEA
+  const instantSyncWrapper = async (operation: () => Promise<void>, successMessage: string) => {
+    if (!autoSyncEnabled) return;
+    
     setIsTransitioning(true);
     try {
       await operation();
-      // Auto-refresh após qualquer operação
+      console.log('✅', successMessage);
+      // Auto-refresh em background (sem bloquear UI)
       setTimeout(async () => {
         await refreshData();
-      }, 1000);
+      }, 500);
+    } catch (error) {
+      console.error('❌ Erro na sincronização:', error);
+      toast.error('❌ Erro ao sincronizar. Tente novamente.');
     } finally {
-      setIsTransitioning(false);
+      setTimeout(() => setIsTransitioning(false), 100);
     }
   };
 
-  // Funções de salvamento com sincronização automática
+  // Funções de salvamento com sincronização INSTANTÂNEA
   const updatePageTexts = async (texts: PageTexts) => {
     if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
+      await instantSyncWrapper(async () => {
         await saveSupabasePageTexts(texts);
-        toast.success('💾 Configurações salvas automaticamente');
-      });
+      }, 'Configurações salvas automaticamente');
     } else {
       saveLocalPageTexts(texts);
     }
@@ -197,10 +181,9 @@ export const useAdminDataIntegrated = () => {
 
   const saveAllTeamMembers = async (members: TeamMember[]) => {
     if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
+      await instantSyncWrapper(async () => {
         await saveSupabaseTeamMembers(members);
-        toast.success('👥 Equipe salva automaticamente');
-      });
+      }, 'Equipe salva automaticamente');
     } else {
       saveLocalTeamMembers(members);
     }
@@ -235,10 +218,9 @@ export const useAdminDataIntegrated = () => {
 
   const saveServicePagesData = async (pages: ServicePage[]) => {
     if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
+      await instantSyncWrapper(async () => {
         await saveSupabaseServicePages(pages);
-        toast.success('📄 Páginas salvas automaticamente');
-      });
+      }, 'Páginas salvas automaticamente');
     } else {
       saveLocalServicePages(pages);
     }
@@ -246,10 +228,9 @@ export const useAdminDataIntegrated = () => {
 
   const saveCategoriesData = async (cats: CategoryInfo[]) => {
     if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
+      await instantSyncWrapper(async () => {
         await saveSupabaseCategories(cats);
-        toast.success('📂 Categorias salvas automaticamente');
-      });
+      }, 'Categorias salvas automaticamente');
     } else {
       saveLocalCategories(cats);
     }
@@ -257,15 +238,14 @@ export const useAdminDataIntegrated = () => {
 
   const saveAll = async () => {
     if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
+      await instantSyncWrapper(async () => {
         await Promise.all([
           saveSupabasePageTexts(pageTexts),
           saveSupabaseTeamMembers(teamMembers),
           saveSupabaseCategories(categories),
           saveSupabaseServicePages(servicePages)
         ]);
-        toast.success('💾 Todos os dados salvos automaticamente');
-      });
+      }, 'Todos os dados salvos automaticamente');
     }
   };
 
@@ -284,7 +264,8 @@ export const useAdminDataIntegrated = () => {
     finalPages: servicePages.length,
     finalCategories: categories.length,
     isTransitioning,
-    isLoading
+    isLoading,
+    autoSyncEnabled
   });
 
   return {
@@ -299,7 +280,7 @@ export const useAdminDataIntegrated = () => {
     useSupabaseData,
     isTransitioning,
     
-    // Funções de atualização com auto-sync
+    // Funções de atualização com auto-sync INSTANTÂNEO
     updatePageTexts,
     updateTeamMember,
     addTeamMember,
@@ -310,6 +291,10 @@ export const useAdminDataIntegrated = () => {
     refreshData: refreshDataManual,
     
     // Função para migração manual
-    executeMigration
+    executeMigration,
+    
+    // Controle de sync automático
+    autoSyncEnabled,
+    setAutoSyncEnabled
   };
 };

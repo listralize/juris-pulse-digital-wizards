@@ -164,7 +164,7 @@ export const useSupabaseDataNew = () => {
         setTeamMembers(formattedTeamMembers);
       }
 
-      // Montar dados das categorias
+      // Montar dados das categorias - CORRIGIDO
       if (categoriesData && categoriesData.length > 0) {
         const formattedCategories: CategoryInfo[] = categoriesData.map(cat => ({
           id: cat.id,
@@ -423,7 +423,7 @@ export const useSupabaseDataNew = () => {
     }
   };
 
-  // Salvar categorias com sincronização automática - CORRIGIDO
+  // Salvar categorias com sincronização automática - TOTALMENTE CORRIGIDO
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
       console.log('💾 Salvando', cats.length, 'categorias no Supabase...');
@@ -434,15 +434,20 @@ export const useSupabaseDataNew = () => {
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Inserir/atualizar novas categorias, garantindo UUIDs válidos
+      // Processar categorias com dados completos
       const categoryData = cats.map((cat, index) => {
         const validId = ensureValidUUID(cat.id || '');
-        console.log(`📂 Processando categoria: ${cat.name} (${cat.value}) -> UUID: ${validId}`);
+        
+        // GARANTIR que todos os campos obrigatórios estão preenchidos
+        const categoryName = cat.name || cat.label || cat.value || 'Categoria sem nome';
+        const categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || 'categoria-sem-chave';
+        
+        console.log(`📂 Processando categoria: ${categoryName} (${categoryKey}) -> UUID: ${validId}`);
         
         return {
           id: validId,
-          category_key: cat.value,
-          name: cat.name,
+          category_key: categoryKey,
+          name: categoryName, // CAMPO OBRIGATÓRIO
           description: cat.description || '',
           icon: cat.icon || 'FileText',
           color: cat.color || 'bg-gray-500',
@@ -451,6 +456,8 @@ export const useSupabaseDataNew = () => {
           updated_at: new Date().toISOString()
         };
       });
+
+      console.log('📋 Dados das categorias para inserir:', categoryData);
 
       const { data, error } = await supabase
         .from('law_categories')
@@ -464,7 +471,8 @@ export const useSupabaseDataNew = () => {
       // Atualizar estado local com IDs válidos
       const updatedCategories = cats.map((cat, index) => ({
         ...cat,
-        id: categoryData[index].id
+        id: categoryData[index].id,
+        name: categoryData[index].name
       }));
       
       setCategories(updatedCategories);
