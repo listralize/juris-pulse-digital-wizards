@@ -49,7 +49,7 @@ const Partners = () => {
 
   if (isLoading) {
     return (
-      <section id="socios" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+      <section className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="flex justify-center items-center">
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -66,10 +66,10 @@ const Partners = () => {
   };
 
   return (
-    <section 
+    <div 
       id="socios"
       ref={sectionRef}
-      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-center`}
+      className={`min-h-screen py-10 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} flex flex-col justify-center overflow-y-auto`}
     >
       <div className="max-w-6xl mx-auto w-full">
         <h2 
@@ -128,7 +128,7 @@ const Partners = () => {
           </Carousel>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

@@ -43,6 +43,12 @@ export const useSectionTransition = (sections: Section[]) => {
         return;
       }
       
+      // Check if we're inside a scrollable element within socios section
+      const target = e.target as HTMLElement;
+      if (target.closest('#socios')) {
+        return;
+      }
+      
       if (isScrolling || isTransitioning) return;
       
       e.preventDefault();
