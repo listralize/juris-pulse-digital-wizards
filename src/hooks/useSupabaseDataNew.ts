@@ -51,10 +51,18 @@ export const useSupabaseDataNew = () => {
     return uuidRegex.test(str);
   };
 
+  // Função para transformar ID local em UUID válido
+  const ensureValidUUID = (id: string) => {
+    if (!id || !isValidUUID(id)) {
+      return generateValidUUID();
+    }
+    return id;
+  };
+
   // Carregar dados do Supabase
   const loadData = async () => {
     try {
-      console.log('Carregando dados do novo esquema Supabase...');
+      console.log('🔄 Carregando dados do Supabase...');
       
       // Carregar configurações do site
       const { data: siteSettings } = await supabase
@@ -87,6 +95,8 @@ export const useSupabaseDataNew = () => {
         .select('*')
         .eq('is_active', true)
         .order('display_order');
+
+      console.log('📊 Categorias carregadas do Supabase:', categoriesData?.length || 0);
 
       // Carregar páginas de serviços com relacionamentos
       const { data: servicePagesData } = await supabase
@@ -155,7 +165,7 @@ export const useSupabaseDataNew = () => {
       }
 
       // Montar dados das categorias
-      if (categoriesData) {
+      if (categoriesData && categoriesData.length > 0) {
         const formattedCategories: CategoryInfo[] = categoriesData.map(cat => ({
           id: cat.id,
           value: cat.category_key,
@@ -166,6 +176,10 @@ export const useSupabaseDataNew = () => {
           color: cat.color || 'bg-gray-500'
         }));
         setCategories(formattedCategories);
+        console.log('✅ Categorias processadas:', formattedCategories.length);
+      } else {
+        console.log('⚠️ Nenhuma categoria encontrada no Supabase');
+        setCategories([]);
       }
 
       // Montar dados das páginas de serviços
@@ -201,15 +215,17 @@ export const useSupabaseDataNew = () => {
       }
 
     } catch (error) {
-      console.error('Erro ao carregar dados do Supabase:', error);
+      console.error('❌ Erro ao carregar dados do Supabase:', error);
     }
     
     setIsLoading(false);
   };
 
-  // Salvar configurações do site
+  // Salvar configurações do site com sincronização automática
   const savePageTexts = async (texts: PageTexts) => {
     try {
+      console.log('💾 Salvando configurações no Supabase...');
+      
       // Atualizar configurações do site
       await supabase
         .from('site_settings')
@@ -251,16 +267,18 @@ export const useSupabaseDataNew = () => {
         });
 
       setPageTexts(texts);
-      console.log('Configurações salvas no Supabase com sucesso');
+      console.log('✅ Configurações salvas no Supabase');
     } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
+      console.error('❌ Erro ao salvar configurações:', error);
       throw error;
     }
   };
 
-  // Salvar membros da equipe
+  // Salvar membros da equipe com sincronização automática
   const saveTeamMembers = async (members: TeamMember[]) => {
     try {
+      console.log('💾 Salvando equipe no Supabase...');
+      
       // Primeiro, desativar todos os membros existentes
       await supabase
         .from('team_members')
@@ -269,7 +287,7 @@ export const useSupabaseDataNew = () => {
 
       // Inserir/atualizar novos membros, garantindo UUIDs válidos
       const memberData = members.map((member, index) => ({
-        id: isValidUUID(member.id) ? member.id : generateValidUUID(),
+        id: ensureValidUUID(member.id),
         name: member.name,
         title: member.title,
         oab: member.oab,
@@ -286,17 +304,17 @@ export const useSupabaseDataNew = () => {
         .upsert(memberData);
 
       setTeamMembers(members);
-      console.log('Equipe salva no Supabase com sucesso');
+      console.log('✅ Equipe salva no Supabase');
     } catch (error) {
-      console.error('Erro ao salvar equipe:', error);
+      console.error('❌ Erro ao salvar equipe:', error);
       throw error;
     }
   };
 
-  // Salvar páginas de serviços - versão corrigida com UUIDs válidos
+  // Salvar páginas de serviços com sincronização automática
   const saveServicePages = async (pages: ServicePage[]) => {
     try {
-      console.log('Iniciando salvamento das páginas de serviços...', pages.length);
+      console.log('💾 Salvando', pages.length, 'páginas de serviços no Supabase...');
       
       // Primeiro, desativar todas as páginas existentes
       await supabase
@@ -307,10 +325,10 @@ export const useSupabaseDataNew = () => {
       // Para cada página, salvar página principal e relacionamentos
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
-        console.log(`Salvando página ${i + 1}/${pages.length}: ${page.title}`);
+        console.log(`📄 Processando página ${i + 1}/${pages.length}: ${page.title}`);
 
         // Gerar UUID válido se necessário
-        const validPageId = isValidUUID(page.id) ? page.id : generateValidUUID();
+        const validPageId = ensureValidUUID(page.id);
 
         // Encontrar categoria correspondente
         const category = categories.find(cat => cat.value === page.category);
@@ -332,11 +350,9 @@ export const useSupabaseDataNew = () => {
           .single();
 
         if (pageError) {
-          console.error('Erro ao salvar página:', pageError);
+          console.error('❌ Erro ao salvar página:', pageError);
           continue;
         }
-
-        console.log('Página salva:', savedPage.title);
 
         // Limpar relacionamentos existentes
         await Promise.all([
@@ -357,7 +373,6 @@ export const useSupabaseDataNew = () => {
           }));
 
           await supabase.from('service_benefits').insert(benefitsData);
-          console.log(`Salvos ${benefitsData.length} benefícios para ${page.title}`);
         }
 
         // Salvar processos
@@ -371,7 +386,6 @@ export const useSupabaseDataNew = () => {
           }));
 
           await supabase.from('service_process_steps').insert(processData);
-          console.log(`Salvos ${processData.length} passos de processo para ${page.title}`);
         }
 
         // Salvar FAQ
@@ -384,7 +398,6 @@ export const useSupabaseDataNew = () => {
           }));
 
           await supabase.from('service_faq').insert(faqData);
-          console.log(`Salvos ${faqData.length} FAQs para ${page.title}`);
         }
 
         // Salvar depoimentos
@@ -392,54 +405,74 @@ export const useSupabaseDataNew = () => {
           const testimonialsData = page.testimonials.map((testimonial, index) => ({
             service_page_id: validPageId,
             name: testimonial.name,
-            text: testimonial.text,
+            text: testimonial.text || 'Depoimento excelente',
             role: testimonial.role,
             image: testimonial.image,
             display_order: index
           }));
 
           await supabase.from('service_testimonials').insert(testimonialsData);
-          console.log(`Salvos ${testimonialsData.length} depoimentos para ${page.title}`);
         }
       }
 
       setServicePages(pages);
-      console.log('Todas as páginas de serviços foram salvas no Supabase com sucesso');
+      console.log('✅ Todas as páginas salvas no Supabase');
     } catch (error) {
-      console.error('Erro ao salvar páginas de serviços:', error);
+      console.error('❌ Erro ao salvar páginas de serviços:', error);
       throw error;
     }
   };
 
-  // Salvar categorias
+  // Salvar categorias com sincronização automática - CORRIGIDO
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
+      console.log('💾 Salvando', cats.length, 'categorias no Supabase...');
+      
       // Primeiro, desativar todas as categorias existentes
       await supabase
         .from('law_categories')
         .update({ is_active: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      const categoryData = cats.map((cat, index) => ({
-        id: isValidUUID(cat.id || '') ? cat.id : generateValidUUID(),
-        category_key: cat.value,
-        name: cat.name,
-        description: cat.description,
-        icon: cat.icon,
-        color: cat.color,
-        display_order: index,
-        is_active: true,
-        updated_at: new Date().toISOString()
-      }));
+      // Inserir/atualizar novas categorias, garantindo UUIDs válidos
+      const categoryData = cats.map((cat, index) => {
+        const validId = ensureValidUUID(cat.id || '');
+        console.log(`📂 Processando categoria: ${cat.name} (${cat.value}) -> UUID: ${validId}`);
+        
+        return {
+          id: validId,
+          category_key: cat.value,
+          name: cat.name,
+          description: cat.description || '',
+          icon: cat.icon || 'FileText',
+          color: cat.color || 'bg-gray-500',
+          display_order: index,
+          is_active: true,
+          updated_at: new Date().toISOString()
+        };
+      });
 
-      await supabase
+      const { data, error } = await supabase
         .from('law_categories')
         .upsert(categoryData);
 
-      setCategories(cats);
-      console.log('Categorias salvas no Supabase com sucesso');
+      if (error) {
+        console.error('❌ Erro ao inserir categorias:', error);
+        throw error;
+      }
+
+      // Atualizar estado local com IDs válidos
+      const updatedCategories = cats.map((cat, index) => ({
+        ...cat,
+        id: categoryData[index].id
+      }));
+      
+      setCategories(updatedCategories);
+      console.log('✅ Categorias salvas no Supabase:', categoryData.length);
+      
+      return updatedCategories;
     } catch (error) {
-      console.error('Erro ao salvar categorias:', error);
+      console.error('❌ Erro ao salvar categorias:', error);
       throw error;
     }
   };
