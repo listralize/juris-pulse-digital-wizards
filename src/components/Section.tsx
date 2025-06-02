@@ -29,10 +29,11 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           right: 0,
           bottom: 0,
           zIndex: isActive ? 10 : 1,
-          transition: 'opacity 500ms ease, visibility 500ms ease',
+          transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
+          minHeight: '100vh',
           maxHeight: '100vh',
           overflow: 'hidden'
         }}

@@ -32,6 +32,45 @@ export const useSectionTransition = (sections: Section[]) => {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [sections]);
+
+  // Add wheel event listener for scroll navigation
+  useEffect(() => {
+    let isScrolling = false;
+    
+    const handleWheel = (e: WheelEvent) => {
+      if (isScrolling || isTransitioning) return;
+      
+      e.preventDefault();
+      isScrolling = true;
+      
+      const currentIndex = sections.findIndex(section => section.id === activeSection);
+      let nextIndex = currentIndex;
+      
+      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
+        // Scroll down
+        nextIndex = currentIndex + 1;
+      } else if (e.deltaY < 0 && currentIndex > 0) {
+        // Scroll up
+        nextIndex = currentIndex - 1;
+      }
+      
+      if (nextIndex !== currentIndex) {
+        const nextSection = sections[nextIndex];
+        transitionToSection(nextSection.id);
+      }
+      
+      setTimeout(() => {
+        isScrolling = false;
+      }, 1000);
+    };
+
+    // Add wheel event listener to document
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+    };
+  }, [activeSection, sections, isTransitioning]);
   
   // Function to transition to a section
   const transitionToSection = (id: string) => {

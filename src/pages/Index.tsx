@@ -33,19 +33,24 @@ const Index = () => {
     document.body.style.color = isDark ? '#FFFFFF' : '#000000';
   }, [isDark]);
   
-  // Disable scroll for page-like navigation
+  // Disable default scroll and enable custom navigation
   useEffect(() => {
+    // Disable scroll on body and html
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+    document.documentElement.style.height = '100vh';
     
     return () => {
       document.body.style.overflow = 'auto';
       document.documentElement.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      document.documentElement.style.height = 'auto';
     };
   }, []);
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500`}>
+    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500 overflow-hidden`}>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
