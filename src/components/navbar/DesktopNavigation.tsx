@@ -62,6 +62,16 @@ const DesktopNavigation = ({
         />
         
         <NavigationItem 
+          to="/blog" 
+          label="Blog" 
+          isActive={window.location.pathname === '/blog'} 
+          onClick={e => {
+            e.preventDefault();
+            navigate('/blog');
+          }} 
+        />
+        
+        <NavigationItem 
           to="/#contact" 
           label="Contato" 
           isActive={activeSection === 'contact'} 

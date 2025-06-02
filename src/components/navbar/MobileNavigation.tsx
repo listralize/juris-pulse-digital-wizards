@@ -73,8 +73,8 @@ const MobileNavigation = ({
           Sobre Nós
         </a>
         
-        <Link
-          to="/#socios"
+        <a
+          href="/#socios"
           onClick={(e) => {
             e.preventDefault();
             handleNavigation('socios', '/#socios');
@@ -83,10 +83,10 @@ const MobileNavigation = ({
           className="block px-4 py-3 rounded-lg mx-2 font-medium text-sm transition-colors duration-200"
         >
           Nossa Equipe
-        </Link>
+        </a>
         
-        <Link
-          to="/#cliente"
+        <a
+          href="/#cliente"
           onClick={(e) => {
             e.preventDefault();
             handleNavigation('cliente', '/#cliente');
@@ -95,6 +95,20 @@ const MobileNavigation = ({
           className="block px-4 py-3 rounded-lg mx-2 font-medium text-sm transition-colors duration-200"
         >
           Área do Cliente
+        </a>
+        
+        <Link
+          to="/blog"
+          className={`block px-4 py-3 rounded-lg mx-2 ${
+            window.location.pathname === '/blog'
+            ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
+            : ''} font-medium text-sm transition-colors duration-200`}
+          onClick={() => {
+            setIsMenuOpen(false);
+            navigate('/blog');
+          }}
+        >
+          Blog
         </Link>
         
         <a 

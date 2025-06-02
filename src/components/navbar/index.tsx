@@ -30,6 +30,8 @@ const Navbar = () => {
                '/constitucional', '/administrativo', '/previdenciario', 
                '/consumidor', '/civil'].includes(path)) {
       setActiveSection('areas');
+    } else if (path === '/blog') {
+      setActiveSection('blog');
     } else {
       setActiveSection('');
     }
