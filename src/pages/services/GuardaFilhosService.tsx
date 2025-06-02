@@ -7,131 +7,131 @@ const GuardaFilhosService = () => {
     <ServiceLandingLayout
       serviceArea="Direito de Família"
       serviceName="Guarda de Filhos"
-      serviceDescription="Assessoria jurídica especializada em questões de guarda compartilhada, unilateral, direito de visitas e convivência parental, priorizando sempre o melhor interesse da criança e adolescente."
+      serviceDescription="Assessoria jurídica especializada em ações de guarda, regulamentação de visitas e proteção dos interesses das crianças e adolescentes em processos familiares."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Priorização do Bem-Estar",
-          description: "Estratégias que priorizam o bem-estar psicológico e emocional das crianças durante todo o processo, seguindo o princípio do melhor interesse.",
-          icon: "❤️"
+          title: "Proteção do Melhor Interesse da Criança",
+          description: "Estratégia jurídica focada na proteção dos direitos fundamentais e bem-estar físico, emocional e psicológico das crianças e adolescentes envolvidos.",
+          icon: "🛡️"
         },
         {
-          title: "Acordos Equilibrados",
-          description: "Mediação para estabelecer acordos equilibrados de guarda e convivência que respeitem os direitos de ambos os pais e das crianças.",
+          title: "Modalidades de Guarda Especializadas",
+          description: "Conhecimento técnico em todas as modalidades: guarda unilateral, compartilhada, alternada e de terceiros, com escolha da mais adequada para cada caso.",
           icon: "⚖️"
         },
         {
-          title: "Resolução de Conflitos",
-          description: "Abordagem focada na resolução de conflitos e na construção de um ambiente saudável de coparentalidade.",
+          title: "Regulamentação de Visitas Detalhada",
+          description: "Estabelecimento de cronogramas de visitação equilibrados, incluindo feriados, férias escolares, datas comemorativas e situações especiais.",
+          icon: "📅"
+        },
+        {
+          title: "Mediação Familiar Especializada",
+          description: "Condução de processos de mediação para resolução amigável de conflitos, priorizando acordos que preservem as relações familiares.",
           icon: "🤝"
         },
         {
-          title: "Expertise Jurídica",
-          description: "Conhecimento aprofundado da legislação atual e jurisprudência dos tribunais superiores em matéria de guarda.",
-          icon: "📚"
-        },
-        {
           title: "Acompanhamento Psicossocial",
-          description: "Trabalho conjunto com equipe multidisciplinar para garantir avaliações técnicas qualificadas.",
+          description: "Coordenação com equipe multidisciplinar incluindo psicólogos e assistentes sociais para avaliação técnica completa da dinâmica familiar.",
           icon: "👥"
         },
         {
-          title: "Urgência e Agilidade",
-          description: "Atuação em medidas urgentes e liminares quando há risco ao bem-estar da criança ou adolescente.",
-          icon: "⚡"
+          title: "Modificação e Revisão de Guardas",
+          description: "Assessoria em pedidos de alteração de guarda e visitação quando há mudanças significativas nas circunstâncias familiares ou interesse dos menores.",
+          icon: "🔄"
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Consulta Inicial Detalhada",
-          description: "Análise completa da situação familiar, histórico de convivência, rotina das crianças e identificação de questões urgentes. Orientação sobre direitos e deveres parentais."
+          title: "Análise Detalhada da Situação Familiar",
+          description: "Avaliação completa da dinâmica familiar, rotina das crianças, capacidade dos genitores e identificação dos pontos de conflito principais."
         },
         {
           step: 2,
-          title: "Avaliação Estratégica",
-          description: "Desenvolvimento de estratégia personalizada considerando aspectos psicológicos, sociais e jurídicos. Definição da modalidade de guarda mais adequada ao caso."
+          title: "Coleta de Documentação Probatória",
+          description: "Reunião de documentos que comprovem a capacidade de cuidado: comprovantes de residência, renda, saúde, rede de apoio familiar e registros escolares."
         },
         {
           step: 3,
-          title: "Preparação Documental",
-          description: "Reunião de documentos probatórios, laudos técnicos, comprovantes de residência, renda e condições de moradia. Organização de prontuário completo."
+          title: "Tentativa de Acordo Extrajudicial",
+          description: "Condução de negociações diretas entre as partes buscando acordo consensual sobre guarda e visitação, evitando desgaste judicial desnecessário."
         },
         {
           step: 4,
-          title: "Tentativa de Acordo",
-          description: "Mediação familiar para busca de solução consensual, com definição de guarda, visitação e pensão alimentícia de forma harmoniosa."
+          title: "Ajuizamento da Ação de Guarda",
+          description: "Elaboração e protocolo da petição inicial fundamentada, com pedidos claros sobre modalidade de guarda, visitação e outras questões pertinentes."
         },
         {
           step: 5,
-          title: "Ação Judicial",
-          description: "Quando necessário, ajuizamento de ação de guarda com pedidos de liminar, produção de provas e acompanhamento de audiências."
+          title: "Acompanhamento do Estudo Psicossocial",
+          description: "Orientação para participação no estudo psicossocial obrigatório, preparação para entrevistas e visitas domiciliares da equipe técnica."
         },
         {
           step: 6,
-          title: "Estudo Psicossocial",
-          description: "Acompanhamento durante estudo social e avaliação psicológica realizados pela equipe técnica do Judiciário."
+          title: "Audiência de Conciliação e Instrução",
+          description: "Representação nas audiências judiciais, apresentação de argumentos técnicos e busca por acordos que atendam o interesse superior dos menores."
         },
         {
           step: 7,
-          title: "Execução e Monitoramento",
-          description: "Acompanhamento do cumprimento da decisão judicial e orientação para eventuais modificações futuras conforme mudança de circunstâncias."
+          title: "Execução e Acompanhamento da Decisão",
+          description: "Implementação prática da decisão judicial, orientação sobre cumprimento das determinações e acompanhamento da adaptação familiar."
         }
       ]}
       testimonials={[
         {
-          name: "Ricardo M., Pai",
-          quote: "A guarda compartilhada parecia impossível devido aos conflitos, mas com a mediação especializada conseguimos um acordo que realmente funciona para nossa filha."
+          name: "Marina S., Mãe",
+          quote: "Consegui a guarda compartilhada de forma amigável. A mediação foi fundamental para preservarmos uma boa relação em prol dos nossos filhos."
         },
         {
-          name: "Patrícia L., Mãe",
-          quote: "Em um momento tão delicado, ter profissionais que realmente se importam com o aspecto emocional das crianças fez toda a diferença no resultado."
+          name: "Roberto M., Pai",
+          quote: "Estava há dois anos sem ver meus filhos. A ação de regulamentação de visitas me devolveu o direito de ser pai presente na vida deles."
         },
         {
-          name: "Fernando S., Pai Solo",
-          quote: "Consegui a guarda unilateral do meu filho após comprovar a melhor condição de cuidado. O suporte jurídico foi essencial em cada etapa."
+          name: "Ana Paula L., Avó",
+          quote: "Como avó, consegui a guarda dos meus netos após comprovar que oferecia o melhor ambiente para eles. A orientação jurídica foi essencial."
         },
         {
-          name: "Carla e João, Pais",
-          quote: "A orientação sobre visitação nos ajudou a estabelecer uma rotina saudável que respeita os direitos de todos e mantém a estabilidade das crianças."
+          name: "Carlos e Júlia, Ex-Casal",
+          quote: "Mesmo com conflitos iniciais, chegamos a um acordo de guarda compartilhada que funciona perfeitamente para toda a família."
         },
         {
-          name: "Ana Paula, Avó",
-          quote: "Como avó que buscava a guarda dos netos, recebi todo o suporte necessário para comprovar que oferecia o melhor ambiente familiar."
+          name: "Fernanda T., Mãe Solo",
+          quote: "A regulamentação das visitas trouxe segurança e previsibilidade para mim e minha filha. Agora temos uma rotina estabelecida e respeitada."
         }
       ]}
       faq={[
         {
-          question: "Qual a diferença entre guarda compartilhada e guarda alternada?",
-          answer: "Na guarda compartilhada, ambos os pais compartilham as decisões importantes sobre a vida dos filhos (educação, saúde, lazer), independentemente de com quem a criança resida. A criança tem residência fixa com um dos pais e visitação com o outro. Já na guarda alternada, a criança passa períodos iguais com cada genitor, alternando residências. A legislação brasileira privilegia a guarda compartilhada como regra geral."
+          question: "Qual a diferença entre guarda unilateral e compartilhada?",
+          answer: "Na guarda unilateral, apenas um dos pais detém a guarda, com o outro exercendo direito de visitação. Na compartilhada, ambos os pais exercem a guarda conjuntamente, tomando decisões importantes em conjunto, mesmo que a criança resida principalmente com um deles."
         },
         {
-          question: "Como é definido o tempo de convivência de cada genitor com os filhos?",
-          answer: "O tempo de convivência é definido considerando: rotina escolar e atividades da criança, proximidade das residências, disponibilidade dos pais, idade e preferência da criança (quando tem discernimento), e principalmente o melhor interesse do menor. Normalmente inclui finais de semana alternados, feriados divididos e período de férias escolares."
+          question: "A guarda compartilhada é obrigatória por lei?",
+          answer: "Sim, desde 2014 a guarda compartilhada é a regra legal quando ambos os pais estão aptos. Só se aplica a guarda unilateral quando um dos pais não reúne condições de exercer o poder familiar ou quando há incompatibilidade absoluta entre os genitores."
         },
         {
-          question: "É possível alterar um acordo de guarda já homologado?",
-          answer: "Sim, é possível modificar acordos de guarda quando houver mudança significativa nas circunstâncias que justifique a alteração, sempre observando o melhor interesse da criança. Exemplos: mudança de cidade, alteração na condição financeira, novos relacionamentos, problemas de saúde ou comportamentais."
+          question: "Como é definido o valor da pensão alimentícia na guarda compartilhada?",
+          answer: "Na guarda compartilhada, a pensão é calculada proporcionalmente à renda de cada genitor e ao tempo que a criança permanece com cada um. Pode haver compensação de valores conforme os gastos diretos de cada pai."
         },
         {
-          question: "Avós podem obter a guarda dos netos?",
-          answer: "Sim, avós e outros parentes podem obter a guarda quando comprovarem que oferecem melhores condições que os pais ou quando os pais estão impossibilitados de exercer o poder familiar (por morte, incapacidade, abandono ou situações de risco)."
+          question: "Avós podem pedir guarda dos netos?",
+          answer: "Sim, avós e outros parentes podem requerer a guarda quando os pais não têm condições de exercer adequadamente o poder familiar. É necessário comprovar que a guarda com os avós atende melhor o interesse da criança."
         },
         {
-          question: "Como funciona a guarda compartilhada na prática?",
-          answer: "Na guarda compartilhada, ambos os pais mantêm o poder familiar e tomam decisões conjuntas sobre questões importantes. A criança tem residência principal com um dos pais e convivência regular com o outro. Decisões sobre escola, médico, viagens precisam ser consensuais ou, em caso de impasse, definidas judicialmente."
+          question: "É possível modificar a guarda já estabelecida?",
+          answer: "Sim, a guarda pode ser modificada sempre que houver mudança significativa nas circunstâncias que justifique a alteração no interesse da criança. É necessário ação judicial específica com nova avaliação psicossocial."
         },
         {
-          question: "Qual o papel do Ministério Público em ações de guarda?",
-          answer: "O Ministério Público atua como fiscal da lei e defensor dos direitos da criança e adolescente. Emite parecer em todas as ações, pode requisitar estudos técnicos e tem legitimidade para propor ações quando há violação de direitos fundamentais dos menores."
+          question: "Como funciona a visitação nos finais de semana e feriados?",
+          answer: "Geralmente se estabelece visitação em finais de semana alternados, com pernoite, e divisão equilibrada de feriados e férias escolares. O regime pode ser adaptado conforme a rotina e necessidades específicas de cada família."
         },
         {
-          question: "Posso viajar com meu filho sem autorização do outro genitor?",
-          answer: "Para viagens nacionais, geralmente não é necessária autorização quando se tem a guarda. Para viagens internacionais, é obrigatória autorização expressa do outro genitor ou autorização judicial. Em caso de guarda compartilhada, recomenda-se sempre comunicar e, se possível, obter anuência prévia."
+          question: "O que acontece se um dos pais não cumprir a visitação?",
+          answer: "O descumprimento da visitação pode ser executado judicialmente, podendo resultar em multa, modificação da guarda e até mesmo crime de desobediência. É importante documentar todas as violações."
         },
         {
-          question: "Como é feito o estudo psicossocial?",
-          answer: "O estudo psicossocial é realizado por assistente social e psicólogo do Judiciário, incluindo: entrevistas com pais e filhos, visita domiciliar, análise das condições socioeconômicas e psicológicas, avaliação do vínculo afetivo e relatório técnico fundamentado que subsidia a decisão judicial."
+          question: "Crianças podem escolher com qual pai querem ficar?",
+          answer: "A opinião da criança é considerada conforme sua idade e maturidade, mas não é determinante. O juiz sempre decide com base no melhor interesse do menor, considerando aspectos técnicos e psicossociais."
         }
       ]}
       relatedServices={[
@@ -148,8 +148,8 @@ const GuardaFilhosService = () => {
           path: "/servicos/adocao"
         },
         {
-          name: "Investigação de Paternidade",
-          path: "/servicos/investigacao-paternidade"
+          name: "Proteção de Menores",
+          path: "/servicos/protecao-menores"
         }
       ]}
       mainAreaPath="/areas/familia"

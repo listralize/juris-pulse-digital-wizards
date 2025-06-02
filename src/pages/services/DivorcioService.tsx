@@ -7,131 +7,131 @@ const DivorcioService = () => {
     <ServiceLandingLayout
       serviceArea="Direito de Família"
       serviceName="Divórcio e Separação"
-      serviceDescription="Assessoria jurídica completa em processos de divórcio consensual e litigioso, separação e dissolução de união estável, com foco na proteção dos direitos de toda a família."
+      serviceDescription="Assessoria jurídica completa em processos de divórcio consensual e litigioso, dissolução de união estável e partilha de bens, priorizando soluções ágeis e menos desgastantes."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Divórcio Consensual Rápido",
-          description: "Procedimento extrajudicial em cartório para casais sem filhos menores ou incapazes, sem necessidade de advogado comum.",
-          icon: "⚡"
+          title: "Divórcio Consensual Extrajudicial",
+          description: "Realização de divórcio em cartório quando há acordo total entre as partes, sem filhos menores ou incapazes, com procedimento mais rápido e econômico.",
+          icon: "📋"
         },
         {
-          title: "Proteção Patrimonial",
-          description: "Orientação especializada sobre partilha de bens, proteção de patrimônio e planejamento sucessório pós-divórcio.",
+          title: "Mediação e Negociação Especializada",
+          description: "Condução de processos de mediação familiar para resolução amigável de conflitos sobre bens, guarda e pensão, evitando desgaste emocional desnecessário.",
+          icon: "🤝"
+        },
+        {
+          title: "Proteção Patrimonial Estratégica",
+          description: "Estratégias para proteção do patrimônio individual, análise detalhada de bens adquiridos antes e durante o casamento conforme regime escolhido.",
           icon: "🛡️"
         },
         {
-          title: "Mediação Familiar",
-          description: "Técnicas de mediação para resolução amigável de conflitos, preservando relacionamentos familiares.",
-          icon: "🕊️"
-        },
-        {
-          title: "Defesa em Divórcio Litigioso",
-          description: "Representação técnica especializada quando não há acordo, protegendo direitos e interesses em todas as instâncias.",
+          title: "Partilha de Bens Especializada",
+          description: "Avaliação e partilha criteriosa de todos os bens do casal, incluindo imóveis, empresas, investimentos, previdência privada e bens de difícil divisão.",
           icon: "⚖️"
         },
         {
-          title: "Cuidado com os Filhos",
-          description: "Orientação sobre guarda, visitação e pensão alimentícia, sempre priorizando o bem-estar das crianças.",
-          icon: "👨‍👩‍👧‍👦"
+          title: "Proteção dos Filhos Menores",
+          description: "Estabelecimento de acordos sobre guarda, visitação e pensão alimentícia que priorizem o bem-estar e interesse superior das crianças envolvidas.",
+          icon: "👶"
         },
         {
-          title: "Aspectos Previdenciários",
-          description: "Orientação sobre divisão de benefícios previdenciários e manutenção de direitos após o divórcio.",
-          icon: "📋"
+          title: "Dissolução de União Estável",
+          description: "Assessoria especializada na dissolução de união estável, com reconhecimento de direitos patrimoniais e estabelecimento de acordos sobre bens comuns.",
+          icon: "💔"
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Consulta e Avaliação Inicial",
-          description: "Análise completa da situação conjugal, patrimonial e familiar. Identificação da modalidade de divórcio mais adequada e orientação sobre direitos e deveres."
+          title: "Consulta Inicial e Análise da Situação",
+          description: "Avaliação detalhada da situação matrimonial, regime de bens, existência de filhos, patrimônio do casal e identificação da melhor estratégia legal."
         },
         {
           step: 2,
-          title: "Inventário Patrimonial",
-          description: "Levantamento detalhado de todos os bens, direitos e obrigações do casal, incluindo imóveis, veículos, investimentos e dívidas."
+          title: "Levantamento Patrimonial Completo",
+          description: "Mapeamento detalhado de todos os bens, direitos, dívidas e obrigações do casal, incluindo bens ocultos e participações societárias."
         },
         {
           step: 3,
-          title: "Negociação e Acordo",
-          description: "Mediação para construção de acordo abrangendo partilha de bens, guarda de filhos, pensão alimentícia e visitação."
+          title: "Tentativa de Acordo Amigável",
+          description: "Condução de negociações diretas ou mediação para buscar acordo consensual sobre todos os aspectos do divórcio, priorizando soluções equilibradas."
         },
         {
           step: 4,
-          title: "Documentação Legal",
-          description: "Preparação de toda documentação necessária: escritura de divórcio, acordo de partilha, termo de guarda e visitação."
+          title: "Elaboração de Acordo ou Petição",
+          description: "Redação detalhada do acordo de divórcio consensual ou petição inicial fundamentada para divórcio litigioso, com todos os pedidos necessários."
         },
         {
           step: 5,
           title: "Procedimento Cartorial ou Judicial",
-          description: "Execução do divórcio em cartório (quando consensual) ou ajuizamento de ação judicial (quando litigioso)."
+          description: "Acompanhamento do processo em cartório (consensual) ou condução do processo judicial (litigioso) até decisão final transitada em julgado."
         },
         {
           step: 6,
-          title: "Transferência de Bens",
-          description: "Acompanhamento das transferências imobiliárias, alterações societárias e demais providências decorrentes da partilha."
+          title: "Execução da Partilha de Bens",
+          description: "Implementação prática da partilha acordada ou determinada judicialmente, com transferência de propriedades e regularização documentária."
         },
         {
           step: 7,
           title: "Acompanhamento Pós-Divórcio",
-          description: "Orientação sobre cumprimento de obrigações, modificação de acordos e resolução de questões supervenientes."
+          description: "Orientação sobre cumprimento de obrigações estabelecidas, alteração de documentos pessoais e apoio em questões supervenientes."
         }
       ]}
       testimonials={[
         {
-          name: "Marina S., Empresária",
-          quote: "O divórcio consensual foi concluído em 30 dias. A orientação sobre proteção do patrimônio empresarial foi fundamental para manter meus negócios seguros."
+          name: "Sandra e Paulo, Ex-Casal",
+          quote: "O divórcio consensual foi resolvido em apenas 30 dias no cartório. A orientação jurídica nos ajudou a chegar a um acordo justo para ambos."
         },
         {
-          name: "Carlos R., Professor",
-          quote: "Mesmo sendo um divórcio litigioso, conseguimos chegar a um acordo justo que protegeu os direitos dos meus filhos e preservou nosso relacionamento como pais."
+          name: "Mariana R., Empresária",
+          quote: "A proteção da minha empresa familiar durante o divórcio foi fundamental. A estratégia jurídica preservou meu patrimônio empresarial."
         },
         {
-          name: "Ana Paula M., Médica",
-          quote: "A mediação familiar evitou um desgaste maior. Hoje mantenho uma relação respeitosa com meu ex-marido pelo bem das nossas crianças."
+          name: "Roberto C., Médico",
+          quote: "Mesmo em um divórcio litigioso complexo, conseguimos resolver a partilha de forma equilibrada, protegendo os interesses dos nossos filhos."
         },
         {
-          name: "Roberto L., Engenheiro",
-          quote: "A orientação sobre questões previdenciárias me ajudou a manter meus direitos de aposentadoria após 20 anos de casamento."
+          name: "Ana Paula M., Professora",
+          quote: "A dissolução da união estável foi tratada com o mesmo cuidado de um casamento formal. Meus direitos patrimoniais foram totalmente preservados."
         },
         {
-          name: "Fernanda P., Arquiteta",
-          quote: "O acompanhamento durante todo o processo de partilha dos imóveis garantiu que tudo fosse feito dentro da legalidade e sem surpresas."
+          name: "Carlos L., Engenheiro",
+          quote: "A mediação familiar evitou um processo judicial desgastante. Conseguimos manter uma boa relação para cuidar dos nossos filhos."
         }
       ]}
       faq={[
         {
           question: "Qual a diferença entre divórcio consensual e litigioso?",
-          answer: "O divórcio consensual ocorre quando há acordo entre os cônjuges sobre todos os aspectos (partilha, guarda, pensão). Pode ser feito em cartório se não houver filhos menores. O divórcio litigioso é necessário quando não há acordo, exigindo decisão judicial sobre os pontos controvertidos."
+          answer: "O divórcio consensual ocorre quando há acordo total entre as partes sobre bens, guarda e pensão, podendo ser feito em cartório se não houver filhos menores. O litigioso é judicial, quando há discordâncias que precisam ser decididas pelo juiz."
         },
         {
           question: "É possível fazer divórcio sem advogado?",
-          answer: "Apenas no divórcio consensual em cartório, quando o casal não tem filhos menores ou incapazes e há acordo sobre a partilha. Em todos os outros casos, é obrigatória a assistência de advogado."
+          answer: "Apenas no divórcio consensual em cartório, quando não há filhos menores ou incapazes e há acordo total. Mesmo nesses casos, a orientação jurídica é recomendável para proteger direitos."
+        },
+        {
+          question: "Como funciona a partilha no regime de comunhão parcial?",
+          answer: "No regime de comunhão parcial, são partilhados apenas os bens adquiridos durante o casamento. Bens anteriores ao casamento, heranças e doações exclusivas permanecem com o proprietário original."
         },
         {
           question: "Quanto tempo demora um processo de divórcio?",
-          answer: "Divórcio consensual em cartório: 15 a 30 dias. Divórcio consensual judicial: 2 a 6 meses. Divórcio litigioso: 1 a 3 anos, dependendo da complexidade e grau de conflito."
+          answer: "Divórcio consensual em cartório: 15 a 30 dias. Divórcio consensual judicial: 2 a 6 meses. Divórcio litigioso: 1 a 3 anos, dependendo da complexidade patrimonial e existência de filhos."
         },
         {
-          question: "Como funciona a partilha de bens no divórcio?",
-          answer: "Depende do regime de bens do casamento. No regime da comunhão parcial (padrão), divide-se tudo adquirido após o casamento. Na comunhão universal, divide-se tudo. Na separação de bens, cada um fica com o que é seu."
+          question: "É possível pedir pensão alimentícia para ex-cônjuge?",
+          answer: "Sim, quando comprovada necessidade de um cônjuge e capacidade contributiva do outro. Geralmente é temporária, visando permitir a recolocação profissional e independência financeira."
         },
         {
-          question: "Posso mudar meu nome após o divórcio?",
-          answer: "Sim, a mulher pode escolher voltar ao nome de solteira ou manter o nome de casada. A decisão deve ser manifestada no processo de divórcio ou posteriormente através de procedimento específico."
+          question: "Como ficam os filhos no processo de divórcio?",
+          answer: "Os pais devem estabelecer acordo sobre guarda (preferencialmente compartilhada), visitação e pensão alimentícia. Na falta de acordo, o juiz decide com base no melhor interesse das crianças."
         },
         {
-          question: "O que acontece com as dívidas no divórcio?",
-          answer: "Dívidas contraídas em benefício da família são divididas entre os cônjuges. Dívidas pessoais de cada um permanecem de responsabilidade individual. É importante fazer prova da destinação de cada dívida."
+          question: "Posso modificar o acordo de divórcio depois?",
+          answer: "Questões sobre filhos (guarda, visitação, pensão) podem ser modificadas conforme mudanças na situação. A partilha de bens, uma vez homologada, só pode ser alterada em casos excepcionais."
         },
         {
-          question: "Posso solicitar pensão alimentícia para mim?",
-          answer: "Sim, é possível em casos excepcionais quando um dos cônjuges não tem condições de se manter, considerando idade, saúde, qualificação profissional e padrão de vida durante o casamento. Geralmente é temporária."
-        },
-        {
-          question: "Como fica a guarda dos filhos no divórcio?",
-          answer: "A lei estabelece a guarda compartilhada como regra, salvo se um dos pais não reunir condições. A decisão sempre considera o melhor interesse da criança, incluindo aspectos emocionais, sociais e materiais."
+          question: "Como proceder se o ex-cônjuge não cumpre o acordo?",
+          answer: "O descumprimento pode ser executado judicialmente, resultando em penhora de bens, bloqueio de contas, protesto de nome e outras medidas coercitivas conforme a obrigação descumprida."
         }
       ]}
       relatedServices={[
@@ -148,8 +148,8 @@ const DivorcioService = () => {
           path: "/servicos/inventario-partilha"
         },
         {
-          name: "União Estável",
-          path: "/servicos/uniao-estavel"
+          name: "Casamento e União Estável",
+          path: "/servicos/casamento-uniao"
         }
       ]}
       mainAreaPath="/areas/familia"
