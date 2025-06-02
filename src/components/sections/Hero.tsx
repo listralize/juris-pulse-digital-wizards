@@ -69,16 +69,16 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <section id="home" className="h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Full-width marble banner background - always using black regardless of theme */}
       <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full">
         <MarbleBanner />
       </div>
       
-      <div className="relative z-10 text-center max-w-4xl mt-[-80px]">
+      <div className="relative z-10 text-center max-w-4xl">
         <div 
           ref={logoRef} 
-          className="mb-6 w-full max-w-lg md:max-w-xl mx-auto relative"
+          className="mb-4 w-full max-w-md md:max-w-lg mx-auto relative"
         >
           <div className="logo-container relative">
             <img 
@@ -92,15 +92,15 @@ const Hero = () => {
           </div>
         </div>
         
-        <h1 ref={headlineRef} className="text-4xl md:text-6xl lg:text-7xl mb-4 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
+        <h1 ref={headlineRef} className="text-3xl md:text-5xl lg:text-6xl mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
           Soluções Jurídicas Inovadoras
         </h1>
         
-        <p ref={subheadlineRef} className="text-lg md:text-xl text-gray-200 mb-8 text-center max-w-lg mx-auto font-satoshi">
+        <p ref={subheadlineRef} className="text-base md:text-lg text-gray-200 mb-6 text-center max-w-lg mx-auto font-satoshi">
           Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
         </p>
         
-        <div ref={ctaRef} className="flex flex-col md:flex-row gap-4 justify-center">
+        <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
           <a 
             href="https://api.whatsapp.com/send?phone=5562994594496" 
             target="_blank"
@@ -121,7 +121,7 @@ const Hero = () => {
         </div>
       </div>
       
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
         <svg 
           width="24" 
           height="24" 

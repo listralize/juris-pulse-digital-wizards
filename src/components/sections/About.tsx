@@ -122,7 +122,7 @@ const About = () => {
 
   if (isLoading) {
     return (
-      <section id="about" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <section id="about" className={`h-screen flex flex-col justify-center py-8 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
         <div className="flex justify-center items-center">
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -138,23 +138,25 @@ const About = () => {
   const secondPart = description.substring(breakPoint + 1);
 
   return (
-    <section id="about" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
-      <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-        {pageTexts.aboutTitle}
-      </h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-        <p ref={textRef1} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi`}>
-          {firstPart}
-        </p>
+    <section id="about" className={`h-screen flex flex-col justify-center py-8 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <div className="max-w-6xl mx-auto w-full">
+        <h2 ref={titleRef} className={`text-3xl md:text-4xl lg:text-5xl mb-8 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}>
+          {pageTexts.aboutTitle}
+        </h2>
         
-        <p ref={textRef2} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi`}>
-          {secondPart}
-        </p>
-      </div>
-      
-      <div className="mt-16 flex justify-center">
-        <div className={`w-24 h-1 ${isDark ? 'bg-white' : 'bg-black'}`}></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+          <p ref={textRef1} className={`text-base md:text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi text-justify`}>
+            {firstPart}
+          </p>
+          
+          <p ref={textRef2} className={`text-base md:text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'} font-satoshi text-justify`}>
+            {secondPart}
+          </p>
+        </div>
+        
+        <div className="mt-8 flex justify-center">
+          <div className={`w-24 h-1 ${isDark ? 'bg-white' : 'bg-black'}`}></div>
+        </div>
       </div>
     </section>
   );

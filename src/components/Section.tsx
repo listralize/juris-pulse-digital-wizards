@@ -27,8 +27,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          minHeight: id === 'contact' ? '90vh' : '80vh', // Reduced contact section height slightly
-          paddingTop: id === 'contact' ? '100px' : '0' // Increased padding for contact section
+          height: '100vh', // Força altura total da tela
+          maxHeight: '100vh', // Limita altura máxima
+          overflow: 'hidden', // Evita scroll interno
+          padding: id === 'contact' ? '60px 0 20px 0' : '0' // Padding específico para contact
         }}
       >
         {children}
