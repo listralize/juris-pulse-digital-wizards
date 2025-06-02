@@ -15,6 +15,7 @@ export interface SpecializedService {
   description: string;
   category: string;
   icon?: string;
+  href?: string;
   detailedDescription?: string;
   benefits?: string[];
   process?: string[];
@@ -34,7 +35,28 @@ export interface ServicePage {
   title: string;
   description: string;
   category: string;
-  content: {
+  href?: string;
+  benefits?: Array<{
+    title: string;
+    description: string;
+    icon?: string;
+  }>;
+  process?: Array<{
+    step: number;
+    title: string;
+    description: string;
+  }>;
+  faq?: Array<{
+    question: string;
+    answer: string;
+  }>;
+  testimonials?: Array<{
+    name: string;
+    text: string;
+    role?: string;
+    image?: string;
+  }>;
+  content?: {
     hero: {
       title: string;
       subtitle: string;
@@ -67,7 +89,7 @@ export interface ServicePage {
       whatsappNumber?: string;
     };
   };
-  seo: {
+  seo?: {
     metaTitle: string;
     metaDescription: string;
     keywords: string[];
@@ -136,6 +158,8 @@ export interface CategoryInfo {
   description: string;
   color: string;
   icon: string;
+  value?: string;
+  label?: string;
 }
 
 export const categories: CategoryInfo[] = [
@@ -144,62 +168,80 @@ export const categories: CategoryInfo[] = [
     name: "Direito de Família",
     description: "Assessoria completa em questões familiares",
     color: "bg-blue-500",
-    icon: "Heart"
+    icon: "Heart",
+    value: "familia",
+    label: "Direito de Família"
   },
   {
     id: "tributario", 
     name: "Direito Tributário",
     description: "Consultoria e defesa em questões fiscais",
     color: "bg-green-500",
-    icon: "Calculator"
+    icon: "Calculator",
+    value: "tributario",
+    label: "Direito Tributário"
   },
   {
     id: "empresarial",
     name: "Direito Empresarial", 
     description: "Soluções jurídicas para empresas",
     color: "bg-purple-500",
-    icon: "Building"
+    icon: "Building",
+    value: "empresarial",
+    label: "Direito Empresarial"
   },
   {
     id: "trabalho",
     name: "Direito do Trabalho",
     description: "Defesa dos direitos trabalhistas", 
     color: "bg-orange-500",
-    icon: "Briefcase"
+    icon: "Briefcase",
+    value: "trabalho",
+    label: "Direito do Trabalho"
   },
   {
     id: "constitucional",
     name: "Direito Constitucional",
     description: "Proteção dos direitos fundamentais",
     color: "bg-red-500", 
-    icon: "Scale"
+    icon: "Scale",
+    value: "constitucional",
+    label: "Direito Constitucional"
   },
   {
     id: "administrativo",
     name: "Direito Administrativo",
     description: "Atuação junto ao poder público",
     color: "bg-indigo-500",
-    icon: "FileText"
+    icon: "FileText",
+    value: "administrativo",
+    label: "Direito Administrativo"
   },
   {
     id: "previdenciario",
     name: "Direito Previdenciário",
     description: "Benefícios e aposentadorias",
     color: "bg-teal-500",
-    icon: "Shield"
+    icon: "Shield",
+    value: "previdenciario",
+    label: "Direito Previdenciário"
   },
   {
     id: "consumidor",
     name: "Direito do Consumidor", 
     description: "Defesa dos direitos do consumidor",
     color: "bg-pink-500",
-    icon: "ShoppingCart"
+    icon: "ShoppingCart",
+    value: "consumidor",
+    label: "Direito do Consumidor"
   },
   {
     id: "civil",
     name: "Direito Civil",
     description: "Questões cíveis em geral",
     color: "bg-yellow-500",
-    icon: "Users"
+    icon: "Users",
+    value: "civil",
+    label: "Direito Civil"
   }
 ];

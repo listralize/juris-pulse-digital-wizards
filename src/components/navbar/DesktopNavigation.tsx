@@ -25,6 +25,7 @@ const DesktopNavigation = ({
           isActive={activeSection === 'home'} 
           onClick={e => {
             e.preventDefault();
+            console.log('DesktopNavigation: Home clicked');
             handleNavigation('home', '/');
           }} 
         />
@@ -37,6 +38,7 @@ const DesktopNavigation = ({
           isActive={activeSection === 'about'} 
           onClick={e => {
             e.preventDefault();
+            console.log('DesktopNavigation: About clicked');
             handleNavigation('about', '/#about');
           }} 
         />
@@ -47,6 +49,7 @@ const DesktopNavigation = ({
           isActive={activeSection === 'socios'} 
           onClick={e => {
             e.preventDefault();
+            console.log('DesktopNavigation: Team clicked');
             handleNavigation('socios', '/#socios');
           }} 
         />
@@ -57,6 +60,7 @@ const DesktopNavigation = ({
           isActive={activeSection === 'cliente'} 
           onClick={e => {
             e.preventDefault();
+            console.log('DesktopNavigation: Client Area clicked');
             handleNavigation('cliente', '/#cliente');
           }} 
         />
@@ -67,6 +71,7 @@ const DesktopNavigation = ({
           isActive={window.location.pathname === '/blog'} 
           onClick={e => {
             e.preventDefault();
+            console.log('DesktopNavigation: Blog clicked');
             navigate('/blog');
           }} 
         />
@@ -77,6 +82,7 @@ const DesktopNavigation = ({
           isActive={activeSection === 'contact'} 
           onClick={e => {
             e.preventDefault();
+            console.log('DesktopNavigation: Contact clicked');
             handleNavigation('contact', '/#contact');
           }} 
         />

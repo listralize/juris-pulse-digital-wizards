@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -127,7 +126,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   value={pageTexts.aboutDescription}
                   onChange={(e) => onUpdatePageTexts({...pageTexts, aboutDescription: e.target.value})}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  rows={4}
                   placeholder="Descrição completa sobre o escritório..."
                 />
               </div>
@@ -173,7 +171,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.familiaDescription}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, familiaDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
                   
@@ -191,7 +188,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.tributarioDescription}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, tributarioDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
                   
@@ -209,7 +205,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.empresarialDescription}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, empresarialDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
 
@@ -227,7 +222,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.trabalhoDescription}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, trabalhoDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
 
@@ -245,7 +239,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.civilDescription || 'Proteção de direitos e interesses individuais'}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, civilDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
 
@@ -263,7 +256,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.previdenciarioDescription || 'Benefícios e aposentadorias'}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, previdenciarioDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
 
@@ -281,7 +273,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.consumidorDescription || 'Proteção e defesa do consumidor'}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, consumidorDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
 
@@ -299,7 +290,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.constitucionalDescription || 'Direitos fundamentais e constitucionalidade'}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, constitucionalDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
 
@@ -317,7 +307,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                       value={pageTexts.administrativoDescription || 'Relações com a administração pública'}
                       onChange={(e) => onUpdatePageTexts({...pageTexts, administrativoDescription: e.target.value})}
                       className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      rows={2}
                     />
                   </div>
                 </div>
@@ -469,7 +458,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   value={pageTexts.clientAreaDescription}
                   onChange={(e) => onUpdatePageTexts({...pageTexts, clientAreaDescription: e.target.value})}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  rows={3}
                 />
               </div>
               <div>

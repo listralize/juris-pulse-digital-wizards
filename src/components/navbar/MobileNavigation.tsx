@@ -26,18 +26,20 @@ const MobileNavigation = ({
   return (
     <div className="md:hidden">
       <div className={`pt-4 pb-4 space-y-2 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-        <Link 
-          to="/" 
+        <a 
+          href="/"
           className={`block px-4 py-3 rounded-lg mx-2 ${activeSection === 'home'
             ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
             : ''} font-medium text-sm transition-colors duration-200`}
-          onClick={() => {
-            setIsMenuOpen(false);
+          onClick={(e) => {
+            e.preventDefault();
+            console.log('MobileNavigation: Home clicked');
             handleNavigation('home', '/');
+            setIsMenuOpen(false);
           }}
         >
           Home
-        </Link>
+        </a>
         
         <div className="relative space-y-1">
           <p className="block px-4 py-3 font-medium text-sm mx-2">Áreas de Atuação</p>
@@ -51,6 +53,7 @@ const MobileNavigation = ({
                   ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
                   : ''} font-medium text-sm transition-colors duration-200`}
                 onClick={() => {
+                  console.log('MobileNavigation: Area clicked:', area.path);
                   setIsMenuOpen(false);
                   navigate(area.path);
                 }}
@@ -65,6 +68,7 @@ const MobileNavigation = ({
           href="/#about"
           onClick={(e) => {
             e.preventDefault();
+            console.log('MobileNavigation: About clicked');
             handleNavigation('about', '/#about');
             setIsMenuOpen(false);
           }}
@@ -77,6 +81,7 @@ const MobileNavigation = ({
           href="/#socios"
           onClick={(e) => {
             e.preventDefault();
+            console.log('MobileNavigation: Team clicked');
             handleNavigation('socios', '/#socios');
             setIsMenuOpen(false);
           }}
@@ -89,6 +94,7 @@ const MobileNavigation = ({
           href="/#cliente"
           onClick={(e) => {
             e.preventDefault();
+            console.log('MobileNavigation: Client Area clicked');
             handleNavigation('cliente', '/#cliente');
             setIsMenuOpen(false);
           }}
@@ -104,6 +110,7 @@ const MobileNavigation = ({
             ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
             : ''} font-medium text-sm transition-colors duration-200`}
           onClick={() => {
+            console.log('MobileNavigation: Blog clicked');
             setIsMenuOpen(false);
             navigate('/blog');
           }}
@@ -115,6 +122,7 @@ const MobileNavigation = ({
           href="/#contact"
           onClick={(e) => {
             e.preventDefault();
+            console.log('MobileNavigation: Contact clicked');
             handleNavigation('contact', '/#contact');
             setIsMenuOpen(false);
           }}

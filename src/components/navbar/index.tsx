@@ -19,6 +19,8 @@ const Navbar = () => {
     const path = location.pathname;
     const hash = location.hash.substring(1);
     
+    console.log('Navbar: Current path:', path, 'Hash:', hash);
+    
     if (path === '/') {
       // For home page, use hash to determine active section
       if (hash && ['home', 'about', 'areas', 'socios', 'cliente', 'contact'].includes(hash)) {
@@ -43,45 +45,57 @@ const Navbar = () => {
   
   // Handle smooth scrolling for anchor links
   const scrollToSection = (sectionId: string) => {
-    console.log('Scrolling to section:', sectionId);
+    console.log('Navbar: Scrolling to section:', sectionId);
     setIsMenuOpen(false);
     
+    // Always navigate to home first if not already there
     if (location.pathname !== '/') {
-      // Navigate to home first with the hash
-      navigate(`/#${sectionId}`);
+      console.log('Navbar: Not on home page, navigating to home first');
+      navigate('/', { replace: true });
+      
+      // Wait for navigation to complete, then scroll
       setTimeout(() => {
         const section = document.getElementById(sectionId);
-        console.log('Found section element:', section);
+        console.log('Navbar: Found section element after navigation:', section);
         if (section) {
           section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Update URL hash
+          window.history.pushState(null, '', `#${sectionId}`);
+          setActiveSection(sectionId);
         }
-      }, 200);
+      }, 300); // Increased timeout for navigation
       return;
     }
     
+    // If already on home page, scroll directly
     const section = document.getElementById(sectionId);
-    console.log('Direct scroll - Found section element:', section);
+    console.log('Navbar: Direct scroll - Found section element:', section);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       // Update URL hash
-      if (history.pushState) {
-        history.pushState(null, '', `#${sectionId}`);
-      }
+      window.history.pushState(null, '', `#${sectionId}`);
       setActiveSection(sectionId);
     }
   };
   
   // Navigate to section on home page or specific page
   const handleNavigation = (sectionId: string, path: string) => {
-    console.log('Handle navigation called:', sectionId, path);
+    console.log('Navbar: Handle navigation called:', sectionId, path);
     setIsMenuOpen(false);
     
-    if (location.pathname === '/') {
-      scrollToSection(sectionId);
-    } else {
-      navigate(`/#${sectionId}`);
-      setTimeout(() => scrollToSection(sectionId), 200);
+    // Special handling for home navigation
+    if (sectionId === 'home') {
+      if (location.pathname !== '/') {
+        navigate('/', { replace: true });
+        setActiveSection('home');
+      } else {
+        scrollToSection('home');
+      }
+      return;
     }
+    
+    // For other sections, ensure we're on home page first
+    scrollToSection(sectionId);
   };
 
   return (
