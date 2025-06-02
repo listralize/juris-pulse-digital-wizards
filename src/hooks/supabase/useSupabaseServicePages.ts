@@ -25,6 +25,21 @@ export const useSupabaseServicePages = () => {
   const loadServicePages = async () => {
     try {
       console.log('📄 CARREGANDO PÁGINAS DE SERVIÇOS...');
+      
+      // Primeiro, carregar as categorias para fazer o match
+      const { data: categoriesData, error: catError } = await supabase
+        .from('law_categories')
+        .select('id, category_key, name')
+        .eq('is_active', true);
+
+      if (catError) {
+        console.error('❌ Erro ao carregar categorias:', catError);
+        return;
+      }
+
+      console.log('📂 Categorias carregadas:', categoriesData?.length || 0);
+
+      // Carregar páginas de serviços
       const { data: servicePagesData, error: pagesError } = await supabase
         .from('service_pages')
         .select(`
@@ -40,17 +55,122 @@ export const useSupabaseServicePages = () => {
 
       if (pagesError) {
         console.error('❌ Erro ao carregar service pages:', pagesError);
-      } else {
-        console.log('📄 Páginas de serviços carregadas:', servicePagesData?.length || 0);
+        return;
       }
+
+      console.log('📄 Páginas de serviços carregadas:', servicePagesData?.length || 0);
 
       if (servicePagesData && servicePagesData.length > 0) {
         console.log('📄 PROCESSANDO PÁGINAS DE SERVIÇOS...');
-        const formattedServicePages: ServicePage[] = servicePagesData.map(page => {
-          const categoryKey = page.law_categories?.category_key || '';
-          console.log(`📄 Página "${page.title}" -> Categoria: ${categoryKey} (ID: ${page.law_categories?.id})`);
+        const formattedServicePages: ServicePage[] = [];
+
+        for (const page of servicePagesData) {
+          let categoryKey = '';
           
-          return {
+          // Se já tem categoria vinculada, usar ela
+          if (page.law_categories?.category_key) {
+            categoryKey = page.law_categories.category_key;
+            console.log(`📄 Página "${page.title}" já vinculada à categoria: ${categoryKey}`);
+          } else {
+            // Se não tem categoria vinculada, tentar deduzir pelo href
+            console.log(`📄 Página "${page.title}" sem categoria - tentando deduzir pelo href: ${page.href}`);
+            
+            // Mapear hrefs para categorias
+            const hrefToCategoryMap: { [key: string]: string } = {
+              // Direito de Família
+              'divorcio': 'familia',
+              'pensao-alimenticia': 'familia',
+              'guarda-filhos': 'familia',
+              'adocao': 'familia',
+              'investigacao-paternidade': 'familia',
+              'casamento-uniao': 'familia',
+              'inventario-partilha': 'familia',
+              'testamentos-sucessoes': 'familia',
+              
+              // Direito Tributário
+              'planejamento-tributario': 'tributario',
+              'consultoria-impostos': 'tributario',
+              'contencioso-tributario': 'tributario',
+              'compliance-tributario': 'tributario',
+              'auditoria-tributaria': 'tributario',
+              'elisao-fiscal': 'tributario',
+              'parcelamento-debitos': 'tributario',
+              
+              // Direito Empresarial
+              'consultoria-empresarial': 'empresarial',
+              'constituicao-empresas': 'empresarial',
+              'contratos-empresariais': 'empresarial',
+              'fusoes-aquisicoes': 'empresarial',
+              'reestruturacao-societaria': 'empresarial',
+              'governanca-corporativa': 'empresarial',
+              'compliance-empresarial': 'empresarial',
+              'contencioso-empresarial': 'empresarial',
+              'propriedade-intelectual': 'empresarial',
+              'recuperacao-creditos': 'empresarial',
+              
+              // Direito do Trabalho
+              'assessoria-trabalhista': 'trabalho',
+              'contencioso-trabalhista': 'trabalho',
+              'compliance-trabalhista': 'trabalho',
+              'horas-extras': 'trabalho',
+              'verbas-rescissorias': 'trabalho',
+              'reconhecimento-vinculo': 'trabalho',
+              'defesa-justa-causa': 'trabalho',
+              'assedio-moral-sexual': 'trabalho',
+              'acordos-coletivos': 'trabalho',
+              'saude-seguranca': 'trabalho',
+              'desvio-funcao': 'trabalho',
+              'adicionais-insalubridade': 'trabalho',
+              'direitos-gestante': 'trabalho',
+              'defesa-trabalhador': 'trabalho'
+            };
+
+            // Tentar encontrar categoria pelo href
+            const href = page.href || '';
+            for (const [hrefPattern, category] of Object.entries(hrefToCategoryMap)) {
+              if (href.includes(hrefPattern)) {
+                categoryKey = category;
+                console.log(`📄 Categoria deduzida para "${page.title}": ${categoryKey} (baseado no href: ${href})`);
+                break;
+              }
+            }
+
+            // Se ainda não encontrou, tentar pelo título
+            if (!categoryKey) {
+              const title = page.title?.toLowerCase() || '';
+              if (title.includes('família') || title.includes('divórcio') || title.includes('pensão') || title.includes('guarda')) {
+                categoryKey = 'familia';
+              } else if (title.includes('tributário') || title.includes('imposto') || title.includes('fiscal')) {
+                categoryKey = 'tributario';
+              } else if (title.includes('empresarial') || title.includes('sociedade') || title.includes('contrato')) {
+                categoryKey = 'empresarial';
+              } else if (title.includes('trabalho') || title.includes('trabalhista') || title.includes('emprego')) {
+                categoryKey = 'trabalho';
+              }
+              
+              if (categoryKey) {
+                console.log(`📄 Categoria deduzida pelo título para "${page.title}": ${categoryKey}`);
+              }
+            }
+
+            // Se ainda não encontrou, usar categoria padrão
+            if (!categoryKey) {
+              categoryKey = 'empresarial'; // categoria padrão
+              console.log(`📄 Usando categoria padrão para "${page.title}": ${categoryKey}`);
+            }
+
+            // Atualizar a página no banco de dados com a categoria correta
+            const matchingCategory = categoriesData?.find(cat => cat.category_key === categoryKey);
+            if (matchingCategory) {
+              console.log(`📄 Atualizando página "${page.title}" com categoria ID: ${matchingCategory.id}`);
+              await supabase
+                .from('service_pages')
+                .update({ category_id: matchingCategory.id })
+                .eq('id', page.id);
+            }
+          }
+          
+          const formattedPage: ServicePage = {
             id: page.id,
             title: page.title,
             description: page.description || '',
@@ -77,10 +197,12 @@ export const useSupabaseServicePages = () => {
               image: testimonial.image
             })) || []
           };
-        });
+
+          formattedServicePages.push(formattedPage);
+        }
         
         setServicePages(formattedServicePages);
-        console.log('✅ PÁGINAS DE SERVIÇOS SETADAS:', formattedServicePages.length);
+        console.log('✅ PÁGINAS DE SERVIÇOS PROCESSADAS E VINCULADAS:', formattedServicePages.length);
       } else {
         console.log('⚠️ NENHUMA PÁGINA DE SERVIÇO ENCONTRADA');
         setServicePages([]);
