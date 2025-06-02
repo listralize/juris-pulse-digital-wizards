@@ -243,6 +243,7 @@ export const useSupabaseDataNew = () => {
       console.log('Configurações salvas no Supabase com sucesso');
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
+      throw error;
     }
   };
 
@@ -253,7 +254,7 @@ export const useSupabaseDataNew = () => {
       await supabase
         .from('team_members')
         .update({ is_active: false })
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // dummy condition
+        .neq('id', '00000000-0000-0000-0000-000000000000');
 
       // Inserir/atualizar novos membros
       const memberData = members.map((member, index) => ({
@@ -277,24 +278,134 @@ export const useSupabaseDataNew = () => {
       console.log('Equipe salva no Supabase com sucesso');
     } catch (error) {
       console.error('Erro ao salvar equipe:', error);
+      throw error;
     }
   };
 
-  // Salvar páginas de serviços
+  // Salvar páginas de serviços - versão completa
   const saveServicePages = async (pages: ServicePage[]) => {
     try {
-      // Esta função será mais complexa pois precisa salvar relacionamentos
-      // Por agora, vamos apenas atualizar o estado local
+      console.log('Iniciando salvamento das páginas de serviços...', pages.length);
+      
+      // Primeiro, desativar todas as páginas existentes
+      await supabase
+        .from('service_pages')
+        .update({ is_active: false })
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      // Para cada página, salvar página principal e relacionamentos
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        console.log(`Salvando página ${i + 1}/${pages.length}: ${page.title}`);
+
+        // Encontrar categoria correspondente
+        const category = categories.find(cat => cat.value === page.category);
+        
+        // Salvar página principal
+        const { data: savedPage, error: pageError } = await supabase
+          .from('service_pages')
+          .upsert({
+            id: page.id,
+            title: page.title,
+            description: page.description,
+            href: page.href,
+            category_id: category?.id,
+            display_order: i,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (pageError) {
+          console.error('Erro ao salvar página:', pageError);
+          continue;
+        }
+
+        console.log('Página salva:', savedPage.title);
+
+        // Limpar relacionamentos existentes
+        await Promise.all([
+          supabase.from('service_benefits').delete().eq('service_page_id', page.id),
+          supabase.from('service_process_steps').delete().eq('service_page_id', page.id),
+          supabase.from('service_faq').delete().eq('service_page_id', page.id),
+          supabase.from('service_testimonials').delete().eq('service_page_id', page.id)
+        ]);
+
+        // Salvar benefícios
+        if (page.benefits && page.benefits.length > 0) {
+          const benefitsData = page.benefits.map((benefit, index) => ({
+            service_page_id: page.id,
+            title: benefit.title,
+            description: benefit.description || '',
+            icon: benefit.icon,
+            display_order: index
+          }));
+
+          await supabase.from('service_benefits').insert(benefitsData);
+          console.log(`Salvos ${benefitsData.length} benefícios para ${page.title}`);
+        }
+
+        // Salvar processos
+        if (page.process && page.process.length > 0) {
+          const processData = page.process.map((step, index) => ({
+            service_page_id: page.id,
+            step_number: step.step,
+            title: step.title,
+            description: step.description || '',
+            display_order: index
+          }));
+
+          await supabase.from('service_process_steps').insert(processData);
+          console.log(`Salvos ${processData.length} passos de processo para ${page.title}`);
+        }
+
+        // Salvar FAQ
+        if (page.faq && page.faq.length > 0) {
+          const faqData = page.faq.map((faq, index) => ({
+            service_page_id: page.id,
+            question: faq.question,
+            answer: faq.answer,
+            display_order: index
+          }));
+
+          await supabase.from('service_faq').insert(faqData);
+          console.log(`Salvos ${faqData.length} FAQs para ${page.title}`);
+        }
+
+        // Salvar depoimentos
+        if (page.testimonials && page.testimonials.length > 0) {
+          const testimonialsData = page.testimonials.map((testimonial, index) => ({
+            service_page_id: page.id,
+            name: testimonial.name,
+            text: testimonial.text,
+            role: testimonial.role,
+            image: testimonial.image,
+            display_order: index
+          }));
+
+          await supabase.from('service_testimonials').insert(testimonialsData);
+          console.log(`Salvos ${testimonialsData.length} depoimentos para ${page.title}`);
+        }
+      }
+
       setServicePages(pages);
-      console.log('Páginas de serviços atualizadas localmente');
+      console.log('Todas as páginas de serviços foram salvas no Supabase com sucesso');
     } catch (error) {
       console.error('Erro ao salvar páginas de serviços:', error);
+      throw error;
     }
   };
 
   // Salvar categorias
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
+      // Primeiro, desativar todas as categorias existentes
+      await supabase
+        .from('law_categories')
+        .update({ is_active: false })
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
       const categoryData = cats.map((cat, index) => ({
         id: cat.id,
         category_key: cat.value,
@@ -315,6 +426,7 @@ export const useSupabaseDataNew = () => {
       console.log('Categorias salvas no Supabase com sucesso');
     } catch (error) {
       console.error('Erro ao salvar categorias:', error);
+      throw error;
     }
   };
 
