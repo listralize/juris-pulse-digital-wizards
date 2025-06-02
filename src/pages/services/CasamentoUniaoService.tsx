@@ -7,140 +7,145 @@ const CasamentoUniaoService = () => {
     <ServiceLandingLayout
       serviceArea="Direito de Família"
       serviceName="Casamento e União Estável"
-      serviceDescription="Assessoria jurídica completa para formalização e regularização de casamentos e uniões estáveis, incluindo contratos pré-nupciais, pactos de convivência e proteção patrimonial."
+      serviceDescription="Assessoria jurídica completa em questões matrimoniais, desde a celebração até o reconhecimento de união estável, incluindo pactos antenupciais e conversão de união em casamento."
       mainImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       benefits={[
         {
-          title: "Segurança Jurídica",
-          description: "Contratos matrimoniais e pactos de convivência que garantem proteção patrimonial e segurança jurídica para o casal.",
-          icon: "🛡️"
+          title: "Pacto Antenupcial Personalizado",
+          description: "Elaboração de pactos antenupciais sob medida para proteger patrimônio individual, definir regime de bens e estabelecer acordos específicos para o casal.",
+          icon: "📜"
         },
         {
-          title: "Reconhecimento de Direitos",
-          description: "Regularização de uniões estáveis com reconhecimento legal e defesa de todos os direitos previstos em lei.",
+          title: "Reconhecimento de União Estável",
+          description: "Assessoria completa para reconhecimento judicial ou extrajudicial de união estável, com todos os efeitos patrimoniais e previdenciários decorrentes.",
+          icon: "💑"
+        },
+        {
+          title: "Conversão União em Casamento",
+          description: "Procedimento simplificado para conversão de união estável em casamento civil, mantendo a data de início da união para todos os efeitos legais.",
+          icon: "💒"
+        },
+        {
+          title: "Regimes de Bens Especializado",
+          description: "Orientação técnica sobre todos os regimes: comunhão parcial, total, separação total, participação final nos aquestos, com análise das implicações de cada um.",
           icon: "⚖️"
         },
         {
-          title: "Proteção Patrimonial",
-          description: "Orientação especializada sobre regimes de bens e estratégias para proteção do patrimônio individual e familiar.",
-          icon: "💰"
+          title: "Proteção Patrimonial Estratégica",
+          description: "Estratégias jurídicas para proteção do patrimônio empresarial e familiar, incluindo holdings familiares e blindagem patrimonial lícita.",
+          icon: "🛡️"
         },
         {
-          title: "Planejamento Sucessório",
-          description: "Assessoria em testamentos e planejamento sucessório integrado ao regime matrimonial escolhido.",
+          title: "Questões Previdenciárias e Sucessórias",
+          description: "Orientação sobre direitos previdenciários do cônjuge/companheiro e planejamento sucessório para garantir proteção da família constituída.",
           icon: "📋"
-        },
-        {
-          title: "União Homoafetiva",
-          description: "Especialização em casamento e união estável entre pessoas do mesmo sexo, garantindo todos os direitos constitucionais.",
-          icon: "🏳️‍🌈"
-        },
-        {
-          title: "Conversão e Modificação",
-          description: "Conversão de união estável em casamento e alteração de regimes matrimoniais quando necessário.",
-          icon: "🔄"
         }
       ]}
       process={[
         {
           step: 1,
-          title: "Consulta Inicial Detalhada",
-          description: "Análise da situação patrimonial do casal, orientação sobre regimes de bens e identificação das necessidades específicas de proteção."
+          title: "Consulta e Análise Patrimonial",
+          description: "Avaliação detalhada da situação patrimonial de ambos os cônjuges, objetivos do casal e identificação da melhor estratégia jurídica para o caso."
         },
         {
           step: 2,
-          title: "Planejamento Patrimonial",
-          description: "Desenvolvimento de estratégia personalizada considerando patrimônio atual, expectativas futuras, atividade profissional e objetivos familiares."
+          title: "Escolha do Regime de Bens",
+          description: "Orientação técnica sobre as vantagens e desvantagens de cada regime, considerando patrimônio atual, atividade profissional e planejamento futuro."
         },
         {
           step: 3,
-          title: "Elaboração de Contratos",
-          description: "Redação de pacto antenupcial, contrato de convivência ou outros instrumentos adequados à situação específica do casal."
+          title: "Elaboração de Documentos",
+          description: "Redação de pacto antenupcial, contrato de união estável ou outros documentos necessários, com cláusulas específicas adaptadas ao casal."
         },
         {
           step: 4,
           title: "Procedimentos Cartoriais",
-          description: "Acompanhamento dos procedimentos de habilitação para casamento, escritura pública de pacto ou reconhecimento de união estável."
+          description: "Acompanhamento de todos os procedimentos em cartório: habilitação para casamento, registro de união estável, averbações necessárias."
         },
         {
           step: 5,
-          title: "Regularização Documental",
-          description: "Providências para atualização de documentos, alteração de nome (se desejado) e registro de mudança de estado civil."
+          title: "Reconhecimento Judicial (se necessário)",
+          description: "Condução de ação judicial para reconhecimento de união estável quando há resistência ou necessidade de definição de efeitos patrimoniais."
         },
         {
           step: 6,
-          title: "Orientação Continuada",
-          description: "Acompanhamento para questões supervenientes, alterações contratuais e orientações sobre direitos e deveres conjugais."
+          title: "Regularização Documental",
+          description: "Providências para atualização de documentos pessoais, inclusão de dependentes em planos de saúde e previdência privada."
+        },
+        {
+          step: 7,
+          title: "Orientação Pós-Matrimonial",
+          description: "Acompanhamento sobre direitos e deveres decorrentes do casamento/união, orientação para questões supervenientes e atualizações necessárias."
         }
       ]}
       testimonials={[
         {
-          name: "Mariana e João, Empresários",
-          quote: "O pacto antenupcial protegeu nossas empresas familiares. Casamos tranquilos sabendo que nossos patrimônios estão seguros e organizados."
+          name: "Marina e Paulo, Empresários",
+          quote: "O pacto antenupcial protegeu nossos negócios familiares e definiu claramente como seria a gestão do patrimônio comum. Foi fundamental para nossa tranquilidade."
         },
         {
-          name: "Carlos P., Médico",
-          quote: "Após 15 anos de união estável, o reconhecimento legal trouxe segurança jurídica para nossa família e direitos previdenciários para minha companheira."
+          name: "Ana Carolina, Médica",
+          quote: "O reconhecimento da nossa união estável de 8 anos garantiu todos os direitos previdenciários e sucessórios que tínhamos perdido por não ter formalizado antes."
         },
         {
-          name: "Amanda e Sofia, Casal Homoafetivo",
-          quote: "Conseguimos nos casar civilmente com total segurança jurídica. Hoje temos todos os direitos garantidos e uma família legalmente constituída."
+          name: "Roberto e Juliana",
+          quote: "A conversão da união estável em casamento foi muito simples e rápida. Mantivemos a data original da união para todos os efeitos, que era nosso objetivo."
         },
         {
-          name: "Roberto L., Advogado",
-          quote: "A orientação sobre regime de bens foi fundamental. Escolhemos a participação final nos aquestos para equilibrar proteção e comunhão patrimonial."
+          name: "Carlos, Advogado",
+          quote: "A orientação sobre regime de bens foi esclarecedora. Escolhemos a participação final nos aquestos, que se adequou perfeitamente ao nosso perfil patrimonial."
         },
         {
-          name: "Helena M., Arquiteta",
-          quote: "A conversão da nossa união estável em casamento foi simples e rápida. Agora temos a formalização que sempre desejamos."
+          name: "Fernanda e Lucas, Jovem Casal",
+          quote: "Mesmo sendo jovens e com pouco patrimônio, a orientação jurídica foi importante para entendermos nossos direitos e planejarmos o futuro com segurança."
         }
       ]}
       faq={[
         {
-          question: "Qual a diferença entre casamento e união estável?",
-          answer: "O casamento é um ato formal celebrado perante autoridade competente, enquanto a união estável é reconhecida pela convivência pública, contínua e duradoura. Ambos geram efeitos jurídicos similares, mas o casamento oferece maior segurança jurídica e facilidade de comprovação."
+          question: "Qual a diferença prática entre casamento e união estável?",
+          answer: "Ambos geram os mesmos direitos patrimoniais e sucessórios. A principal diferença está na formalização: casamento exige celebração civil, união estável pode ser reconhecida pelos fatos. Para alguns procedimentos (adoção, visto internacional), o casamento ainda é preferencial."
         },
         {
           question: "É obrigatório fazer pacto antenupcial?",
-          answer: "Não é obrigatório, mas é altamente recomendável quando há patrimônio significativo, empresas, bens de família ou intenção de proteger determinados ativos. Sem pacto, aplica-se o regime legal da comunhão parcial de bens."
+          answer: "Não é obrigatório. Sem pacto, aplica-se automaticamente o regime da comunhão parcial de bens. O pacto só é necessário se os noivos quiserem escolher outro regime ou estabelecer cláusulas específicas."
         },
         {
-          question: "Quais são os regimes de bens disponíveis?",
-          answer: "Comunhão parcial (padrão), comunhão universal, separação total de bens e participação final nos aquestos. Cada regime tem características específicas de proteção e partilha patrimonial."
+          question: "Posso mudar o regime de bens após o casamento?",
+          answer: "Sim, desde 2002 é possível alterar o regime através de procedimento judicial, desde que comprovada a inexistência de prejuízo a terceiros e que ambos os cônjuges concordem com a mudança."
         },
         {
-          question: "Posso alterar o regime de bens após o casamento?",
-          answer: "Sim, é possível através de processo judicial com justificativa relevante e sem prejuízo a terceiros. Requer motivação consistente e concordância de ambos os cônjuges."
+          question: "Como comprovar união estável para fins legais?",
+          answer: "Através de documentos que demonstrem convivência pública, contínua e duradoura: contas conjuntas, declaração de dependente no IR, testemunhas, fotos, correspondências. O reconhecimento pode ser judicial ou por escritura pública."
         },
         {
-          question: "Como comprovar união estável?",
-          answer: "Através de documentos que demonstrem vida em comum: conta bancária conjunta, declaração de dependente no IR, seguro de vida, testemunhas, fotos, contratos de locação em conjunto, entre outros."
+          question: "Quais os requisitos para o casamento civil?",
+          answer: "Ambos devem ser maiores de 16 anos (entre 16-18 com autorização dos pais), não ter impedimentos legais, apresentar documentação completa e cumprir o processo de habilitação no cartório com antecedência mínima."
         },
         {
-          question: "Casais homoafetivos têm os mesmos direitos?",
-          answer: "Sim, desde 2013 têm direito ao casamento civil e todos os direitos decorrentes: regime de bens, adoção, herança, pensão, benefícios previdenciários e fiscais."
+          question: "União estável tem os mesmos direitos previdenciários?",
+          answer: "Sim, companheiro(a) tem direito a pensão por morte, auxílio-reclusão e outros benefícios previdenciários nas mesmas condições do cônjuge, desde que comprovada a dependência econômica e união."
         },
         {
-          question: "É possível casar no exterior?",
-          answer: "Sim, brasileiros podem casar no exterior. O casamento deve ser registrado no consulado brasileiro ou ter sua validade reconhecida no Brasil através de processo específico."
+          question: "É possível casamento homoafetivo no Brasil?",
+          answer: "Sim, desde 2013 o casamento entre pessoas do mesmo sexo é plenamente reconhecido no Brasil, com todos os direitos iguais ao casamento heterossexual, incluindo adoção, herança e benefícios previdenciários."
         },
         {
-          question: "Preciso de advogado para casar?",
-          answer: "Para o casamento em si, não. Mas é recomendável consultar advogado para orientação sobre regime de bens, elaboração de pacto antenupcial e planejamento patrimonial."
+          question: "Como funciona o regime de participação final nos aquestos?",
+          answer: "Durante o casamento, cada cônjuge administra livremente seus bens. Na dissolução, há direito à metade do que o outro cônjuge adquiriu onerosamente durante a união, sendo uma modalidade híbrida entre separação e comunhão."
         }
       ]}
       relatedServices={[
         {
-          name: "Divórcio",
+          name: "Divórcio e Separação",
           path: "/servicos/divorcio"
-        },
-        {
-          name: "Inventário e Partilha",
-          path: "/servicos/inventario-partilha"
         },
         {
           name: "Testamentos e Sucessões",
           path: "/servicos/testamentos-sucessoes"
+        },
+        {
+          name: "Inventário e Partilha",
+          path: "/servicos/inventario-partilha"
         },
         {
           name: "Planejamento Patrimonial",

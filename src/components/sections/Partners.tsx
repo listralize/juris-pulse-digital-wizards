@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -142,7 +143,7 @@ const Partners = () => {
                         {member.name}
                       </h3>
                       <p className={`text-sm mb-3 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                        {member.position}
+                        {member.role || 'Advogado'}
                       </p>
                       <p className={`text-sm leading-relaxed flex-1 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
                         {member.description}
