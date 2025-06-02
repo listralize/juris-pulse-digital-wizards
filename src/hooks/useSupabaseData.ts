@@ -34,11 +34,11 @@ export const useSupabaseData = () => {
 
       if (supabaseData) {
         console.log('Data loaded from Supabase');
-        setTeamMembers(supabaseData.team_members || defaultTeamMembers);
-        setPageTexts(supabaseData.page_texts || defaultPageTexts);
-        setServicePages(supabaseData.service_pages || defaultServicePages);
-        setCategories(supabaseData.categories || defaultCategories);
-        setSpecializedServices(supabaseData.specialized_services || defaultSpecializedServices);
+        setTeamMembers((supabaseData.team_members as TeamMember[]) || defaultTeamMembers);
+        setPageTexts((supabaseData.page_texts as PageTexts) || defaultPageTexts);
+        setServicePages((supabaseData.service_pages as ServicePage[]) || defaultServicePages);
+        setCategories((supabaseData.categories as CategoryInfo[]) || defaultCategories);
+        setSpecializedServices((supabaseData.specialized_services as SpecializedService[]) || defaultSpecializedServices);
       } else {
         console.log('No data in Supabase, loading from localStorage or defaults');
         // Fallback to localStorage
@@ -73,11 +73,11 @@ export const useSupabaseData = () => {
       console.log('Saving data to Supabase...');
       
       const dataToSave = {
-        team_members: teamMembers,
-        page_texts: pageTexts,
-        service_pages: servicePages,
-        categories: categories,
-        specialized_services: specializedServices,
+        team_members: teamMembers as any,
+        page_texts: pageTexts as any,
+        service_pages: servicePages as any,
+        categories: categories as any,
+        specialized_services: specializedServices as any,
         updated_at: new Date().toISOString()
       };
 

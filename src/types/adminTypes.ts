@@ -6,100 +6,22 @@ export interface TeamMember {
   oab: string;
   email: string;
   image: string;
-  description?: string;
-}
-
-export interface SpecializedService {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  icon?: string;
-  href?: string;
-  detailedDescription?: string;
-  benefits?: string[];
-  process?: string[];
-  faq?: Array<{
-    question: string;
-    answer: string;
-  }>;
-  testimonials?: Array<{
-    name: string;
-    text: string;
-    role?: string;
-  }>;
-}
-
-export interface ServicePage {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  href?: string;
-  benefits?: Array<{
-    title: string;
-    description: string;
-    icon?: string;
-  }>;
-  process?: Array<{
-    step: number;
-    title: string;
-    description: string;
-  }>;
-  faq?: Array<{
-    question: string;
-    answer: string;
-  }>;
-  testimonials?: Array<{
-    name: string;
-    text: string;
-    role?: string;
-    image?: string;
-  }>;
-  content?: {
-    hero: {
-      title: string;
-      subtitle: string;
-      backgroundImage?: string;
-    };
-    benefits: Array<{
-      title: string;
-      description: string;
-      icon?: string;
-    }>;
-    process: Array<{
-      step: number;
-      title: string;
-      description: string;
-    }>;
-    faq: Array<{
-      question: string;
-      answer: string;
-    }>;
-    testimonials: Array<{
-      name: string;
-      text: string;
-      role?: string;
-      image?: string;
-    }>;
-    cta: {
-      title: string;
-      subtitle: string;
-      buttonText: string;
-      whatsappNumber?: string;
-    };
-  };
-  seo?: {
-    metaTitle: string;
-    metaDescription: string;
-    keywords: string[];
-  };
 }
 
 export interface CategoryTexts {
   id: string;
   title: string;
   description: string;
+}
+
+export interface CategoryInfo {
+  id: string;
+  value: string;
+  label: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
 }
 
 export interface ContactTexts {
@@ -112,7 +34,6 @@ export interface ContactTexts {
 export interface FooterTexts {
   companyName: string;
   description: string;
-  copyright: string;
 }
 
 export interface PageTexts {
@@ -122,13 +43,7 @@ export interface PageTexts {
   aboutTitle: string;
   aboutDescription: string;
   aboutImage?: string;
-  contactTitle: string;
-  contactSubtitle: string;
-  teamTitle: string;
   areasTitle: string;
-  clientAreaTitle: string;
-  clientAreaDescription: string;
-  clientPortalLink?: string;
   familiaTitle: string;
   familiaDescription: string;
   tributarioTitle: string;
@@ -137,111 +52,135 @@ export interface PageTexts {
   empresarialDescription: string;
   trabalhoTitle: string;
   trabalhoDescription: string;
-  constitucionalTitle: string;
-  constitucionalDescription: string;
-  administrativoTitle: string;
-  administrativoDescription: string;
-  previdenciarioTitle: string;
-  previdenciarioDescription: string;
-  consumidorTitle: string;
-  consumidorDescription: string;
-  civilTitle: string;
-  civilDescription: string;
+  civilTitle?: string;
+  civilDescription?: string;
+  previdenciarioTitle?: string;
+  previdenciarioDescription?: string;
+  consumidorTitle?: string;
+  consumidorDescription?: string;
+  constitucionalTitle?: string;
+  constitucionalDescription?: string;
+  administrativoTitle?: string;
+  administrativoDescription?: string;
+  teamTitle: string;
+  clientAreaTitle: string;
+  clientAreaDescription: string;
+  clientPortalLink?: string;
+  contactTitle: string;
+  contactSubtitle: string;
   categoryTexts: CategoryTexts[];
   contactTexts: ContactTexts;
   footerTexts: FooterTexts;
 }
 
-export interface CategoryInfo {
-  id: string;
+export interface Testimonial {
   name: string;
+  text: string;
+  role?: string;
+  image?: string;
+}
+
+export interface ServicePage {
+  id: string;
+  title: string;
   description: string;
-  color: string;
+  category: string;
+  href?: string;
+  benefits?: string[];
+  process?: string[];
+  testimonials?: Testimonial[];
+  faq?: Array<{ question: string; answer: string; }>;
+}
+
+export interface SpecializedService {
+  id: string;
+  title: string;
+  description: string;
   icon: string;
-  value?: string;
-  label?: string;
+  category: string;
+  href: string;
 }
 
 export const categories: CategoryInfo[] = [
   {
-    id: "familia",
-    name: "Direito de Família",
-    description: "Assessoria completa em questões familiares",
-    color: "bg-blue-500",
-    icon: "Heart",
-    value: "familia",
-    label: "Direito de Família"
+    id: 'familia',
+    value: 'familia',
+    label: 'Direito de Família',
+    name: 'Direito de Família',
+    description: 'Proteção e orientação em questões familiares',
+    icon: 'Heart',
+    color: 'bg-rose-500'
   },
   {
-    id: "tributario", 
-    name: "Direito Tributário",
-    description: "Consultoria e defesa em questões fiscais",
-    color: "bg-green-500",
-    icon: "Calculator",
-    value: "tributario",
-    label: "Direito Tributário"
+    id: 'tributario',
+    value: 'tributario',
+    label: 'Direito Tributário',
+    name: 'Direito Tributário',
+    description: 'Consultoria e planejamento tributário',
+    icon: 'Calculator',
+    color: 'bg-blue-500'
   },
   {
-    id: "empresarial",
-    name: "Direito Empresarial", 
-    description: "Soluções jurídicas para empresas",
-    color: "bg-purple-500",
-    icon: "Building",
-    value: "empresarial",
-    label: "Direito Empresarial"
+    id: 'empresarial',
+    value: 'empresarial',
+    label: 'Direito Empresarial',
+    name: 'Direito Empresarial',
+    description: 'Suporte jurídico para empresas',
+    icon: 'Building2',
+    color: 'bg-green-500'
   },
   {
-    id: "trabalho",
-    name: "Direito do Trabalho",
-    description: "Defesa dos direitos trabalhistas", 
-    color: "bg-orange-500",
-    icon: "Briefcase",
-    value: "trabalho",
-    label: "Direito do Trabalho"
+    id: 'trabalho',
+    value: 'trabalho',
+    label: 'Direito do Trabalho',
+    name: 'Direito do Trabalho',
+    description: 'Defesa dos direitos trabalhistas',
+    icon: 'Users',
+    color: 'bg-orange-500'
   },
   {
-    id: "constitucional",
-    name: "Direito Constitucional",
-    description: "Proteção dos direitos fundamentais",
-    color: "bg-red-500", 
-    icon: "Scale",
-    value: "constitucional",
-    label: "Direito Constitucional"
+    id: 'civil',
+    value: 'civil',
+    label: 'Direito Civil',
+    name: 'Direito Civil',
+    description: 'Proteção de direitos e interesses individuais',
+    icon: 'Scale',
+    color: 'bg-purple-500'
   },
   {
-    id: "administrativo",
-    name: "Direito Administrativo",
-    description: "Atuação junto ao poder público",
-    color: "bg-indigo-500",
-    icon: "FileText",
-    value: "administrativo",
-    label: "Direito Administrativo"
+    id: 'previdenciario',
+    value: 'previdenciario',
+    label: 'Direito Previdenciário',
+    name: 'Direito Previdenciário',
+    description: 'Benefícios e aposentadorias',
+    icon: 'Shield',
+    color: 'bg-indigo-500'
   },
   {
-    id: "previdenciario",
-    name: "Direito Previdenciário",
-    description: "Benefícios e aposentadorias",
-    color: "bg-teal-500",
-    icon: "Shield",
-    value: "previdenciario",
-    label: "Direito Previdenciário"
+    id: 'consumidor',
+    value: 'consumidor',
+    label: 'Direito do Consumidor',
+    name: 'Direito do Consumidor',
+    description: 'Proteção e defesa do consumidor',
+    icon: 'ShoppingCart',
+    color: 'bg-yellow-500'
   },
   {
-    id: "consumidor",
-    name: "Direito do Consumidor", 
-    description: "Defesa dos direitos do consumidor",
-    color: "bg-pink-500",
-    icon: "ShoppingCart",
-    value: "consumidor",
-    label: "Direito do Consumidor"
+    id: 'constitucional',
+    value: 'constitucional',
+    label: 'Direito Constitucional',
+    name: 'Direito Constitucional',
+    description: 'Direitos fundamentais e constitucionalidade',
+    icon: 'BookOpen',
+    color: 'bg-red-500'
   },
   {
-    id: "civil",
-    name: "Direito Civil",
-    description: "Questões cíveis em geral",
-    color: "bg-yellow-500",
-    icon: "Users",
-    value: "civil",
-    label: "Direito Civil"
+    id: 'administrativo',
+    value: 'administrativo',
+    label: 'Direito Administrativo',
+    name: 'Direito Administrativo',
+    description: 'Relações com a administração pública',
+    icon: 'FileText',
+    color: 'bg-gray-500'
   }
 ];

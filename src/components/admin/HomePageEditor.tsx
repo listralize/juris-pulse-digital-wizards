@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -329,7 +330,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                               onUpdatePageTexts({...pageTexts, categoryTexts: updatedCategories});
                             }}
                             className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                            size="sm"
                           />
                         </div>
                         <div>
