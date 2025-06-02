@@ -395,7 +395,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                         value={member.name}
                         onChange={(e) => onUpdateTeamMember(member.id, 'name', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        size="sm"
                       />
                     </div>
                     <div>
@@ -404,7 +403,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                         value={member.title}
                         onChange={(e) => onUpdateTeamMember(member.id, 'title', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        size="sm"
                       />
                     </div>
                     <div>
@@ -413,7 +411,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                         value={member.oab}
                         onChange={(e) => onUpdateTeamMember(member.id, 'oab', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        size="sm"
                       />
                     </div>
                     <div>
@@ -422,7 +419,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                         value={member.email}
                         onChange={(e) => onUpdateTeamMember(member.id, 'email', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        size="sm"
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -431,7 +427,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                         value={member.image}
                         onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        size="sm"
                         placeholder="/lovable-uploads/foto.png"
                       />
                     </div>
