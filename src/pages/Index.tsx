@@ -43,21 +43,34 @@ const Index = () => {
   useEffect(() => {
     console.log('Index useEffect - setting up horizontal scroll behavior');
     
-    // Disable scroll on body and html completely
+    // Completely disable scroll on body and html
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     document.body.style.height = '100vh';
     document.documentElement.style.height = '100vh';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
+    document.body.style.top = '0';
+    document.body.style.left = '0';
+    
+    // Disable scroll restoration
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
     
     return () => {
-      document.body.style.overflow = 'auto';
-      document.documentElement.style.overflow = 'auto';
-      document.body.style.height = 'auto';
-      document.documentElement.style.height = 'auto';
-      document.body.style.position = 'static';
-      document.body.style.width = 'auto';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.height = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'auto';
+      }
     };
   }, []);
   

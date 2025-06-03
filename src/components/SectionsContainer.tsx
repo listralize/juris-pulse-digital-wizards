@@ -57,10 +57,11 @@ const SectionsContainer: React.FC = () => {
       {/* Horizontal container that slides */}
       <div 
         ref={containerRef}
-        className="flex h-full transition-none"
+        className="flex h-full"
         style={{ 
           width: `${sections.length * 100}vw`,
           transform: `translateX(-${activeSectionIndex * 100}vw)`,
+          transition: 'none'
         }}
       >
         {sections.map((section, index) => {
@@ -73,7 +74,7 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className="w-screen h-full flex-shrink-0"
+              className="w-screen h-full flex-shrink-0 relative"
               style={{ width: '100vw' }}
             >
               <Section 

@@ -94,15 +94,15 @@ export const useSectionTransition = (sections: Section[]) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
       
-      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
         const nextIndex = (activeSectionIndex + 1) % sections.length;
-        console.log('Keyboard navigation down:', sections[nextIndex].id);
+        console.log('Keyboard navigation next:', sections[nextIndex].id);
         transitionToSection(sections[nextIndex].id);
-      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
         const prevIndex = activeSectionIndex === 0 ? sections.length - 1 : activeSectionIndex - 1;
-        console.log('Keyboard navigation up:', sections[prevIndex].id);
+        console.log('Keyboard navigation prev:', sections[prevIndex].id);
         transitionToSection(sections[prevIndex].id);
       }
     };
@@ -120,6 +120,7 @@ export const useSectionTransition = (sections: Section[]) => {
       
       console.log('Wheel event detected:', { 
         deltaY: e.deltaY, 
+        deltaX: e.deltaX,
         isTransitioning: isTransitioning.current,
         timeSinceLastScroll: now - lastScrollTime.current,
         activeSection,
@@ -134,14 +135,14 @@ export const useSectionTransition = (sections: Section[]) => {
       }
 
       // Throttle scroll events
-      if (now - lastScrollTime.current < 800) {
+      if (now - lastScrollTime.current < 600) {
         e.preventDefault();
         console.log('Blocking scroll - too soon since last scroll');
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 50) {
+      if (Math.abs(e.deltaY) < 30) {
         console.log('Scroll too small, ignoring');
         return;
       }
@@ -174,10 +175,10 @@ export const useSectionTransition = (sections: Section[]) => {
     };
 
     // Add event listener with passive: false to allow preventDefault
-    document.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
-      document.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('wheel', handleWheel);
     };
   }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
 
