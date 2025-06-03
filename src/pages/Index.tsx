@@ -39,21 +39,25 @@ const Index = () => {
     }
   }, [isDark]);
   
-  // Disable default scroll and enable custom navigation
+  // Disable default scroll and enable horizontal navigation
   useEffect(() => {
-    console.log('Index useEffect - setting up scroll behavior');
+    console.log('Index useEffect - setting up horizontal scroll behavior');
     
-    // Disable scroll on body and html
+    // Disable scroll on body and html completely
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     document.body.style.height = '100vh';
     document.documentElement.style.height = '100vh';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
     
     return () => {
       document.body.style.overflow = 'auto';
       document.documentElement.style.overflow = 'auto';
       document.body.style.height = 'auto';
       document.documentElement.style.height = 'auto';
+      document.body.style.position = 'static';
+      document.body.style.width = 'auto';
     };
   }, []);
   

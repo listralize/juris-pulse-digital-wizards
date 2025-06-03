@@ -24,18 +24,9 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
+        className={`section-container w-full h-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
         style={{ 
-          opacity: isActive ? 1 : 0,
-          visibility: isActive ? 'visible' : 'hidden',
-          pointerEvents: isActive ? 'auto' : 'none',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: isActive ? 10 : 1,
-          transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: allowScroll ? 'flex-start' : 'center',

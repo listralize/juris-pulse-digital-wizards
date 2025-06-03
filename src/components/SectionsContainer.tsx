@@ -24,9 +24,9 @@ const SectionsContainer: React.FC = () => {
     { id: 'contact', component: Contact }
   ];
   
-  const { activeSection, transitionToSection, sectionsRef, isInitialized } = useSectionTransition(sections);
+  const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
 
-  console.log('SectionsContainer render:', { activeSection, sectionsLength: sections.length, isInitialized });
+  console.log('SectionsContainer render:', { activeSection, activeSectionIndex, sectionsLength: sections.length, isInitialized });
 
   // Listen for custom section change events from navbar
   useEffect(() => {
@@ -54,31 +54,46 @@ const SectionsContainer: React.FC = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {sections.map((section, index) => {
-        const Component = section.component;
-        const allowScroll = section.id === 'contact' || section.id === 'socios';
-        const isActive = activeSection === section.id;
-        
-        console.log(`Section ${section.id}:`, { isActive, index, allowScroll });
-        
-        return (
-          <Section 
-            key={section.id} 
-            id={section.id} 
-            isActive={isActive}
-            allowScroll={allowScroll}
-            ref={el => {
-              if (el) {
-                sectionsRef.current[index] = el;
-              }
-            }}
-            className={section.id === 'contact' ? 'pb-0' : ''}
-          >
-            <Component />
-            {section.id === 'contact' && <Footer />}
-          </Section>
-        );
-      })}
+      {/* Horizontal container that slides */}
+      <div 
+        ref={containerRef}
+        className="flex h-full transition-none"
+        style={{ 
+          width: `${sections.length * 100}vw`,
+          transform: `translateX(-${activeSectionIndex * 100}vw)`,
+        }}
+      >
+        {sections.map((section, index) => {
+          const Component = section.component;
+          const allowScroll = section.id === 'contact' || section.id === 'socios';
+          const isActive = activeSectionIndex === index;
+          
+          console.log(`Section ${section.id}:`, { isActive, index, allowScroll, activeSectionIndex });
+          
+          return (
+            <div
+              key={section.id}
+              className="w-screen h-full flex-shrink-0"
+              style={{ width: '100vw' }}
+            >
+              <Section 
+                id={section.id} 
+                isActive={isActive}
+                allowScroll={allowScroll}
+                ref={el => {
+                  if (el) {
+                    sectionsRef.current[index] = el;
+                  }
+                }}
+                className={section.id === 'contact' ? 'pb-0' : ''}
+              >
+                <Component />
+                {section.id === 'contact' && <Footer />}
+              </Section>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
