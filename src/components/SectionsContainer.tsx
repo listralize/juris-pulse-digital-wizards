@@ -26,17 +26,22 @@ const SectionsContainer: React.FC = () => {
   
   const { activeSection, transitionToSection, sectionsRef } = useSectionTransition(sections);
 
+  console.log('SectionsContainer render:', { activeSection, sectionsLength: sections.length });
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {sections.map((section, index) => {
         const Component = section.component;
         const allowScroll = section.id === 'contact' || section.id === 'socios';
+        const isActive = activeSection === section.id;
+        
+        console.log(`Section ${section.id}:`, { isActive, index });
         
         return (
           <Section 
             key={section.id} 
             id={section.id} 
-            isActive={activeSection === section.id}
+            isActive={isActive}
             allowScroll={allowScroll}
             ref={el => {
               if (el) {

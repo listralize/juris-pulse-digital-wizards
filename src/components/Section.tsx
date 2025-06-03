@@ -15,6 +15,8 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
+    console.log(`Section ${id} render:`, { isActive, isDark, theme });
+    
     return (
       <div 
         id={id} 
@@ -25,7 +27,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           opacity: isActive ? 1 : 0,
           visibility: isActive ? 'visible' : 'hidden',
           pointerEvents: isActive ? 'auto' : 'none',
-          position: 'fixed',
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,

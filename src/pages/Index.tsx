@@ -16,8 +16,12 @@ const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
+  console.log('Index page render:', { theme, isDark });
+  
   // Apply theme class to body
   useEffect(() => {
+    console.log('Index useEffect - applying theme:', { isDark });
+    
     if (isDark) {
       document.body.classList.add('dark');
       document.body.classList.remove('light');
@@ -37,6 +41,8 @@ const Index = () => {
   
   // Disable default scroll and enable custom navigation
   useEffect(() => {
+    console.log('Index useEffect - setting up scroll behavior');
+    
     // Disable scroll on body and html
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';

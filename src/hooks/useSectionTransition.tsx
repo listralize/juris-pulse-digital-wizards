@@ -1,5 +1,10 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { gsap } from 'gsap';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+
+gsap.registerPlugin(ScrollToPlugin);
 
 interface Section {
   id: string;
@@ -7,129 +12,107 @@ interface Section {
 }
 
 export const useSectionTransition = (sections: Section[]) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('home');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const sectionsRef = useRef<HTMLDivElement[]>([]);
-  
-  // Handle initial load and hash changes
+  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const isTransitioning = useRef(false);
+
+  // Initialize active section based on hash or default to home
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.substring(1);
-      const validIds = sections.map(section => section.id);
-      const newSection = hash && validIds.includes(hash) ? hash : 'home';
+    const hash = location.hash.substring(1);
+    if (hash && sections.find(s => s.id === hash)) {
+      setActiveSection(hash);
+    } else {
+      setActiveSection('home');
+    }
+  }, [location.hash, sections]);
+
+  const transitionToSection = useCallback((sectionId: string) => {
+    if (isTransitioning.current || activeSection === sectionId) return;
+    
+    console.log('Transitioning to section:', sectionId);
+    
+    const sectionExists = sections.find(s => s.id === sectionId);
+    if (!sectionExists) {
+      console.warn('Section not found:', sectionId);
+      return;
+    }
+    
+    isTransitioning.current = true;
+    
+    // Update URL hash
+    if (location.pathname === '/') {
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+    
+    // Set new active section immediately for better UX
+    setActiveSection(sectionId);
+    
+    // Reset transition flag after animation
+    setTimeout(() => {
+      isTransitioning.current = false;
+    }, 600);
+  }, [activeSection, sections, location.pathname]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isTransitioning.current) return;
       
-      console.log('Hash change detected:', hash, 'Setting section to:', newSection);
-      setActiveSection(newSection);
+      const currentIndex = sections.findIndex(s => s.id === activeSection);
+      
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        const nextIndex = (currentIndex + 1) % sections.length;
+        transitionToSection(sections[nextIndex].id);
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        const prevIndex = currentIndex === 0 ? sections.length - 1 : currentIndex - 1;
+        transitionToSection(sections[prevIndex].id);
+      }
     };
 
-    // Set initial section
-    handleHashChange();
-    
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, [sections]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeSection, sections, transitionToSection]);
 
-  // Add wheel event listener for scroll navigation
+  // Handle scroll for section navigation
   useEffect(() => {
-    let isScrolling = false;
+    let scrollTimeout: NodeJS.Timeout;
     
     const handleWheel = (e: WheelEvent) => {
-      if (isScrolling || isTransitioning) return;
-      
-      // For scrollable sections, check if we're at boundaries
-      if (activeSection === 'contact' || activeSection === 'socios') {
-        const target = e.target as HTMLElement;
-        const scrollContainer = target.closest('[data-allow-scroll="true"]') || 
-                               target.closest('.section-container');
-        
-        if (scrollContainer) {
-          const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-          const isAtTop = scrollTop <= 1;
-          const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
-          
-          // Only allow section transition if at boundaries
-          if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
-            console.log('Allowing internal scroll, not at boundary');
-            return; // Allow normal scrolling within the section
-          }
-          
-          console.log('At boundary, allowing section transition');
-        }
-      }
-      
-      // Check if we're inside any other scrollable container that shouldn't trigger transitions
-      const target = e.target as HTMLElement;
-      const scrollableParent = target.closest('[data-radix-scroll-area-viewport]') ||
-                              target.closest('.scroll-area:not(.section-container)');
-      
-      if (scrollableParent && activeSection !== 'contact' && activeSection !== 'socios') {
-        console.log('Found other scrollable parent, allowing normal scroll');
+      if (isTransitioning.current) {
+        e.preventDefault();
         return;
       }
       
-      e.preventDefault();
-      isScrolling = true;
-      
-      const currentIndex = sections.findIndex(section => section.id === activeSection);
-      let nextIndex = currentIndex;
-      
-      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
-        // Scroll down
-        nextIndex = currentIndex + 1;
-      } else if (e.deltaY < 0 && currentIndex > 0) {
-        // Scroll up
-        nextIndex = currentIndex - 1;
-      }
-      
-      if (nextIndex !== currentIndex) {
-        const nextSection = sections[nextIndex];
-        transitionToSection(nextSection.id);
-      }
-      
-      setTimeout(() => {
-        isScrolling = false;
-      }, 1000);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const currentIndex = sections.findIndex(s => s.id === activeSection);
+        
+        if (e.deltaY > 0) {
+          // Scroll down
+          const nextIndex = (currentIndex + 1) % sections.length;
+          transitionToSection(sections[nextIndex].id);
+        } else if (e.deltaY < 0) {
+          // Scroll up
+          const prevIndex = currentIndex === 0 ? sections.length - 1 : currentIndex - 1;
+          transitionToSection(sections[prevIndex].id);
+        }
+      }, 100);
     };
 
-    document.addEventListener('wheel', handleWheel, { passive: false });
-    
+    window.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
-      document.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('wheel', handleWheel);
+      clearTimeout(scrollTimeout);
     };
-  }, [activeSection, sections, isTransitioning]);
-  
-  // Function to transition to a section
-  const transitionToSection = (id: string) => {
-    if (isTransitioning || id === activeSection) return;
-    
-    console.log('Transitioning to section:', id);
-    setIsTransitioning(true);
-    
-    // Update URL
-    if (history.pushState) {
-      history.pushState(null, '', `#${id}`);
-    } else {
-      window.location.hash = id;
-    }
-    
-    setActiveSection(id);
-    
-    // Reset transitioning state after animation completes
-    setTimeout(() => {
-      setIsTransitioning(false);
-    }, 600);
-  };
+  }, [activeSection, sections, transitionToSection]);
 
   return {
     activeSection,
     transitionToSection,
-    sectionsRef,
-    isTransitioning
+    sectionsRef
   };
 };
-
-export default useSectionTransition;
