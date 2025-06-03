@@ -57,7 +57,7 @@ const SectionsContainer: React.FC = () => {
       {/* Horizontal container that slides */}
       <div 
         ref={containerRef}
-        className="flex h-full"
+        className="flex h-full will-change-transform"
         style={{ 
           width: `${sections.length * 100}vw`,
           transform: `translateX(-${activeSectionIndex * 100}vw)`,

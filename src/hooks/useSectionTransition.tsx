@@ -2,9 +2,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-
-gsap.registerPlugin(ScrollToPlugin);
 
 interface Section {
   id: string;
@@ -22,7 +19,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const lastScrollTime = useRef(0);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log('useSectionTransition - Current activeSection:', activeSection, 'Index:', activeSectionIndex);
+  console.log('useSectionTransition - Current state:', { activeSection, activeSectionIndex, sectionsLength: sections.length });
 
   // Initialize active section based on hash or default to home
   useEffect(() => {
@@ -36,7 +33,7 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSectionIndex(targetIndex >= 0 ? targetIndex : 0);
     setIsInitialized(true);
     
-    console.log('useSectionTransition - Setting active section to:', targetSection, 'Index:', targetIndex);
+    console.log('useSectionTransition - Initialized:', { targetSection, targetIndex });
   }, [location.hash, sections]);
 
   const transitionToSection = useCallback((sectionId: string) => {
@@ -54,7 +51,7 @@ export const useSectionTransition = (sections: Section[]) => {
       return;
     }
     
-    console.log('Starting horizontal transition to:', sectionId, 'Index:', sectionIndex);
+    console.log('Starting transition to:', sectionId, 'Index:', sectionIndex);
     isTransitioning.current = true;
     
     // Update URL hash
@@ -66,7 +63,7 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animate horizontal slide transition
+    // Animate horizontal slide transition using GSAP
     if (containerRef.current) {
       const targetX = -sectionIndex * 100; // Each section is 100vw wide
       
@@ -76,12 +73,12 @@ export const useSectionTransition = (sections: Section[]) => {
         ease: 'power2.inOut',
         onComplete: () => {
           isTransitioning.current = false;
-          console.log('Horizontal transition completed for:', sectionId);
+          console.log('Transition completed for:', sectionId);
         }
       });
     }
     
-    // Reset transition flag after animation if GSAP doesn't complete
+    // Safety timeout in case GSAP fails
     setTimeout(() => {
       isTransitioning.current = false;
     }, 1000);
@@ -96,12 +93,12 @@ export const useSectionTransition = (sections: Section[]) => {
       
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
-        const nextIndex = (activeSectionIndex + 1) % sections.length;
+        const nextIndex = activeSectionIndex < sections.length - 1 ? activeSectionIndex + 1 : 0;
         console.log('Keyboard navigation next:', sections[nextIndex].id);
         transitionToSection(sections[nextIndex].id);
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        const prevIndex = activeSectionIndex === 0 ? sections.length - 1 : activeSectionIndex - 1;
+        const prevIndex = activeSectionIndex > 0 ? activeSectionIndex - 1 : sections.length - 1;
         console.log('Keyboard navigation prev:', sections[prevIndex].id);
         transitionToSection(sections[prevIndex].id);
       }
@@ -118,9 +115,8 @@ export const useSectionTransition = (sections: Section[]) => {
     const handleWheel = (e: WheelEvent) => {
       const now = Date.now();
       
-      console.log('Wheel event detected:', { 
+      console.log('Wheel event:', { 
         deltaY: e.deltaY, 
-        deltaX: e.deltaX,
         isTransitioning: isTransitioning.current,
         timeSinceLastScroll: now - lastScrollTime.current,
         activeSection,
@@ -130,20 +126,17 @@ export const useSectionTransition = (sections: Section[]) => {
       // Block scroll during transition
       if (isTransitioning.current) {
         e.preventDefault();
-        console.log('Blocking scroll - transition in progress');
         return;
       }
 
-      // Throttle scroll events
-      if (now - lastScrollTime.current < 600) {
+      // Throttle scroll events - longer delay for better control
+      if (now - lastScrollTime.current < 1000) {
         e.preventDefault();
-        console.log('Blocking scroll - too soon since last scroll');
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 30) {
-        console.log('Scroll too small, ignoring');
+      if (Math.abs(e.deltaY) < 50) {
         return;
       }
 
@@ -151,25 +144,19 @@ export const useSectionTransition = (sections: Section[]) => {
       e.preventDefault();
       lastScrollTime.current = now;
       
-      console.log('Processing scroll - currentIndex:', activeSectionIndex, 'deltaY:', e.deltaY);
-      
       if (e.deltaY > 0) {
         // Scroll down - move to next section
         if (activeSectionIndex < sections.length - 1) {
           const nextIndex = activeSectionIndex + 1;
-          console.log('Scrolling down to section:', sections[nextIndex].id);
+          console.log('Scrolling to next section:', sections[nextIndex].id);
           transitionToSection(sections[nextIndex].id);
-        } else {
-          console.log('Already at last section, cannot scroll down');
         }
       } else if (e.deltaY < 0) {
         // Scroll up - move to previous section
         if (activeSectionIndex > 0) {
           const prevIndex = activeSectionIndex - 1;
-          console.log('Scrolling up to section:', sections[prevIndex].id);
+          console.log('Scrolling to prev section:', sections[prevIndex].id);
           transitionToSection(sections[prevIndex].id);
-        } else {
-          console.log('Already at first section, cannot scroll up');
         }
       }
     };

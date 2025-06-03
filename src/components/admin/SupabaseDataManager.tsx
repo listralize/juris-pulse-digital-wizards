@@ -41,37 +41,118 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
   const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
   const hasSupabaseData = supabaseTeamMembers.length > 0 || supabaseServicePages.length > 0 || supabaseCategories.length > 0 || supabasePageTexts.heroTitle;
 
-  // NOVA FUNÇÃO: MIGRAÇÃO FORÇADA SÓ DE CATEGORIAS
-  const forceCategoriesMigration = async () => {
-    if (localCategories.length === 0) {
-      alert('Nenhuma categoria local para migrar');
-      return;
-    }
+  console.log('🔍 SUPABASE DATA MANAGER - ESTADO ATUAL:', {
+    hasLocalData,
+    hasSupabaseData,
+    localCategories: localCategories.length,
+    supabaseCategories: supabaseCategories.length,
+    localServicePages: localServicePages.length,
+    supabaseServicePages: supabaseServicePages.length
+  });
 
-    console.log('🔥 FORÇANDO MIGRAÇÃO APENAS DE CATEGORIAS');
+  // MIGRAÇÃO FORÇADA DE CATEGORIAS PADRÃO - NOVA VERSÃO
+  const forceCategoriesMigration = async () => {
+    console.log('🔥 FORÇANDO MIGRAÇÃO DE CATEGORIAS PADRÃO');
     setIsProcessing(true);
     
     try {
-      // Preparar categorias com campos obrigatórios
-      const categoriesForMigration = localCategories.map((cat, index) => ({
-        ...cat,
-        name: cat.name || cat.label || `Categoria ${index + 1}`,
-        value: cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`,
-        label: cat.label || cat.name || `Categoria ${index + 1}`,
-        description: cat.description || `Descrição da categoria`,
-        icon: cat.icon || 'FileText',
-        color: cat.color || 'bg-blue-500'
-      }));
+      // Definir categorias padrão sempre
+      const defaultCategories = [
+        {
+          id: 'familia-' + Date.now(),
+          value: 'familia',
+          label: 'Direito de Família',
+          name: 'Direito de Família',
+          description: 'Proteção e orientação em questões familiares',
+          icon: 'Heart',
+          color: 'bg-rose-500'
+        },
+        {
+          id: 'tributario-' + Date.now(),
+          value: 'tributario',
+          label: 'Direito Tributário',
+          name: 'Direito Tributário',
+          description: 'Consultoria e planejamento tributário',
+          icon: 'Calculator',
+          color: 'bg-blue-500'
+        },
+        {
+          id: 'empresarial-' + Date.now(),
+          value: 'empresarial',
+          label: 'Direito Empresarial',
+          name: 'Direito Empresarial',
+          description: 'Suporte jurídico para empresas',
+          icon: 'Building2',
+          color: 'bg-green-500'
+        },
+        {
+          id: 'trabalho-' + Date.now(),
+          value: 'trabalho',
+          label: 'Direito do Trabalho',
+          name: 'Direito do Trabalho',
+          description: 'Defesa dos direitos trabalhistas',
+          icon: 'Users',
+          color: 'bg-orange-500'
+        },
+        {
+          id: 'constitucional-' + Date.now(),
+          value: 'constitucional',
+          label: 'Direito Constitucional',
+          name: 'Direito Constitucional',
+          description: 'Defesa de direitos fundamentais',
+          icon: 'Scale',
+          color: 'bg-purple-500'
+        },
+        {
+          id: 'administrativo-' + Date.now(),
+          value: 'administrativo',
+          label: 'Direito Administrativo',
+          name: 'Direito Administrativo',
+          description: 'Atuação junto ao poder público',
+          icon: 'FileText',
+          color: 'bg-indigo-500'
+        },
+        {
+          id: 'previdenciario-' + Date.now(),
+          value: 'previdenciario',
+          label: 'Direito Previdenciário',
+          name: 'Direito Previdenciário',
+          description: 'Benefícios previdenciários',
+          icon: 'Shield',
+          color: 'bg-yellow-500'
+        },
+        {
+          id: 'consumidor-' + Date.now(),
+          value: 'consumidor',
+          label: 'Direito do Consumidor',
+          name: 'Direito do Consumidor',
+          description: 'Proteção aos direitos do consumidor',
+          icon: 'ShoppingCart',
+          color: 'bg-teal-500'
+        },
+        {
+          id: 'civil-' + Date.now(),
+          value: 'civil',
+          label: 'Direito Civil',
+          name: 'Direito Civil',
+          description: 'Questões civis e contratuais',
+          icon: 'Home',
+          color: 'bg-gray-500'
+        }
+      ];
 
-      console.log('📋 Migrando categorias:', categoriesForMigration);
+      console.log('📋 Migrando categorias padrão:', defaultCategories.length);
       
-      await saveSupabaseCategories(categoriesForMigration);
+      await saveSupabaseCategories(defaultCategories);
       
-      // Aguardar e recarregar
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Aguardar e recarregar múltiplas vezes
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      await supabaseRefreshData();
+      await new Promise(resolve => setTimeout(resolve, 1000));
       await supabaseRefreshData();
       
-      alert(`✅ ${categoriesForMigration.length} categorias migradas com sucesso!`);
+      console.log(`✅ ${defaultCategories.length} categorias padrão migradas!`);
+      alert(`✅ ${defaultCategories.length} categorias padrão migradas com sucesso!`);
     } catch (error) {
       console.error('❌ Erro na migração de categorias:', error);
       alert(`❌ Erro: ${error.message}`);
@@ -82,11 +163,8 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
 
   // Status da migração
   const migrationStatus = () => {
-    // Verificação específica de categorias
-    const categoriesMissing = localCategories.length > 0 && supabaseCategories.length === 0;
-    
-    if (categoriesMissing) {
-      return 'categories_pending';
+    if (supabaseCategories.length === 0) {
+      return 'categories_missing';
     }
     
     if (hasSupabaseData && hasLocalData) {
@@ -150,15 +228,14 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {status === 'categories_pending' && (
+        {status === 'categories_missing' && (
           <div className={`p-4 rounded-lg border ${isDark ? 'border-red-500/20 bg-red-500/10' : 'border-red-500/20 bg-red-50'}`}>
             <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-red-400' : 'text-red-700'}`}>
               <AlertCircle className="w-4 h-4" />
-              CATEGORIAS NÃO MIGRADAS!
+              CATEGORIAS NÃO ENCONTRADAS NO SUPABASE!
             </h3>
             <p className={`text-sm mb-3 ${isDark ? 'text-red-200' : 'text-red-600'}`}>
-              Detectamos {localCategories.length} categorias no localStorage que não foram migradas para o Supabase.
-              Isso está causando problemas de sincronização.
+              O sistema precisa das categorias para funcionar corretamente. Vamos migrar as categorias padrão agora.
             </p>
             <Button 
               onClick={forceCategoriesMigration}
@@ -166,7 +243,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               <Zap className="w-4 h-4 mr-2" />
-              MIGRAR CATEGORIAS AGORA
+              MIGRAR CATEGORIAS PADRÃO
             </Button>
           </div>
         )}
@@ -249,7 +326,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
             Recarregar
           </Button>
           
-          {status === 'categories_pending' && (
+          {status === 'categories_missing' && (
             <Button 
               onClick={forceCategoriesMigration}
               size="sm" 
