@@ -35,7 +35,7 @@ const SectionsContainer: React.FC = () => {
         const allowScroll = section.id === 'contact' || section.id === 'socios';
         const isActive = activeSection === section.id;
         
-        console.log(`Section ${section.id}:`, { isActive, index });
+        console.log(`Section ${section.id}:`, { isActive, index, allowScroll });
         
         return (
           <Section 

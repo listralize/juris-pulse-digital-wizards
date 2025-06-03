@@ -17,10 +17,14 @@ export const useSectionTransition = (sections: Section[]) => {
   const [activeSection, setActiveSection] = useState('home');
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const isTransitioning = useRef(false);
+  const lastScrollTime = useRef(0);
+
+  console.log('useSectionTransition - Current activeSection:', activeSection);
 
   // Initialize active section based on hash or default to home
   useEffect(() => {
     const hash = location.hash.substring(1);
+    console.log('useSectionTransition - Hash changed:', hash);
     if (hash && sections.find(s => s.id === hash)) {
       setActiveSection(hash);
     } else {
@@ -29,9 +33,12 @@ export const useSectionTransition = (sections: Section[]) => {
   }, [location.hash, sections]);
 
   const transitionToSection = useCallback((sectionId: string) => {
-    if (isTransitioning.current || activeSection === sectionId) return;
+    console.log('transitionToSection called:', { sectionId, activeSection, isTransitioning: isTransitioning.current });
     
-    console.log('Transitioning to section:', sectionId);
+    if (isTransitioning.current || activeSection === sectionId) {
+      console.log('Transition blocked - already transitioning or same section');
+      return;
+    }
     
     const sectionExists = sections.find(s => s.id === sectionId);
     if (!sectionExists) {
@@ -39,6 +46,7 @@ export const useSectionTransition = (sections: Section[]) => {
       return;
     }
     
+    console.log('Starting transition to:', sectionId);
     isTransitioning.current = true;
     
     // Update URL hash
@@ -46,13 +54,14 @@ export const useSectionTransition = (sections: Section[]) => {
       window.history.pushState(null, '', `#${sectionId}`);
     }
     
-    // Set new active section immediately for better UX
+    // Set new active section immediately
     setActiveSection(sectionId);
     
-    // Reset transition flag after animation
+    // Reset transition flag
     setTimeout(() => {
       isTransitioning.current = false;
-    }, 600);
+      console.log('Transition completed for:', sectionId);
+    }, 700);
   }, [activeSection, sections, location.pathname]);
 
   // Handle keyboard navigation
@@ -65,10 +74,12 @@ export const useSectionTransition = (sections: Section[]) => {
       if (e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault();
         const nextIndex = (currentIndex + 1) % sections.length;
+        console.log('Keyboard navigation down:', sections[nextIndex].id);
         transitionToSection(sections[nextIndex].id);
       } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault();
         const prevIndex = currentIndex === 0 ? sections.length - 1 : currentIndex - 1;
+        console.log('Keyboard navigation up:', sections[prevIndex].id);
         transitionToSection(sections[prevIndex].id);
       }
     };
@@ -79,34 +90,61 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Handle scroll for section navigation
   useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout;
-    
     const handleWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      
+      console.log('Wheel event:', { 
+        deltaY: e.deltaY, 
+        isTransitioning: isTransitioning.current,
+        timeSinceLastScroll: now - lastScrollTime.current,
+        activeSection
+      });
+
+      // Prevent scroll if transitioning
       if (isTransitioning.current) {
         e.preventDefault();
         return;
       }
+
+      // Throttle scroll events
+      if (now - lastScrollTime.current < 300) {
+        e.preventDefault();
+        return;
+      }
+
+      // Only handle significant scroll movements
+      if (Math.abs(e.deltaY) < 50) {
+        return;
+      }
+
+      lastScrollTime.current = now;
+      e.preventDefault();
       
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        const currentIndex = sections.findIndex(s => s.id === activeSection);
-        
-        if (e.deltaY > 0) {
-          // Scroll down
-          const nextIndex = (currentIndex + 1) % sections.length;
+      const currentIndex = sections.findIndex(s => s.id === activeSection);
+      console.log('Processing scroll - currentIndex:', currentIndex);
+      
+      if (e.deltaY > 0) {
+        // Scroll down
+        const nextIndex = currentIndex < sections.length - 1 ? currentIndex + 1 : currentIndex;
+        if (nextIndex !== currentIndex) {
+          console.log('Scrolling down to:', sections[nextIndex].id);
           transitionToSection(sections[nextIndex].id);
-        } else if (e.deltaY < 0) {
-          // Scroll up
-          const prevIndex = currentIndex === 0 ? sections.length - 1 : currentIndex - 1;
+        }
+      } else if (e.deltaY < 0) {
+        // Scroll up
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+        if (prevIndex !== currentIndex) {
+          console.log('Scrolling up to:', sections[prevIndex].id);
           transitionToSection(sections[prevIndex].id);
         }
-      }, 100);
+      }
     };
 
-    window.addEventListener('wheel', handleWheel, { passive: false });
+    // Add event listener with passive: false to allow preventDefault
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    
     return () => {
-      window.removeEventListener('wheel', handleWheel);
-      clearTimeout(scrollTimeout);
+      document.removeEventListener('wheel', handleWheel);
     };
   }, [activeSection, sections, transitionToSection]);
 

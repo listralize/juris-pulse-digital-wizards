@@ -15,25 +15,27 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
-    console.log(`Section ${id} render:`, { isActive, isDark, theme });
+    console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
     
     return (
       <div 
         id={id} 
         ref={ref}
+        data-section={id}
+        data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
         className={`section-container w-full h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
         style={{ 
           opacity: isActive ? 1 : 0,
           visibility: isActive ? 'visible' : 'hidden',
           pointerEvents: isActive ? 'auto' : 'none',
-          position: 'absolute',
+          position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
           zIndex: isActive ? 10 : 1,
-          transition: 'opacity 600ms ease-in-out, visibility 600ms ease-in-out',
+          transition: 'opacity 600ms cubic-bezier(0.4, 0, 0.2, 1), visibility 600ms cubic-bezier(0.4, 0, 0.2, 1)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: allowScroll ? 'flex-start' : 'center',
@@ -43,7 +45,9 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           WebkitOverflowScrolling: allowScroll ? 'touch' : 'auto'
         }}
       >
-        {children}
+        <div className="w-full h-full">
+          {children}
+        </div>
       </div>
     );
   }
