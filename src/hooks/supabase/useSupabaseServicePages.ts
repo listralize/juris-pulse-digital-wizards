@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { ServicePage } from '../../types/adminTypes';
@@ -64,22 +63,22 @@ export const useSupabaseServicePages = () => {
         console.log('📄 PROCESSANDO PÁGINAS DE SERVIÇOS...');
         const formattedServicePages: ServicePage[] = [];
 
-        for (const page of servicePagesData) {
-          let categoryKey = '';
+        // Primeiro passo: identificar páginas sem categoria vinculada
+        const pagesWithoutCategory = servicePagesData.filter(page => !page.category_id);
+        console.log('📄 Páginas sem categoria vinculada:', pagesWithoutCategory.length);
+
+        // Segundo passo: vincular categorias automaticamente para páginas sem vinculação
+        if (pagesWithoutCategory.length > 0 && categoriesData && categoriesData.length > 0) {
+          console.log('🔗 VINCULANDO CATEGORIAS AUTOMATICAMENTE...');
           
-          // Se já tem categoria vinculada, usar ela
-          if (page.law_categories?.category_key) {
-            categoryKey = page.law_categories.category_key;
-            console.log(`📄 Página "${page.title}" já vinculada à categoria: ${categoryKey}`);
-          } else {
-            // Se não tem categoria vinculada, tentar deduzir pelo href
-            console.log(`📄 Página "${page.title}" sem categoria - tentando deduzir pelo href: ${page.href}`);
+          for (const page of pagesWithoutCategory) {
+            let categoryMatch = null;
             
-            // Mapear hrefs para categorias
+            // Mapear hrefs/títulos para categorias
             const hrefToCategoryMap: { [key: string]: string } = {
               // Direito de Família
               'divorcio': 'familia',
-              'pensao-alimenticia': 'familia',
+              'pensao-alimenticia': 'familia', 
               'guarda-filhos': 'familia',
               'adocao': 'familia',
               'investigacao-paternidade': 'familia',
@@ -127,47 +126,72 @@ export const useSupabaseServicePages = () => {
 
             // Tentar encontrar categoria pelo href
             const href = page.href || '';
-            for (const [hrefPattern, category] of Object.entries(hrefToCategoryMap)) {
+            for (const [hrefPattern, categoryKey] of Object.entries(hrefToCategoryMap)) {
               if (href.includes(hrefPattern)) {
-                categoryKey = category;
-                console.log(`📄 Categoria deduzida para "${page.title}": ${categoryKey} (baseado no href: ${href})`);
-                break;
+                categoryMatch = categoriesData.find(cat => cat.category_key === categoryKey);
+                if (categoryMatch) {
+                  console.log(`🔗 Categoria encontrada para "${page.title}" via href: ${categoryKey}`);
+                  break;
+                }
               }
             }
 
-            // Se ainda não encontrou, tentar pelo título
-            if (!categoryKey) {
+            // Se não encontrou pelo href, tentar pelo título
+            if (!categoryMatch) {
               const title = page.title?.toLowerCase() || '';
               if (title.includes('família') || title.includes('divórcio') || title.includes('pensão') || title.includes('guarda')) {
-                categoryKey = 'familia';
+                categoryMatch = categoriesData.find(cat => cat.category_key === 'familia');
               } else if (title.includes('tributário') || title.includes('imposto') || title.includes('fiscal')) {
-                categoryKey = 'tributario';
+                categoryMatch = categoriesData.find(cat => cat.category_key === 'tributario');
               } else if (title.includes('empresarial') || title.includes('sociedade') || title.includes('contrato')) {
-                categoryKey = 'empresarial';
+                categoryMatch = categoriesData.find(cat => cat.category_key === 'empresarial');
               } else if (title.includes('trabalho') || title.includes('trabalhista') || title.includes('emprego')) {
-                categoryKey = 'trabalho';
+                categoryMatch = categoriesData.find(cat => cat.category_key === 'trabalho');
               }
               
-              if (categoryKey) {
-                console.log(`📄 Categoria deduzida pelo título para "${page.title}": ${categoryKey}`);
+              if (categoryMatch) {
+                console.log(`🔗 Categoria encontrada para "${page.title}" via título: ${categoryMatch.category_key}`);
               }
             }
 
             // Se ainda não encontrou, usar categoria padrão
-            if (!categoryKey) {
-              categoryKey = 'empresarial'; // categoria padrão
-              console.log(`📄 Usando categoria padrão para "${page.title}": ${categoryKey}`);
+            if (!categoryMatch) {
+              categoryMatch = categoriesData.find(cat => cat.category_key === 'empresarial') || categoriesData[0];
+              console.log(`🔗 Usando categoria padrão para "${page.title}": ${categoryMatch?.category_key}`);
             }
 
             // Atualizar a página no banco de dados com a categoria correta
-            const matchingCategory = categoriesData?.find(cat => cat.category_key === categoryKey);
-            if (matchingCategory) {
-              console.log(`📄 Atualizando página "${page.title}" com categoria ID: ${matchingCategory.id}`);
-              await supabase
+            if (categoryMatch) {
+              console.log(`💾 Atualizando página "${page.title}" com categoria ID: ${categoryMatch.id}`);
+              const { error: updateError } = await supabase
                 .from('service_pages')
-                .update({ category_id: matchingCategory.id })
+                .update({ category_id: categoryMatch.id })
                 .eq('id', page.id);
+                
+              if (updateError) {
+                console.error(`❌ Erro ao atualizar página ${page.title}:`, updateError);
+              } else {
+                console.log(`✅ Página "${page.title}" vinculada à categoria "${categoryMatch.name}"`);
+                // Atualizar o objeto local também
+                page.category_id = categoryMatch.id;
+                page.law_categories = categoryMatch;
+              }
             }
+          }
+        }
+
+        // Terceiro passo: processar todas as páginas (agora com categorias vinculadas)
+        for (const page of servicePagesData) {
+          let categoryKey = '';
+          
+          // Se tem categoria vinculada, usar ela
+          if (page.law_categories?.category_key) {
+            categoryKey = page.law_categories.category_key;
+            console.log(`📄 Página "${page.title}" vinculada à categoria: ${categoryKey}`);
+          } else {
+            // Fallback - usar primeira categoria disponível
+            categoryKey = categoriesData?.[0]?.category_key || 'empresarial';
+            console.log(`📄 Página "${page.title}" usando categoria fallback: ${categoryKey}`);
           }
           
           const formattedPage: ServicePage = {
@@ -224,8 +248,7 @@ export const useSupabaseServicePages = () => {
         return;
       }
 
-      // 1. BUSCAR CATEGORIAS ATUALIZADAS DO SUPABASE
-      console.log('📂 Buscando categorias atualizadas...');
+      // Buscar categorias atualizadas do Supabase
       const { data: currentCategories, error: catError } = await supabase
         .from('law_categories')
         .select('id, category_key, name')
@@ -236,72 +259,35 @@ export const useSupabaseServicePages = () => {
         throw catError;
       }
 
-      console.log('📂 Categorias disponíveis:', currentCategories);
-      
       if (!currentCategories || currentCategories.length === 0) {
         console.error('❌ NENHUMA CATEGORIA ENCONTRADA NO SUPABASE');
         throw new Error('Nenhuma categoria encontrada. Execute a migração de categorias primeiro.');
       }
 
-      // 2. LIMPAR DADOS EXISTENTES COMPLETAMENTE
-      console.log('🗑️ Limpando TODOS os dados existentes...');
-      
-      // Desativar páginas existentes
-      await supabase
-        .from('service_pages')
-        .update({ is_active: false })
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-
-      // Deletar dados relacionados existentes
-      await Promise.all([
-        supabase.from('service_benefits').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-        supabase.from('service_process_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-        supabase.from('service_faq').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-        supabase.from('service_testimonials').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      ]);
-
-      // 3. PROCESSAR E SALVAR CADA PÁGINA COM MÁXIMA COMPATIBILIDADE
+      // Processar e salvar cada página
       const savedPages: ServicePage[] = [];
       
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         console.log(`📄 Processando página ${i + 1}/${pages.length}: "${page.title}"`);
-        console.log(`📄 Categoria da página: "${page.category}"`);
 
         const validPageId = ensureValidUUID(page.id);
         
-        // ENCONTRAR CATEGORIA CORRESPONDENTE COM MÁXIMA FLEXIBILIDADE
+        // Encontrar categoria correspondente
         const matchingCategory = currentCategories.find(cat => {
           const pageCategory = page.category?.toLowerCase().trim();
           const catKey = cat.category_key?.toLowerCase().trim();
           const catName = cat.name?.toLowerCase().trim();
           
-          // Múltiplos tipos de match
-          const directMatch = catKey === pageCategory || catName === pageCategory;
-          const slugMatch = catKey === pageCategory?.replace(/\s+/g, '-') || 
-                           catName?.replace(/\s+/g, '-') === pageCategory;
-          const partialMatch = catKey?.includes(pageCategory) || 
-                              catName?.includes(pageCategory) ||
-                              pageCategory?.includes(catKey) ||
-                              pageCategory?.includes(catName);
-          
-          const isMatch = directMatch || slugMatch || partialMatch;
-          
-          if (isMatch) {
-            console.log(`✅ MATCH encontrado: "${cat.name}" (${cat.category_key}) para "${page.category}"`);
-          }
-          
-          return isMatch;
+          return catKey === pageCategory || catName === pageCategory;
         });
         
         if (!matchingCategory) {
           console.warn(`⚠️ CATEGORIA NÃO ENCONTRADA PARA "${page.category}" - PÁGINA: "${page.title}"`);
-          console.warn('📂 Categorias disponíveis:', currentCategories.map(c => `${c.name} (${c.category_key})`));
-          
-          // Tentar usar a primeira categoria como fallback
           const fallbackCategory = currentCategories[0];
           console.warn(`🔄 Usando categoria fallback: "${fallbackCategory.name}"`);
           
+          // Salvar com categoria fallback
           const { data: savedPage, error: pageError } = await supabase
             .from('service_pages')
             .upsert({
@@ -317,24 +303,17 @@ export const useSupabaseServicePages = () => {
             .select()
             .single();
 
-          if (pageError) {
-            console.error(`❌ Erro ao salvar página "${page.title}":`, pageError);
-            continue;
+          if (!pageError) {
+            savedPages.push({
+              ...page,
+              id: validPageId,
+              category: fallbackCategory.category_key
+            });
           }
-
-          savedPages.push({
-            ...page,
-            id: validPageId,
-            category: fallbackCategory.category_key
-          });
-          
           continue;
         }
 
-        console.log(`✅ CATEGORIA VINCULADA: "${matchingCategory.name}" (ID: ${matchingCategory.id})`);
-        
-        // SALVAR PÁGINA COM CATEGORIA VINCULADA
-        console.log(`💾 Salvando página "${page.title}" com categoria ID: ${matchingCategory.id}`);
+        // Salvar página com categoria vinculada
         const { data: savedPage, error: pageError } = await supabase
           .from('service_pages')
           .upsert({
@@ -350,68 +329,58 @@ export const useSupabaseServicePages = () => {
           .select()
           .single();
 
-        if (pageError) {
-          console.error(`❌ Erro ao salvar página "${page.title}":`, pageError);
-          continue;
+        if (!pageError) {
+          // Salvar dados relacionados (benefits, process, faq, testimonials)
+          if (page.benefits && page.benefits.length > 0) {
+            const benefitsData = page.benefits.map((benefit, index) => ({
+              service_page_id: validPageId,
+              title: benefit.title,
+              description: benefit.description || '',
+              icon: benefit.icon,
+              display_order: index
+            }));
+            await supabase.from('service_benefits').insert(benefitsData);
+          }
+
+          if (page.process && page.process.length > 0) {
+            const processData = page.process.map((step, index) => ({
+              service_page_id: validPageId,
+              step_number: step.step,
+              title: step.title,
+              description: step.description || '',
+              display_order: index
+            }));
+            await supabase.from('service_process_steps').insert(processData);
+          }
+
+          if (page.faq && page.faq.length > 0) {
+            const faqData = page.faq.map((faq, index) => ({
+              service_page_id: validPageId,
+              question: faq.question,
+              answer: faq.answer,
+              display_order: index
+            }));
+            await supabase.from('service_faq').insert(faqData);
+          }
+
+          if (page.testimonials && page.testimonials.length > 0) {
+            const testimonialsData = page.testimonials.map((testimonial, index) => ({
+              service_page_id: validPageId,
+              name: testimonial.name,
+              text: testimonial.text || 'Depoimento excelente',
+              role: testimonial.role,
+              image: testimonial.image,
+              display_order: index
+            }));
+            await supabase.from('service_testimonials').insert(testimonialsData);
+          }
+
+          savedPages.push({
+            ...page,
+            id: validPageId,
+            category: matchingCategory.category_key
+          });
         }
-
-        console.log(`✅ Página "${page.title}" salva com sucesso`);
-
-        // SALVAR DADOS RELACIONADOS
-        if (page.benefits && page.benefits.length > 0) {
-          const benefitsData = page.benefits.map((benefit, index) => ({
-            service_page_id: validPageId,
-            title: benefit.title,
-            description: benefit.description || '',
-            icon: benefit.icon,
-            display_order: index
-          }));
-          const { error: benefitsError } = await supabase.from('service_benefits').insert(benefitsData);
-          if (benefitsError) console.error('❌ Erro ao salvar benefits:', benefitsError);
-        }
-
-        if (page.process && page.process.length > 0) {
-          const processData = page.process.map((step, index) => ({
-            service_page_id: validPageId,
-            step_number: step.step,
-            title: step.title,
-            description: step.description || '',
-            display_order: index
-          }));
-          const { error: processError } = await supabase.from('service_process_steps').insert(processData);
-          if (processError) console.error('❌ Erro ao salvar process:', processError);
-        }
-
-        if (page.faq && page.faq.length > 0) {
-          const faqData = page.faq.map((faq, index) => ({
-            service_page_id: validPageId,
-            question: faq.question,
-            answer: faq.answer,
-            display_order: index
-          }));
-          const { error: faqError } = await supabase.from('service_faq').insert(faqData);
-          if (faqError) console.error('❌ Erro ao salvar FAQ:', faqError);
-        }
-
-        if (page.testimonials && page.testimonials.length > 0) {
-          const testimonialsData = page.testimonials.map((testimonial, index) => ({
-            service_page_id: validPageId,
-            name: testimonial.name,
-            text: testimonial.text || 'Depoimento excelente',
-            role: testimonial.role,
-            image: testimonial.image,
-            display_order: index
-          }));
-          const { error: testimonialsError } = await supabase.from('service_testimonials').insert(testimonialsData);
-          if (testimonialsError) console.error('❌ Erro ao salvar testimonials:', testimonialsError);
-        }
-
-        // Adicionar à lista de páginas salvas com a categoria correta
-        savedPages.push({
-          ...page,
-          id: validPageId,
-          category: matchingCategory.category_key
-        });
       }
 
       setServicePages(savedPages);

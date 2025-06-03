@@ -24,9 +24,18 @@ const SectionsContainer: React.FC = () => {
     { id: 'contact', component: Contact }
   ];
   
-  const { activeSection, transitionToSection, sectionsRef } = useSectionTransition(sections);
+  const { activeSection, transitionToSection, sectionsRef, isInitialized } = useSectionTransition(sections);
 
-  console.log('SectionsContainer render:', { activeSection, sectionsLength: sections.length });
+  console.log('SectionsContainer render:', { activeSection, sectionsLength: sections.length, isInitialized });
+
+  // Show loading state until initialized
+  if (!isInitialized) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-black">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-screen overflow-hidden">

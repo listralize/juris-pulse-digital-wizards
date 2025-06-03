@@ -18,6 +18,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const isTransitioning = useRef(false);
   const lastScrollTime = useRef(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   console.log('useSectionTransition - Current activeSection:', activeSection);
 
@@ -25,11 +26,12 @@ export const useSectionTransition = (sections: Section[]) => {
   useEffect(() => {
     const hash = location.hash.substring(1);
     console.log('useSectionTransition - Hash changed:', hash);
-    if (hash && sections.find(s => s.id === hash)) {
-      setActiveSection(hash);
-    } else {
-      setActiveSection('home');
-    }
+    
+    const targetSection = hash && sections.find(s => s.id === hash) ? hash : 'home';
+    setActiveSection(targetSection);
+    setIsInitialized(true);
+    
+    console.log('useSectionTransition - Setting active section to:', targetSection);
   }, [location.hash, sections]);
 
   const transitionToSection = useCallback((sectionId: string) => {
@@ -66,6 +68,8 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Handle keyboard navigation
   useEffect(() => {
+    if (!isInitialized) return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
       
@@ -86,10 +90,12 @@ export const useSectionTransition = (sections: Section[]) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSection, sections, transitionToSection]);
+  }, [activeSection, sections, transitionToSection, isInitialized]);
 
   // Handle scroll for section navigation
   useEffect(() => {
+    if (!isInitialized) return;
+    
     const handleWheel = (e: WheelEvent) => {
       const now = Date.now();
       
@@ -107,13 +113,13 @@ export const useSectionTransition = (sections: Section[]) => {
       }
 
       // Throttle scroll events
-      if (now - lastScrollTime.current < 300) {
+      if (now - lastScrollTime.current < 500) {
         e.preventDefault();
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 50) {
+      if (Math.abs(e.deltaY) < 30) {
         return;
       }
 
@@ -146,11 +152,12 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => {
       document.removeEventListener('wheel', handleWheel);
     };
-  }, [activeSection, sections, transitionToSection]);
+  }, [activeSection, sections, transitionToSection, isInitialized]);
 
   return {
     activeSection,
     transitionToSection,
-    sectionsRef
+    sectionsRef,
+    isInitialized
   };
 };
