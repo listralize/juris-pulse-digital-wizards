@@ -32,9 +32,9 @@ const Index = () => {
     } else {
       document.body.classList.add('light');
       document.body.classList.remove('dark');
-      document.documentElement.style.backgroundColor = '#f5f5f5';
+      document.documentElement.style.backgroundColor = '#FFFFFF';
       document.documentElement.style.color = '#000000';
-      document.body.style.backgroundColor = '#f5f5f5';
+      document.body.style.backgroundColor = '#FFFFFF';
       document.body.style.color = '#000000';
     }
   }, [isDark]);
@@ -43,15 +43,11 @@ const Index = () => {
   useEffect(() => {
     console.log('Index useEffect - setting up horizontal scroll behavior');
     
-    // Completely disable scroll on body and html
+    // Disable scroll on body and html for horizontal navigation
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     document.body.style.height = '100vh';
     document.documentElement.style.height = '100vh';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.top = '0';
-    document.body.style.left = '0';
     
     // Disable scroll restoration
     if ('scrollRestoration' in history) {
@@ -63,10 +59,6 @@ const Index = () => {
       document.documentElement.style.overflow = '';
       document.body.style.height = '';
       document.documentElement.style.height = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
       
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'auto';
@@ -75,7 +67,7 @@ const Index = () => {
   }, []);
   
   return (
-    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} transition-colors duration-500 overflow-hidden`}>
+    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500 overflow-hidden`}>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />

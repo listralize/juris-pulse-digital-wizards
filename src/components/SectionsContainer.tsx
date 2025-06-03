@@ -43,15 +43,6 @@ const SectionsContainer: React.FC = () => {
     };
   }, [transitionToSection]);
 
-  // Show loading state until initialized
-  if (!isInitialized) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-black">
-        <div className="text-white text-xl">Carregando...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Horizontal container that slides */}

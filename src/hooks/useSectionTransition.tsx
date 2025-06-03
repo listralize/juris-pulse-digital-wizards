@@ -17,7 +17,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isTransitioning = useRef(false);
   const lastScrollTime = useRef(0);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(true); // Inicializar como true
 
   console.log('useSectionTransition - Current state:', { activeSection, activeSectionIndex, sectionsLength: sections.length });
 
@@ -31,7 +31,11 @@ export const useSectionTransition = (sections: Section[]) => {
     
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex >= 0 ? targetIndex : 0);
-    setIsInitialized(true);
+    
+    // Definir posição inicial do container sem animação
+    if (containerRef.current && targetIndex >= 0) {
+      gsap.set(containerRef.current, { x: `-${targetIndex * 100}vw` });
+    }
     
     console.log('useSectionTransition - Initialized:', { targetSection, targetIndex });
   }, [location.hash, sections]);
@@ -76,42 +80,39 @@ export const useSectionTransition = (sections: Section[]) => {
           console.log('Transition completed for:', sectionId);
         }
       });
-    }
-    
-    // Safety timeout in case GSAP fails
-    setTimeout(() => {
+    } else {
       isTransitioning.current = false;
-    }, 1000);
+    }
   }, [activeSection, sections, location.pathname]);
 
   // Handle keyboard navigation
   useEffect(() => {
-    if (!isInitialized) return;
-    
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
       
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
-        const nextIndex = activeSectionIndex < sections.length - 1 ? activeSectionIndex + 1 : 0;
-        console.log('Keyboard navigation next:', sections[nextIndex].id);
-        transitionToSection(sections[nextIndex].id);
+        const nextIndex = activeSectionIndex < sections.length - 1 ? activeSectionIndex + 1 : activeSectionIndex;
+        if (nextIndex !== activeSectionIndex) {
+          console.log('Keyboard navigation next:', sections[nextIndex].id);
+          transitionToSection(sections[nextIndex].id);
+        }
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        const prevIndex = activeSectionIndex > 0 ? activeSectionIndex - 1 : sections.length - 1;
-        console.log('Keyboard navigation prev:', sections[prevIndex].id);
-        transitionToSection(sections[prevIndex].id);
+        const prevIndex = activeSectionIndex > 0 ? activeSectionIndex - 1 : activeSectionIndex;
+        if (prevIndex !== activeSectionIndex) {
+          console.log('Keyboard navigation prev:', sections[prevIndex].id);
+          transitionToSection(sections[prevIndex].id);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
+  }, [activeSectionIndex, sections, transitionToSection]);
 
   // Handle scroll for section navigation
   useEffect(() => {
-    if (!isInitialized) return;
-    
     const handleWheel = (e: WheelEvent) => {
       const now = Date.now();
       
@@ -129,14 +130,14 @@ export const useSectionTransition = (sections: Section[]) => {
         return;
       }
 
-      // Throttle scroll events - longer delay for better control
-      if (now - lastScrollTime.current < 1000) {
+      // Throttle scroll events
+      if (now - lastScrollTime.current < 800) {
         e.preventDefault();
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 50) {
+      if (Math.abs(e.deltaY) < 30) {
         return;
       }
 
@@ -167,7 +168,7 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => {
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
+  }, [activeSectionIndex, sections, transitionToSection]);
 
   return {
     activeSection,
