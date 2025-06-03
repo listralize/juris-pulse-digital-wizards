@@ -17,9 +17,14 @@ export const useSectionTransition = (sections: Section[]) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isTransitioning = useRef(false);
   const lastScrollTime = useRef(0);
-  const [isInitialized, setIsInitialized] = useState(true); // Inicializar como true
+  const [isInitialized, setIsInitialized] = useState(true);
 
-  console.log('useSectionTransition - Current state:', { activeSection, activeSectionIndex, sectionsLength: sections.length });
+  console.log('useSectionTransition - Current state:', { 
+    activeSection, 
+    activeSectionIndex, 
+    sectionsLength: sections.length,
+    sectionIds: sections.map(s => s.id)
+  });
 
   // Initialize active section based on hash or default to home
   useEffect(() => {
@@ -28,6 +33,8 @@ export const useSectionTransition = (sections: Section[]) => {
     
     const targetSection = hash && sections.find(s => s.id === hash) ? hash : 'home';
     const targetIndex = sections.findIndex(s => s.id === targetSection);
+    
+    console.log('useSectionTransition - Target section:', targetSection, 'Index:', targetIndex);
     
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex >= 0 ? targetIndex : 0);
@@ -41,16 +48,24 @@ export const useSectionTransition = (sections: Section[]) => {
   }, [location.hash, sections]);
 
   const transitionToSection = useCallback((sectionId: string) => {
-    console.log('transitionToSection called:', { sectionId, activeSection, isTransitioning: isTransitioning.current });
+    console.log('transitionToSection called:', { 
+      sectionId, 
+      activeSection, 
+      isTransitioning: isTransitioning.current,
+      allSections: sections.map(s => s.id)
+    });
     
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
+    
+    console.log('Found section index:', sectionIndex, 'for section:', sectionId);
+    
     if (sectionIndex === -1) {
-      console.warn('Section not found:', sectionId);
+      console.warn('Section not found:', sectionId, 'Available sections:', sections.map(s => s.id));
       return;
     }
 
     // If same section, don't transition
-    if (activeSection === sectionId) {
+    if (activeSection === sectionId && activeSectionIndex === sectionIndex) {
       console.log('Already on target section:', sectionId);
       return;
     }
@@ -71,19 +86,22 @@ export const useSectionTransition = (sections: Section[]) => {
     if (containerRef.current) {
       const targetX = -sectionIndex * 100; // Each section is 100vw wide
       
+      console.log('Animating to position:', targetX + 'vw');
+      
       gsap.to(containerRef.current, {
         x: `${targetX}vw`,
         duration: 0.8,
         ease: 'power2.inOut',
         onComplete: () => {
           isTransitioning.current = false;
-          console.log('Transition completed for:', sectionId);
+          console.log('Transition completed for:', sectionId, 'at index:', sectionIndex);
         }
       });
     } else {
       isTransitioning.current = false;
+      console.warn('Container ref not available for transition');
     }
-  }, [activeSection, sections, location.pathname]);
+  }, [activeSection, activeSectionIndex, sections, location.pathname]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -92,16 +110,16 @@ export const useSectionTransition = (sections: Section[]) => {
       
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
-        const nextIndex = activeSectionIndex < sections.length - 1 ? activeSectionIndex + 1 : activeSectionIndex;
+        const nextIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
         if (nextIndex !== activeSectionIndex) {
-          console.log('Keyboard navigation next:', sections[nextIndex].id);
+          console.log('Keyboard navigation next:', sections[nextIndex].id, 'index:', nextIndex);
           transitionToSection(sections[nextIndex].id);
         }
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        const prevIndex = activeSectionIndex > 0 ? activeSectionIndex - 1 : activeSectionIndex;
+        const prevIndex = Math.max(activeSectionIndex - 1, 0);
         if (prevIndex !== activeSectionIndex) {
-          console.log('Keyboard navigation prev:', sections[prevIndex].id);
+          console.log('Keyboard navigation prev:', sections[prevIndex].id, 'index:', prevIndex);
           transitionToSection(sections[prevIndex].id);
         }
       }
@@ -121,7 +139,8 @@ export const useSectionTransition = (sections: Section[]) => {
         isTransitioning: isTransitioning.current,
         timeSinceLastScroll: now - lastScrollTime.current,
         activeSection,
-        activeSectionIndex
+        activeSectionIndex,
+        totalSections: sections.length
       });
 
       // Block scroll during transition
@@ -131,13 +150,13 @@ export const useSectionTransition = (sections: Section[]) => {
       }
 
       // Throttle scroll events
-      if (now - lastScrollTime.current < 800) {
+      if (now - lastScrollTime.current < 1000) {
         e.preventDefault();
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 30) {
+      if (Math.abs(e.deltaY) < 50) {
         return;
       }
 
@@ -147,17 +166,21 @@ export const useSectionTransition = (sections: Section[]) => {
       
       if (e.deltaY > 0) {
         // Scroll down - move to next section
-        if (activeSectionIndex < sections.length - 1) {
-          const nextIndex = activeSectionIndex + 1;
-          console.log('Scrolling to next section:', sections[nextIndex].id);
+        const nextIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
+        if (nextIndex !== activeSectionIndex) {
+          console.log('Scrolling to next section:', sections[nextIndex].id, 'index:', nextIndex);
           transitionToSection(sections[nextIndex].id);
+        } else {
+          console.log('Already at last section');
         }
       } else if (e.deltaY < 0) {
         // Scroll up - move to previous section
-        if (activeSectionIndex > 0) {
-          const prevIndex = activeSectionIndex - 1;
-          console.log('Scrolling to prev section:', sections[prevIndex].id);
+        const prevIndex = Math.max(activeSectionIndex - 1, 0);
+        if (prevIndex !== activeSectionIndex) {
+          console.log('Scrolling to prev section:', sections[prevIndex].id, 'index:', prevIndex);
           transitionToSection(sections[prevIndex].id);
+        } else {
+          console.log('Already at first section');
         }
       }
     };

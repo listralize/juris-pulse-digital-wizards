@@ -26,7 +26,13 @@ const SectionsContainer: React.FC = () => {
   
   const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
 
-  console.log('SectionsContainer render:', { activeSection, activeSectionIndex, sectionsLength: sections.length, isInitialized });
+  console.log('SectionsContainer render:', { 
+    activeSection, 
+    activeSectionIndex, 
+    sectionsLength: sections.length, 
+    isInitialized,
+    allSectionIds: sections.map(s => s.id)
+  });
 
   // Listen for custom section change events from navbar
   useEffect(() => {
@@ -60,13 +66,22 @@ const SectionsContainer: React.FC = () => {
           const allowScroll = section.id === 'contact' || section.id === 'socios';
           const isActive = activeSectionIndex === index;
           
-          console.log(`Section ${section.id}:`, { isActive, index, allowScroll, activeSectionIndex });
+          console.log(`Section ${section.id} (${index}):`, { 
+            isActive, 
+            index, 
+            allowScroll, 
+            activeSectionIndex,
+            component: Component.name
+          });
           
           return (
             <div
               key={section.id}
               className="w-screen h-full flex-shrink-0 relative"
-              style={{ width: '100vw' }}
+              style={{ 
+                width: '100vw',
+                minWidth: '100vw'
+              }}
             >
               <Section 
                 id={section.id} 
