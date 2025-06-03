@@ -37,14 +37,16 @@ export const useSectionTransition = (sections: Section[]) => {
   const transitionToSection = useCallback((sectionId: string) => {
     console.log('transitionToSection called:', { sectionId, activeSection, isTransitioning: isTransitioning.current });
     
-    if (isTransitioning.current || activeSection === sectionId) {
-      console.log('Transition blocked - already transitioning or same section');
-      return;
-    }
-    
+    // Allow transition even if currently transitioning for immediate navigation
     const sectionExists = sections.find(s => s.id === sectionId);
     if (!sectionExists) {
       console.warn('Section not found:', sectionId);
+      return;
+    }
+
+    // If same section, don't transition
+    if (activeSection === sectionId) {
+      console.log('Already on target section:', sectionId);
       return;
     }
     
@@ -63,7 +65,7 @@ export const useSectionTransition = (sections: Section[]) => {
     setTimeout(() => {
       isTransitioning.current = false;
       console.log('Transition completed for:', sectionId);
-    }, 800);
+    }, 600); // Reduced timeout
   }, [activeSection, sections, location.pathname]);
 
   // Handle keyboard navigation
@@ -106,22 +108,22 @@ export const useSectionTransition = (sections: Section[]) => {
         activeSection
       });
 
-      // Prevent scroll if transitioning
-      if (isTransitioning.current) {
+      // Less strict transition blocking - allow scroll if enough time passed
+      if (isTransitioning.current && now - lastScrollTime.current < 300) {
         e.preventDefault();
         console.log('Blocking scroll - transition in progress');
         return;
       }
 
-      // Throttle scroll events more aggressively
-      if (now - lastScrollTime.current < 800) {
+      // Throttle scroll events but less aggressively
+      if (now - lastScrollTime.current < 500) {
         e.preventDefault();
         console.log('Blocking scroll - too soon since last scroll');
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 50) {
+      if (Math.abs(e.deltaY) < 30) {
         console.log('Scroll too small, ignoring');
         return;
       }

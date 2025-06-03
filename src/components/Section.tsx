@@ -35,7 +35,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           right: 0,
           bottom: 0,
           zIndex: isActive ? 10 : 1,
-          transition: 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: allowScroll ? 'flex-start' : 'center',

@@ -43,42 +43,7 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
   
-  // Handle smooth scrolling for anchor links
-  const scrollToSection = (sectionId: string) => {
-    console.log('Navbar: Scrolling to section:', sectionId);
-    setIsMenuOpen(false);
-    
-    // Always navigate to home first if not already there
-    if (location.pathname !== '/') {
-      console.log('Navbar: Not on home page, navigating to home first');
-      navigate('/', { replace: true });
-      
-      // Wait for navigation to complete, then scroll
-      setTimeout(() => {
-        const section = document.getElementById(sectionId);
-        console.log('Navbar: Found section element after navigation:', section);
-        if (section) {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Update URL hash
-          window.history.pushState(null, '', `#${sectionId}`);
-          setActiveSection(sectionId);
-        }
-      }, 300); // Increased timeout for navigation
-      return;
-    }
-    
-    // If already on home page, scroll directly
-    const section = document.getElementById(sectionId);
-    console.log('Navbar: Direct scroll - Found section element:', section);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Update URL hash
-      window.history.pushState(null, '', `#${sectionId}`);
-      setActiveSection(sectionId);
-    }
-  };
-  
-  // Navigate to section on home page or specific page
+  // Handle navigation to sections - simplified approach
   const handleNavigation = (sectionId: string, path: string) => {
     console.log('Navbar: Handle navigation called:', sectionId, path);
     setIsMenuOpen(false);
@@ -89,13 +54,33 @@ const Navbar = () => {
         navigate('/', { replace: true });
         setActiveSection('home');
       } else {
-        scrollToSection('home');
+        // Trigger section change by updating hash
+        window.history.pushState(null, '', `#${sectionId}`);
+        setActiveSection(sectionId);
+        // Dispatch custom event to trigger section change
+        window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
       }
       return;
     }
     
     // For other sections, ensure we're on home page first
-    scrollToSection(sectionId);
+    if (location.pathname !== '/') {
+      console.log('Navbar: Not on home page, navigating to home first');
+      navigate('/', { replace: true });
+      
+      // Wait for navigation to complete, then change section
+      setTimeout(() => {
+        window.history.pushState(null, '', `#${sectionId}`);
+        setActiveSection(sectionId);
+        window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
+      }, 100);
+      return;
+    }
+    
+    // If already on home page, change section directly
+    window.history.pushState(null, '', `#${sectionId}`);
+    setActiveSection(sectionId);
+    window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
   };
 
   return (

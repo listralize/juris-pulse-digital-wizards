@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
 import Section from './Section';
 
@@ -27,6 +27,21 @@ const SectionsContainer: React.FC = () => {
   const { activeSection, transitionToSection, sectionsRef, isInitialized } = useSectionTransition(sections);
 
   console.log('SectionsContainer render:', { activeSection, sectionsLength: sections.length, isInitialized });
+
+  // Listen for custom section change events from navbar
+  useEffect(() => {
+    const handleSectionChange = (event: CustomEvent) => {
+      const targetSection = event.detail;
+      console.log('SectionsContainer: Custom section change event:', targetSection);
+      transitionToSection(targetSection);
+    };
+
+    window.addEventListener('sectionChange', handleSectionChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('sectionChange', handleSectionChange as EventListener);
+    };
+  }, [transitionToSection]);
 
   // Show loading state until initialized
   if (!isInitialized) {
