@@ -32,7 +32,7 @@ const SectionsContainer: React.FC = () => {
   if (!isInitialized) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-black">
-        <div className="text-white">Carregando...</div>
+        <div className="text-white text-xl">Carregando...</div>
       </div>
     );
   }

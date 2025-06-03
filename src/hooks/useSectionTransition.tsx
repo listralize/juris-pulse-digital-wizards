@@ -59,11 +59,11 @@ export const useSectionTransition = (sections: Section[]) => {
     // Set new active section immediately
     setActiveSection(sectionId);
     
-    // Reset transition flag
+    // Reset transition flag after animation
     setTimeout(() => {
       isTransitioning.current = false;
       console.log('Transition completed for:', sectionId);
-    }, 700);
+    }, 800);
   }, [activeSection, sections, location.pathname]);
 
   // Handle keyboard navigation
@@ -92,14 +92,14 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSection, sections, transitionToSection, isInitialized]);
 
-  // Handle scroll for section navigation
+  // Handle scroll for section navigation with improved logic
   useEffect(() => {
     if (!isInitialized) return;
     
     const handleWheel = (e: WheelEvent) => {
       const now = Date.now();
       
-      console.log('Wheel event:', { 
+      console.log('Wheel event detected:', { 
         deltaY: e.deltaY, 
         isTransitioning: isTransitioning.current,
         timeSinceLastScroll: now - lastScrollTime.current,
@@ -109,39 +109,47 @@ export const useSectionTransition = (sections: Section[]) => {
       // Prevent scroll if transitioning
       if (isTransitioning.current) {
         e.preventDefault();
+        console.log('Blocking scroll - transition in progress');
         return;
       }
 
-      // Throttle scroll events
-      if (now - lastScrollTime.current < 500) {
+      // Throttle scroll events more aggressively
+      if (now - lastScrollTime.current < 800) {
         e.preventDefault();
+        console.log('Blocking scroll - too soon since last scroll');
         return;
       }
 
       // Only handle significant scroll movements
-      if (Math.abs(e.deltaY) < 30) {
+      if (Math.abs(e.deltaY) < 50) {
+        console.log('Scroll too small, ignoring');
         return;
       }
 
-      lastScrollTime.current = now;
+      // Prevent default scrolling
       e.preventDefault();
+      lastScrollTime.current = now;
       
       const currentIndex = sections.findIndex(s => s.id === activeSection);
-      console.log('Processing scroll - currentIndex:', currentIndex);
+      console.log('Processing scroll - currentIndex:', currentIndex, 'deltaY:', e.deltaY);
       
       if (e.deltaY > 0) {
         // Scroll down
-        const nextIndex = currentIndex < sections.length - 1 ? currentIndex + 1 : currentIndex;
-        if (nextIndex !== currentIndex) {
-          console.log('Scrolling down to:', sections[nextIndex].id);
+        if (currentIndex < sections.length - 1) {
+          const nextIndex = currentIndex + 1;
+          console.log('Scrolling down to section:', sections[nextIndex].id);
           transitionToSection(sections[nextIndex].id);
+        } else {
+          console.log('Already at last section, cannot scroll down');
         }
       } else if (e.deltaY < 0) {
         // Scroll up
-        const prevIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
-        if (prevIndex !== currentIndex) {
-          console.log('Scrolling up to:', sections[prevIndex].id);
+        if (currentIndex > 0) {
+          const prevIndex = currentIndex - 1;
+          console.log('Scrolling up to section:', sections[prevIndex].id);
           transitionToSection(sections[prevIndex].id);
+        } else {
+          console.log('Already at first section, cannot scroll up');
         }
       }
     };
