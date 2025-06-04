@@ -28,6 +28,16 @@ export const useSectionTransition = (sections: Section[]) => {
     isInitialized
   });
 
+  // Função para verificar se o usuário rolou até o final da seção
+  const isAtBottom = (element: HTMLElement) => {
+    return element.scrollTop + element.clientHeight >= element.scrollHeight - 10; // 10px de tolerância
+  };
+
+  // Função para verificar se o usuário está no topo da seção
+  const isAtTop = (element: HTMLElement) => {
+    return element.scrollTop <= 10; // 10px de tolerância
+  };
+
   // Inicialização única
   useEffect(() => {
     if (hasInitialized.current) return;
@@ -159,6 +169,33 @@ export const useSectionTransition = (sections: Section[]) => {
     
     const handleWheel = (e: WheelEvent) => {
       if (isTransitioning.current) return;
+      
+      const isMobile = window.innerWidth <= 768;
+      const currentSection = sectionsRef.current[activeSectionIndex];
+      
+      // Se estamos na seção de áreas de atuação e no mobile
+      if (activeSection === 'areas' && isMobile && currentSection) {
+        const scrollArea = currentSection.querySelector('[data-radix-scroll-area-viewport]');
+        
+        if (scrollArea) {
+          const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
+          
+          // Se está rolando para baixo
+          if (scrollDirection === 'down') {
+            // Se não chegou ao final, permite o scroll interno
+            if (!isAtBottom(scrollArea as HTMLElement)) {
+              return; // Permite o scroll interno
+            }
+          } 
+          // Se está rolando para cima
+          else {
+            // Se não está no topo, permite o scroll interno
+            if (!isAtTop(scrollArea as HTMLElement)) {
+              return; // Permite o scroll interno
+            }
+          }
+        }
+      }
       
       const now = Date.now();
       
