@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 
 import { useTheme } from '../ThemeProvider';
-import { defaultTeamMembers } from '../../data/defaultTeamMembers';
+import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,11 +16,12 @@ const Partners = () => {
   
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-
-  // Usar sempre os dados padrão da equipe
-  const teamMembers = defaultTeamMembers;
+  
+  const { teamMembers, isLoading } = useSupabaseDataNew();
 
   useEffect(() => {
+    if (isLoading) return;
+
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     tl.fromTo(
@@ -38,7 +39,15 @@ const Partners = () => {
     return () => {
       tl.kill();
     };
-  }, []);
+  }, [isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
+    );
+  }
 
   return (
     <div 
