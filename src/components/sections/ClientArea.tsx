@@ -105,7 +105,7 @@ const ClientArea = () => {
 
   if (isLoading) {
     return (
-      <section id="cliente" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <section id="cliente" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
         <div className="flex justify-center items-center">
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -119,13 +119,13 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className={`h-full flex flex-col justify-center items-center py-8 px-4 md:py-20 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
+      className={`h-full flex flex-col justify-center items-center py-4 px-4 md:py-8 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
       style={{ minHeight: '100vh' }}
     >
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 lg:gap-16">
           <div className="w-full md:w-2/5 order-1 md:order-1">
-            <div className="relative mb-6 md:mb-0 bg-black p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105">
+            <div className="relative mb-6 md:mb-0 bg-black p-6 md:p-12 rounded-2xl md:rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105">
               <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-xl"></div>
               <div className="absolute -bottom-2 -left-2 md:-bottom-4 md:-left-4 w-20 h-20 md:w-32 md:h-32 bg-gradient-to-tr from-white/10 to-white/5 rounded-full blur-xl"></div>
               <img 
@@ -133,6 +133,7 @@ const ClientArea = () => {
                 src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
                 alt="Área do Cliente em Smartphone" 
                 className="relative z-10 max-w-full w-full h-auto mx-auto"
+                style={{ maxHeight: '400px', objectFit: 'contain' }}
               />
             </div>
           </div>

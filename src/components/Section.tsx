@@ -31,9 +31,9 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: 'flex-start',
           minHeight: '100vh',
-          maxHeight: '100vh',
-          overflow: allowScroll ? 'auto' : 'hidden',
-          WebkitOverflowScrolling: allowScroll ? 'touch' : 'auto'
+          maxHeight: id === 'contact' ? 'auto' : '100vh',
+          overflow: allowScroll || id === 'contact' ? 'auto' : 'hidden',
+          WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto'
         }}
       >
         <div className="w-full h-full">

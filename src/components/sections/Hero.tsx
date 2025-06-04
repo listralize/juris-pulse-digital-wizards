@@ -69,7 +69,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <section id="home" className="h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
       {/* Full-width marble banner background - always using black regardless of theme */}
       <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full">
         <MarbleBanner />
@@ -92,11 +92,11 @@ const Hero = () => {
           </div>
         </div>
         
-        <h1 ref={headlineRef} className="text-3xl md:text-5xl lg:text-6xl mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
+        <h1 ref={headlineRef} className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
           Soluções Jurídicas Inovadoras
         </h1>
         
-        <p ref={subheadlineRef} className="text-base md:text-lg text-gray-200 mb-6 text-center max-w-lg mx-auto font-satoshi">
+        <p ref={subheadlineRef} className="text-sm md:text-base lg:text-lg text-gray-200 mb-6 text-center max-w-lg mx-auto font-satoshi">
           Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
         </p>
         
@@ -105,7 +105,7 @@ const Hero = () => {
             href="https://api.whatsapp.com/send?phone=5562994594496" 
             target="_blank"
             rel="noopener noreferrer"
-            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white"
+            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
             Fale Conosco no WhatsApp
             <ArrowRight className="w-4 h-4" />
@@ -113,7 +113,7 @@ const Hero = () => {
           
           <a 
             href="#areas" 
-            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black"
+            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
             Conheça Nossas Áreas de Atuação
             <ArrowRight className="w-4 h-4" />

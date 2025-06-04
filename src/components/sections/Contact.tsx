@@ -42,11 +42,11 @@ const Contact = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-8 px-4`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 px-4`}
       style={{ minHeight: '100vh' }}
     >
       <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-8 text-center">
+        <div ref={titleRef} className="mb-6 text-center">
           <h2 className={`text-2xl md:text-3xl lg:text-4xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             {pageTexts.contactTitle}
           </h2>
@@ -58,11 +58,11 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="flex flex-col lg:grid lg:grid-cols-5 gap-6"
+          className="flex flex-col lg:grid lg:grid-cols-5 gap-4"
         >
-          <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+          <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
             <div className="w-full">
-              <div className="h-48 lg:h-56">
+              <div className="h-40 lg:h-48">
                 <LocationMap />
               </div>
             </div>

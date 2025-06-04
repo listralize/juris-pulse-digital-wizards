@@ -52,7 +52,7 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`h-full w-full py-8 px-4 md:py-16 md:px-6 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full w-full py-4 px-4 md:py-8 md:px-6 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -63,7 +63,7 @@ const Partners = () => {
       <div className="max-w-6xl mx-auto w-full">
         <h2 
           ref={titleRef}
-          className={`text-2xl md:text-4xl lg:text-5xl xl:text-6xl mb-8 md:mb-16 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-2xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-12 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
           Nossa Equipe
         </h2>
@@ -72,6 +72,7 @@ const Partners = () => {
           <Carousel
             opts={{
               align: "start",
+              loop: true,
             }}
             className="w-full"
           >
