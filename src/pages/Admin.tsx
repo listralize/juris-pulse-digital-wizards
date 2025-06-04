@@ -5,7 +5,6 @@ import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
 import { useAdminDataIntegrated } from '../hooks/useAdminDataIntegrated';
-import { useBlogData } from '../hooks/useBlogData';
 import { TeamMember, SpecializedService, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
@@ -24,6 +23,7 @@ const Admin = () => {
     servicePages,
     categories,
     pageTexts,
+    blogPosts,
     isLoading,
     updatePageTexts,
     updateTeamMember,
@@ -31,17 +31,12 @@ const Admin = () => {
     removeTeamMember,
     saveServicePages,
     saveCategories,
+    saveBlogPosts,
     saveAll,
     refreshData,
     executeMigration,
     useSupabaseData
   } = useAdminDataIntegrated();
-
-  const {
-    blogPosts: initialBlogPosts,
-    isLoading: blogLoading,
-    saveBlogPosts
-  } = useBlogData();
 
   const handleSaveTeamMembers = async () => {
     await saveAll();
@@ -63,12 +58,12 @@ const Admin = () => {
     toast.success('Textos das páginas salvos com sucesso!');
   };
 
-  const handleSaveBlogPosts = (posts: typeof initialBlogPosts) => {
+  const handleSaveBlogPosts = (posts: typeof blogPosts) => {
     saveBlogPosts(posts);
     toast.success('Posts do blog salvos com sucesso!');
   };
 
-  if (isLoading || blogLoading) {
+  if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
@@ -135,7 +130,7 @@ const Admin = () => {
 
           <TabsContent value="blog">
             <BlogManagement
-              blogPosts={initialBlogPosts}
+              blogPosts={blogPosts}
               onSave={handleSaveBlogPosts}
             />
           </TabsContent>

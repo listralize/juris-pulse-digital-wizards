@@ -1,429 +1,186 @@
 
 import { useState, useEffect } from 'react';
-import { TeamMember, PageTexts, ServicePage, CategoryInfo } from '../types/adminTypes';
-import { useSupabaseDataNew } from './useSupabaseDataNew';
 import { useAdminData } from './useAdminData';
-import { toast } from 'sonner';
+import { useSupabaseDataNew } from './useSupabaseDataNew';
+import { useBlogData } from './useBlogData';
+import { useSupabaseBlog } from './supabase/useSupabaseBlog';
+import { TeamMember, ServicePage, CategoryInfo, PageTexts } from '../types/adminTypes';
+import { BlogPost } from '../types/blogTypes';
 
 export const useAdminDataIntegrated = () => {
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [hasMigrated, setHasMigrated] = useState(false);
-  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [useSupabaseData, setUseSupabaseData] = useState(true);
   
-  // Dados do Supabase (prioritários)
-  const {
-    teamMembers: supabaseTeamMembers,
-    pageTexts: supabasePageTexts,
-    servicePages: supabaseServicePages,
-    categories: supabaseCategories,
-    isLoading: supabaseLoading,
-    saveTeamMembers: saveSupabaseTeamMembers,
-    savePageTexts: saveSupabasePageTexts,
-    saveServicePages: saveSupabaseServicePages,
-    saveCategories: saveSupabaseCategories,
-    refreshData
-  } = useSupabaseDataNew();
+  // Hooks locais (localStorage)
+  const localData = useAdminData();
+  
+  // Hooks Supabase
+  const supabaseData = useSupabaseDataNew();
+  const localBlogData = useBlogData();
+  const supabaseBlogData = useSupabaseBlog();
 
-  // Dados do localStorage (fallback)
-  const {
-    teamMembers: localTeamMembers,
-    pageTexts: localPageTexts,
-    servicePages: localServicePages,
-    categories: localCategories,
-    savePageTexts: saveLocalPageTexts,
-    saveTeamMembers: saveLocalTeamMembers,
-    saveServicePages: saveLocalServicePages,
-    saveCategories: saveLocalCategories
-  } = useAdminData();
-
-  // MIGRAÇÃO COMPLETA E SEQUENCIAL - CORRIGIDA
-  const executeMigration = async () => {
-    if (isTransitioning) return;
-
-    console.log('🚀 INICIANDO MIGRAÇÃO COMPLETA SEQUENCIAL - VERSÃO CORRIGIDA');
-    setIsTransitioning(true);
-    
-    try {
-      let migrationCount = 0;
+  // Auto-migração na inicialização
+  useEffect(() => {
+    const performAutoMigration = async () => {
+      setIsLoading(true);
       
-      // ETAPA 1: SEMPRE migrar categorias primeiro (obrigatório para funcionar)
-      console.log('📂 ETAPA 1: Migrando categorias...');
-      
-      if (localCategories.length > 0) {
-        console.log('📋 Categorias locais encontradas:', localCategories.length);
+      try {
+        console.log('🚀 INICIANDO AUTO-MIGRAÇÃO COMPLETA...');
         
-        const categoriesForMigration = localCategories.map((cat, index) => {
-          const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
-          const categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
-          
-          return {
-            id: cat.id || crypto.randomUUID(),
-            value: categoryKey,
-            label: categoryName,
-            name: categoryName,
-            description: cat.description || `Descrição da ${categoryName}`,
-            icon: cat.icon || 'FileText',
-            color: cat.color || 'bg-blue-500'
-          };
+        // 1. Verificar se há dados locais para migrar
+        const hasLocalPages = localData.servicePages.length > 0;
+        const hasLocalBlogPosts = localBlogData.blogPosts.length > 0;
+        const hasLocalCategories = localData.categories.length > 0;
+        
+        console.log('📊 Dados locais encontrados:', {
+          pages: localData.servicePages.length,
+          blog: localBlogData.blogPosts.length,
+          categories: localData.categories.length
         });
 
-        console.log('📋 Categorias preparadas:', categoriesForMigration);
-        await saveSupabaseCategories(categoriesForMigration);
-        migrationCount++;
-        
-        // Aguardar processamento das categorias
-        console.log('⏳ Aguardando categorias serem processadas...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // Recarregar dados para garantir que as categorias estão no Supabase
-        await refreshData();
-        console.log('✅ Categorias migradas e dados recarregados');
-      }
-      
-      // ETAPA 2: MIGRAÇÃO FORÇADA DAS PÁGINAS - NOVA LÓGICA CORRIGIDA
-      if (localServicePages.length > 0) {
-        console.log('📄 ETAPA 2: Migrando páginas de serviços...');
-        console.log(`📄 Total de páginas a migrar: ${localServicePages.length}`);
-        
-        // Aguardar um pouco mais para garantir que as categorias foram carregadas
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await refreshData();
-        
-        console.log('📂 Categorias disponíveis no momento da migração:', supabaseCategories?.length || 0);
-        
-        // Migrar páginas com vinculação correta usando as categorias atuais do state
-        const pagesWithCorrectCategories = localServicePages.map(page => {
-          // Buscar categoria correspondente nas categorias do Supabase atual
-          const matchingCategory = supabaseCategories?.find(cat => 
-            cat.value === page.category || 
-            cat.name === page.category ||
-            cat.label === page.category
-          );
-          
-          if (matchingCategory) {
-            console.log(`📄 Página "${page.title}" vinculada à categoria "${matchingCategory.name}"`);
-            return {
-              ...page,
-              category: matchingCategory.value,
-              id: page.id || crypto.randomUUID()
-            };
-          } else {
-            console.warn(`⚠️ Categoria "${page.category}" não encontrada para página "${page.title}"`);
-            return null;
-          }
-        }).filter(Boolean);
-        
-        console.log(`📄 Páginas válidas para migração: ${pagesWithCorrectCategories.length}`);
-        
-        if (pagesWithCorrectCategories.length > 0) {
-          await saveSupabaseServicePages(pagesWithCorrectCategories);
-          migrationCount++;
-          
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          await refreshData();
+        // 2. Aguardar carregamento inicial do Supabase
+        await supabaseData.refreshData();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // 3. Migrar categorias se necessário
+        if (hasLocalCategories && supabaseData.categories.length === 0) {
+          console.log('📂 Migrando categorias...');
+          await supabaseData.saveCategories(localData.categories);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await supabaseData.refreshData();
         }
-      }
-      
-      // ETAPA 3: Migrar outros dados
-      if (localPageTexts.heroTitle && !supabasePageTexts.heroTitle) {
-        console.log('⚙️ ETAPA 3: Migrando configurações...');
-        await saveSupabasePageTexts(localPageTexts);
-        migrationCount++;
-      }
-      
-      if (localTeamMembers.length > 0 && supabaseTeamMembers.length === 0) {
-        console.log('👥 ETAPA 4: Migrando equipe...');
-        await saveSupabaseTeamMembers(localTeamMembers);
-        migrationCount++;
-      }
-      
-      // Recarregamento final para garantir que tudo está sincronizado
-      console.log('🔄 Recarregamento final...');
-      await refreshData();
-      
-      if (migrationCount > 0) {
-        setHasMigrated(true);
-        toast.success(`🎉 Migração concluída! ${migrationCount} tipos de dados migrados.`);
-      } else {
-        toast.info('ℹ️ Nenhum dado novo para migrar');
-      }
-      
-    } catch (error) {
-      console.error('❌ ERRO NA MIGRAÇÃO:', error);
-      toast.error(`❌ Erro na migração: ${error.message}`);
-    } finally {
-      setIsTransitioning(false);
-    }
-  };
 
-  // MIGRAÇÃO FORÇADA ESPECÍFICA PARA CATEGORIAS
-  const forceCategoryMigration = async () => {
-    console.log('🔥 INICIANDO MIGRAÇÃO FORÇADA DE CATEGORIAS');
-    setIsTransitioning(true);
-    
-    try {
-      // Usar categorias locais ou padrão
-      let categoriesToMigrate = localCategories;
-      
-      if (categoriesToMigrate.length === 0) {
-        console.log('📋 Usando categorias padrão...');
-        categoriesToMigrate = [
-          {
-            id: 'familia-' + Date.now(),
-            value: 'familia',
-            label: 'Direito de Família',
-            name: 'Direito de Família',
-            description: 'Proteção e orientação em questões familiares',
-            icon: 'Heart',
-            color: 'bg-rose-500'
-          },
-          {
-            id: 'tributario-' + Date.now(),
-            value: 'tributario',
-            label: 'Direito Tributário',
-            name: 'Direito Tributário',
-            description: 'Consultoria e planejamento tributário',
-            icon: 'Calculator',
-            color: 'bg-blue-500'
-          },
-          {
-            id: 'empresarial-' + Date.now(),
-            value: 'empresarial',
-            label: 'Direito Empresarial',
-            name: 'Direito Empresarial',
-            description: 'Suporte jurídico para empresas',
-            icon: 'Building2',
-            color: 'bg-green-500'
-          },
-          {
-            id: 'trabalho-' + Date.now(),
-            value: 'trabalho',
-            label: 'Direito do Trabalho',
-            name: 'Direito do Trabalho',
-            description: 'Defesa dos direitos trabalhistas',
-            icon: 'Users',
-            color: 'bg-orange-500'
-          }
-        ];
-      }
+        // 4. Migrar páginas de serviços se necessário
+        if (hasLocalPages && supabaseData.servicePages.length === 0) {
+          console.log('📄 Migrando páginas de serviços...');
+          await supabaseData.saveServicePages(localData.servicePages);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
-      const categoriesForMigration = categoriesToMigrate.map((cat, index) => {
-        const categoryName = cat.name || cat.label || `Categoria ${index + 1}`;
-        const categoryKey = cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`;
+        // 5. Migrar blog posts se necessário
+        if (hasLocalBlogPosts && supabaseBlogData.blogPosts.length === 0) {
+          console.log('📝 Migrando posts do blog...');
+          await supabaseBlogData.saveBlogPosts(localBlogData.blogPosts);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        // 6. Recarregar todos os dados
+        await Promise.all([
+          supabaseData.refreshData(),
+          supabaseBlogData.loadBlogPosts()
+        ]);
+
+        console.log('✅ AUTO-MIGRAÇÃO COMPLETA FINALIZADA!');
         
-        return {
-          id: cat.id || crypto.randomUUID(),
-          value: categoryKey,
-          label: categoryName,
-          name: categoryName,
-          description: cat.description || `Descrição da ${categoryName}`,
-          icon: cat.icon || 'FileText',
-          color: cat.color || 'bg-blue-500'
-        };
-      });
+      } catch (error) {
+        console.error('❌ Erro na auto-migração:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      console.log('📋 Categorias preparadas para migração:', categoriesForMigration);
-      
-      await saveSupabaseCategories(categoriesForMigration);
-      
-      // Aguardar e recarregar múltiplas vezes para garantir sincronia
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      await refreshData();
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await refreshData();
-      
-      toast.success(`🎉 ${categoriesForMigration.length} categorias migradas com sucesso!`);
-      setHasMigrated(true);
-    } catch (error) {
-      console.error('❌ Erro na migração de categorias:', error);
-      toast.error(`❌ Erro na migração: ${error.message}`);
-    } finally {
-      setIsTransitioning(false);
-    }
+    performAutoMigration();
+  }, []);
+
+  // Dados unificados (sempre usar Supabase quando disponível)
+  const teamMembers = supabaseData.teamMembers.length > 0 ? supabaseData.teamMembers : localData.teamMembers;
+  const servicePages = supabaseData.servicePages.length > 0 ? supabaseData.servicePages : localData.servicePages;
+  const categories = supabaseData.categories.length > 0 ? supabaseData.categories : localData.categories;
+  const pageTexts = supabaseData.pageTexts.heroTitle ? supabaseData.pageTexts : localData.pageTexts;
+  const blogPosts = supabaseBlogData.blogPosts.length > 0 ? supabaseBlogData.blogPosts : localBlogData.blogPosts;
+
+  // Funções de atualização (sempre salvar no Supabase)
+  const updatePageTexts = (texts: PageTexts) => {
+    supabaseData.setPageTexts(texts);
   };
 
-  // Lógica de determinação da fonte de dados - CORRIGIDA
-  console.log('🔍 ESTADO ATUAL DOS DADOS:', {
-    supabaseCategories: supabaseCategories?.length || 0,
-    supabaseServicePages: supabaseServicePages?.length || 0,
-    supabaseTeamMembers: supabaseTeamMembers?.length || 0,
-    localCategories: localCategories?.length || 0,
-    localServicePages: localServicePages?.length || 0,
-    localTeamMembers: localTeamMembers?.length || 0,
-    supabasePageTexts: !!supabasePageTexts?.heroTitle
-  });
-
-  // Usar Supabase se houver qualquer dado lá, senão usar localStorage
-  const hasSupabaseData = (supabaseCategories?.length > 0) || 
-                         (supabaseServicePages?.length > 0) || 
-                         (supabaseTeamMembers?.length > 0) || 
-                         !!supabasePageTexts?.heroTitle;
-
-  const useSupabaseData = hasSupabaseData;
-
-  console.log('🎯 FONTE DE DADOS ESCOLHIDA:', {
-    hasSupabaseData,
-    useSupabaseData,
-    reason: hasSupabaseData ? 'Dados encontrados no Supabase' : 'Usando localStorage como fallback'
-  });
-
-  // Dados finais retornados
-  const teamMembers = useSupabaseData ? (supabaseTeamMembers || []) : (localTeamMembers || []);
-  const pageTexts = useSupabaseData ? (supabasePageTexts || localPageTexts) : localPageTexts;
-  const servicePages = useSupabaseData ? (supabaseServicePages || []) : (localServicePages || []);
-  const categories = useSupabaseData ? (supabaseCategories || []) : (localCategories || []);
-  const isLoading = supabaseLoading || isTransitioning;
-
-  console.log('📊 DADOS FINAIS RETORNADOS:', {
-    categories: categories?.length || 0,
-    servicePages: servicePages?.length || 0,
-    teamMembers: teamMembers?.length || 0,
-    useSupabaseData,
-    isLoading
-  });
-
-  // WRAPPER PARA SINCRONIZAÇÃO AUTOMÁTICA
-  const autoSyncWrapper = async (operation: () => Promise<void>, successMessage: string) => {
-    if (!autoSyncEnabled) return;
-    
-    try {
-      await operation();
-      console.log('✅', successMessage);
-      setTimeout(async () => {
-        await refreshData();
-      }, 500);
-      toast.success(successMessage);
-    } catch (error) {
-      console.error('❌ Erro na sincronização:', error);
-      toast.error('❌ Erro ao sincronizar dados');
-    }
-  };
-
-  // FUNÇÕES DE SALVAMENTO COM AUTO-SYNC
-  const updatePageTexts = async (texts: PageTexts) => {
-    if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
-        await saveSupabasePageTexts(texts);
-      }, 'Configurações salvas');
-    } else {
-      saveLocalPageTexts(texts);
-    }
-  };
-
-  const saveAllTeamMembers = async (members: TeamMember[]) => {
-    if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
-        await saveSupabaseTeamMembers(members);
-      }, 'Equipe salva');
-    } else {
-      saveLocalTeamMembers(members);
-    }
-  };
-
-  const updateTeamMember = async (id: string, field: keyof TeamMember, value: string) => {
-    const updatedMembers = teamMembers.map(member => 
+  const updateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
+    const updatedMembers = teamMembers.map(member =>
       member.id === id ? { ...member, [field]: value } : member
     );
-    await saveAllTeamMembers(updatedMembers);
+    supabaseData.setTeamMembers(updatedMembers);
   };
 
-  const addTeamMember = async () => {
+  const addTeamMember = () => {
     const newMember: TeamMember = {
-      id: crypto.randomUUID(),
-      name: '',
-      title: '',
-      oab: '',
-      email: '',
+      id: Date.now().toString(),
+      name: 'Novo Membro',
+      title: 'Cargo',
+      oab: 'OAB/XX 000000',
+      email: 'email@exemplo.com',
       image: '',
-      description: ''
+      description: 'Descrição do membro da equipe'
     };
-    
-    const updatedMembers = [...teamMembers, newMember];
-    await saveAllTeamMembers(updatedMembers);
+    supabaseData.setTeamMembers([...teamMembers, newMember]);
   };
 
-  const removeTeamMember = async (id: string) => {
-    const updatedMembers = teamMembers.filter(member => member.id !== id);
-    await saveAllTeamMembers(updatedMembers);
+  const removeTeamMember = (id: string) => {
+    const filtered = teamMembers.filter(member => member.id !== id);
+    supabaseData.setTeamMembers(filtered);
   };
 
-  const saveServicePagesData = async (pages: ServicePage[]) => {
-    if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
-        await saveSupabaseServicePages(pages);
-      }, 'Páginas salvas');
-    } else {
-      saveLocalServicePages(pages);
-    }
+  const saveServicePages = (pages: ServicePage[]) => {
+    return supabaseData.saveServicePages(pages);
   };
 
-  const saveCategoriesData = async (cats: CategoryInfo[]) => {
-    console.log('💾 SALVANDO CATEGORIAS:', cats.length);
-    if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
-        await saveSupabaseCategories(cats);
-      }, `${cats.length} categorias salvas`);
-    } else {
-      saveLocalCategories(cats);
-    }
+  const saveCategories = (cats: CategoryInfo[]) => {
+    return supabaseData.saveCategories(cats);
+  };
+
+  const saveBlogPosts = (posts: BlogPost[]) => {
+    return supabaseBlogData.saveBlogPosts(posts);
   };
 
   const saveAll = async () => {
-    if (useSupabaseData) {
-      await autoSyncWrapper(async () => {
-        await Promise.all([
-          saveSupabasePageTexts(pageTexts),
-          saveSupabaseTeamMembers(teamMembers),
-          saveSupabaseCategories(categories),
-          saveSupabaseServicePages(servicePages)
-        ]);
-      }, 'Todos os dados salvos');
-    }
+    await Promise.all([
+      supabaseData.saveTeamMembers(teamMembers),
+      supabaseData.savePageTexts(pageTexts)
+    ]);
   };
 
-  const refreshDataManual = async () => {
-    console.log('🔄 REFRESH MANUAL INICIADO');
-    setIsTransitioning(true);
+  const refreshData = async () => {
+    await Promise.all([
+      supabaseData.refreshData(),
+      supabaseBlogData.loadBlogPosts()
+    ]);
+  };
+
+  const executeMigration = async () => {
+    setIsLoading(true);
     try {
+      // Migração forçada de todos os dados
+      await supabaseData.saveCategories(localData.categories);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await supabaseData.saveServicePages(localData.servicePages);
+      await supabaseBlogData.saveBlogPosts(localBlogData.blogPosts);
       await refreshData();
-      console.log('✅ Dados recarregados');
-      toast.success('Dados recarregados');
-    } catch (error) {
-      console.error('❌ Erro ao recarregar:', error);
-      toast.error('Erro ao recarregar dados');
     } finally {
-      setIsTransitioning(false);
+      setIsLoading(false);
     }
   };
 
   return {
-    // Dados
+    // Estado
+    isLoading: isLoading || supabaseData.isLoading || supabaseBlogData.isLoading,
+    useSupabaseData,
+    
+    // Dados unificados
     teamMembers,
-    pageTexts,
     servicePages,
     categories,
-    isLoading,
-    
-    // Estado
-    useSupabaseData,
-    isTransitioning,
+    pageTexts,
+    blogPosts,
     
     // Funções de atualização
     updatePageTexts,
     updateTeamMember,
     addTeamMember,
     removeTeamMember,
-    saveServicePages: saveServicePagesData,
-    saveCategories: saveCategoriesData,
+    saveServicePages,
+    saveCategories,
+    saveBlogPosts,
     saveAll,
-    refreshData: refreshDataManual,
-    
-    // Migração
-    executeMigration,
-    forceCategoryMigration,
-    
-    // Controles
-    autoSyncEnabled,
-    setAutoSyncEnabled
+    refreshData,
+    executeMigration
   };
 };
