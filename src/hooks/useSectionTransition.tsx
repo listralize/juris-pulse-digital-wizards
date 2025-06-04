@@ -175,8 +175,19 @@ export const useSectionTransition = (sections: Section[]) => {
       
       // Se estamos na seção de contato
       if (activeSection === 'contact' && currentSection) {
-        // Permitir scroll vertical dentro da seção de contato
-        return;
+        const contactElement = currentSection.querySelector('#contact') || currentSection;
+        
+        if (e.deltaY > 0) {
+          // Rolando para baixo - verifica se já chegou ao final
+          if (!isAtBottom(contactElement as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        } else {
+          // Rolando para cima - verifica se está no topo
+          if (!isAtTop(contactElement as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        }
       }
       
       // Se estamos na seção de áreas de atuação no desktop

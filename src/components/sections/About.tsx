@@ -71,7 +71,7 @@ const About = () => {
       <div className="max-w-4xl mx-auto text-center">
         <h2 
           ref={titleRef} 
-          className={`text-3xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
           {pageTexts.aboutTitle}
         </h2>

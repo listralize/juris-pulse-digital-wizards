@@ -54,7 +54,7 @@ const Index = () => {
            scrollbarWidth: 'none', 
            msOverflowStyle: 'none' 
          }}>
-      <style jsx>{`
+      <style>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
         }

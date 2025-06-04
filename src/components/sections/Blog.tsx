@@ -36,21 +36,20 @@ const Blog = () => {
 
   return (
     <section 
-      className={`py-8 px-4 ${isDark ? 'bg-black' : 'bg-white'}`} 
+      className={`py-2 px-4 ${isDark ? 'bg-black' : 'bg-white'}`} 
       style={{ 
         minHeight: '100vh', 
         display: 'flex', 
         flexDirection: 'column', 
-        justifyContent: 'center',
-        paddingTop: '2rem'
+        justifyContent: 'center'
       }}
     >
       <div className="container mx-auto">
-        <div className="text-center mb-8 md:mb-12">
-          <h2 className={`text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h2>
-          <p className={`text-lg md:text-xl lg:text-2xl xl:text-3xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-base md:text-lg lg:text-xl xl:text-2xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Mantenha-se atualizado com as últimas novidades do mundo jurídico através dos nossos artigos especializados
           </p>
         </div>
@@ -126,7 +125,7 @@ const Blog = () => {
               </Carousel>
             </div>
 
-            <div className="text-center mt-8">
+            <div className="text-center mt-6">
               <Button 
                 onClick={() => navigate('/blog')}
                 variant="outline"
