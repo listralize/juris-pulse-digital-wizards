@@ -29,7 +29,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: allowScroll ? 'flex-start' : 'center',
+          justifyContent: 'flex-start',
           minHeight: '100vh',
           maxHeight: '100vh',
           overflow: allowScroll ? 'auto' : 'hidden',
