@@ -14,14 +14,14 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('🎯 CategoryGrid RENDER - DEBUGANDO:', {
+  console.log('🎯 CategoryGrid DADOS ATUALIZADOS:', {
     categoriesReceived: categories?.length || 0,
     servicePagesReceived: servicePages?.length || 0,
     categoriesData: categories,
     servicePagesData: servicePages
   });
 
-  // Se não há categorias, mostrar categorias padrão
+  // Se não há categorias do Supabase, mostrar categorias padrão
   const defaultCategories: CategoryInfo[] = [
     {
       id: 'familia-default',
@@ -108,26 +108,43 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
 
   const categoriesToShow = categories && categories.length > 0 ? categories : defaultCategories;
 
-  console.log('📂 Categorias que serão exibidas:', categoriesToShow);
+  console.log('📂 Categorias que serão exibidas:', categoriesToShow.length);
 
   return (
     <div className="space-y-4">
-      <div className={`p-4 rounded-lg ${isDark ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
-        <p className={`text-sm ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>
+      <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+        <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
           📋 Mostrando {categoriesToShow.length} categorias 
-          {categories && categories.length > 0 ? ' (do Supabase)' : ' (padrão - aguardando sincronização)'}
+          {categories && categories.length > 0 ? ' (carregadas do Supabase)' : ' (padrão - aguardando sincronização)'}
+        </p>
+        <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+          📄 Total de {servicePages?.length || 0} páginas de serviços no sistema
         </p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categoriesToShow.map((category) => {
-          const currentCategoryPages = servicePages?.filter(page => 
-            page.category === category.value || 
-            page.category === category.name ||
-            page.category === category.label
-          ) || [];
+          // Buscar páginas que correspondem a esta categoria usando múltiplos critérios
+          const currentCategoryPages = servicePages?.filter(page => {
+            const pageCategory = page.category?.toLowerCase().trim();
+            const catKey = category.value?.toLowerCase().trim();
+            const catName = category.name?.toLowerCase().trim();
+            const catLabel = category.label?.toLowerCase().trim();
+            
+            return pageCategory === catKey || 
+                   pageCategory === catName || 
+                   pageCategory === catLabel ||
+                   page.category === category.value ||
+                   page.category === category.name ||
+                   page.category === category.label;
+          }) || [];
           
-          console.log(`📂 ${category.label}: páginas encontradas=${currentCategoryPages.length}`);
+          console.log(`📂 ${category.label}: ${currentCategoryPages.length} páginas encontradas`, {
+            categoryValue: category.value,
+            categoryName: category.name,
+            categoryLabel: category.label,
+            pagesFound: currentCategoryPages.map(p => ({ title: p.title, category: p.category }))
+          });
           
           return (
             <Card 

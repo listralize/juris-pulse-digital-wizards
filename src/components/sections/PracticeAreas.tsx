@@ -15,16 +15,62 @@ const PracticeAreas = () => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const { theme } = useTheme();
-  const { pageTexts, servicePages, isLoading } = useSupabaseDataNew();
+  const { pageTexts, categories, servicePages, isLoading } = useSupabaseDataNew();
   const isDark = theme === 'dark';
 
-  // Usar servicePages do Supabase em vez de dados hardcoded
-  const practiceAreas = servicePages.map(page => ({
-    id: page.id,
-    title: page.title,
-    description: page.description,
-    href: page.href?.startsWith('/') ? page.href : `/servicos/${page.href}`
-  }));
+  console.log('🔍 PracticeAreas DADOS:', {
+    categoriesCount: categories?.length || 0,
+    servicePagesCount: servicePages?.length || 0,
+    isLoading,
+    categories,
+    servicePages
+  });
+
+  // Gerar áreas de atuação baseadas nas categorias do Supabase
+  const practiceAreas = React.useMemo(() => {
+    if (!categories || categories.length === 0) {
+      console.log('⚠️ Nenhuma categoria encontrada, usando áreas padrão');
+      // Áreas padrão como fallback
+      return [
+        {
+          id: 'familia-fallback',
+          title: 'Direito de Família',
+          description: 'Proteção e orientação em questões familiares',
+          href: '/areas/familia'
+        },
+        {
+          id: 'tributario-fallback', 
+          title: 'Direito Tributário',
+          description: 'Consultoria e planejamento tributário',
+          href: '/areas/tributario'
+        },
+        {
+          id: 'empresarial-fallback',
+          title: 'Direito Empresarial', 
+          description: 'Suporte jurídico para empresas',
+          href: '/areas/empresarial'
+        }
+      ];
+    }
+
+    return categories.map(category => {
+      const categoryPages = servicePages?.filter(page => 
+        page.category === category.value || 
+        page.category === category.name ||
+        page.category === category.label
+      ) || [];
+
+      console.log(`📂 Categoria ${category.label}: ${categoryPages.length} páginas`);
+
+      return {
+        id: category.id || category.value,
+        title: category.label || category.name,
+        description: category.description || `Serviços especializados em ${category.label}`,
+        href: `/areas/${category.value}`,
+        pageCount: categoryPages.length
+      };
+    });
+  }, [categories, servicePages]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -76,11 +122,11 @@ const PracticeAreas = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isLoading]);
+  }, [isLoading, practiceAreas]);
 
   if (isLoading) {
     return (
-      <section id="areas" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-black'}`}>
+      <section className="bg-black text-white min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24">
         <div className="flex justify-center items-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
@@ -88,29 +134,26 @@ const PracticeAreas = () => {
     );
   }
 
+  console.log('🎯 Renderizando áreas:', practiceAreas.length);
+
   return (
     <section 
       id="areas"
       ref={sectionRef}
-      className="bg-black text-white h-full py-2 px-4 md:py-4 md:px-6 lg:px-24 relative"
-      style={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-      }}
+      className="bg-black text-white py-8 px-4 md:px-6 lg:px-24"
+      style={{ minHeight: '100vh' }}
     >
-      <div className="max-w-6xl mx-auto flex flex-col h-full justify-center">
+      <div className="max-w-6xl mx-auto">
         <h2 
           ref={titleRef}
-          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 font-canela text-center text-white"
+          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center text-white mb-6"
         >
-          {pageTexts.areasTitle}
+          {pageTexts.areasTitle || 'Áreas de Atuação'}
         </h2>
         
-        <div className="flex-1 flex items-center">
-          {/* Mobile: Grid compacto sem scroll */}
-          <div className="md:hidden grid grid-cols-1 gap-2 w-full max-h-[70vh] overflow-y-auto">
+        <div className="flex-1 flex items-start">
+          {/* Mobile: Grid compacto */}
+          <div className="md:hidden grid grid-cols-1 gap-4 w-full">
             {practiceAreas.map((area, index) => (
               <Link 
                 key={area.id}
@@ -118,26 +161,29 @@ const PracticeAreas = () => {
                 className="group block"
               >
                 <div 
-                  className="bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105"
+                  className="bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4"
                   ref={el => cardsRef.current[index] = el}
                 >
-                  <div className="p-3">
-                    <h3 className="text-base font-canela mb-1 text-white">
-                      {area.title}
-                    </h3>
-                    <p className="text-xs text-gray-300">
-                      {area.description}
+                  <h3 className="text-lg font-canela mb-2 text-white">
+                    {area.title}
+                  </h3>
+                  <p className="text-sm text-gray-300 mb-2">
+                    {area.description}
+                  </p>
+                  {area.pageCount !== undefined && (
+                    <p className="text-xs text-gray-400">
+                      {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
                     </p>
-                  </div>
+                  )}
                 </div>
               </Link>
             ))}
           </div>
 
-          {/* Desktop: Grid com scroll area centralizado */}
+          {/* Desktop: Grid com scroll area */}
           <div className="hidden md:block w-full">
             <ScrollArea className="h-[60vh]">
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 pb-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                 {practiceAreas.map((area, index) => (
                   <Link 
                     key={area.id}
@@ -145,17 +191,20 @@ const PracticeAreas = () => {
                     className="group block"
                   >
                     <div 
-                      className="bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full"
+                      className="bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6"
                       ref={el => cardsRef.current[index] = el}
                     >
-                      <div className="p-4 lg:p-6">
-                        <h3 className="text-lg lg:text-xl xl:text-2xl font-canela mb-3 text-white">
-                          {area.title}
-                        </h3>
-                        <p className="text-sm text-gray-300">
-                          {area.description}
+                      <h3 className="text-xl xl:text-2xl font-canela mb-3 text-white">
+                        {area.title}
+                      </h3>
+                      <p className="text-sm text-gray-300 mb-3">
+                        {area.description}
+                      </p>
+                      {area.pageCount !== undefined && (
+                        <p className="text-xs text-gray-400">
+                          {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
                         </p>
-                      </div>
+                      )}
                     </div>
                   </Link>
                 ))}

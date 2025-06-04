@@ -41,27 +41,30 @@ export const useSupabaseDataNew = () => {
   const refreshData = async () => {
     setIsLoading(true);
     try {
-      console.log('🔄 CARREGANDO DADOS DO SUPABASE EM SEQUÊNCIA...');
+      console.log('🔄 CARREGANDO DADOS DO SUPABASE EM SEQUÊNCIA CORRIGIDA...');
       
-      // 1. Carregar categorias primeiro
+      // 1. Carregar categorias primeiro (OBRIGATÓRIO)
       console.log('📂 1. Carregando categorias...');
       await loadCategories();
       
-      // 2. Aguardar um pouco para garantir que as categorias estão disponíveis
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // 2. Aguardar um tempo para garantir que as categorias estão disponíveis
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // 3. Carregar páginas de serviços (que dependem das categorias)
-      console.log('📄 2. Carregando páginas de serviços...');
+      console.log('📄 2. Carregando páginas de serviços com vinculação...');
       await loadServicePages();
       
-      // 4. Carregar outros dados em paralelo
+      // 4. Aguardar mais um pouco
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // 5. Carregar outros dados em paralelo
       console.log('👥⚙️ 3. Carregando outros dados...');
       await Promise.all([
         loadTeamMembers(),
         loadPageTexts()
       ]);
       
-      console.log('✅ TODOS OS DADOS CARREGADOS EM SEQUÊNCIA');
+      console.log('✅ TODOS OS DADOS CARREGADOS COM VINCULAÇÃO CORRETA');
     } catch (error) {
       console.error('❌ ERRO AO CARREGAR DADOS:', error);
     } finally {
@@ -69,9 +72,28 @@ export const useSupabaseDataNew = () => {
     }
   };
 
-  // Load data on mount
+  // Load data on mount e escutar eventos de atualização
   useEffect(() => {
     refreshData();
+
+    // Escutar eventos customizados para recarregar dados
+    const handleRefresh = () => {
+      console.log('🔄 Evento de refresh detectado');
+      refreshData();
+    };
+
+    const handleServicePagesUpdate = () => {
+      console.log('📄 Páginas de serviços atualizadas');
+      loadServicePages();
+    };
+
+    window.addEventListener('refreshSupabaseData', handleRefresh);
+    window.addEventListener('servicePagesUpdated', handleServicePagesUpdate);
+
+    return () => {
+      window.removeEventListener('refreshSupabaseData', handleRefresh);
+      window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate);
+    };
   }, []);
 
   return {
