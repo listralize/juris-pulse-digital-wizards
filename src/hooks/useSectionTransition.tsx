@@ -18,6 +18,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const isTransitioning = useRef(false);
   const lastScrollTime = useRef(0);
   const [isInitialized, setIsInitialized] = useState(false);
+  const hasInitialized = useRef(false);
 
   console.log('useSectionTransition - Estado atual:', { 
     activeSection, 
@@ -27,9 +28,11 @@ export const useSectionTransition = (sections: Section[]) => {
     isInitialized
   });
 
-  // Inicialização simplificada
+  // Inicialização única
   useEffect(() => {
-    console.log('useSectionTransition - Inicializando...');
+    if (hasInitialized.current) return;
+    
+    console.log('useSectionTransition - Inicializando ÚNICA VEZ...');
     
     const hash = location.hash.substring(1);
     let targetSection = 'home';
@@ -53,9 +56,10 @@ export const useSectionTransition = (sections: Section[]) => {
       });
     }
     
+    hasInitialized.current = true;
     setIsInitialized(true);
     console.log('useSectionTransition - Inicialização completa');
-  }, [location.hash, sections]);
+  }, []); // Dependências vazias para rodar apenas uma vez
 
   const transitionToSection = useCallback((sectionId: string) => {
     console.log('transitionToSection chamado:', { 
@@ -124,8 +128,10 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Navegação por teclado
   useEffect(() => {
+    if (!isInitialized) return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isInitialized || isTransitioning.current) return;
+      if (isTransitioning.current) return;
       
       let newIndex = activeSectionIndex;
       
@@ -149,18 +155,20 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Navegação por scroll
   useEffect(() => {
+    if (!isInitialized) return;
+    
     const handleWheel = (e: WheelEvent) => {
-      if (!isInitialized || isTransitioning.current) return;
+      if (isTransitioning.current) return;
       
       const now = Date.now();
       
-      // Throttle reduzido
-      if (now - lastScrollTime.current < 400) {
+      // Throttle para evitar scroll muito rápido
+      if (now - lastScrollTime.current < 600) {
         e.preventDefault();
         return;
       }
 
-      if (Math.abs(e.deltaY) < 20) return;
+      if (Math.abs(e.deltaY) < 30) return;
 
       e.preventDefault();
       lastScrollTime.current = now;

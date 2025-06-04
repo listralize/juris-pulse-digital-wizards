@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
+import { defaultTeamMembers } from '../../data/defaultTeamMembers';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,12 +15,12 @@ const Partners = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const { theme } = useTheme();
-  const { teamMembers, pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
 
-  useEffect(() => {
-    if (isLoading) return;
+  // Usar sempre os dados padrão da equipe
+  const teamMembers = defaultTeamMembers;
 
+  useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     tl.fromTo(
@@ -38,15 +38,7 @@ const Partners = () => {
     return () => {
       tl.kill();
     };
-  }, [isLoading]);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div 
@@ -65,7 +57,7 @@ const Partners = () => {
           ref={titleRef}
           className={`text-4xl md:text-5xl lg:text-6xl mb-16 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
-          {pageTexts.teamTitle}
+          Nossa Equipe
         </h2>
         
         <div ref={carouselRef} className="px-12" data-allow-scroll="true">
