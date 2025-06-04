@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollArea } from '../ui/scroll-area';
 import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
 
@@ -129,7 +128,7 @@ const PracticeAreas = () => {
 
   if (isLoading) {
     return (
-      <section id="areas" className={`min-h-screen flex flex-col justify-center py-4 px-4 md:py-20 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+      <section id="areas" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="flex justify-center items-center">
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -141,48 +140,38 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`h-full py-4 px-4 md:py-20 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
-      style={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start'
-      }}
+      className={`min-h-screen py-20 px-6 md:px-16 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
     >
-      <div className="max-w-6xl mx-auto flex flex-col h-full">
+      <div className="max-w-6xl mx-auto">
         <h2 
           ref={titleRef}
-          className={`text-xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-3xl md:text-4xl lg:text-5xl mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
         >
           {pageTexts.areasTitle}
         </h2>
         
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8 pb-4">
-              {practiceAreas.map((area, index) => (
-                <Link 
-                  key={area.id}
-                  to={area.href}
-                  className="group block"
-                >
-                  <div 
-                    className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full`}
-                    ref={el => cardsRef.current[index] = el}
-                  >
-                    <div className="p-4 md:p-6 lg:p-8">
-                      <h3 className={`text-base md:text-xl lg:text-2xl xl:text-3xl font-canela mb-2 md:mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
-                        {area.title}
-                      </h3>
-                      <p className={`text-xs md:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {area.description}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </ScrollArea>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {practiceAreas.map((area, index) => (
+            <Link 
+              key={area.id}
+              to={area.href}
+              className="group block"
+            >
+              <div 
+                className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full`}
+                ref={el => cardsRef.current[index] = el}
+              >
+                <div className="p-6 md:p-8">
+                  <h3 className={`text-2xl md:text-3xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                    {area.title}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {area.description}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
