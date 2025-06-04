@@ -19,7 +19,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const lastScrollTime = useRef(0);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log('useSectionTransition - Current state:', { 
+  console.log('useSectionTransition - Estado atual:', { 
     activeSection, 
     activeSectionIndex, 
     sectionsLength: sections.length,
@@ -27,31 +27,38 @@ export const useSectionTransition = (sections: Section[]) => {
     isInitialized
   });
 
-  // Simplified initialization
+  // Inicialização simplificada
   useEffect(() => {
-    console.log('useSectionTransition - Initializing...');
+    console.log('useSectionTransition - Inicializando...');
     
     const hash = location.hash.substring(1);
-    const targetSection = hash && sections.find(s => s.id === hash) ? hash : 'home';
-    const targetIndex = sections.findIndex(s => s.id === targetSection);
-    const finalIndex = targetIndex >= 0 ? targetIndex : 0;
+    let targetSection = 'home';
+    let targetIndex = 0;
     
-    console.log('useSectionTransition - Setting initial state:', { targetSection, finalIndex });
+    if (hash && sections.find(s => s.id === hash)) {
+      targetSection = hash;
+      targetIndex = sections.findIndex(s => s.id === hash);
+    }
+    
+    console.log('useSectionTransition - Estado inicial:', { targetSection, targetIndex });
     
     setActiveSection(targetSection);
-    setActiveSectionIndex(finalIndex);
+    setActiveSectionIndex(targetIndex);
     
-    // Set initial position immediately without animation
+    // Posição inicial sem animação
     if (containerRef.current) {
-      gsap.set(containerRef.current, { x: `-${finalIndex * 100}vw` });
+      gsap.set(containerRef.current, { 
+        x: `-${targetIndex * 100}vw`,
+        force3D: true
+      });
     }
     
     setIsInitialized(true);
-    console.log('useSectionTransition - Initialization complete');
+    console.log('useSectionTransition - Inicialização completa');
   }, [location.hash, sections]);
 
   const transitionToSection = useCallback((sectionId: string) => {
-    console.log('transitionToSection called:', { 
+    console.log('transitionToSection chamado:', { 
       sectionId, 
       activeSection, 
       isTransitioning: isTransitioning.current,
@@ -61,49 +68,53 @@ export const useSectionTransition = (sections: Section[]) => {
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
     
     if (sectionIndex === -1) {
-      console.warn('Section not found:', sectionId);
+      console.warn('Seção não encontrada:', sectionId);
       return;
     }
 
     if (activeSection === sectionId && activeSectionIndex === sectionIndex) {
-      console.log('Already on target section:', sectionId);
+      console.log('Já está na seção alvo:', sectionId);
       return;
     }
     
-    // Force stop any ongoing transitions
-    if (isTransitioning.current && containerRef.current) {
-      gsap.killTweensOf(containerRef.current);
+    if (isTransitioning.current) {
+      console.log('Já em transição, ignorando...');
+      return;
     }
     
-    console.log('Starting transition to:', sectionId, 'Index:', sectionIndex);
+    console.log('Iniciando transição para:', sectionId, 'Índice:', sectionIndex);
     isTransitioning.current = true;
     
-    // Update URL hash
+    // Atualizar URL hash
     if (location.pathname === '/') {
       window.history.pushState(null, '', `#${sectionId}`);
     }
     
-    // Set new active section immediately
+    // Atualizar estado imediatamente
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animate transition
+    // Animar transição
     if (containerRef.current) {
       const targetX = -sectionIndex * 100;
       
-      console.log('Animating to position:', targetX + 'vw');
+      console.log('Animando para posição:', targetX + 'vw');
+      
+      // Parar qualquer animação anterior
+      gsap.killTweensOf(containerRef.current);
       
       gsap.to(containerRef.current, {
         x: `${targetX}vw`,
-        duration: 0.6,
+        duration: 0.8,
         ease: 'power2.inOut',
+        force3D: true,
         onComplete: () => {
           isTransitioning.current = false;
-          console.log('Transition completed for:', sectionId);
+          console.log('Transição completada para:', sectionId);
         },
         onInterrupt: () => {
           isTransitioning.current = false;
-          console.log('Transition interrupted for:', sectionId);
+          console.log('Transição interrompida para:', sectionId);
         }
       });
     } else {
@@ -111,10 +122,10 @@ export const useSectionTransition = (sections: Section[]) => {
     }
   }, [activeSection, activeSectionIndex, sections, location.pathname]);
 
-  // Handle keyboard navigation with better logic
+  // Navegação por teclado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isInitialized) return;
+      if (!isInitialized || isTransitioning.current) return;
       
       let newIndex = activeSectionIndex;
       
@@ -127,7 +138,7 @@ export const useSectionTransition = (sections: Section[]) => {
       }
       
       if (newIndex !== activeSectionIndex && sections[newIndex]) {
-        console.log('Keyboard navigation to:', sections[newIndex].id);
+        console.log('Navegação por teclado para:', sections[newIndex].id);
         transitionToSection(sections[newIndex].id);
       }
     };
@@ -136,20 +147,20 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
 
-  // Improved scroll navigation
+  // Navegação por scroll
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (!isInitialized) return;
+      if (!isInitialized || isTransitioning.current) return;
       
       const now = Date.now();
       
-      // Reduced throttle time and improved logic
-      if (now - lastScrollTime.current < 600) {
+      // Throttle reduzido
+      if (now - lastScrollTime.current < 400) {
         e.preventDefault();
         return;
       }
 
-      if (Math.abs(e.deltaY) < 30) return;
+      if (Math.abs(e.deltaY) < 20) return;
 
       e.preventDefault();
       lastScrollTime.current = now;
@@ -157,22 +168,22 @@ export const useSectionTransition = (sections: Section[]) => {
       let newIndex = activeSectionIndex;
       
       if (e.deltaY > 0) {
-        // Scroll down - next section
+        // Scroll para baixo - próxima seção
         newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
       } else {
-        // Scroll up - previous section
+        // Scroll para cima - seção anterior
         newIndex = Math.max(activeSectionIndex - 1, 0);
       }
       
       if (newIndex !== activeSectionIndex && sections[newIndex]) {
-        console.log('Scroll navigation to:', sections[newIndex].id);
+        console.log('Navegação por scroll para:', sections[newIndex].id, 'de', activeSection);
         transitionToSection(sections[newIndex].id);
       }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection]);
 
   return {
     activeSection,

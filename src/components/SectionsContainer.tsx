@@ -33,18 +33,17 @@ const SectionsContainer: React.FC = () => {
     isInitialized
   });
 
-  // Listen for custom section change events with improved handling
+  // Listener para eventos de mudança de seção
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
       const targetSection = event.detail;
-      console.log('SectionsContainer: Section change event received:', targetSection);
+      console.log('SectionsContainer: Evento de mudança de seção recebido:', targetSection);
       
-      // Validate that the section exists
       const sectionExists = sections.find(s => s.id === targetSection);
       if (sectionExists) {
         transitionToSection(targetSection);
       } else {
-        console.warn('SectionsContainer: Invalid section requested:', targetSection);
+        console.warn('SectionsContainer: Seção inválida solicitada:', targetSection);
       }
     };
 
@@ -55,23 +54,22 @@ const SectionsContainer: React.FC = () => {
     };
   }, [transitionToSection, sections]);
 
-  // Show minimal loading state
   if (!isInitialized) {
     return (
       <div className="w-full h-screen bg-transparent flex items-center justify-center">
-        <div className="text-current opacity-50">Inicializando...</div>
+        <div className="text-current opacity-50">Carregando...</div>
       </div>
     );
   }
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Horizontal container */}
       <div 
         ref={containerRef}
-        className="flex h-full will-change-transform"
+        className="flex h-full"
         style={{ 
-          width: `${sections.length * 100}vw`
+          width: `${sections.length * 100}vw`,
+          willChange: 'transform'
         }}
       >
         {sections.map((section, index) => {
