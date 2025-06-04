@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollArea } from '../ui/scroll-area';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
+import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,65 +15,16 @@ const PracticeAreas = () => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const { theme } = useTheme();
-  const { pageTexts, isLoading } = useAdminData();
+  const { pageTexts, servicePages, isLoading } = useSupabaseDataNew();
   const isDark = theme === 'dark';
 
-  const practiceAreas = [
-    {
-      id: 'familia',
-      title: pageTexts.familiaTitle,
-      description: pageTexts.familiaDescription,
-      href: '/areas/familia'
-    },
-    {
-      id: 'tributario',
-      title: pageTexts.tributarioTitle,
-      description: pageTexts.tributarioDescription,
-      href: '/areas/tributario'
-    },
-    {
-      id: 'empresarial',
-      title: pageTexts.empresarialTitle,
-      description: pageTexts.empresarialDescription,
-      href: '/areas/empresarial'
-    },
-    {
-      id: 'trabalho',
-      title: pageTexts.trabalhoTitle,
-      description: pageTexts.trabalhoDescription,
-      href: '/areas/trabalho'
-    },
-    {
-      id: 'constitucional',
-      title: pageTexts.constitucionalTitle,
-      description: pageTexts.constitucionalDescription,
-      href: '/areas/constitucional'
-    },
-    {
-      id: 'administrativo',
-      title: pageTexts.administrativoTitle,
-      description: pageTexts.administrativoDescription,
-      href: '/areas/administrativo'
-    },
-    {
-      id: 'previdenciario',
-      title: pageTexts.previdenciarioTitle,
-      description: pageTexts.previdenciarioDescription,
-      href: '/areas/previdenciario'
-    },
-    {
-      id: 'consumidor',
-      title: pageTexts.consumidorTitle,
-      description: pageTexts.consumidorDescription,
-      href: '/areas/consumidor'
-    },
-    {
-      id: 'civil',
-      title: pageTexts.civilTitle,
-      description: pageTexts.civilDescription,
-      href: '/areas/civil'
-    }
-  ];
+  // Usar servicePages do Supabase em vez de dados hardcoded
+  const practiceAreas = servicePages.map(page => ({
+    id: page.id,
+    title: page.title,
+    description: page.description,
+    href: page.href?.startsWith('/') ? page.href : `/servicos/${page.href}`
+  }));
 
   useEffect(() => {
     if (isLoading) return;
@@ -129,9 +80,9 @@ const PracticeAreas = () => {
 
   if (isLoading) {
     return (
-      <section id="areas" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+      <section id="areas" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-black'}`}>
         <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
       </section>
     );
@@ -141,7 +92,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`h-full py-2 px-4 md:py-4 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className="bg-black text-white h-full py-2 px-4 md:py-4 md:px-6 lg:px-24 relative"
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -152,7 +103,7 @@ const PracticeAreas = () => {
       <div className="max-w-6xl mx-auto flex flex-col h-full justify-center">
         <h2 
           ref={titleRef}
-          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
+          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 font-canela text-center text-white"
         >
           {pageTexts.areasTitle}
         </h2>
@@ -167,14 +118,14 @@ const PracticeAreas = () => {
                 className="group block"
               >
                 <div 
-                  className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105`}
+                  className="bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105"
                   ref={el => cardsRef.current[index] = el}
                 >
                   <div className="p-3">
-                    <h3 className={`text-base font-canela mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                    <h3 className="text-base font-canela mb-1 text-white">
                       {area.title}
                     </h3>
-                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className="text-xs text-gray-300">
                       {area.description}
                     </p>
                   </div>
@@ -194,14 +145,14 @@ const PracticeAreas = () => {
                     className="group block"
                   >
                     <div 
-                      className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full`}
+                      className="bg-black/80 border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full"
                       ref={el => cardsRef.current[index] = el}
                     >
                       <div className="p-4 lg:p-6">
-                        <h3 className={`text-lg lg:text-xl xl:text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+                        <h3 className="text-lg lg:text-xl xl:text-2xl font-canela mb-3 text-white">
                           {area.title}
                         </h3>
-                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        <p className="text-sm text-gray-300">
                           {area.description}
                         </p>
                       </div>

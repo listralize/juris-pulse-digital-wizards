@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import ServiceLandingLayout from './ServiceLandingLayout';
 import { ServicePage, CategoryInfo } from '../types/adminTypes';
+import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 
 interface DynamicServicePageProps {
   pageData: ServicePage;
@@ -9,6 +10,8 @@ interface DynamicServicePageProps {
 }
 
 const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categories }) => {
+  const { servicePages } = useSupabaseDataNew();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -18,22 +21,13 @@ const DynamicServicePage: React.FC<DynamicServicePageProps> = ({ pageData, categ
   const mainAreaPath = `/areas/${pageData.category}`;
 
   const getRelatedServices = (): Array<{ name: string; path: string }> => {
-    try {
-      const savedPages = localStorage.getItem('adminServicePages');
-      if (savedPages) {
-        const allPages: ServicePage[] = JSON.parse(savedPages);
-        return allPages
-          .filter(page => page.category === pageData.category && page.id !== pageData.id)
-          .slice(0, 3)
-          .map(page => ({
-            name: page.title,
-            path: page.href?.startsWith('/') ? page.href : `/servicos/${page.href}`
-          }));
-      }
-    } catch (error) {
-      console.error('Erro ao carregar serviços relacionados:', error);
-    }
-    return [];
+    return servicePages
+      .filter(page => page.category === pageData.category && page.id !== pageData.id)
+      .slice(0, 3)
+      .map(page => ({
+        name: page.title,
+        path: page.href?.startsWith('/') ? page.href : `/servicos/${page.href}`
+      }));
   };
 
   // Transform testimonials to match ServiceLandingLayout expectations

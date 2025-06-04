@@ -2,61 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { Route } from 'react-router-dom';
 import { ServicePage, CategoryInfo } from '../types/adminTypes';
-import { categories as defaultCategories } from '../types/adminTypes';
+import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import DynamicServicePage from './DynamicServicePage';
 
 export const useDynamicServiceRoutes = () => {
-  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
-  const [categories, setCategories] = useState<CategoryInfo[]>(defaultCategories);
+  const { servicePages, categories, isLoading } = useSupabaseDataNew();
 
-  useEffect(() => {
-    const loadServicePages = () => {
-      try {
-        const savedPages = localStorage.getItem('adminServicePages');
-        if (savedPages) {
-          const parsedPages = JSON.parse(savedPages);
-          if (Array.isArray(parsedPages)) {
-            setServicePages(parsedPages);
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar páginas de serviços:', error);
-      }
-    };
-
-    const loadCategories = () => {
-      try {
-        const savedCategories = localStorage.getItem('adminCategories');
-        if (savedCategories) {
-          const parsedCategories = JSON.parse(savedCategories);
-          if (Array.isArray(parsedCategories)) {
-            setCategories(parsedCategories);
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
-      }
-    };
-
-    loadServicePages();
-    loadCategories();
-
-    const handleServicePagesUpdate = (event: CustomEvent) => {
-      setServicePages(event.detail);
-    };
-
-    const handleCategoriesUpdate = (event: CustomEvent) => {
-      setCategories(event.detail);
-    };
-
-    window.addEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
-    window.addEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
-
-    return () => {
-      window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
-      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
-    };
-  }, []);
+  if (isLoading) {
+    return [];
+  }
 
   return servicePages.map((page) => {
     if (!page.href) return null;

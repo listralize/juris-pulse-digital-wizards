@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../types/adminTypes';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Plus, ArrowLeft, Save, Settings } from 'lucide-react';
+import { Plus, ArrowLeft, Save, Settings, RefreshCw } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { CategoryGrid } from './service-pages/CategoryGrid';
 import { PagesList } from './service-pages/PagesList';
@@ -34,6 +33,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Sincronizar páginas locais com as páginas recebidas apenas quando necessário
   useEffect(() => {
@@ -57,9 +57,25 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     ));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log('Salvando páginas locais:', localPages.length);
-    onSave([...localPages]);
+    setIsRefreshing(true);
+    try {
+      await onSave([...localPages]);
+      // Forçar atualização da tela após salvar
+      window.dispatchEvent(new CustomEvent('servicePagesUpdated'));
+    } catch (error) {
+      console.error('Erro ao salvar páginas:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    // Disparar evento para recarregar dados
+    window.dispatchEvent(new CustomEvent('refreshSupabaseData'));
+    setTimeout(() => setIsRefreshing(false), 2000);
   };
 
   const addNewServicePage = () => {
@@ -143,11 +159,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               Gerenciar Páginas por Área do Direito
             </CardTitle>
             <div className="flex gap-2">
+              <Button onClick={handleRefresh} size="sm" variant="outline" disabled={isRefreshing}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Atualizar
+              </Button>
               <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
                 <Settings className="w-4 h-4 mr-2" />
                 Editar Categorias
               </Button>
-              <Button onClick={handleSave} size="sm" variant="outline">
+              <Button onClick={handleSave} size="sm" variant="outline" disabled={isRefreshing}>
                 <Save className="w-4 h-4 mr-2" />
                 Salvar Tudo
               </Button>
@@ -191,7 +211,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Página
               </Button>
-              <Button onClick={handleSave} size="sm" variant="outline">
+              <Button onClick={handleSave} size="sm" variant="outline" disabled={isRefreshing}>
                 <Save className="w-4 h-4 mr-2" />
                 Salvar Tudo
               </Button>
@@ -229,7 +249,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 Editando: {selectedPage.title || 'Nova Página'}
               </CardTitle>
             </div>
-            <Button onClick={handleSave} size="sm" variant="outline">
+            <Button onClick={handleSave} size="sm" variant="outline" disabled={isRefreshing}>
               <Save className="w-4 h-4 mr-2" />
               Salvar
             </Button>

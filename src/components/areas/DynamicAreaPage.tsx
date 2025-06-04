@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../PracticeAreaLayout';
 import { Card, CardContent } from '../ui/card';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
+import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { ServicePage } from '../../types/adminTypes';
 
 interface DynamicAreaPageProps {
@@ -22,7 +22,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   icon,
   introText
 }) => {
-  const { servicePages, isLoading } = useAdminData();
+  const { servicePages, isLoading } = useSupabaseDataNew();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
@@ -37,62 +37,6 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
 
   // Filtrar serviços da categoria específica
   const areaServices = servicePages.filter(page => page.category === areaKey);
-
-  // Adicionar serviços estáticos para áreas específicas
-  const getStaticServices = () => {
-    if (areaKey === 'familia') {
-      return [
-        {
-          id: 'divorcio-separacao',
-          title: 'Divórcio e Separação',
-          description: 'Assessoria completa em processos de divórcio consensual e litigioso, dissolução de união estável e partilha de bens.',
-          category: 'familia',
-          href: '/servicos/divorcio-separacao',
-          benefits: [],
-          process: [],
-          faq: [],
-          testimonials: []
-        },
-        {
-          id: 'guarda-filhos',
-          title: 'Guarda de Filhos',
-          description: 'Assessoria especializada em ações de guarda, regulamentação de visitas e proteção dos interesses das crianças.',
-          category: 'familia',
-          href: '/servicos/guarda-filhos',
-          benefits: [],
-          process: [],
-          faq: [],
-          testimonials: []
-        },
-        {
-          id: 'pensao-alimenticia',
-          title: 'Pensão Alimentícia',
-          description: 'Cálculo, revisão e execução de pensão alimentícia para filhos e ex-cônjuges.',
-          category: 'familia',
-          href: '/servicos/pensao-alimenticia',
-          benefits: [],
-          process: [],
-          faq: [],
-          testimonials: []
-        },
-        {
-          id: 'inventario-partilha',
-          title: 'Inventário e Partilha',
-          description: 'Resolução de sucessão familiar com inventários judiciais e extrajudiciais.',
-          category: 'familia',
-          href: '/servicos/inventario-partilha',
-          benefits: [],
-          process: [],
-          faq: [],
-          testimonials: []
-        }
-      ];
-    }
-    return [];
-  };
-
-  const staticServices = getStaticServices();
-  const allServices = [...areaServices, ...staticServices];
 
   return (
     <PracticeAreaLayout
@@ -118,14 +62,15 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
           </p>
         </div>
 
-        {allServices.length > 0 ? (
+        {areaServices.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allServices.map((service, serviceIndex) => (
+            {areaServices.map((service, serviceIndex) => (
               <Card 
                 key={serviceIndex}
                 className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
                 onClick={() => {
-                  navigate(service.href);
+                  const href = service.href?.startsWith('/') ? service.href : `/servicos/${service.href}`;
+                  navigate(href);
                 }}
               >
                 <CardContent className="p-6">
