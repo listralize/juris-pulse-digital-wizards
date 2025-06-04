@@ -129,7 +129,7 @@ const PracticeAreas = () => {
 
   if (isLoading) {
     return (
-      <section id="areas" className={`min-h-screen flex flex-col justify-center py-20 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+      <section id="areas" className={`min-h-screen flex flex-col justify-center py-4 px-4 md:py-20 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="flex justify-center items-center">
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -141,7 +141,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`h-full py-8 px-4 md:py-20 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full py-4 px-4 md:py-20 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -152,14 +152,14 @@ const PracticeAreas = () => {
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         <h2 
           ref={titleRef}
-          className={`text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-6 md:mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-12 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
         >
           {pageTexts.areasTitle}
         </h2>
         
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 pb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8 pb-4">
               {practiceAreas.map((area, index) => (
                 <Link 
                   key={area.id}
@@ -171,7 +171,7 @@ const PracticeAreas = () => {
                     ref={el => cardsRef.current[index] = el}
                   >
                     <div className="p-4 md:p-6 lg:p-8">
-                      <h3 className={`text-lg md:text-xl lg:text-2xl xl:text-3xl font-canela mb-3 md:mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`text-base md:text-xl lg:text-2xl xl:text-3xl font-canela mb-2 md:mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
                         {area.title}
                       </h3>
                       <p className={`text-xs md:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>

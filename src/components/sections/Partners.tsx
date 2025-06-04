@@ -52,7 +52,7 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`h-full w-full py-8 px-4 md:py-16 md:px-6 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full w-full py-4 px-4 md:py-16 md:px-6 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -63,7 +63,7 @@ const Partners = () => {
       <div className="max-w-6xl mx-auto w-full">
         <h2 
           ref={titleRef}
-          className={`text-2xl md:text-4xl lg:text-5xl xl:text-6xl mb-8 md:mb-16 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-16 text-center font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
           Nossa Equipe
         </h2>
@@ -78,8 +78,8 @@ const Partners = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {teamMembers.map((member, index) => (
                 <CarouselItem key={index} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <div className={`p-4 md:p-6 h-full ${isDark ? 'bg-white/5' : 'bg-white'} rounded-lg shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col`}>
-                    <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200">
+                  <div className={`p-3 md:p-6 h-full ${isDark ? 'bg-white/5' : 'bg-white'} rounded-lg shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col`}>
+                    <div className="w-20 h-20 md:w-32 md:h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gray-200">
                       {member.image ? (
                         <img 
                           src={member.image} 
@@ -87,17 +87,17 @@ const Partners = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className={`w-full h-full flex items-center justify-center text-2xl md:text-4xl ${isDark ? 'bg-white/10' : 'bg-gray-300'}`}>
+                        <div className={`w-full h-full flex items-center justify-center text-xl md:text-4xl ${isDark ? 'bg-white/10' : 'bg-gray-300'}`}>
                           👤
                         </div>
                       )}
                     </div>
                     
                     <div className="text-center flex-1 flex flex-col">
-                      <h3 className={`text-lg md:text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`text-base md:text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                         {member.name}
                       </h3>
-                      <p className={`text-xs md:text-sm mb-3 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                      <p className={`text-xs md:text-sm mb-2 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
                         {member.title || 'Advogado'}
                       </p>
                       <p className={`text-xs md:text-sm leading-relaxed flex-1 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
