@@ -141,7 +141,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`h-full py-6 px-4 md:py-8 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full py-2 px-4 md:py-4 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -152,14 +152,14 @@ const PracticeAreas = () => {
       <div className="max-w-6xl mx-auto flex flex-col h-full justify-center">
         <h2 
           ref={titleRef}
-          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-canela text-center ${isDark ? 'text-white' : 'text-black'}`}
         >
           {pageTexts.areasTitle}
         </h2>
         
         <div className="flex-1 flex items-center">
           {/* Mobile: Grid compacto sem scroll */}
-          <div className="md:hidden grid grid-cols-1 gap-3 w-full max-h-[75vh] overflow-y-auto">
+          <div className="md:hidden grid grid-cols-1 gap-2 w-full max-h-[70vh] overflow-y-auto">
             {practiceAreas.map((area, index) => (
               <Link 
                 key={area.id}
@@ -170,11 +170,11 @@ const PracticeAreas = () => {
                   className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105`}
                   ref={el => cardsRef.current[index] = el}
                 >
-                  <div className="p-4">
-                    <h3 className={`text-lg font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                  <div className="p-3">
+                    <h3 className={`text-base font-canela mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
                       {area.title}
                     </h3>
-                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {area.description}
                     </p>
                   </div>
@@ -185,7 +185,7 @@ const PracticeAreas = () => {
 
           {/* Desktop: Grid com scroll area centralizado */}
           <div className="hidden md:block w-full">
-            <ScrollArea className="h-[65vh]">
+            <ScrollArea className="h-[60vh]">
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 pb-4">
                 {practiceAreas.map((area, index) => (
                   <Link 

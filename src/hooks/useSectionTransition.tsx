@@ -30,12 +30,12 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Função para verificar se o usuário rolou até o final da seção
   const isAtBottom = (element: HTMLElement) => {
-    return element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
+    return element.scrollTop + element.clientHeight >= element.scrollHeight - 10; // 10px de tolerância
   };
 
   // Função para verificar se o usuário está no topo da seção
   const isAtTop = (element: HTMLElement) => {
-    return element.scrollTop <= 10;
+    return element.scrollTop <= 10; // 10px de tolerância
   };
 
   // Inicialização única
@@ -61,7 +61,7 @@ export const useSectionTransition = (sections: Section[]) => {
     // Posição inicial sem animação
     if (containerRef.current) {
       gsap.set(containerRef.current, { 
-        y: `-${targetIndex * 100}vh`,
+        x: `-${targetIndex * 100}vw`,
         force3D: true
       });
     }
@@ -69,7 +69,7 @@ export const useSectionTransition = (sections: Section[]) => {
     hasInitialized.current = true;
     setIsInitialized(true);
     console.log('useSectionTransition - Inicialização completa');
-  }, []);
+  }, []); // Dependências vazias para rodar apenas uma vez
 
   const transitionToSection = useCallback((sectionId: string) => {
     console.log('transitionToSection chamado:', { 
@@ -108,17 +108,17 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animar transição vertical
+    // Animar transição
     if (containerRef.current) {
-      const targetY = -sectionIndex * 100;
+      const targetX = -sectionIndex * 100;
       
-      console.log('Animando para posição:', targetY + 'vh');
+      console.log('Animando para posição:', targetX + 'vw');
       
       // Parar qualquer animação anterior
       gsap.killTweensOf(containerRef.current);
       
       gsap.to(containerRef.current, {
-        y: `${targetY}vh`,
+        x: `${targetX}vw`,
         duration: 0.8,
         ease: 'power2.inOut',
         force3D: true,
@@ -145,10 +145,10 @@ export const useSectionTransition = (sections: Section[]) => {
       
       let newIndex = activeSectionIndex;
       
-      if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
         newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
-      } else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         newIndex = Math.max(activeSectionIndex - 1, 0);
       }
@@ -163,7 +163,7 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
 
-  // Navegação por scroll melhorada
+  // Navegação por scroll
   useEffect(() => {
     if (!isInitialized) return;
     
@@ -173,22 +173,42 @@ export const useSectionTransition = (sections: Section[]) => {
       const isMobile = window.innerWidth <= 768;
       const currentSection = sectionsRef.current[activeSectionIndex];
       
-      // Verificar se estamos em uma seção que permite scroll interno
-      if (currentSection) {
-        const scrollableElements = currentSection.querySelectorAll('[data-radix-scroll-area-viewport], .overflow-y-auto, #contact');
+      // Se estamos na seção de contato
+      if (activeSection === 'contact' && currentSection) {
+        const contactElement = currentSection.querySelector('#contact') || currentSection;
         
-        for (const element of scrollableElements) {
-          const htmlElement = element as HTMLElement;
+        if (e.deltaY > 0) {
+          // Rolando para baixo - verifica se já chegou ao final
+          if (!isAtBottom(contactElement as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        } else {
+          // Rolando para cima - verifica se está no topo
+          if (!isAtTop(contactElement as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        }
+      }
+      
+      // Se estamos na seção de áreas de atuação no desktop
+      if (activeSection === 'areas' && !isMobile && currentSection) {
+        const scrollArea = currentSection.querySelector('[data-radix-scroll-area-viewport]');
+        
+        if (scrollArea) {
+          const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
           
-          if (e.deltaY > 0) {
-            // Rolando para baixo
-            if (!isAtBottom(htmlElement)) {
-              return; // Permite scroll interno
+          // Se está rolando para baixo
+          if (scrollDirection === 'down') {
+            // Se não chegou ao final, permite o scroll interno
+            if (!isAtBottom(scrollArea as HTMLElement)) {
+              return; // Permite o scroll interno
             }
-          } else {
-            // Rolando para cima
-            if (!isAtTop(htmlElement)) {
-              return; // Permite scroll interno
+          } 
+          // Se está rolando para cima
+          else {
+            // Se não está no topo, permite o scroll interno
+            if (!isAtTop(scrollArea as HTMLElement)) {
+              return; // Permite o scroll interno
             }
           }
         }
@@ -196,13 +216,13 @@ export const useSectionTransition = (sections: Section[]) => {
       
       const now = Date.now();
       
-      // Throttle mais rigoroso
-      if (now - lastScrollTime.current < 800) {
+      // Throttle para evitar scroll muito rápido
+      if (now - lastScrollTime.current < 600) {
         e.preventDefault();
         return;
       }
 
-      if (Math.abs(e.deltaY) < 50) return;
+      if (Math.abs(e.deltaY) < 30) return;
 
       e.preventDefault();
       lastScrollTime.current = now;
@@ -210,8 +230,10 @@ export const useSectionTransition = (sections: Section[]) => {
       let newIndex = activeSectionIndex;
       
       if (e.deltaY > 0) {
+        // Scroll para baixo - próxima seção
         newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
       } else {
+        // Scroll para cima - seção anterior
         newIndex = Math.max(activeSectionIndex - 1, 0);
       }
       
