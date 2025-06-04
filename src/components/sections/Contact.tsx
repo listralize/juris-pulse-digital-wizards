@@ -42,11 +42,15 @@ const Contact = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto flex flex-col justify-center`}
-      style={{ paddingTop: '20px', paddingBottom: '20px', minHeight: '100vh' }}
+      className={`w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} overflow-y-auto`}
+      style={{ 
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        height: '100vh'
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={titleRef} className="mb-6 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div ref={titleRef} className="mb-8 text-center">
           <h2 className={`text-3xl md:text-4xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             {pageTexts.contactTitle}
           </h2>
@@ -58,7 +62,7 @@ const Contact = () => {
         
         <div 
           ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8"
         >
           <div className="lg:col-span-2 space-y-4 flex flex-col">
             <div className="w-full">
