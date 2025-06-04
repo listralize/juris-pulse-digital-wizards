@@ -35,7 +35,8 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
     categories: supabaseCategories,
     servicePages: supabaseServicePages,
     refreshData: supabaseRefreshData,
-    saveCategories: saveSupabaseCategories
+    saveCategories: saveSupabaseCategories,
+    saveServicePages: saveSupabaseServicePages
   } = useSupabaseDataNew();
 
   const hasLocalData = localTeamMembers.length > 0 || localServicePages.length > 0 || localCategories.length > 0 || localPageTexts.heroTitle;
@@ -50,13 +51,13 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
     supabaseServicePages: supabaseServicePages.length
   });
 
-  // MIGRAÇÃO FORÇADA DE CATEGORIAS PADRÃO - NOVA VERSÃO
-  const forceCategoriesMigration = async () => {
-    console.log('🔥 FORÇANDO MIGRAÇÃO DE CATEGORIAS PADRÃO');
+  // MIGRAÇÃO FORÇADA COMPLETA - NOVA VERSÃO
+  const forceCompleteMigration = async () => {
+    console.log('🔥 FORÇANDO MIGRAÇÃO COMPLETA - CATEGORIAS + PÁGINAS');
     setIsProcessing(true);
     
     try {
-      // Definir categorias padrão sempre
+      // 1. MIGRAR CATEGORIAS PADRÃO
       const defaultCategories = [
         {
           id: 'familia-' + Date.now(),
@@ -141,21 +142,101 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
         }
       ];
 
-      console.log('📋 Migrando categorias padrão:', defaultCategories.length);
-      
+      console.log('📋 1. Migrando categorias padrão...');
       await saveSupabaseCategories(defaultCategories);
       
-      // Aguardar e recarregar múltiplas vezes
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // 2. AGUARDAR CATEGORIAS SEREM PROCESSADAS
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 3. MIGRAR PÁGINAS DE SERVIÇOS (USAR DADOS LOCAIS SE DISPONÍVEIS)
+      let pagesToMigrate = localServicePages;
+      
+      // Se não há páginas locais, criar páginas de exemplo
+      if (!pagesToMigrate || pagesToMigrate.length === 0) {
+        console.log('📄 Criando páginas de serviços de exemplo...');
+        pagesToMigrate = [
+          {
+            id: 'divorcio-' + Date.now(),
+            title: 'Divórcio',
+            description: 'Orientação completa para processo de divórcio',
+            category: 'familia',
+            href: 'divorcio',
+            benefits: [
+              { title: 'Agilidade', description: 'Processo rápido e eficiente' },
+              { title: 'Segurança Jurídica', description: 'Proteção total dos seus direitos' }
+            ],
+            process: [
+              { step: 1, title: 'Consulta Inicial', description: 'Análise do seu caso' },
+              { step: 2, title: 'Documentação', description: 'Preparação dos documentos' }
+            ],
+            faq: [
+              { question: 'Quanto tempo demora?', answer: 'O processo pode levar de 3 a 6 meses.' }
+            ],
+            testimonials: [
+              { name: 'Maria Silva', text: 'Excelente atendimento!', role: 'Cliente' }
+            ]
+          },
+          {
+            id: 'planejamento-tributario-' + Date.now(),
+            title: 'Planejamento Tributário',
+            description: 'Otimização fiscal para sua empresa',
+            category: 'tributario',
+            href: 'planejamento-tributario',
+            benefits: [
+              { title: 'Economia', description: 'Redução significativa de impostos' },
+              { title: 'Compliance', description: 'Conformidade com a legislação' }
+            ],
+            process: [
+              { step: 1, title: 'Análise Fiscal', description: 'Diagnóstico da situação atual' },
+              { step: 2, title: 'Estratégia', description: 'Desenvolvimento do plano' }
+            ],
+            faq: [
+              { question: 'É legal?', answer: 'Sim, totalmente dentro da legislação.' }
+            ],
+            testimonials: [
+              { name: 'João Santos', text: 'Economizei muito!', role: 'Empresário' }
+            ]
+          },
+          {
+            id: 'constituicao-empresa-' + Date.now(),
+            title: 'Constituição de Empresa',
+            description: 'Abertura de empresa de forma rápida e segura',
+            category: 'empresarial',
+            href: 'constituicao-empresa',
+            benefits: [
+              { title: 'Rapidez', description: 'Processo otimizado' },
+              { title: 'Suporte Completo', description: 'Acompanhamento total' }
+            ],
+            process: [
+              { step: 1, title: 'Planejamento', description: 'Definição da estrutura' },
+              { step: 2, title: 'Registro', description: 'Formalização da empresa' }
+            ],
+            faq: [
+              { question: 'Qual o prazo?', answer: 'De 15 a 30 dias úteis.' }
+            ],
+            testimonials: [
+              { name: 'Ana Costa', text: 'Processo muito tranquilo!', role: 'Empreendedora' }
+            ]
+          }
+        ];
+      }
+      
+      console.log('📄 2. Migrando páginas de serviços:', pagesToMigrate.length);
+      await saveSupabaseServicePages(pagesToMigrate);
+      
+      // 4. RECARREGAR DADOS MÚLTIPLAS VEZES
+      console.log('🔄 3. Recarregando dados...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
       await supabaseRefreshData();
       await new Promise(resolve => setTimeout(resolve, 1000));
       await supabaseRefreshData();
       
-      console.log(`✅ ${defaultCategories.length} categorias padrão migradas!`);
-      alert(`✅ ${defaultCategories.length} categorias padrão migradas com sucesso!`);
+      console.log(`✅ MIGRAÇÃO COMPLETA FINALIZADA!`);
+      alert(`✅ Migração completa realizada com sucesso!\n${defaultCategories.length} categorias + ${pagesToMigrate.length} páginas migradas!`);
+      
     } catch (error) {
-      console.error('❌ Erro na migração de categorias:', error);
-      alert(`❌ Erro: ${error.message}`);
+      console.error('❌ Erro na migração completa:', error);
+      alert(`❌ Erro na migração: ${error.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -165,6 +246,10 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
   const migrationStatus = () => {
     if (supabaseCategories.length === 0) {
       return 'categories_missing';
+    }
+    
+    if (supabaseServicePages.length === 0 && supabaseCategories.length > 0) {
+      return 'pages_missing';
     }
     
     if (hasSupabaseData && hasLocalData) {
@@ -232,18 +317,38 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
           <div className={`p-4 rounded-lg border ${isDark ? 'border-red-500/20 bg-red-500/10' : 'border-red-500/20 bg-red-50'}`}>
             <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-red-400' : 'text-red-700'}`}>
               <AlertCircle className="w-4 h-4" />
-              CATEGORIAS NÃO ENCONTRADAS NO SUPABASE!
+              CATEGORIAS NÃO ENCONTRADAS!
             </h3>
             <p className={`text-sm mb-3 ${isDark ? 'text-red-200' : 'text-red-600'}`}>
-              O sistema precisa das categorias para funcionar corretamente. Vamos migrar as categorias padrão agora.
+              O sistema precisa das categorias para funcionar.
             </p>
             <Button 
-              onClick={forceCategoriesMigration}
+              onClick={forceCompleteMigration}
               disabled={isProcessing}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               <Zap className="w-4 h-4 mr-2" />
-              MIGRAR CATEGORIAS PADRÃO
+              MIGRAÇÃO COMPLETA AGORA
+            </Button>
+          </div>
+        )}
+
+        {status === 'pages_missing' && (
+          <div className={`p-4 rounded-lg border ${isDark ? 'border-orange-500/20 bg-orange-500/10' : 'border-orange-500/20 bg-orange-50'}`}>
+            <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-orange-400' : 'text-orange-700'}`}>
+              <AlertCircle className="w-4 h-4" />
+              PÁGINAS DE SERVIÇOS NÃO ENCONTRADAS!
+            </h3>
+            <p className={`text-sm mb-3 ${isDark ? 'text-orange-200' : 'text-orange-600'}`}>
+              Categorias existem mas não há páginas de serviços vinculadas.
+            </p>
+            <Button 
+              onClick={forceCompleteMigration}
+              disabled={isProcessing}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              MIGRAR PÁGINAS AGORA
             </Button>
           </div>
         )}
@@ -264,9 +369,17 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               <Clock className="w-4 h-4" />
               Migração Parcial
             </h3>
-            <p className={`text-sm ${isDark ? 'text-orange-200' : 'text-orange-600'}`}>
+            <p className={`text-sm mb-3 ${isDark ? 'text-orange-200' : 'text-orange-600'}`}>
               Alguns dados foram migrados, mas ainda há inconsistências.
             </p>
+            <Button 
+              onClick={forceCompleteMigration}
+              disabled={isProcessing}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              COMPLETAR MIGRAÇÃO
+            </Button>
           </div>
         ) : status === 'pending' ? (
           <div className={`p-4 rounded-lg border ${isDark ? 'border-yellow-500/20 bg-yellow-500/10' : 'border-yellow-500/20 bg-yellow-50'}`}>
@@ -274,18 +387,34 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               <AlertCircle className="w-4 h-4" />
               Migração Pendente
             </h3>
-            <p className={`text-sm ${isDark ? 'text-yellow-200' : 'text-yellow-600'}`}>
+            <p className={`text-sm mb-3 ${isDark ? 'text-yellow-200' : 'text-yellow-600'}`}>
               Dados no localStorage precisam ser migrados.
             </p>
+            <Button 
+              onClick={forceCompleteMigration}
+              disabled={isProcessing}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              MIGRAR AGORA
+            </Button>
           </div>
         ) : (
           <div className={`p-4 rounded-lg border ${isDark ? 'border-blue-500/20 bg-blue-500/10' : 'border-blue-500/20 bg-blue-50'}`}>
             <h3 className={`font-semibold mb-2 ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
-              Sistema Pronto
+              Sistema Vazio
             </h3>
-            <p className={`text-sm ${isDark ? 'text-blue-200' : 'text-blue-600'}`}>
-              Sistema configurado e pronto para uso.
+            <p className={`text-sm mb-3 ${isDark ? 'text-blue-200' : 'text-blue-600'}`}>
+              Nenhum dado encontrado. Vamos configurar tudo.
             </p>
+            <Button 
+              onClick={forceCompleteMigration}
+              disabled={isProcessing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              CONFIGURAR SISTEMA
+            </Button>
           </div>
         )}
 
@@ -308,7 +437,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
             </h4>
             <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
               <li>• Categorias: <strong className={supabaseCategories.length === 0 ? 'text-red-500' : 'text-green-500'}>{supabaseCategories.length}</strong></li>
-              <li>• Páginas: {supabaseServicePages.length}</li>
+              <li>• Páginas: <strong className={supabaseServicePages.length === 0 ? 'text-red-500' : 'text-green-500'}>{supabaseServicePages.length}</strong></li>
               <li>• Equipe: {supabaseTeamMembers.length}</li>
               <li>• Configurações: {supabasePageTexts.heroTitle ? 'Sim' : 'Não'}</li>
             </ul>
@@ -326,18 +455,16 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
             Recarregar
           </Button>
           
-          {status === 'categories_missing' && (
-            <Button 
-              onClick={forceCategoriesMigration}
-              size="sm" 
-              variant="default"
-              disabled={isProcessing}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Zap className="w-4 h-4 mr-2" />
-              Migrar Categorias
-            </Button>
-          )}
+          <Button 
+            onClick={forceCompleteMigration}
+            size="sm" 
+            variant="default"
+            disabled={isProcessing}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Zap className="w-4 h-4 mr-2" />
+            MIGRAÇÃO TOTAL
+          </Button>
           
           {(status === 'pending' || status === 'partial') && onForceMigration && (
             <Button 
@@ -347,7 +474,7 @@ export const SupabaseDataManager: React.FC<SupabaseDataManagerProps> = ({
               disabled={isProcessing}
             >
               <Upload className="w-4 h-4 mr-2" />
-              Migração Completa
+              Migração Alternativa
             </Button>
           )}
         </div>

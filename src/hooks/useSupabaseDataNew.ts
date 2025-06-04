@@ -41,30 +41,27 @@ export const useSupabaseDataNew = () => {
   const refreshData = async () => {
     setIsLoading(true);
     try {
-      console.log('🔄 CARREGANDO DADOS DO SUPABASE EM SEQUÊNCIA CORRIGIDA...');
+      console.log('🔄 CARREGANDO DADOS DO SUPABASE...');
       
       // 1. Carregar categorias primeiro (OBRIGATÓRIO)
       console.log('📂 1. Carregando categorias...');
       await loadCategories();
       
       // 2. Aguardar um tempo para garantir que as categorias estão disponíveis
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 3. Carregar páginas de serviços (que dependem das categorias)
-      console.log('📄 2. Carregando páginas de serviços com vinculação...');
-      await loadServicePages();
-      
-      // 4. Aguardar mais um pouco
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // 5. Carregar outros dados em paralelo
+      // 3. Carregar páginas de serviços (que dependem das categorias)
+      console.log('📄 2. Carregando páginas de serviços...');
+      await loadServicePages();
+      
+      // 4. Carregar outros dados em paralelo
       console.log('👥⚙️ 3. Carregando outros dados...');
       await Promise.all([
         loadTeamMembers(),
         loadPageTexts()
       ]);
       
-      console.log('✅ TODOS OS DADOS CARREGADOS COM VINCULAÇÃO CORRETA');
+      console.log('✅ TODOS OS DADOS CARREGADOS');
     } catch (error) {
       console.error('❌ ERRO AO CARREGAR DADOS:', error);
     } finally {
