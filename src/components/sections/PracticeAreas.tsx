@@ -141,7 +141,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`h-full py-4 px-4 md:py-8 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full py-2 px-4 md:py-8 md:px-6 lg:px-24 relative ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -157,32 +157,60 @@ const PracticeAreas = () => {
           {pageTexts.areasTitle}
         </h2>
         
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6 pb-4">
-              {practiceAreas.map((area, index) => (
-                <Link 
-                  key={area.id}
-                  to={area.href}
-                  className="group block"
+        <div className="flex-1">
+          {/* Mobile: Grid sem scroll, todos os cards visíveis */}
+          <div className="md:hidden grid grid-cols-1 gap-3 pb-4">
+            {practiceAreas.map((area, index) => (
+              <Link 
+                key={area.id}
+                to={area.href}
+                className="group block"
+              >
+                <div 
+                  className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105`}
+                  ref={el => cardsRef.current[index] = el}
                 >
-                  <div 
-                    className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full`}
-                    ref={el => cardsRef.current[index] = el}
-                  >
-                    <div className="p-3 md:p-4 lg:p-6">
-                      <h3 className={`text-base md:text-lg lg:text-xl xl:text-2xl font-canela mb-2 md:mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                        {area.title}
-                      </h3>
-                      <p className={`text-xs md:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {area.description}
-                      </p>
-                    </div>
+                  <div className="p-3">
+                    <h3 className={`text-base font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                      {area.title}
+                    </h3>
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {area.description}
+                    </p>
                   </div>
-                </Link>
-              ))}
-            </div>
-          </ScrollArea>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop: Grid com scroll area */}
+          <div className="hidden md:block">
+            <ScrollArea className="h-full">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 pb-4">
+                {practiceAreas.map((area, index) => (
+                  <Link 
+                    key={area.id}
+                    to={area.href}
+                    className="group block"
+                  >
+                    <div 
+                      className={`${isDark ? 'bg-black/80 border border-white/10' : 'bg-white/80 border border-black/10'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full`}
+                      ref={el => cardsRef.current[index] = el}
+                    >
+                      <div className="p-4 lg:p-6">
+                        <h3 className={`text-lg lg:text-xl xl:text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+                          {area.title}
+                        </h3>
+                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {area.description}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </section>
