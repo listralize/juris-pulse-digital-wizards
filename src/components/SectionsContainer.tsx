@@ -30,15 +30,14 @@ const SectionsContainer: React.FC = () => {
     activeSection, 
     activeSectionIndex, 
     sectionsLength: sections.length, 
-    isInitialized,
-    allSectionIds: sections.map(s => s.id)
+    isInitialized
   });
 
-  // Listen for custom section change events from navbar
+  // Listen for custom section change events
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
       const targetSection = event.detail;
-      console.log('SectionsContainer: Custom section change event:', targetSection);
+      console.log('SectionsContainer: Section change event:', targetSection);
       transitionToSection(targetSection);
     };
 
@@ -49,9 +48,18 @@ const SectionsContainer: React.FC = () => {
     };
   }, [transitionToSection]);
 
+  // Show loading while initializing
+  if (!isInitialized) {
+    return (
+      <div className="w-full h-screen bg-white flex items-center justify-center">
+        <div className="text-black">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Horizontal container that slides */}
+      {/* Horizontal container */}
       <div 
         ref={containerRef}
         className="flex h-full will-change-transform"
@@ -65,14 +73,6 @@ const SectionsContainer: React.FC = () => {
           const Component = section.component;
           const allowScroll = section.id === 'contact' || section.id === 'socios';
           const isActive = activeSectionIndex === index;
-          
-          console.log(`Section ${section.id} (${index}):`, { 
-            isActive, 
-            index, 
-            allowScroll, 
-            activeSectionIndex,
-            component: Component.name
-          });
           
           return (
             <div

@@ -18,36 +18,42 @@ const Index = () => {
   
   console.log('Index page render:', { theme, isDark });
   
-  // Apply theme class to body
+  // Apply theme to body
   useEffect(() => {
     console.log('Index useEffect - applying theme:', { isDark });
     
+    const body = document.body;
+    const html = document.documentElement;
+    
     if (isDark) {
-      document.body.classList.add('dark');
-      document.body.classList.remove('light');
-      document.documentElement.style.backgroundColor = '#000000';
-      document.documentElement.style.color = '#FFFFFF';
-      document.body.style.backgroundColor = '#000000';
-      document.body.style.color = '#FFFFFF';
+      body.classList.add('dark');
+      body.classList.remove('light');
+      html.style.backgroundColor = '#000000';
+      html.style.color = '#FFFFFF';
+      body.style.backgroundColor = '#000000';
+      body.style.color = '#FFFFFF';
     } else {
-      document.body.classList.add('light');
-      document.body.classList.remove('dark');
-      document.documentElement.style.backgroundColor = '#FFFFFF';
-      document.documentElement.style.color = '#000000';
-      document.body.style.backgroundColor = '#FFFFFF';
-      document.body.style.color = '#000000';
+      body.classList.add('light');
+      body.classList.remove('dark');
+      html.style.backgroundColor = '#f5f5f5';
+      html.style.color = '#000000';
+      body.style.backgroundColor = '#f5f5f5';
+      body.style.color = '#000000';
     }
   }, [isDark]);
   
-  // Disable default scroll and enable horizontal navigation
+  // Setup horizontal scroll behavior
   useEffect(() => {
     console.log('Index useEffect - setting up horizontal scroll behavior');
     
-    // Disable scroll on body and html for horizontal navigation
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
-    document.documentElement.style.height = '100vh';
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Disable scroll for horizontal navigation
+    body.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
+    body.style.height = '100vh';
+    html.style.height = '100vh';
     
     // Disable scroll restoration
     if ('scrollRestoration' in history) {
@@ -55,10 +61,10 @@ const Index = () => {
     }
     
     return () => {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.height = '';
+      body.style.overflow = '';
+      html.style.overflow = '';
+      body.style.height = '';
+      html.style.height = '';
       
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'auto';
