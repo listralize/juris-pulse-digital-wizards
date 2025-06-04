@@ -49,7 +49,24 @@ const Index = () => {
   }, []);
   
   return (
-    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500 overflow-hidden`}>
+    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500 overflow-hidden`}
+         style={{ 
+           scrollbarWidth: 'none', 
+           msOverflowStyle: 'none' 
+         }}>
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        body, html {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+        body::-webkit-scrollbar,
+        html::-webkit-scrollbar {
+          display: none !important;
+        }
+      `}</style>
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />

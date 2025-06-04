@@ -173,8 +173,14 @@ export const useSectionTransition = (sections: Section[]) => {
       const isMobile = window.innerWidth <= 768;
       const currentSection = sectionsRef.current[activeSectionIndex];
       
-      // Se estamos na seção de áreas de atuação e no mobile
-      if (activeSection === 'areas' && isMobile && currentSection) {
+      // Se estamos na seção de contato
+      if (activeSection === 'contact' && currentSection) {
+        // Permitir scroll vertical dentro da seção de contato
+        return;
+      }
+      
+      // Se estamos na seção de áreas de atuação no desktop
+      if (activeSection === 'areas' && !isMobile && currentSection) {
         const scrollArea = currentSection.querySelector('[data-radix-scroll-area-viewport]');
         
         if (scrollArea) {

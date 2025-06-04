@@ -47,11 +47,11 @@ const Contact = () => {
     >
       <div className="max-w-7xl mx-auto">
         <div ref={titleRef} className="mb-6 text-center">
-          <h2 className={`text-2xl md:text-3xl lg:text-4xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             {pageTexts.contactTitle}
           </h2>
           <div className={`w-20 h-1 mx-auto mt-2 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-          <p className={`mt-2 text-sm md:text-base ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+          <p className={`mt-2 text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
             {pageTexts.contactSubtitle}
           </p>
         </div>

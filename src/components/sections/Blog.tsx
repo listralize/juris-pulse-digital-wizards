@@ -35,13 +35,22 @@ const Blog = () => {
   }
 
   return (
-    <section className={`py-8 ${isDark ? 'bg-black' : 'bg-white'}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className={`text-2xl md:text-4xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+    <section 
+      className={`py-8 px-4 ${isDark ? 'bg-black' : 'bg-white'}`} 
+      style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center',
+        paddingTop: '2rem'
+      }}
+    >
+      <div className="container mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className={`text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h2>
-          <p className={`text-base md:text-lg max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className={`text-lg md:text-xl lg:text-2xl xl:text-3xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Mantenha-se atualizado com as últimas novidades do mundo jurídico através dos nossos artigos especializados
           </p>
         </div>

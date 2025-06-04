@@ -9,59 +9,81 @@ gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
   const { theme } = useTheme();
   const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
-  
+
   useEffect(() => {
     if (isLoading) return;
 
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    
-    tl.fromTo(
+    gsap.fromTo(
       titleRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1 }
-    )
-    .fromTo(
+      { opacity: 0, scaleY: 0.9 },
+      {
+        opacity: 1,
+        scaleY: 1,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+    
+    gsap.fromTo(
       textRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: textRef.current,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      }
     );
     
     return () => {
-      tl.kill();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
     };
   }, [isLoading]);
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-      </div>
+      <section id="about" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+        <div className="flex justify-center items-center">
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+        </div>
+      </section>
     );
   }
 
   return (
-    <div className="flex flex-col justify-center items-center h-full px-6 md:px-16 lg:px-24">
+    <section 
+      id="about" 
+      className={`h-full flex flex-col justify-center items-center px-4 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
+      style={{ minHeight: '100vh' }}
+    >
       <div className="max-w-4xl mx-auto text-center">
-        <h2 ref={titleRef} className={`text-4xl md:text-5xl lg:text-6xl mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+        <h2 
+          ref={titleRef} 
+          className={`text-3xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+        >
           {pageTexts.aboutTitle}
         </h2>
         
-        <div ref={textRef} className="space-y-6">
-          <p className={`text-lg md:text-xl leading-relaxed ${isDark ? 'text-gray-200' : 'text-gray-800'} font-satoshi max-w-3xl mx-auto`}>
-            {pageTexts.aboutDescription}
-          </p>
-        </div>
-        
-        <div className="mt-8">
-          <div className={`w-24 h-1 mx-auto ${isDark ? 'bg-white' : 'bg-black'}`}></div>
-        </div>
+        <p 
+          ref={textRef} 
+          className={`text-lg md:text-xl lg:text-2xl xl:text-3xl leading-relaxed font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+        >
+          {pageTexts.aboutDescription}
+        </p>
       </div>
-    </div>
+    </section>
   );
 };
 
