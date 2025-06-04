@@ -22,61 +22,63 @@ export function ThemeProvider({
   defaultTheme = 'light',
   storageKey = 'theme' 
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check for saved theme preference
+  const [theme, setTheme] = useState<Theme>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Initialize theme from localStorage or use default
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem(storageKey);
-      if (savedTheme === 'light' || savedTheme === 'dark') {
-        return savedTheme as Theme;
-      }
+      const initialTheme = (savedTheme === 'light' || savedTheme === 'dark') ? savedTheme as Theme : 'light';
+      setTheme(initialTheme);
+      setIsInitialized(true);
     }
-    
-    // Default to light theme instead of dark
-    return 'light';
-  });
+  }, [storageKey]);
   
-  // Update document class and localStorage when theme changes
+  // Apply theme to document when theme changes
   useEffect(() => {
+    if (!isInitialized) return;
+    
     if (typeof window !== 'undefined') {
       localStorage.setItem(storageKey, theme);
       
+      const body = document.body;
+      const html = document.documentElement;
+      
+      // Remove all theme classes first
+      body.classList.remove('dark', 'light');
+      html.classList.remove('dark', 'light');
+      
       if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.documentElement.classList.remove('light');
-        document.documentElement.style.backgroundColor = '#000000';
-        document.documentElement.style.color = '#FFFFFF';
-        document.body.style.backgroundColor = '#000000';
-        document.body.style.color = '#FFFFFF';
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
+        body.classList.add('dark');
+        html.classList.add('dark');
+        html.style.backgroundColor = '#000000';
+        html.style.color = '#FFFFFF';
+        body.style.backgroundColor = '#000000';
+        body.style.color = '#FFFFFF';
       } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-        document.documentElement.style.backgroundColor = '#f5f5f5';
-        document.documentElement.style.color = '#000000';
-        document.body.style.backgroundColor = '#f5f5f5';
-        document.body.style.color = '#000000';
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
+        body.classList.add('light');
+        html.classList.add('light');
+        html.style.backgroundColor = '#f5f5f5';
+        html.style.color = '#000000';
+        body.style.backgroundColor = '#f5f5f5';
+        body.style.color = '#000000';
       }
     }
-  }, [theme, storageKey]);
-
-  // Initialize with light theme on first load
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Set light theme by default
-      const savedTheme = localStorage.getItem(storageKey);
-      if (!savedTheme) {
-        setTheme('light');
-        localStorage.setItem(storageKey, 'light');
-      }
-    }
-  }, [storageKey]);
+  }, [theme, storageKey, isInitialized]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
+
+  // Don't render children until theme is initialized
+  if (!isInitialized) {
+    return (
+      <div className="w-full h-screen bg-white flex items-center justify-center">
+        <div className="text-black">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>

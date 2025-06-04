@@ -18,30 +18,6 @@ const Index = () => {
   
   console.log('Index page render:', { theme, isDark });
   
-  // Apply theme to body
-  useEffect(() => {
-    console.log('Index useEffect - applying theme:', { isDark });
-    
-    const body = document.body;
-    const html = document.documentElement;
-    
-    if (isDark) {
-      body.classList.add('dark');
-      body.classList.remove('light');
-      html.style.backgroundColor = '#000000';
-      html.style.color = '#FFFFFF';
-      body.style.backgroundColor = '#000000';
-      body.style.color = '#FFFFFF';
-    } else {
-      body.classList.add('light');
-      body.classList.remove('dark');
-      html.style.backgroundColor = '#f5f5f5';
-      html.style.color = '#000000';
-      body.style.backgroundColor = '#f5f5f5';
-      body.style.color = '#000000';
-    }
-  }, [isDark]);
-  
   // Setup horizontal scroll behavior
   useEffect(() => {
     console.log('Index useEffect - setting up horizontal scroll behavior');

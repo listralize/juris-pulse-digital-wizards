@@ -56,17 +56,17 @@ const SectionsContainer: React.FC = () => {
 
   if (!isInitialized) {
     return (
-      <div className="w-full h-screen bg-transparent flex items-center justify-center">
-        <div className="text-current opacity-50">Carregando...</div>
+      <div className="w-full h-screen bg-white flex items-center justify-center">
+        <div className="text-black opacity-50">Carregando seções...</div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden bg-white">
       <div 
         ref={containerRef}
-        className="flex h-full"
+        className="flex h-full bg-white"
         style={{ 
           width: `${sections.length * 100}vw`,
           willChange: 'transform'
@@ -80,7 +80,7 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className="w-screen h-full flex-shrink-0 relative"
+              className="w-screen h-full flex-shrink-0 relative bg-white"
               style={{ 
                 width: '100vw',
                 minWidth: '100vw'
