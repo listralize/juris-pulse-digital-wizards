@@ -119,50 +119,57 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className={`h-full flex flex-col justify-center items-center py-2 px-4 md:py-4 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
-      style={{ minHeight: '100vh' }}
+      className={`h-full py-6 px-4 md:py-8 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
+      style={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}
     >
       <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 lg:gap-16">
-          <div className="w-full md:w-2/5 order-1 md:order-1">
-            <div className="relative mb-4 md:mb-0 bg-black p-6 md:p-12 lg:p-16 rounded-2xl md:rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105">
-              <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-xl"></div>
-              <div className="absolute -bottom-2 -left-2 md:-bottom-4 md:-left-4 w-20 h-20 md:w-32 md:h-32 bg-gradient-to-tr from-white/10 to-white/5 rounded-full blur-xl"></div>
+        <div className="flex flex-col items-center text-center space-y-8 md:space-y-12">
+          {/* Imagem centralizada */}
+          <div className="w-full max-w-sm md:max-w-md lg:max-w-lg">
+            <div className="relative bg-black p-8 md:p-12 lg:p-16 rounded-2xl md:rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105">
+              <div className="absolute -top-3 -right-3 w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 md:w-36 md:h-36 bg-gradient-to-tr from-white/10 to-white/5 rounded-full blur-xl"></div>
               <img 
                 ref={imageRef}
                 src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
                 alt="Área do Cliente em Smartphone" 
-                className="relative z-10 max-w-full w-full h-auto mx-auto"
-                style={{ maxHeight: '600px', objectFit: 'contain' }}
+                className="relative z-10 w-full h-auto max-h-[500px] md:max-h-[600px] object-contain"
               />
             </div>
           </div>
           
-          <div className="w-full md:w-3/5 text-center md:text-left order-2 md:order-2">
+          {/* Conteúdo textual centralizado */}
+          <div className="w-full max-w-4xl">
             <h2 
               ref={titleRef} 
-              className={`text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {pageTexts.clientAreaTitle}
             </h2>
             
             <p 
               ref={textRef} 
-              className={`text-base md:text-lg lg:text-xl xl:text-2xl mb-6 md:mb-8 font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+              className={`text-lg md:text-xl lg:text-2xl xl:text-3xl mb-8 md:mb-12 font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
             >
               {pageTexts.clientAreaDescription}
             </p>
             
-            <div className="flex flex-col space-y-3 md:space-y-4">
+            {/* Botões centralizados */}
+            <div className="flex flex-col space-y-4 md:space-y-6 max-w-md mx-auto">
               <a 
                 ref={button1Ref}
                 href={clientPortalLink} 
-                className={`group relative overflow-hidden rounded-lg md:rounded-xl ${isDark ? 'bg-white text-black' : 'bg-black text-white'} px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base`}
+                className={`group relative overflow-hidden rounded-xl ${isDark ? 'bg-white text-black' : 'bg-black text-white'} px-8 py-4 md:py-5 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-base md:text-lg`}
               >
                 <span className="absolute inset-0 w-0 bg-gradient-to-r from-gray-200 to-gray-300 transition-all duration-500 ease-out group-hover:w-full"></span>
-                <Lock className={`mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10 ${!isDark && 'text-white'}`} />
+                <Lock className={`mr-3 h-5 w-5 md:h-6 md:w-6 relative z-10 ${!isDark && 'text-white'}`} />
                 <span className="font-medium relative z-10">Acessar minha área</span>
-                <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="ml-3 h-5 w-5 md:h-6 md:w-6 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
               </a>
               
               <a 
@@ -170,14 +177,14 @@ const ClientArea = () => {
                 href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group relative overflow-hidden rounded-lg md:rounded-xl border ${isDark 
+                className={`group relative overflow-hidden rounded-xl border ${isDark 
                   ? 'border-white/20 text-white' 
-                  : 'border-black/20 text-black'} px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base`}
+                  : 'border-black/20 text-black'} px-8 py-4 md:py-5 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-base md:text-lg`}
               >
                 <span className={`absolute inset-0 w-0 ${isDark 
                   ? 'bg-white/10' 
                   : 'bg-black/5'} transition-all duration-500 ease-out group-hover:w-full`}></span>
-                <MessageSquare className="mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10" />
+                <MessageSquare className="mr-3 h-5 w-5 md:h-6 md:w-6 relative z-10" />
                 <span className="font-medium relative z-10">Primeiro acesso via WhatsApp</span>
               </a>
             </div>

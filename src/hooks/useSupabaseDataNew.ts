@@ -7,6 +7,7 @@ import { useSupabasePageTexts } from './supabase/useSupabasePageTexts';
 
 export const useSupabaseDataNew = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
 
   // Individual hooks
   const {
@@ -37,31 +38,26 @@ export const useSupabaseDataNew = () => {
     setPageTexts
   } = useSupabasePageTexts();
 
-  // Load all data - SEQUENCIAL para garantir ordem correta
-  const refreshData = async () => {
+  // Load all data com force refresh
+  const refreshData = async (forceRefresh = false) => {
     setIsLoading(true);
     try {
-      console.log('🔄 CARREGANDO DADOS DO SUPABASE EM SEQUÊNCIA...');
+      console.log('🔄 CARREGANDO DADOS DO SUPABASE...');
       
-      // 1. Carregar categorias primeiro
-      console.log('📂 1. Carregando categorias...');
-      await loadCategories();
+      if (forceRefresh) {
+        console.log('🔄 REFRESH FORÇADO - Recarregando tudo...');
+      }
       
-      // 2. Aguardar um pouco para garantir que as categorias estão disponíveis
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // 3. Carregar páginas de serviços (que dependem das categorias)
-      console.log('📄 2. Carregando páginas de serviços...');
-      await loadServicePages();
-      
-      // 4. Carregar outros dados em paralelo
-      console.log('👥⚙️ 3. Carregando outros dados...');
+      // Carregar dados em paralelo para melhor performance
       await Promise.all([
+        loadCategories(),
         loadTeamMembers(),
+        loadServicePages(),
         loadPageTexts()
       ]);
       
-      console.log('✅ TODOS OS DADOS CARREGADOS EM SEQUÊNCIA');
+      setLastRefresh(Date.now());
+      console.log('✅ TODOS OS DADOS CARREGADOS');
     } catch (error) {
       console.error('❌ ERRO AO CARREGAR DADOS:', error);
     } finally {
@@ -74,6 +70,16 @@ export const useSupabaseDataNew = () => {
     refreshData();
   }, []);
 
+  // Auto-refresh a cada 30 segundos para manter dados sincronizados
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refresh dos dados...');
+      refreshData();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return {
     // Data
     categories,
@@ -81,6 +87,7 @@ export const useSupabaseDataNew = () => {
     servicePages,
     pageTexts,
     isLoading,
+    lastRefresh,
     
     // Individual save functions
     saveCategories,
@@ -95,6 +102,6 @@ export const useSupabaseDataNew = () => {
     setPageTexts,
     
     // Refresh function
-    refreshData
+    refreshData: () => refreshData(true)
   };
 };
