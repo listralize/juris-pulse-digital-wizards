@@ -33,12 +33,19 @@ const SectionsContainer: React.FC = () => {
     isInitialized
   });
 
-  // Listen for custom section change events
+  // Listen for custom section change events with improved handling
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
       const targetSection = event.detail;
-      console.log('SectionsContainer: Section change event:', targetSection);
-      transitionToSection(targetSection);
+      console.log('SectionsContainer: Section change event received:', targetSection);
+      
+      // Validate that the section exists
+      const sectionExists = sections.find(s => s.id === targetSection);
+      if (sectionExists) {
+        transitionToSection(targetSection);
+      } else {
+        console.warn('SectionsContainer: Invalid section requested:', targetSection);
+      }
     };
 
     window.addEventListener('sectionChange', handleSectionChange as EventListener);
@@ -46,13 +53,13 @@ const SectionsContainer: React.FC = () => {
     return () => {
       window.removeEventListener('sectionChange', handleSectionChange as EventListener);
     };
-  }, [transitionToSection]);
+  }, [transitionToSection, sections]);
 
-  // Show loading while initializing
+  // Show minimal loading state
   if (!isInitialized) {
     return (
-      <div className="w-full h-screen bg-white flex items-center justify-center">
-        <div className="text-black">Carregando...</div>
+      <div className="w-full h-screen bg-transparent flex items-center justify-center">
+        <div className="text-current opacity-50">Inicializando...</div>
       </div>
     );
   }
@@ -64,9 +71,7 @@ const SectionsContainer: React.FC = () => {
         ref={containerRef}
         className="flex h-full will-change-transform"
         style={{ 
-          width: `${sections.length * 100}vw`,
-          transform: `translateX(-${activeSectionIndex * 100}vw)`,
-          transition: 'none'
+          width: `${sections.length * 100}vw`
         }}
       >
         {sections.map((section, index) => {

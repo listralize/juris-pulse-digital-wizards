@@ -23,7 +23,7 @@ const Navbar = () => {
     
     if (path === '/') {
       // For home page, use hash to determine active section
-      if (hash && ['home', 'about', 'areas', 'socios', 'cliente', 'contact'].includes(hash)) {
+      if (hash && ['home', 'about', 'areas', 'socios', 'cliente', 'blog', 'contact'].includes(hash)) {
         setActiveSection(hash);
       } else {
         setActiveSection('home');
@@ -43,7 +43,7 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
   
-  // Handle navigation to sections - simplified approach
+  // Improved navigation handling
   const handleNavigation = (sectionId: string, path: string) => {
     console.log('Navbar: Handle navigation called:', sectionId, path);
     setIsMenuOpen(false);
@@ -54,10 +54,8 @@ const Navbar = () => {
         navigate('/', { replace: true });
         setActiveSection('home');
       } else {
-        // Trigger section change by updating hash
-        window.history.pushState(null, '', `#${sectionId}`);
+        // Force navigation to home section
         setActiveSection(sectionId);
-        // Dispatch custom event to trigger section change
         window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
       }
       return;
@@ -70,15 +68,14 @@ const Navbar = () => {
       
       // Wait for navigation to complete, then change section
       setTimeout(() => {
-        window.history.pushState(null, '', `#${sectionId}`);
         setActiveSection(sectionId);
         window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
-      }, 100);
+      }, 150);
       return;
     }
     
     // If already on home page, change section directly
-    window.history.pushState(null, '', `#${sectionId}`);
+    console.log('Navbar: Changing section to:', sectionId);
     setActiveSection(sectionId);
     window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
   };

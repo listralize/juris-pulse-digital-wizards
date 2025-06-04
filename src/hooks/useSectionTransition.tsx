@@ -43,8 +43,7 @@ export const useSectionTransition = (sections: Section[]) => {
     
     // Set initial position immediately without animation
     if (containerRef.current) {
-      containerRef.current.style.transform = `translateX(-${finalIndex * 100}vw)`;
-      containerRef.current.style.transition = 'none';
+      gsap.set(containerRef.current, { x: `-${finalIndex * 100}vw` });
     }
     
     setIsInitialized(true);
@@ -55,7 +54,8 @@ export const useSectionTransition = (sections: Section[]) => {
     console.log('transitionToSection called:', { 
       sectionId, 
       activeSection, 
-      isTransitioning: isTransitioning.current
+      isTransitioning: isTransitioning.current,
+      sections: sections.map(s => s.id)
     });
     
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
@@ -65,14 +65,14 @@ export const useSectionTransition = (sections: Section[]) => {
       return;
     }
 
-    if (activeSection === sectionId) {
+    if (activeSection === sectionId && activeSectionIndex === sectionIndex) {
       console.log('Already on target section:', sectionId);
       return;
     }
     
-    if (isTransitioning.current) {
-      console.log('Transition in progress, ignoring');
-      return;
+    // Force stop any ongoing transitions
+    if (isTransitioning.current && containerRef.current) {
+      gsap.killTweensOf(containerRef.current);
     }
     
     console.log('Starting transition to:', sectionId, 'Index:', sectionIndex);
@@ -83,7 +83,7 @@ export const useSectionTransition = (sections: Section[]) => {
       window.history.pushState(null, '', `#${sectionId}`);
     }
     
-    // Set new active section
+    // Set new active section immediately
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
@@ -95,35 +95,40 @@ export const useSectionTransition = (sections: Section[]) => {
       
       gsap.to(containerRef.current, {
         x: `${targetX}vw`,
-        duration: 0.8,
+        duration: 0.6,
         ease: 'power2.inOut',
         onComplete: () => {
           isTransitioning.current = false;
           console.log('Transition completed for:', sectionId);
+        },
+        onInterrupt: () => {
+          isTransitioning.current = false;
+          console.log('Transition interrupted for:', sectionId);
         }
       });
     } else {
       isTransitioning.current = false;
     }
-  }, [activeSection, sections, location.pathname]);
+  }, [activeSection, activeSectionIndex, sections, location.pathname]);
 
-  // Handle keyboard navigation
+  // Handle keyboard navigation with better logic
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTransitioning.current || !isInitialized) return;
+      if (!isInitialized) return;
+      
+      let newIndex = activeSectionIndex;
       
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
-        const nextIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
-        if (nextIndex !== activeSectionIndex) {
-          transitionToSection(sections[nextIndex].id);
-        }
+        newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
-        const prevIndex = Math.max(activeSectionIndex - 1, 0);
-        if (prevIndex !== activeSectionIndex) {
-          transitionToSection(sections[prevIndex].id);
-        }
+        newIndex = Math.max(activeSectionIndex - 1, 0);
+      }
+      
+      if (newIndex !== activeSectionIndex && sections[newIndex]) {
+        console.log('Keyboard navigation to:', sections[newIndex].id);
+        transitionToSection(sections[newIndex].id);
       }
     };
 
@@ -131,35 +136,37 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
 
-  // Handle scroll navigation
+  // Improved scroll navigation
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (!isInitialized) return;
       
       const now = Date.now();
       
-      if (isTransitioning.current || now - lastScrollTime.current < 1000) {
+      // Reduced throttle time and improved logic
+      if (now - lastScrollTime.current < 600) {
         e.preventDefault();
         return;
       }
 
-      if (Math.abs(e.deltaY) < 50) return;
+      if (Math.abs(e.deltaY) < 30) return;
 
       e.preventDefault();
       lastScrollTime.current = now;
       
+      let newIndex = activeSectionIndex;
+      
       if (e.deltaY > 0) {
         // Scroll down - next section
-        const nextIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
-        if (nextIndex !== activeSectionIndex) {
-          transitionToSection(sections[nextIndex].id);
-        }
+        newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
       } else {
         // Scroll up - previous section
-        const prevIndex = Math.max(activeSectionIndex - 1, 0);
-        if (prevIndex !== activeSectionIndex) {
-          transitionToSection(sections[prevIndex].id);
-        }
+        newIndex = Math.max(activeSectionIndex - 1, 0);
+      }
+      
+      if (newIndex !== activeSectionIndex && sections[newIndex]) {
+        console.log('Scroll navigation to:', sections[newIndex].id);
+        transitionToSection(sections[newIndex].id);
       }
     };
 
