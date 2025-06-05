@@ -6,19 +6,19 @@ import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import { Calendar, User, ArrowRight } from 'lucide-react';
-import { useBlogData } from '../../hooks/useBlogData';
+import { useSupabaseBlog } from '../../hooks/supabase/useSupabaseBlog';
 
 const Blog = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  const { blogPosts, isLoading } = useBlogData();
+  const { blogPosts, isLoading } = useSupabaseBlog();
 
   // Primeiro tenta pegar posts em destaque, senão pega os 6 mais recentes
   const featuredPosts = blogPosts.filter(post => post.featured);
   const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : blogPosts.slice(0, 6);
 
-  console.log('Blog posts loaded:', blogPosts.length);
+  console.log('Blog posts loaded from Supabase:', blogPosts.length);
   console.log('Featured posts:', featuredPosts.length);
   console.log('Display posts:', displayPosts.length);
 

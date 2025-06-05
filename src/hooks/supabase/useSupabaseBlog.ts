@@ -28,7 +28,8 @@ export const useSupabaseBlog = () => {
       console.log('📝 CARREGANDO POSTS DO BLOG...');
       setIsLoading(true);
       
-      const { data: blogData, error: blogError } = await supabase
+      // Usar any para evitar erro de tipo até o Supabase atualizar os tipos
+      const { data: blogData, error: blogError } = await (supabase as any)
         .from('blog_posts')
         .select('*')
         .eq('is_active', true)
@@ -41,7 +42,7 @@ export const useSupabaseBlog = () => {
       }
 
       if (blogData && blogData.length > 0) {
-        const formattedPosts: BlogPost[] = blogData.map(post => ({
+        const formattedPosts: BlogPost[] = blogData.map((post: any) => ({
           id: post.id,
           title: post.title || '',
           content: post.content || '',
@@ -80,8 +81,8 @@ export const useSupabaseBlog = () => {
         return;
       }
 
-      // Limpar posts existentes
-      const { error: deleteError } = await supabase
+      // Limpar posts existentes usando any para evitar erro de tipo
+      const { error: deleteError } = await (supabase as any)
         .from('blog_posts')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000');
@@ -107,7 +108,7 @@ export const useSupabaseBlog = () => {
         is_active: true
       }));
 
-      const { data: insertedPosts, error: insertError } = await supabase
+      const { data: insertedPosts, error: insertError } = await (supabase as any)
         .from('blog_posts')
         .insert(postsToInsert)
         .select();

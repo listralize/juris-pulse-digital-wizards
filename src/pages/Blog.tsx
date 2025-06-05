@@ -6,18 +6,18 @@ import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Calendar, User, Search, ArrowRight } from 'lucide-react';
-import { useBlogData } from '../hooks/useBlogData';
+import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
 
 const BlogPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  const { blogPosts, isLoading } = useBlogData();
+  const { blogPosts, isLoading } = useSupabaseBlog();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
 
-  console.log('BlogPage - Posts loaded:', blogPosts.length);
+  console.log('BlogPage - Posts loaded from Supabase:', blogPosts.length);
 
   // Filtrar posts por termo de busca e tag
   const filteredPosts = blogPosts.filter(post => {

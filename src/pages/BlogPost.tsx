@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../components/ThemeProvider';
 import { Button } from '../components/ui/button';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
-import { useBlogData } from '../hooks/useBlogData';
+import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
 
 const BlogPost = () => {
@@ -12,7 +12,7 @@ const BlogPost = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { blogPosts, isLoading } = useBlogData();
+  const { blogPosts, isLoading } = useSupabaseBlog();
 
   const post = blogPosts.find(p => p.slug === slug);
 

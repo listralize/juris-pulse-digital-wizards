@@ -9,7 +9,6 @@ import { BlogPost } from '../types/blogTypes';
 
 export const useAdminDataIntegrated = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [useSupabaseData, setUseSupabaseData] = useState(true);
   
   // Hooks locais (localStorage)
   const localData = useAdminData();
@@ -27,44 +26,70 @@ export const useAdminDataIntegrated = () => {
       try {
         console.log('🚀 INICIANDO AUTO-MIGRAÇÃO COMPLETA...');
         
-        // 1. Verificar se há dados locais para migrar
+        // 1. Aguardar carregamento inicial do Supabase
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await supabaseData.refreshData();
+        await supabaseBlogData.loadBlogPosts();
+        
+        // 2. Verificar se há dados locais para migrar
         const hasLocalPages = localData.servicePages.length > 0;
         const hasLocalBlogPosts = localBlogData.blogPosts.length > 0;
         const hasLocalCategories = localData.categories.length > 0;
+        const hasLocalTeamMembers = localData.teamMembers.length > 0;
         
         console.log('📊 Dados locais encontrados:', {
           pages: localData.servicePages.length,
           blog: localBlogData.blogPosts.length,
-          categories: localData.categories.length
+          categories: localData.categories.length,
+          team: localData.teamMembers.length
         });
 
-        // 2. Aguardar carregamento inicial do Supabase
-        await supabaseData.refreshData();
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('📊 Dados Supabase atuais:', {
+          pages: supabaseData.servicePages.length,
+          blog: supabaseBlogData.blogPosts.length,
+          categories: supabaseData.categories.length,
+          team: supabaseData.teamMembers.length
+        });
 
         // 3. Migrar categorias se necessário
         if (hasLocalCategories && supabaseData.categories.length === 0) {
           console.log('📂 Migrando categorias...');
           await supabaseData.saveCategories(localData.categories);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 1500));
           await supabaseData.refreshData();
         }
 
-        // 4. Migrar páginas de serviços se necessário
-        if (hasLocalPages && supabaseData.servicePages.length === 0) {
-          console.log('📄 Migrando páginas de serviços...');
+        // 4. Migrar páginas de serviços se necessário (sempre que local tem mais)
+        if (hasLocalPages && localData.servicePages.length > supabaseData.servicePages.length) {
+          console.log('📄 Migrando páginas de serviços...', localData.servicePages.length, 'páginas');
           await supabaseData.saveServicePages(localData.servicePages);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await supabaseData.refreshData();
+        }
+
+        // 5. Migrar equipe se necessário
+        if (hasLocalTeamMembers && supabaseData.teamMembers.length === 0) {
+          console.log('👥 Migrando equipe...');
+          await supabaseData.saveTeamMembers(localData.teamMembers);
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        // 5. Migrar blog posts se necessário
+        // 6. Migrar textos da página se necessário
+        if (localData.pageTexts.heroTitle && !supabaseData.pageTexts.heroTitle) {
+          console.log('📝 Migrando textos da página...');
+          await supabaseData.savePageTexts(localData.pageTexts);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        // 7. Migrar blog posts se necessário
         if (hasLocalBlogPosts && supabaseBlogData.blogPosts.length === 0) {
           console.log('📝 Migrando posts do blog...');
           await supabaseBlogData.saveBlogPosts(localBlogData.blogPosts);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          await supabaseBlogData.loadBlogPosts();
         }
 
-        // 6. Recarregar todos os dados
+        // 8. Recarregar todos os dados finais
         await Promise.all([
           supabaseData.refreshData(),
           supabaseBlogData.loadBlogPosts()
@@ -82,7 +107,7 @@ export const useAdminDataIntegrated = () => {
     performAutoMigration();
   }, []);
 
-  // Dados unificados (sempre usar Supabase quando disponível)
+  // Dados unificados (sempre priorizar Supabase quando disponível)
   const teamMembers = supabaseData.teamMembers.length > 0 ? supabaseData.teamMembers : localData.teamMembers;
   const servicePages = supabaseData.servicePages.length > 0 ? supabaseData.servicePages : localData.servicePages;
   const categories = supabaseData.categories.length > 0 ? supabaseData.categories : localData.categories;
@@ -145,24 +170,9 @@ export const useAdminDataIntegrated = () => {
     ]);
   };
 
-  const executeMigration = async () => {
-    setIsLoading(true);
-    try {
-      // Migração forçada de todos os dados
-      await supabaseData.saveCategories(localData.categories);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await supabaseData.saveServicePages(localData.servicePages);
-      await supabaseBlogData.saveBlogPosts(localBlogData.blogPosts);
-      await refreshData();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return {
     // Estado
     isLoading: isLoading || supabaseData.isLoading || supabaseBlogData.isLoading,
-    useSupabaseData,
     
     // Dados unificados
     teamMembers,
@@ -180,7 +190,6 @@ export const useAdminDataIntegrated = () => {
     saveCategories,
     saveBlogPosts,
     saveAll,
-    refreshData,
-    executeMigration
+    refreshData
   };
 };
