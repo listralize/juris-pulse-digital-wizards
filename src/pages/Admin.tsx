@@ -33,9 +33,7 @@ const Admin = () => {
     saveCategories,
     saveBlogPosts,
     saveAll,
-    refreshData,
-    executeMigration,
-    useSupabaseData
+    refreshData
   } = useAdminDataIntegrated();
 
   const handleSaveTeamMembers = async () => {
@@ -97,10 +95,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="supabase">
-            <SupabaseDataManager 
-              onForceMigration={executeMigration}
-              refreshData={refreshData}
-            />
+            <SupabaseDataManager />
           </TabsContent>
 
           <TabsContent value="content">
