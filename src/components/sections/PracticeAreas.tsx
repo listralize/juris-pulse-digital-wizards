@@ -140,18 +140,18 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className="bg-black text-white py-8 px-4 md:px-6 lg:px-24"
+      className="bg-black text-white flex flex-col justify-center py-8 px-4 md:px-6 lg:px-24"
       style={{ minHeight: '100vh' }}
     >
       <div className="max-w-6xl mx-auto">
         <h2 
           ref={titleRef}
-          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center text-white mb-6"
+          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center text-white mb-8 md:mb-12"
         >
           {pageTexts.areasTitle || 'Áreas de Atuação'}
         </h2>
         
-        <div className="flex-1 flex items-start">
+        <div className="flex-1 flex items-center">
           {/* Mobile: Grid compacto */}
           <div className="md:hidden grid grid-cols-1 gap-4 w-full">
             {practiceAreas.map((area, index) => (
@@ -182,7 +182,7 @@ const PracticeAreas = () => {
 
           {/* Desktop: Grid com scroll area */}
           <div className="hidden md:block w-full">
-            <ScrollArea className="h-[60vh]">
+            <ScrollArea className="h-[50vh]">
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                 {practiceAreas.map((area, index) => (
                   <Link 
