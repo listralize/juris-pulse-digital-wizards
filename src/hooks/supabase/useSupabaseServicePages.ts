@@ -108,121 +108,119 @@ export const useSupabaseServicePages = () => {
         categoryMap.set(cat.category_key, cat.id);
       });
 
-      // Limpar páginas existentes
-      const { error: deleteError } = await supabase
-        .from('service_pages')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+      console.log('📂 Mapeamento de categorias:', Object.fromEntries(categoryMap));
 
-      if (deleteError) {
-        console.error('❌ Erro ao limpar páginas:', deleteError);
-      }
-
-      // Inserir páginas principais
-      const pagesToInsert = pages.map((page, index) => ({
-        id: page.id,
-        title: page.title,
-        description: page.description,
-        href: page.href,
-        category_id: categoryMap.get(page.category) || null,
-        display_order: index,
-        is_active: true
-      }));
-
-      console.log('📄 Inserindo páginas:', pagesToInsert);
-
-      const { data: insertedPages, error: insertError } = await supabase
-        .from('service_pages')
-        .insert(pagesToInsert)
-        .select();
-
-      if (insertError) {
-        console.error('❌ Erro ao inserir páginas:', insertError);
-        throw insertError;
-      }
-
-      // Inserir dados relacionados para cada página
+      // Para cada página, salvar ou atualizar
       for (const page of pages) {
-        const pageId = page.id;
+        const categoryId = categoryMap.get(page.category);
+        
+        if (!categoryId) {
+          console.warn(`⚠️ Categoria '${page.category}' não encontrada para página '${page.title}'`);
+          continue;
+        }
 
-        // Inserir benefits
+        // Verificar se a página já existe
+        const { data: existingPage } = await supabase
+          .from('service_pages')
+          .select('id')
+          .eq('id', page.id)
+          .maybeSingle();
+
+        const pageData = {
+          title: page.title,
+          description: page.description,
+          href: page.href,
+          category_id: categoryId,
+          is_active: true
+        };
+
+        if (existingPage) {
+          // Atualizar página existente
+          const { error: updateError } = await supabase
+            .from('service_pages')
+            .update(pageData)
+            .eq('id', page.id);
+
+          if (updateError) {
+            console.error('❌ Erro ao atualizar página:', updateError);
+            continue;
+          }
+        } else {
+          // Inserir nova página
+          const { error: insertError } = await supabase
+            .from('service_pages')
+            .insert({
+              id: page.id,
+              ...pageData
+            });
+
+          if (insertError) {
+            console.error('❌ Erro ao inserir página:', insertError);
+            continue;
+          }
+        }
+
+        // Limpar dados relacionados existentes
+        await Promise.all([
+          supabase.from('service_benefits').delete().eq('service_page_id', page.id),
+          supabase.from('service_process_steps').delete().eq('service_page_id', page.id),
+          supabase.from('service_faq').delete().eq('service_page_id', page.id),
+          supabase.from('service_testimonials').delete().eq('service_page_id', page.id)
+        ]);
+
+        // Inserir dados relacionados
         if (page.benefits && page.benefits.length > 0) {
           const benefits = page.benefits.map((benefit, index) => ({
-            service_page_id: pageId,
+            service_page_id: page.id,
             title: benefit.title,
             description: benefit.description,
             icon: benefit.icon,
             display_order: index
           }));
 
-          const { error: benefitsError } = await supabase
-            .from('service_benefits')
-            .insert(benefits);
-
-          if (benefitsError) {
-            console.error('❌ Erro ao inserir benefits:', benefitsError);
-          }
+          await supabase.from('service_benefits').insert(benefits);
         }
 
-        // Inserir process steps
         if (page.process && page.process.length > 0) {
           const processSteps = page.process.map((step, index) => ({
-            service_page_id: pageId,
+            service_page_id: page.id,
             step_number: step.step,
             title: step.title,
             description: step.description,
             display_order: index
           }));
 
-          const { error: processError } = await supabase
-            .from('service_process_steps')
-            .insert(processSteps);
-
-          if (processError) {
-            console.error('❌ Erro ao inserir process steps:', processError);
-          }
+          await supabase.from('service_process_steps').insert(processSteps);
         }
 
-        // Inserir FAQ
         if (page.faq && page.faq.length > 0) {
           const faqItems = page.faq.map((faq, index) => ({
-            service_page_id: pageId,
+            service_page_id: page.id,
             question: faq.question,
             answer: faq.answer,
             display_order: index
           }));
 
-          const { error: faqError } = await supabase
-            .from('service_faq')
-            .insert(faqItems);
-
-          if (faqError) {
-            console.error('❌ Erro ao inserir FAQ:', faqError);
-          }
+          await supabase.from('service_faq').insert(faqItems);
         }
 
-        // Inserir testimonials
         if (page.testimonials && page.testimonials.length > 0) {
           const testimonials = page.testimonials.map((testimonial, index) => ({
-            service_page_id: pageId,
+            service_page_id: page.id,
             name: testimonial.name,
             text: testimonial.text,
             image: testimonial.image,
             display_order: index
           }));
 
-          const { error: testimonialsError } = await supabase
-            .from('service_testimonials')
-            .insert(testimonials);
-
-          if (testimonialsError) {
-            console.error('❌ Erro ao inserir testimonials:', testimonialsError);
-          }
+          await supabase.from('service_testimonials').insert(testimonials);
         }
       }
 
       console.log('✅ PÁGINAS SALVAS NO SUPABASE:', pages.length);
-      setServicePages(pages);
+      
+      // Recarregar as páginas após salvar
+      await loadServicePages();
       
       return pages;
     } catch (error) {
