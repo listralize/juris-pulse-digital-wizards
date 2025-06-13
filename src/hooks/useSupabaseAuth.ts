@@ -22,7 +22,7 @@ export const useSupabaseAuth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadProfile(session.user.id);
+        createProfileFromUser(session.user);
       } else {
         setLoading(false);
       }
@@ -36,7 +36,7 @@ export const useSupabaseAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await loadProfile(session.user.id);
+          createProfileFromUser(session.user);
         } else {
           setProfile(null);
           setLoading(false);
@@ -47,21 +47,19 @@ export const useSupabaseAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadProfile = async (userId: string) => {
+  const createProfileFromUser = (user: User) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error loading profile:', error);
-      } else {
-        setProfile(data);
-      }
+      // Create profile from user data since profiles table doesn't exist
+      const userProfile: Profile = {
+        id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+        role: user.email === 'admin@stadv.com.br' ? 'admin' : 'user'
+      };
+      
+      setProfile(userProfile);
     } catch (error) {
-      console.error('Profile load error:', error);
+      console.error('Error creating profile:', error);
     } finally {
       setLoading(false);
     }
@@ -95,7 +93,7 @@ export const useSupabaseAuth = () => {
   };
 
   const isAdmin = () => {
-    return profile?.role === 'admin';
+    return profile?.role === 'admin' || user?.email === 'admin@stadv.com.br';
   };
 
   return {
