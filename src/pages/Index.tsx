@@ -18,9 +18,28 @@ const Index = () => {
   
   console.log('Index page render:', { theme, isDark });
   
-  // Setup horizontal scroll behavior
+  // Force initial theme application
   useEffect(() => {
-    console.log('Index useEffect - setting up horizontal scroll behavior');
+    console.log('Index useEffect - forcing initial theme application');
+    
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Force light theme initially
+    body.style.backgroundColor = '#f5f5f5';
+    html.style.backgroundColor = '#f5f5f5';
+    body.style.color = '#000000';
+    html.style.color = '#000000';
+    body.classList.add('light');
+    html.classList.add('light');
+    body.classList.remove('dark');
+    html.classList.remove('dark');
+    
+  }, []);
+  
+  // Setup horizontal scroll behavior and theme
+  useEffect(() => {
+    console.log('Index useEffect - setting up horizontal scroll and theme:', { theme, isDark });
     
     const body = document.body;
     const html = document.documentElement;
@@ -37,11 +56,19 @@ const Index = () => {
       html.style.backgroundColor = '#000000';
       body.style.color = '#ffffff';
       html.style.color = '#ffffff';
+      body.classList.add('dark');
+      html.classList.add('dark');
+      body.classList.remove('light');
+      html.classList.remove('light');
     } else {
       body.style.backgroundColor = '#f5f5f5';
       html.style.backgroundColor = '#f5f5f5';
       body.style.color = '#000000';
       html.style.color = '#000000';
+      body.classList.add('light');
+      html.classList.add('light');
+      body.classList.remove('dark');
+      html.classList.remove('dark');
     }
     
     // Disable scroll restoration
@@ -59,7 +86,7 @@ const Index = () => {
         history.scrollRestoration = 'auto';
       }
     };
-  }, [isDark]);
+  }, [isDark, theme]);
   
   return (
     <div 
@@ -89,6 +116,15 @@ const Index = () => {
         body::-webkit-scrollbar,
         html::-webkit-scrollbar {
           display: none !important;
+        }
+        /* Force light theme by default */
+        body.light {
+          background-color: #f5f5f5 !important;
+          color: #000000 !important;
+        }
+        body.dark {
+          background-color: #000000 !important;
+          color: #ffffff !important;
         }
       `}</style>
       
