@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -10,13 +9,14 @@ import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoriesManager } from './CategoriesManager';
 import { toast } from 'sonner';
+import { crypto } from 'crypto';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
   categories: CategoryInfo[];
   pageTexts: PageTexts;
-  onSave: (pages: ServicePage[]) => void;
-  onSaveCategories: (categories: CategoryInfo[]) => void;
+  onSave: (pages: ServicePage[]) => Promise<void>;
+  onSaveCategories: (categories: CategoryInfo[]) => Promise<void>;
   onSavePageTexts: () => void;
   onUpdatePageTexts: (texts: PageTexts) => void;
 }
@@ -40,10 +40,8 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (servicePages && servicePages.length >= 0) {
-      console.log('ServicePagesManager: Sincronizando páginas recebidas:', servicePages.length);
-      setLocalPages([...servicePages]);
-    }
+    console.log('🔄 Sincronizando páginas:', servicePages.length);
+    setLocalPages([...servicePages]);
   }, [servicePages]);
 
   const filteredPages = selectedCategory 
@@ -55,7 +53,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     : null;
 
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
-    console.log(`Atualizando página ${pageId} - ${field}:`, value);
+    console.log(`📝 Atualizando ${field} da página ${pageId}`);
     setLocalPages(pages => pages.map(page => 
       page.id === pageId ? { ...page, [field]: value } : page
     ));
@@ -64,12 +62,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log('💾 Iniciando salvamento de páginas:', localPages.length);
+      console.log('💾 Salvando páginas:', localPages.length);
       
-      await onSave([...localPages]);
-      
+      await onSave(localPages);
       toast.success('Páginas salvas com sucesso!');
-      console.log('✅ Salvamento concluído');
     } catch (error) {
       console.error('❌ Erro ao salvar:', error);
       toast.error('Erro ao salvar páginas');
@@ -82,66 +78,47 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     if (!selectedCategory) return;
     
     const categoryInfo = categories.find(c => c.value === selectedCategory);
-    const newId = `${selectedCategory}-${Date.now()}`;
-    const defaultHref = `${selectedCategory}-servico-${Date.now()}`;
+    const newId = crypto.randomUUID();
+    const timestamp = Date.now();
     
     const newServicePage: ServicePage = {
       id: newId,
       title: `Novo Serviço - ${categoryInfo?.label || selectedCategory}`,
       description: 'Descrição do novo serviço',
       category: selectedCategory,
-      href: defaultHref,
-      benefits: [
-        {
-          title: "Benefício 1",
-          description: "Descrição do benefício 1"
-        }
-      ],
-      process: [
-        {
-          step: 1,
-          title: "Primeira Etapa",
-          description: "Descrição da primeira etapa do processo"
-        }
-      ],
-      faq: [
-        {
-          question: "Pergunta frequente?",
-          answer: "Resposta à pergunta frequente"
-        }
-      ],
-      testimonials: [
-        {
-          name: "Cliente Satisfeito",
-          text: "Excelente atendimento e resultado"
-        }
-      ]
+      href: `${selectedCategory}-servico-${timestamp}`,
+      benefits: [{
+        title: "Benefício 1",
+        description: "Descrição do benefício 1"
+      }],
+      process: [{
+        step: 1,
+        title: "Primeira Etapa",
+        description: "Descrição da primeira etapa"
+      }],
+      faq: [{
+        question: "Pergunta frequente?",
+        answer: "Resposta à pergunta"
+      }],
+      testimonials: [{
+        name: "Cliente Satisfeito",
+        text: "Excelente atendimento"
+      }]
     };
     
-    console.log('Adicionando nova página:', newId);
+    console.log('➕ Adicionando nova página:', newId);
     setLocalPages(prev => [...prev, newServicePage]);
     setSelectedPageId(newId);
-    
     toast.success('Nova página criada!');
   };
 
   const removeServicePage = (pageId: string) => {
-    console.log('Removendo página:', pageId);
+    console.log('🗑️ Removendo página:', pageId);
     setLocalPages(pages => pages.filter(page => page.id !== pageId));
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
     }
     toast.success('Página removida!');
-  };
-
-  const handleBackToCategories = () => {
-    setSelectedCategory(null);
-    setSelectedPageId(null);
-    setShowCategoryEditor(false);
-  };
-
-  const handleBackToPages = () => {
-    setSelectedPageId(null);
   };
 
   // Se está editando categorias

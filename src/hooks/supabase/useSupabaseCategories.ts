@@ -6,53 +6,38 @@ import { CategoryInfo } from '../../types/adminTypes';
 export const useSupabaseCategories = () => {
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
 
-  const generateValidUUID = () => {
-    return crypto.randomUUID();
-  };
-
   const loadCategories = async () => {
     try {
-      console.log('📂 CARREGANDO CATEGORIAS DO SUPABASE...');
+      console.log('📂 CARREGANDO CATEGORIAS...');
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('law_categories')
         .select('*')
         .eq('is_active', true)
         .order('display_order');
 
-      console.log('📂 RESULTADO QUERY CATEGORIAS:');
-      console.log('  - Dados:', categoriesData);
-      console.log('  - Erro:', categoriesError);
-      console.log('  - Quantidade:', categoriesData?.length || 0);
+      console.log('📂 Categorias carregadas:', categoriesData);
+
+      if (categoriesError) throw categoriesError;
 
       if (categoriesData && categoriesData.length > 0) {
-        console.log('📂 PROCESSANDO CATEGORIAS...');
-        const formattedCategories: CategoryInfo[] = categoriesData.map(cat => {
-          const categoryName = cat.name || cat.category_key || 'Categoria';
-          const categoryKey = cat.category_key || cat.name?.toLowerCase().replace(/\s+/g, '-') || 'categoria';
-          
-          const processed = {
-            id: cat.id,
-            value: categoryKey,
-            label: categoryName,
-            name: categoryName,
-            description: cat.description || '',
-            icon: cat.icon || 'FileText',
-            color: cat.color || 'bg-gray-500'
-          };
-          
-          console.log(`📂 Categoria processada: ${categoryName} (${categoryKey}) -> ID: ${cat.id}`);
-          return processed;
-        });
+        const formattedCategories: CategoryInfo[] = categoriesData.map(cat => ({
+          id: cat.id,
+          value: cat.category_key,
+          label: cat.name,
+          name: cat.name,
+          description: cat.description || '',
+          icon: cat.icon || 'FileText',
+          color: cat.color || 'bg-gray-500'
+        }));
         
         setCategories(formattedCategories);
-        console.log('✅ CATEGORIAS SETADAS NO STATE:', formattedCategories.length);
-        console.log('✅ Categorias:', formattedCategories);
+        console.log('✅ Categorias formatadas:', formattedCategories);
       } else {
-        console.log('⚠️ NENHUMA CATEGORIA ENCONTRADA - CRIANDO CATEGORIAS PADRÃO');
+        console.log('⚠️ Criando categorias padrão...');
         await createDefaultCategories();
       }
     } catch (error) {
-      console.error('💥 ERRO AO CARREGAR CATEGORIAS:', error);
+      console.error('❌ Erro ao carregar categorias:', error);
       await createDefaultCategories();
     }
   };
@@ -60,7 +45,6 @@ export const useSupabaseCategories = () => {
   const createDefaultCategories = async () => {
     const defaultCategories = [
       {
-        id: generateValidUUID(),
         category_key: 'familia',
         name: 'Direito de Família',
         description: 'Proteção e orientação em questões familiares',
@@ -70,7 +54,6 @@ export const useSupabaseCategories = () => {
         is_active: true
       },
       {
-        id: generateValidUUID(),
         category_key: 'tributario',
         name: 'Direito Tributário',
         description: 'Consultoria e planejamento tributário',
@@ -80,7 +63,6 @@ export const useSupabaseCategories = () => {
         is_active: true
       },
       {
-        id: generateValidUUID(),
         category_key: 'empresarial',
         name: 'Direito Empresarial',
         description: 'Suporte jurídico para empresas',
@@ -101,67 +83,42 @@ export const useSupabaseCategories = () => {
       }
     } catch (error) {
       console.error('Erro ao criar categorias padrão:', error);
-      // Usar categorias em memória como fallback
-      const fallbackCategories = defaultCategories.map(cat => ({
-        id: cat.id,
-        value: cat.category_key,
-        label: cat.name,
-        name: cat.name,
-        description: cat.description,
-        icon: cat.icon,
-        color: cat.color
-      }));
-      setCategories(fallbackCategories);
     }
   };
 
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
-      console.log('💾 SALVANDO CATEGORIAS:', cats.length);
+      console.log('💾 SALVANDO CATEGORIAS:', cats);
       
-      if (!cats || cats.length === 0) {
-        console.log('⚠️ Nenhuma categoria para salvar');
-        return;
-      }
+      if (!cats || cats.length === 0) return;
 
-      const categoryData = cats.map((cat, index) => {
-        let validId = cat.id;
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        if (!uuidRegex.test(cat.id)) {
-          validId = generateValidUUID();
-        }
-        
-        return {
-          id: validId,
-          category_key: cat.value || cat.name?.toLowerCase().replace(/\s+/g, '-') || `categoria-${index + 1}`,
-          name: cat.name || cat.label || cat.value || `Categoria ${index + 1}`,
-          description: cat.description || `Descrição da ${cat.name || cat.label}`,
+      for (const cat of cats) {
+        const categoryData = {
+          id: cat.id.startsWith('categoria-') ? crypto.randomUUID() : cat.id,
+          category_key: cat.value,
+          name: cat.name || cat.label,
+          description: cat.description || '',
           icon: cat.icon || 'FileText',
           color: cat.color || 'bg-gray-500',
-          display_order: index,
+          display_order: 0,
           is_active: true
         };
-      });
 
-      // Usar UPSERT para inserir ou atualizar
-      const { error } = await supabase
-        .from('law_categories')
-        .upsert(categoryData, { 
-          onConflict: 'id',
-          ignoreDuplicates: false 
-        });
+        const { error } = await supabase
+          .from('law_categories')
+          .upsert(categoryData, { onConflict: 'id' });
 
-      if (error) {
-        console.error('❌ Erro ao salvar categorias:', error);
-        throw error;
+        if (error) {
+          console.error('❌ Erro ao salvar categoria:', error);
+        } else {
+          console.log('✅ Categoria salva:', categoryData.name);
+        }
       }
 
-      console.log('✅ CATEGORIAS SALVAS NO SUPABASE');
       await loadCategories();
-      
       return categories;
     } catch (error) {
-      console.error('💥 ERRO CRÍTICO AO SALVAR CATEGORIAS:', error);
+      console.error('💥 ERRO ao salvar categorias:', error);
       throw error;
     }
   };
