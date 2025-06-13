@@ -10,7 +10,18 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) => {
-  const { theme, toggleTheme } = useTheme();
+  // Add error boundary protection
+  let theme = 'light';
+  let toggleTheme = () => {};
+  
+  try {
+    const themeContext = useTheme();
+    theme = themeContext.theme;
+    toggleTheme = themeContext.toggleTheme;
+  } catch (error) {
+    console.warn('ThemeToggle: useTheme hook failed, using defaults:', error);
+  }
+  
   const isDark = theme === 'dark';
 
   console.log('ThemeToggle render:', { theme, isDark });

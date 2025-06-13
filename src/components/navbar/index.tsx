@@ -7,7 +7,15 @@ import MobileNavigation from './MobileNavigation';
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
-  const { theme } = useTheme();
+  // Add error boundary protection for theme
+  let theme = 'light';
+  try {
+    const themeContext = useTheme();
+    theme = themeContext.theme;
+  } catch (error) {
+    console.warn('Navbar: useTheme hook failed, using light theme as default:', error);
+  }
+  
   const location = useLocation();
   const navigate = useNavigate();
   const isDark = theme === 'dark';

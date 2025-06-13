@@ -22,7 +22,7 @@ export function ThemeProvider({
   defaultTheme = 'light',
   storageKey = 'theme' 
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [isInitialized, setIsInitialized] = useState(false);
   
   // Apply theme to DOM immediately
@@ -56,11 +56,11 @@ export function ThemeProvider({
     }
   };
 
-  // Initialize theme immediately
+  // Initialize theme immediately on mount
   useEffect(() => {
     console.log('🎨 ThemeProvider: Inicializando tema...');
     
-    let initialTheme: Theme = 'light'; // Default to light
+    let initialTheme: Theme = defaultTheme;
     
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem(storageKey);
@@ -75,7 +75,7 @@ export function ThemeProvider({
     applyThemeToDOM(initialTheme);
     setTheme(initialTheme);
     setIsInitialized(true);
-  }, [storageKey]);
+  }, [defaultTheme, storageKey]);
 
   // Apply theme when theme changes
   useEffect(() => {
@@ -95,13 +95,15 @@ export function ThemeProvider({
     setTheme(newTheme);
   };
 
-  // Apply initial theme immediately on render
-  if (typeof window !== 'undefined' && !isInitialized) {
-    applyThemeToDOM('light');
-  }
+  // Provide context value immediately, even before initialization
+  const contextValue: ThemeContextProps = {
+    theme,
+    toggleTheme,
+    setTheme
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
