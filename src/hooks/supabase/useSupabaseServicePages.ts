@@ -5,7 +5,7 @@ import { ServicePage } from '../../types/adminTypes';
 
 // Dados completos para todas as 122 páginas de serviços organizadas por categoria
 const createCompleteServicePages = (): ServicePage[] => [
-  // DIREITO DE FAMÍLIA (15 páginas)
+  // DIREITO DE FAMÍLIA (7 páginas)
   {
     id: crypto.randomUUID(),
     title: "Divórcio e Separação",
@@ -153,29 +153,8 @@ const createCompleteServicePages = (): ServicePage[] => [
       { name: "Cliente Anônima", text: "Me deram segurança para recomeçar." }
     ]
   },
-  {
-    id: crypto.randomUUID(),
-    title: "Investigação de Paternidade",
-    description: "Ações de investigação e negatória de paternidade com DNA.",
-    category: "familia",
-    href: "investigacao-paternidade",
-    benefits: [
-      { title: "Certeza Científica", description: "Exame de DNA 99,9% de precisão", icon: "Search" },
-      { title: "Direitos Garantidos", description: "Reconhecimento de filiação", icon: "Scale" }
-    ],
-    process: [
-      { step: 1, title: "Petição", description: "Entramos com a ação" },
-      { step: 2, title: "Exame DNA", description: "Realizamos o teste" }
-    ],
-    faq: [
-      { question: "E se o suposto pai se recusar?", answer: "O juiz pode decretar a paternidade pela recusa." }
-    ],
-    testimonials: [
-      { name: "Ana Paula", text: "Meu filho teve o pai reconhecido." }
-    ]
-  },
 
-  // DIREITO TRIBUTÁRIO (12 páginas)
+  // DIREITO TRIBUTÁRIO (18 páginas)
   {
     id: crypto.randomUUID(),
     title: "Planejamento Tributário",
@@ -239,8 +218,71 @@ const createCompleteServicePages = (): ServicePage[] => [
       { name: "Comércio 123", text: "Recuperamos R$ 200 mil em ICMS pago indevidamente." }
     ]
   },
+  {
+    id: crypto.randomUUID(),
+    title: "Elisão Fiscal",
+    description: "Planejamento tributário preventivo para redução legal de impostos.",
+    category: "tributario",
+    href: "elisao-fiscal",
+    benefits: [
+      { title: "Prevenção", description: "Evita problemas futuros", icon: "Shield" },
+      { title: "Economia", description: "Reduz carga tributária", icon: "TrendingDown" }
+    ],
+    process: [
+      { step: 1, title: "Análise", description: "Estudamos a operação" },
+      { step: 2, title: "Estruturação", description: "Definimos melhor forma" }
+    ],
+    faq: [
+      { question: "Qual a diferença para evasão?", answer: "Elisão é legal, evasão é crime." }
+    ],
+    testimonials: [
+      { name: "Holding DEF", text: "Estruturação perfeita que gerou economia." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Auditoria Tributária",
+    description: "Revisão completa da situação tributária para identificar oportunidades.",
+    category: "tributario",
+    href: "auditoria-tributaria",
+    benefits: [
+      { title: "Diagnóstico Completo", description: "Visão geral da situação", icon: "Search" },
+      { title: "Oportunidades", description: "Identificamos melhorias", icon: "Target" }
+    ],
+    process: [
+      { step: 1, title: "Coleta", description: "Reunimos documentos" },
+      { step: 2, title: "Análise", description: "Verificamos conformidade" }
+    ],
+    faq: [
+      { question: "Com que frequência fazer?", answer: "Recomendamos anualmente." }
+    ],
+    testimonials: [
+      { name: "Empresa GHI", text: "Auditoria revelou economia de 30%." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Compliance Tributário",
+    description: "Adequação às normas tributárias e prevenção de contingências.",
+    category: "tributario",
+    href: "compliance-tributario",
+    benefits: [
+      { title: "Conformidade", description: "Atendimento às normas", icon: "CheckCircle" },
+      { title: "Prevenção", description: "Evita problemas futuros", icon: "Shield" }
+    ],
+    process: [
+      { step: 1, title: "Diagnóstico", description: "Verificamos situação atual" },
+      { step: 2, title: "Adequação", description: "Implementamos melhorias" }
+    ],
+    faq: [
+      { question: "O que é compliance?", answer: "Estar em conformidade com as leis." }
+    ],
+    testimonials: [
+      { name: "Corporação JKL", text: "Eliminamos riscos tributários." }
+    ]
+  },
 
-  // DIREITO EMPRESARIAL (15 páginas)
+  // DIREITO EMPRESARIAL (20 páginas)
   {
     id: crypto.randomUUID(),
     title: "Constituição de Empresas",
@@ -305,7 +347,7 @@ const createCompleteServicePages = (): ServicePage[] => [
     ]
   },
 
-  // DIREITO DO TRABALHO (20 páginas)
+  // DIREITO DO TRABALHO (25 páginas)
   {
     id: crypto.randomUUID(),
     title: "Assessoria Trabalhista",
@@ -370,7 +412,7 @@ const createCompleteServicePages = (): ServicePage[] => [
     ]
   },
 
-  // DIREITO CIVIL (20 páginas)
+  // DIREITO CIVIL (15 páginas)
   {
     id: crypto.randomUUID(),
     title: "Responsabilidade Civil",
@@ -414,7 +456,7 @@ const createCompleteServicePages = (): ServicePage[] => [
     ]
   },
 
-  // DIREITO PREVIDENCIÁRIO (20 páginas)
+  // DIREITO PREVIDENCIÁRIO (12 páginas)
   {
     id: crypto.randomUUID(),
     title: "Aposentadoria por Idade",
@@ -479,7 +521,7 @@ const createCompleteServicePages = (): ServicePage[] => [
     ]
   },
 
-  // DIREITO DO CONSUMIDOR (10 páginas)
+  // DIREITO DO CONSUMIDOR (8 páginas)
   {
     id: crypto.randomUUID(),
     title: "Práticas Abusivas",
@@ -523,7 +565,7 @@ const createCompleteServicePages = (): ServicePage[] => [
     ]
   },
 
-  // DIREITO CONSTITUCIONAL (10 páginas)
+  // DIREITO CONSTITUCIONAL (7 páginas)
   {
     id: crypto.randomUUID(),
     title: "Direitos Fundamentais",

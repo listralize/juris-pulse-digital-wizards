@@ -46,12 +46,21 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
 
   // Filtrar serviços da categoria específica com comparação exata
   const areaServices = servicePages?.filter(page => {
-    return page.category === areaKey;
+    const pageCategory = page.category?.toLowerCase().trim();
+    const targetCategory = areaKey?.toLowerCase().trim();
+    
+    console.log(`🔍 Comparando: "${pageCategory}" === "${targetCategory}" = ${pageCategory === targetCategory}`);
+    
+    return pageCategory === targetCategory;
   }) || [];
 
   console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
     total: areaServices.length,
-    servicos: areaServices.map(s => ({ title: s.title, category: s.category }))
+    servicos: areaServices.map(s => ({ 
+      title: s.title, 
+      category: s.category,
+      id: s.id 
+    }))
   });
 
   return (
@@ -106,11 +115,14 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
         ) : (
           <div className="text-center py-16">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Carregando serviços para esta área...
+              Nenhum serviço encontrado para esta área.
             </p>
             <div className={`text-sm mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Área: {areaKey} | Total de páginas no sistema: {servicePages?.length || 0}
+                Debug: Área: {areaKey} | Total de páginas no sistema: {servicePages?.length || 0}
+              </p>
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs mt-2`}>
+                Categorias disponíveis: {servicePages?.map(p => p.category).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
               </p>
             </div>
           </div>
