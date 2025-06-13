@@ -7,6 +7,11 @@ export const useSupabaseServicePages = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Função para gerar UUID válido
+  const generateValidUUID = () => {
+    return crypto.randomUUID();
+  };
+
   const loadServicePages = async () => {
     try {
       console.log('📄 CARREGANDO PÁGINAS DE SERVIÇOS...');
@@ -119,64 +124,54 @@ export const useSupabaseServicePages = () => {
           continue;
         }
 
-        // Verificar se a página já existe
-        const { data: existingPage } = await supabase
-          .from('service_pages')
-          .select('id')
-          .eq('id', page.id)
-          .maybeSingle();
+        // Gerar UUID válido se o ID atual não for válido
+        let validPageId = page.id;
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(page.id)) {
+          validPageId = generateValidUUID();
+          console.log(`🔄 Gerando novo UUID para ${page.title}: ${validPageId}`);
+        }
 
         const pageData = {
+          id: validPageId,
           title: page.title,
           description: page.description,
           href: page.href,
           category_id: categoryId,
-          is_active: true
+          is_active: true,
+          display_order: 0
         };
 
-        if (existingPage) {
-          // Atualizar página existente
-          const { error: updateError } = await supabase
-            .from('service_pages')
-            .update(pageData)
-            .eq('id', page.id);
+        // Usar UPSERT (inserir ou atualizar)
+        const { error: upsertError } = await supabase
+          .from('service_pages')
+          .upsert(pageData, { 
+            onConflict: 'id',
+            ignoreDuplicates: false 
+          });
 
-          if (updateError) {
-            console.error('❌ Erro ao atualizar página:', updateError);
-            continue;
-          }
-          console.log('✅ Página atualizada:', page.title);
-        } else {
-          // Inserir nova página
-          const { error: insertError } = await supabase
-            .from('service_pages')
-            .insert({
-              id: page.id,
-              ...pageData
-            });
-
-          if (insertError) {
-            console.error('❌ Erro ao inserir página:', insertError);
-            continue;
-          }
-          console.log('✅ Nova página inserida:', page.title);
+        if (upsertError) {
+          console.error('❌ Erro ao salvar página:', upsertError);
+          continue;
         }
+        console.log('✅ Página salva:', page.title);
 
         // Limpar dados relacionados existentes
         await Promise.all([
-          supabase.from('service_benefits').delete().eq('service_page_id', page.id),
-          supabase.from('service_process_steps').delete().eq('service_page_id', page.id),
-          supabase.from('service_faq').delete().eq('service_page_id', page.id),
-          supabase.from('service_testimonials').delete().eq('service_page_id', page.id)
+          supabase.from('service_benefits').delete().eq('service_page_id', validPageId),
+          supabase.from('service_process_steps').delete().eq('service_page_id', validPageId),
+          supabase.from('service_faq').delete().eq('service_page_id', validPageId),
+          supabase.from('service_testimonials').delete().eq('service_page_id', validPageId)
         ]);
 
         // Inserir dados relacionados
         if (page.benefits && page.benefits.length > 0) {
           const benefits = page.benefits.map((benefit, index) => ({
-            service_page_id: page.id,
+            id: generateValidUUID(),
+            service_page_id: validPageId,
             title: benefit.title,
             description: benefit.description,
-            icon: benefit.icon,
+            icon: benefit.icon || 'FileText',
             display_order: index
           }));
 
@@ -191,7 +186,8 @@ export const useSupabaseServicePages = () => {
 
         if (page.process && page.process.length > 0) {
           const processSteps = page.process.map((step, index) => ({
-            service_page_id: page.id,
+            id: generateValidUUID(),
+            service_page_id: validPageId,
             step_number: step.step,
             title: step.title,
             description: step.description,
@@ -209,7 +205,8 @@ export const useSupabaseServicePages = () => {
 
         if (page.faq && page.faq.length > 0) {
           const faqItems = page.faq.map((faq, index) => ({
-            service_page_id: page.id,
+            id: generateValidUUID(),
+            service_page_id: validPageId,
             question: faq.question,
             answer: faq.answer,
             display_order: index
@@ -226,7 +223,8 @@ export const useSupabaseServicePages = () => {
 
         if (page.testimonials && page.testimonials.length > 0) {
           const testimonials = page.testimonials.map((testimonial, index) => ({
-            service_page_id: page.id,
+            id: generateValidUUID(),
+            service_page_id: validPageId,
             name: testimonial.name,
             text: testimonial.text,
             image: testimonial.image,
