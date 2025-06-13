@@ -124,12 +124,12 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categoriesToShow.map((category) => {
-          // Buscar páginas que correspondem a esta categoria usando múltiplos critérios
+          // Buscar páginas que correspondem a esta categoria usando comparação mais flexível
           const currentCategoryPages = servicePages?.filter(page => {
-            const pageCategory = page.category?.toLowerCase().trim();
-            const catKey = category.value?.toLowerCase().trim();
-            const catName = category.name?.toLowerCase().trim();
-            const catLabel = category.label?.toLowerCase().trim();
+            const pageCategory = page.category?.toLowerCase()?.trim();
+            const catKey = category.value?.toLowerCase()?.trim();
+            const catName = category.name?.toLowerCase()?.trim();
+            const catLabel = category.label?.toLowerCase()?.trim();
             
             return pageCategory === catKey || 
                    pageCategory === catName || 
