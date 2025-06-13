@@ -26,43 +26,32 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
 
-  console.log('🎯 DynamicAreaPage COMPLETA:', {
+  console.log('🎯 DynamicAreaPage DADOS:', {
     areaKey,
     totalServicePages: servicePages?.length || 0,
     categoriesCount: categories?.length || 0,
-    servicePagesDetalhes: servicePages?.map(p => ({ 
-      title: p.title, 
-      category: p.category, 
-      href: p.href 
-    })),
-    categories: categories?.map(c => ({ value: c.value, label: c.label }))
+    paginasPorCategoria: servicePages?.reduce((acc, page) => {
+      acc[page.category] = (acc[page.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>) || {}
   });
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
       </div>
     );
   }
 
-  // Filtrar serviços da categoria específica com lógica mais robusta
+  // Filtrar serviços da categoria específica com comparação exata
   const areaServices = servicePages?.filter(page => {
-    const pageCategory = page.category?.toLowerCase()?.trim();
-    const searchKey = areaKey.toLowerCase().trim();
-    
-    console.log(`🔍 Comparando página "${page.title}":`, {
-      pageCategory,
-      searchKey,
-      match: pageCategory === searchKey
-    });
-    
-    return pageCategory === searchKey;
+    return page.category === areaKey;
   }) || [];
 
   console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
     total: areaServices.length,
-    servicos: areaServices.map(s => s.title)
+    servicos: areaServices.map(s => ({ title: s.title, category: s.category }))
   });
 
   return (
@@ -74,7 +63,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
       <div className="space-y-16">
         <div className="prose max-w-none">
           {introText.map((paragraph, index) => (
-            <p key={index} className="text-lg leading-relaxed">
+            <p key={index} className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
               {paragraph}
             </p>
           ))}
@@ -93,7 +82,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {areaServices.map((service, serviceIndex) => (
               <Card 
-                key={serviceIndex}
+                key={`${service.id}-${serviceIndex}`}
                 className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
                 onClick={() => {
                   const href = service.href?.startsWith('/') ? service.href : `/servicos/${service.href}`;
@@ -117,17 +106,11 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
         ) : (
           <div className="text-center py-16">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Nenhum serviço encontrado para esta área.
+              Carregando serviços para esta área...
             </p>
             <div className={`text-sm mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Debug: Procurando categoria "{areaKey}" em {servicePages?.length || 0} páginas totais
-              </p>
-              <p className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-xs mt-2`}>
-                Categorias disponíveis: {categories?.map(c => c.value).join(', ') || 'Nenhuma'}
-              </p>
-              <p className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-xs mt-1`}>
-                Todas as páginas: {servicePages?.map(p => `${p.title} (${p.category})`).join(', ') || 'Nenhuma'}
+                Área: {areaKey} | Total de páginas no sistema: {servicePages?.length || 0}
               </p>
             </div>
           </div>
