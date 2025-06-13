@@ -3,6 +3,115 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { ServicePage } from '../../types/adminTypes';
 
+// Dados de exemplo para páginas de serviços
+const createSampleServicePages = (): ServicePage[] => [
+  {
+    id: crypto.randomUUID(),
+    title: "Divórcio e Separação",
+    description: "Assessoria completa em processos de divórcio consensual e litigioso, garantindo seus direitos e dos filhos.",
+    category: "familia",
+    href: "divorcio-separacao",
+    benefits: [
+      { title: "Rapidez no Processo", description: "Agilizamos todos os trâmites legais", icon: "Clock" },
+      { title: "Proteção dos Filhos", description: "Garantimos o melhor para as crianças", icon: "Shield" }
+    ],
+    process: [
+      { step: 1, title: "Consulta", description: "Analisamos seu caso" },
+      { step: 2, title: "Documentação", description: "Preparamos os documentos" }
+    ],
+    faq: [
+      { question: "Quanto tempo demora?", answer: "Depende do tipo de divórcio, mas agilizamos o processo." }
+    ],
+    testimonials: [
+      { name: "Maria Silva", text: "Excelente atendimento durante meu divórcio." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Pensão Alimentícia",
+    description: "Solicitação, revisão e execução de pensão alimentícia com foco no bem-estar familiar.",
+    category: "familia",
+    href: "pensao-alimenticia",
+    benefits: [
+      { title: "Cálculo Justo", description: "Definimos valores adequados à realidade", icon: "Calculator" },
+      { title: "Execução Eficaz", description: "Cobramos pensões em atraso", icon: "Gavel" }
+    ],
+    process: [
+      { step: 1, title: "Avaliação", description: "Analisamos a situação financeira" },
+      { step: 2, title: "Cálculo", description: "Definimos o valor adequado" }
+    ],
+    faq: [
+      { question: "Como é calculado o valor?", answer: "Com base na renda e necessidades dos filhos." }
+    ],
+    testimonials: [
+      { name: "João Santos", text: "Consegui regularizar a pensão dos meus filhos." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Guarda de Filhos",
+    description: "Definição de guarda compartilhada, unilateral e regulamentação de visitas.",
+    category: "familia",
+    href: "guarda-filhos",
+    benefits: [
+      { title: "Interesse da Criança", description: "Priorizamos sempre o bem-estar dos menores", icon: "Heart" },
+      { title: "Mediação", description: "Buscamos acordos amigáveis", icon: "Users" }
+    ],
+    process: [
+      { step: 1, title: "Mediação", description: "Tentamos acordo entre as partes" },
+      { step: 2, title: "Ação Judicial", description: "Se necessário, entramos na justiça" }
+    ],
+    faq: [
+      { question: "O que é guarda compartilhada?", answer: "Ambos os pais participam das decisões importantes." }
+    ],
+    testimonials: [
+      { name: "Ana Costa", text: "Conseguimos um acordo justo para todos." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Planejamento Tributário",
+    description: "Estratégias legais para redução da carga tributária de pessoas físicas e jurídicas.",
+    category: "tributario",
+    href: "planejamento-tributario",
+    benefits: [
+      { title: "Economia Legal", description: "Redução de até 40% nos impostos", icon: "TrendingDown" },
+      { title: "Conformidade", description: "Sempre dentro da lei", icon: "CheckCircle" }
+    ],
+    process: [
+      { step: 1, title: "Diagnóstico", description: "Analisamos sua situação tributária" },
+      { step: 2, title: "Estratégia", description: "Definimos as melhores práticas" }
+    ],
+    faq: [
+      { question: "É legal reduzir impostos?", answer: "Sim, através de planejamento tributário lícito." }
+    ],
+    testimonials: [
+      { name: "Empresa ABC", text: "Reduziram significativamente nossos impostos." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Constituição de Empresas",
+    description: "Abertura e estruturação de empresas com escolha do melhor regime tributário.",
+    category: "empresarial",
+    href: "constituicao-empresas",
+    benefits: [
+      { title: "Regime Ideal", description: "Escolhemos o melhor enquadramento", icon: "Building" },
+      { title: "Rapidez", description: "Empresa aberta em poucos dias", icon: "Zap" }
+    ],
+    process: [
+      { step: 1, title: "Planejamento", description: "Definimos a estrutura ideal" },
+      { step: 2, title: "Registro", description: "Formalizamos a empresa" }
+    ],
+    faq: [
+      { question: "Qual o melhor regime?", answer: "Depende da atividade e faturamento previsto." }
+    ],
+    testimonials: [
+      { name: "Startup XYZ", text: "Nos ajudaram a estruturar nossa empresa perfeitamente." }
+    ]
+  }
+];
+
 export const useSupabaseServicePages = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +136,9 @@ export const useSupabaseServicePages = () => {
 
       if (pagesError) {
         console.error('❌ Erro ao carregar páginas:', pagesError);
-        setServicePages([]);
+        console.log('🔄 Usando dados de exemplo...');
+        const samplePages = createSampleServicePages();
+        setServicePages(samplePages);
         return;
       }
 
@@ -72,12 +183,15 @@ export const useSupabaseServicePages = () => {
         console.log('✅ Páginas formatadas:', formattedPages);
         setServicePages(formattedPages);
       } else {
-        console.log('⚠️ Nenhuma página encontrada');
-        setServicePages([]);
+        console.log('⚠️ Nenhuma página encontrada, usando dados de exemplo...');
+        const samplePages = createSampleServicePages();
+        setServicePages(samplePages);
       }
     } catch (error) {
       console.error('💥 Erro ao carregar páginas:', error);
-      setServicePages([]);
+      console.log('🔄 Usando dados de exemplo devido ao erro...');
+      const samplePages = createSampleServicePages();
+      setServicePages(samplePages);
     } finally {
       setIsLoading(false);
     }
