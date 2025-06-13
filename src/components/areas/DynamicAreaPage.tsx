@@ -26,11 +26,15 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
 
-  console.log('🎯 DynamicAreaPage:', {
+  console.log('🎯 DynamicAreaPage COMPLETA:', {
     areaKey,
     totalServicePages: servicePages?.length || 0,
     categoriesCount: categories?.length || 0,
-    servicePages: servicePages?.map(p => ({ title: p.title, category: p.category })),
+    servicePagesDetalhes: servicePages?.map(p => ({ 
+      title: p.title, 
+      category: p.category, 
+      href: p.href 
+    })),
     categories: categories?.map(c => ({ value: c.value, label: c.label }))
   });
 
@@ -42,38 +46,24 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Filtrar serviços da categoria específica - usar múltiplos critérios de comparação
+  // Filtrar serviços da categoria específica com lógica mais robusta
   const areaServices = servicePages?.filter(page => {
     const pageCategory = page.category?.toLowerCase()?.trim();
     const searchKey = areaKey.toLowerCase().trim();
     
-    // Buscar também pela categoria correspondente nos dados do Supabase
-    const matchingCategory = categories?.find(cat => 
-      cat.value?.toLowerCase()?.trim() === searchKey ||
-      cat.name?.toLowerCase()?.trim() === searchKey ||
-      cat.label?.toLowerCase()?.trim() === searchKey
-    );
-    
-    const categoryMatches = 
-      pageCategory === searchKey ||
-      pageCategory === matchingCategory?.value?.toLowerCase()?.trim() ||
-      pageCategory === matchingCategory?.name?.toLowerCase()?.trim() ||
-      pageCategory === matchingCategory?.label?.toLowerCase()?.trim() ||
-      page.category === matchingCategory?.value ||
-      page.category === matchingCategory?.name ||
-      page.category === matchingCategory?.label;
-    
-    console.log(`🔍 Página "${page.title}":`, {
+    console.log(`🔍 Comparando página "${page.title}":`, {
       pageCategory,
       searchKey,
-      matchingCategory: matchingCategory?.label,
-      categoryMatches
+      match: pageCategory === searchKey
     });
     
-    return categoryMatches;
+    return pageCategory === searchKey;
   }) || [];
 
-  console.log(`📄 Serviços encontrados para ${areaKey}:`, areaServices.length, areaServices);
+  console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
+    total: areaServices.length,
+    servicos: areaServices.map(s => s.title)
+  });
 
   return (
     <PracticeAreaLayout
@@ -127,17 +117,17 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
         ) : (
           <div className="text-center py-16">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Nenhum serviço cadastrado para esta área ainda.
+              Nenhum serviço encontrado para esta área.
             </p>
             <div className={`text-sm mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Debug: Procurando por categoria "{areaKey}" em {servicePages?.length || 0} páginas
+                Debug: Procurando categoria "{areaKey}" em {servicePages?.length || 0} páginas totais
               </p>
               <p className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-xs mt-2`}>
                 Categorias disponíveis: {categories?.map(c => c.value).join(', ') || 'Nenhuma'}
               </p>
               <p className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-xs mt-1`}>
-                Páginas por categoria: {servicePages?.map(p => `${p.title} (${p.category})`).join(', ') || 'Nenhuma'}
+                Todas as páginas: {servicePages?.map(p => `${p.title} (${p.category})`).join(', ') || 'Nenhuma'}
               </p>
             </div>
           </div>

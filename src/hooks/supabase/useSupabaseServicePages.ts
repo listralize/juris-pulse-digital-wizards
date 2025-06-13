@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { ServicePage } from '../../types/adminTypes';
 
-// Dados de exemplo para páginas de serviços
+// Dados de exemplo completos para páginas de serviços de família
 const createSampleServicePages = (): ServicePage[] => [
   {
     id: crypto.randomUUID(),
@@ -68,6 +67,117 @@ const createSampleServicePages = (): ServicePage[] => [
       { name: "Ana Costa", text: "Conseguimos um acordo justo para todos." }
     ]
   },
+  {
+    id: crypto.randomUUID(),
+    title: "Casamento e União Estável",
+    description: "Formalização de relacionamentos, pactos antenupciais e conversão de união estável.",
+    category: "familia",
+    href: "casamento-uniao-estavel",
+    benefits: [
+      { title: "Pactos Personalizados", description: "Proteção patrimonial adequada ao seu perfil", icon: "FileText" },
+      { title: "Assessoria Completa", description: "Do planejamento à formalização", icon: "CheckCircle" }
+    ],
+    process: [
+      { step: 1, title: "Planejamento", description: "Definimos a melhor estratégia" },
+      { step: 2, title: "Documentação", description: "Preparamos todos os documentos" },
+      { step: 3, title: "Formalização", description: "Acompanhamos os procedimentos" }
+    ],
+    faq: [
+      { question: "Preciso de pacto antenupcial?", answer: "Recomendamos para proteção patrimonial." }
+    ],
+    testimonials: [
+      { name: "Carlos e Marina", text: "Nos ajudaram a proteger nosso patrimônio familiar." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Inventário e Sucessões",
+    description: "Inventário judicial e extrajudicial, partilha de bens e testamentos.",
+    category: "familia",
+    href: "inventario-sucessoes",
+    benefits: [
+      { title: "Rapidez", description: "Inventário extrajudicial quando possível", icon: "Zap" },
+      { title: "Economia", description: "Reduzimos custos e tempo", icon: "DollarSign" }
+    ],
+    process: [
+      { step: 1, title: "Análise", description: "Verificamos a documentação" },
+      { step: 2, title: "Estratégia", description: "Definimos o melhor caminho" },
+      { step: 3, title: "Execução", description: "Conduzimos o processo" }
+    ],
+    faq: [
+      { question: "Quanto tempo demora?", answer: "Extrajudicial: 30-60 dias. Judicial: 6-12 meses." }
+    ],
+    testimonials: [
+      { name: "Família Santos", text: "Processo rápido e sem complicações." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Adoção",
+    description: "Assessoria completa em processos de adoção nacional e internacional.",
+    category: "familia",
+    href: "adocao",
+    benefits: [
+      { title: "Suporte Emocional", description: "Acompanhamento humanizado", icon: "Heart" },
+      { title: "Expertise Técnica", description: "Conhecimento especializado", icon: "Award" }
+    ],
+    process: [
+      { step: 1, title: "Orientação", description: "Explicamos todo o processo" },
+      { step: 2, title: "Documentação", description: "Preparamos a habilitação" },
+      { step: 3, title: "Acompanhamento", description: "Suporte durante todo o processo" }
+    ],
+    faq: [
+      { question: "Quais os requisitos?", answer: "Idade mínima 18 anos, diferença de 16 anos do adotando." }
+    ],
+    testimonials: [
+      { name: "Paulo e Rita", text: "Realizaram nosso sonho de ser pais." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Violência Doméstica",
+    description: "Medidas protetivas e defesa de vítimas de violência doméstica e familiar.",
+    category: "familia",
+    href: "violencia-domestica",
+    benefits: [
+      { title: "Urgência", description: "Medidas protetivas imediatas", icon: "Shield" },
+      { title: "Sigilo", description: "Atendimento confidencial", icon: "Lock" }
+    ],
+    process: [
+      { step: 1, title: "Acolhimento", description: "Escuta qualificada da vítima" },
+      { step: 2, title: "Medidas Urgentes", description: "Solicitação de proteção" },
+      { step: 3, title: "Acompanhamento", description: "Suporte jurídico contínuo" }
+    ],
+    faq: [
+      { question: "Como funciona a medida protetiva?", answer: "Proíbe aproximação e contato do agressor." }
+    ],
+    testimonials: [
+      { name: "Cliente Anônima", text: "Me deram segurança para recomeçar." }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Investigação de Paternidade",
+    description: "Ações de investigação e negatória de paternidade com DNA.",
+    category: "familia",
+    href: "investigacao-paternidade",
+    benefits: [
+      { title: "Certeza Científica", description: "Exame de DNA 99,9% de precisão", icon: "Search" },
+      { title: "Direitos Garantidos", description: "Reconhecimento de filiação", icon: "Scale" }
+    ],
+    process: [
+      { step: 1, title: "Petição", description: "Entramos com a ação" },
+      { step: 2, title: "Exame DNA", description: "Realizamos o teste" },
+      { step: 3, title: "Sentença", description: "Reconhecimento judicial" }
+    ],
+    faq: [
+      { question: "E se o suposto pai se recusar?", answer: "O juiz pode decretar a paternidade pela recusa." }
+    ],
+    testimonials: [
+      { name: "Ana Paula", text: "Meu filho teve o pai reconhecido." }
+    ]
+  },
+  // Adicionar alguns serviços de outras áreas para teste
   {
     id: crypto.randomUUID(),
     title: "Planejamento Tributário",
@@ -136,14 +246,16 @@ export const useSupabaseServicePages = () => {
 
       if (pagesError) {
         console.error('❌ Erro ao carregar páginas:', pagesError);
-        console.log('🔄 Usando dados de exemplo...');
+        console.log('🔄 Usando dados de exemplo completos...');
         const samplePages = createSampleServicePages();
+        console.log('📋 Total de páginas de exemplo:', samplePages.length);
+        console.log('👨‍👩‍👧‍👦 Páginas de família:', samplePages.filter(p => p.category === 'familia').length);
         setServicePages(samplePages);
         return;
       }
 
       if (pagesData && pagesData.length > 0) {
-        console.log('📄 Páginas carregadas:', pagesData);
+        console.log('📄 Páginas carregadas do Supabase:', pagesData.length);
         
         const formattedPages: ServicePage[] = pagesData.map((page: any) => ({
           id: page.id,
@@ -180,17 +292,21 @@ export const useSupabaseServicePages = () => {
             }))
         }));
         
-        console.log('✅ Páginas formatadas:', formattedPages);
+        console.log('✅ Páginas formatadas do Supabase:', formattedPages.length);
         setServicePages(formattedPages);
       } else {
-        console.log('⚠️ Nenhuma página encontrada, usando dados de exemplo...');
+        console.log('⚠️ Nenhuma página encontrada no Supabase, usando dados de exemplo completos...');
         const samplePages = createSampleServicePages();
+        console.log('📋 Total de páginas de exemplo:', samplePages.length);
+        console.log('👨‍👩‍👧‍👦 Páginas de família:', samplePages.filter(p => p.category === 'familia').length);
         setServicePages(samplePages);
       }
     } catch (error) {
       console.error('💥 Erro ao carregar páginas:', error);
-      console.log('🔄 Usando dados de exemplo devido ao erro...');
+      console.log('🔄 Usando dados de exemplo completos devido ao erro...');
       const samplePages = createSampleServicePages();
+      console.log('📋 Total de páginas de exemplo:', samplePages.length);
+      console.log('👨‍👩‍👧‍👦 Páginas de família:', samplePages.filter(p => p.category === 'familia').length);
       setServicePages(samplePages);
     } finally {
       setIsLoading(false);
