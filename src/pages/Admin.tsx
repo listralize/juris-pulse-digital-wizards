@@ -11,7 +11,6 @@ import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
-import { createSampleServicePages } from '../utils/createSampleServicePages';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -37,18 +36,25 @@ const Admin = () => {
     refreshData
   } = useAdminDataIntegrated();
 
-  const [hasInitializedSampleData, setHasInitializedSampleData] = useState(false);
+  const [hasInitializedData, setHasInitializedData] = useState(false);
 
-  // Inicializar dados de exemplo se não houver páginas
+  // Forçar inicialização das 122 páginas se necessário
   useEffect(() => {
-    if (!isLoading && servicePages.length === 0 && !hasInitializedSampleData) {
-      console.log('🚀 Inicializando dados de exemplo...');
-      const samplePages = createSampleServicePages();
-      saveServicePages(samplePages);
-      setHasInitializedSampleData(true);
-      toast.success('Dados de exemplo criados!');
+    if (!isLoading && !hasInitializedData) {
+      console.log('🚀 Verificando se precisamos inicializar dados completos...');
+      console.log('📊 Páginas atuais:', servicePages.length);
+      
+      // Se temos menos de 100 páginas, forçar recarga completa
+      if (servicePages.length < 100) {
+        console.log('⚠️ Páginas insuficientes, forçando inicialização completa...');
+        setTimeout(() => {
+          refreshData();
+        }, 1000);
+      }
+      
+      setHasInitializedData(true);
     }
-  }, [isLoading, servicePages.length, hasInitializedSampleData, saveServicePages]);
+  }, [isLoading, servicePages.length, hasInitializedData, refreshData]);
 
   const handleSaveTeamMembers = async () => {
     await saveAll();
@@ -98,11 +104,21 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto">
         <AdminHeader onLogout={logout} />
 
+        {/* Debug info */}
+        <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+          <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+            📊 Status: {servicePages.length} páginas carregadas de 122 esperadas
+          </p>
+          <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+            📂 Categorias: {categories.length} | 👥 Equipe: {teamMembers.length} | 📝 Posts: {blogPosts.length}
+          </p>
+        </div>
+
         <Tabs defaultValue="service-pages" className="space-y-6">
           <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="service-pages" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
-              Páginas de Serviços
+              Páginas de Serviços ({servicePages.length})
             </TabsTrigger>
             <TabsTrigger value="supabase" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
