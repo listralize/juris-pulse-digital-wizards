@@ -49,11 +49,17 @@ const Index = () => {
   }, []);
   
   return (
-    <div className={`h-screen w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-500 overflow-hidden`}
+    <div className={`h-screen w-full transition-colors duration-500 overflow-hidden ${
+      isDark 
+        ? 'bg-black text-white' 
+        : 'bg-[#f5f5f5] text-black'
+    }`}
          style={{ 
            scrollbarWidth: 'none', 
            msOverflowStyle: 'none' 
          }}>
+         
+      {/* Force specific background colors */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
@@ -66,7 +72,20 @@ const Index = () => {
         html::-webkit-scrollbar {
           display: none !important;
         }
+        
+        /* Force light theme colors */
+        body.light, html.light {
+          background-color: #f5f5f5 !important;
+          color: #000000 !important;
+        }
+        
+        /* Force dark theme colors when needed */
+        body.dark, html.dark {
+          background-color: #000000 !important;
+          color: #ffffff !important;
+        }
       `}</style>
+      
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />

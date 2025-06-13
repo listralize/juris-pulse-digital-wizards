@@ -32,6 +32,7 @@ export function ThemeProvider({
       const initialTheme = (savedTheme === 'light' || savedTheme === 'dark') ? savedTheme as Theme : 'light';
       setTheme(initialTheme);
       setIsInitialized(true);
+      console.log('Theme initialized:', initialTheme);
     }
   }, [storageKey]);
   
@@ -48,6 +49,8 @@ export function ThemeProvider({
       // Remove all theme classes first
       body.classList.remove('dark', 'light');
       html.classList.remove('dark', 'light');
+      
+      console.log('Applying theme:', theme);
       
       if (theme === 'dark') {
         body.classList.add('dark');
@@ -68,13 +71,15 @@ export function ThemeProvider({
   }, [theme, storageKey, isInitialized]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    console.log('Toggling theme from', theme, 'to', newTheme);
+    setTheme(newTheme);
   };
 
-  // Don't render children until theme is initialized
+  // Show loading with light background while initializing
   if (!isInitialized) {
     return (
-      <div className="w-full h-screen bg-white flex items-center justify-center">
+      <div className="w-full h-screen bg-[#f5f5f5] flex items-center justify-center">
         <div className="text-black">Carregando...</div>
       </div>
     );

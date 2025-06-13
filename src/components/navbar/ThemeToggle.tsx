@@ -13,17 +13,22 @@ const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) =>
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
+  console.log('ThemeToggle render:', { theme, isDark });
+
   return (
     <Toggle 
       aria-label="Alternar tema"
       pressed={isDark}
-      onPressedChange={toggleTheme}
+      onPressedChange={() => {
+        console.log('Theme toggle clicked, current theme:', theme);
+        toggleTheme();
+      }}
       className={`rounded-full p-2 transition-all hover:scale-105 
         ${isDark 
           ? 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20' 
           : 'bg-black/10 text-black hover:bg-black/20'
         } ${className}`}
-      style={{ zIndex: 20 }} // Lower z-index to prevent overlap with contact section
+      style={{ zIndex: 20 }}
     >
       {isDark 
         ? <Sun className="h-5 w-5" /> 
