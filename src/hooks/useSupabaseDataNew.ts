@@ -49,7 +49,7 @@ export const useSupabaseDataNew = () => {
       await loadCategories();
       
       // 2. Aguardar um tempo para garantir que as categorias estão disponíveis
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // 3. Carregar páginas de serviços (que dependem das categorias)
       console.log('📄 2. Carregando páginas de serviços...');
@@ -81,8 +81,10 @@ export const useSupabaseDataNew = () => {
     };
 
     const handleServicePagesUpdate = () => {
-      console.log('📄 Páginas de serviços atualizadas');
-      loadServicePages();
+      console.log('📄 Páginas de serviços atualizadas, recarregando...');
+      setTimeout(() => {
+        loadServicePages();
+      }, 500);
     };
 
     window.addEventListener('refreshSupabaseData', handleRefresh);
@@ -92,7 +94,7 @@ export const useSupabaseDataNew = () => {
       window.removeEventListener('refreshSupabaseData', handleRefresh);
       window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate);
     };
-  }, []);
+  }, []); // Dependências vazias para evitar loops
 
   // Combinar o loading dos service pages com o loading geral
   const combinedLoading = isLoading || servicePagesLoading;

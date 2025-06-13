@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -8,6 +9,7 @@ import { CategoryGrid } from './CategoryGrid';
 import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoriesManager } from './CategoriesManager';
+import { toast } from 'sonner';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
@@ -35,6 +37,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (servicePages && servicePages.length >= 0) {
@@ -58,9 +61,21 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     ));
   };
 
-  const handleSave = () => {
-    console.log('Salvando páginas locais:', localPages.length);
-    onSave([...localPages]);
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      console.log('💾 Iniciando salvamento de páginas:', localPages.length);
+      
+      await onSave([...localPages]);
+      
+      toast.success('Páginas salvas com sucesso!');
+      console.log('✅ Salvamento concluído');
+    } catch (error) {
+      console.error('❌ Erro ao salvar:', error);
+      toast.error('Erro ao salvar páginas');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const addNewServicePage = () => {
@@ -106,6 +121,8 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     console.log('Adicionando nova página:', newId);
     setLocalPages(prev => [...prev, newServicePage]);
     setSelectedPageId(newId);
+    
+    toast.success('Nova página criada!');
   };
 
   const removeServicePage = (pageId: string) => {
@@ -114,6 +131,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
     }
+    toast.success('Página removida!');
   };
 
   const handleBackToCategories = () => {
@@ -165,9 +183,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 <Settings className="w-4 h-4 mr-2" />
                 Editar Categorias
               </Button>
-              <Button onClick={handleSave} size="sm" variant="outline">
+              <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
                 <Save className="w-4 h-4 mr-2" />
-                Salvar Tudo
+                {isSaving ? 'Salvando...' : 'Salvar Tudo'}
               </Button>
             </div>
           </div>
@@ -184,7 +202,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   }
 
   // Se categoria selecionada mas nenhuma página, mostra lista de páginas
-  if (selectedCategory && !selectedPageId) {
+  if (selectedCategory && !selectedPageId) {  
     const categoryInfo = categories.find(c => c.value === selectedCategory);
     
     return (
@@ -209,9 +227,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Página
               </Button>
-              <Button onClick={handleSave} size="sm" variant="outline">
+              <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
                 <Save className="w-4 h-4 mr-2" />
-                Salvar Tudo
+                {isSaving ? 'Salvando...' : 'Salvar Tudo'}
               </Button>
             </div>
           </div>
@@ -249,9 +267,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 {categoryInfo?.label} › {selectedPage.title || 'Nova Página'}
               </CardTitle>
             </div>
-            <Button onClick={handleSave} size="sm" variant="outline">
+            <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
-              Salvar
+              {isSaving ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </CardHeader>

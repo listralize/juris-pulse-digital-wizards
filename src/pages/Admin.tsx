@@ -11,6 +11,7 @@ import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
+import { createSampleServicePages } from '../utils/createSampleServicePages';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -36,14 +37,32 @@ const Admin = () => {
     refreshData
   } = useAdminDataIntegrated();
 
+  const [hasInitializedSampleData, setHasInitializedSampleData] = useState(false);
+
+  // Inicializar dados de exemplo se não houver páginas
+  useEffect(() => {
+    if (!isLoading && servicePages.length === 0 && !hasInitializedSampleData) {
+      console.log('🚀 Inicializando dados de exemplo...');
+      const samplePages = createSampleServicePages();
+      saveServicePages(samplePages);
+      setHasInitializedSampleData(true);
+      toast.success('Dados de exemplo criados!');
+    }
+  }, [isLoading, servicePages.length, hasInitializedSampleData, saveServicePages]);
+
   const handleSaveTeamMembers = async () => {
     await saveAll();
     toast.success('Equipe salva com sucesso!');
   };
 
-  const handleSaveServicePages = (pages: ServicePage[]) => {
-    saveServicePages(pages);
-    toast.success('Páginas de serviços salvas com sucesso!');
+  const handleSaveServicePages = async (pages: ServicePage[]) => {
+    try {
+      await saveServicePages(pages);
+      toast.success('Páginas de serviços salvas com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar páginas:', error);
+      toast.error('Erro ao salvar páginas de serviços');
+    }
   };
 
   const handleSaveCategories = (cats: CategoryInfo[]) => {
@@ -74,8 +93,12 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto">
         <AdminHeader onLogout={logout} />
 
-        <Tabs defaultValue="supabase" className="space-y-6">
+        <Tabs defaultValue="service-pages" className="space-y-6">
           <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+            <TabsTrigger value="service-pages" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Páginas de Serviços
+            </TabsTrigger>
             <TabsTrigger value="supabase" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Supabase
@@ -84,15 +107,23 @@ const Admin = () => {
               <Edit className="w-4 h-4" />
               Conteúdo Geral
             </TabsTrigger>
-            <TabsTrigger value="service-pages" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Páginas de Serviços
-            </TabsTrigger>
             <TabsTrigger value="blog" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Blog
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="service-pages">
+            <ServicePagesManager 
+              servicePages={servicePages}
+              categories={categories}
+              pageTexts={pageTexts}
+              onSave={handleSaveServicePages}
+              onSaveCategories={handleSaveCategories}
+              onSavePageTexts={handleSavePageTexts}
+              onUpdatePageTexts={updatePageTexts}
+            />
+          </TabsContent>
 
           <TabsContent value="supabase">
             <SupabaseDataManager />
@@ -108,18 +139,6 @@ const Admin = () => {
               onSaveTeamMembers={handleSaveTeamMembers}
               onUpdatePageTexts={updatePageTexts}
               onSavePageTexts={handleSavePageTexts}
-            />
-          </TabsContent>
-
-          <TabsContent value="service-pages">
-            <ServicePagesManager 
-              servicePages={servicePages}
-              categories={categories}
-              pageTexts={pageTexts}
-              onSave={handleSaveServicePages}
-              onSaveCategories={handleSaveCategories}
-              onSavePageTexts={handleSavePageTexts}
-              onUpdatePageTexts={updatePageTexts}
             />
           </TabsContent>
 

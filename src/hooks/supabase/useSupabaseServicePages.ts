@@ -145,6 +145,7 @@ export const useSupabaseServicePages = () => {
             console.error('❌ Erro ao atualizar página:', updateError);
             continue;
           }
+          console.log('✅ Página atualizada:', page.title);
         } else {
           // Inserir nova página
           const { error: insertError } = await supabase
@@ -158,6 +159,7 @@ export const useSupabaseServicePages = () => {
             console.error('❌ Erro ao inserir página:', insertError);
             continue;
           }
+          console.log('✅ Nova página inserida:', page.title);
         }
 
         // Limpar dados relacionados existentes
@@ -178,7 +180,13 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          await supabase.from('service_benefits').insert(benefits);
+          const { error: benefitsError } = await supabase
+            .from('service_benefits')
+            .insert(benefits);
+          
+          if (benefitsError) {
+            console.error('❌ Erro ao salvar benefícios:', benefitsError);
+          }
         }
 
         if (page.process && page.process.length > 0) {
@@ -190,7 +198,13 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          await supabase.from('service_process_steps').insert(processSteps);
+          const { error: processError } = await supabase
+            .from('service_process_steps')
+            .insert(processSteps);
+            
+          if (processError) {
+            console.error('❌ Erro ao salvar processo:', processError);
+          }
         }
 
         if (page.faq && page.faq.length > 0) {
@@ -201,7 +215,13 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          await supabase.from('service_faq').insert(faqItems);
+          const { error: faqError } = await supabase
+            .from('service_faq')
+            .insert(faqItems);
+            
+          if (faqError) {
+            console.error('❌ Erro ao salvar FAQ:', faqError);
+          }
         }
 
         if (page.testimonials && page.testimonials.length > 0) {
@@ -213,7 +233,13 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          await supabase.from('service_testimonials').insert(testimonials);
+          const { error: testimonialsError } = await supabase
+            .from('service_testimonials')
+            .insert(testimonials);
+            
+          if (testimonialsError) {
+            console.error('❌ Erro ao salvar depoimentos:', testimonialsError);
+          }
         }
       }
 
@@ -221,6 +247,9 @@ export const useSupabaseServicePages = () => {
       
       // Recarregar as páginas após salvar
       await loadServicePages();
+      
+      // Disparar evento para atualizar outras partes da aplicação
+      window.dispatchEvent(new CustomEvent('servicePagesUpdated'));
       
       return pages;
     } catch (error) {
