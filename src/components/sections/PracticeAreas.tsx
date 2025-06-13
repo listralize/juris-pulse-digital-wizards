@@ -55,9 +55,7 @@ const PracticeAreas = () => {
 
     return categories.map(category => {
       const categoryPages = servicePages?.filter(page => 
-        page.category === category.value || 
-        page.category === category.name ||
-        page.category === category.label
+        page.category === category.value
       ) || [];
 
       console.log(`📂 Categoria ${category.label}: ${categoryPages.length} páginas`);

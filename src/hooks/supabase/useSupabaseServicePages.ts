@@ -17,7 +17,7 @@ export const useSupabaseServicePages = () => {
         .from('service_pages')
         .select(`
           *,
-          law_categories!service_pages_category_id_fkey(category_key, name),
+          law_categories!service_pages_category_id_fkey(id, category_key, name),
           service_benefits(*),
           service_process_steps(*),
           service_faq(*),
@@ -39,7 +39,7 @@ export const useSupabaseServicePages = () => {
           id: page.id,
           title: page.title || '',
           description: page.description || '',
-          category: page.law_categories?.category_key || page.category_id || 'geral',
+          category: page.law_categories?.category_key || 'geral',
           href: page.href || '',
           benefits: (page.service_benefits || [])
             .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))

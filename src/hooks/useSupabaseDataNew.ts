@@ -25,6 +25,7 @@ export const useSupabaseDataNew = () => {
 
   const {
     servicePages,
+    isLoading: servicePagesLoading,
     loadServicePages,
     saveServicePages,
     setServicePages
@@ -93,13 +94,16 @@ export const useSupabaseDataNew = () => {
     };
   }, []);
 
+  // Combinar o loading dos service pages com o loading geral
+  const combinedLoading = isLoading || servicePagesLoading;
+
   return {
     // Data
     categories,
     teamMembers,
     servicePages,
     pageTexts,
-    isLoading,
+    isLoading: combinedLoading,
     
     // Individual save functions
     saveCategories,

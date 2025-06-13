@@ -5,7 +5,6 @@ import PracticeAreaLayout from '../PracticeAreaLayout';
 import { Card, CardContent } from '../ui/card';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
-import { ServicePage } from '../../types/adminTypes';
 
 interface DynamicAreaPageProps {
   areaKey: string;
@@ -42,16 +41,14 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Filtrar serviços da categoria específica usando múltiplos critérios
+  // Filtrar serviços da categoria específica
   const areaServices = servicePages?.filter(page => {
     const pageCategory = page.category?.toLowerCase().trim();
     const searchKey = areaKey.toLowerCase().trim();
     
     console.log(`🔍 Comparando: "${pageCategory}" === "${searchKey}"`, pageCategory === searchKey);
     
-    return pageCategory === searchKey || 
-           page.category === areaKey ||
-           page.category?.includes(areaKey);
+    return pageCategory === searchKey;
   }) || [];
 
   console.log(`📄 Serviços encontrados para ${areaKey}:`, areaServices.length, areaServices);
