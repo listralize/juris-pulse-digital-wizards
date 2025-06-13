@@ -31,6 +31,19 @@ const Index = () => {
     body.style.height = '100vh';
     html.style.height = '100vh';
     
+    // Force background colors based on theme
+    if (isDark) {
+      body.style.backgroundColor = '#000000';
+      html.style.backgroundColor = '#000000';
+      body.style.color = '#ffffff';
+      html.style.color = '#ffffff';
+    } else {
+      body.style.backgroundColor = '#f5f5f5';
+      html.style.backgroundColor = '#f5f5f5';
+      body.style.color = '#000000';
+      html.style.color = '#000000';
+    }
+    
     // Disable scroll restoration
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
@@ -46,20 +59,23 @@ const Index = () => {
         history.scrollRestoration = 'auto';
       }
     };
-  }, []);
+  }, [isDark]);
   
   return (
-    <div className={`h-screen w-full transition-colors duration-500 overflow-hidden ${
-      isDark 
-        ? 'bg-black text-white' 
-        : 'bg-[#f5f5f5] text-black'
-    }`}
-         style={{ 
-           scrollbarWidth: 'none', 
-           msOverflowStyle: 'none' 
-         }}>
-         
-      {/* Force specific background colors */}
+    <div 
+      className={`h-screen w-full transition-colors duration-300 overflow-hidden ${
+        isDark 
+          ? 'bg-black text-white' 
+          : 'bg-[#f5f5f5] text-black'
+      }`}
+      style={{ 
+        scrollbarWidth: 'none', 
+        msOverflowStyle: 'none',
+        backgroundColor: isDark ? '#000000' : '#f5f5f5',
+        color: isDark ? '#ffffff' : '#000000'
+      }}
+    >
+      {/* Global styles to force theme colors */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
@@ -67,22 +83,12 @@ const Index = () => {
         body, html {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
+          background-color: ${isDark ? '#000000' : '#f5f5f5'} !important;
+          color: ${isDark ? '#ffffff' : '#000000'} !important;
         }
         body::-webkit-scrollbar,
         html::-webkit-scrollbar {
           display: none !important;
-        }
-        
-        /* Force light theme colors */
-        body.light, html.light {
-          background-color: #f5f5f5 !important;
-          color: #000000 !important;
-        }
-        
-        /* Force dark theme colors when needed */
-        body.dark, html.dark {
-          background-color: #000000 !important;
-          color: #ffffff !important;
         }
       `}</style>
       
