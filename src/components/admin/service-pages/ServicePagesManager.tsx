@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -9,7 +10,6 @@ import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoriesManager } from './CategoriesManager';
 import { toast } from 'sonner';
-import { crypto } from 'crypto';
 
 interface ServicePagesManagerProps {
   servicePages: ServicePage[];
@@ -72,6 +72,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleBackToCategories = () => {
+    setSelectedCategory(null);
+    setSelectedPageId(null);
+    setShowCategoryEditor(false);
+  };
+
+  const handleBackToPages = () => {
+    setSelectedPageId(null);
   };
 
   const addNewServicePage = () => {

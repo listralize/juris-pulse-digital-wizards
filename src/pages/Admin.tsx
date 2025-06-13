@@ -65,9 +65,14 @@ const Admin = () => {
     }
   };
 
-  const handleSaveCategories = (cats: CategoryInfo[]) => {
-    saveCategories(cats);
-    toast.success('Categorias salvas com sucesso!');
+  const handleSaveCategories = async (cats: CategoryInfo[]) => {
+    try {
+      await saveCategories(cats);
+      toast.success('Categorias salvas com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar categorias:', error);
+      toast.error('Erro ao salvar categorias');
+    }
   };
 
   const handleSavePageTexts = async () => {
