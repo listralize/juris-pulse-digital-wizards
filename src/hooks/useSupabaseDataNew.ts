@@ -7,7 +7,6 @@ import { useSupabasePageTexts } from './supabase/useSupabasePageTexts';
 
 export const useSupabaseDataNew = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Individual hooks
   const {
@@ -39,15 +38,13 @@ export const useSupabaseDataNew = () => {
     setPageTexts
   } = useSupabasePageTexts();
 
-  // Load all data - SEQUENCIAL para garantir ordem correta
+  // Load all data - SIMPLIFICADO para evitar problemas
   const refreshData = useCallback(async () => {
-    if (hasInitialized) return;
-    
     setIsLoading(true);
     try {
       console.log('🔄 CARREGANDO DADOS DO SUPABASE...');
       
-      // Carregar dados em paralelo para melhor performance
+      // Carregar dados em paralelo
       await Promise.all([
         loadCategories(),
         loadTeamMembers(),
@@ -56,18 +53,17 @@ export const useSupabaseDataNew = () => {
       ]);
       
       console.log('✅ TODOS OS DADOS CARREGADOS');
-      setHasInitialized(true);
     } catch (error) {
       console.error('❌ ERRO AO CARREGAR DADOS:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [hasInitialized, loadCategories, loadTeamMembers, loadPageTexts, loadServicePages]);
+  }, [loadCategories, loadTeamMembers, loadPageTexts, loadServicePages]);
 
-  // Load data on mount apenas uma vez
+  // Load data on mount
   useEffect(() => {
     refreshData();
-  }, [refreshData]);
+  }, []);
 
   // Combinar o loading dos service pages com o loading geral
   const combinedLoading = isLoading || servicePagesLoading;
@@ -93,9 +89,6 @@ export const useSupabaseDataNew = () => {
     setPageTexts,
     
     // Refresh function
-    refreshData: () => {
-      setHasInitialized(false);
-      refreshData();
-    }
+    refreshData
   };
 };

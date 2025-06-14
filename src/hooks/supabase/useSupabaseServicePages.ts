@@ -102,7 +102,8 @@ export const useSupabaseServicePages = () => {
 
   const getDefaultPages = (): ServicePage[] => {
     try {
-      return [
+      console.log('📦 Gerando páginas padrão...');
+      const defaultPages = [
         ...createFamiliaServicePages(),
         ...createTributarioServicePages(),
         ...createEmpresarialServicePages(),
@@ -113,6 +114,8 @@ export const useSupabaseServicePages = () => {
         ...createConstitucionalServicePages(),
         ...createAdministrativoServicePages()
       ];
+      console.log('✅ Páginas padrão geradas:', defaultPages.length);
+      return defaultPages;
     } catch (error) {
       console.error('❌ Erro ao gerar páginas padrão:', error);
       return [];
@@ -120,11 +123,16 @@ export const useSupabaseServicePages = () => {
   };
 
   const loadServicePages = async () => {
-    console.log('🔄 Carregando páginas de serviço...');
+    console.log('🔄 Iniciando carregamento de páginas...');
     setIsLoading(true);
     
+    // SEMPRE inicializar com dados padrão primeiro
+    const defaultPages = getDefaultPages();
+    setServicePages(defaultPages);
+    console.log('✅ Páginas padrão carregadas primeiro:', defaultPages.length);
+    
     try {
-      // Primeiro, tentar carregar do Supabase
+      // Tentar carregar do Supabase em segundo plano
       const { data: supabasePages, error } = await supabase
         .from('service_pages')
         .select(`
@@ -138,13 +146,14 @@ export const useSupabaseServicePages = () => {
         .order('display_order');
 
       if (error) {
-        console.error('❌ Erro ao carregar do Supabase:', error);
-        throw error;
+        console.error('❌ Erro ao carregar do Supabase (mantendo dados padrão):', error);
+        setIsLoading(false);
+        return;
       }
 
-      // Se há dados no Supabase, usar eles
+      // Se há dados no Supabase, substituir pelos dados do Supabase
       if (supabasePages && supabasePages.length > 0) {
-        console.log('✅ Páginas carregadas do Supabase:', supabasePages.length);
+        console.log('✅ Páginas encontradas no Supabase:', supabasePages.length);
         
         const convertedPages: ServicePage[] = supabasePages.map(page => ({
           id: page.id,
@@ -174,34 +183,26 @@ export const useSupabaseServicePages = () => {
         }));
 
         setServicePages(convertedPages);
-        setIsLoading(false);
-        return;
+        console.log('✅ Páginas do Supabase aplicadas');
+      } else {
+        console.log('📦 Nenhuma página no Supabase, mantendo páginas padrão');
       }
-
-      // Se não há dados no Supabase, usar dados padrão
-      console.log('📦 Carregando dados padrão...');
-      const defaultPages = getDefaultPages();
-      setServicePages(defaultPages);
       
     } catch (error) {
-      console.error('❌ Erro ao carregar páginas:', error);
-      
-      // Em caso de erro, usar dados padrão
-      console.log('🔄 Usando dados padrão como fallback...');
-      const defaultPages = getDefaultPages();
-      setServicePages(defaultPages);
+      console.error('❌ Erro ao carregar do Supabase (mantendo dados padrão):', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const saveServicePages = async (pages: ServicePage[]) => {
-    console.log('💾 Salvando páginas no Supabase...');
+    console.log('💾 Salvando', pages.length, 'páginas no Supabase...');
     
     try {
-      // Salvar páginas
+      // Salvar cada página
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
+        console.log('💾 Salvando página:', page.title);
         
         const { data: upsertedPage, error: pageError } = await supabase
           .from('service_pages')
@@ -218,13 +219,13 @@ export const useSupabaseServicePages = () => {
           .single();
 
         if (pageError) {
-          console.error('❌ Erro ao salvar página:', pageError);
+          console.error('❌ Erro ao salvar página:', page.title, pageError);
           continue;
         }
 
         const pageId = upsertedPage.id;
 
-        // Limpar dados relacionados
+        // Limpar dados relacionados existentes
         await Promise.all([
           supabase.from('service_benefits').delete().eq('service_page_id', pageId),
           supabase.from('service_process_steps').delete().eq('service_page_id', pageId),
@@ -232,9 +233,9 @@ export const useSupabaseServicePages = () => {
           supabase.from('service_testimonials').delete().eq('service_page_id', pageId)
         ]);
 
-        // Inserir novos dados
+        // Inserir novos dados relacionados
         if (page.benefits?.length) {
-          await supabase.from('service_benefits').insert(
+          const { error: benefitsError } = await supabase.from('service_benefits').insert(
             page.benefits.map((benefit, index) => ({
               service_page_id: pageId,
               title: benefit.title,
@@ -243,10 +244,11 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }))
           );
+          if (benefitsError) console.error('❌ Erro ao salvar benefícios:', benefitsError);
         }
 
         if (page.process?.length) {
-          await supabase.from('service_process_steps').insert(
+          const { error: processError } = await supabase.from('service_process_steps').insert(
             page.process.map((step, index) => ({
               service_page_id: pageId,
               step_number: step.step,
@@ -255,10 +257,11 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }))
           );
+          if (processError) console.error('❌ Erro ao salvar processo:', processError);
         }
 
         if (page.faq?.length) {
-          await supabase.from('service_faq').insert(
+          const { error: faqError } = await supabase.from('service_faq').insert(
             page.faq.map((faq, index) => ({
               service_page_id: pageId,
               question: faq.question,
@@ -266,10 +269,11 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }))
           );
+          if (faqError) console.error('❌ Erro ao salvar FAQ:', faqError);
         }
 
         if (page.testimonials?.length) {
-          await supabase.from('service_testimonials').insert(
+          const { error: testimonialsError } = await supabase.from('service_testimonials').insert(
             page.testimonials.map((testimonial, index) => ({
               service_page_id: pageId,
               name: testimonial.name,
@@ -278,14 +282,16 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }))
           );
+          if (testimonialsError) console.error('❌ Erro ao salvar depoimentos:', testimonialsError);
         }
       }
 
-      console.log('✅ Páginas salvas com sucesso!');
+      console.log('✅ Todas as páginas foram salvas!');
+      // Recarregar dados após salvar
       await loadServicePages();
       
     } catch (error) {
-      console.error('❌ Erro ao salvar páginas:', error);
+      console.error('❌ Erro geral ao salvar páginas:', error);
       throw error;
     }
   };

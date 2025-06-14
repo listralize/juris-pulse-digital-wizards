@@ -14,24 +14,33 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('🎯 CategoryGrid DADOS RECEBIDOS:', {
+  console.log('🎯 CategoryGrid RENDERIZANDO:', {
     categoriesCount: categories?.length || 0,
     servicePagesCount: servicePages?.length || 0,
-    servicePages: servicePages?.slice(0, 3).map(p => ({ id: p.id, title: p.title, category: p.category }))
+    firstPage: servicePages?.[0] ? { id: servicePages[0].id, title: servicePages[0].title, category: servicePages[0].category } : 'nenhuma'
   });
+
+  // Garantir que temos arrays válidos
+  const validCategories = categories || [];
+  const validServicePages = servicePages || [];
 
   return (
     <div className="space-y-4">
       <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
         <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-          📋 Exibindo {categories.length} categorias | 📄 Total de {servicePages?.length || 0} páginas de serviços
+          📋 Exibindo {validCategories.length} categorias | 📄 Total de {validServicePages.length} páginas de serviços
         </p>
+        {validServicePages.length > 0 && (
+          <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+            ✅ Páginas carregadas: {validServicePages.slice(0, 3).map(p => p.title).join(', ')}...
+          </p>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((category) => {
+        {validCategories.map((category) => {
           // Filtrar páginas por categoria usando múltiplas comparações
-          const categoryPages = servicePages?.filter(page => {
+          const categoryPages = validServicePages.filter(page => {
             const pageCategory = page.category?.toLowerCase?.()?.trim?.();
             const categoryValue = category.value?.toLowerCase?.()?.trim?.();
             const categoryName = category.name?.toLowerCase?.()?.trim?.();
@@ -40,12 +49,9 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
             return pageCategory === categoryValue || 
                    pageCategory === categoryName || 
                    pageCategory === categoryLabel;
-          }) || [];
-          
-          console.log(`📂 ${category.label}: ${categoryPages.length} páginas`, {
-            categoryValue: category.value,
-            pagesSample: categoryPages.slice(0, 2).map(p => ({ title: p.title, category: p.category }))
           });
+          
+          console.log(`📂 ${category.label}: ${categoryPages.length} páginas encontradas`);
           
           return (
             <Card 
