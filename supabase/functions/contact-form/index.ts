@@ -55,10 +55,10 @@ serve(async (req) => {
       source: 'Website - Formulário de Contato'
     }
 
-    // Enviar para webhook (Make.com)
-    const webhookUrl = Deno.env.get('CONTACT_WEBHOOK_URL')
+    // Enviar para o webhook que você criou
+    const webhookUrl = Deno.env.get('WEBHOOK_URL')
     if (!webhookUrl) {
-      console.error('CONTACT_WEBHOOK_URL não configurada')
+      console.error('WEBHOOK_URL não configurada')
       return new Response(
         JSON.stringify({ error: 'Configuração de webhook não encontrada' }),
         { 
@@ -68,6 +68,7 @@ serve(async (req) => {
       )
     }
 
+    console.log('📤 Enviando para webhook:', webhookUrl)
     const webhookResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
@@ -77,7 +78,7 @@ serve(async (req) => {
     })
 
     if (!webhookResponse.ok) {
-      console.error('Erro ao enviar webhook:', await webhookResponse.text())
+      console.error('❌ Erro ao enviar webhook:', await webhookResponse.text())
       return new Response(
         JSON.stringify({ error: 'Erro interno do servidor' }),
         { 
