@@ -105,7 +105,7 @@ export const useSupabaseServicePages = () => {
     setIsLoading(true);
     
     try {
-      // Primeiro tentar carregar do Supabase
+      // Carregar páginas do Supabase
       const { data: supabasePages, error } = await supabase
         .from('service_pages')
         .select(`
@@ -123,10 +123,10 @@ export const useSupabaseServicePages = () => {
         throw error;
       }
 
+      // Se temos páginas no Supabase, converter formato
       if (supabasePages && supabasePages.length > 0) {
         console.log('✅ Páginas carregadas do Supabase:', supabasePages.length);
         
-        // Converter formato Supabase para formato local
         const convertedPages: ServicePage[] = supabasePages.map(page => ({
           id: page.id,
           title: page.title,
@@ -159,7 +159,7 @@ export const useSupabaseServicePages = () => {
         return;
       }
 
-      // Se não há dados no Supabase, inicializar com dados padrão
+      // Se não há dados no Supabase, carregar dados padrão
       console.log('📦 Inicializando com dados padrão...');
       const allPages: ServicePage[] = [
         ...createFamiliaServicePages(),
@@ -173,13 +173,19 @@ export const useSupabaseServicePages = () => {
         ...createAdministrativoServicePages()
       ];
 
-      console.log('🚀 Salvando páginas iniciais no Supabase...');
-      await saveServicePages(allPages);
-      
       setServicePages(allPages);
+      
+      // Auto-salvar no Supabase em background
+      console.log('🚀 Auto-salvando páginas iniciais no Supabase...');
+      setTimeout(() => {
+        saveServicePages(allPages);
+      }, 1000);
+      
     } catch (error) {
       console.error('❌ Erro ao carregar páginas:', error);
+      
       // Em caso de erro, carregar dados locais
+      console.log('🔄 Carregando dados locais como fallback...');
       const allPages: ServicePage[] = [
         ...createFamiliaServicePages(),
         ...createTributarioServicePages(),
@@ -201,21 +207,14 @@ export const useSupabaseServicePages = () => {
     console.log('💾 Salvando', pages.length, 'páginas no Supabase...');
     
     try {
-      // Primeiro, limpar páginas existentes
-      await supabase.from('service_testimonials').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('service_faq').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('service_process_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('service_benefits').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('service_pages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
       // Salvar páginas principais
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         
-        // Inserir página principal
-        const { data: insertedPage, error: pageError } = await supabase
+        // Upsert página principal
+        const { data: upsertedPage, error: pageError } = await supabase
           .from('service_pages')
-          .insert({
+          .upsert({
             id: page.id,
             title: page.title,
             description: page.description,
@@ -232,7 +231,13 @@ export const useSupabaseServicePages = () => {
           continue;
         }
 
-        const pageId = insertedPage.id;
+        const pageId = upsertedPage.id;
+
+        // Limpar dados relacionados antigos
+        await supabase.from('service_benefits').delete().eq('service_page_id', pageId);
+        await supabase.from('service_process_steps').delete().eq('service_page_id', pageId);
+        await supabase.from('service_faq').delete().eq('service_page_id', pageId);
+        await supabase.from('service_testimonials').delete().eq('service_page_id', pageId);
 
         // Inserir benefícios
         if (page.benefits && page.benefits.length > 0) {
@@ -244,13 +249,7 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          const { error: benefitsError } = await supabase
-            .from('service_benefits')
-            .insert(benefits);
-
-          if (benefitsError) {
-            console.error('❌ Erro ao inserir benefícios:', benefitsError);
-          }
+          await supabase.from('service_benefits').insert(benefits);
         }
 
         // Inserir etapas do processo
@@ -263,13 +262,7 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          const { error: processError } = await supabase
-            .from('service_process_steps')
-            .insert(processSteps);
-
-          if (processError) {
-            console.error('❌ Erro ao inserir etapas do processo:', processError);
-          }
+          await supabase.from('service_process_steps').insert(processSteps);
         }
 
         // Inserir FAQ
@@ -281,13 +274,7 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          const { error: faqError } = await supabase
-            .from('service_faq')
-            .insert(faqItems);
-
-          if (faqError) {
-            console.error('❌ Erro ao inserir FAQ:', faqError);
-          }
+          await supabase.from('service_faq').insert(faqItems);
         }
 
         // Inserir depoimentos
@@ -300,13 +287,7 @@ export const useSupabaseServicePages = () => {
             display_order: index
           }));
 
-          const { error: testimonialsError } = await supabase
-            .from('service_testimonials')
-            .insert(testimonials);
-
-          if (testimonialsError) {
-            console.error('❌ Erro ao inserir depoimentos:', testimonialsError);
-          }
+          await supabase.from('service_testimonials').insert(testimonials);
         }
       }
 
@@ -332,11 +313,6 @@ export const useSupabaseServicePages = () => {
     loadServicePages,
     saveServicePages,
     setServicePages,
-    refetch: () => {
-      setIsLoading(true);
-      setTimeout(() => {
-        loadServicePages();
-      }, 100);
-    }
+    refetch: loadServicePages
   };
 };
