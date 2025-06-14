@@ -1,9 +1,7 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollArea } from '../ui/scroll-area';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 
@@ -178,36 +176,34 @@ const PracticeAreas = () => {
             ))}
           </div>
 
-          {/* Desktop: Grid com scroll area */}
+          {/* Desktop: Grid sem scroll area */}
           <div className="hidden md:block w-full">
-            <ScrollArea className="h-[50vh]">
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
-                {practiceAreas.map((area, index) => (
-                  <Link 
-                    key={area.id}
-                    to={area.href}
-                    className="group block"
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              {practiceAreas.map((area, index) => (
+                <Link 
+                  key={area.id}
+                  to={area.href}
+                  className="group block"
+                >
+                  <div 
+                    className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/90 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6`}
+                    ref={el => cardsRef.current[index] = el}
                   >
-                    <div 
-                      className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/90 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6`}
-                      ref={el => cardsRef.current[index] = el}
-                    >
-                      <h3 className={`text-xl xl:text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                        {area.title}
-                      </h3>
-                      <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {area.description}
+                    <h3 className={`text-xl xl:text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+                      {area.title}
+                    </h3>
+                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {area.description}
+                    </p>
+                    {area.pageCount !== undefined && (
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
                       </p>
-                      {area.pageCount !== undefined && (
-                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </ScrollArea>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
