@@ -40,7 +40,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    console.log('🔄 Sincronizando páginas:', servicePages.length);
+    console.log('🔄 Sincronizando páginas do ServicePagesManager:', servicePages.length);
     setLocalPages([...servicePages]);
   }, [servicePages]);
 
@@ -62,13 +62,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log('💾 Salvando páginas:', localPages.length);
+      console.log('💾 Salvando páginas no Supabase:', localPages.length);
       
       await onSave(localPages);
-      toast.success('Páginas salvas com sucesso!');
+      toast.success('Páginas salvas com sucesso no Supabase!');
     } catch (error) {
-      console.error('❌ Erro ao salvar:', error);
-      toast.error('Erro ao salvar páginas');
+      console.error('❌ Erro ao salvar páginas:', error);
+      toast.error('Erro ao salvar páginas no Supabase');
     } finally {
       setIsSaving(false);
     }
@@ -99,7 +99,8 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       href: `${selectedCategory}-servico-${timestamp}`,
       benefits: [{
         title: "Benefício 1",
-        description: "Descrição do benefício 1"
+        description: "Descrição do benefício 1",
+        icon: "⚖️"
       }],
       process: [{
         step: 1,
@@ -172,10 +173,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               </Button>
               <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Salvando...' : 'Salvar Tudo'}
+                {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
               </Button>
             </div>
           </div>
+          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            Total de páginas carregadas: {localPages.length} | Status: {localPages.length > 0 ? '✅ Dados carregados' : '⚠️ Sem dados'}
+          </p>
         </CardHeader>
         <CardContent>
           <CategoryGrid 
@@ -216,7 +220,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               </Button>
               <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Salvando...' : 'Salvar Tudo'}
+                {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
               </Button>
             </div>
           </div>
@@ -256,7 +260,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             </div>
             <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? 'Salvando...' : 'Salvar'}
+              {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
             </Button>
           </div>
         </CardHeader>

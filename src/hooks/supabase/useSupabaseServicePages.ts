@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { ServicePage, CategoryInfo } from '../../types/adminTypes';
+import { supabase } from '../../integrations/supabase/client';
 import { createFamiliaServicePages } from './servicePagesData/familiaServicePages';
 import { createTributarioServicePages } from './servicePagesData/tributarioServicePages';
 import { createEmpresarialServicePages } from './servicePagesData/empresarialServicePages';
@@ -99,49 +100,225 @@ export const useSupabaseServicePages = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadServicePages = () => {
-    console.log('🔄 Carregando todas as páginas de serviço...');
+  const loadServicePages = async () => {
+    console.log('🔄 Carregando páginas de serviço do Supabase...');
+    setIsLoading(true);
     
-    const allPages: ServicePage[] = [
-      ...createFamiliaServicePages(),      // 14 páginas
-      ...createTributarioServicePages(),   // 10 páginas
-      ...createEmpresarialServicePages(),  // 12 páginas
-      ...createTrabalhoServicePages(),     // 12 páginas
-      ...createCivilServicePages(),        // 12 páginas
-      ...createPrevidenciarioServicePages(), // 12 páginas
-      ...createConsumidorServicePages(),   // 12 páginas
-      ...createConstitucionalServicePages(), // 12 páginas
-      ...createAdministrativoServicePages()  // 12 páginas
-    ];
+    try {
+      // Primeiro tentar carregar do Supabase
+      const { data: supabasePages, error } = await supabase
+        .from('service_pages')
+        .select(`
+          *,
+          service_benefits(*),
+          service_process_steps(*),
+          service_faq(*),
+          service_testimonials(*)
+        `)
+        .eq('is_active', true)
+        .order('display_order');
 
-    console.log('✅ Total de páginas carregadas:', allPages.length);
-    console.log('📊 Páginas por categoria:', {
-      familia: allPages.filter(p => p.category === 'familia').length,
-      tributario: allPages.filter(p => p.category === 'tributario').length,
-      empresarial: allPages.filter(p => p.category === 'empresarial').length,
-      trabalho: allPages.filter(p => p.category === 'trabalho').length,
-      civil: allPages.filter(p => p.category === 'civil').length,
-      previdenciario: allPages.filter(p => p.category === 'previdenciario').length,
-      consumidor: allPages.filter(p => p.category === 'consumidor').length,
-      constitucional: allPages.filter(p => p.category === 'constitucional').length,
-      administrativo: allPages.filter(p => p.category === 'administrativo').length
-    });
+      if (error) {
+        console.error('❌ Erro ao carregar do Supabase:', error);
+        throw error;
+      }
 
-    // Verificar se chegamos ao número esperado
-    if (allPages.length >= 108) { // Total esperado com a distribuição atual
-      console.log('🎉 SUCESSO: Todas as', allPages.length, 'páginas foram carregadas!');
-    } else {
-      console.warn('⚠️ Esperado mais páginas. Total atual:', allPages.length);
+      if (supabasePages && supabasePages.length > 0) {
+        console.log('✅ Páginas carregadas do Supabase:', supabasePages.length);
+        
+        // Converter formato Supabase para formato local
+        const convertedPages: ServicePage[] = supabasePages.map(page => ({
+          id: page.id,
+          title: page.title,
+          description: page.description || '',
+          category: page.category_id || '',
+          href: page.href || '',
+          benefits: (page.service_benefits || []).map((b: any) => ({
+            title: b.title,
+            description: b.description || '',
+            icon: b.icon || ''
+          })),
+          process: (page.service_process_steps || []).map((p: any) => ({
+            step: p.step_number,
+            title: p.title,
+            description: p.description || ''
+          })),
+          faq: (page.service_faq || []).map((f: any) => ({
+            question: f.question,
+            answer: f.answer
+          })),
+          testimonials: (page.service_testimonials || []).map((t: any) => ({
+            name: t.name,
+            text: t.text,
+            image: t.image
+          }))
+        }));
+
+        setServicePages(convertedPages);
+        setIsLoading(false);
+        return;
+      }
+
+      // Se não há dados no Supabase, inicializar com dados padrão
+      console.log('📦 Inicializando com dados padrão...');
+      const allPages: ServicePage[] = [
+        ...createFamiliaServicePages(),
+        ...createTributarioServicePages(),
+        ...createEmpresarialServicePages(),
+        ...createTrabalhoServicePages(),
+        ...createCivilServicePages(),
+        ...createPrevidenciarioServicePages(),
+        ...createConsumidorServicePages(),
+        ...createConstitucionalServicePages(),
+        ...createAdministrativoServicePages()
+      ];
+
+      console.log('🚀 Salvando páginas iniciais no Supabase...');
+      await saveServicePages(allPages);
+      
+      setServicePages(allPages);
+    } catch (error) {
+      console.error('❌ Erro ao carregar páginas:', error);
+      // Em caso de erro, carregar dados locais
+      const allPages: ServicePage[] = [
+        ...createFamiliaServicePages(),
+        ...createTributarioServicePages(),
+        ...createEmpresarialServicePages(),
+        ...createTrabalhoServicePages(),
+        ...createCivilServicePages(),
+        ...createPrevidenciarioServicePages(),
+        ...createConsumidorServicePages(),
+        ...createConstitucionalServicePages(),
+        ...createAdministrativoServicePages()
+      ];
+      setServicePages(allPages);
+    } finally {
+      setIsLoading(false);
     }
-
-    setServicePages(allPages);
-    setIsLoading(false);
   };
 
   const saveServicePages = async (pages: ServicePage[]) => {
-    console.log('💾 Salvando páginas de serviços...');
-    setServicePages(pages);
-    return Promise.resolve();
+    console.log('💾 Salvando', pages.length, 'páginas no Supabase...');
+    
+    try {
+      // Primeiro, limpar páginas existentes
+      await supabase.from('service_testimonials').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('service_faq').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('service_process_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('service_benefits').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('service_pages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+      // Salvar páginas principais
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        
+        // Inserir página principal
+        const { data: insertedPage, error: pageError } = await supabase
+          .from('service_pages')
+          .insert({
+            id: page.id,
+            title: page.title,
+            description: page.description,
+            category_id: page.category,
+            href: page.href,
+            display_order: i,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (pageError) {
+          console.error('❌ Erro ao inserir página:', pageError);
+          continue;
+        }
+
+        const pageId = insertedPage.id;
+
+        // Inserir benefícios
+        if (page.benefits && page.benefits.length > 0) {
+          const benefits = page.benefits.map((benefit, index) => ({
+            service_page_id: pageId,
+            title: benefit.title,
+            description: benefit.description,
+            icon: benefit.icon,
+            display_order: index
+          }));
+
+          const { error: benefitsError } = await supabase
+            .from('service_benefits')
+            .insert(benefits);
+
+          if (benefitsError) {
+            console.error('❌ Erro ao inserir benefícios:', benefitsError);
+          }
+        }
+
+        // Inserir etapas do processo
+        if (page.process && page.process.length > 0) {
+          const processSteps = page.process.map((step, index) => ({
+            service_page_id: pageId,
+            step_number: step.step,
+            title: step.title,
+            description: step.description,
+            display_order: index
+          }));
+
+          const { error: processError } = await supabase
+            .from('service_process_steps')
+            .insert(processSteps);
+
+          if (processError) {
+            console.error('❌ Erro ao inserir etapas do processo:', processError);
+          }
+        }
+
+        // Inserir FAQ
+        if (page.faq && page.faq.length > 0) {
+          const faqItems = page.faq.map((faq, index) => ({
+            service_page_id: pageId,
+            question: faq.question,
+            answer: faq.answer,
+            display_order: index
+          }));
+
+          const { error: faqError } = await supabase
+            .from('service_faq')
+            .insert(faqItems);
+
+          if (faqError) {
+            console.error('❌ Erro ao inserir FAQ:', faqError);
+          }
+        }
+
+        // Inserir depoimentos
+        if (page.testimonials && page.testimonials.length > 0) {
+          const testimonials = page.testimonials.map((testimonial, index) => ({
+            service_page_id: pageId,
+            name: testimonial.name,
+            text: testimonial.text,
+            image: testimonial.image,
+            display_order: index
+          }));
+
+          const { error: testimonialsError } = await supabase
+            .from('service_testimonials')
+            .insert(testimonials);
+
+          if (testimonialsError) {
+            console.error('❌ Erro ao inserir depoimentos:', testimonialsError);
+          }
+        }
+      }
+
+      console.log('✅ Todas as páginas foram salvas no Supabase com sucesso!');
+      
+      // Recarregar dados após salvar
+      await loadServicePages();
+      
+    } catch (error) {
+      console.error('❌ Erro ao salvar páginas no Supabase:', error);
+      throw error;
+    }
   };
 
   useEffect(() => {
