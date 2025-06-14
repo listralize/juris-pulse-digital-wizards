@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
+import { AuthProvider } from './contexts/AuthContext';
 
 // Pages
 import Index from './pages/Index';
@@ -41,35 +42,37 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="app-theme">
-        <Router>
-          <div className="min-h-screen">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/obrigado" element={<Obrigado />} />
-              
-              {/* Practice Areas */}
-              <Route path="/areas/administrativo" element={<Administrativo />} />
-              <Route path="/areas/civil" element={<Civil />} />
-              <Route path="/areas/constitucional" element={<Constitucional />} />
-              <Route path="/areas/consumidor" element={<Consumidor />} />
-              <Route path="/areas/empresarial" element={<Empresarial />} />
-              <Route path="/areas/familia" element={<Familia />} />
-              <Route path="/areas/previdenciario" element={<Previdenciario />} />
-              <Route path="/areas/trabalho" element={<Trabalho />} />
-              <Route path="/areas/tributario" element={<Tributario />} />
-              
-              {/* Dynamic Service Routes */}
-              <Route path="/servicos/*" element={<DynamicServiceRoutes />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-          <Toaster />
-        </Router>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/obrigado" element={<Obrigado />} />
+                
+                {/* Practice Areas */}
+                <Route path="/areas/administrativo" element={<Administrativo />} />
+                <Route path="/areas/civil" element={<Civil />} />
+                <Route path="/areas/constitucional" element={<Constitucional />} />
+                <Route path="/areas/consumidor" element={<Consumidor />} />
+                <Route path="/areas/empresarial" element={<Empresarial />} />
+                <Route path="/areas/familia" element={<Familia />} />
+                <Route path="/areas/previdenciario" element={<Previdenciario />} />
+                <Route path="/areas/trabalho" element={<Trabalho />} />
+                <Route path="/areas/tributario" element={<Tributario />} />
+                
+                {/* Dynamic Service Routes */}
+                <Route path="/servicos/*" element={<DynamicServiceRoutes />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+            <Toaster />
+          </Router>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
