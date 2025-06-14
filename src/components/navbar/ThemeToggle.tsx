@@ -10,30 +10,14 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle = ({ showLabel = false, className = '' }: ThemeToggleProps) => {
-  // Add error boundary protection
-  let theme = 'light';
-  let toggleTheme = () => {};
-  
-  try {
-    const themeContext = useTheme();
-    theme = themeContext.theme;
-    toggleTheme = themeContext.toggleTheme;
-  } catch (error) {
-    console.warn('ThemeToggle: useTheme hook failed, using defaults:', error);
-  }
-  
+  const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
-
-  console.log('ThemeToggle render:', { theme, isDark });
 
   return (
     <Toggle 
       aria-label="Alternar tema"
       pressed={isDark}
-      onPressedChange={() => {
-        console.log('Theme toggle clicked, current theme:', theme);
-        toggleTheme();
-      }}
+      onPressedChange={toggleTheme}
       className={`rounded-full p-2 transition-all hover:scale-105 
         ${isDark 
           ? 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20' 

@@ -22,80 +22,55 @@ export function ThemeProvider({
   defaultTheme = 'light',
   storageKey = 'theme' 
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
-  const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Apply theme to DOM immediately
-  const applyThemeToDOM = (themeToApply: Theme) => {
-    if (typeof window === 'undefined') return;
-    
-    const body = document.body;
-    const html = document.documentElement;
-    
-    console.log('🎨 Aplicando tema ao DOM:', themeToApply);
-    
-    // Remove all theme classes first
-    body.classList.remove('dark', 'light');
-    html.classList.remove('dark', 'light');
-    
-    // Apply theme
-    body.classList.add(themeToApply);
-    html.classList.add(themeToApply);
-    
-    // Force background colors immediately
-    if (themeToApply === 'dark') {
-      body.style.backgroundColor = '#000000';
-      html.style.backgroundColor = '#000000';
-      body.style.color = '#ffffff';
-      html.style.color = '#ffffff';
-    } else {
-      body.style.backgroundColor = '#f5f5f5';
-      html.style.backgroundColor = '#f5f5f5';
-      body.style.color = '#000000';
-      html.style.color = '#000000';
-    }
-  };
-
-  // Initialize theme immediately on mount
-  useEffect(() => {
-    console.log('🎨 ThemeProvider: Inicializando tema...');
-    
-    let initialTheme: Theme = defaultTheme;
-    
+  const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem(storageKey);
-      if (savedTheme === 'dark' || savedTheme === 'light') {
-        initialTheme = savedTheme;
+      const saved = localStorage.getItem(storageKey);
+      if (saved === 'dark' || saved === 'light') {
+        return saved;
       }
     }
+    return defaultTheme;
+  });
+  
+  // Apply theme to DOM
+  const applyTheme = (themeToApply: Theme) => {
+    if (typeof window === 'undefined') return;
     
-    console.log('🎨 Tema inicial determinado:', initialTheme);
+    const root = document.documentElement;
+    const body = document.body;
     
-    // Apply theme immediately
-    applyThemeToDOM(initialTheme);
-    setTheme(initialTheme);
-    setIsInitialized(true);
-  }, [defaultTheme, storageKey]);
-
-  // Apply theme when theme changes
-  useEffect(() => {
-    if (!isInitialized) return;
+    // Remove existing theme classes
+    root.classList.remove('light', 'dark');
+    body.classList.remove('light', 'dark');
     
-    console.log('🎨 Tema mudou para:', theme);
+    // Add new theme class
+    root.classList.add(themeToApply);
+    body.classList.add(themeToApply);
     
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(storageKey, theme);
-      applyThemeToDOM(theme);
+    // Set explicit styles
+    if (themeToApply === 'dark') {
+      root.style.colorScheme = 'dark';
+      body.style.backgroundColor = '#000000';
+      body.style.color = '#ffffff';
+    } else {
+      root.style.colorScheme = 'light';
+      body.style.backgroundColor = '#f5f5f5';
+      body.style.color = '#000000';
     }
-  }, [theme, storageKey, isInitialized]);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    console.log('🎨 Alternando tema de', theme, 'para', newTheme);
-    setTheme(newTheme);
   };
 
-  // Provide context value immediately, even before initialization
+  // Apply theme on mount and when theme changes
+  useEffect(() => {
+    applyTheme(theme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(storageKey, theme);
+    }
+  }, [theme, storageKey]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   const contextValue: ThemeContextProps = {
     theme,
     toggleTheme,
