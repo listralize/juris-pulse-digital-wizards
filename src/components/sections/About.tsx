@@ -17,35 +17,39 @@ const About = () => {
   useEffect(() => {
     if (isLoading) return;
 
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, scaleY: 0.9 },
-      {
-        opacity: 1,
-        scaleY: 1,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse'
+    try {
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, scaleY: 0.9 },
+        {
+          opacity: 1,
+          scaleY: 1,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: titleRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          }
         }
-      }
-    );
-    
-    gsap.fromTo(
-      textRef.current,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: textRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse'
+      );
+      
+      gsap.fromTo(
+        textRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: textRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          }
         }
-      }
-    );
+      );
+    } catch (error) {
+      console.error('❌ Erro na animação About:', error);
+    }
     
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
@@ -62,6 +66,9 @@ const About = () => {
     );
   }
 
+  const aboutTitle = pageTexts?.aboutTitle || 'Sobre Nós';
+  const aboutDescription = pageTexts?.aboutDescription || 'Descrição sobre o escritório';
+
   return (
     <section 
       id="about" 
@@ -73,14 +80,14 @@ const About = () => {
           ref={titleRef} 
           className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
         >
-          {pageTexts.aboutTitle}
+          {aboutTitle}
         </h2>
         
         <p 
           ref={textRef} 
           className={`text-lg md:text-xl lg:text-2xl xl:text-3xl leading-relaxed font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
         >
-          {pageTexts.aboutDescription}
+          {aboutDescription}
         </p>
       </div>
     </section>

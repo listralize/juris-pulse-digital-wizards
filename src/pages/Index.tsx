@@ -18,30 +18,34 @@ const Index = () => {
   
   // Setup horizontal scroll behavior
   useEffect(() => {
-    const body = document.body;
-    const html = document.documentElement;
-    
-    // Disable scroll for horizontal navigation
-    body.style.overflow = 'hidden';
-    html.style.overflow = 'hidden';
-    body.style.height = '100vh';
-    html.style.height = '100vh';
-    
-    // Disable scroll restoration
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-    
-    return () => {
-      body.style.overflow = '';
-      html.style.overflow = '';
-      body.style.height = '';
-      html.style.height = '';
+    try {
+      const body = document.body;
+      const html = document.documentElement;
       
+      // Disable scroll for horizontal navigation
+      body.style.overflow = 'hidden';
+      html.style.overflow = 'hidden';
+      body.style.height = '100vh';
+      html.style.height = '100vh';
+      
+      // Disable scroll restoration
       if ('scrollRestoration' in history) {
-        history.scrollRestoration = 'auto';
+        history.scrollRestoration = 'manual';
       }
-    };
+      
+      return () => {
+        body.style.overflow = '';
+        html.style.overflow = '';
+        body.style.height = '';
+        html.style.height = '';
+        
+        if ('scrollRestoration' in history) {
+          history.scrollRestoration = 'auto';
+        }
+      };
+    } catch (error) {
+      console.error('❌ Erro ao configurar scroll:', error);
+    }
   }, []);
   
   return (

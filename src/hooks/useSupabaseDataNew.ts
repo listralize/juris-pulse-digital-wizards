@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabaseCategories } from './supabase/useSupabaseCategories';
 import { useSupabaseTeamMembers } from './supabase/useSupabaseTeamMembers';
 import { useSupabaseServicePages } from './supabase/useSupabaseServicePages';
@@ -7,6 +7,7 @@ import { useSupabasePageTexts } from './supabase/useSupabasePageTexts';
 
 export const useSupabaseDataNew = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Individual hooks
   const {
@@ -39,62 +40,34 @@ export const useSupabaseDataNew = () => {
   } = useSupabasePageTexts();
 
   // Load all data - SEQUENCIAL para garantir ordem correta
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
+    if (hasInitialized) return;
+    
     setIsLoading(true);
     try {
       console.log('🔄 CARREGANDO DADOS DO SUPABASE...');
       
-      // 1. Carregar categorias primeiro (OBRIGATÓRIO)
-      console.log('📂 1. Carregando categorias...');
-      await loadCategories();
-      
-      // 2. Aguardar um tempo para garantir que as categorias estão disponíveis
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 3. Carregar páginas de serviços (que dependem das categorias)
-      console.log('📄 2. Carregando páginas de serviços...');
-      await loadServicePages();
-      
-      // 4. Carregar outros dados em paralelo
-      console.log('👥⚙️ 3. Carregando outros dados...');
+      // Carregar dados em paralelo para melhor performance
       await Promise.all([
+        loadCategories(),
         loadTeamMembers(),
-        loadPageTexts()
+        loadPageTexts(),
+        loadServicePages()
       ]);
       
       console.log('✅ TODOS OS DADOS CARREGADOS');
+      setHasInitialized(true);
     } catch (error) {
       console.error('❌ ERRO AO CARREGAR DADOS:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hasInitialized, loadCategories, loadTeamMembers, loadPageTexts, loadServicePages]);
 
-  // Load data on mount e escutar eventos de atualização
+  // Load data on mount apenas uma vez
   useEffect(() => {
     refreshData();
-
-    // Escutar eventos customizados para recarregar dados
-    const handleRefresh = () => {
-      console.log('🔄 Evento de refresh detectado');
-      refreshData();
-    };
-
-    const handleServicePagesUpdate = () => {
-      console.log('📄 Páginas de serviços atualizadas, recarregando...');
-      setTimeout(() => {
-        loadServicePages();
-      }, 500);
-    };
-
-    window.addEventListener('refreshSupabaseData', handleRefresh);
-    window.addEventListener('servicePagesUpdated', handleServicePagesUpdate);
-
-    return () => {
-      window.removeEventListener('refreshSupabaseData', handleRefresh);
-      window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate);
-    };
-  }, []); // Dependências vazias para evitar loops
+  }, [refreshData]);
 
   // Combinar o loading dos service pages com o loading geral
   const combinedLoading = isLoading || servicePagesLoading;
@@ -120,6 +93,9 @@ export const useSupabaseDataNew = () => {
     setPageTexts,
     
     // Refresh function
-    refreshData
+    refreshData: () => {
+      setHasInitialized(false);
+      refreshData();
+    }
   };
 };
