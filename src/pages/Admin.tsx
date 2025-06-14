@@ -11,6 +11,7 @@ import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
+import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -91,87 +92,87 @@ const Admin = () => {
     toast.success('Posts do blog salvos com sucesso!');
   };
 
-  if (isLoading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-      </div>
-    );
-  }
-
   return (
-    <div className={`min-h-screen p-6 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
-      <div className="max-w-7xl mx-auto">
-        <AdminHeader onLogout={logout} />
-
-        {/* Debug info */}
-        <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
-          <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-            📊 Status: {servicePages.length} páginas carregadas de 122 esperadas
-          </p>
-          <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-            📂 Categorias: {categories.length} | 👥 Equipe: {teamMembers.length} | 📝 Posts: {blogPosts.length}
-          </p>
+    <AdminProtectedRoute>
+      {isLoading ? (
+        <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
+      ) : (
+        <div className={`min-h-screen p-6 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
+          <div className="max-w-7xl mx-auto">
+            <AdminHeader onLogout={logout} />
 
-        <Tabs defaultValue="service-pages" className="space-y-6">
-          <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
-            <TabsTrigger value="service-pages" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Páginas de Serviços ({servicePages.length})
-            </TabsTrigger>
-            <TabsTrigger value="supabase" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
-              Supabase
-            </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2">
-              <Edit className="w-4 h-4" />
-              Conteúdo Geral
-            </TabsTrigger>
-            <TabsTrigger value="blog" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Blog
-            </TabsTrigger>
-          </TabsList>
+            {/* Status info */}
+            <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-green-500/10 border border-green-500/20' : 'bg-green-50 border border-green-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-green-300' : 'text-green-700'}`}>
+                🔒 Sistema Seguro Ativo: Row Level Security (RLS) implementado em todas as tabelas
+              </p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                📊 Status: {servicePages.length} páginas | 📂 Categorias: {categories.length} | 👥 Equipe: {teamMembers.length} | 📝 Posts: {blogPosts.length}
+              </p>
+            </div>
 
-          <TabsContent value="service-pages">
-            <ServicePagesManager 
-              servicePages={servicePages}
-              categories={categories}
-              pageTexts={pageTexts}
-              onSave={handleSaveServicePages}
-              onSaveCategories={handleSaveCategories}
-              onSavePageTexts={handleSavePageTexts}
-              onUpdatePageTexts={updatePageTexts}
-            />
-          </TabsContent>
+            <Tabs defaultValue="service-pages" className="space-y-6">
+              <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+                <TabsTrigger value="service-pages" className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Páginas de Serviços ({servicePages.length})
+                </TabsTrigger>
+                <TabsTrigger value="supabase" className="flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  Supabase
+                </TabsTrigger>
+                <TabsTrigger value="content" className="flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Conteúdo Geral
+                </TabsTrigger>
+                <TabsTrigger value="blog" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Blog
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="supabase">
-            <SupabaseDataManager />
-          </TabsContent>
+              <TabsContent value="service-pages">
+                <ServicePagesManager 
+                  servicePages={servicePages}
+                  categories={categories}
+                  pageTexts={pageTexts}
+                  onSave={handleSaveServicePages}
+                  onSaveCategories={handleSaveCategories}
+                  onSavePageTexts={handleSavePageTexts}
+                  onUpdatePageTexts={updatePageTexts}
+                />
+              </TabsContent>
 
-          <TabsContent value="content">
-            <ContentManagement
-              teamMembers={teamMembers}
-              pageTexts={pageTexts}
-              onAddTeamMember={addTeamMember}
-              onRemoveTeamMember={removeTeamMember}
-              onUpdateTeamMember={updateTeamMember}
-              onSaveTeamMembers={handleSaveTeamMembers}
-              onUpdatePageTexts={updatePageTexts}
-              onSavePageTexts={handleSavePageTexts}
-            />
-          </TabsContent>
+              <TabsContent value="supabase">
+                <SupabaseDataManager />
+              </TabsContent>
 
-          <TabsContent value="blog">
-            <BlogManagement
-              blogPosts={blogPosts}
-              onSave={handleSaveBlogPosts}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+              <TabsContent value="content">
+                <ContentManagement
+                  teamMembers={teamMembers}
+                  pageTexts={pageTexts}
+                  onAddTeamMember={addTeamMember}
+                  onRemoveTeamMember={removeTeamMember}
+                  onUpdateTeamMember={updateTeamMember}
+                  onSaveTeamMembers={handleSaveTeamMembers}
+                  onUpdatePageTexts={updatePageTexts}
+                  onSavePageTexts={handleSavePageTexts}
+                />
+              </TabsContent>
+
+              <TabsContent value="blog">
+                <BlogManagement
+                  blogPosts={blogPosts}
+                  onSave={handleSaveBlogPosts}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      )}
+    </AdminProtectedRoute>
   );
 };
 

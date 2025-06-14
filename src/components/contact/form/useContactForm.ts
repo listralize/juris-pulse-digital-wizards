@@ -1,76 +1,100 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from 'zod';
-import { useToast } from "../../../hooks/use-toast";
+import { toast } from 'sonner';
+import { supabase } from '../../../integrations/supabase/client';
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "O nome deve ter pelo menos 2 caracteres.",
-  }),
-  email: z.string().email({
-    message: "Por favor insira um e-mail válido.",
-  }),
-  phone: z.string().optional(),
-  service: z.string(),
-  message: z.string().min(10, {
-    message: "A mensagem deve ter pelo menos 10 caracteres.",
-  }),
-  urgent: z.boolean().default(false),
-});
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  service: string;
+  isUrgent: boolean;
+}
 
-export type ContactFormValues = z.infer<typeof formSchema>;
-
-export const useContactForm = (preselectedService?: string) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      service: preselectedService || "",
-      message: "",
-      urgent: false,
-    },
+export const useContactForm = () => {
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+    service: '',
+    isUrgent: false
   });
 
-  const onSubmit = async (values: ContactFormValues) => {
-    setIsSubmitting(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const updateField = (field: keyof ContactFormData, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      toast.error('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      const response = await fetch('https://hook.us1.make.com/30b2rz3ot9c417lv8rlwbusolkuv3a5x', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
+      console.log('📤 Enviando formulário via edge function segura...');
+
+      const { data, error } = await supabase.functions.invoke('contact-form', {
+        body: formData
       });
-      
-      if (response.ok) {
-        navigate('/obrigado');
-      } else {
-        throw new Error('Falha ao enviar formulário');
+
+      if (error) {
+        console.error('❌ Erro na edge function:', error);
+        throw error;
       }
-    } catch (error) {
-      toast({
-        title: "Erro ao enviar mensagem",
-        description: "Por favor, tente novamente.",
-        variant: "destructive",
+
+      console.log('✅ Resposta da edge function:', data);
+      
+      toast.success('Mensagem enviada com sucesso! Entraremos em contato em breve.');
+      setIsSubmitted(true);
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        message: '',
+        service: '',
+        isUrgent: false
       });
+
+    } catch (error) {
+      console.error('❌ Erro ao enviar formulário:', error);
+      toast.error('Erro ao enviar mensagem. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const resetForm = () => {
+    setIsSubmitted(false);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      message: '',
+      service: '',
+      isUrgent: false
+    });
+  };
+
   return {
-    form,
+    formData,
     isSubmitting,
-    onSubmit,
+    isSubmitted,
+    updateField,
+    handleSubmit,
+    resetForm
   };
 };

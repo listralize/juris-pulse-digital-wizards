@@ -44,7 +44,7 @@ const Login = () => {
       }
     } catch (error) {
       toast.error('Erro no processo de autenticação');
-      console.error('Auth error:', error);
+      console.error('Erro de autenticação:', error);
     } finally {
       setLoading(false);
     }
@@ -77,15 +77,15 @@ const Login = () => {
             )}
             <div>
               <Label htmlFor="email" className={`${isDark ? 'text-white' : 'text-black'}`}>
-                {isSignUp ? 'Email' : 'Email ou Usuário'}
+                Email
               </Label>
               <Input
                 id="email"
-                type="text"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                placeholder={isSignUp ? 'seu@email.com' : 'admin ou seu@email.com'}
+                placeholder="seu@email.com"
                 required
               />
             </div>
@@ -121,10 +121,11 @@ const Login = () => {
             </button>
           </div>
 
-          <div className={`mt-4 p-3 rounded text-xs ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-            <strong>Acesso Admin Local:</strong><br />
-            Usuário: admin<br />
-            Senha: stadv2024
+          <div className={`mt-6 p-3 rounded text-xs ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+            <p className={`${isDark ? 'text-blue-200' : 'text-blue-700'}`}>
+              <strong>🔒 Sistema Seguro:</strong><br />
+              Faça login com suas credenciais do Supabase para acessar o painel administrativo.
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -22,7 +22,7 @@ export const useSupabaseAuth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        createProfileFromUser(session.user);
+        checkUserRole(session.user);
       } else {
         setLoading(false);
       }
@@ -31,12 +31,12 @@ export const useSupabaseAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session);
+        console.log('🔄 Estado de autenticação alterado:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          createProfileFromUser(session.user);
+          checkUserRole(session.user);
         } else {
           setProfile(null);
           setLoading(false);
@@ -47,19 +47,40 @@ export const useSupabaseAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const createProfileFromUser = (user: User) => {
+  const checkUserRole = async (user: User) => {
     try {
-      // Create profile from user data since profiles table doesn't exist
+      // Verificar role do usuário na tabela user_roles
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      let userRole = 'user';
+      if (!roleError && roleData) {
+        userRole = roleData.role;
+      }
+
+      // Criar profile baseado nos dados do usuário
       const userProfile: Profile = {
         id: user.id,
         email: user.email || '',
         full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-        role: user.email === 'admin@stadv.com.br' ? 'admin' : 'user'
+        role: userRole
       };
       
       setProfile(userProfile);
+      console.log('👤 Profile do usuário criado:', userProfile);
     } catch (error) {
-      console.error('Error creating profile:', error);
+      console.error('❌ Erro ao verificar role do usuário:', error);
+      // Em caso de erro, criar profile básico
+      const basicProfile: Profile = {
+        id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+        role: 'user'
+      };
+      setProfile(basicProfile);
     } finally {
       setLoading(false);
     }
@@ -93,7 +114,7 @@ export const useSupabaseAuth = () => {
   };
 
   const isAdmin = () => {
-    return profile?.role === 'admin' || user?.email === 'admin@stadv.com.br';
+    return profile?.role === 'admin';
   };
 
   return {
