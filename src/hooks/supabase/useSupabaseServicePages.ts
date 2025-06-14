@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ServicePage, CategoryInfo } from '../../types/adminTypes';
 import { createFamiliaServicePages } from './servicePagesData/familiaServicePages';
@@ -11,54 +12,132 @@ import { createConstitucionalServicePages } from './servicePagesData/constitucio
 import { createAdministrativoServicePages } from './servicePagesData/administrativoServicePages';
 
 const categories: CategoryInfo[] = [
-  { label: 'Direito de Família', value: 'familia' },
-  { label: 'Direito Tributário', value: 'tributario' },
-  { label: 'Direito Empresarial', value: 'empresarial' },
-  { label: 'Direito do Trabalho', value: 'trabalho' },
-  { label: 'Direito Civil', value: 'civil' },
-  { label: 'Direito Previdenciário', value: 'previdenciario' },
-  { label: 'Direito do Consumidor', value: 'consumidor' },
-  { label: 'Direito Constitucional', value: 'constitucional' },
-  { label: 'Direito Administrativo', value: 'administrativo' }
+  { 
+    id: 'familia',
+    name: 'Direito de Família',
+    label: 'Direito de Família', 
+    value: 'familia',
+    description: 'Assessoria em questões familiares',
+    icon: '👨‍👩‍👧‍👦',
+    color: '#E11D48'
+  },
+  { 
+    id: 'tributario',
+    name: 'Direito Tributário',
+    label: 'Direito Tributário', 
+    value: 'tributario',
+    description: 'Planejamento e consultoria tributária',
+    icon: '💰',
+    color: '#059669'
+  },
+  { 
+    id: 'empresarial',
+    name: 'Direito Empresarial',
+    label: 'Direito Empresarial', 
+    value: 'empresarial',
+    description: 'Assessoria para empresas',
+    icon: '🏢',
+    color: '#0EA5E9'
+  },
+  { 
+    id: 'trabalho',
+    name: 'Direito do Trabalho',
+    label: 'Direito do Trabalho', 
+    value: 'trabalho',
+    description: 'Relações trabalhistas',
+    icon: '👷',
+    color: '#DC2626'
+  },
+  { 
+    id: 'civil',
+    name: 'Direito Civil',
+    label: 'Direito Civil', 
+    value: 'civil',
+    description: 'Questões civis diversas',
+    icon: '📄',
+    color: '#7C3AED'
+  },
+  { 
+    id: 'previdenciario',
+    name: 'Direito Previdenciário',
+    label: 'Direito Previdenciário', 
+    value: 'previdenciario',
+    description: 'Benefícios previdenciários',
+    icon: '👴',
+    color: '#EA580C'
+  },
+  { 
+    id: 'consumidor',
+    name: 'Direito do Consumidor',
+    label: 'Direito do Consumidor', 
+    value: 'consumidor',
+    description: 'Proteção do consumidor',
+    icon: '🛡️',
+    color: '#10B981'
+  },
+  { 
+    id: 'constitucional',
+    name: 'Direito Constitucional',
+    label: 'Direito Constitucional', 
+    value: 'constitucional',
+    description: 'Direitos fundamentais',
+    icon: '⚖️',
+    color: '#F59E0B'
+  },
+  { 
+    id: 'administrativo',
+    name: 'Direito Administrativo',
+    label: 'Direito Administrativo', 
+    value: 'administrativo',
+    description: 'Questões administrativas',
+    icon: '🏛️',
+    color: '#8B5CF6'
+  }
 ];
 
 export const useSupabaseServicePages = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const loadServicePages = () => {
+    console.log('🔄 Carregando todas as páginas de serviço...');
+    
+    const allPages: ServicePage[] = [
+      ...createFamiliaServicePages(),
+      ...createTributarioServicePages(),
+      ...createEmpresarialServicePages(),
+      ...createTrabalhoServicePages(),
+      ...createCivilServicePages(),
+      ...createPrevidenciarioServicePages(),
+      ...createConsumidorServicePages(),
+      ...createConstitucionalServicePages(),
+      ...createAdministrativoServicePages()
+    ];
+
+    console.log('✅ Total de páginas carregadas:', allPages.length);
+    console.log('📊 Páginas por categoria:', {
+      familia: allPages.filter(p => p.category === 'familia').length,
+      tributario: allPages.filter(p => p.category === 'tributario').length,
+      empresarial: allPages.filter(p => p.category === 'empresarial').length,
+      trabalho: allPages.filter(p => p.category === 'trabalho').length,
+      civil: allPages.filter(p => p.category === 'civil').length,
+      previdenciario: allPages.filter(p => p.category === 'previdenciario').length,
+      consumidor: allPages.filter(p => p.category === 'consumidor').length,
+      constitucional: allPages.filter(p => p.category === 'constitucional').length,
+      administrativo: allPages.filter(p => p.category === 'administrativo').length
+    });
+
+    setServicePages(allPages);
+    setIsLoading(false);
+  };
+
+  const saveServicePages = async (pages: ServicePage[]) => {
+    console.log('💾 Salvando páginas de serviços...');
+    setServicePages(pages);
+    return Promise.resolve();
+  };
+
   useEffect(() => {
-    const loadServicePages = () => {
-      console.log('🔄 Carregando todas as 122 páginas de serviço...');
-      
-      const allPages: ServicePage[] = [
-        ...createFamiliaServicePages(),
-        ...createTributarioServicePages(),
-        ...createEmpresarialServicePages(),
-        ...createTrabalhoServicePages(),
-        ...createCivilServicePages(),
-        ...createPrevidenciarioServicePages(),
-        ...createConsumidorServicePages(),
-        ...createConstitucionalServicePages(),
-        ...createAdministrativoServicePages()
-      ];
-
-      console.log('✅ Total de páginas carregadas:', allPages.length);
-      console.log('📊 Páginas por categoria:', {
-        familia: allPages.filter(p => p.category === 'familia').length,
-        tributario: allPages.filter(p => p.category === 'tributario').length,
-        empresarial: allPages.filter(p => p.category === 'empresarial').length,
-        trabalho: allPages.filter(p => p.category === 'trabalho').length,
-        civil: allPages.filter(p => p.category === 'civil').length,
-        previdenciario: allPages.filter(p => p.category === 'previdenciario').length,
-        consumidor: allPages.filter(p => p.category === 'consumidor').length,
-        constitucional: allPages.filter(p => p.category === 'constitucional').length,
-        administrativo: allPages.filter(p => p.category === 'administrativo').length
-      });
-
-      setServicePages(allPages);
-      setIsLoading(false);
-    };
-
     loadServicePages();
   }, []);
 
@@ -66,10 +145,13 @@ export const useSupabaseServicePages = () => {
     servicePages,
     categories,
     isLoading,
+    loadServicePages,
+    saveServicePages,
+    setServicePages,
     refetch: () => {
       setIsLoading(true);
       setTimeout(() => {
-        setIsLoading(false);
+        loadServicePages();
       }, 100);
     }
   };

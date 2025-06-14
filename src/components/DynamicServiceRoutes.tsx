@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import DynamicServicePage from './DynamicServicePage';
 
-export const useDynamicServiceRoutes = () => {
+const DynamicServiceRoutes = () => {
   const { servicePages, categories, isLoading } = useSupabaseDataNew();
 
   console.log('🚀 DynamicServiceRoutes:', {
@@ -14,29 +14,35 @@ export const useDynamicServiceRoutes = () => {
   });
 
   if (isLoading) {
-    return [];
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
-  const routes = servicePages.map((page) => {
-    if (!page.href) {
-      console.warn('⚠️ Página sem href:', page.title);
-      return null;
-    }
-    
-    const path = page.href.startsWith('/') ? page.href : `/servicos/${page.href}`;
-    
-    console.log('🔗 Criando rota:', { title: page.title, path, category: page.category });
-    
-    return (
-      <Route 
-        key={page.id} 
-        path={path} 
-        element={<DynamicServicePage pageData={page} categories={categories} />} 
-      />
-    );
-  }).filter(Boolean);
-
-  console.log('✅ Rotas criadas:', routes.length);
-  
-  return routes;
+  return (
+    <Routes>
+      {servicePages.map((page) => {
+        if (!page.href) {
+          console.warn('⚠️ Página sem href:', page.title);
+          return null;
+        }
+        
+        const path = page.href.startsWith('/servicos/') ? page.href.replace('/servicos/', '') : page.href;
+        
+        console.log('🔗 Criando rota:', { title: page.title, path, category: page.category });
+        
+        return (
+          <Route 
+            key={page.id} 
+            path={path} 
+            element={<DynamicServicePage pageData={page} categories={categories} />} 
+          />
+        );
+      })}
+    </Routes>
+  );
 };
+
+export default DynamicServiceRoutes;
