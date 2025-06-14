@@ -17,7 +17,7 @@ const categories: CategoryInfo[] = [
     name: 'Direito de Família',
     label: 'Direito de Família', 
     value: 'familia',
-    description: 'Assessoria em questões familiares',
+    description: 'Proteção e orientação em questões familiares',
     icon: '👨‍👩‍👧‍👦',
     color: '#E11D48'
   },
@@ -103,15 +103,15 @@ export const useSupabaseServicePages = () => {
     console.log('🔄 Carregando todas as páginas de serviço...');
     
     const allPages: ServicePage[] = [
-      ...createFamiliaServicePages(),
-      ...createTributarioServicePages(),
-      ...createEmpresarialServicePages(),
-      ...createTrabalhoServicePages(),
-      ...createCivilServicePages(),
-      ...createPrevidenciarioServicePages(),
-      ...createConsumidorServicePages(),
-      ...createConstitucionalServicePages(),
-      ...createAdministrativoServicePages()
+      ...createFamiliaServicePages(),      // 14 páginas
+      ...createTributarioServicePages(),   // 10 páginas
+      ...createEmpresarialServicePages(),  // 12 páginas
+      ...createTrabalhoServicePages(),     // 12 páginas
+      ...createCivilServicePages(),        // 12 páginas
+      ...createPrevidenciarioServicePages(), // 12 páginas
+      ...createConsumidorServicePages(),   // 12 páginas
+      ...createConstitucionalServicePages(), // 12 páginas
+      ...createAdministrativoServicePages()  // 12 páginas
     ];
 
     console.log('✅ Total de páginas carregadas:', allPages.length);
@@ -126,6 +126,13 @@ export const useSupabaseServicePages = () => {
       constitucional: allPages.filter(p => p.category === 'constitucional').length,
       administrativo: allPages.filter(p => p.category === 'administrativo').length
     });
+
+    // Verificar se chegamos ao número esperado
+    if (allPages.length >= 108) { // Total esperado com a distribuição atual
+      console.log('🎉 SUCESSO: Todas as', allPages.length, 'páginas foram carregadas!');
+    } else {
+      console.warn('⚠️ Esperado mais páginas. Total atual:', allPages.length);
+    }
 
     setServicePages(allPages);
     setIsLoading(false);
