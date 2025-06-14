@@ -1,75 +1,76 @@
+import { useState, useEffect } from 'react';
+import { ServicePage, CategoryInfo } from '../../types/adminTypes';
+import { createFamiliaServicePages } from './servicePagesData/familiaServicePages';
+import { createTributarioServicePages } from './servicePagesData/tributarioServicePages';
+import { createEmpresarialServicePages } from './servicePagesData/empresarialServicePages';
+import { createTrabalhoServicePages } from './servicePagesData/trabalhoServicePages';
+import { createCivilServicePages } from './servicePagesData/civilServicePages';
+import { createPrevidenciarioServicePages } from './servicePagesData/previdenciarioServicePages';
+import { createConsumidorServicePages } from './servicePagesData/consumidorServicePages';
+import { createConstitucionalServicePages } from './servicePagesData/constitucionalServicePages';
+import { createAdministrativoServicePages } from './servicePagesData/administrativoServicePages';
 
-import { useState, useEffect, useCallback } from 'react';
-import { ServicePage, CategoryInfo, categories as defaultCategoriesList } from '../../types/adminTypes';
-import {
-  createFamiliaServicePages,
-  createTributarioServicePages,
-  createEmpresarialServicePages,
-  createTrabalhoServicePages,
-  createCivilServicePages,
-  createPrevidenciarioServicePages,
-  createConsumidorServicePages,
-  createConstitucionalServicePages,
-  createAdministrativoServicePages
-} from './servicePagesData';
-
-// Use the imported categories list which has the full CategoryInfo type
-const categories: CategoryInfo[] = defaultCategoriesList;
+const categories: CategoryInfo[] = [
+  { label: 'Direito de Família', value: 'familia' },
+  { label: 'Direito Tributário', value: 'tributario' },
+  { label: 'Direito Empresarial', value: 'empresarial' },
+  { label: 'Direito do Trabalho', value: 'trabalho' },
+  { label: 'Direito Civil', value: 'civil' },
+  { label: 'Direito Previdenciário', value: 'previdenciario' },
+  { label: 'Direito do Consumidor', value: 'consumidor' },
+  { label: 'Direito Constitucional', value: 'constitucional' },
+  { label: 'Direito Administrativo', value: 'administrativo' }
+];
 
 export const useSupabaseServicePages = () => {
-  const [servicePages, setServicePagesState] = useState<ServicePage[]>([]);
+  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadServicePages = useCallback(() => {
-    console.log('🔄 (useSupabaseServicePages) Carregando todas as páginas de serviço estáticas...');
-    setIsLoading(true);
-    
-    const allPages: ServicePage[] = [
-      ...createFamiliaServicePages(),
-      ...createTributarioServicePages(),
-      ...createEmpresarialServicePages(),
-      ...createTrabalhoServicePages(),
-      ...createCivilServicePages(),
-      ...createPrevidenciarioServicePages(),
-      ...createConsumidorServicePages(),
-      ...createConstitucionalServicePages(),
-      ...createAdministrativoServicePages()
-    ];
-
-    console.log('✅ (useSupabaseServicePages) Total de páginas carregadas:', allPages.length);
-
-    setServicePagesState(allPages);
-    setIsLoading(false);
-  }, []);
-
   useEffect(() => {
-    loadServicePages();
-  }, [loadServicePages]);
+    const loadServicePages = () => {
+      console.log('🔄 Carregando todas as 122 páginas de serviço...');
+      
+      const allPages: ServicePage[] = [
+        ...createFamiliaServicePages(),
+        ...createTributarioServicePages(),
+        ...createEmpresarialServicePages(),
+        ...createTrabalhoServicePages(),
+        ...createCivilServicePages(),
+        ...createPrevidenciarioServicePages(),
+        ...createConsumidorServicePages(),
+        ...createConstitucionalServicePages(),
+        ...createAdministrativoServicePages()
+      ];
 
-  // Placeholder save function, as this data is static for now
-  const saveServicePages = async (pagesToSave: ServicePage[]) => {
-    console.log('💾 (useSupabaseServicePages) Tentativa de salvar páginas (placeholder):', pagesToSave.length);
-    setServicePagesState(pagesToSave);
-    return Promise.resolve();
-  };
+      console.log('✅ Total de páginas carregadas:', allPages.length);
+      console.log('📊 Páginas por categoria:', {
+        familia: allPages.filter(p => p.category === 'familia').length,
+        tributario: allPages.filter(p => p.category === 'tributario').length,
+        empresarial: allPages.filter(p => p.category === 'empresarial').length,
+        trabalho: allPages.filter(p => p.category === 'trabalho').length,
+        civil: allPages.filter(p => p.category === 'civil').length,
+        previdenciario: allPages.filter(p => p.category === 'previdenciario').length,
+        consumidor: allPages.filter(p => p.category === 'consumidor').length,
+        constitucional: allPages.filter(p => p.category === 'constitucional').length,
+        administrativo: allPages.filter(p => p.category === 'administrativo').length
+      });
 
-  const setServicePages = (newPages: ServicePage[]) => {
-    console.log('🔄 (useSupabaseServicePages) Definindo páginas de serviço (placeholder):', newPages.length);
-    setServicePagesState(newPages);
-  };
-  
-  const refetch = useCallback(() => {
-    console.log('🔄 (useSupabaseServicePages) Refetch chamado.');
+      setServicePages(allPages);
+      setIsLoading(false);
+    };
+
     loadServicePages();
-  }, [loadServicePages]);
+  }, []);
 
   return {
     servicePages,
     categories,
     isLoading,
-    loadServicePages,
-    saveServicePages,
-    setServicePages,
-    refetch
+    refetch: () => {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 100);
+    }
   };
 };
