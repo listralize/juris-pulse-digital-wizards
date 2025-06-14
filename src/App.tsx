@@ -26,7 +26,7 @@ import Trabalho from './pages/areas/Trabalho';
 import Tributario from './pages/areas/Tributario';
 
 // Dynamic components
-import DynamicServiceRoutes from './components/DynamicServiceRoutes';
+import DynamicServiceRoutes from './components/DynamicServiceRoutes'; // Default import should work now
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,8 +62,8 @@ function App() {
               <Route path="/areas/trabalho" element={<Trabalho />} />
               <Route path="/areas/tributario" element={<Tributario />} />
               
-              {/* Dynamic Service Routes */}
-              <Route path="/servicos/*" element={<DynamicServiceRoutes />} />
+              {/* Dynamic Service Routes - This should now work as DynamicServiceRoutes is a component */}
+              <Route path="/servicos/*" element={<DynamicServiceRoutes />} /> 
               
               <Route path="*" element={<NotFound />} />
             </Routes>
