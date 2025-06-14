@@ -13,7 +13,7 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
   const { pageTexts } = useAdminData();
   const isDark = respectTheme ? theme === 'dark' : true;
   
-  const whatsappNumber = pageTexts.contactTexts.whatsapp || '5562994594496';
+  const whatsappNumber = '5562994594496';
   
   return (
     <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
@@ -31,21 +31,33 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
               }}
             />
             <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi max-w-sm`}>
-              {pageTexts.footerTexts.description}
+              {pageTexts.footerTexts.description || 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.'}
             </p>
           </div>
           
           <div>
             <h4 className={`text-lg font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Contato Rápido</h4>
             <div className="space-y-2">
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>{pageTexts.contactTexts.address}</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>
+                World Trade Center<br />
+                Torre Office e Corporate<br />
+                Av. D, Av. 85 - St. Marista<br />
+                Goiânia - GO, 74150-040
+              </p>
               <a 
-                href={`mailto:${pageTexts.contactTexts.email}`}
+                href="mailto:contato@stadv.com"
                 className={`${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} hover:underline font-satoshi block`}
               >
-                {pageTexts.contactTexts.email}
+                contato@stadv.com
               </a>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>{pageTexts.contactTexts.phone}</p>
+              <a 
+                href="https://api.whatsapp.com/send?phone=5562994594496"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline font-satoshi block`}
+              >
+                +55 62 99459-4496
+              </a>
             </div>
           </div>
           
@@ -72,7 +84,7 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
         
         <div className={`mt-10 pt-6 border-t ${isDark ? 'border-white/30' : 'border-black/10'} flex flex-col md:flex-row justify-between items-center`}>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi mb-4 md:mb-0`}>
-            © {currentYear} {pageTexts.footerTexts.companyName}. Todos os direitos reservados.
+            © {currentYear} {pageTexts.footerTexts.companyName || 'Serafim & Trombela Advocacia'}. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6">
             <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Política de Privacidade</a>
