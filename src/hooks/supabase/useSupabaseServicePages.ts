@@ -187,10 +187,11 @@ export const useSupabaseServicePages = () => {
 
       setServicePages([...cleanPages]);
 
-      // Atualiza UI e outros componentes
+      // Atualiza globalmente
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
         detail: { pages: [...cleanPages] } 
       }));
+      window.dispatchEvent(new CustomEvent('refreshSupabaseData'));
     } catch (error) {
       console.error('❌ Erro crítico ao salvar service pages:', error);
       throw error;

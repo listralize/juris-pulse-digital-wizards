@@ -59,7 +59,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave(localPages);
+      await onSave([...localPages]);
+      // Após salvar com sucesso, faz reload global
+      window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
+        detail: { pages: [...localPages] }
+      }));
+      window.dispatchEvent(new CustomEvent('refreshSupabaseData'));
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas no Supabase');
