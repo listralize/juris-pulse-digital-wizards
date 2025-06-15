@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -40,7 +39,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    console.log('🔄 Sincronizando páginas do ServicePagesManager:', servicePages.length);
     setLocalPages([...servicePages]);
   }, [servicePages]);
 
@@ -53,19 +51,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     : null;
 
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
-    console.log(`📝 Atualizando ${field} da página ${pageId}`);
     setLocalPages(pages => pages.map(page => 
       page.id === pageId ? { ...page, [field]: value } : page
     ));
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
-      setIsSaving(true);
-      console.log('💾 Salvando páginas no Supabase:', localPages.length);
-      
       await onSave(localPages);
-      toast.success('Páginas salvas com sucesso no Supabase!');
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas no Supabase');
@@ -86,11 +80,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const addNewServicePage = () => {
     if (!selectedCategory) return;
-    
     const categoryInfo = categories.find(c => c.value === selectedCategory);
     const newId = crypto.randomUUID();
     const timestamp = Date.now();
-    
     const newServicePage: ServicePage = {
       id: newId,
       title: `Novo Serviço - ${categoryInfo?.label || selectedCategory}`,
@@ -116,20 +108,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         text: "Excelente atendimento"
       }]
     };
-    
-    console.log('➕ Adicionando nova página:', newId);
     setLocalPages(prev => [...prev, newServicePage]);
     setSelectedPageId(newId);
-    toast.success('Nova página criada!');
   };
 
   const removeServicePage = (pageId: string) => {
-    console.log('🗑️ Removendo página:', pageId);
     setLocalPages(pages => pages.filter(page => page.id !== pageId));
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
     }
-    toast.success('Página removida!');
   };
 
   // Se está editando categorias

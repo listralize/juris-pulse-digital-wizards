@@ -102,25 +102,6 @@ export const useSupabaseServicePages = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [adminSettingsId, setAdminSettingsId] = useState<string | null>(null);
 
-  const getDefaultPages = (): ServicePage[] => {
-    console.log('📦 Gerando páginas padrão...');
-    
-    const defaultPages = [
-      ...createFamiliaServicePages().map(page => ({ ...page, category: 'familia' })),
-      ...createTributarioServicePages().map(page => ({ ...page, category: 'tributario' })),
-      ...createEmpresarialServicePages().map(page => ({ ...page, category: 'empresarial' })),
-      ...createTrabalhoServicePages().map(page => ({ ...page, category: 'trabalho' })),
-      ...createCivilServicePages().map(page => ({ ...page, category: 'civil' })),
-      ...createPrevidenciarioServicePages().map(page => ({ ...page, category: 'previdenciario' })),
-      ...createConsumidorServicePages().map(page => ({ ...page, category: 'consumidor' })),
-      ...createConstitucionalServicePages().map(page => ({ ...page, category: 'constitucional' })),
-      ...createAdministrativoServicePages().map(page => ({ ...page, category: 'administrativo' }))
-    ];
-    
-    console.log('✅ Páginas padrão geradas:', defaultPages.length);
-    return defaultPages;
-  };
-
   // Função para garantir que toda ServicePage tenha todos os campos
   const sanitizeServicePages = (pages: unknown): ServicePage[] => {
     if (!Array.isArray(pages)) return [];
@@ -136,7 +117,6 @@ export const useSupabaseServicePages = () => {
         process: Array.isArray(page.process) ? page.process : [],
         faq: Array.isArray(page.faq) ? page.faq : [],
         testimonials: Array.isArray(page.testimonials) ? page.testimonials : [],
-        // manter extensibilidade caso novas chaves existam
         ...page
       }));
   };
@@ -166,20 +146,11 @@ export const useSupabaseServicePages = () => {
         }
       }
 
-      if (!finalPages.length) {
-        console.warn('ℹ️ Não encontrou páginas no Supabase. Gerando padrão.');
-        finalPages = getDefaultPages();
-      }
-
       setAdminSettingsId(recordId);
       setServicePages([...finalPages]);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(finalPages));
     } catch (error) {
       console.error('❌ Erro ao carregar páginas:', error);
-      // Fallback para páginas padrão
-      const fallbackPages = getDefaultPages();
-      setServicePages([...fallbackPages]);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackPages));
+      setServicePages([]);
     } finally {
       setIsLoading(false);
     }
@@ -215,7 +186,6 @@ export const useSupabaseServicePages = () => {
       if (!adminSettingsId && data?.id) setAdminSettingsId(data.id);
 
       setServicePages([...cleanPages]);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanPages));
 
       // Atualiza UI e outros componentes
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
