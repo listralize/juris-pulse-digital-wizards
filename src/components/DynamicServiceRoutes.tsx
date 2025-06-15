@@ -84,7 +84,7 @@ const DynamicServiceRoutes = () => {
   console.log('🗺️ DynamicServiceRoutes: Criando rotas para', pagesToRender.length, 'páginas');
 
   return (
-    <Routes key={routeKey}>
+    <Routes key={`routes-${routeKey}`}>
       {pagesToRender.map((page) => {
         if (!page.href) {
           console.warn('⚠️ Página sem href:', page.title);
@@ -114,7 +114,7 @@ const DynamicServiceRoutes = () => {
         
         return (
           <Route 
-            key={`${page.id}-${routeKey}`} 
+            key={`${page.id}-${routeKey}-${page.href}`} 
             path={path} 
             element={<DynamicServicePage pageData={page} categories={categories || []} />} 
           />

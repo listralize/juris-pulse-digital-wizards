@@ -159,54 +159,58 @@ export const useSupabaseServicePages = () => {
     console.log('📝 Páginas a salvar:', cleanPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
     
     try {
-      let upsertObj: any;
+      // Preparar objeto para upsert
+      const upsertData: any = {
+        service_pages: cleanPages
+      };
+
+      // Se temos um ID, incluir no upsert
       if (adminSettingsId) {
-        upsertObj = {
-          id: adminSettingsId,
-          service_pages: cleanPages
-        };
-      } else {
-        upsertObj = {
-          service_pages: cleanPages
-        };
+        upsertData.id = adminSettingsId;
       }
-      
+
       const { error, data } = await supabase
         .from('admin_settings')
-        .upsert(upsertObj, { onConflict: 'id' })
+        .upsert(upsertData, { 
+          onConflict: adminSettingsId ? 'id' : undefined 
+        })
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('❌ Erro ao salvar no Supabase:', error);
         throw error;
       }
 
-      // Atualiza id se não tinha antes
-      if (!adminSettingsId && data?.id) {
-        setAdminSettingsId(data.id);
-      }
-
       console.log('✅ [useSupabaseServicePages] Salvo com sucesso no Supabase!');
       console.log('📊 Dados salvos:', data);
+      
+      // Atualizar estado local e ID se necessário
+      if (data?.id && !adminSettingsId) {
+        setAdminSettingsId(data.id);
+      }
       
       // Atualizar estado local imediatamente
       setServicePages([...cleanPages]);
       
-      // Disparar eventos globais
-      window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-        detail: { pages: cleanPages } 
-      }));
-      
-      window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
-        detail: { pages: cleanPages } 
-      }));
-
-      // Força recarregamento após salvar para garantir sincronização
-      console.log('🔄 Recarregando dados após salvar...');
+      // Disparar eventos globais APÓS atualização local
       setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
+          detail: { pages: cleanPages } 
+        }));
+        
+        window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
+          detail: { pages: cleanPages } 
+        }));
+      }, 100);
+
+      // Recarregar dados do Supabase para garantir sincronização
+      setTimeout(() => {
+        console.log('🔄 Recarregando dados do Supabase para confirmar persistência...');
         loadServicePages();
       }, 500);
+
+      return data;
 
     } catch (error) {
       console.error('❌ Erro crítico ao salvar service pages:', error);

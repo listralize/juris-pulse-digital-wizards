@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -55,6 +56,17 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     ? localPages.find(page => page.id === selectedPageId)
     : null;
 
+  const generateSlugFromTitle = (title: string): string => {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+      .replace(/\s+/g, '-') // Substitui espaços por hífens
+      .replace(/-+/g, '-') // Remove hífens duplos
+      .trim();
+  };
+
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
     console.log('📝 [ServicePagesManager] Atualizando página:', pageId, field, value);
     
@@ -64,15 +76,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         
         // Se estiver alterando o título, ajustar o href automaticamente
         if (field === 'title' && typeof value === 'string') {
-          const slug = value
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-            .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-            .replace(/\s+/g, '-') // Substitui espaços por hífens
-            .replace(/-+/g, '-') // Remove hífens duplos
-            .trim();
-          
+          const slug = generateSlugFromTitle(value);
           updatedPage.href = slug;
           console.log('🔗 Href atualizado automaticamente:', slug);
         }
@@ -89,7 +93,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       console.log('💾 [ServicePagesManager] Iniciando save de', localPages.length, 'páginas');
       console.log('📄 Páginas a salvar:', localPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
       
-      await onSave([...localPages]);
+      const result = await onSave([...localPages]);
       console.log('✅ [ServicePagesManager] Save concluído com sucesso');
       
       toast.success('Páginas salvas com sucesso no Supabase!');
@@ -118,12 +122,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     const newId = crypto.randomUUID();
     const timestamp = Date.now();
     
-    // Criar href limpo sem prefixos
-    const baseHref = `novo-servico-${timestamp}`;
+    const newTitle = `Novo Serviço - ${categoryInfo?.label || selectedCategory}`;
+    const baseHref = generateSlugFromTitle(newTitle);
     
     const newServicePage: ServicePage = {
       id: newId,
-      title: `Novo Serviço - ${categoryInfo?.label || selectedCategory}`,
+      title: newTitle,
       description: 'Descrição do novo serviço',
       category: selectedCategory,
       href: baseHref,
