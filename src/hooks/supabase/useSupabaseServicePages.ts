@@ -140,7 +140,8 @@ export const useSupabaseServicePages = () => {
 
       if (supabaseData?.service_pages && Array.isArray(supabaseData.service_pages)) {
         console.log('📊 Páginas carregadas do Supabase:', supabaseData.service_pages.length);
-        finalPages = supabaseData.service_pages;
+        // Converter de Json para ServicePage[]
+        finalPages = supabaseData.service_pages as ServicePage[];
       } else {
         // Se não há dados no Supabase, verificar localStorage
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -183,12 +184,14 @@ export const useSupabaseServicePages = () => {
     console.log('💾 Salvando páginas no Supabase:', pages.length);
     
     try {
+      // Converter ServicePage[] para Json antes de salvar
+      const pagesAsJson = JSON.parse(JSON.stringify(pages));
+      
       // Salvar no Supabase
       const { error } = await supabase
         .from('admin_settings')
         .upsert({ 
-          id: '550e8400-e29b-41d4-a716-446655440000', // ID fixo para admin_settings
-          service_pages: pages 
+          service_pages: pagesAsJson 
         });
 
       if (error) {
