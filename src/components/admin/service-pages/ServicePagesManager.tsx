@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -35,14 +36,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
-
-  // LOCAL STATE: só copia do Supabase, nunca é alterado depois do save diretamente!
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   // Sincronizar localPages APENAS quando servicePages do Supabase mudar:
   useEffect(() => {
-    console.log('[ServicePagesManager] atualizando localPages do Suapbase:', servicePages.length, servicePages.map(p => p.title).join(','));
+    console.log('🔄 [ServicePagesManager] Props servicePages mudaram:', {
+      count: servicePages.length,
+      titles: servicePages.map(p => p.title).slice(0, 3)
+    });
     setLocalPages([...servicePages]);
   }, [servicePages]);
 
@@ -55,6 +57,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     : null;
 
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
+    console.log('📝 [ServicePagesManager] Atualizando página:', pageId, field);
     setLocalPages(pages => pages.map(page => 
       page.id === pageId ? { ...page, [field]: value } : page
     ));
@@ -63,12 +66,11 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      console.log('💾 [ServicePagesManager] Iniciando save de', localPages.length, 'páginas');
       await onSave([...localPages]);
-      // Não atualizar localPages aqui! Eles só mudam pelo novo dado do Supabase.
-      console.log('✅ [ServicePagesManager] Save enviado, esperando reload do Supabase...');
-      // Opcional: Toast será disparado no handler do Admin
+      console.log('✅ [ServicePagesManager] Save concluído com sucesso');
     } catch (error) {
-      console.error('❌ Erro ao salvar páginas:', error);
+      console.error('❌ [ServicePagesManager] Erro no save:', error);
       toast.error('Erro ao salvar páginas no Supabase');
     } finally {
       setIsSaving(false);
@@ -115,11 +117,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         text: "Excelente atendimento"
       }]
     };
+    console.log('➕ [ServicePagesManager] Adicionando nova página:', newId);
     setLocalPages(prev => [...prev, newServicePage]);
     setSelectedPageId(newId);
   };
 
   const removeServicePage = (pageId: string) => {
+    console.log('🗑️ [ServicePagesManager] Removendo página:', pageId);
     setLocalPages(pages => pages.filter(page => page.id !== pageId));
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
@@ -172,7 +176,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             </div>
           </div>
           <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            Total de páginas carregadas: {localPages.length} | Status: {localPages.length > 0 ? '✅ Dados carregados' : '⚠️ Sem dados'}
+            Total de páginas: {localPages.length} | Status: {localPages.length > 0 ? '✅ Dados carregados' : '⚠️ Sem dados'}
           </p>
         </CardHeader>
         <CardContent>

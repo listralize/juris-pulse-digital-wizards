@@ -1,15 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ServicePage, CategoryInfo } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
-import { createFamiliaServicePages } from './servicePagesData/familiaServicePages';
-import { createTributarioServicePages } from './servicePagesData/tributarioServicePages';
-import { createEmpresarialServicePages } from './servicePagesData/empresarialServicePages';
-import { createTrabalhoServicePages } from './servicePagesData/trabalhoServicePages';
-import { createCivilServicePages } from './servicePagesData/civilServicePages';
-import { createPrevidenciarioServicePages } from './servicePagesData/previdenciarioServicePages';
-import { createConsumidorServicePages } from './servicePagesData/consumidorServicePages';
-import { createConstitucionalServicePages } from './servicePagesData/constitucionalServicePages';
-import { createAdministrativoServicePages } from './servicePagesData/administrativoServicePages';
 
 const STORAGE_KEY = 'lovable_service_pages';
 
@@ -156,7 +147,7 @@ export const useSupabaseServicePages = () => {
 
   const saveServicePages = async (pages: ServicePage[]) => {
     const cleanPages = sanitizeServicePages(pages);
-    console.log('💾 [Supabase] Salvando páginas no Supabase:', cleanPages.length, cleanPages.map(p => p.title));
+    console.log('💾 [Supabase] Salvando páginas no Supabase:', cleanPages.length);
     try {
       let upsertObj: any;
       if (adminSettingsId) {
@@ -183,28 +174,18 @@ export const useSupabaseServicePages = () => {
       // Atualiza id se não tinha antes (primeiro insert)
       if (!adminSettingsId && data?.id) setAdminSettingsId(data.id);
 
-      // ATENÇÃO: carrega novamente APENAS do Supabase depois de salvar!
+      // Recarrega os dados automaticamente após salvar
       await loadServicePages();
 
+      // Dispara eventos para outros componentes
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
         detail: { pages: [...cleanPages] } 
       }));
-      window.dispatchEvent(new CustomEvent('refreshSupabaseData'));
     } catch (error) {
       console.error('❌ Erro crítico ao salvar service pages:', error);
       throw error;
     }
   };
-
-  useEffect(() => {
-    const handleRefresh = () => {
-      console.log('🔄 Evento de refresh detectado');
-      loadServicePages();
-    };
-
-    window.addEventListener('refreshSupabaseData', handleRefresh);
-    return () => window.removeEventListener('refreshSupabaseData', handleRefresh);
-  }, []);
 
   useEffect(() => {
     loadServicePages();

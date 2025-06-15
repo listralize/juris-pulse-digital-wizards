@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -44,8 +45,7 @@ const Admin = () => {
       console.log('💾 Admin salvando páginas:', pages.length);
       await saveServicePages(pages);
       toast.success('Páginas de serviços salvas com sucesso!');
-      console.log('🔄 Forçando refresh dos dados após salvar ServicePages...');
-      await refreshData(); // <- força os dados a serem ATUALIZADOS do Supabase
+      console.log('🔄 Dados salvos, aguardando atualização automática...');
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas de serviços');
@@ -56,7 +56,6 @@ const Admin = () => {
     try {
       await saveCategories(cats);
       toast.success('Categorias salvas com sucesso!');
-      await refreshData();
     } catch (error) {
       console.error('Erro ao salvar categorias:', error);
       toast.error('Erro ao salvar categorias');
