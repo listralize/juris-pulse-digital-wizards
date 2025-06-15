@@ -36,16 +36,14 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
 
-  // O estado local só é atualizado vindo do Supabase (somente, nunca por array local do save)
-  const [localPages, setLocalPages] = useState<ServicePage[]>([]); 
+  // LOCAL STATE: só copia do Supabase, nunca é alterado depois do save diretamente!
+  const [localPages, setLocalPages] = useState<ServicePage[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sincronizar localPages sempre que servicePages mudar (apenas entrada do Supabase)
+  // Sincronizar localPages APENAS quando servicePages do Supabase mudar:
   useEffect(() => {
-    if (Array.isArray(servicePages)) {
-      console.log('[ServicePagesManager] Atualizando localPages pelo servicePages:', servicePages.length, servicePages.map(p => p.title));
-      setLocalPages([...servicePages]);
-    }
+    console.log('[ServicePagesManager] atualizando localPages do Suapbase:', servicePages.length, servicePages.map(p => p.title).join(','));
+    setLocalPages([...servicePages]);
   }, [servicePages]);
 
   const filteredPages = selectedCategory 
@@ -65,11 +63,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Salvar sempre o localPages, mas deixar o setLocalPages ser feito só quando servicePages mudar pelo hook! Não sobrescrever depois do save.
       await onSave([...localPages]);
-      // Não manipular localPages aqui!
-      // Log para garantir o fluxo:
-      console.log('✅ [ServicePagesManager] Save enviado, aguardando servicePages se atualizar...');
+      // Não atualizar localPages aqui! Eles só mudam pelo novo dado do Supabase.
+      console.log('✅ [ServicePagesManager] Save enviado, esperando reload do Supabase...');
+      // Opcional: Toast será disparado no handler do Admin
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas no Supabase');
