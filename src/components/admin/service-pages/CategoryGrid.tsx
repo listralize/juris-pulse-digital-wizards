@@ -39,29 +39,14 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {validCategories.map((category) => {
-          // Filtrar páginas desta categoria usando múltiplos critérios
+          // Filtrar páginas desta categoria usando o VALUE da categoria (que é usado para filtrar)
           const categoryPages = validServicePages.filter(page => {
-            // Primeiro tentar match com o value da categoria (que é o que salvamos nas páginas)
-            if (page.category === category.value) return true;
-            
-            // Tentar match com o ID da categoria (UUID do Supabase)
-            if (page.category === category.id) return true;
-            
-            // Tentar match case-insensitive com name/label para backwards compatibility
-            const pageCategory = page.category?.toLowerCase?.()?.trim?.();
-            const categoryValue = category.value?.toLowerCase?.()?.trim?.();
-            const categoryName = category.name?.toLowerCase?.()?.trim?.();
-            const categoryLabel = category.label?.toLowerCase?.()?.trim?.();
-            
-            return pageCategory === categoryValue || 
-                   pageCategory === categoryName || 
-                   pageCategory === categoryLabel;
+            // A lógica principal: usar category.value para filtrar
+            return page.category === category.value;
           });
           
           console.log(`📂 ${category.label}: ${categoryPages.length} páginas encontradas`, {
-            categoryId: category.id,
             categoryValue: category.value,
-            categoryName: category.name,
             foundPages: categoryPages.map(p => ({ title: p.title, category: p.category }))
           });
           
