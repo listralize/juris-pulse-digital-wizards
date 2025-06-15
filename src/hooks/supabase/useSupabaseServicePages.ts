@@ -12,6 +12,8 @@ import { createConsumidorServicePages } from './servicePagesData/consumidorServi
 import { createConstitucionalServicePages } from './servicePagesData/constitucionalServicePages';
 import { createAdministrativoServicePages } from './servicePagesData/administrativoServicePages';
 
+const STORAGE_KEY = 'lovable_service_pages';
+
 const categories: CategoryInfo[] = [
   { 
     id: 'familia',
@@ -124,14 +126,29 @@ export const useSupabaseServicePages = () => {
     setIsLoading(true);
     
     try {
-      // SEMPRE carregar páginas padrão primeiro
+      // Primeiro verificar localStorage
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsedPages = JSON.parse(stored);
+          if (Array.isArray(parsedPages) && parsedPages.length > 0) {
+            console.log('📋 Páginas carregadas do localStorage:', parsedPages.length);
+            setServicePages(parsedPages);
+            setIsLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('❌ Erro ao parsear localStorage:', error);
+        }
+      }
+
+      // Se não há dados no localStorage, carregar páginas padrão
       const defaultPages = getDefaultPages();
-      console.log('✅ Páginas padrão carregadas:', defaultPages.length);
-      
-      // Definir as páginas imediatamente
+      console.log('✅ Carregando páginas padrão:', defaultPages.length);
       setServicePages(defaultPages);
       
-      console.log('📊 PÁGINAS DEFINIDAS NO ESTADO:', defaultPages.length);
+      // Salvar no localStorage para próximas cargas
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPages));
       
     } catch (error) {
       console.error('❌ Erro ao carregar páginas:', error);
@@ -143,11 +160,37 @@ export const useSupabaseServicePages = () => {
   };
 
   const saveServicePages = async (pages: ServicePage[]) => {
-    console.log('💾 Salvando páginas no Supabase...');
-    // Por enquanto, apenas atualizar o estado local
-    setServicePages([...pages]);
-    console.log('✅ Páginas atualizadas no estado local');
+    console.log('💾 Salvando páginas:', pages.length);
+    
+    try {
+      // Salvar no localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pages));
+      
+      // Atualizar estado local
+      setServicePages([...pages]);
+      
+      // Disparar evento para notificar outros componentes
+      window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
+        detail: { pages: [...pages] } 
+      }));
+      
+      console.log('✅ Páginas salvas com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao salvar páginas:', error);
+      throw error;
+    }
   };
+
+  // Escutar eventos de refresh
+  useEffect(() => {
+    const handleRefresh = () => {
+      console.log('🔄 Evento de refresh detectado');
+      loadServicePages();
+    };
+
+    window.addEventListener('refreshSupabaseData', handleRefresh);
+    return () => window.removeEventListener('refreshSupabaseData', handleRefresh);
+  }, []);
 
   useEffect(() => {
     loadServicePages();

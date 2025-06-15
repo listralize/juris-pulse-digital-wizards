@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { ServicePage } from '../types/adminTypes';
 import { defaultServicePages } from '../data/defaultServicePages';
 
+const STORAGE_KEY = 'lovable_service_pages';
+
 export const useServicePageData = (serviceId?: string) => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -11,8 +13,8 @@ export const useServicePageData = (serviceId?: string) => {
     try {
       console.log('useServicePageData: Carregando dados para serviceId:', serviceId);
       
-      // Carregar páginas salvas no admin
-      const savedServicePages = localStorage.getItem('adminServicePages');
+      // Carregar páginas salvas no localStorage
+      const savedServicePages = localStorage.getItem(STORAGE_KEY);
       let finalPages = [...defaultServicePages];
       
       if (savedServicePages) {
@@ -51,15 +53,20 @@ export const useServicePageData = (serviceId?: string) => {
     loadServicePages();
 
     // Escutar mudanças salvas no admin
-    const handleServicePagesUpdate = () => {
+    const handleServicePagesUpdate = (event: CustomEvent) => {
       console.log('useServicePageData: Detectada atualização nas páginas de serviços');
-      loadServicePages();
+      const updatedPages = event.detail?.pages;
+      if (updatedPages && Array.isArray(updatedPages)) {
+        setServicePages([...updatedPages]);
+      } else {
+        loadServicePages();
+      }
     };
 
-    window.addEventListener('servicePagesUpdated', handleServicePagesUpdate);
+    window.addEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate);
+      window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
     };
   }, [serviceId]);
 
