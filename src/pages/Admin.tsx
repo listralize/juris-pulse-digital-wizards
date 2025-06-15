@@ -12,6 +12,7 @@ import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
+import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -68,6 +69,9 @@ const Admin = () => {
     toast.success('Textos das páginas salvos com sucesso!');
   };
 
+  // Use default page texts as fallback
+  const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
+
   return (
     <AdminProtectedRoute>
       {isLoading ? (
@@ -113,7 +117,7 @@ const Admin = () => {
                 <ServicePagesManager 
                   servicePages={servicePages || []}
                   categories={categories || []}
-                  pageTexts={pageTexts || {}}
+                  pageTexts={validPageTexts}
                   onSave={handleSaveServicePages}
                   onSaveCategories={handleSaveCategories}
                   onSavePageTexts={handleSavePageTexts}
