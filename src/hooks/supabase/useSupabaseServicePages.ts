@@ -138,7 +138,11 @@ export const useSupabaseServicePages = () => {
       setServicePages([...finalPages]);
       
       console.log('✅ [useSupabaseServicePages] Páginas carregadas:', finalPages.length);
-      console.log('📄 Páginas carregadas:', finalPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
+      console.log('📄 URLs das páginas:', finalPages.map(p => ({ 
+        title: p.title, 
+        href: p.href,
+        fullURL: p.href ? `/services/${p.href.replace(/^\/?(services?\/)?/, '')}` : 'sem-href'
+      })));
       
       // Disparar evento global após carregar
       window.dispatchEvent(new CustomEvent('servicePagesLoaded', { 
@@ -156,15 +160,17 @@ export const useSupabaseServicePages = () => {
   const saveServicePages = async (pages: ServicePage[]) => {
     const cleanPages = sanitizeServicePages(pages);
     console.log('💾 [useSupabaseServicePages] Salvando', cleanPages.length, 'páginas no Supabase...');
-    console.log('📝 Páginas a salvar:', cleanPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
+    console.log('📝 URLs a salvar:', cleanPages.map(p => ({ 
+      title: p.title, 
+      href: p.href,
+      fullURL: p.href ? `/services/${p.href.replace(/^\/?(services?\/)?/, '')}` : 'sem-href'
+    })));
     
     try {
-      // Preparar objeto para upsert
       const upsertData: any = {
         service_pages: cleanPages
       };
 
-      // Se temos um ID, incluir no upsert
       if (adminSettingsId) {
         upsertData.id = adminSettingsId;
       }
@@ -183,32 +189,24 @@ export const useSupabaseServicePages = () => {
       }
 
       console.log('✅ [useSupabaseServicePages] Salvo com sucesso no Supabase!');
-      console.log('📊 Dados salvos:', data);
       
-      // Atualizar estado local e ID se necessário
       if (data?.id && !adminSettingsId) {
         setAdminSettingsId(data.id);
       }
       
-      // Atualizar estado local imediatamente
+      // Atualizar estado local IMEDIATAMENTE
       setServicePages([...cleanPages]);
       
-      // Disparar eventos globais APÓS atualização local
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-          detail: { pages: cleanPages } 
-        }));
-        
-        window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
-          detail: { pages: cleanPages } 
-        }));
-      }, 100);
+      // Disparar eventos globais
+      window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
+        detail: { pages: cleanPages } 
+      }));
+      
+      window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
+        detail: { pages: cleanPages } 
+      }));
 
-      // Recarregar dados do Supabase para garantir sincronização
-      setTimeout(() => {
-        console.log('🔄 Recarregando dados do Supabase para confirmar persistência...');
-        loadServicePages();
-      }, 500);
+      console.log('🔄 Eventos de atualização disparados');
 
       return data;
 

@@ -79,6 +79,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
           const slug = generateSlugFromTitle(value);
           updatedPage.href = slug;
           console.log('🔗 Href atualizado automaticamente:', slug);
+          console.log('🌐 URL da página será:', `/services/${slug}`);
         }
         
         return updatedPage;
@@ -91,12 +92,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     setIsSaving(true);
     try {
       console.log('💾 [ServicePagesManager] Iniciando save de', localPages.length, 'páginas');
-      console.log('📄 Páginas a salvar:', localPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
+      console.log('📄 URLs das páginas a salvar:', localPages.map(p => ({ 
+        title: p.title, 
+        href: p.href,
+        fullURL: p.href ? `/services/${p.href}` : 'sem-href'
+      })));
       
-      const result = await onSave([...localPages]);
+      await onSave([...localPages]);
       console.log('✅ [ServicePagesManager] Save concluído com sucesso');
       
-      toast.success('Páginas salvas com sucesso no Supabase!');
+      toast.success('Páginas salvas com sucesso! As rotas foram atualizadas.');
       
     } catch (error) {
       console.error('❌ [ServicePagesManager] Erro no save:', error);
@@ -120,7 +125,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     if (!selectedCategory) return;
     const categoryInfo = categories.find(c => c.value === selectedCategory);
     const newId = crypto.randomUUID();
-    const timestamp = Date.now();
     
     const newTitle = `Novo Serviço - ${categoryInfo?.label || selectedCategory}`;
     const baseHref = generateSlugFromTitle(newTitle);
@@ -154,6 +158,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     console.log('➕ [ServicePagesManager] Adicionando nova página:', { 
       id: newId, 
       href: baseHref,
+      fullURL: `/services/${baseHref}`,
       category: selectedCategory 
     });
     
