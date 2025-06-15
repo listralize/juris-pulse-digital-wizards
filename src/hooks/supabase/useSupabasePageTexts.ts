@@ -1,170 +1,98 @@
 
-import { useState } from 'react';
-import { supabase } from '../../integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { PageTexts } from '../../types/adminTypes';
+import { supabase } from '../../integrations/supabase/client';
+import { defaultPageTexts } from '../../data/defaultPageTexts';
 
 export const useSupabasePageTexts = () => {
-  const [pageTexts, setPageTexts] = useState<PageTexts>({
-    heroTitle: '',
-    heroSubtitle: '',
-    aboutTitle: '',
-    aboutDescription: '',
-    contactTitle: '',
-    contactSubtitle: '',
-    teamTitle: '',
-    areasTitle: '',
-    clientAreaTitle: '',
-    clientAreaDescription: '',
-    familiaTitle: '',
-    familiaDescription: '',
-    tributarioTitle: '',
-    tributarioDescription: '',
-    empresarialTitle: '',
-    empresarialDescription: '',
-    trabalhoTitle: '',
-    trabalhoDescription: '',
-    categoryTexts: [],
-    contactTexts: {
-      phone: '',
-      email: '',
-      address: '',
-      whatsapp: ''
-    },
-    footerTexts: {
-      companyName: '',
-      description: ''
-    }
-  });
+  const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadPageTexts = async () => {
+    console.log('🔄 [useSupabasePageTexts] Carregando textos das páginas...');
+    setIsLoading(true);
+    
     try {
-      // Carregar configurações do site
-      const { data: siteSettings, error: siteError } = await supabase
+      const { data: settings, error } = await supabase
         .from('site_settings')
         .select('*')
-        .single();
+        .limit(1)
+        .maybeSingle();
 
-      if (siteError && siteError.code !== 'PGRST116') {
-        console.error('❌ Erro ao carregar site settings:', siteError);
-      }
-
-      // Carregar informações de contato
-      const { data: contactInfo, error: contactError } = await supabase
-        .from('contact_info')
-        .select('*')
-        .single();
-
-      if (contactError && contactError.code !== 'PGRST116') {
-        console.error('❌ Erro ao carregar contact info:', contactError);
-      }
-
-      // Carregar informações do rodapé
-      const { data: footerInfo, error: footerError } = await supabase
-        .from('footer_info')
-        .select('*')
-        .single();
-
-      if (footerError && footerError.code !== 'PGRST116') {
-        console.error('❌ Erro ao carregar footer info:', footerError);
-      }
-
-      // PROCESSAR E SETAR DADOS DE PÁGINA
-      if (siteSettings || contactInfo || footerInfo) {
-        const processedPageTexts = {
-          heroTitle: siteSettings?.hero_title || '',
-          heroSubtitle: siteSettings?.hero_subtitle || '',
-          heroBackgroundImage: siteSettings?.hero_background_image,
-          aboutTitle: siteSettings?.about_title || '',
-          aboutDescription: siteSettings?.about_description || '',
-          aboutImage: siteSettings?.about_image,
-          areasTitle: siteSettings?.areas_title || '',
-          teamTitle: siteSettings?.team_title || '',
-          clientAreaTitle: siteSettings?.client_area_title || '',
-          clientAreaDescription: siteSettings?.client_area_description || '',
-          clientPortalLink: siteSettings?.client_portal_link,
-          contactTitle: siteSettings?.contact_title || '',
-          contactSubtitle: siteSettings?.contact_subtitle || '',
-          familiaTitle: '',
-          familiaDescription: '',
-          tributarioTitle: '',
-          tributarioDescription: '',
-          empresarialTitle: '',
-          empresarialDescription: '',
-          trabalhoTitle: '',
-          trabalhoDescription: '',
-          categoryTexts: [],
-          contactTexts: {
-            phone: contactInfo?.phone || '',
-            email: contactInfo?.email || '',
-            address: contactInfo?.address || '',
-            whatsapp: contactInfo?.whatsapp || ''
-          },
-          footerTexts: {
-            companyName: footerInfo?.company_name || '',
-            description: footerInfo?.description || ''
-          }
+      if (error) {
+        console.error('❌ Erro ao carregar textos:', error);
+        setPageTexts(defaultPageTexts);
+      } else if (settings) {
+        const loadedTexts: PageTexts = {
+          heroTitle: settings.hero_title || defaultPageTexts.heroTitle,
+          heroSubtitle: settings.hero_subtitle || defaultPageTexts.heroSubtitle,
+          aboutTitle: settings.about_title || defaultPageTexts.aboutTitle,
+          aboutDescription: settings.about_description || defaultPageTexts.aboutDescription,
+          areasTitle: settings.areas_title || defaultPageTexts.areasTitle,
+          teamTitle: settings.team_title || defaultPageTexts.teamTitle,
+          clientAreaTitle: settings.client_area_title || defaultPageTexts.clientAreaTitle,
+          clientAreaDescription: settings.client_area_description || defaultPageTexts.clientAreaDescription,
+          contactTitle: settings.contact_title || defaultPageTexts.contactTitle,
+          contactSubtitle: settings.contact_subtitle || defaultPageTexts.contactSubtitle
         };
-        setPageTexts(processedPageTexts);
-        console.log('⚙️ Page texts processados e setados');
+        
+        setPageTexts(loadedTexts);
+        console.log('✅ [useSupabasePageTexts] Textos carregados com sucesso!');
+      } else {
+        console.log('ℹ️ [useSupabasePageTexts] Nenhuma configuração encontrada, usando defaults');
+        setPageTexts(defaultPageTexts);
       }
     } catch (error) {
-      console.error('💥 ERRO AO CARREGAR PAGE TEXTS:', error);
+      console.error('❌ Erro crítico ao carregar textos:', error);
+      setPageTexts(defaultPageTexts);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const savePageTexts = async (texts: PageTexts) => {
+    console.log('💾 [useSupabasePageTexts] Salvando textos das páginas...');
+    
     try {
-      console.log('💾 Salvando configurações no Supabase...');
-      
-      await supabase
+      const { error } = await supabase
         .from('site_settings')
         .upsert({
           hero_title: texts.heroTitle,
           hero_subtitle: texts.heroSubtitle,
-          hero_background_image: texts.heroBackgroundImage,
           about_title: texts.aboutTitle,
           about_description: texts.aboutDescription,
-          about_image: texts.aboutImage,
           areas_title: texts.areasTitle,
           team_title: texts.teamTitle,
           client_area_title: texts.clientAreaTitle,
           client_area_description: texts.clientAreaDescription,
-          client_portal_link: texts.clientPortalLink,
           contact_title: texts.contactTitle,
-          contact_subtitle: texts.contactSubtitle,
-          updated_at: new Date().toISOString()
+          contact_subtitle: texts.contactSubtitle
         });
 
-      await supabase
-        .from('contact_info')
-        .upsert({
-          phone: texts.contactTexts.phone,
-          email: texts.contactTexts.email,
-          address: texts.contactTexts.address,
-          whatsapp: texts.contactTexts.whatsapp,
-          updated_at: new Date().toISOString()
-        });
+      if (error) {
+        console.error('❌ Erro ao salvar textos:', error);
+        throw error;
+      }
 
-      await supabase
-        .from('footer_info')
-        .upsert({
-          company_name: texts.footerTexts.companyName,
-          description: texts.footerTexts.description,
-          updated_at: new Date().toISOString()
-        });
-
-      setPageTexts(texts);
-      console.log('✅ Configurações salvas no Supabase');
+      setPageTexts({ ...texts });
+      console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
+      
     } catch (error) {
-      console.error('❌ Erro ao salvar configurações:', error);
+      console.error('❌ Erro crítico ao salvar textos:', error);
       throw error;
     }
   };
 
+  useEffect(() => {
+    loadPageTexts();
+  }, []);
+
   return {
     pageTexts,
+    isLoading,
     loadPageTexts,
     savePageTexts,
-    setPageTexts
+    setPageTexts,
+    refetch: loadPageTexts
   };
 };

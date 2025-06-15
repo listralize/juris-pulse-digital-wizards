@@ -5,6 +5,7 @@ import { useSupabaseCategories } from './supabase/useSupabaseCategories';
 import { useSupabaseTeamMembers } from './supabase/useSupabaseTeamMembers';
 import { useSupabasePageTexts } from './supabase/useSupabasePageTexts';
 import { TeamMember, ServicePage, CategoryInfo, PageTexts } from '../types/adminTypes';
+import { defaultPageTexts } from '../data/defaultPageTexts';
 
 export const useSupabaseDataNew = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,7 +16,6 @@ export const useSupabaseDataNew = () => {
     categories: rawCategories, 
     isLoading: servicePagesLoading,
     saveServicePages,
-    saveCategories: saveServiceCategories,
     setServicePages,
     loadServicePages,
     refetch: refetchServicePages
@@ -25,6 +25,7 @@ export const useSupabaseDataNew = () => {
     categories: additionalCategories, 
     isLoading: categoriesLoading,
     saveCategories: saveCategoriesOnly,
+    setCategories,
     refetch: refetchCategories
   } = useSupabaseCategories();
 
@@ -48,7 +49,7 @@ export const useSupabaseDataNew = () => {
   const [servicePages, setServicePagesState] = useState<ServicePage[]>([]);
   const [categories, setCategoriesState] = useState<CategoryInfo[]>([]);
   const [teamMembers, setTeamMembersState] = useState<TeamMember[]>([]);
-  const [pageTexts, setPageTextsState] = useState<PageTexts>({});
+  const [pageTexts, setPageTextsState] = useState<PageTexts>(defaultPageTexts);
 
   // Atualizar estados quando dados mudam
   useEffect(() => {
@@ -82,12 +83,12 @@ export const useSupabaseDataNew = () => {
   }, [rawTeamMembers]);
 
   useEffect(() => {
-    if (rawPageTexts && typeof rawPageTexts === 'object') {
+    if (rawPageTexts && typeof rawPageTexts === 'object' && Object.keys(rawPageTexts).length > 0) {
       console.log('🔄 useSupabaseDataNew: Atualizando pageTexts');
       setPageTextsState({ ...rawPageTexts });
     } else {
-      console.log('⚠️ useSupabaseDataNew: rawPageTexts não é objeto válido:', rawPageTexts);
-      setPageTextsState({});
+      console.log('⚠️ useSupabaseDataNew: rawPageTexts não é objeto válido, usando defaults:', rawPageTexts);
+      setPageTextsState(defaultPageTexts);
     }
   }, [rawPageTexts]);
 
@@ -109,7 +110,6 @@ export const useSupabaseDataNew = () => {
   const saveCategories = async (cats: CategoryInfo[]) => {
     console.log('💾 useSupabaseDataNew: Salvando categorias');
     try {
-      await saveServiceCategories(cats);
       await saveCategoriesOnly(cats);
       setCategoriesState([...cats]);
     } catch (error) {
@@ -160,7 +160,7 @@ export const useSupabaseDataNew = () => {
     savePageTexts,
     setServicePages,
     setTeamMembers,
-    setPageTexts,
+    setPageTexts: setPageTextsState,
     refreshData,
     
     // Funções de recarga individual
