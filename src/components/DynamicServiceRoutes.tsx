@@ -14,13 +14,15 @@ const DynamicServiceRoutes = () => {
     servicePagesCount: servicePages?.length || 0,
     currentPagesCount: currentPages.length,
     isLoading,
-    routeKey
+    routeKey,
+    servicePages: servicePages?.slice(0, 3)?.map(p => ({ id: p.id, title: p.title, href: p.href }))
   });
 
   // Atualizar páginas quando servicePages mudar
   useEffect(() => {
     if (servicePages && servicePages.length > 0) {
       console.log('🔄 DynamicServiceRoutes: Atualizando páginas do useSupabaseDataNew');
+      console.log('📄 Páginas recebidas:', servicePages.map(p => ({ id: p.id, title: p.title, href: p.href })));
       setCurrentPages([...servicePages]);
       setRouteKey(prev => prev + 1); // Força re-render das rotas
     }
@@ -32,6 +34,7 @@ const DynamicServiceRoutes = () => {
       console.log('📡 DynamicServiceRoutes: Evento servicePagesUpdated recebido');
       const updatedPages = event.detail?.pages;
       if (updatedPages && Array.isArray(updatedPages)) {
+        console.log('📄 Páginas do evento:', updatedPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
         setCurrentPages([...updatedPages]);
         setRouteKey(prev => prev + 1); // Força re-render das rotas
       }
@@ -41,6 +44,7 @@ const DynamicServiceRoutes = () => {
       console.log('📡 DynamicServiceRoutes: Evento routesNeedUpdate recebido');
       const updatedPages = event.detail?.pages;
       if (updatedPages && Array.isArray(updatedPages)) {
+        console.log('📄 Páginas do evento routes:', updatedPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
         setCurrentPages([...updatedPages]);
         setRouteKey(prev => prev + 1); // Força re-render das rotas
       }
@@ -50,6 +54,7 @@ const DynamicServiceRoutes = () => {
       console.log('📡 DynamicServiceRoutes: Evento servicePagesLoaded recebido');
       const loadedPages = event.detail?.pages;
       if (loadedPages && Array.isArray(loadedPages)) {
+        console.log('📄 Páginas carregadas:', loadedPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
         setCurrentPages([...loadedPages]);
         setRouteKey(prev => prev + 1);
       }
@@ -88,9 +93,13 @@ const DynamicServiceRoutes = () => {
         
         // Normalizar o path para garantir formato correto
         let path = page.href;
+        
+        // Se já tem o prefixo /servicos/, remover
         if (path.startsWith('/servicos/')) {
           path = path.replace('/servicos/', '');
         }
+        
+        // Se tem apenas /, remover
         if (path.startsWith('/')) {
           path = path.substring(1);
         }
@@ -99,6 +108,7 @@ const DynamicServiceRoutes = () => {
           title: page.title, 
           originalHref: page.href,
           normalizedPath: path, 
+          fullPath: `/services/${path}`,
           category: page.category 
         });
         

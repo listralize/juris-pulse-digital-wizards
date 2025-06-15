@@ -111,7 +111,7 @@ export const useSupabaseServicePages = () => {
   };
 
   const loadServicePages = async () => {
-    console.log('🔄 [useSupabaseServicePages] Carregando páginas...');
+    console.log('🔄 [useSupabaseServicePages] Carregando páginas do Supabase...');
     setIsLoading(true);
     try {
       const { data: rows, error } = await supabase
@@ -138,6 +138,7 @@ export const useSupabaseServicePages = () => {
       setServicePages([...finalPages]);
       
       console.log('✅ [useSupabaseServicePages] Páginas carregadas:', finalPages.length);
+      console.log('📄 Páginas carregadas:', finalPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
       
       // Disparar evento global após carregar
       window.dispatchEvent(new CustomEvent('servicePagesLoaded', { 
@@ -155,6 +156,7 @@ export const useSupabaseServicePages = () => {
   const saveServicePages = async (pages: ServicePage[]) => {
     const cleanPages = sanitizeServicePages(pages);
     console.log('💾 [useSupabaseServicePages] Salvando', cleanPages.length, 'páginas no Supabase...');
+    console.log('📝 Páginas a salvar:', cleanPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
     
     try {
       let upsertObj: any;
@@ -185,7 +187,8 @@ export const useSupabaseServicePages = () => {
         setAdminSettingsId(data.id);
       }
 
-      console.log('✅ [useSupabaseServicePages] Salvo com sucesso!');
+      console.log('✅ [useSupabaseServicePages] Salvo com sucesso no Supabase!');
+      console.log('📊 Dados salvos:', data);
       
       // Atualizar estado local imediatamente
       setServicePages([...cleanPages]);
@@ -198,6 +201,12 @@ export const useSupabaseServicePages = () => {
       window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
         detail: { pages: cleanPages } 
       }));
+
+      // Força recarregamento após salvar para garantir sincronização
+      console.log('🔄 Recarregando dados após salvar...');
+      setTimeout(() => {
+        loadServicePages();
+      }, 500);
 
     } catch (error) {
       console.error('❌ Erro crítico ao salvar service pages:', error);

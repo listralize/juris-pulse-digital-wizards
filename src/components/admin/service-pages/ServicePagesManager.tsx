@@ -42,7 +42,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   useEffect(() => {
     console.log('🔄 [ServicePagesManager] Props servicePages mudaram:', {
       count: servicePages.length,
-      firstThree: servicePages.slice(0, 3).map(p => ({ id: p.id, title: p.title }))
+      pages: servicePages.map(p => ({ id: p.id, title: p.title, href: p.href }))
     });
     setLocalPages([...servicePages]);
   }, [servicePages]);
@@ -57,22 +57,42 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
     console.log('📝 [ServicePagesManager] Atualizando página:', pageId, field, value);
-    setLocalPages(pages => pages.map(page => 
-      page.id === pageId ? { ...page, [field]: value } : page
-    ));
+    
+    setLocalPages(pages => pages.map(page => {
+      if (page.id === pageId) {
+        const updatedPage = { ...page, [field]: value };
+        
+        // Se estiver alterando o título, ajustar o href automaticamente
+        if (field === 'title' && typeof value === 'string') {
+          const slug = value
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+            .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+            .replace(/\s+/g, '-') // Substitui espaços por hífens
+            .replace(/-+/g, '-') // Remove hífens duplos
+            .trim();
+          
+          updatedPage.href = slug;
+          console.log('🔗 Href atualizado automaticamente:', slug);
+        }
+        
+        return updatedPage;
+      }
+      return page;
+    }));
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       console.log('💾 [ServicePagesManager] Iniciando save de', localPages.length, 'páginas');
+      console.log('📄 Páginas a salvar:', localPages.map(p => ({ id: p.id, title: p.title, href: p.href })));
+      
       await onSave([...localPages]);
       console.log('✅ [ServicePagesManager] Save concluído com sucesso');
       
-      // Aguardar um pouco e recarregar a página para garantir sincronização
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      toast.success('Páginas salvas com sucesso no Supabase!');
       
     } catch (error) {
       console.error('❌ [ServicePagesManager] Erro no save:', error);
@@ -98,15 +118,15 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     const newId = crypto.randomUUID();
     const timestamp = Date.now();
     
-    // Criar href sem /servicos/ para evitar duplicação
-    const baseHref = `${selectedCategory}-servico-${timestamp}`;
+    // Criar href limpo sem prefixos
+    const baseHref = `novo-servico-${timestamp}`;
     
     const newServicePage: ServicePage = {
       id: newId,
       title: `Novo Serviço - ${categoryInfo?.label || selectedCategory}`,
       description: 'Descrição do novo serviço',
       category: selectedCategory,
-      href: baseHref, // Sem prefixo /servicos/
+      href: baseHref,
       benefits: [{
         title: "Benefício 1",
         description: "Descrição do benefício 1",
@@ -276,6 +296,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
             </Button>
           </div>
+          <p className={`text-sm mt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            URL da página: /services/{selectedPage.href || 'sem-url'}
+          </p>
         </CardHeader>
         <CardContent>
           <PageEditor page={selectedPage} onUpdatePage={updatePage} />
