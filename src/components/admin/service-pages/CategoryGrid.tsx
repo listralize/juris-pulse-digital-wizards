@@ -24,6 +24,11 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
   const validCategories = categories || [];
   const validServicePages = servicePages || [];
 
+  // Debug: mostrar todas as categorias das páginas
+  const allPageCategories = validServicePages.map(p => p.category);
+  console.log('📋 Todas as categorias das páginas:', allPageCategories);
+  console.log('📂 Categorias únicas:', [...new Set(allPageCategories)]);
+
   return (
     <div className="space-y-4">
       <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
@@ -39,14 +44,29 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {validCategories.map((category) => {
-          // Filtrar páginas desta categoria usando o VALUE da categoria (que é usado para filtrar)
+          // Usar múltiplas estratégias de filtro para encontrar páginas
           const categoryPages = validServicePages.filter(page => {
-            // A lógica principal: usar category.value para filtrar
-            return page.category === category.value;
+            // Estratégia 1: Match exato com category.value
+            if (page.category === category.value) return true;
+            
+            // Estratégia 2: Match exato com category.id (UUID)
+            if (page.category === category.id) return true;
+            
+            // Estratégia 3: Match com category.name (backwards compatibility)
+            if (page.category === category.name) return true;
+            
+            // Estratégia 4: Match case-insensitive
+            const pageCategory = page.category?.toLowerCase().trim();
+            const categoryValue = category.value?.toLowerCase().trim();
+            if (pageCategory === categoryValue) return true;
+            
+            return false;
           });
           
           console.log(`📂 ${category.label}: ${categoryPages.length} páginas encontradas`, {
             categoryValue: category.value,
+            categoryId: category.id,
+            categoryName: category.name,
             foundPages: categoryPages.map(p => ({ title: p.title, category: p.category }))
           });
           

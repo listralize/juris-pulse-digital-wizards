@@ -102,7 +102,7 @@ export const useSupabaseServicePages = () => {
 
   const getDefaultPages = (): ServicePage[] => {
     try {
-      console.log('📦 Gerando páginas padrão...');
+      console.log('📦 Gerando páginas padrão para todas as categorias...');
       
       // Gerar páginas usando os valores das categorias (familia, tributario, etc.)
       const defaultPages = [
@@ -145,10 +145,15 @@ export const useSupabaseServicePages = () => {
       ];
       
       console.log('✅ Páginas padrão geradas:', defaultPages.length);
-      console.log('🔍 Distribuição por categoria:', defaultPages.reduce((acc, page) => {
+      
+      // Debug: verificar distribuição por categoria
+      const distribuicao = defaultPages.reduce((acc, page) => {
         acc[page.category] = (acc[page.category] || 0) + 1;
         return acc;
-      }, {} as Record<string, number>));
+      }, {} as Record<string, number>);
+      
+      console.log('🔍 Distribuição por categoria:', distribuicao);
+      console.log('📄 Exemplo de página:', defaultPages[0]);
       
       return defaultPages;
     } catch (error) {
@@ -162,10 +167,21 @@ export const useSupabaseServicePages = () => {
     setIsLoading(true);
     
     try {
-      // Sempre carregar páginas padrão primeiro
+      // Sempre carregar páginas padrão primeiro - ISSO É CRUCIAL
       const defaultPages = getDefaultPages();
+      console.log('✅ Páginas padrão carregadas primeiro:', defaultPages.length);
+      
+      // Verificar se realmente temos páginas
+      if (defaultPages.length === 0) {
+        console.error('❌ NENHUMA página padrão foi gerada! Problema crítico!');
+        setServicePages([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Setar as páginas imediatamente para que apareçam na UI
       setServicePages(defaultPages);
-      console.log('✅ Páginas padrão carregadas:', defaultPages.length);
+      console.log('📊 PÁGINAS SETADAS NO ESTADO:', defaultPages.length);
       
       // Tentar carregar do Supabase em segundo plano
       const { data: supabasePages, error } = await supabase
@@ -221,13 +237,17 @@ export const useSupabaseServicePages = () => {
         console.log('✅ Páginas do Supabase aplicadas');
       } else {
         console.log('📦 Nenhuma página no Supabase, mantendo páginas padrão');
+        // Páginas padrão já foram setadas acima
       }
       
     } catch (error) {
       console.error('❌ Erro ao carregar dados:', error);
-      // Em caso de erro, pelo menos carregar páginas padrão
+      // Em caso de erro, pelo menos manter páginas padrão se já foram setadas
       const fallbackPages = getDefaultPages();
-      setServicePages(fallbackPages);
+      if (fallbackPages.length > 0) {
+        setServicePages(fallbackPages);
+        console.log('🔄 Fallback: Páginas padrão aplicadas após erro');
+      }
     } finally {
       setIsLoading(false);
     }
