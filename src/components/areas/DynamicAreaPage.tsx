@@ -48,7 +48,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   const targetCategory = categories?.find(cat => 
     cat.value === areaKey || 
     cat.name?.toLowerCase() === areaKey.toLowerCase() ||
-    cat.category_key === areaKey
+    cat.value === areaKey
   );
 
   console.log('🎯 Categoria encontrada:', targetCategory);
