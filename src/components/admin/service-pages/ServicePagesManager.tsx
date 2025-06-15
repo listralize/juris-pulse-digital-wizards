@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -39,11 +38,11 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sincronizar localPages APENAS quando servicePages do Supabase mudar:
+  // Sincronizar localPages quando servicePages mudar
   useEffect(() => {
     console.log('🔄 [ServicePagesManager] Props servicePages mudaram:', {
       count: servicePages.length,
-      titles: servicePages.map(p => p.title).slice(0, 3)
+      firstThree: servicePages.slice(0, 3).map(p => ({ id: p.id, title: p.title }))
     });
     setLocalPages([...servicePages]);
   }, [servicePages]);
@@ -57,7 +56,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     : null;
 
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
-    console.log('📝 [ServicePagesManager] Atualizando página:', pageId, field);
+    console.log('📝 [ServicePagesManager] Atualizando página:', pageId, field, value);
     setLocalPages(pages => pages.map(page => 
       page.id === pageId ? { ...page, [field]: value } : page
     ));
@@ -69,6 +68,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       console.log('💾 [ServicePagesManager] Iniciando save de', localPages.length, 'páginas');
       await onSave([...localPages]);
       console.log('✅ [ServicePagesManager] Save concluído com sucesso');
+      
+      // Aguardar um pouco e recarregar a página para garantir sincronização
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
     } catch (error) {
       console.error('❌ [ServicePagesManager] Erro no save:', error);
       toast.error('Erro ao salvar páginas no Supabase');
@@ -92,12 +97,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     const categoryInfo = categories.find(c => c.value === selectedCategory);
     const newId = crypto.randomUUID();
     const timestamp = Date.now();
+    
+    // Criar href sem /servicos/ para evitar duplicação
+    const baseHref = `${selectedCategory}-servico-${timestamp}`;
+    
     const newServicePage: ServicePage = {
       id: newId,
       title: `Novo Serviço - ${categoryInfo?.label || selectedCategory}`,
       description: 'Descrição do novo serviço',
       category: selectedCategory,
-      href: `${selectedCategory}-servico-${timestamp}`,
+      href: baseHref, // Sem prefixo /servicos/
       benefits: [{
         title: "Benefício 1",
         description: "Descrição do benefício 1",
@@ -117,7 +126,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         text: "Excelente atendimento"
       }]
     };
-    console.log('➕ [ServicePagesManager] Adicionando nova página:', newId);
+    
+    console.log('➕ [ServicePagesManager] Adicionando nova página:', { 
+      id: newId, 
+      href: baseHref,
+      category: selectedCategory 
+    });
+    
     setLocalPages(prev => [...prev, newServicePage]);
     setSelectedPageId(newId);
   };
@@ -176,7 +191,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             </div>
           </div>
           <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            Total de páginas: {localPages.length} | Status: {localPages.length > 0 ? '✅ Dados carregados' : '⚠️ Sem dados'}
+            Total de páginas: {localPages.length} | Local: {localPages.length} | Supabase: {servicePages.length}
           </p>
         </CardHeader>
         <CardContent>

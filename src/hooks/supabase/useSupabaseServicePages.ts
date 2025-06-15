@@ -1,8 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { ServicePage, CategoryInfo } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
-
-const STORAGE_KEY = 'lovable_service_pages';
 
 const categories: CategoryInfo[] = [
   { 
@@ -112,7 +111,7 @@ export const useSupabaseServicePages = () => {
   };
 
   const loadServicePages = async () => {
-    console.log('🔄 [Supabase] Carregando páginas de serviço...');
+    console.log('🔄 [useSupabaseServicePages] Carregando páginas...');
     setIsLoading(true);
     try {
       const { data: rows, error } = await supabase
@@ -134,9 +133,17 @@ export const useSupabaseServicePages = () => {
           finalPages = sanitizeServicePages(rows.service_pages);
         }
       }
+      
       setAdminSettingsId(recordId);
       setServicePages([...finalPages]);
-      console.log('✅ [Supabase] Páginas carregadas:', finalPages.length, finalPages.map(p => p.title));
+      
+      console.log('✅ [useSupabaseServicePages] Páginas carregadas:', finalPages.length);
+      
+      // Disparar evento global após carregar
+      window.dispatchEvent(new CustomEvent('servicePagesLoaded', { 
+        detail: { pages: finalPages } 
+      }));
+      
     } catch (error) {
       console.error('❌ Erro ao carregar páginas:', error);
       setServicePages([]);
@@ -147,7 +154,8 @@ export const useSupabaseServicePages = () => {
 
   const saveServicePages = async (pages: ServicePage[]) => {
     const cleanPages = sanitizeServicePages(pages);
-    console.log('💾 [Supabase] Salvando páginas no Supabase:', cleanPages.length);
+    console.log('💾 [useSupabaseServicePages] Salvando', cleanPages.length, 'páginas no Supabase...');
+    
     try {
       let upsertObj: any;
       if (adminSettingsId) {
@@ -160,6 +168,7 @@ export const useSupabaseServicePages = () => {
           service_pages: cleanPages
         };
       }
+      
       const { error, data } = await supabase
         .from('admin_settings')
         .upsert(upsertObj, { onConflict: 'id' })
@@ -171,16 +180,25 @@ export const useSupabaseServicePages = () => {
         throw error;
       }
 
-      // Atualiza id se não tinha antes (primeiro insert)
-      if (!adminSettingsId && data?.id) setAdminSettingsId(data.id);
+      // Atualiza id se não tinha antes
+      if (!adminSettingsId && data?.id) {
+        setAdminSettingsId(data.id);
+      }
 
-      // Recarrega os dados automaticamente após salvar
-      await loadServicePages();
-
-      // Dispara eventos para outros componentes
+      console.log('✅ [useSupabaseServicePages] Salvo com sucesso!');
+      
+      // Atualizar estado local imediatamente
+      setServicePages([...cleanPages]);
+      
+      // Disparar eventos globais
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-        detail: { pages: [...cleanPages] } 
+        detail: { pages: cleanPages } 
       }));
+      
+      window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
+        detail: { pages: cleanPages } 
+      }));
+
     } catch (error) {
       console.error('❌ Erro crítico ao salvar service pages:', error);
       throw error;

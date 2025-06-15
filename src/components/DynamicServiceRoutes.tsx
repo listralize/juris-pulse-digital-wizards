@@ -8,34 +8,61 @@ import { ServicePage } from '../types/adminTypes';
 const DynamicServiceRoutes = () => {
   const { servicePages, categories, isLoading } = useSupabaseDataNew();
   const [currentPages, setCurrentPages] = useState<ServicePage[]>([]);
+  const [routeKey, setRouteKey] = useState(0);
 
-  console.log('🚀 DynamicServiceRoutes:', {
+  console.log('🚀 DynamicServiceRoutes renderizando:', {
     servicePagesCount: servicePages?.length || 0,
-    categoriesCount: categories?.length || 0,
-    isLoading
+    currentPagesCount: currentPages.length,
+    isLoading,
+    routeKey
   });
 
   // Atualizar páginas quando servicePages mudar
   useEffect(() => {
     if (servicePages && servicePages.length > 0) {
+      console.log('🔄 DynamicServiceRoutes: Atualizando páginas do useSupabaseDataNew');
       setCurrentPages([...servicePages]);
+      setRouteKey(prev => prev + 1); // Força re-render das rotas
     }
   }, [servicePages]);
 
-  // Escutar mudanças nas páginas
+  // Escutar eventos de atualização
   useEffect(() => {
     const handleServicePagesUpdate = (event: CustomEvent) => {
-      console.log('🔄 DynamicServiceRoutes detectou atualização');
+      console.log('📡 DynamicServiceRoutes: Evento servicePagesUpdated recebido');
       const updatedPages = event.detail?.pages;
       if (updatedPages && Array.isArray(updatedPages)) {
         setCurrentPages([...updatedPages]);
+        setRouteKey(prev => prev + 1); // Força re-render das rotas
+      }
+    };
+
+    const handleRoutesUpdate = (event: CustomEvent) => {
+      console.log('📡 DynamicServiceRoutes: Evento routesNeedUpdate recebido');
+      const updatedPages = event.detail?.pages;
+      if (updatedPages && Array.isArray(updatedPages)) {
+        setCurrentPages([...updatedPages]);
+        setRouteKey(prev => prev + 1); // Força re-render das rotas
+      }
+    };
+
+    const handlePagesLoaded = (event: CustomEvent) => {
+      console.log('📡 DynamicServiceRoutes: Evento servicePagesLoaded recebido');
+      const loadedPages = event.detail?.pages;
+      if (loadedPages && Array.isArray(loadedPages)) {
+        setCurrentPages([...loadedPages]);
+        setRouteKey(prev => prev + 1);
       }
     };
 
     window.addEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
+    window.addEventListener('routesNeedUpdate', handleRoutesUpdate as EventListener);
+    window.addEventListener('servicePagesLoaded', handlePagesLoaded as EventListener);
     
     return () => {
       window.removeEventListener('servicePagesUpdated', handleServicePagesUpdate as EventListener);
+      window.removeEventListener('routesNeedUpdate', handleRoutesUpdate as EventListener);
+      window.removeEventListener('servicePagesLoaded', handlePagesLoaded as EventListener);
     };
   }, []);
 
@@ -49,23 +76,37 @@ const DynamicServiceRoutes = () => {
 
   const pagesToRender = currentPages.length > 0 ? currentPages : servicePages || [];
 
+  console.log('🗺️ DynamicServiceRoutes: Criando rotas para', pagesToRender.length, 'páginas');
+
   return (
-    <Routes>
+    <Routes key={routeKey}>
       {pagesToRender.map((page) => {
         if (!page.href) {
           console.warn('⚠️ Página sem href:', page.title);
           return null;
         }
         
-        const path = page.href.startsWith('/servicos/') ? page.href.replace('/servicos/', '') : page.href;
+        // Normalizar o path para garantir formato correto
+        let path = page.href;
+        if (path.startsWith('/servicos/')) {
+          path = path.replace('/servicos/', '');
+        }
+        if (path.startsWith('/')) {
+          path = path.substring(1);
+        }
         
-        console.log('🔗 Criando rota:', { title: page.title, path, category: page.category });
+        console.log('🔗 Criando rota:', { 
+          title: page.title, 
+          originalHref: page.href,
+          normalizedPath: path, 
+          category: page.category 
+        });
         
         return (
           <Route 
-            key={`${page.id}-${Date.now()}`} 
+            key={`${page.id}-${routeKey}`} 
             path={path} 
-            element={<DynamicServicePage pageData={page} categories={categories} />} 
+            element={<DynamicServicePage pageData={page} categories={categories || []} />} 
           />
         );
       })}
