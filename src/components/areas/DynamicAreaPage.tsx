@@ -44,14 +44,29 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Filtrar serviços da categoria específica com comparação exata
+  // Encontrar a categoria correspondente
+  const targetCategory = categories?.find(cat => 
+    cat.value === areaKey || 
+    cat.name?.toLowerCase() === areaKey.toLowerCase() ||
+    cat.category_key === areaKey
+  );
+
+  console.log('🎯 Categoria encontrada:', targetCategory);
+
+  // Filtrar serviços da categoria específica
   const areaServices = servicePages?.filter(page => {
+    // Primeiro tentar match com o UUID da categoria (se encontrou a categoria)
+    if (targetCategory && page.category === targetCategory.id) {
+      return true;
+    }
+    
+    // Depois tentar match com a string original para backwards compatibility
     const pageCategory = page.category?.toLowerCase().trim();
-    const targetCategory = areaKey?.toLowerCase().trim();
+    const targetKey = areaKey?.toLowerCase().trim();
     
-    console.log(`🔍 Comparando: "${pageCategory}" === "${targetCategory}" = ${pageCategory === targetCategory}`);
+    console.log(`🔍 Comparando: "${pageCategory}" === "${targetKey}" = ${pageCategory === targetKey}`);
     
-    return pageCategory === targetCategory;
+    return pageCategory === targetKey;
   }) || [];
 
   console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
@@ -119,7 +134,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
             </p>
             <div className={`text-sm mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Debug: Área: {areaKey} | Total de páginas no sistema: {servicePages?.length || 0}
+                Debug: Área: {areaKey} | Categoria encontrada: {targetCategory?.name || 'N/A'} | Total de páginas no sistema: {servicePages?.length || 0}
               </p>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs mt-2`}>
                 Categorias disponíveis: {servicePages?.map(p => p.category).filter((v, i, a) => a.indexOf(v) === i).join(', ')}

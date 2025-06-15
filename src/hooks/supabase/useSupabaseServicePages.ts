@@ -99,22 +99,82 @@ const categories: CategoryInfo[] = [
 export const useSupabaseServicePages = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
-  const getDefaultPages = (): ServicePage[] => {
+  // Criar mapeamento entre category_key e UUID
+  const loadCategoryMapping = async () => {
     try {
-      console.log('📦 Gerando páginas padrão...');
+      const { data: supabaseCategories, error } = await supabase
+        .from('law_categories')
+        .select('id, category_key')
+        .eq('is_active', true);
+
+      if (error) {
+        console.error('❌ Erro ao carregar mapeamento de categorias:', error);
+        return;
+      }
+
+      // Criar mapa: category_key -> UUID
+      const mapping: Record<string, string> = {};
+      supabaseCategories?.forEach(cat => {
+        mapping[cat.category_key] = cat.id;
+      });
+      
+      console.log('🗺️ Mapeamento de categorias criado:', mapping);
+      setCategoryMap(mapping);
+      return mapping;
+    } catch (error) {
+      console.error('❌ Erro ao criar mapeamento:', error);
+      return {};
+    }
+  };
+
+  const getDefaultPages = (categoryMapping: Record<string, string> = {}): ServicePage[] => {
+    try {
+      console.log('📦 Gerando páginas padrão com mapeamento:', categoryMapping);
+      
+      // Gerar páginas com categorias mapeadas para UUIDs
       const defaultPages = [
-        ...createFamiliaServicePages(),
-        ...createTributarioServicePages(),
-        ...createEmpresarialServicePages(),
-        ...createTrabalhoServicePages(),
-        ...createCivilServicePages(),
-        ...createPrevidenciarioServicePages(),
-        ...createConsumidorServicePages(),
-        ...createConstitucionalServicePages(),
-        ...createAdministrativoServicePages()
+        ...createFamiliaServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['familia'] || 'familia' 
+        })),
+        ...createTributarioServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['tributario'] || 'tributario' 
+        })),
+        ...createEmpresarialServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['empresarial'] || 'empresarial' 
+        })),
+        ...createTrabalhoServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['trabalho'] || 'trabalho' 
+        })),
+        ...createCivilServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['civil'] || 'civil' 
+        })),
+        ...createPrevidenciarioServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['previdenciario'] || 'previdenciario' 
+        })),
+        ...createConsumidorServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['consumidor'] || 'consumidor' 
+        })),
+        ...createConstitucionalServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['constitucional'] || 'constitucional' 
+        })),
+        ...createAdministrativoServicePages().map(page => ({ 
+          ...page, 
+          category: categoryMapping['administrativo'] || 'administrativo' 
+        }))
       ];
-      console.log('✅ Páginas padrão geradas:', defaultPages.length);
+      
+      console.log('✅ Páginas padrão geradas com categorias mapeadas:', defaultPages.length);
+      console.log('🔍 Primeira página exemplo:', defaultPages[0]);
       return defaultPages;
     } catch (error) {
       console.error('❌ Erro ao gerar páginas padrão:', error);
@@ -126,12 +186,15 @@ export const useSupabaseServicePages = () => {
     console.log('🔄 Iniciando carregamento de páginas...');
     setIsLoading(true);
     
-    // SEMPRE inicializar com dados padrão primeiro
-    const defaultPages = getDefaultPages();
-    setServicePages(defaultPages);
-    console.log('✅ Páginas padrão carregadas primeiro:', defaultPages.length);
-    
     try {
+      // Primeiro, carregar o mapeamento de categorias
+      const mapping = await loadCategoryMapping();
+      
+      // Sempre inicializar com dados padrão usando o mapeamento correto
+      const defaultPages = getDefaultPages(mapping || {});
+      setServicePages(defaultPages);
+      console.log('✅ Páginas padrão carregadas com mapeamento:', defaultPages.length);
+      
       // Tentar carregar do Supabase em segundo plano
       const { data: supabasePages, error } = await supabase
         .from('service_pages')
@@ -185,11 +248,14 @@ export const useSupabaseServicePages = () => {
         setServicePages(convertedPages);
         console.log('✅ Páginas do Supabase aplicadas');
       } else {
-        console.log('📦 Nenhuma página no Supabase, mantendo páginas padrão');
+        console.log('📦 Nenhuma página no Supabase, mantendo páginas padrão com mapeamento');
       }
       
     } catch (error) {
-      console.error('❌ Erro ao carregar do Supabase (mantendo dados padrão):', error);
+      console.error('❌ Erro ao carregar dados:', error);
+      // Em caso de erro, pelo menos carregar páginas padrão sem mapeamento
+      const fallbackPages = getDefaultPages();
+      setServicePages(fallbackPages);
     } finally {
       setIsLoading(false);
     }
