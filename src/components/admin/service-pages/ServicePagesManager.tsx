@@ -20,14 +20,14 @@ interface ServicePagesManagerProps {
   onUpdatePageTexts: (texts: PageTexts) => void;
 }
 
-export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({ 
-  servicePages, 
+export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
+  servicePages,
   categories,
   pageTexts,
   onSave,
-  onSaveCategories, 
+  onSaveCategories,
   onSavePageTexts,
-  onUpdatePageTexts 
+  onUpdatePageTexts
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -60,11 +60,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     setIsSaving(true);
     try {
       await onSave([...localPages]);
-      // Após salvar com sucesso, faz reload global
-      window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-        detail: { pages: [...localPages] }
-      }));
-      window.dispatchEvent(new CustomEvent('refreshSupabaseData'));
+      // Após salvar, os dados serão recarregados do supabase pelo hook!
+      // Não faça mais nada aqui.
+      // Se quiser, adicione log:
+      console.log('✅ Salvo com sucesso, aguardando reload dos dados do Supabase...');
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas no Supabase');

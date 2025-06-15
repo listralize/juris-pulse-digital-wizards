@@ -102,7 +102,6 @@ export const useSupabaseServicePages = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [adminSettingsId, setAdminSettingsId] = useState<string | null>(null);
 
-  // Função para garantir que toda ServicePage tenha todos os campos
   const sanitizeServicePages = (pages: unknown): ServicePage[] => {
     if (!Array.isArray(pages)) return [];
     return pages
@@ -121,7 +120,6 @@ export const useSupabaseServicePages = () => {
       }));
   };
 
-  // Carrega APENAS o primeiro registro de admin_settings (fonte única)
   const loadServicePages = async () => {
     console.log('🔄 [Supabase] Carregando páginas de serviço...');
     setIsLoading(true);
@@ -145,9 +143,9 @@ export const useSupabaseServicePages = () => {
           finalPages = sanitizeServicePages(rows.service_pages);
         }
       }
-
       setAdminSettingsId(recordId);
       setServicePages([...finalPages]);
+      console.log('✅ [Supabase] Páginas carregadas:', finalPages.length, finalPages.map(p => p.title));
     } catch (error) {
       console.error('❌ Erro ao carregar páginas:', error);
       setServicePages([]);
@@ -158,7 +156,7 @@ export const useSupabaseServicePages = () => {
 
   const saveServicePages = async (pages: ServicePage[]) => {
     const cleanPages = sanitizeServicePages(pages);
-    console.log('💾 Salvando páginas (validadas e limpas) no Supabase:', cleanPages.length, { adminSettingsId });
+    console.log('💾 [Supabase] Salvando páginas no Supabase:', cleanPages.length, cleanPages.map(p => p.title));
     try {
       let upsertObj: any;
       if (adminSettingsId) {
@@ -185,9 +183,9 @@ export const useSupabaseServicePages = () => {
       // Atualiza id se não tinha antes (primeiro insert)
       if (!adminSettingsId && data?.id) setAdminSettingsId(data.id);
 
-      setServicePages([...cleanPages]);
+      // ATENÇÃO: carrega novamente APENAS do Supabase depois de salvar!
+      await loadServicePages();
 
-      // Atualiza globalmente
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
         detail: { pages: [...cleanPages] } 
       }));
@@ -198,7 +196,6 @@ export const useSupabaseServicePages = () => {
     }
   };
 
-  // Sempre observa eventos de recarregamento
   useEffect(() => {
     const handleRefresh = () => {
       console.log('🔄 Evento de refresh detectado');
@@ -209,7 +206,6 @@ export const useSupabaseServicePages = () => {
     return () => window.removeEventListener('refreshSupabaseData', handleRefresh);
   }, []);
 
-  // Carrega tudo inicialmente
   useEffect(() => {
     loadServicePages();
   }, []);
