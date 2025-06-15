@@ -14,20 +14,16 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('🎯 CategoryGrid RENDERIZANDO:', {
+  console.log('🎯 CategoryGrid DADOS RECEBIDOS:', {
     categoriesCount: categories?.length || 0,
     servicePagesCount: servicePages?.length || 0,
-    firstPage: servicePages?.[0] ? { id: servicePages[0].id, title: servicePages[0].title, category: servicePages[0].category } : 'nenhuma'
+    firstCategory: categories?.[0],
+    firstPage: servicePages?.[0]
   });
 
   // Garantir que temos arrays válidos
   const validCategories = categories || [];
   const validServicePages = servicePages || [];
-
-  // Debug: mostrar todas as categorias das páginas
-  const allPageCategories = validServicePages.map(p => p.category);
-  console.log('📋 Todas as categorias das páginas:', allPageCategories);
-  console.log('📂 Categorias únicas:', [...new Set(allPageCategories)]);
 
   return (
     <div className="space-y-4">
@@ -37,37 +33,23 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
         </p>
         {validServicePages.length > 0 && (
           <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-            ✅ Páginas carregadas: {validServicePages.slice(0, 3).map(p => p.title).join(', ')}...
+            ✅ Primeiras páginas: {validServicePages.slice(0, 3).map(p => p.title).join(', ')}...
           </p>
         )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {validCategories.map((category) => {
-          // Usar múltiplas estratégias de filtro para encontrar páginas
+          // Filtrar páginas por categoria usando o valor exato
           const categoryPages = validServicePages.filter(page => {
-            // Estratégia 1: Match exato com category.value
-            if (page.category === category.value) return true;
-            
-            // Estratégia 2: Match exato com category.id (UUID)
-            if (page.category === category.id) return true;
-            
-            // Estratégia 3: Match com category.name (backwards compatibility)
-            if (page.category === category.name) return true;
-            
-            // Estratégia 4: Match case-insensitive
             const pageCategory = page.category?.toLowerCase().trim();
             const categoryValue = category.value?.toLowerCase().trim();
-            if (pageCategory === categoryValue) return true;
-            
-            return false;
+            return pageCategory === categoryValue;
           });
           
-          console.log(`📂 ${category.label}: ${categoryPages.length} páginas encontradas`, {
+          console.log(`📂 ${category.label}: ${categoryPages.length} páginas`, {
             categoryValue: category.value,
-            categoryId: category.id,
-            categoryName: category.name,
-            foundPages: categoryPages.map(p => ({ title: p.title, category: p.category }))
+            pagesFound: categoryPages.map(p => p.title)
           });
           
           return (
