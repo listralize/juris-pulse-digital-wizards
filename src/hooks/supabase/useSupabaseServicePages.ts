@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ServicePage, CategoryInfo } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
@@ -101,6 +100,7 @@ const categories: CategoryInfo[] = [
 export const useSupabaseServicePages = () => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [adminSettingsId, setAdminSettingsId] = useState<string | null>(null);
 
   const getDefaultPages = (): ServicePage[] => {
     console.log('📦 Gerando páginas padrão...');
@@ -121,59 +121,64 @@ export const useSupabaseServicePages = () => {
     return defaultPages;
   };
 
+  // Função para garantir que toda ServicePage tenha todos os campos
+  const sanitizeServicePages = (pages: unknown): ServicePage[] => {
+    if (!Array.isArray(pages)) return [];
+    return pages
+      .filter(page => page && typeof page === 'object')
+      .map((page: any, idx) => ({
+        id: page.id || `no-id-${idx}`,
+        title: page.title || '',
+        description: page.description || '',
+        category: page.category || '',
+        href: page.href || '',
+        benefits: Array.isArray(page.benefits) ? page.benefits : [],
+        process: Array.isArray(page.process) ? page.process : [],
+        faq: Array.isArray(page.faq) ? page.faq : [],
+        testimonials: Array.isArray(page.testimonials) ? page.testimonials : [],
+        // manter extensibilidade caso novas chaves existam
+        ...page
+      }));
+  };
+
+  // Carrega APENAS o primeiro registro de admin_settings (fonte única)
   const loadServicePages = async () => {
-    console.log('🔄 Carregando páginas de serviço do Supabase...');
+    console.log('🔄 [Supabase] Carregando páginas de serviço...');
     setIsLoading(true);
-    
     try {
-      // Primeiro tentar carregar do Supabase
-      const { data: supabaseData, error } = await supabase
+      const { data: rows, error } = await supabase
         .from('admin_settings')
-        .select('service_pages')
-        .single();
+        .select('id,service_pages')
+        .limit(1)
+        .maybeSingle();
 
       if (error) {
-        console.log('ℹ️ Nenhum dado no Supabase ainda, usando dados padrão');
+        console.warn('❌ Erro carregando admin_settings:', error);
       }
 
       let finalPages: ServicePage[] = [];
+      let recordId = null;
 
-      if (supabaseData?.service_pages && Array.isArray(supabaseData.service_pages)) {
-        console.log('📊 Páginas carregadas do Supabase:', supabaseData.service_pages.length);
-        // Converter de Json para ServicePage[] através de unknown
-        finalPages = supabaseData.service_pages as unknown as ServicePage[];
-      } else {
-        // Se não há dados no Supabase, verificar localStorage
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          try {
-            const parsedPages = JSON.parse(stored);
-            if (Array.isArray(parsedPages) && parsedPages.length > 0) {
-              console.log('📋 Páginas carregadas do localStorage:', parsedPages.length);
-              finalPages = parsedPages;
-            }
-          } catch (error) {
-            console.error('❌ Erro ao parsear localStorage:', error);
-          }
-        }
-
-        // Se ainda não temos dados, usar páginas padrão
-        if (finalPages.length === 0) {
-          finalPages = getDefaultPages();
-          console.log('✅ Usando páginas padrão:', finalPages.length);
+      if (rows) {
+        recordId = rows.id;
+        if (rows.service_pages && Array.isArray(rows.service_pages)) {
+          finalPages = sanitizeServicePages(rows.service_pages);
         }
       }
 
-      setServicePages(finalPages);
-      
-      // Salvar no localStorage como cache
+      if (!finalPages.length) {
+        console.warn('ℹ️ Não encontrou páginas no Supabase. Gerando padrão.');
+        finalPages = getDefaultPages();
+      }
+
+      setAdminSettingsId(recordId);
+      setServicePages([...finalPages]);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(finalPages));
-      
     } catch (error) {
-      console.error('❌ Erro ao carregar páginas do Supabase:', error);
+      console.error('❌ Erro ao carregar páginas:', error);
       // Fallback para páginas padrão
       const fallbackPages = getDefaultPages();
-      setServicePages(fallbackPages);
+      setServicePages([...fallbackPages]);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackPages));
     } finally {
       setIsLoading(false);
@@ -181,41 +186,48 @@ export const useSupabaseServicePages = () => {
   };
 
   const saveServicePages = async (pages: ServicePage[]) => {
-    console.log('💾 Salvando páginas no Supabase:', pages.length);
-    
+    const cleanPages = sanitizeServicePages(pages);
+    console.log('💾 Salvando páginas (validadas e limpas) no Supabase:', cleanPages.length, { adminSettingsId });
     try {
-      // Salvar no Supabase
-      const { error } = await supabase
+      let upsertObj: any;
+      if (adminSettingsId) {
+        upsertObj = {
+          id: adminSettingsId,
+          service_pages: cleanPages
+        };
+      } else {
+        upsertObj = {
+          service_pages: cleanPages
+        };
+      }
+      const { error, data } = await supabase
         .from('admin_settings')
-        .upsert({ 
-          service_pages: pages as any
-        });
+        .upsert(upsertObj, { onConflict: 'id' })
+        .select()
+        .maybeSingle();
 
       if (error) {
         console.error('❌ Erro ao salvar no Supabase:', error);
         throw error;
       }
 
-      console.log('✅ Páginas salvas no Supabase com sucesso');
-      
-      // Salvar no localStorage como cache
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pages));
-      
-      // Atualizar estado local
-      setServicePages([...pages]);
-      
-      // Disparar evento para notificar outros componentes
+      // Atualiza id se não tinha antes (primeiro insert)
+      if (!adminSettingsId && data?.id) setAdminSettingsId(data.id);
+
+      setServicePages([...cleanPages]);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanPages));
+
+      // Atualiza UI e outros componentes
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-        detail: { pages: [...pages] } 
+        detail: { pages: [...cleanPages] } 
       }));
-      
     } catch (error) {
-      console.error('❌ Erro ao salvar páginas:', error);
+      console.error('❌ Erro crítico ao salvar service pages:', error);
       throw error;
     }
   };
 
-  // Escutar eventos de refresh
+  // Sempre observa eventos de recarregamento
   useEffect(() => {
     const handleRefresh = () => {
       console.log('🔄 Evento de refresh detectado');
@@ -226,6 +238,7 @@ export const useSupabaseServicePages = () => {
     return () => window.removeEventListener('refreshSupabaseData', handleRefresh);
   }, []);
 
+  // Carrega tudo inicialmente
   useEffect(() => {
     loadServicePages();
   }, []);
