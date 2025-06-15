@@ -122,48 +122,83 @@ export const useSupabaseServicePages = () => {
   };
 
   const loadServicePages = async () => {
-    console.log('🔄 Carregando páginas de serviço...');
+    console.log('🔄 Carregando páginas de serviço do Supabase...');
     setIsLoading(true);
     
     try {
-      // Primeiro verificar localStorage
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          const parsedPages = JSON.parse(stored);
-          if (Array.isArray(parsedPages) && parsedPages.length > 0) {
-            console.log('📋 Páginas carregadas do localStorage:', parsedPages.length);
-            setServicePages(parsedPages);
-            setIsLoading(false);
-            return;
+      // Primeiro tentar carregar do Supabase
+      const { data: supabaseData, error } = await supabase
+        .from('admin_settings')
+        .select('service_pages')
+        .single();
+
+      if (error) {
+        console.log('ℹ️ Nenhum dado no Supabase ainda, usando dados padrão');
+      }
+
+      let finalPages: ServicePage[] = [];
+
+      if (supabaseData?.service_pages && Array.isArray(supabaseData.service_pages)) {
+        console.log('📊 Páginas carregadas do Supabase:', supabaseData.service_pages.length);
+        finalPages = supabaseData.service_pages;
+      } else {
+        // Se não há dados no Supabase, verificar localStorage
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsedPages = JSON.parse(stored);
+            if (Array.isArray(parsedPages) && parsedPages.length > 0) {
+              console.log('📋 Páginas carregadas do localStorage:', parsedPages.length);
+              finalPages = parsedPages;
+            }
+          } catch (error) {
+            console.error('❌ Erro ao parsear localStorage:', error);
           }
-        } catch (error) {
-          console.error('❌ Erro ao parsear localStorage:', error);
+        }
+
+        // Se ainda não temos dados, usar páginas padrão
+        if (finalPages.length === 0) {
+          finalPages = getDefaultPages();
+          console.log('✅ Usando páginas padrão:', finalPages.length);
         }
       }
 
-      // Se não há dados no localStorage, carregar páginas padrão
-      const defaultPages = getDefaultPages();
-      console.log('✅ Carregando páginas padrão:', defaultPages.length);
-      setServicePages(defaultPages);
+      setServicePages(finalPages);
       
-      // Salvar no localStorage para próximas cargas
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPages));
+      // Salvar no localStorage como cache
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(finalPages));
       
     } catch (error) {
-      console.error('❌ Erro ao carregar páginas:', error);
+      console.error('❌ Erro ao carregar páginas do Supabase:', error);
+      // Fallback para páginas padrão
       const fallbackPages = getDefaultPages();
       setServicePages(fallbackPages);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackPages));
     } finally {
       setIsLoading(false);
     }
   };
 
   const saveServicePages = async (pages: ServicePage[]) => {
-    console.log('💾 Salvando páginas:', pages.length);
+    console.log('💾 Salvando páginas no Supabase:', pages.length);
     
     try {
-      // Salvar no localStorage
+      // Salvar no Supabase
+      const { error } = await supabase
+        .from('admin_settings')
+        .upsert({ 
+          id: '550e8400-e29b-41d4-a716-446655440000', // ID fixo para admin_settings
+          service_pages: pages 
+        });
+
+      if (error) {
+        console.error('❌ Erro ao salvar no Supabase:', error);
+        throw error;
+      }
+
+      console.log('✅ Páginas salvas no Supabase com sucesso');
+      
+      // Salvar no localStorage como cache
       localStorage.setItem(STORAGE_KEY, JSON.stringify(pages));
       
       // Atualizar estado local
@@ -174,7 +209,6 @@ export const useSupabaseServicePages = () => {
         detail: { pages: [...pages] } 
       }));
       
-      console.log('✅ Páginas salvas com sucesso');
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       throw error;
