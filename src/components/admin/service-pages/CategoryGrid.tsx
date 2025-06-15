@@ -39,15 +39,15 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {validCategories.map((category) => {
-          // Usar o value da categoria (que pode ser o UUID do Supabase ou a string original)
+          // Filtrar páginas desta categoria usando múltiplos critérios
           const categoryPages = validServicePages.filter(page => {
-            // Primeiro tentar match exato com o ID/UUID da categoria do Supabase
-            if (page.category === category.id) return true;
-            
-            // Depois tentar match com o value da categoria
+            // Primeiro tentar match com o value da categoria (que é o que salvamos nas páginas)
             if (page.category === category.value) return true;
             
-            // Finalmente, tentar match com o name/label para backwards compatibility
+            // Tentar match com o ID da categoria (UUID do Supabase)
+            if (page.category === category.id) return true;
+            
+            // Tentar match case-insensitive com name/label para backwards compatibility
             const pageCategory = page.category?.toLowerCase?.()?.trim?.();
             const categoryValue = category.value?.toLowerCase?.()?.trim?.();
             const categoryName = category.name?.toLowerCase?.()?.trim?.();
@@ -58,7 +58,12 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
                    pageCategory === categoryLabel;
           });
           
-          console.log(`📂 ${category.label}: ${categoryPages.length} páginas encontradas (ID: ${category.id}, Value: ${category.value})`);
+          console.log(`📂 ${category.label}: ${categoryPages.length} páginas encontradas`, {
+            categoryId: category.id,
+            categoryValue: category.value,
+            categoryName: category.name,
+            foundPages: categoryPages.map(p => ({ title: p.title, category: p.category }))
+          });
           
           return (
             <Card 
