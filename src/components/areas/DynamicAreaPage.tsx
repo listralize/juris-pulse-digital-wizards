@@ -31,7 +31,9 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     totalServicePages: servicePages?.length || 0,
     categoriesCount: categories?.length || 0,
     paginasPorCategoria: servicePages?.reduce((acc, page) => {
-      acc[page.category] = (acc[page.category] || 0) + 1;
+      if (page && page.category) {
+        acc[page.category] = (acc[page.category] || 0) + 1;
+      }
       return acc;
     }, {} as Record<string, number>) || {}
   });
@@ -46,15 +48,21 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
 
   // Encontrar a categoria correspondente
   const targetCategory = categories?.find(cat => 
-    cat.value === areaKey || 
-    cat.name?.toLowerCase() === areaKey.toLowerCase() ||
-    cat.value === areaKey
+    cat && (
+      cat.value === areaKey || 
+      cat.name?.toLowerCase() === areaKey.toLowerCase() ||
+      cat.value === areaKey
+    )
   );
 
   console.log('🎯 Categoria encontrada:', targetCategory);
 
-  // Filtrar serviços da categoria específica
+  // Filtrar serviços da categoria específica - com verificação de segurança
   const areaServices = servicePages?.filter(page => {
+    if (!page || !page.category) {
+      return false;
+    }
+    
     // Primeiro tentar match com o UUID da categoria (se encontrou a categoria)
     if (targetCategory && page.category === targetCategory.id) {
       return true;
@@ -72,9 +80,9 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
     total: areaServices.length,
     servicos: areaServices.map(s => ({ 
-      title: s.title, 
-      category: s.category,
-      id: s.id 
+      title: s?.title || 'Sem título', 
+      category: s?.category || 'Sem categoria',
+      id: s?.id || 'Sem ID'
     }))
   });
 
@@ -102,30 +110,38 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
           </p>
         </div>
 
-        {areaServices.length > 0 ? (
+        {areaServices && areaServices.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {areaServices.map((service, serviceIndex) => (
-              <Card 
-                key={`${service.id}-${serviceIndex}`}
-                className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
-                onClick={() => {
-                  const href = service.href?.startsWith('/') ? service.href : `/servicos/${service.href}`;
-                  navigate(href);
-                }}
-              >
-                <CardContent className="p-6">
-                  <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
-                    {service.title}
-                  </h4>
-                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
-                    {service.description}
-                  </p>
-                  <p className={`text-sm font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
-                    Saiba mais →
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+            {areaServices.map((service, serviceIndex) => {
+              if (!service || !service.id) {
+                return null;
+              }
+              
+              return (
+                <Card 
+                  key={`${service.id}-${serviceIndex}`}
+                  className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
+                  onClick={() => {
+                    if (service.href) {
+                      const href = service.href.startsWith('/') ? service.href : `/servicos/${service.href}`;
+                      navigate(href);
+                    }
+                  }}
+                >
+                  <CardContent className="p-6">
+                    <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                      {service.title || 'Sem título'}
+                    </h4>
+                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
+                      {service.description || 'Sem descrição'}
+                    </p>
+                    <p className={`text-sm font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                      Saiba mais →
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-16">
@@ -137,7 +153,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                 Debug: Área: {areaKey} | Categoria encontrada: {targetCategory?.name || 'N/A'} | Total de páginas no sistema: {servicePages?.length || 0}
               </p>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs mt-2`}>
-                Categorias disponíveis: {servicePages?.map(p => p.category).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
+                Categorias disponíveis: {servicePages?.map(p => p?.category).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || 'Nenhuma'}
               </p>
             </div>
           </div>

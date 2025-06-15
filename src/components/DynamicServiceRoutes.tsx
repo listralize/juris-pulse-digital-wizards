@@ -21,10 +21,13 @@ const DynamicServiceRoutes = () => {
 
   // Atualizar páginas quando servicePages mudar
   useEffect(() => {
-    if (servicePages && servicePages.length > 0) {
+    if (servicePages && Array.isArray(servicePages) && servicePages.length > 0) {
       console.log('🔄 DynamicServiceRoutes: Atualizando páginas do useSupabaseDataNew');
       console.log('📄 Páginas recebidas:', servicePages.map(p => ({ id: p.id, title: p.title, href: p.href })));
       setCurrentPages([...servicePages]);
+    } else {
+      console.log('⚠️ DynamicServiceRoutes: Nenhuma página válida recebida');
+      setCurrentPages([]);
     }
   }, [servicePages]);
 
@@ -65,15 +68,24 @@ const DynamicServiceRoutes = () => {
     );
   }
 
-  const pagesToRender = currentPages.length > 0 ? currentPages : servicePages || [];
+  const pagesToRender = currentPages && currentPages.length > 0 ? currentPages : servicePages || [];
 
   console.log('🗺️ DynamicServiceRoutes: Criando rotas para', pagesToRender.length, 'páginas');
+
+  if (!pagesToRender || pagesToRender.length === 0) {
+    console.log('⚠️ DynamicServiceRoutes: Nenhuma página para renderizar');
+    return (
+      <Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    );
+  }
 
   return (
     <Routes>
       {pagesToRender.map((page) => {
-        if (!page.href) {
-          console.warn('⚠️ Página sem href:', page.title);
+        if (!page || !page.href || !page.id) {
+          console.warn('⚠️ Página inválida:', page);
           return null;
         }
         
