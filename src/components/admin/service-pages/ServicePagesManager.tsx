@@ -35,11 +35,17 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
-  const [localPages, setLocalPages] = useState<ServicePage[]>([]);
+
+  // O estado local só é atualizado vindo do Supabase (somente, nunca por array local do save)
+  const [localPages, setLocalPages] = useState<ServicePage[]>([]); 
   const [isSaving, setIsSaving] = useState(false);
 
+  // Sincronizar localPages sempre que servicePages mudar (apenas entrada do Supabase)
   useEffect(() => {
-    setLocalPages([...servicePages]);
+    if (Array.isArray(servicePages)) {
+      console.log('[ServicePagesManager] Atualizando localPages pelo servicePages:', servicePages.length, servicePages.map(p => p.title));
+      setLocalPages([...servicePages]);
+    }
   }, [servicePages]);
 
   const filteredPages = selectedCategory 
@@ -59,11 +65,11 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // Salvar sempre o localPages, mas deixar o setLocalPages ser feito só quando servicePages mudar pelo hook! Não sobrescrever depois do save.
       await onSave([...localPages]);
-      // Após salvar, os dados serão recarregados do supabase pelo hook!
-      // Não faça mais nada aqui.
-      // Se quiser, adicione log:
-      console.log('✅ Salvo com sucesso, aguardando reload dos dados do Supabase...');
+      // Não manipular localPages aqui!
+      // Log para garantir o fluxo:
+      console.log('✅ [ServicePagesManager] Save enviado, aguardando servicePages se atualizar...');
     } catch (error) {
       console.error('❌ Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas no Supabase');

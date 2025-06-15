@@ -24,7 +24,6 @@ const Admin = () => {
     servicePages,
     categories,
     pageTexts,
-    blogPosts, // garantir prop se existe, senão remover
     isLoading,
     saveServicePages,
     saveCategories,
@@ -138,9 +137,6 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="blog">
-                {/* BlogManagement requer prop blogPosts e função onSave:
-                    Você deve garantir que blogPosts é carregado do Supabase no hook ou removê-lo se não estiver implementado ainda.
-                 */}
                 <div className="text-center py-8">
                   <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Área de blog em desenvolvimento
