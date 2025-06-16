@@ -17,18 +17,29 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const testimonials = page.testimonials || [];
+  const testimonials = Array.isArray(page.testimonials) ? page.testimonials : [];
 
   const addTestimonial = () => {
-    const newTestimonial: Testimonial = { name: '', text: '', image: '' };
-    onUpdatePage(page.id, 'testimonials', [...testimonials, newTestimonial]);
+    console.log('➕ Adicionando novo depoimento');
+    const newTestimonial: Testimonial = { 
+      name: 'Novo Cliente', 
+      text: 'Excelente atendimento e resultados satisfatórios.', 
+      image: '',
+      role: 'Cliente'
+    };
+    const updatedTestimonials = [...testimonials, newTestimonial];
+    console.log('📝 Depoimentos atualizados:', updatedTestimonials);
+    onUpdatePage(page.id, 'testimonials', updatedTestimonials);
   };
 
   const removeTestimonial = (index: number) => {
-    onUpdatePage(page.id, 'testimonials', testimonials.filter((_, i) => i !== index));
+    console.log('🗑️ Removendo depoimento:', index);
+    const updatedTestimonials = testimonials.filter((_, i) => i !== index);
+    onUpdatePage(page.id, 'testimonials', updatedTestimonials);
   };
 
   const updateTestimonial = (index: number, field: keyof Testimonial, value: string) => {
+    console.log('✏️ Atualizando depoimento:', index, field, value);
     const updatedTestimonials = testimonials.map((testimonial, i) => 
       i === index ? { ...testimonial, [field]: value } : testimonial
     );
@@ -48,19 +59,28 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
       </div>
       <div className="space-y-3">
         {testimonials.map((testimonial, index) => (
-          <div key={index} className={`p-4 border rounded ${isDark ? 'border-white/20 bg-black/30' : 'border-gray-200 bg-gray-50'}`}>
+          <div key={`testimonial-${index}`} className={`p-4 border rounded ${isDark ? 'border-white/20 bg-black/30' : 'border-gray-200 bg-gray-50'}`}>
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-medium">Depoimento {index + 1}</span>
               <Button onClick={() => removeTestimonial(index)} size="sm" variant="destructive">
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Nome</Label>
                 <Input
-                  value={testimonial.name}
+                  value={testimonial.name || ''}
                   onChange={(e) => updateTestimonial(index, 'name', e.target.value)}
+                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Cargo/Função</Label>
+                <Input
+                  value={testimonial.role || ''}
+                  onChange={(e) => updateTestimonial(index, 'role', e.target.value)}
+                  placeholder="Ex: Cliente"
                   className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                 />
               </div>
@@ -69,21 +89,30 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
                 <Input
                   value={testimonial.image || ''}
                   onChange={(e) => updateTestimonial(index, 'image', e.target.value)}
+                  placeholder="/lovable-uploads/cliente.jpg"
                   className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                 />
               </div>
               <div>
                 <Label className="text-xs">Depoimento</Label>
                 <Textarea
-                  value={testimonial.text}
+                  value={testimonial.text || ''}
                   onChange={(e) => updateTestimonial(index, 'text', e.target.value)}
                   rows={2}
+                  placeholder="Descreva a experiência do cliente..."
                   className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                 />
               </div>
             </div>
           </div>
         ))}
+        {testimonials.length === 0 && (
+          <div className="text-center py-4">
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Nenhum depoimento adicionado ainda.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

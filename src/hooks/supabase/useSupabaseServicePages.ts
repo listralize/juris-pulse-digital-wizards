@@ -210,15 +210,12 @@ export const useSupabaseServicePages = () => {
     console.log('💾 [useSupabaseServicePages] SALVANDO - Total:', cleanPages.length, 'páginas');
     
     try {
-      // Salvar apenas as primeiras 20 páginas para evitar timeout
-      const pagesToSave = cleanPages.slice(0, 20);
-      console.log(`📦 Salvando ${pagesToSave.length} páginas`);
-      
+      // Processar todas as páginas para garantir que novos itens sejam salvos
       const savedPages: ServicePage[] = [];
       
-      for (let pageIndex = 0; pageIndex < pagesToSave.length; pageIndex++) {
-        const page = pagesToSave[pageIndex];
-        console.log(`💾 [${pageIndex + 1}/${pagesToSave.length}] Salvando: "${page.title}"`);
+      for (let pageIndex = 0; pageIndex < cleanPages.length; pageIndex++) {
+        const page = cleanPages[pageIndex];
+        console.log(`💾 [${pageIndex + 1}/${cleanPages.length}] Salvando: "${page.title}"`);
         
         try {
           // Gerar UUID se necessário
@@ -249,7 +246,7 @@ export const useSupabaseServicePages = () => {
 
           console.log('✅ Página salva:', page.title);
           
-          // Limpar dados relacionados
+          // Limpar dados relacionados ANTES de inserir novos
           await Promise.all([
             supabase.from('service_benefits').delete().eq('service_page_id', finalId),
             supabase.from('service_process_steps').delete().eq('service_page_id', finalId),
@@ -257,9 +254,9 @@ export const useSupabaseServicePages = () => {
             supabase.from('service_testimonials').delete().eq('service_page_id', finalId)
           ]);
 
-          // Inserir novos dados relacionados
+          // Inserir novos benefits (garantir que todos sejam salvos)
           if (page.benefits && page.benefits.length > 0) {
-            const benefitsToInsert = page.benefits.slice(0, 3).map((benefit, index) => ({
+            const benefitsToInsert = page.benefits.map((benefit, index) => ({
               service_page_id: finalId,
               title: benefit.title || '',
               description: benefit.description || '',
@@ -267,11 +264,20 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }));
             
-            await supabase.from('service_benefits').insert(benefitsToInsert);
+            const { error: benefitsError } = await supabase
+              .from('service_benefits')
+              .insert(benefitsToInsert);
+              
+            if (benefitsError) {
+              console.error('❌ Erro ao salvar benefícios:', benefitsError);
+            } else {
+              console.log(`✅ ${benefitsToInsert.length} benefícios salvos`);
+            }
           }
 
+          // Inserir novos process steps
           if (page.process && page.process.length > 0) {
-            const processToInsert = page.process.slice(0, 3).map((step, index) => ({
+            const processToInsert = page.process.map((step, index) => ({
               service_page_id: finalId,
               step_number: step.step || index + 1,
               title: step.title || '',
@@ -279,22 +285,40 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }));
             
-            await supabase.from('service_process_steps').insert(processToInsert);
+            const { error: processError } = await supabase
+              .from('service_process_steps')
+              .insert(processToInsert);
+              
+            if (processError) {
+              console.error('❌ Erro ao salvar processo:', processError);
+            } else {
+              console.log(`✅ ${processToInsert.length} etapas do processo salvas`);
+            }
           }
 
+          // Inserir novas FAQs
           if (page.faq && page.faq.length > 0) {
-            const faqToInsert = page.faq.slice(0, 3).map((faq, index) => ({
+            const faqToInsert = page.faq.map((faq, index) => ({
               service_page_id: finalId,
               question: faq.question || '',
               answer: faq.answer || '',
               display_order: index
             }));
             
-            await supabase.from('service_faq').insert(faqToInsert);
+            const { error: faqError } = await supabase
+              .from('service_faq')
+              .insert(faqToInsert);
+              
+            if (faqError) {
+              console.error('❌ Erro ao salvar FAQ:', faqError);
+            } else {
+              console.log(`✅ ${faqToInsert.length} FAQs salvas`);
+            }
           }
 
+          // Inserir novos testimonials
           if (page.testimonials && page.testimonials.length > 0) {
-            const testimonialsToInsert = page.testimonials.slice(0, 2).map((testimonial, index) => ({
+            const testimonialsToInsert = page.testimonials.map((testimonial, index) => ({
               service_page_id: finalId,
               name: testimonial.name || '',
               text: testimonial.text || '',
@@ -303,7 +327,15 @@ export const useSupabaseServicePages = () => {
               display_order: index
             }));
             
-            await supabase.from('service_testimonials').insert(testimonialsToInsert);
+            const { error: testimonialsError } = await supabase
+              .from('service_testimonials')
+              .insert(testimonialsToInsert);
+              
+            if (testimonialsError) {
+              console.error('❌ Erro ao salvar depoimentos:', testimonialsError);
+            } else {
+              console.log(`✅ ${testimonialsToInsert.length} depoimentos salvos`);
+            }
           }
 
           savedPages.push({ ...page, id: finalId });
@@ -322,25 +354,26 @@ export const useSupabaseServicePages = () => {
         await supabase
           .from('admin_settings')
           .upsert({
-            service_pages: [...savedPages, ...cleanPages.slice(20)] as any
+            service_pages: savedPages as any
           });
         console.log('✅ Backup realizado');
       } catch (backupError) {
         console.warn('⚠️ Erro no backup:', backupError);
       }
       
-      setServicePages([...savedPages, ...cleanPages.slice(20)]);
+      setServicePages(savedPages);
       
+      // Disparar eventos de atualização
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-        detail: { pages: [...savedPages, ...cleanPages.slice(20)] } 
+        detail: { pages: savedPages } 
       }));
       
       window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
-        detail: { pages: [...savedPages, ...cleanPages.slice(20)] } 
+        detail: { pages: savedPages } 
       }));
 
       console.log('🏁 PROCESSO COMPLETO!');
-      return [...savedPages, ...cleanPages.slice(20)];
+      return savedPages;
 
     } catch (error) {
       console.error('❌ ERRO CRÍTICO no salvamento:', error);
