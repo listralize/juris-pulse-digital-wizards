@@ -2,9 +2,9 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import HomePageEditor from './HomePageEditor';
-import ServicesManagement from './ServicesManagement';
-import TeamManagement from './TeamManagement';
-import BlogManagement from './BlogManagement';
+import { ServicesManagement } from './ServicesManagement';
+import { TeamManagement } from './TeamManagement';
+import { BlogManagement } from './BlogManagement';
 
 const ContentManagement = () => {
   return (

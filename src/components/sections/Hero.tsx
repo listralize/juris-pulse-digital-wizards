@@ -28,10 +28,10 @@ const Hero = () => {
       try {
         const { supabase } = await import('../../integrations/supabase/client');
         
-        // Carregar textos do hero
+        // Carregar textos do hero com fallback para campos que podem não existir
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('hero_title, hero_subtitle, hero_background_image, hero_primary_button_text, hero_secondary_button_text, hero_primary_button_link, hero_secondary_button_link')
+          .select('hero_title, hero_subtitle, hero_background_image')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -49,10 +49,6 @@ const Hero = () => {
           setHeroTitle(settings.hero_title || 'Escritório de Advocacia');
           setHeroSubtitle(settings.hero_subtitle || 'Soluções jurídicas com excelência e compromisso');
           setBackgroundImage(settings.hero_background_image || '');
-          setPrimaryButtonText(settings.hero_primary_button_text || 'Fale Conosco');
-          setSecondaryButtonText(settings.hero_secondary_button_text || 'Saiba Mais');
-          setPrimaryButtonLink(settings.hero_primary_button_link || '');
-          setSecondaryButtonLink(settings.hero_secondary_button_link || '');
         }
 
         if (contact?.whatsapp) {
