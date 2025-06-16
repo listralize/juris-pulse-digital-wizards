@@ -18,8 +18,8 @@ const Hero = () => {
   const isDark = theme === 'dark';
 
   // Estados para os textos editáveis
-  const [heroTitle, setHeroTitle] = useState('Soluções Jurídicas Inovadoras');
-  const [heroSubtitle, setHeroSubtitle] = useState('Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.');
+  const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
+  const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
   const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco no WhatsApp');
   const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
@@ -40,8 +40,8 @@ const Hero = () => {
 
         if (settings) {
           console.log('🦸 Hero: Dados carregados do Supabase:', settings);
-          setHeroTitle(settings.hero_title || 'Soluções Jurídicas Inovadoras');
-          setHeroSubtitle(settings.hero_subtitle || 'Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.');
+          setHeroTitle(settings.hero_title || 'Excelência em Advocacia');
+          setHeroSubtitle(settings.hero_subtitle || 'Defendemos seus direitos com dedicação e expertise');
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados do Hero:', error);
@@ -64,12 +64,30 @@ const Hero = () => {
         heroSecondaryButtonLink
       } = event.detail;
       
-      if (newTitle !== undefined) setHeroTitle(newTitle);
-      if (newSubtitle !== undefined) setHeroSubtitle(newSubtitle);
-      if (heroPrimaryButtonText !== undefined) setPrimaryButtonText(heroPrimaryButtonText);
-      if (heroPrimaryButtonLink !== undefined) setPrimaryButtonLink(heroPrimaryButtonLink);
-      if (heroSecondaryButtonText !== undefined) setSecondaryButtonText(heroSecondaryButtonText);
-      if (heroSecondaryButtonLink !== undefined) setSecondaryButtonLink(heroSecondaryButtonLink);
+      if (newTitle !== undefined) {
+        console.log('🦸 Hero: Atualizando título:', newTitle);
+        setHeroTitle(newTitle);
+      }
+      if (newSubtitle !== undefined) {
+        console.log('🦸 Hero: Atualizando subtítulo:', newSubtitle);
+        setHeroSubtitle(newSubtitle);
+      }
+      if (heroPrimaryButtonText !== undefined) {
+        console.log('🦸 Hero: Atualizando texto do botão primário:', heroPrimaryButtonText);
+        setPrimaryButtonText(heroPrimaryButtonText);
+      }
+      if (heroPrimaryButtonLink !== undefined) {
+        console.log('🦸 Hero: Atualizando link do botão primário:', heroPrimaryButtonLink);
+        setPrimaryButtonLink(heroPrimaryButtonLink);
+      }
+      if (heroSecondaryButtonText !== undefined) {
+        console.log('🦸 Hero: Atualizando texto do botão secundário:', heroSecondaryButtonText);
+        setSecondaryButtonText(heroSecondaryButtonText);
+      }
+      if (heroSecondaryButtonLink !== undefined) {
+        console.log('🦸 Hero: Atualizando link do botão secundário:', heroSecondaryButtonLink);
+        setSecondaryButtonLink(heroSecondaryButtonLink);
+      }
     };
 
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);

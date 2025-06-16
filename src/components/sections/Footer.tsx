@@ -1,7 +1,6 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
 
 interface FooterProps {
   respectTheme?: boolean;
@@ -10,10 +9,65 @@ interface FooterProps {
 const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
-  const { pageTexts } = useAdminData();
   const isDark = respectTheme ? theme === 'dark' : true;
   
+  // Estados locais para os dados do footer
+  const [companyName, setCompanyName] = useState('Serafim & Trombela Advocacia');
+  const [description, setDescription] = useState('A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.');
+  
   const whatsappNumber = '5562994594496';
+
+  // Carregar dados iniciais do Supabase
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: footer } = await supabase
+          .from('footer_info')
+          .select('company_name, description')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (footer) {
+          console.log('🦶 Footer: Dados carregados do Supabase:', footer);
+          setCompanyName(footer.company_name || 'Serafim & Trombela Advocacia');
+          setDescription(footer.description || 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados do Footer:', error);
+      }
+    };
+
+    loadInitialData();
+  }, []);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('🦶 Footer: Recebendo atualização de textos:', event.detail);
+      
+      if (event.detail.footerTexts) {
+        const { companyName: newCompanyName, description: newDescription } = event.detail.footerTexts;
+        
+        if (newCompanyName !== undefined) {
+          console.log('🦶 Footer: Atualizando nome da empresa:', newCompanyName);
+          setCompanyName(newCompanyName);
+        }
+        if (newDescription !== undefined) {
+          console.log('🦶 Footer: Atualizando descrição:', newDescription);
+          setDescription(newDescription);
+        }
+      }
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
   
   return (
     <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
@@ -31,7 +85,7 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
               }}
             />
             <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi max-w-sm`}>
-              {pageTexts.footerTexts.description || 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.'}
+              {description}
             </p>
           </div>
           
@@ -84,7 +138,7 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
         
         <div className={`mt-10 pt-6 border-t ${isDark ? 'border-white/30' : 'border-black/10'} flex flex-col md:flex-row justify-between items-center`}>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi mb-4 md:mb-0`}>
-            © {currentYear} {pageTexts.footerTexts.companyName || 'Serafim & Trombela Advocacia'}. Todos os direitos reservados.
+            © {currentYear} {companyName}. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6">
             <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Política de Privacidade</a>

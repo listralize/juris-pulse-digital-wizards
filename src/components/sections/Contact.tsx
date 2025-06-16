@@ -7,7 +7,6 @@ import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,21 +17,51 @@ const Contact = () => {
   
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { pageTexts } = useAdminData();
   
   // Estado local para receber atualizações em tempo real
-  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+  const [contactTitle, setContactTitle] = useState('Entre em Contato');
+  const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudá-lo');
 
-  // Atualizar quando pageTexts muda
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
-    setLocalPageTexts(pageTexts);
-  }, [pageTexts]);
+    const loadInitialData = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('contact_title, contact_subtitle')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (settings) {
+          console.log('📞 Contact: Dados carregados do Supabase:', settings);
+          setContactTitle(settings.contact_title || 'Entre em Contato');
+          setContactSubtitle(settings.contact_subtitle || 'Estamos prontos para ajudá-lo');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados do Contact:', error);
+      }
+    };
+
+    loadInitialData();
+  }, []);
 
   // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📱 Contact: Recebendo atualização de textos:', event.detail);
-      setLocalPageTexts(event.detail);
+      console.log('📞 Contact: Recebendo atualização de textos:', event.detail);
+      const { contactTitle: newTitle, contactSubtitle: newSubtitle } = event.detail;
+      
+      if (newTitle !== undefined) {
+        console.log('📞 Contact: Atualizando título:', newTitle);
+        setContactTitle(newTitle);
+      }
+      if (newSubtitle !== undefined) {
+        console.log('📞 Contact: Atualizando subtítulo:', newSubtitle);
+        setContactSubtitle(newSubtitle);
+      }
     };
 
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
@@ -60,9 +89,6 @@ const Contact = () => {
       tl.kill();
     };
   }, []);
-
-  const contactTitle = localPageTexts?.contactTitle || 'Entre em Contato';
-  const contactSubtitle = localPageTexts?.contactSubtitle || 'Estamos prontos para ajudá-lo';
 
   return (
     <div 

@@ -15,7 +15,7 @@ const About = () => {
   
   // Estado local para textos da página
   const [aboutTitle, setAboutTitle] = useState('Sobre Nós');
-  const [aboutDescription, setAboutDescription] = useState('Descrição sobre o escritório');
+  const [aboutDescription, setAboutDescription] = useState('Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.');
   const [aboutMedia, setAboutMedia] = useState('');
   const [aboutMediaType, setAboutMediaType] = useState<'image' | 'video'>('image');
 
@@ -36,7 +36,7 @@ const About = () => {
         if (settings) {
           console.log('📱 About: Dados carregados do Supabase:', settings);
           setAboutTitle(settings.about_title || 'Sobre Nós');
-          setAboutDescription(settings.about_description || 'Descrição sobre o escritório');
+          setAboutDescription(settings.about_description || 'Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.');
           setAboutMedia(settings.about_image || '');
           
           // Corrigir o tipo para aceitar apenas os valores válidos
@@ -158,7 +158,10 @@ const About = () => {
       const videoId = url.split('youtu.be/')[1]?.split('?')[0];
       return `https://www.youtube.com/embed/${videoId}`;
     }
-    return url; // Se já for uma URL de embed ou outro formato
+    if (url.includes('youtube.com/embed/')) {
+      return url; // Já é uma URL de embed
+    }
+    return url; // Se for outro formato
   };
 
   return (
