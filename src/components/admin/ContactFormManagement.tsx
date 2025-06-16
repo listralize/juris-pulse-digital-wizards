@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -6,7 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
-import { Save, Star, StarOff } from 'lucide-react';
+import { Save, Star, StarOff, Send, Loader2 } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
@@ -16,6 +15,7 @@ import { useFormConfig } from '../../hooks/useFormConfig';
 
 const defaultFormConfig: FormConfig = {
   webhookUrl: '',
+  redirectUrl: '',
   serviceOptions: [
     { value: "familia", label: "Divórcio e questões familiares" },
     { value: "tributario", label: "Consultoria tributária" },
@@ -66,17 +66,6 @@ const defaultFormConfig: FormConfig = {
       isDefault: true
     },
     {
-      id: 'service',
-      name: 'service',
-      label: 'Qual problema você precisa resolver?',
-      type: 'select',
-      required: false,
-      placeholder: 'Selecione seu problema jurídico',
-      order: 3,
-      isDefault: true,
-      options: []
-    },
-    {
       id: 'message',
       name: 'message',
       label: 'Detalhes do seu caso *',
@@ -104,19 +93,20 @@ export const ContactFormManagement: React.FC = () => {
   const { multipleFormsConfig, setMultipleFormsConfig } = useFormConfig();
   const [currentFormIndex, setCurrentFormIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [availablePages, setAvailablePages] = useState<Array<{ value: string; label: string }>>([]);
+  const [isTestingWebhook, setIsTestingWebhook] = useState(false);
+  const [availablePages, setAvailablePages] = useState<Array<{ value: string; label: string; category?: string }>>([]);
 
   const currentForm = multipleFormsConfig.forms[currentFormIndex] || defaultFormConfig;
 
-  // Carregar páginas de serviços disponíveis
+  // Carregar páginas de serviços disponíveis organizadas por categoria
   useEffect(() => {
     const loadServicePages = async () => {
       try {
         const { data, error } = await supabase
           .from('service_pages')
-          .select('href, title')
+          .select('href, title, category')
           .eq('is_active', true)
-          .order('title');
+          .order('category, title');
 
         if (error) {
           console.error('Erro ao carregar páginas de serviços:', error);
@@ -124,7 +114,6 @@ export const ContactFormManagement: React.FC = () => {
         }
 
         const pages = data?.map(page => {
-          // Normalizar o href para remover prefixos duplicados
           let cleanHref = page.href || '';
           if (cleanHref.startsWith('/services/services/')) {
             cleanHref = cleanHref.replace('/services/services/', '');
@@ -134,14 +123,14 @@ export const ContactFormManagement: React.FC = () => {
           
           return {
             value: cleanHref,
-            label: page.title
+            label: page.title,
+            category: page.category || 'Outros'
           };
         }) || [];
 
-        // Adicionar páginas principais
         const mainPages = [
-          { value: 'home', label: 'Página Inicial' },
-          { value: 'contato', label: 'Página de Contato' }
+          { value: 'home', label: 'Página Inicial', category: 'Principal' },
+          { value: 'contato', label: 'Página de Contato', category: 'Principal' }
         ];
 
         setAvailablePages([...mainPages, ...pages]);
@@ -160,6 +149,48 @@ export const ContactFormManagement: React.FC = () => {
       ...multipleFormsConfig,
       forms: updatedForms
     });
+  };
+
+  const testWebhook = async () => {
+    if (!currentForm.webhookUrl) {
+      toast.error('Configure uma URL de webhook primeiro');
+      return;
+    }
+
+    setIsTestingWebhook(true);
+    try {
+      const testData = {
+        name: 'Teste do Sistema',
+        email: 'teste@exemplo.com',
+        phone: '(11) 99999-9999',
+        message: 'Esta é uma mensagem de teste do webhook configurado no painel administrativo.',
+        service: 'Teste',
+        isUrgent: false,
+        customFields: {},
+        timestamp: new Date().toISOString(),
+        source: 'Teste - Painel Admin',
+        isTest: true
+      };
+
+      const response = await fetch(currentForm.webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testData)
+      });
+
+      if (response.ok) {
+        toast.success('Webhook testado com sucesso!');
+      } else {
+        toast.error(`Erro no webhook: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Erro ao testar webhook:', error);
+      toast.error('Erro ao conectar com o webhook');
+    } finally {
+      setIsTestingWebhook(false);
+    }
   };
 
   const addNewForm = () => {
@@ -287,6 +318,16 @@ export const ContactFormManagement: React.FC = () => {
     }
   };
 
+  // Organizar páginas por categoria
+  const pagesByCategory = availablePages.reduce((acc, page) => {
+    const category = page.category || 'Outros';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(page);
+    return acc;
+  }, {} as Record<string, typeof availablePages>);
+
   return (
     <div className="space-y-6">
       {/* Form Selector */}
@@ -374,40 +415,74 @@ export const ContactFormManagement: React.FC = () => {
             </div>
             <div>
               <Label>Webhook URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={currentForm.webhookUrl}
+                  onChange={(e) => updateCurrentForm({ webhookUrl: e.target.value })}
+                  placeholder="https://seu-webhook-url.com/endpoint"
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+                <Button
+                  onClick={testWebhook}
+                  disabled={!currentForm.webhookUrl || isTestingWebhook}
+                  size="sm"
+                  variant="outline"
+                >
+                  {isTestingWebhook ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <Label>URL de Redirecionamento (opcional)</Label>
               <Input
-                value={currentForm.webhookUrl}
-                onChange={(e) => updateCurrentForm({ webhookUrl: e.target.value })}
-                placeholder="https://seu-webhook-url.com/endpoint"
+                value={currentForm.redirectUrl || ''}
+                onChange={(e) => updateCurrentForm({ redirectUrl: e.target.value })}
+                placeholder="https://seusite.com/obrigado"
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Página para onde o usuário será redirecionado após enviar o formulário
+              </p>
             </div>
           </div>
           
           <div>
             <Label>Páginas Específicas (deixe vazio para usar como principal)</Label>
-            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
               Selecione as páginas onde este formulário deve aparecer. Páginas não selecionadas usarão o formulário principal.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {availablePages.map((page) => (
-                <div key={page.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`page-${page.value}`}
-                    checked={currentForm.linkedPages?.includes(page.value) || false}
-                    onCheckedChange={(checked) => {
-                      const currentPages = currentForm.linkedPages || [];
-                      const updatedPages = checked
-                        ? [...currentPages, page.value]
-                        : currentPages.filter(p => p !== page.value);
-                      updateLinkedPages(updatedPages);
-                    }}
-                  />
-                  <Label htmlFor={`page-${page.value}`} className="text-sm">
-                    {page.label}
-                  </Label>
+            
+            {Object.entries(pagesByCategory).map(([category, pages]) => (
+              <div key={category} className="mb-4">
+                <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                  {category}
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 ml-4">
+                  {pages.map((page) => (
+                    <div key={page.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`page-${page.value}`}
+                        checked={currentForm.linkedPages?.includes(page.value) || false}
+                        onCheckedChange={(checked) => {
+                          const currentPages = currentForm.linkedPages || [];
+                          const updatedPages = checked
+                            ? [...currentPages, page.value]
+                            : currentPages.filter(p => p !== page.value);
+                          updateLinkedPages(updatedPages);
+                        }}
+                      />
+                      <Label htmlFor={`page-${page.value}`} className="text-sm">
+                        {page.label}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

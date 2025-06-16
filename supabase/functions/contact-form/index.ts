@@ -11,6 +11,9 @@ interface ContactFormData {
   service: string;
   isUrgent: boolean;
   customFields?: { [key: string]: any };
+  formConfig?: {
+    redirectUrl?: string;
+  };
 }
 
 serve(async (req) => {
@@ -21,7 +24,7 @@ serve(async (req) => {
 
   try {
     const formData: ContactFormData = await req.json()
-    const { name, email, phone, message, service, isUrgent, customFields } = formData
+    const { name, email, phone, message, service, isUrgent, customFields, formConfig } = formData
 
     // Validação de entrada
     if (!name || !email || !message) {
@@ -70,10 +73,23 @@ serve(async (req) => {
       )
     }
 
-    // Obter webhook URL das configurações
+    // Obter webhook URL das configurações (pode haver múltiplos formulários)
     let webhookUrl = ''
-    if (settingsData && settingsData.form_config && settingsData.form_config.webhookUrl) {
-      webhookUrl = settingsData.form_config.webhookUrl
+    if (settingsData && settingsData.form_config) {
+      const config = settingsData.form_config as any
+      
+      // Se é o novo formato com múltiplos formulários
+      if (config.forms && Array.isArray(config.forms)) {
+        // Por enquanto, usar o primeiro formulário com webhook configurado
+        // TODO: implementar lógica para identificar qual formulário foi usado
+        const formWithWebhook = config.forms.find((form: any) => form.webhookUrl)
+        if (formWithWebhook) {
+          webhookUrl = formWithWebhook.webhookUrl
+        }
+      } else if (config.webhookUrl) {
+        // Formato antigo
+        webhookUrl = config.webhookUrl
+      }
     }
 
     if (!webhookUrl) {
@@ -97,7 +113,8 @@ serve(async (req) => {
       isUrgent: Boolean(isUrgent),
       customFields: customFields || {},
       timestamp: new Date().toISOString(),
-      source: 'Website - Formulário de Contato'
+      source: 'Website - Formulário de Contato',
+      redirectUrl: formConfig?.redirectUrl || ''
     }
 
     console.log('📤 Enviando para webhook:', webhookUrl)
@@ -125,7 +142,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Mensagem enviada com sucesso!' 
+        message: 'Mensagem enviada com sucesso!',
+        redirectUrl: formConfig?.redirectUrl 
       }),
       { 
         status: 200,

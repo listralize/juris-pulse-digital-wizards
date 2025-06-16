@@ -11,7 +11,7 @@ interface ContactFormData {
   message: string;
   service: string;
   isUrgent: boolean;
-  [key: string]: any; // Para campos personalizados
+  [key: string]: any;
 }
 
 export const useContactForm = () => {
@@ -38,8 +38,10 @@ export const useContactForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar campos obrigatórios usando a configuração dinâmica
-    const requiredFields = formConfig.allFields?.filter(field => field.required) || [];
+    // Validar apenas campos obrigatórios que não estão desabilitados
+    const requiredFields = formConfig.allFields?.filter(field => 
+      field.required && !field.disabled
+    ) || [];
     
     for (const field of requiredFields) {
       const value = formData[field.name];
@@ -57,14 +59,17 @@ export const useContactForm = () => {
       // Incluir todos os campos personalizados nos dados enviados
       const customFieldsData = {};
       formConfig.allFields?.forEach(field => {
-        if (!field.isDefault) {
+        if (!field.isDefault && !field.disabled) {
           customFieldsData[field.name] = formData[field.name] || '';
         }
       });
 
       const submitData = {
         ...formData,
-        customFields: customFieldsData
+        customFields: customFieldsData,
+        formConfig: {
+          redirectUrl: formConfig.redirectUrl
+        }
       };
 
       const { data, error } = await supabase.functions.invoke('contact-form', {
@@ -80,6 +85,13 @@ export const useContactForm = () => {
       
       toast.success(formConfig.formTexts.successMessage);
       setIsSubmitted(true);
+      
+      // Redirecionamento se configurado
+      if (formConfig.redirectUrl) {
+        setTimeout(() => {
+          window.location.href = formConfig.redirectUrl!;
+        }, 2000);
+      }
       
       // Reset form
       const resetData: ContactFormData = {

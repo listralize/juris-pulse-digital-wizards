@@ -29,14 +29,13 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
 
   const renderField = (field: FormField) => {
     // Verificar se o campo está desabilitado
-    const isDisabled = (field as any).disabled;
-    if (isDisabled) {
-      return null; // Não renderizar campos desabilitados
+    if (field.disabled) {
+      return null;
     }
 
     // Layout especial para nome e telefone (lado a lado)
     if (field.name === 'name') {
-      const phoneField = formFields.find(f => f.name === 'phone' && !(f as any).disabled);
+      const phoneField = formFields.find(f => f.name === 'phone' && !f.disabled);
       if (phoneField) {
         return (
           <div key="name-phone-group" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -90,7 +89,7 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
               value={formData[field.name] || ''}
               onChange={(e) => updateField(field.name, e.target.value)}
               placeholder={field.placeholder}
-              required={field.required}
+              required={field.required && !field.disabled}
               className={baseClassName}
             />
           </div>
@@ -106,7 +105,7 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
               value={formData[field.name] || ''}
               onChange={(e) => updateField(field.name, e.target.value)}
               placeholder={field.placeholder}
-              required={field.required}
+              required={field.required && !field.disabled}
               rows={4}
               className={`${baseClassName} resize-vertical`}
             />
@@ -122,7 +121,7 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
             <select
               value={formData[field.name] || ''}
               onChange={(e) => updateField(field.name, e.target.value)}
-              required={field.required}
+              required={field.required && !field.disabled}
               className={baseClassName}
             >
               <option value="">{field.placeholder || 'Selecione uma opção'}</option>
@@ -158,7 +157,7 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
 
   // Ordena os campos pela propriedade order e filtra campos desabilitados
   const sortedFields = [...formFields]
-    .filter(field => !(field as any).disabled)
+    .filter(field => !field.disabled)
     .sort((a, b) => a.order - b.order);
 
   return (

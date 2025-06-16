@@ -8,13 +8,15 @@ export interface FormField {
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   order: number;
-  isDefault: boolean; // Agora é obrigatório
+  isDefault: boolean;
+  disabled?: boolean;
 }
 
 export interface FormConfig {
   id?: string;
-  name?: string; // Nome do formulário
+  name?: string;
   webhookUrl: string;
+  redirectUrl?: string;
   serviceOptions: Array<{
     value: string;
     label: string;
@@ -27,11 +29,11 @@ export interface FormConfig {
     errorMessage: string;
   };
   customFields?: FormField[];
-  allFields: FormField[]; // Agora é obrigatório
-  linkedPages?: string[]; // Páginas onde este formulário aparece
+  allFields: FormField[];
+  linkedPages?: string[];
 }
 
 export interface MultipleFormsConfig {
   forms: FormConfig[];
-  defaultFormId?: string; // ID do formulário padrão
+  defaultFormId?: string;
 }
