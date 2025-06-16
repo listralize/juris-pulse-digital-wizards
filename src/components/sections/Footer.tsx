@@ -10,7 +10,8 @@ const Footer = () => {
   const [footerInfo, setFooterInfo] = useState({
     companyName: 'Serafim & Trombela Advocacia',
     description: 'Soluções jurídicas inovadoras com foco em resultados e excelência no atendimento.',
-    copyright: '© 2024 Serafim & Trombela Advocacia. Todos os direitos reservados.'
+    copyright: '© 2024 Serafim & Trombela Advocacia. Todos os direitos reservados.',
+    logo: '/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png'
   });
 
   const [contactInfo, setContactInfo] = useState({
@@ -74,6 +75,7 @@ const Footer = () => {
       if (event.detail.footerTexts) {
         const { companyName, description } = event.detail.footerTexts;
         setFooterInfo(prev => ({
+          ...prev,
           companyName: companyName || prev.companyName,
           description: description || prev.description,
           copyright: `© ${new Date().getFullYear()} ${companyName || prev.companyName}. Todos os direitos reservados.`
@@ -95,15 +97,21 @@ const Footer = () => {
     };
   }, []);
 
-  const currentYear = new Date().getFullYear();
-
   return (
     <footer className={`${isDark ? 'bg-black border-t border-white/20' : 'bg-gray-900'} text-white py-12`}>
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Informações da Empresa */}
-          <div className="lg:col-span-1">
-            <h3 className="text-2xl font-canela mb-4">{footerInfo.companyName}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Logo e Informações da Empresa */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center mb-4">
+              <img 
+                src={footerInfo.logo} 
+                alt={footerInfo.companyName}
+                className="h-8 w-auto mr-3"
+                style={{ filter: isDark ? 'none' : 'invert(1)' }}
+              />
+              <h3 className="text-xl font-canela">{footerInfo.companyName}</h3>
+            </div>
             <p className="text-gray-300 font-satoshi mb-6 leading-relaxed">
               {footerInfo.description}
             </p>
