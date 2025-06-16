@@ -13,20 +13,22 @@ const About = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
+  // Estado local para textos da página
   const [aboutTitle, setAboutTitle] = useState('Sobre Nós');
   const [aboutDescription, setAboutDescription] = useState('Descrição sobre o escritório');
   const [aboutMedia, setAboutMedia] = useState('');
   const [aboutMediaType, setAboutMediaType] = useState<'image' | 'video'>('image');
 
-  // Carregar dados do Supabase
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
-    const loadAboutData = async () => {
+    const loadInitialData = async () => {
       try {
         const { supabase } = await import('../../integrations/supabase/client');
         
+        // Buscar apenas o registro mais recente
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('about_title, about_description, about_image')
+          .select('about_title, about_description, about_image, about_media_type')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -36,13 +38,14 @@ const About = () => {
           setAboutTitle(settings.about_title || 'Sobre Nós');
           setAboutDescription(settings.about_description || 'Descrição sobre o escritório');
           setAboutMedia(settings.about_image || '');
+          setAboutMediaType(settings.about_media_type || 'image');
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados da seção About:', error);
+        console.error('❌ Erro ao carregar dados iniciais:', error);
       }
     };
 
-    loadAboutData();
+    loadInitialData();
   }, []);
 
   // Escutar eventos de atualização em tempo real
@@ -51,10 +54,22 @@ const About = () => {
       console.log('📱 About: Recebendo atualização de textos via evento:', event.detail);
       const { aboutTitle: newTitle, aboutDescription: newDescription, aboutImage: newMedia, aboutMediaType: newMediaType } = event.detail;
       
-      if (newTitle !== undefined) setAboutTitle(newTitle);
-      if (newDescription !== undefined) setAboutDescription(newDescription);
-      if (newMedia !== undefined) setAboutMedia(newMedia);
-      if (newMediaType !== undefined) setAboutMediaType(newMediaType);
+      if (newTitle !== undefined) {
+        console.log('📱 About: Atualizando título:', newTitle);
+        setAboutTitle(newTitle);
+      }
+      if (newDescription !== undefined) {
+        console.log('📱 About: Atualizando descrição:', newDescription);
+        setAboutDescription(newDescription);
+      }
+      if (newMedia !== undefined) {
+        console.log('📱 About: Atualizando mídia:', newMedia);
+        setAboutMedia(newMedia);
+      }
+      if (newMediaType !== undefined) {
+        console.log('📱 About: Atualizando tipo de mídia:', newMediaType);
+        setAboutMediaType(newMediaType);
+      }
     };
 
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
@@ -121,6 +136,8 @@ const About = () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
     };
   }, [aboutMedia]);
+
+  console.log('🔍 About renderizando com:', { aboutTitle, aboutDescription, aboutMedia, aboutMediaType });
 
   return (
     <section 

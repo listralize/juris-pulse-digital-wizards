@@ -1,518 +1,450 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Save, Upload, X, Link } from 'lucide-react';
-import { useToast } from '../ui/use-toast';
-import { useSupabaseContactInfo } from '../../hooks/supabase/useSupabaseContactInfo';
-import { useSupabasePageTexts } from '../../hooks/supabase/useSupabasePageTexts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
+import { PageTexts, TeamMember } from '../../types/adminTypes';
+import { useTheme } from '../ThemeProvider';
+import { toast } from 'sonner';
 
-const HomePageEditor = () => {
-  const { toast } = useToast();
-  const { 
-    pageTexts, 
-    savePageTexts, 
-    isLoading: pageTextsLoading 
-  } = useSupabasePageTexts();
-  
-  const { 
-    contactInfo, 
-    saveContactInfo, 
-    isLoading: contactLoading 
-  } = useSupabaseContactInfo();
+interface HomePageEditorProps {
+  pageTexts: PageTexts;
+  teamMembers: TeamMember[];
+  onUpdatePageTexts: (texts: PageTexts) => void;
+  onAddTeamMember: () => void;
+  onRemoveTeamMember: (id: string) => void;
+  onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
+  onSaveAll: () => void;
+}
 
-  // Estados locais para edição
-  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
-  const [localContactInfo, setLocalContactInfo] = useState(contactInfo);
-  const [localFooterTexts, setLocalFooterTexts] = useState({
-    companyName: 'Serafim & Trombela Advocacia',
-    description: 'Soluções jurídicas inovadoras com foco em resultados e excelência no atendimento.'
-  });
-  const [uploadingImage, setUploadingImage] = useState(false);
+export const HomePageEditor: React.FC<HomePageEditorProps> = ({
+  pageTexts,
+  teamMembers = [],
+  onUpdatePageTexts,
+  onAddTeamMember,
+  onRemoveTeamMember,
+  onUpdateTeamMember,
+  onSaveAll
+}) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
-  const isLoading = pageTextsLoading || contactLoading;
+  const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
-  // Sincronizar com os dados carregados
-  useEffect(() => {
-    setLocalPageTexts(pageTexts);
-  }, [pageTexts]);
-
-  useEffect(() => {
-    setLocalContactInfo(contactInfo);
-  }, [contactInfo]);
-
-  // Funções de upload de imagem
-  const handleImageUpload = async (file: File, field: string) => {
-    setUploadingImage(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Simular upload - substitua pela implementação real
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target?.result as string;
-        
-        if (field === 'heroBackgroundImage') {
-          setLocalPageTexts(prev => ({
-            ...prev,
-            heroBackgroundImage: imageUrl
-          }));
-        } else if (field === 'aboutImage') {
-          setLocalPageTexts(prev => ({
-            ...prev,
-            aboutImage: imageUrl
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
-
-      toast({
-        title: "Imagem carregada",
-        description: "A imagem foi carregada com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro no upload",
-        description: "Houve um erro ao carregar a imagem.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingImage(false);
-    }
+  const handleInputChange = (field: keyof PageTexts, value: string) => {
+    console.log('📝 Alterando campo:', field, 'para:', value);
+    const updatedTexts = {
+      ...pageTexts,
+      [field]: value
+    };
+    onUpdatePageTexts(updatedTexts);
+    
+    // Disparar evento para atualizar componentes em tempo real
+    window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
+      detail: updatedTexts 
+    }));
   };
 
-  // Função para salvar dados da página
-  const handleSavePageTexts = async () => {
-    try {
-      await savePageTexts(localPageTexts);
-      toast({
-        title: "Alterações salvas",
-        description: "Os textos da página foram atualizados com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Houve um erro ao salvar as alterações.",
-        variant: "destructive",
-      });
+  const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
+    console.log('📝 Alterando campo aninhado:', parent, field, 'para:', value);
+    const parentObject = pageTexts[parent] || {};
+    const updatedTexts = {
+      ...pageTexts,
+      [parent]: {
+        ...parentObject,
+        [field]: value
+      }
+    };
+    onUpdatePageTexts(updatedTexts);
+    
+    // Disparar eventos específicos
+    if (parent === 'contactTexts') {
+      window.dispatchEvent(new CustomEvent('contactInfoUpdated', { 
+        detail: { [field]: value }
+      }));
     }
+    
+    window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
+      detail: updatedTexts 
+    }));
   };
 
-  // Função para salvar informações de contato
-  const handleSaveContactInfo = async () => {
+  const handleSaveAndNotify = async () => {
     try {
-      await saveContactInfo(localContactInfo);
-      toast({
-        title: "Contato atualizado",
-        description: "As informações de contato foram atualizadas com sucesso.",
-      });
+      console.log('💾 Salvando alterações...', pageTexts);
+      await onSaveAll();
+      toast.success('Alterações salvas com sucesso!');
     } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Houve um erro ao salvar as informações de contato.",
-        variant: "destructive",
-      });
+      console.error('Erro ao salvar:', error);
+      toast.error('Erro ao salvar alterações');
     }
   };
-
-  // Função para salvar informações do rodapé
-  const handleSaveFooterTexts = async () => {
-    try {
-      // Implementar quando necessário
-      toast({
-        title: "Rodapé atualizado",
-        description: "As informações do rodapé foram atualizadas com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Houve um erro ao salvar as informações do rodapé.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Editor da Página Inicial</h2>
-      </div>
+    <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+            Editor Completo da Página Inicial
+          </CardTitle>
+          <Button onClick={handleSaveAndNotify} size="sm" variant="outline">
+            <Save className="w-4 h-4 mr-2" />
+            Salvar Tudo
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="about" className="space-y-4">
+          <TabsList className={`grid w-full grid-cols-6 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+            <TabsTrigger value="hero" className="flex items-center gap-1">
+              <Image className="w-3 h-3" />
+              Hero
+            </TabsTrigger>
+            <TabsTrigger value="about" className="flex items-center gap-1">
+              <FileText className="w-3 h-3" />
+              Sobre
+            </TabsTrigger>
+            <TabsTrigger value="areas" className="flex items-center gap-1">
+              <Link className="w-3 h-3" />
+              Áreas
+            </TabsTrigger>
+            <TabsTrigger value="team" className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              Equipe
+            </TabsTrigger>
+            <TabsTrigger value="client" className="flex items-center gap-1">
+              <Phone className="w-3 h-3" />
+              Cliente
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              Contato
+            </TabsTrigger>
+          </TabsList>
 
-      <Tabs defaultValue="hero" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="hero">Hero</TabsTrigger>
-          <TabsTrigger value="about">Sobre</TabsTrigger>
-          <TabsTrigger value="contact">Contato</TabsTrigger>
-          <TabsTrigger value="footer">Rodapé</TabsTrigger>
-          <TabsTrigger value="buttons">Botões</TabsTrigger>
-        </TabsList>
-
-        {/* Seção Hero */}
-        <TabsContent value="hero">
-          <Card>
-            <CardHeader>
-              <CardTitle>Seção Hero</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <TabsContent value="hero" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Hero</h3>
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="hero-title">Título Principal</Label>
+                <Label>Título Principal</Label>
                 <Input
-                  id="hero-title"
-                  value={localPageTexts.heroTitle || ''}
-                  onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroTitle: e.target.value }))}
-                  placeholder="Digite o título principal"
+                  value={pageTexts.heroTitle || ''}
+                  onChange={(e) => handleInputChange('heroTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Escritório de Advocacia"
                 />
               </div>
-
               <div>
-                <Label htmlFor="hero-subtitle">Subtítulo</Label>
+                <Label>Subtítulo</Label>
                 <Textarea
-                  id="hero-subtitle"
-                  value={localPageTexts.heroSubtitle || ''}
-                  onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroSubtitle: e.target.value }))}
-                  placeholder="Digite o subtítulo"
+                  value={pageTexts.heroSubtitle || ''}
+                  onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Subtítulo da página principal..."
                   rows={3}
                 />
               </div>
+            </div>
+          </TabsContent>
 
+          <TabsContent value="about" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Sobre Nós</h3>
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="hero-background">Imagem de Fundo</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="hero-background"
-                    value={localPageTexts.heroBackgroundImage || ''}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroBackgroundImage: e.target.value }))}
-                    placeholder="URL da imagem de fundo"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('hero-bg-upload')?.click()}
-                    disabled={uploadingImage}
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                  <input
-                    id="hero-bg-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageUpload(file, 'heroBackgroundImage');
-                    }}
-                  />
-                  {localPageTexts.heroBackgroundImage && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setLocalPageTexts(prev => ({ ...prev, heroBackgroundImage: '' }))}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                {localPageTexts.heroBackgroundImage && (
-                  <div className="mt-2">
-                    <img
-                      src={localPageTexts.heroBackgroundImage}
-                      alt="Preview"
-                      className="w-32 h-20 object-cover rounded border"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <Button onClick={handleSavePageTexts} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Seção Hero
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Seção Botões */}
-        <TabsContent value="buttons">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configuração dos Botões do Hero</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Botão Primário */}
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold">Botão Primário</h4>
-                <div>
-                  <Label htmlFor="primary-button-text">Texto do Botão</Label>
-                  <Input
-                    id="primary-button-text"
-                    value={localPageTexts.heroPrimaryButtonText || 'Fale Conosco'}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroPrimaryButtonText: e.target.value }))}
-                    placeholder="Texto do botão primário"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="primary-button-link">Link do Botão</Label>
-                  <div className="flex items-center gap-2">
-                    <Link className="h-4 w-4 text-gray-500" />
-                    <Input
-                      id="primary-button-link"
-                      value={localPageTexts.heroPrimaryButtonLink || ''}
-                      onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroPrimaryButtonLink: e.target.value }))}
-                      placeholder="Ex: #contact, https://wa.me/5562999999999, mailto:contato@exemplo.com"
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Use #id para rolar para seções, URLs para links externos, ou deixe vazio para WhatsApp padrão
-                  </p>
-                </div>
-              </div>
-
-              {/* Botão Secundário */}
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold">Botão Secundário</h4>
-                <div>
-                  <Label htmlFor="secondary-button-text">Texto do Botão</Label>
-                  <Input
-                    id="secondary-button-text"
-                    value={localPageTexts.heroSecondaryButtonText || 'Saiba Mais'}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroSecondaryButtonText: e.target.value }))}
-                    placeholder="Texto do botão secundário"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="secondary-button-link">Link do Botão</Label>
-                  <div className="flex items-center gap-2">
-                    <Link className="h-4 w-4 text-gray-500" />
-                    <Input
-                      id="secondary-button-link"
-                      value={localPageTexts.heroSecondaryButtonLink || ''}
-                      onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroSecondaryButtonLink: e.target.value }))}
-                      placeholder="Ex: #about, https://exemplo.com, tel:+5562999999999"
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Use #id para rolar para seções, URLs para links externos, ou deixe vazio para scroll padrão
-                  </p>
-                </div>
-              </div>
-
-              <Button onClick={handleSavePageTexts} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Configurações dos Botões
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Outras abas mantidas iguais */}
-        <TabsContent value="about">
-          <Card>
-            <CardHeader>
-              <CardTitle>Seção Sobre Nós</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="about-title">Título</Label>
+                <Label>Título da Seção</Label>
                 <Input
-                  id="about-title"
-                  value={localPageTexts.aboutTitle || ''}
-                  onChange={(e) => setLocalPageTexts(prev => ({ ...prev, aboutTitle: e.target.value }))}
-                  placeholder="Digite o título da seção sobre"
+                  value={pageTexts.aboutTitle || ''}
+                  onChange={(e) => handleInputChange('aboutTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Sobre Nós"
                 />
               </div>
-
               <div>
-                <Label htmlFor="about-description">Descrição</Label>
+                <Label>Descrição</Label>
                 <Textarea
-                  id="about-description"
-                  value={localPageTexts.aboutDescription || ''}
-                  onChange={(e) => setLocalPageTexts(prev => ({ ...prev, aboutDescription: e.target.value }))}
-                  placeholder="Digite a descrição da seção sobre"
+                  value={pageTexts.aboutDescription || ''}
+                  onChange={(e) => handleInputChange('aboutDescription', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Descrição completa sobre o escritório..."
                   rows={4}
                 />
               </div>
-
               <div>
-                <Label htmlFor="about-image">Imagem/Vídeo</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="about-image"
-                    value={localPageTexts.aboutImage || ''}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, aboutImage: e.target.value }))}
-                    placeholder="URL da imagem ou vídeo"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('about-img-upload')?.click()}
-                    disabled={uploadingImage}
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                  <input
-                    id="about-img-upload"
-                    type="file"
-                    accept="image/*,video/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageUpload(file, 'aboutImage');
-                    }}
-                  />
-                  {localPageTexts.aboutImage && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setLocalPageTexts(prev => ({ ...prev, aboutImage: '' }))}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                {localPageTexts.aboutImage && (
-                  <div className="mt-2">
-                    {localPageTexts.aboutImage.includes('video') || localPageTexts.aboutImage.endsWith('.mp4') ? (
-                      <video
-                        src={localPageTexts.aboutImage}
-                        className="w-32 h-20 object-cover rounded border"
-                        controls
-                      />
-                    ) : (
-                      <img
-                        src={localPageTexts.aboutImage}
-                        alt="Preview"
-                        className="w-32 h-20 object-cover rounded border"
-                      />
-                    )}
-                  </div>
-                )}
+                <Label>Tipo de Mídia</Label>
+                <Select
+                  value={pageTexts.aboutMediaType || 'image'}
+                  onValueChange={(value) => handleInputChange('aboutMediaType', value)}
+                >
+                  <SelectTrigger className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="image">Imagem</SelectItem>
+                    <SelectItem value="video">Vídeo</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-
-              <Button onClick={handleSavePageTexts} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Seção Sobre
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="contact">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações de Contato</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="contact-phone">Telefone</Label>
-                  <Input
-                    id="contact-phone"
-                    value={localContactInfo.phone || ''}
-                    onChange={(e) => setLocalContactInfo(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="(XX) XXXXX-XXXX"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contact-whatsapp">WhatsApp</Label>
-                  <Input
-                    id="contact-whatsapp"
-                    value={localContactInfo.whatsapp || ''}
-                    onChange={(e) => setLocalContactInfo(prev => ({ ...prev, whatsapp: e.target.value }))}
-                    placeholder="5562XXXXXXXXX"
-                  />
-                </div>
-              </div>
-
               <div>
-                <Label htmlFor="contact-email">E-mail</Label>
+                <Label>
+                  {pageTexts.aboutMediaType === 'video' ? 'URL do Vídeo' : 'URL da Imagem'}
+                </Label>
                 <Input
-                  id="contact-email"
-                  value={localContactInfo.email || ''}
-                  onChange={(e) => setLocalContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                  value={pageTexts.aboutImage || ''}
+                  onChange={(e) => handleInputChange('aboutImage', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder={pageTexts.aboutMediaType === 'video' ? 'URL do vídeo' : 'URL da imagem'}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="areas" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Áreas de Atuação</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label>Título da Seção</Label>
+                <Input
+                  value={pageTexts.areasTitle || ''}
+                  onChange={(e) => handleInputChange('areasTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="team" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
+                Nossa Equipe ({safeTeamMembers.length} membros)
+              </h3>
+              <Button onClick={onAddTeamMember} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Membro
+              </Button>
+            </div>
+            
+            <div>
+              <Label>Título da Seção</Label>
+              <Input
+                value={pageTexts.teamTitle || ''}
+                onChange={(e) => handleInputChange('teamTitle', e.target.value)}
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+              />
+            </div>
+
+            <div className="space-y-4">
+              {safeTeamMembers.map((member) => (
+                <div key={member.id} className={`p-4 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                      {member.name || 'Novo Membro'}
+                    </h4>
+                    <Button 
+                      onClick={() => onRemoveTeamMember(member.id)}
+                      size="sm"
+                      variant="destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm">Nome</Label>
+                      <Input
+                        value={member.name || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'name', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">Cargo</Label>
+                      <Input
+                        value={member.title || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'title', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">OAB</Label>
+                      <Input
+                        value={member.oab || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'oab', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">Email</Label>
+                      <Input
+                        value={member.email || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'email', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-sm">URL da Foto</Label>
+                      <Input
+                        value={member.image || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        placeholder="/lovable-uploads/foto.png"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-sm">Descrição</Label>
+                      <Textarea
+                        value={member.description || ''}
+                        onChange={(e) => onUpdateTeamMember(member.id, 'description', e.target.value)}
+                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        rows={3}
+                        placeholder="Descrição profissional do membro da equipe..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="client" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Área do Cliente</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label>Título da Seção</Label>
+                <Input
+                  value={pageTexts.clientAreaTitle || ''}
+                  onChange={(e) => handleInputChange('clientAreaTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              <div>
+                <Label>Descrição</Label>
+                <Textarea
+                  value={pageTexts.clientAreaDescription || ''}
+                  onChange={(e) => handleInputChange('clientAreaDescription', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              <div>
+                <Label>Link do Portal do Cliente</Label>
+                <Input
+                  value={pageTexts.clientPortalLink || ''}
+                  onChange={(e) => handleInputChange('clientPortalLink', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="https://portal.escritorio.com"
+                />
+              </div>
+              <div>
+                <Label>Link do WhatsApp para Primeiro Acesso</Label>
+                <Input
+                  value={pageTexts.contactTexts?.whatsapp || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="5562994594496"
+                />
+                <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Apenas números, sem espaços ou símbolos
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Contato, Localização & Rodapé</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Título Contato</Label>
+                <Input
+                  value={pageTexts.contactTitle || ''}
+                  onChange={(e) => handleInputChange('contactTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              <div>
+                <Label>Subtítulo Contato</Label>
+                <Input
+                  value={pageTexts.contactSubtitle || ''}
+                  onChange={(e) => handleInputChange('contactSubtitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                />
+              </div>
+              
+              <div>
+                <Label>Telefone</Label>
+                <Input
+                  value={pageTexts.contactTexts?.phone || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'phone', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="(11) 9999-9999"
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  value={pageTexts.contactTexts?.email || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'email', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="contato@exemplo.com"
                 />
               </div>
-
-              <div>
-                <Label htmlFor="contact-address">Endereço</Label>
-                <Textarea
-                  id="contact-address"
-                  value={localContactInfo.address || ''}
-                  onChange={(e) => setLocalContactInfo(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Endereço completo"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="contact-map">URL do Mapa</Label>
-                <Textarea
-                  id="contact-map"
-                  value={localContactInfo.mapEmbedUrl || ''}
-                  onChange={(e) => setLocalContactInfo(prev => ({ ...prev, mapEmbedUrl: e.target.value }))}
-                  placeholder="Cole aqui a URL do iframe do Google Maps"
-                  rows={3}
-                />
-              </div>
-
-              <Button onClick={handleSaveContactInfo} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Informações de Contato
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="footer">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações do Rodapé</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="footer-company">Nome da Empresa</Label>
+              <div className="md:col-span-2">
+                <Label>Endereço</Label>
                 <Input
-                  id="footer-company"
-                  value={localFooterTexts.companyName || ''}
-                  onChange={(e) => setLocalFooterTexts(prev => ({ ...prev, companyName: e.target.value }))}
-                  placeholder="Nome da empresa"
+                  value={pageTexts.contactTexts?.address || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'address', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Rua Exemplo, 123 - São Paulo, SP"
                 />
               </div>
-
               <div>
-                <Label htmlFor="footer-description">Descrição</Label>
-                <Textarea
-                  id="footer-description"
-                  value={localFooterTexts.description || ''}
-                  onChange={(e) => setLocalFooterTexts(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Descrição da empresa"
-                  rows={3}
+                <Label>WhatsApp (números apenas)</Label>
+                <Input
+                  value={pageTexts.contactTexts?.whatsapp || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="5511999999999"
                 />
               </div>
-
-              <Button onClick={handleSaveFooterTexts} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Informações do Rodapé
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+              <div>
+                <Label>URL Embed do Google Maps</Label>
+                <Input
+                  value={pageTexts.contactTexts?.mapEmbedUrl || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'mapEmbedUrl', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="URL do iframe do Google Maps"
+                />
+                <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Cole a URL do iframe do Google Maps para personalizar a localização
+                </p>
+              </div>
+              
+              <div className="md:col-span-2">
+                <Label>Nome da Empresa (Rodapé)</Label>
+                <Input
+                  value={pageTexts.footerTexts?.companyName || ''}
+                  onChange={(e) => handleNestedChange('footerTexts', 'companyName', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Serafim & Trombela Advocacia"
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <Label>Descrição da Empresa (Rodapé)</Label>
+                <Textarea
+                  value={pageTexts.footerTexts?.description || ''}
+                  onChange={(e) => handleNestedChange('footerTexts', 'description', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  rows={2}
+                  placeholder="Soluções jurídicas inovadoras com foco em resultados..."
+                />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
-
-export default HomePageEditor;
