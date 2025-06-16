@@ -107,7 +107,7 @@ const Footer = () => {
               <img 
                 src={footerInfo.logo} 
                 alt={footerInfo.companyName}
-                className="h-8 w-auto mr-3"
+                className="h-12 w-auto mr-3"
                 style={{ filter: isDark ? 'none' : 'invert(1)' }}
               />
               <h3 className="text-xl font-canela">{footerInfo.companyName}</h3>

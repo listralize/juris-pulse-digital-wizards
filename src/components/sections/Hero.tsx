@@ -31,7 +31,7 @@ const Hero = () => {
         // Carregar textos do hero
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('hero_title, hero_subtitle, hero_background_image')
+          .select('hero_title, hero_subtitle, hero_background_image, hero_primary_button_text, hero_secondary_button_text, hero_primary_button_link, hero_secondary_button_link')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -49,6 +49,10 @@ const Hero = () => {
           setHeroTitle(settings.hero_title || 'Escritório de Advocacia');
           setHeroSubtitle(settings.hero_subtitle || 'Soluções jurídicas com excelência e compromisso');
           setBackgroundImage(settings.hero_background_image || '');
+          setPrimaryButtonText(settings.hero_primary_button_text || 'Fale Conosco');
+          setSecondaryButtonText(settings.hero_secondary_button_text || 'Saiba Mais');
+          setPrimaryButtonLink(settings.hero_primary_button_link || '');
+          setSecondaryButtonLink(settings.hero_secondary_button_link || '');
         }
 
         if (contact?.whatsapp) {
@@ -70,11 +74,11 @@ const Hero = () => {
       const { 
         heroTitle: newTitle, 
         heroSubtitle: newSubtitle,
-        primaryButtonText: newPrimaryText,
-        secondaryButtonText: newSecondaryText,
-        primaryButtonLink: newPrimaryLink,
-        secondaryButtonLink: newSecondaryLink,
-        backgroundImage: newBgImage
+        heroPrimaryButtonText: newPrimaryText,
+        heroSecondaryButtonText: newSecondaryText,
+        heroPrimaryButtonLink: newPrimaryLink,
+        heroSecondaryButtonLink: newSecondaryLink,
+        heroBackgroundImage: newBgImage
       } = event.detail;
       
       if (newTitle !== undefined) setHeroTitle(newTitle);
@@ -106,7 +110,7 @@ const Hero = () => {
     try {
       const tl = gsap.timeline();
 
-      // Efeito de parallax no banner
+      // Efeito de parallax no banner apenas se houver imagem de fundo
       if (bannerRef.current && backgroundImage) {
         gsap.set(bannerRef.current, { 
           backgroundPosition: 'center 20%',

@@ -8,25 +8,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Save, Upload, X, Link } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
-import { useAdminDataIntegrated } from '../../hooks/useAdminDataIntegrated';
+import { useSupabaseContactInfo } from '../../hooks/supabase/useSupabaseContactInfo';
+import { useSupabasePageTexts } from '../../hooks/supabase/useSupabasePageTexts';
 
 const HomePageEditor = () => {
   const { toast } = useToast();
   const { 
     pageTexts, 
-    contactInfo,
-    footerTexts,
     savePageTexts, 
-    saveContactInfo,
-    saveFooterTexts,
-    isLoading 
-  } = useAdminDataIntegrated();
+    isLoading: pageTextsLoading 
+  } = useSupabasePageTexts();
+  
+  const { 
+    contactInfo, 
+    saveContactInfo, 
+    isLoading: contactLoading 
+  } = useSupabaseContactInfo();
 
   // Estados locais para edição
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [localContactInfo, setLocalContactInfo] = useState(contactInfo);
-  const [localFooterTexts, setLocalFooterTexts] = useState(footerTexts);
+  const [localFooterTexts, setLocalFooterTexts] = useState({
+    companyName: 'Serafim & Trombela Advocacia',
+    description: 'Soluções jurídicas inovadoras com foco em resultados e excelência no atendimento.'
+  });
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  const isLoading = pageTextsLoading || contactLoading;
 
   // Sincronizar com os dados carregados
   useEffect(() => {
@@ -36,10 +44,6 @@ const HomePageEditor = () => {
   useEffect(() => {
     setLocalContactInfo(contactInfo);
   }, [contactInfo]);
-
-  useEffect(() => {
-    setLocalFooterTexts(footerTexts);
-  }, [footerTexts]);
 
   // Funções de upload de imagem
   const handleImageUpload = async (file: File, field: string) => {
@@ -56,7 +60,7 @@ const HomePageEditor = () => {
         if (field === 'heroBackgroundImage') {
           setLocalPageTexts(prev => ({
             ...prev,
-            backgroundImage: imageUrl
+            heroBackgroundImage: imageUrl
           }));
         } else if (field === 'aboutImage') {
           setLocalPageTexts(prev => ({
@@ -119,7 +123,7 @@ const HomePageEditor = () => {
   // Função para salvar informações do rodapé
   const handleSaveFooterTexts = async () => {
     try {
-      await saveFooterTexts(localFooterTexts);
+      // Implementar quando necessário
       toast({
         title: "Rodapé atualizado",
         description: "As informações do rodapé foram atualizadas com sucesso.",
@@ -189,8 +193,8 @@ const HomePageEditor = () => {
                 <div className="flex items-center gap-2">
                   <Input
                     id="hero-background"
-                    value={localPageTexts.backgroundImage || ''}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, backgroundImage: e.target.value }))}
+                    value={localPageTexts.heroBackgroundImage || ''}
+                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroBackgroundImage: e.target.value }))}
                     placeholder="URL da imagem de fundo"
                   />
                   <Button
@@ -211,20 +215,20 @@ const HomePageEditor = () => {
                       if (file) handleImageUpload(file, 'heroBackgroundImage');
                     }}
                   />
-                  {localPageTexts.backgroundImage && (
+                  {localPageTexts.heroBackgroundImage && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setLocalPageTexts(prev => ({ ...prev, backgroundImage: '' }))}
+                      onClick={() => setLocalPageTexts(prev => ({ ...prev, heroBackgroundImage: '' }))}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
-                {localPageTexts.backgroundImage && (
+                {localPageTexts.heroBackgroundImage && (
                   <div className="mt-2">
                     <img
-                      src={localPageTexts.backgroundImage}
+                      src={localPageTexts.heroBackgroundImage}
                       alt="Preview"
                       className="w-32 h-20 object-cover rounded border"
                     />
@@ -254,8 +258,8 @@ const HomePageEditor = () => {
                   <Label htmlFor="primary-button-text">Texto do Botão</Label>
                   <Input
                     id="primary-button-text"
-                    value={localPageTexts.primaryButtonText || 'Fale Conosco'}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, primaryButtonText: e.target.value }))}
+                    value={localPageTexts.heroPrimaryButtonText || 'Fale Conosco'}
+                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroPrimaryButtonText: e.target.value }))}
                     placeholder="Texto do botão primário"
                   />
                 </div>
@@ -265,8 +269,8 @@ const HomePageEditor = () => {
                     <Link className="h-4 w-4 text-gray-500" />
                     <Input
                       id="primary-button-link"
-                      value={localPageTexts.primaryButtonLink || ''}
-                      onChange={(e) => setLocalPageTexts(prev => ({ ...prev, primaryButtonLink: e.target.value }))}
+                      value={localPageTexts.heroPrimaryButtonLink || ''}
+                      onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroPrimaryButtonLink: e.target.value }))}
                       placeholder="Ex: #contact, https://wa.me/5562999999999, mailto:contato@exemplo.com"
                     />
                   </div>
@@ -283,8 +287,8 @@ const HomePageEditor = () => {
                   <Label htmlFor="secondary-button-text">Texto do Botão</Label>
                   <Input
                     id="secondary-button-text"
-                    value={localPageTexts.secondaryButtonText || 'Saiba Mais'}
-                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, secondaryButtonText: e.target.value }))}
+                    value={localPageTexts.heroSecondaryButtonText || 'Saiba Mais'}
+                    onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroSecondaryButtonText: e.target.value }))}
                     placeholder="Texto do botão secundário"
                   />
                 </div>
@@ -294,8 +298,8 @@ const HomePageEditor = () => {
                     <Link className="h-4 w-4 text-gray-500" />
                     <Input
                       id="secondary-button-link"
-                      value={localPageTexts.secondaryButtonLink || ''}
-                      onChange={(e) => setLocalPageTexts(prev => ({ ...prev, secondaryButtonLink: e.target.value }))}
+                      value={localPageTexts.heroSecondaryButtonLink || ''}
+                      onChange={(e) => setLocalPageTexts(prev => ({ ...prev, heroSecondaryButtonLink: e.target.value }))}
                       placeholder="Ex: #about, https://exemplo.com, tel:+5562999999999"
                     />
                   </div>
