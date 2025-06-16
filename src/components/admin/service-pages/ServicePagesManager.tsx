@@ -90,32 +90,24 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       return;
     }
     
-    console.log('🚀 [ServicePagesManager] INICIANDO SALVAMENTO NO SUPABASE');
-    console.log('📊 Páginas para salvar:', {
-      total: localPages.length,
-      amostras: localPages.slice(0, 3).map(p => ({
-        id: p.id,
-        title: p.title,
-        category: p.category,
-        href: p.href
-      }))
-    });
-
+    console.log('🚀 [ServicePagesManager] INICIANDO SALVAMENTO');
     setIsSaving(true);
     
     try {
-      console.log('💾 Chamando função onSave...');
       await onSave([...localPages]);
-      
-      console.log('✅ SUCESSO! Páginas salvas no Supabase');
-      toast.success('🎉 Páginas salvas com sucesso no Supabase!');
+      console.log('✅ SUCESSO! Páginas salvas');
+      toast.success('🎉 Páginas salvas com sucesso!');
       
     } catch (error) {
       console.error('❌ ERRO ao salvar páginas:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error(`❌ Erro ao salvar: ${errorMessage}`);
     } finally {
-      setIsSaving(false);
+      // Garante que o estado sempre seja resetado
+      setTimeout(() => {
+        setIsSaving(false);
+        console.log('🔄 Estado de salvamento resetado');
+      }, 100);
     }
   };
 
@@ -225,12 +217,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 disabled={isSaving}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
+                {isSaving ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </div>
           <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            📊 Total de páginas locais: {localPages.length} | Supabase: {servicePages.length}
+            📊 Total de páginas: {localPages.length}
           </p>
         </CardHeader>
         <CardContent>
@@ -276,7 +268,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 disabled={isSaving}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
+                {isSaving ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </div>
@@ -320,7 +312,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               disabled={isSaving}
             >
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
+              {isSaving ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
           <p className={`text-sm mt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
