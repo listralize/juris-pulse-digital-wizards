@@ -5,6 +5,7 @@ import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
 import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
@@ -41,6 +42,11 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       [field]: value
     };
     onUpdatePageTexts(updatedTexts);
+    
+    // Disparar evento para atualizar componentes em tempo real
+    window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
+      detail: updatedTexts 
+    }));
   };
 
   const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
@@ -54,6 +60,17 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       }
     };
     onUpdatePageTexts(updatedTexts);
+    
+    // Disparar eventos específicos
+    if (parent === 'contactTexts') {
+      window.dispatchEvent(new CustomEvent('contactInfoUpdated', { 
+        detail: { [field]: value }
+      }));
+    }
+    
+    window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
+      detail: updatedTexts 
+    }));
   };
 
   const handleSaveAndNotify = async () => {
@@ -109,6 +126,31 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="hero" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Hero</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label>Título Principal</Label>
+                <Input
+                  value={pageTexts.heroTitle || ''}
+                  onChange={(e) => handleInputChange('heroTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Escritório de Advocacia"
+                />
+              </div>
+              <div>
+                <Label>Subtítulo</Label>
+                <Textarea
+                  value={pageTexts.heroSubtitle || ''}
+                  onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Subtítulo da página principal..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="about" className="space-y-4">
             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Sobre Nós</h3>
             <div className="grid grid-cols-1 gap-4">
@@ -132,46 +174,29 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 />
               </div>
               <div>
-                <Label>Imagem da Seção Sobre</Label>
+                <Label>Tipo de Mídia</Label>
+                <Select
+                  value={pageTexts.aboutMediaType || 'image'}
+                  onValueChange={(value) => handleInputChange('aboutMediaType', value)}
+                >
+                  <SelectTrigger className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="image">Imagem</SelectItem>
+                    <SelectItem value="video">Vídeo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>
+                  {pageTexts.aboutMediaType === 'video' ? 'URL do Vídeo' : 'URL da Imagem'}
+                </Label>
                 <Input
                   value={pageTexts.aboutImage || ''}
                   onChange={(e) => handleInputChange('aboutImage', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="URL da imagem"
-                />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="hero" className="space-y-4">
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Hero</h3>
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label>Título Principal</Label>
-                <Input
-                  value={pageTexts.heroTitle || ''}
-                  onChange={(e) => handleInputChange('heroTitle', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Ex: Escritório de Advocacia"
-                />
-              </div>
-              <div>
-                <Label>Subtítulo</Label>
-                <Textarea
-                  value={pageTexts.heroSubtitle || ''}
-                  onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Subtítulo da página principal..."
-                  rows={3}
-                />
-              </div>
-              <div>
-                <Label>Imagem de Fundo</Label>
-                <Input
-                  value={pageTexts.heroBackgroundImage || ''}
-                  onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="URL da imagem de fundo"
+                  placeholder={pageTexts.aboutMediaType === 'video' ? 'URL do vídeo' : 'URL da imagem'}
                 />
               </div>
             </div>
@@ -328,7 +353,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           </TabsContent>
 
           <TabsContent value="contact" className="space-y-4">
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Contato & Rodapé</h3>
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Contato, Localização & Rodapé</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Título Contato</Label>
@@ -382,6 +407,18 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="5511999999999"
                 />
+              </div>
+              <div>
+                <Label>URL Embed do Google Maps</Label>
+                <Input
+                  value={pageTexts.contactTexts?.mapEmbedUrl || ''}
+                  onChange={(e) => handleNestedChange('contactTexts', 'mapEmbedUrl', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="URL do iframe do Google Maps"
+                />
+                <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Cole a URL do iframe do Google Maps para personalizar a localização
+                </p>
               </div>
               
               <div className="md:col-span-2">

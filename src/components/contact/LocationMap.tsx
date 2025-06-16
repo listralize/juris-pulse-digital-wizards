@@ -1,30 +1,83 @@
 
-import React from 'react';
-import { MapPin } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 
-const LocationMap: React.FC = () => {
+const LocationMap = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const [mapConfig, setMapConfig] = useState({
+    embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3821.8377!2d-49.2647!3d-16.6869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935ef1b5d8b00001%3A0x1234567890abcdef!2sWorld%20Trade%20Center%20Goi%C3%A2nia!5e0!3m2!1spt!2sbr!4v1234567890123',
+    location: 'World Trade Center, Goiânia - GO'
+  });
+
+  // Carregar configurações do mapa do Supabase
+  useEffect(() => {
+    const loadMapConfig = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: contact } = await supabase
+          .from('contact_info')
+          .select('address')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (contact?.address) {
+          console.log('🗺️ LocationMap: Endereço carregado:', contact.address);
+          setMapConfig(prev => ({
+            ...prev,
+            location: contact.address
+          }));
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar configurações do mapa:', error);
+      }
+    };
+
+    loadMapConfig();
+  }, []);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handleMapUpdate = (event: CustomEvent) => {
+      console.log('🗺️ LocationMap: Recebendo atualização:', event.detail);
+      if (event.detail.address) {
+        setMapConfig(prev => ({
+          ...prev,
+          location: event.detail.address
+        }));
+      }
+      if (event.detail.mapEmbedUrl) {
+        setMapConfig(prev => ({
+          ...prev,
+          embedUrl: event.detail.mapEmbedUrl
+        }));
+      }
+    };
+
+    window.addEventListener('contactInfoUpdated', handleMapUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('contactInfoUpdated', handleMapUpdate as EventListener);
+    };
+  }, []);
+
   return (
-    <div className={`${isDark ? 'border-white/10 bg-neutral-900/90' : 'border-black/10 bg-neutral-100/90'} rounded-lg overflow-hidden shadow-lg relative h-full backdrop-blur-sm border`}>
-      <div className="w-full h-full flex items-center justify-center overflow-hidden">
-        <img 
-          src="/lovable-uploads/19f07831-e584-4a1f-b8ef-284685df9717.png" 
-          alt="World Trade Center Goiânia"
-          className="w-full h-full object-cover opacity-90"
+    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'} h-full`}>
+      <div className="h-full min-h-[200px]">
+        <iframe
+          src={mapConfig.embedUrl}
+          width="100%"
+          height="100%"
+          style={{ border: 0, minHeight: '200px' }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title={`Localização: ${mapConfig.location}`}
+          className="w-full h-full"
         />
-      </div>
-      <div className="absolute bottom-2 right-2">
-        <a 
-          href="https://maps.google.com/?q=World+Trade+Center+Goiania" 
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${isDark ? 'bg-white/20 text-white hover:bg-white hover:text-black' : 'bg-black/20 text-white hover:bg-black hover:text-white'} backdrop-blur-md text-xs md:text-sm py-1 flex items-center px-2 transition-all duration-300 rounded-sm`}
-        >
-          <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Abrir no Google Maps
-        </a>
       </div>
     </div>
   );

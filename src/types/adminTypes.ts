@@ -33,6 +33,7 @@ export interface ContactTexts {
   email: string;
   address: string;
   whatsapp: string;
+  mapEmbedUrl?: string;
 }
 
 export interface FooterTexts {
@@ -48,6 +49,7 @@ export interface PageTexts {
   aboutTitle: string;
   aboutDescription: string;
   aboutImage?: string;
+  aboutMediaType?: 'image' | 'video';
   areasTitle: string;
   familiaTitle: string;
   familiaDescription: string;
