@@ -81,6 +81,47 @@ const DynamicServiceRoutes = () => {
     );
   }
 
+  // Função para normalizar completamente o path
+  const normalizePath = (href: string): string => {
+    if (!href) return '';
+    
+    let path = href;
+    
+    // Remover múltiplas barras consecutivas
+    path = path.replace(/\/+/g, '/');
+    
+    // Remover todos os prefixos conhecidos (ordem importa)
+    if (path.startsWith('/services/services/')) {
+      path = path.replace('/services/services/', '');
+    } else if (path.startsWith('/servicos/servicos/')) {
+      path = path.replace('/servicos/servicos/', '');
+    } else if (path.startsWith('/services/')) {
+      path = path.replace('/services/', '');
+    } else if (path.startsWith('/servicos/')) {
+      path = path.replace('/servicos/', '');
+    } else if (path.startsWith('services/services/')) {
+      path = path.replace('services/services/', '');
+    } else if (path.startsWith('servicos/servicos/')) {
+      path = path.replace('servicos/servicos/', '');
+    } else if (path.startsWith('services/')) {
+      path = path.replace('services/', '');
+    } else if (path.startsWith('servicos/')) {
+      path = path.replace('servicos/', '');
+    }
+    
+    // Remover barra inicial se existir
+    if (path.startsWith('/')) {
+      path = path.substring(1);
+    }
+    
+    // Remover barra final se existir
+    if (path.endsWith('/')) {
+      path = path.slice(0, -1);
+    }
+    
+    return path;
+  };
+
   return (
     <Routes>
       {pagesToRender.map((page) => {
@@ -89,27 +130,10 @@ const DynamicServiceRoutes = () => {
           return null;
         }
         
-        // Normalizar o path - garantir que não há duplicação de prefixos
-        let path = page.href;
-        
-        // Remover todos os prefixos conhecidos
-        if (path.startsWith('/services/')) {
-          path = path.replace('/services/', '');
-        } else if (path.startsWith('/servicos/')) {
-          path = path.replace('/servicos/', '');
-        } else if (path.startsWith('services/')) {
-          path = path.replace('services/', '');
-        } else if (path.startsWith('servicos/')) {
-          path = path.replace('servicos/', '');
-        }
-        
-        // Remover barra inicial se existir
-        if (path.startsWith('/')) {
-          path = path.substring(1);
-        }
+        const normalizedPath = normalizePath(page.href);
         
         // Garantir que não está vazio
-        if (!path) {
+        if (!normalizedPath) {
           console.warn('⚠️ Path vazio após normalização para página:', page.title);
           return null;
         }
@@ -117,15 +141,15 @@ const DynamicServiceRoutes = () => {
         console.log('🔗 Criando rota:', { 
           title: page.title, 
           originalHref: page.href,
-          normalizedPath: path, 
-          fullPath: `/services/${path}`,
+          normalizedPath: normalizedPath, 
+          fullPath: `/services/${normalizedPath}`,
           category: page.category 
         });
         
         return (
           <Route 
-            key={`${page.id}-${path}`} 
-            path={path} 
+            key={`${page.id}-${normalizedPath}`} 
+            path={normalizedPath} 
             element={<DynamicServicePage pageData={page} categories={categories || []} />} 
           />
         );

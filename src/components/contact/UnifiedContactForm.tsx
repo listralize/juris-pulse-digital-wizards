@@ -24,13 +24,41 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     if (pathname === '/' || pathname === '/home') return 'home';
     if (pathname === '/contato') return 'contato';
     if (pathname.startsWith('/services/')) {
-      // Normalizar o slug do serviço removendo barras duplas
-      const cleanPath = pathname.replace('/services/', '').replace(/\/+/g, '/').replace(/\/$/, '');
+      // Normalizar completamente o slug do serviço
+      let cleanPath = pathname.replace('/services/', '');
+      
+      // Remover possível duplicação de prefixos
+      if (cleanPath.startsWith('services/')) {
+        cleanPath = cleanPath.replace('services/', '');
+      }
+      
+      // Remover múltiplas barras e normalizar
+      cleanPath = cleanPath.replace(/\/+/g, '/').replace(/\/$/, '');
+      
+      // Remover barra inicial se existir
+      if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+      }
+      
       return cleanPath;
     }
     if (pathname.startsWith('/servicos/')) {
-      // Normalizar o slug do serviço removendo barras duplas
-      const cleanPath = pathname.replace('/servicos/', '').replace(/\/+/g, '/').replace(/\/$/, '');
+      // Normalizar completamente o slug do serviço
+      let cleanPath = pathname.replace('/servicos/', '');
+      
+      // Remover possível duplicação de prefixos
+      if (cleanPath.startsWith('servicos/')) {
+        cleanPath = cleanPath.replace('servicos/', '');
+      }
+      
+      // Remover múltiplas barras e normalizar
+      cleanPath = cleanPath.replace(/\/+/g, '/').replace(/\/$/, '');
+      
+      // Remover barra inicial se existir
+      if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+      }
+      
       return cleanPath;
     }
     return 'home'; // fallback

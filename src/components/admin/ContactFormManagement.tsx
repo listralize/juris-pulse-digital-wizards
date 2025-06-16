@@ -6,7 +6,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
-import { Save } from 'lucide-react';
+import { Save, Star, StarOff } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
@@ -123,10 +123,20 @@ export const ContactFormManagement: React.FC = () => {
           return;
         }
 
-        const pages = data?.map(page => ({
-          value: page.href || '',
-          label: page.title
-        })) || [];
+        const pages = data?.map(page => {
+          // Normalizar o href para remover prefixos duplicados
+          let cleanHref = page.href || '';
+          if (cleanHref.startsWith('/services/services/')) {
+            cleanHref = cleanHref.replace('/services/services/', '');
+          } else if (cleanHref.startsWith('/services/')) {
+            cleanHref = cleanHref.replace('/services/', '');
+          }
+          
+          return {
+            value: cleanHref,
+            label: page.title
+          };
+        }) || [];
 
         // Adicionar páginas principais
         const mainPages = [
@@ -177,6 +187,14 @@ export const ContactFormManagement: React.FC = () => {
       return;
     }
     
+    const formToRemove = multipleFormsConfig.forms[index];
+    const isDefault = multipleFormsConfig.defaultFormId === formToRemove.id;
+    
+    if (isDefault) {
+      toast.error('Não é possível remover o formulário principal. Defina outro como principal primeiro.');
+      return;
+    }
+    
     const updatedForms = multipleFormsConfig.forms.filter((_, i) => i !== index);
     setMultipleFormsConfig({
       ...multipleFormsConfig,
@@ -186,6 +204,14 @@ export const ContactFormManagement: React.FC = () => {
     if (currentFormIndex >= updatedForms.length) {
       setCurrentFormIndex(0);
     }
+  };
+
+  const setAsDefaultForm = (formId: string) => {
+    setMultipleFormsConfig({
+      ...multipleFormsConfig,
+      defaultFormId: formId
+    });
+    toast.success('Formulário definido como principal!');
   };
 
   const updateFormFields = (fields: FormField[]) => {
@@ -274,29 +300,54 @@ export const ContactFormManagement: React.FC = () => {
               + Novo Formulário
             </Button>
           </div>
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            O formulário principal será usado em todas as páginas que não tiverem um formulário específico atribuído.
+          </p>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {multipleFormsConfig.forms.map((form, index) => (
-              <div key={form.id} className="flex items-center gap-2">
-                <Button
-                  onClick={() => setCurrentFormIndex(index)}
-                  variant={index === currentFormIndex ? "default" : "outline"}
-                  size="sm"
-                >
-                  {form.name}
-                </Button>
-                {multipleFormsConfig.forms.length > 1 && (
+            {multipleFormsConfig.forms.map((form, index) => {
+              const isDefault = multipleFormsConfig.defaultFormId === form.id;
+              return (
+                <div key={form.id} className="flex items-center gap-2 p-2 border rounded-lg">
                   <Button
-                    onClick={() => removeForm(index)}
-                    variant="destructive"
+                    onClick={() => setCurrentFormIndex(index)}
+                    variant={index === currentFormIndex ? "default" : "outline"}
                     size="sm"
+                    className="flex items-center gap-2"
                   >
-                    ×
+                    {isDefault && <Star className="w-4 h-4 text-yellow-500" fill="currentColor" />}
+                    {form.name}
+                    {isDefault && <span className="text-xs">(Principal)</span>}
                   </Button>
-                )}
-              </div>
-            ))}
+                  
+                  <div className="flex gap-1">
+                    {!isDefault && (
+                      <Button
+                        onClick={() => setAsDefaultForm(form.id!)}
+                        variant="outline"
+                        size="sm"
+                        title="Definir como formulário principal"
+                      >
+                        <StarOff className="w-4 h-4" />
+                      </Button>
+                    )}
+                    
+                    {multipleFormsConfig.forms.length > 1 && (
+                      <Button
+                        onClick={() => removeForm(index)}
+                        variant="destructive"
+                        size="sm"
+                        disabled={isDefault}
+                        title={isDefault ? "Não é possível remover o formulário principal" : "Remover formulário"}
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -306,6 +357,9 @@ export const ContactFormManagement: React.FC = () => {
         <CardHeader>
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
             ⚙️ Configurações do Formulário: {currentForm.name}
+            {multipleFormsConfig.defaultFormId === currentForm.id && (
+              <span className="ml-2 text-yellow-500 text-sm">(Principal)</span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -330,8 +384,11 @@ export const ContactFormManagement: React.FC = () => {
           </div>
           
           <div>
-            <Label>Páginas Vinculadas</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+            <Label>Páginas Específicas (deixe vazio para usar como principal)</Label>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+              Selecione as páginas onde este formulário deve aparecer. Páginas não selecionadas usarão o formulário principal.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {availablePages.map((page) => (
                 <div key={page.value} className="flex items-center space-x-2">
                   <Checkbox
