@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -95,15 +94,34 @@ export const ContactFormManagement: React.FC = () => {
   const saveFormConfig = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase
+      // First check if there's an existing record
+      const { data: existingData } = await supabase
         .from('admin_settings')
-        .upsert({
-          id: crypto.randomUUID(),
-          form_config: formConfig,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        .select('id')
+        .single();
 
-      if (error) throw error;
+      if (existingData) {
+        // Update existing record
+        const { error } = await supabase
+          .from('admin_settings')
+          .update({
+            form_config: formConfig as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+
+        if (error) throw error;
+      } else {
+        // Create new record
+        const { error } = await supabase
+          .from('admin_settings')
+          .insert({
+            form_config: formConfig as any,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+      }
 
       toast.success('Configurações do formulário salvas com sucesso!');
     } catch (error) {
