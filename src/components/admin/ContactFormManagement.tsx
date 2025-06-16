@@ -9,27 +9,8 @@ import { Save, TestTube, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
-
-interface FormConfig {
-  webhookUrl: string;
-  serviceOptions: Array<{
-    value: string;
-    label: string;
-  }>;
-  formTexts: {
-    headerTitle: string;
-    headerSubtitle: string;
-    nameLabel: string;
-    emailLabel: string;
-    phoneLabel: string;
-    serviceLabel: string;
-    messageLabel: string;
-    urgentLabel: string;
-    submitButton: string;
-    successMessage: string;
-    errorMessage: string;
-  };
-}
+import { CustomFieldsEditor } from './contact-form/CustomFieldsEditor';
+import { FormConfig } from '../../types/contactFormTypes';
 
 const defaultFormConfig: FormConfig = {
   webhookUrl: '',
@@ -55,7 +36,8 @@ const defaultFormConfig: FormConfig = {
     submitButton: "Enviar mensagem",
     successMessage: "Mensagem enviada com sucesso! Entraremos em contato em breve.",
     errorMessage: "Erro ao enviar mensagem. Tente novamente."
-  }
+  },
+  customFields: []
 };
 
 export const ContactFormManagement: React.FC = () => {
@@ -74,14 +56,16 @@ export const ContactFormManagement: React.FC = () => {
     try {
       console.log('🔄 Carregando configurações do formulário...');
       
+      // Busca apenas o primeiro registro para evitar o erro de múltiplos registros
       const { data, error } = await supabase
         .from('admin_settings')
         .select('*')
-        .maybeSingle();
+        .limit(1)
+        .single();
 
       console.log('📊 Dados carregados:', { data, error });
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('❌ Erro ao carregar configurações:', error);
         toast.error('Erro ao carregar configurações do formulário');
         return;
@@ -99,7 +83,8 @@ export const ContactFormManagement: React.FC = () => {
             ...defaultFormConfig.formTexts,
             ...(savedConfig.formTexts || {})
           },
-          serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions
+          serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
+          customFields: savedConfig.customFields || []
         };
         
         setFormConfig(mergedConfig);
@@ -119,22 +104,23 @@ export const ContactFormManagement: React.FC = () => {
     try {
       console.log('💾 Iniciando salvamento das configurações:', formConfig);
       
-      // Primeiro verifica se existe um registro
+      // Primeiro tenta buscar o primeiro registro
       const { data: existingData, error: selectError } = await supabase
         .from('admin_settings')
         .select('id')
+        .limit(1)
         .maybeSingle();
 
       console.log('🔍 Verificação de registro existente:', { existingData, selectError });
 
-      if (selectError) {
+      if (selectError && selectError.code !== 'PGRST116') {
         console.error('❌ Erro ao verificar registro existente:', selectError);
         throw selectError;
       }
 
       if (existingData) {
-        // Atualiza o registro existente
-        console.log('🔄 Atualizando registro existente com ID:', existingData.id);
+        // Atualiza o primeiro registro encontrado
+        console.log('🔄 Atualizando primeiro registro com ID:', existingData.id);
         
         const { error: updateError } = await supabase
           .from('admin_settings')
@@ -171,9 +157,6 @@ export const ContactFormManagement: React.FC = () => {
 
       toast.success('Configurações do formulário salvas com sucesso!');
       console.log('🎉 Salvamento concluído com sucesso');
-      
-      // Recarrega as configurações para confirmar que foram salvas
-      await loadFormConfig();
       
     } catch (error) {
       console.error('💥 Erro ao salvar configurações:', error);
@@ -471,6 +454,12 @@ export const ContactFormManagement: React.FC = () => {
           ))}
         </CardContent>
       </Card>
+
+      {/* Custom Fields Editor */}
+      <CustomFieldsEditor
+        customFields={formConfig.customFields || []}
+        onUpdateCustomFields={(fields) => setFormConfig({ ...formConfig, customFields: fields })}
+      />
 
       {/* Save Button */}
       <div className="flex justify-end">
