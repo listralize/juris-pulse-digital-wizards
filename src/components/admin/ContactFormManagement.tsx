@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -11,6 +10,7 @@ import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
 import { FormFieldsManager } from './contact-form/FormFieldsManager';
 import { FormConfig, FormField } from '../../types/contactFormTypes';
+import { useFormConfig } from '../../hooks/useFormConfig';
 
 const defaultFormConfig: FormConfig = {
   webhookUrl: '',
@@ -98,63 +98,59 @@ const defaultFormConfig: FormConfig = {
 export const ContactFormManagement: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [formConfig, setFormConfig] = useState<FormConfig>(defaultFormConfig);
+  const { multipleFormsConfig, setMultipleFormsConfig } = useFormConfig();
+  const [currentFormIndex, setCurrentFormIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadFormConfig();
-  }, []);
+  const currentForm = multipleFormsConfig.forms[currentFormIndex] || defaultFormConfig;
 
-  const loadFormConfig = async () => {
-    try {
-      console.log('🔄 Carregando configurações do formulário...');
-      
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .limit(1)
-        .single();
+  const updateCurrentForm = (updates: Partial<FormConfig>) => {
+    const updatedForms = [...multipleFormsConfig.forms];
+    updatedForms[currentFormIndex] = { ...currentForm, ...updates };
+    setMultipleFormsConfig({
+      ...multipleFormsConfig,
+      forms: updatedForms
+    });
+  };
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('❌ Erro ao carregar configurações:', error);
-        toast.error('Erro ao carregar configurações do formulário');
-        return;
-      }
+  const addNewForm = () => {
+    const newForm: FormConfig = {
+      ...defaultFormConfig,
+      id: `form_${Date.now()}`,
+      name: `Novo Formulário ${multipleFormsConfig.forms.length + 1}`,
+      linkedPages: []
+    };
+    
+    setMultipleFormsConfig({
+      ...multipleFormsConfig,
+      forms: [...multipleFormsConfig.forms, newForm]
+    });
+    setCurrentFormIndex(multipleFormsConfig.forms.length);
+  };
 
-      if (data && data.form_config) {
-        const savedConfig = data.form_config as any;
-        console.log('✅ Configurações encontradas:', savedConfig);
-        
-        const mergedConfig = {
-          ...defaultFormConfig,
-          ...savedConfig,
-          formTexts: {
-            ...defaultFormConfig.formTexts,
-            ...(savedConfig.formTexts || {})
-          },
-          serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
-          customFields: savedConfig.customFields || [],
-          allFields: savedConfig.allFields || defaultFormConfig.allFields
-        };
-        
-        setFormConfig(mergedConfig);
-        console.log('🔧 Configurações aplicadas:', mergedConfig);
-      } else {
-        console.log('⚠️ Nenhuma configuração encontrada, usando padrões');
-        setFormConfig(defaultFormConfig);
-      }
-    } catch (error) {
-      console.error('💥 Erro crítico ao carregar configurações:', error);
-      toast.error('Erro crítico ao carregar configurações');
+  const removeForm = (index: number) => {
+    if (multipleFormsConfig.forms.length <= 1) {
+      toast.error('Deve existir pelo menos um formulário');
+      return;
+    }
+    
+    const updatedForms = multipleFormsConfig.forms.filter((_, i) => i !== index);
+    setMultipleFormsConfig({
+      ...multipleFormsConfig,
+      forms: updatedForms
+    });
+    
+    if (currentFormIndex >= updatedForms.length) {
+      setCurrentFormIndex(0);
     }
   };
 
   const saveFormConfig = async () => {
     setIsSaving(true);
     try {
-      console.log('💾 Iniciando salvamento das configurações:', formConfig);
+      console.log('💾 Iniciando salvamento das configurações:', multipleFormsConfig);
       
       const { data: existingData, error: selectError } = await supabase
         .from('admin_settings')
@@ -173,7 +169,7 @@ export const ContactFormManagement: React.FC = () => {
         const { error: updateError } = await supabase
           .from('admin_settings')
           .update({
-            form_config: formConfig as any,
+            form_config: multipleFormsConfig as any,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingData.id);
@@ -190,7 +186,7 @@ export const ContactFormManagement: React.FC = () => {
         const { error: insertError } = await supabase
           .from('admin_settings')
           .insert({
-            form_config: formConfig as any,
+            form_config: multipleFormsConfig as any,
             updated_at: new Date().toISOString()
           });
 
@@ -202,19 +198,19 @@ export const ContactFormManagement: React.FC = () => {
         console.log('✅ Novo registro criado com sucesso');
       }
 
-      toast.success('Configurações do formulário salvas com sucesso!');
+      toast.success('Configurações dos formulários salvas com sucesso!');
       console.log('🎉 Salvamento concluído com sucesso');
       
     } catch (error) {
       console.error('💥 Erro ao salvar configurações:', error);
-      toast.error('Erro ao salvar configurações do formulário');
+      toast.error('Erro ao salvar configurações dos formulários');
     } finally {
       setIsSaving(false);
     }
   };
 
   const testWebhook = async () => {
-    if (!formConfig.webhookUrl) {
+    if (!currentForm.webhookUrl) {
       toast.error('Por favor, configure o webhook primeiro');
       return;
     }
@@ -234,7 +230,7 @@ export const ContactFormManagement: React.FC = () => {
         source: 'Admin - Teste de Webhook'
       };
 
-      const response = await fetch(formConfig.webhookUrl, {
+      const response = await fetch(currentForm.webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -258,68 +254,83 @@ export const ContactFormManagement: React.FC = () => {
     }
   };
 
-  const updateServiceOption = (index: number, field: 'value' | 'label', value: string) => {
-    const newOptions = [...formConfig.serviceOptions];
-    newOptions[index] = { ...newOptions[index], [field]: value };
-    setFormConfig({ ...formConfig, serviceOptions: newOptions });
-  };
-
-  const addServiceOption = () => {
-    setFormConfig({
-      ...formConfig,
-      serviceOptions: [
-        ...formConfig.serviceOptions,
-        { value: 'nova-opcao', label: 'Nova Opção' }
-      ]
-    });
-  };
-
-  const removeServiceOption = (index: number) => {
-    setFormConfig({
-      ...formConfig,
-      serviceOptions: formConfig.serviceOptions.filter((_, i) => i !== index)
-    });
-  };
-
   return (
     <div className="space-y-6">
-      {/* Webhook Configuration */}
+      {/* Form Selector */}
+      <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
+              📋 Gerenciar Formulários ({multipleFormsConfig.forms.length})
+            </CardTitle>
+            <Button onClick={addNewForm} size="sm">
+              + Novo Formulário
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {multipleFormsConfig.forms.map((form, index) => (
+              <div key={form.id} className="flex items-center gap-2">
+                <Button
+                  onClick={() => setCurrentFormIndex(index)}
+                  variant={index === currentFormIndex ? "default" : "outline"}
+                  size="sm"
+                >
+                  {form.name}
+                </Button>
+                {multipleFormsConfig.forms.length > 1 && (
+                  <Button
+                    onClick={() => removeForm(index)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Form Settings */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            🔗 Configuração do Webhook
+            ⚙️ Configurações do Formulário: {currentForm.name}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label>URL do Webhook</Label>
-            <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Nome do Formulário</Label>
               <Input
-                value={formConfig.webhookUrl}
-                onChange={(e) => setFormConfig({ ...formConfig, webhookUrl: e.target.value })}
+                value={currentForm.name || ''}
+                onChange={(e) => updateCurrentForm({ name: e.target.value })}
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+              />
+            </div>
+            <div>
+              <Label>Webhook URL</Label>
+              <Input
+                value={currentForm.webhookUrl}
+                onChange={(e) => updateCurrentForm({ webhookUrl: e.target.value })}
                 placeholder="https://seu-webhook-url.com/endpoint"
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
-              <Button onClick={testWebhook} disabled={isTesting} variant="outline">
-                <TestTube className="w-4 h-4 mr-2" />
-                {isTesting ? 'Testando...' : 'Testar'}
-              </Button>
             </div>
-            {testResult && (
-              <div className={`mt-2 flex items-center gap-2 text-sm ${
-                testResult === 'success' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {testResult === 'success' ? (
-                  <CheckCircle className="w-4 h-4" />
-                ) : (
-                  <AlertCircle className="w-4 h-4" />
-                )}
-                {testResult === 'success' 
-                  ? 'Webhook funcionando corretamente' 
-                  : 'Erro no webhook - verifique a URL'
-                }
-              </div>
-            )}
+          </div>
+          <div>
+            <Label>Páginas Vinculadas (separadas por vírgula)</Label>
+            <Input
+              value={currentForm.linkedPages?.join(', ') || ''}
+              onChange={(e) => updateCurrentForm({ 
+                linkedPages: e.target.value.split(',').map(p => p.trim()).filter(Boolean)
+              })}
+              placeholder="home, contato, sobre"
+              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+            />
           </div>
         </CardContent>
       </Card>
@@ -336,10 +347,9 @@ export const ContactFormManagement: React.FC = () => {
             <div>
               <Label>Título do Cabeçalho</Label>
               <Input
-                value={formConfig.formTexts.headerTitle}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, headerTitle: e.target.value }
+                value={currentForm.formTexts.headerTitle}
+                onChange={(e) => updateCurrentForm({
+                  formTexts: { ...currentForm.formTexts, headerTitle: e.target.value }
                 })}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
@@ -347,10 +357,9 @@ export const ContactFormManagement: React.FC = () => {
             <div>
               <Label>Subtítulo do Cabeçalho</Label>
               <Input
-                value={formConfig.formTexts.headerSubtitle}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, headerSubtitle: e.target.value }
+                value={currentForm.formTexts.headerSubtitle}
+                onChange={(e) => updateCurrentForm({
+                  formTexts: { ...currentForm.formTexts, headerSubtitle: e.target.value }
                 })}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
@@ -358,10 +367,9 @@ export const ContactFormManagement: React.FC = () => {
             <div>
               <Label>Texto do Botão</Label>
               <Input
-                value={formConfig.formTexts.submitButton}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, submitButton: e.target.value }
+                value={currentForm.formTexts.submitButton}
+                onChange={(e) => updateCurrentForm({
+                  formTexts: { ...currentForm.formTexts, submitButton: e.target.value }
                 })}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
@@ -369,10 +377,9 @@ export const ContactFormManagement: React.FC = () => {
             <div>
               <Label>Mensagem de Sucesso</Label>
               <Textarea
-                value={formConfig.formTexts.successMessage}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, successMessage: e.target.value }
+                value={currentForm.formTexts.successMessage}
+                onChange={(e) => updateCurrentForm({
+                  formTexts: { ...currentForm.formTexts, successMessage: e.target.value }
                 })}
                 rows={2}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
@@ -381,10 +388,9 @@ export const ContactFormManagement: React.FC = () => {
             <div>
               <Label>Mensagem de Erro</Label>
               <Textarea
-                value={formConfig.formTexts.errorMessage}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, errorMessage: e.target.value }
+                value={currentForm.formTexts.errorMessage}
+                onChange={(e) => updateCurrentForm({
+                  formTexts: { ...currentForm.formTexts, errorMessage: e.target.value }
                 })}
                 rows={2}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
@@ -394,35 +400,55 @@ export const ContactFormManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Service Options */}
+      {/* Service Options for this form */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-              ⚖️ Opções de Serviços
+              ⚖️ Opções de Serviços deste Formulário
             </CardTitle>
-            <Button onClick={addServiceOption} size="sm">
+            <Button 
+              onClick={() => {
+                const newOptions = [
+                  ...currentForm.serviceOptions,
+                  { value: 'nova-opcao', label: 'Nova Opção' }
+                ];
+                updateCurrentForm({ serviceOptions: newOptions });
+              }} 
+              size="sm"
+            >
               + Adicionar Opção
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {formConfig.serviceOptions.map((option, index) => (
+          {currentForm.serviceOptions.map((option, index) => (
             <div key={index} className="flex gap-2 items-center">
               <Input
                 placeholder="Valor (ex: familia)"
                 value={option.value}
-                onChange={(e) => updateServiceOption(index, 'value', e.target.value)}
+                onChange={(e) => {
+                  const newOptions = [...currentForm.serviceOptions];
+                  newOptions[index] = { ...newOptions[index], value: e.target.value };
+                  updateCurrentForm({ serviceOptions: newOptions });
+                }}
                 className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
               <Input
                 placeholder="Texto exibido"
                 value={option.label}
-                onChange={(e) => updateServiceOption(index, 'label', e.target.value)}
+                onChange={(e) => {
+                  const newOptions = [...currentForm.serviceOptions];
+                  newOptions[index] = { ...newOptions[index], label: e.target.value };
+                  updateCurrentForm({ serviceOptions: newOptions });
+                }}
                 className={`flex-2 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
               <Button
-                onClick={() => removeServiceOption(index)}
+                onClick={() => {
+                  const newOptions = currentForm.serviceOptions.filter((_, i) => i !== index);
+                  updateCurrentForm({ serviceOptions: newOptions });
+                }}
                 size="sm"
                 variant="destructive"
               >
@@ -435,9 +461,8 @@ export const ContactFormManagement: React.FC = () => {
 
       {/* Unified Fields Manager */}
       <FormFieldsManager
-        formFields={formConfig.allFields || []}
-        onUpdateFormFields={(fields) => setFormConfig({ 
-          ...formConfig, 
+        formFields={currentForm.allFields || []}
+        onUpdateFormFields={(fields) => updateCurrentForm({ 
           allFields: fields,
           customFields: fields.filter(f => !f.isDefault)
         })}
@@ -447,7 +472,7 @@ export const ContactFormManagement: React.FC = () => {
       <div className="flex justify-end">
         <Button onClick={saveFormConfig} disabled={isSaving}>
           <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Salvando...' : 'Salvar Configurações'}
+          {isSaving ? 'Salvando...' : 'Salvar Todas as Configurações'}
         </Button>
       </div>
     </div>

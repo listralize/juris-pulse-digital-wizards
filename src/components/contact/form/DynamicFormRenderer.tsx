@@ -28,8 +28,11 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
   }`;
 
   const renderField = (field: FormField) => {
-    // Para o campo de serviço, usar as opções de serviço configuradas
+    // Para o campo de serviço, usar as opções específicas do campo, não as serviceOptions gerais
     if (field.name === 'service') {
+      // Usar as opções definidas no próprio campo se existirem, senão usar serviceOptions como fallback
+      const optionsToUse = field.options && field.options.length > 0 ? field.options : serviceOptions;
+      
       return (
         <div key={field.id}>
           <label className={labelClassName}>
@@ -42,7 +45,7 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
             className={baseClassName}
           >
             <option value="">{field.placeholder || 'Selecione uma opção'}</option>
-            {serviceOptions.map((option) => (
+            {optionsToUse.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

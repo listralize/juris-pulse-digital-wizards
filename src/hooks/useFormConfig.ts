@@ -1,9 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { FormConfig, FormField } from '../types/contactFormTypes';
+import { FormConfig, FormField, MultipleFormsConfig } from '../types/contactFormTypes';
 
 const defaultFormConfig: FormConfig = {
+  id: 'default',
+  name: 'Formulário Principal',
   webhookUrl: '',
   serviceOptions: [
     { value: "familia", label: "Divórcio e questões familiares" },
@@ -83,16 +85,41 @@ const defaultFormConfig: FormConfig = {
       order: 5,
       isDefault: true
     }
-  ]
+  ],
+  linkedPages: ['home'] // Páginas onde aparece por padrão
 };
 
-export const useFormConfig = () => {
-  const [formConfig, setFormConfig] = useState<FormConfig>(defaultFormConfig);
+export const useFormConfig = (formId?: string, pageId?: string) => {
+  const [multipleFormsConfig, setMultipleFormsConfig] = useState<MultipleFormsConfig>({
+    forms: [defaultFormConfig],
+    defaultFormId: 'default'
+  });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Retorna o formulário específico ou o padrão
+  const getCurrentForm = (): FormConfig => {
+    if (formId) {
+      return multipleFormsConfig.forms.find(f => f.id === formId) || defaultFormConfig;
+    }
+    
+    if (pageId) {
+      // Busca um formulário vinculado à página específica
+      const pageForm = multipleFormsConfig.forms.find(f => 
+        f.linkedPages?.includes(pageId)
+      );
+      if (pageForm) return pageForm;
+    }
+    
+    // Retorna o formulário padrão
+    const defaultForm = multipleFormsConfig.forms.find(f => 
+      f.id === multipleFormsConfig.defaultFormId
+    );
+    return defaultForm || defaultFormConfig;
+  };
 
   const loadFormConfig = async () => {
     try {
-      console.log('🔄 [useFormConfig] Carregando configurações do formulário...');
+      console.log('🔄 [useFormConfig] Carregando configurações dos formulários...');
       
       const { data, error } = await supabase
         .from('admin_settings')
@@ -109,27 +136,56 @@ export const useFormConfig = () => {
         const savedConfig = data.form_config as any;
         console.log('✅ [useFormConfig] Configurações encontradas:', savedConfig);
         
-        const mergedConfig = {
-          ...defaultFormConfig,
-          ...savedConfig,
-          formTexts: {
-            ...defaultFormConfig.formTexts,
-            ...(savedConfig.formTexts || {})
-          },
-          serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
-          customFields: savedConfig.customFields || [],
-          allFields: savedConfig.allFields || defaultFormConfig.allFields
-        };
-        
-        setFormConfig(mergedConfig);
-        console.log('🔧 [useFormConfig] Configurações aplicadas:', mergedConfig);
+        // Verificar se é o novo formato com múltiplos formulários
+        if (savedConfig.forms) {
+          // Novo formato
+          setMultipleFormsConfig({
+            forms: savedConfig.forms.map((form: any) => ({
+              ...defaultFormConfig,
+              ...form,
+              allFields: form.allFields?.map((field: any) => ({
+                ...field,
+                isDefault: field.isDefault ?? false
+              })) || defaultFormConfig.allFields
+            })),
+            defaultFormId: savedConfig.defaultFormId || 'default'
+          });
+        } else {
+          // Formato antigo - converter
+          const migratedForm = {
+            ...defaultFormConfig,
+            ...savedConfig,
+            id: 'default',
+            name: 'Formulário Principal',
+            formTexts: {
+              ...defaultFormConfig.formTexts,
+              ...(savedConfig.formTexts || {})
+            },
+            serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
+            allFields: (savedConfig.allFields || defaultFormConfig.allFields).map((field: any) => ({
+              ...field,
+              isDefault: field.isDefault ?? false
+            }))
+          };
+          
+          setMultipleFormsConfig({
+            forms: [migratedForm],
+            defaultFormId: 'default'
+          });
+        }
       } else {
         console.log('⚠️ [useFormConfig] Nenhuma configuração encontrada, usando padrões');
-        setFormConfig(defaultFormConfig);
+        setMultipleFormsConfig({
+          forms: [defaultFormConfig],
+          defaultFormId: 'default'
+        });
       }
     } catch (error) {
       console.error('💥 [useFormConfig] Erro crítico:', error);
-      setFormConfig(defaultFormConfig);
+      setMultipleFormsConfig({
+        forms: [defaultFormConfig],
+        defaultFormId: 'default'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -139,5 +195,11 @@ export const useFormConfig = () => {
     loadFormConfig();
   }, []);
 
-  return { formConfig, isLoading, refreshConfig: loadFormConfig };
+  return { 
+    formConfig: getCurrentForm(), 
+    multipleFormsConfig,
+    isLoading, 
+    refreshConfig: loadFormConfig,
+    setMultipleFormsConfig
+  };
 };

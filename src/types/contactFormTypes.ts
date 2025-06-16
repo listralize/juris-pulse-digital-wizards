@@ -8,10 +8,12 @@ export interface FormField {
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   order: number;
-  isDefault?: boolean;
+  isDefault: boolean; // Agora é obrigatório
 }
 
 export interface FormConfig {
+  id?: string;
+  name?: string; // Nome do formulário
   webhookUrl: string;
   serviceOptions: Array<{
     value: string;
@@ -25,5 +27,11 @@ export interface FormConfig {
     errorMessage: string;
   };
   customFields?: FormField[];
-  allFields?: FormField[]; // Todos os campos (padrão + personalizados)
+  allFields: FormField[]; // Agora é obrigatório
+  linkedPages?: string[]; // Páginas onde este formulário aparece
+}
+
+export interface MultipleFormsConfig {
+  forms: FormConfig[];
+  defaultFormId?: string; // ID do formulário padrão
 }

@@ -6,24 +6,13 @@ import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Checkbox } from '../../ui/checkbox';
-import { Plus, Trash2, MoveUp, MoveDown, Settings } from 'lucide-react';
+import { Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
-
-interface FormFieldConfig {
-  id: string;
-  name: string;
-  label: string;
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'checkbox';
-  required: boolean;
-  placeholder?: string;
-  options?: Array<{ value: string; label: string }>;
-  order: number;
-  isDefault: boolean; // Indica se é um campo padrão do sistema
-}
+import { FormField } from '../../../types/contactFormTypes';
 
 interface FormFieldsManagerProps {
-  formFields: FormFieldConfig[];
-  onUpdateFormFields: (fields: FormFieldConfig[]) => void;
+  formFields: FormField[];
+  onUpdateFormFields: (fields: FormField[]) => void;
 }
 
 export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
@@ -34,7 +23,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
   const isDark = theme === 'dark';
 
   const addCustomField = () => {
-    const newField: FormFieldConfig = {
+    const newField: FormField = {
       id: `custom_${Date.now()}`,
       name: `campo_${formFields.filter(f => !f.isDefault).length + 1}`,
       label: 'Novo Campo',
@@ -47,14 +36,20 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
     onUpdateFormFields([...formFields, newField]);
   };
 
-  const updateField = (index: number, updates: Partial<FormFieldConfig>) => {
+  const updateField = (index: number, updates: Partial<FormField>) => {
     const updatedFields = [...formFields];
     updatedFields[index] = { ...updatedFields[index], ...updates };
     onUpdateFormFields(updatedFields);
   };
 
   const removeField = (index: number) => {
-    if (formFields[index].isDefault) return; // Não permite remover campos padrão
+    const field = formFields[index];
+    if (field.isDefault) {
+      // Para campos padrão, apenas ocultar/desabilitar
+      updateField(index, { required: false });
+      return;
+    }
+    // Para campos personalizados, remover completamente
     const updatedFields = formFields.filter((_, i) => i !== index);
     onUpdateFormFields(updatedFields);
   };
@@ -152,15 +147,13 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                   >
                     <MoveDown className="w-4 h-4" />
                   </Button>
-                  {!field.isDefault && (
-                    <Button
-                      onClick={() => removeField(index)}
-                      size="sm"
-                      variant="destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() => removeField(index)}
+                    size="sm"
+                    variant="destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
 
