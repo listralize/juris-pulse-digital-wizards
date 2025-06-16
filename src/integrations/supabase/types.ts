@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           categories: Json | null
           created_at: string | null
+          form_config: Json | null
           id: string
           page_texts: Json | null
           service_pages: Json | null
@@ -23,6 +24,7 @@ export type Database = {
         Insert: {
           categories?: Json | null
           created_at?: string | null
+          form_config?: Json | null
           id?: string
           page_texts?: Json | null
           service_pages?: Json | null
@@ -33,6 +35,7 @@ export type Database = {
         Update: {
           categories?: Json | null
           created_at?: string | null
+          form_config?: Json | null
           id?: string
           page_texts?: Json | null
           service_pages?: Json | null

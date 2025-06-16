@@ -83,8 +83,9 @@ export const ContactFormManagement: React.FC = () => {
         return;
       }
 
-      if (data?.form_config) {
-        setFormConfig({ ...defaultFormConfig, ...data.form_config });
+      if (data && data.form_config) {
+        const savedConfig = data.form_config as any;
+        setFormConfig({ ...defaultFormConfig, ...savedConfig });
       }
     } catch (error) {
       console.error('Erro ao carregar configurações do formulário:', error);
