@@ -13,18 +13,42 @@ export const useSupabasePageTexts = () => {
     setIsLoading(true);
     
     try {
-      const { data: settings, error } = await supabase
+      // Primeiro, vamos limpar registros duplicados e manter apenas o mais recente
+      const { data: allSettings, error: fetchError } = await supabase
         .from('site_settings')
         .select('*')
-        .limit(1)
-        .maybeSingle();
+        .order('updated_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ Erro ao carregar textos:', error);
+      if (fetchError) {
+        console.error('❌ Erro ao carregar configurações:', fetchError);
         setPageTexts(defaultPageTexts);
-      } else if (settings) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Se temos múltiplos registros, vamos manter apenas o mais recente
+      if (allSettings && allSettings.length > 1) {
+        console.log(`🧹 Limpando ${allSettings.length - 1} registros duplicados...`);
+        const [latestSetting, ...duplicates] = allSettings;
+        
+        // Deletar os duplicados
+        const duplicateIds = duplicates.map(d => d.id);
+        if (duplicateIds.length > 0) {
+          const { error: deleteError } = await supabase
+            .from('site_settings')
+            .delete()
+            .in('id', duplicateIds);
+            
+          if (deleteError) {
+            console.error('❌ Erro ao deletar duplicados:', deleteError);
+          } else {
+            console.log('✅ Registros duplicados removidos com sucesso');
+          }
+        }
+        
+        // Usar o registro mais recente
+        const settings = latestSetting;
         const loadedTexts: PageTexts = {
-          // Textos principais
           heroTitle: settings.hero_title || defaultPageTexts.heroTitle,
           heroSubtitle: settings.hero_subtitle || defaultPageTexts.heroSubtitle,
           heroBackgroundImage: settings.hero_background_image || defaultPageTexts.heroBackgroundImage,
@@ -39,7 +63,7 @@ export const useSupabasePageTexts = () => {
           contactTitle: settings.contact_title || defaultPageTexts.contactTitle,
           contactSubtitle: settings.contact_subtitle || defaultPageTexts.contactSubtitle,
           
-          // Textos das áreas específicas - usar defaultPageTexts como fallback
+          // Usar defaults para textos específicos das áreas
           familiaTitle: defaultPageTexts.familiaTitle,
           familiaDescription: defaultPageTexts.familiaDescription,
           tributarioTitle: defaultPageTexts.tributarioTitle,
@@ -59,7 +83,51 @@ export const useSupabasePageTexts = () => {
           administrativoTitle: defaultPageTexts.administrativoTitle,
           administrativoDescription: defaultPageTexts.administrativoDescription,
           
-          // Objetos aninhados
+          contactTexts: defaultPageTexts.contactTexts,
+          footerTexts: defaultPageTexts.footerTexts,
+          categoryTexts: defaultPageTexts.categoryTexts
+        };
+        
+        setPageTexts(loadedTexts);
+        console.log('✅ [useSupabasePageTexts] Textos carregados após limpeza:', loadedTexts);
+      } else if (allSettings && allSettings.length === 1) {
+        // Caso ideal: apenas um registro
+        const settings = allSettings[0];
+        const loadedTexts: PageTexts = {
+          heroTitle: settings.hero_title || defaultPageTexts.heroTitle,
+          heroSubtitle: settings.hero_subtitle || defaultPageTexts.heroSubtitle,
+          heroBackgroundImage: settings.hero_background_image || defaultPageTexts.heroBackgroundImage,
+          aboutTitle: settings.about_title || defaultPageTexts.aboutTitle,
+          aboutDescription: settings.about_description || defaultPageTexts.aboutDescription,
+          aboutImage: settings.about_image || defaultPageTexts.aboutImage,
+          areasTitle: settings.areas_title || defaultPageTexts.areasTitle,
+          teamTitle: settings.team_title || defaultPageTexts.teamTitle,
+          clientAreaTitle: settings.client_area_title || defaultPageTexts.clientAreaTitle,
+          clientAreaDescription: settings.client_area_description || defaultPageTexts.clientAreaDescription,
+          clientPortalLink: settings.client_portal_link || defaultPageTexts.clientPortalLink,
+          contactTitle: settings.contact_title || defaultPageTexts.contactTitle,
+          contactSubtitle: settings.contact_subtitle || defaultPageTexts.contactSubtitle,
+          
+          // Usar defaults para textos específicos das áreas
+          familiaTitle: defaultPageTexts.familiaTitle,
+          familiaDescription: defaultPageTexts.familiaDescription,
+          tributarioTitle: defaultPageTexts.tributarioTitle,
+          tributarioDescription: defaultPageTexts.tributarioDescription,
+          empresarialTitle: defaultPageTexts.empresarialTitle,
+          empresarialDescription: defaultPageTexts.empresarialDescription,
+          trabalhoTitle: defaultPageTexts.trabalhoTitle,
+          trabalhoDescription: defaultPageTexts.trabalhoDescription,
+          civilTitle: defaultPageTexts.civilTitle,
+          civilDescription: defaultPageTexts.civilDescription,
+          previdenciarioTitle: defaultPageTexts.previdenciarioTitle,
+          previdenciarioDescription: defaultPageTexts.previdenciarioDescription,
+          consumidorTitle: defaultPageTexts.consumidorTitle,
+          consumidorDescription: defaultPageTexts.consumidorDescription,
+          constitucionalTitle: defaultPageTexts.constitucionalTitle,
+          constitucionalDescription: defaultPageTexts.constitucionalDescription,
+          administrativoTitle: defaultPageTexts.administrativoTitle,
+          administrativoDescription: defaultPageTexts.administrativoDescription,
+          
           contactTexts: defaultPageTexts.contactTexts,
           footerTexts: defaultPageTexts.footerTexts,
           categoryTexts: defaultPageTexts.categoryTexts
@@ -83,10 +151,11 @@ export const useSupabasePageTexts = () => {
     console.log('💾 [useSupabasePageTexts] Salvando textos das páginas...', texts);
     
     try {
-      // Verificar se já existe um registro
+      // Buscar o registro único (se existe)
       const { data: existing } = await supabase
         .from('site_settings')
         .select('id')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -109,13 +178,13 @@ export const useSupabasePageTexts = () => {
 
       let result;
       if (existing) {
-        console.log('📝 Atualizando registro existente:', existing.id);
+        console.log('📝 Atualizando registro único existente:', existing.id);
         result = await supabase
           .from('site_settings')
           .update(dataToSave)
           .eq('id', existing.id);
       } else {
-        console.log('➕ Inserindo novo registro');
+        console.log('➕ Inserindo primeiro registro');
         result = await supabase
           .from('site_settings')
           .insert(dataToSave);

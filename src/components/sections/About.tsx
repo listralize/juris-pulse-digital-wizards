@@ -21,13 +21,17 @@ const About = () => {
     const loadInitialData = async () => {
       try {
         const { supabase } = await import('../../integrations/supabase/client');
+        
+        // Buscar apenas o registro mais recente
         const { data: settings } = await supabase
           .from('site_settings')
           .select('about_title, about_description')
+          .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (settings) {
+          console.log('📱 About: Dados carregados do Supabase:', settings);
           setAboutTitle(settings.about_title || 'Sobre Nós');
           setAboutDescription(settings.about_description || 'Descrição sobre o escritório');
         }
@@ -42,11 +46,17 @@ const About = () => {
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📱 About: Recebendo atualização de textos:', event.detail);
+      console.log('📱 About: Recebendo atualização de textos via evento:', event.detail);
       const { aboutTitle: newTitle, aboutDescription: newDescription } = event.detail;
       
-      if (newTitle) setAboutTitle(newTitle);
-      if (newDescription) setAboutDescription(newDescription);
+      if (newTitle !== undefined) {
+        console.log('📱 About: Atualizando título:', newTitle);
+        setAboutTitle(newTitle);
+      }
+      if (newDescription !== undefined) {
+        console.log('📱 About: Atualizando descrição:', newDescription);
+        setAboutDescription(newDescription);
+      }
     };
 
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
