@@ -6,7 +6,7 @@ import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Checkbox } from '../../ui/checkbox';
-import { Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
+import { Plus, Trash2, MoveUp, MoveDown, EyeOff, Eye } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
 import { FormField } from '../../../types/contactFormTypes';
 
@@ -48,9 +48,9 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
     if (!field) return;
 
     if (field.isDefault) {
-      // Para campos padrão, não remover mas desabilitar
+      // Para campos padrão, adicionar uma propriedade 'disabled' ou 'hidden'
       const updatedFields = formFields.map(f => 
-        f.id === fieldId ? { ...f, required: false } : f
+        f.id === fieldId ? { ...f, disabled: true, required: false } : f
       );
       onUpdateFormFields(updatedFields);
     } else {
@@ -63,6 +63,20 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
       }));
       onUpdateFormFields(reorderedFields);
     }
+  };
+
+  const toggleFieldVisibility = (fieldId: string) => {
+    const field = formFields.find(f => f.id === fieldId);
+    if (!field) return;
+
+    const updatedFields = formFields.map(f => 
+      f.id === fieldId ? { 
+        ...f, 
+        disabled: !(f as any).disabled,
+        required: (f as any).disabled ? f.required : false
+      } : f
+    );
+    onUpdateFormFields(updatedFields);
   };
 
   const moveField = (fieldId: string, direction: 'up' | 'down') => {
@@ -136,153 +150,171 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {sortedFields.map((field, index) => (
-          <Card key={field.id} className={`p-4 ${isDark ? 'bg-black/50 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
-                    {field.isDefault ? '🔒' : '📝'} {field.label}
-                  </h4>
-                  {field.isDefault && (
-                    <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
-                      Campo Padrão
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => moveField(field.id, 'up')}
-                    disabled={index === 0}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <MoveUp className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => moveField(field.id, 'down')}
-                    disabled={index === sortedFields.length - 1}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <MoveDown className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => removeField(field.id)}
-                    size="sm"
-                    variant="destructive"
-                    title={field.isDefault ? 'Desabilitar campo padrão' : 'Deletar campo personalizado'}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Nome do Campo</Label>
-                  <Input
-                    value={field.name}
-                    onChange={(e) => updateField(field.id, { name: e.target.value })}
-                    placeholder="nome_do_campo"
-                    disabled={field.isDefault}
-                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} ${
-                      field.isDefault ? 'opacity-60' : ''
-                    }`}
-                  />
-                </div>
-                <div>
-                  <Label>Rótulo Exibido</Label>
-                  <Input
-                    value={field.label}
-                    onChange={(e) => updateField(field.id, { label: e.target.value })}
-                    placeholder="Rótulo do campo"
-                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  />
-                </div>
-                <div>
-                  <Label>Tipo do Campo</Label>
-                  <Select
-                    value={field.type}
-                    onValueChange={(value: any) => updateField(field.id, { type: value })}
-                    disabled={field.isDefault}
-                  >
-                    <SelectTrigger className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} ${
-                      field.isDefault ? 'opacity-60' : ''
-                    }`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Texto</SelectItem>
-                      <SelectItem value="email">E-mail</SelectItem>
-                      <SelectItem value="tel">Telefone</SelectItem>
-                      <SelectItem value="textarea">Área de Texto</SelectItem>
-                      <SelectItem value="select">Seleção</SelectItem>
-                      <SelectItem value="checkbox">Checkbox</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Placeholder</Label>
-                  <Input
-                    value={field.placeholder || ''}
-                    onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
-                    placeholder="Texto de ajuda"
-                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={`required-${field.id}`}
-                  checked={field.required}
-                  onCheckedChange={(checked) => updateField(field.id, { required: checked as boolean })}
-                />
-                <Label htmlFor={`required-${field.id}`}>Campo obrigatório</Label>
-              </div>
-
-              {field.type === 'select' && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label>Opções de Seleção</Label>
+        {sortedFields.map((field, index) => {
+          const isDisabled = (field as any).disabled;
+          return (
+            <Card key={field.id} className={`p-4 ${isDark ? 'bg-black/50 border-white/10' : 'bg-gray-50 border-gray-200'} ${
+              isDisabled ? 'opacity-60' : ''
+            }`}>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                      {field.isDefault ? '🔒' : '📝'} {field.label}
+                      {isDisabled && <span className="ml-2 text-red-500">(Desabilitado)</span>}
+                    </h4>
+                    {field.isDefault && (
+                      <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
+                        Campo Padrão
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
                     <Button
-                      onClick={() => addSelectOption(field.id)}
+                      onClick={() => moveField(field.id, 'up')}
+                      disabled={index === 0}
                       size="sm"
                       variant="outline"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Opção
+                      <MoveUp className="w-4 h-4" />
                     </Button>
-                  </div>
-                  {field.options?.map((option, optionIndex) => (
-                    <div key={optionIndex} className="flex gap-2 items-center">
-                      <Input
-                        placeholder="Valor"
-                        value={option.value}
-                        onChange={(e) => updateSelectOption(field.id, optionIndex, { value: e.target.value })}
-                        className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      />
-                      <Input
-                        placeholder="Texto exibido"
-                        value={option.label}
-                        onChange={(e) => updateSelectOption(field.id, optionIndex, { label: e.target.value })}
-                        className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                      />
+                    <Button
+                      onClick={() => moveField(field.id, 'down')}
+                      disabled={index === sortedFields.length - 1}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <MoveDown className="w-4 h-4" />
+                    </Button>
+                    {field.isDefault ? (
                       <Button
-                        onClick={() => removeSelectOption(field.id, optionIndex)}
+                        onClick={() => toggleFieldVisibility(field.id)}
+                        size="sm"
+                        variant={isDisabled ? "secondary" : "destructive"}
+                        title={isDisabled ? 'Reabilitar campo' : 'Desabilitar campo'}
+                      >
+                        {isDisabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => removeField(field.id)}
                         size="sm"
                         variant="destructive"
+                        title="Deletar campo personalizado"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                    </div>
-                  ))}
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </Card>
-        ))}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Nome do Campo</Label>
+                    <Input
+                      value={field.name}
+                      onChange={(e) => updateField(field.id, { name: e.target.value })}
+                      placeholder="nome_do_campo"
+                      disabled={field.isDefault}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} ${
+                        field.isDefault ? 'opacity-60' : ''
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Rótulo Exibido</Label>
+                    <Input
+                      value={field.label}
+                      onChange={(e) => updateField(field.id, { label: e.target.value })}
+                      placeholder="Rótulo do campo"
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Tipo do Campo</Label>
+                    <Select
+                      value={field.type}
+                      onValueChange={(value: any) => updateField(field.id, { type: value })}
+                      disabled={field.isDefault}
+                    >
+                      <SelectTrigger className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} ${
+                        field.isDefault ? 'opacity-60' : ''
+                      }`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Texto</SelectItem>
+                        <SelectItem value="email">E-mail</SelectItem>
+                        <SelectItem value="tel">Telefone</SelectItem>
+                        <SelectItem value="textarea">Área de Texto</SelectItem>
+                        <SelectItem value="select">Seleção</SelectItem>
+                        <SelectItem value="checkbox">Checkbox</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Placeholder</Label>
+                    <Input
+                      value={field.placeholder || ''}
+                      onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
+                      placeholder="Texto de ajuda"
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`required-${field.id}`}
+                    checked={field.required}
+                    onCheckedChange={(checked) => updateField(field.id, { required: checked as boolean })}
+                    disabled={isDisabled}
+                  />
+                  <Label htmlFor={`required-${field.id}`}>Campo obrigatório</Label>
+                </div>
+
+                {field.type === 'select' && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Label>Opções de Seleção</Label>
+                      <Button
+                        onClick={() => addSelectOption(field.id)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar Opção
+                      </Button>
+                    </div>
+                    {field.options?.map((option, optionIndex) => (
+                      <div key={optionIndex} className="flex gap-2 items-center">
+                        <Input
+                          placeholder="Valor"
+                          value={option.value}
+                          onChange={(e) => updateSelectOption(field.id, optionIndex, { value: e.target.value })}
+                          className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                        <Input
+                          placeholder="Texto exibido"
+                          value={option.label}
+                          onChange={(e) => updateSelectOption(field.id, optionIndex, { label: e.target.value })}
+                          className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                        />
+                        <Button
+                          onClick={() => removeSelectOption(field.id, optionIndex)}
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+          );
+        })}
 
         {formFields.filter(f => !f.isDefault).length === 0 && (
           <div className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>

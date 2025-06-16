@@ -7,16 +7,7 @@ const defaultFormConfig: FormConfig = {
   id: 'default',
   name: 'Formulário Principal',
   webhookUrl: '',
-  serviceOptions: [
-    { value: "familia", label: "Divórcio e questões familiares" },
-    { value: "tributario", label: "Consultoria tributária" },
-    { value: "empresarial", label: "Direito empresarial" },
-    { value: "trabalho", label: "Direito trabalhista" },
-    { value: "constitucional", label: "Direitos fundamentais" },
-    { value: "administrativo", label: "Direito administrativo" },
-    { value: "previdenciario", label: "Direito previdenciário" },
-    { value: "consumidor", label: "Direito do consumidor" }
-  ],
+  serviceOptions: [],
   formTexts: {
     headerTitle: "Como podemos ajudar você?",
     headerSubtitle: "Entre em contato conosco",
@@ -57,24 +48,13 @@ const defaultFormConfig: FormConfig = {
       isDefault: true
     },
     {
-      id: 'service',
-      name: 'service',
-      label: 'Qual problema você precisa resolver?',
-      type: 'select',
-      required: false,
-      placeholder: 'Selecione seu problema jurídico',
-      order: 3,
-      isDefault: true,
-      options: []
-    },
-    {
       id: 'message',
       name: 'message',
       label: 'Detalhes do seu caso *',
       type: 'textarea',
       required: true,
       placeholder: 'Conte-nos brevemente sobre o seu caso',
-      order: 4,
+      order: 3,
       isDefault: true
     },
     {
@@ -83,7 +63,7 @@ const defaultFormConfig: FormConfig = {
       label: 'Preciso de atendimento urgente',
       type: 'checkbox',
       required: false,
-      order: 5,
+      order: 4,
       isDefault: true
     }
   ],
@@ -99,8 +79,13 @@ export const useFormConfig = (formId?: string, pageId?: string) => {
 
   // Retorna o formulário específico ou o padrão
   const getCurrentForm = (): FormConfig => {
+    console.log('🔍 [getCurrentForm] Buscando formulário para:', { formId, pageId });
+    console.log('📝 [getCurrentForm] Formulários disponíveis:', multipleFormsConfig.forms.map(f => ({ id: f.id, name: f.name, linkedPages: f.linkedPages })));
+    
     if (formId) {
-      return multipleFormsConfig.forms.find(f => f.id === formId) || defaultFormConfig;
+      const foundForm = multipleFormsConfig.forms.find(f => f.id === formId);
+      console.log('🎯 [getCurrentForm] Formulário por ID encontrado:', foundForm?.name);
+      return foundForm || defaultFormConfig;
     }
     
     if (pageId) {
@@ -108,13 +93,18 @@ export const useFormConfig = (formId?: string, pageId?: string) => {
       const pageForm = multipleFormsConfig.forms.find(f => 
         f.linkedPages?.includes(pageId)
       );
-      if (pageForm) return pageForm;
+      if (pageForm) {
+        console.log('📄 [getCurrentForm] Formulário para página encontrado:', pageForm.name, 'para página:', pageId);
+        return pageForm;
+      }
+      console.log('⚠️ [getCurrentForm] Nenhum formulário específico para página:', pageId);
     }
     
     // Retorna o formulário padrão
     const defaultForm = multipleFormsConfig.forms.find(f => 
       f.id === multipleFormsConfig.defaultFormId
     );
+    console.log('🔄 [getCurrentForm] Usando formulário padrão:', defaultForm?.name);
     return defaultForm || defaultFormConfig;
   };
 
@@ -145,19 +135,10 @@ export const useFormConfig = (formId?: string, pageId?: string) => {
               const processedForm = {
                 ...defaultFormConfig,
                 ...form,
-                allFields: form.allFields?.map((field: any) => {
-                  const processedField = {
-                    ...field,
-                    isDefault: field.isDefault ?? false
-                  };
-                  
-                  // Para o campo de serviço, garantir que use as opções corretas
-                  if (field.name === 'service' && field.isDefault) {
-                    processedField.options = form.serviceOptions || [];
-                  }
-                  
-                  return processedField;
-                }) || defaultFormConfig.allFields
+                allFields: form.allFields?.map((field: any) => ({
+                  ...field,
+                  isDefault: field.isDefault ?? false
+                })) || defaultFormConfig.allFields
               };
               
               return processedForm;
@@ -175,20 +156,11 @@ export const useFormConfig = (formId?: string, pageId?: string) => {
               ...defaultFormConfig.formTexts,
               ...(savedConfig.formTexts || {})
             },
-            serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
-            allFields: (savedConfig.allFields || defaultFormConfig.allFields).map((field: any) => {
-              const processedField = {
-                ...field,
-                isDefault: field.isDefault ?? false
-              };
-              
-              // Para o campo de serviço, garantir que use as opções corretas
-              if (field.name === 'service' && field.isDefault) {
-                processedField.options = savedConfig.serviceOptions || [];
-              }
-              
-              return processedField;
-            })
+            serviceOptions: [],
+            allFields: (savedConfig.allFields || defaultFormConfig.allFields).map((field: any) => ({
+              ...field,
+              isDefault: field.isDefault ?? false
+            }))
           };
           
           setMultipleFormsConfig({

@@ -8,13 +8,31 @@ import ContactFormContainer from './form/ContactFormContainer';
 interface UnifiedContactFormProps {
   preselectedService?: string;
   darkBackground?: boolean;
+  pageId?: string; // Adicionar propriedade para identificar a página
 }
 
 const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({ 
   preselectedService,
-  darkBackground = false
+  darkBackground = false,
+  pageId
 }) => {
-  const { formConfig, isLoading } = useFormConfig();
+  // Determinar o pageId baseado na URL atual se não fornecido
+  const currentPageId = pageId || (() => {
+    const pathname = window.location.pathname;
+    console.log('🌐 [UnifiedContactForm] Pathname atual:', pathname);
+    
+    if (pathname === '/' || pathname === '/home') return 'home';
+    if (pathname === '/contato') return 'contato';
+    if (pathname.startsWith('/services/')) {
+      const serviceSlug = pathname.replace('/services/', '');
+      return serviceSlug;
+    }
+    return 'home'; // fallback
+  })();
+
+  console.log('📍 [UnifiedContactForm] PageId determinado:', currentPageId);
+
+  const { formConfig, isLoading } = useFormConfig(undefined, currentPageId);
   const { formData, isSubmitting, updateField, handleSubmit } = useContactForm();
 
   // Pre-selecionar serviço se fornecido
@@ -35,6 +53,8 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
       </ContactFormContainer>
     );
   }
+
+  console.log('📋 [UnifiedContactForm] Usando formulário:', formConfig.name, 'para página:', currentPageId);
 
   return (
     <ContactFormContainer darkBackground={darkBackground}>

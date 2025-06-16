@@ -28,36 +28,15 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
   }`;
 
   const renderField = (field: FormField) => {
-    // Para o campo de serviço, usar as opções específicas do campo, não as serviceOptions gerais
-    if (field.name === 'service') {
-      // Usar as opções definidas no próprio campo se existirem, senão usar serviceOptions como fallback
-      const optionsToUse = field.options && field.options.length > 0 ? field.options : serviceOptions;
-      
-      return (
-        <div key={field.id}>
-          <label className={labelClassName}>
-            {field.label}
-          </label>
-          <select
-            value={formData[field.name] || ''}
-            onChange={(e) => updateField(field.name, e.target.value)}
-            required={field.required}
-            className={baseClassName}
-          >
-            <option value="">{field.placeholder || 'Selecione uma opção'}</option>
-            {optionsToUse.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
+    // Verificar se o campo está desabilitado
+    const isDisabled = (field as any).disabled;
+    if (isDisabled) {
+      return null; // Não renderizar campos desabilitados
     }
 
     // Layout especial para nome e telefone (lado a lado)
     if (field.name === 'name') {
-      const phoneField = formFields.find(f => f.name === 'phone');
+      const phoneField = formFields.find(f => f.name === 'phone' && !(f as any).disabled);
       if (phoneField) {
         return (
           <div key="name-phone-group" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -177,8 +156,10 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
     }
   };
 
-  // Ordena os campos pela propriedade order
-  const sortedFields = [...formFields].sort((a, b) => a.order - b.order);
+  // Ordena os campos pela propriedade order e filtra campos desabilitados
+  const sortedFields = [...formFields]
+    .filter(field => !(field as any).disabled)
+    .sort((a, b) => a.order - b.order);
 
   return (
     <>
