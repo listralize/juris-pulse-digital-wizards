@@ -48,33 +48,23 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
 
   // Encontrar a categoria correspondente
   const targetCategory = categories?.find(cat => 
-    cat && (
-      cat.value === areaKey || 
-      cat.name?.toLowerCase() === areaKey.toLowerCase() ||
-      cat.value === areaKey
-    )
+    cat && cat.value === areaKey
   );
 
   console.log('🎯 Categoria encontrada:', targetCategory);
 
-  // Filtrar serviços da categoria específica - com verificação de segurança
+  // Filtrar serviços da categoria específica - correção da lógica de filtragem
   const areaServices = servicePages?.filter(page => {
     if (!page || !page.category) {
       return false;
     }
     
-    // Primeiro tentar match com o UUID da categoria (se encontrou a categoria)
-    if (targetCategory && page.category === targetCategory.id) {
-      return true;
-    }
+    // Usar category_id se disponível, senão usar category como fallback
+    const categoryToMatch = page.category_id || page.category;
     
-    // Depois tentar match com a string original para backwards compatibility
-    const pageCategory = page.category?.toLowerCase().trim();
-    const targetKey = areaKey?.toLowerCase().trim();
+    console.log(`🔍 Comparando: "${categoryToMatch}" === "${areaKey}" = ${categoryToMatch === areaKey}`);
     
-    console.log(`🔍 Comparando: "${pageCategory}" === "${targetKey}" = ${pageCategory === targetKey}`);
-    
-    return pageCategory === targetKey;
+    return categoryToMatch === areaKey;
   }) || [];
 
   console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
@@ -82,6 +72,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     servicos: areaServices.map(s => ({ 
       title: s?.title || 'Sem título', 
       category: s?.category || 'Sem categoria',
+      category_id: s?.category_id || 'Sem category_id',
       id: s?.id || 'Sem ID'
     }))
   });
@@ -120,7 +111,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
               return (
                 <Card 
                   key={`${service.id}-${serviceIndex}`}
-                  className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-black/10'} border hover:${isDark ? 'bg-black/60' : 'bg-white/60'} transition-all duration-300 cursor-pointer group`}
+                  className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border hover:shadow-lg transition-all duration-300 cursor-pointer group`}
                   onClick={() => {
                     if (service.href) {
                       const href = service.href.startsWith('/') ? service.href : `/servicos/${service.href}`;
@@ -129,13 +120,13 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                   }}
                 >
                   <CardContent className="p-6">
-                    <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                    <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
                       {service.title || 'Sem título'}
                     </h4>
                     <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
                       {service.description || 'Sem descrição'}
                     </p>
-                    <p className={`text-sm font-medium ${isDark ? 'text-white/70' : 'text-black/70'} group-hover:${isDark ? 'text-white' : 'text-black'}`}>
+                    <p className={`text-sm font-medium ${isDark ? 'text-blue-300' : 'text-blue-600'} group-hover:underline`}>
                       Saiba mais →
                     </p>
                   </CardContent>
@@ -153,7 +144,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                 Debug: Área: {areaKey} | Categoria encontrada: {targetCategory?.name || 'N/A'} | Total de páginas no sistema: {servicePages?.length || 0}
               </p>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs mt-2`}>
-                Categorias disponíveis: {servicePages?.map(p => p?.category).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || 'Nenhuma'}
+                Categorias disponíveis: {servicePages?.map(p => p?.category_id || p?.category).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || 'Nenhuma'}
               </p>
             </div>
           </div>
