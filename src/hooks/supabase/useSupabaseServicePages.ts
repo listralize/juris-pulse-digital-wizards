@@ -223,12 +223,23 @@ export const useSupabaseServicePages = () => {
       
       console.log('✅ Conexão OK - Iniciando processo de salvamento');
 
+      // Mapear IDs antigos para novos UUIDs
+      const idMapping = new Map<string, string>();
+
       for (let i = 0; i < cleanPages.length; i++) {
         const page = cleanPages[i];
         console.log(`\n💾 [${i+1}/${cleanPages.length}] Salvando página: "${page.title}"`);
         
+        // Gerar UUID se o ID não for um UUID válido
+        let finalId = page.id;
+        if (!page.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          finalId = crypto.randomUUID();
+          idMapping.set(page.id, finalId);
+          console.log(`🔄 ID convertido de "${page.id}" para UUID "${finalId}"`);
+        }
+
         const pageData = {
-          id: page.id,
+          id: finalId,
           title: page.title,
           description: page.description || '',
           category_id: page.category || '',
@@ -252,13 +263,16 @@ export const useSupabaseServicePages = () => {
 
         console.log('✅ Página principal salva com sucesso:', savedPage.title);
 
+        // Usar o UUID correto para as tabelas relacionadas
+        const servicePageId = finalId;
+
         // Salvar benefícios
         if (page.benefits && page.benefits.length > 0) {
           console.log('💾 Salvando benefícios...');
-          await supabase.from('service_benefits').delete().eq('service_page_id', page.id);
+          await supabase.from('service_benefits').delete().eq('service_page_id', servicePageId);
           
           const benefitsToInsert = page.benefits.map((benefit, index) => ({
-            service_page_id: page.id,
+            service_page_id: servicePageId,
             title: benefit.title || '',
             description: benefit.description || '',
             icon: benefit.icon || '⚖️',
@@ -279,10 +293,10 @@ export const useSupabaseServicePages = () => {
         // Salvar processos
         if (page.process && page.process.length > 0) {
           console.log('💾 Salvando processos...');
-          await supabase.from('service_process_steps').delete().eq('service_page_id', page.id);
+          await supabase.from('service_process_steps').delete().eq('service_page_id', servicePageId);
           
           const processToInsert = page.process.map((step, index) => ({
-            service_page_id: page.id,
+            service_page_id: servicePageId,
             step_number: step.step || index + 1,
             title: step.title || '',
             description: step.description || '',
@@ -303,10 +317,10 @@ export const useSupabaseServicePages = () => {
         // Salvar FAQ
         if (page.faq && page.faq.length > 0) {
           console.log('💾 Salvando FAQ...');
-          await supabase.from('service_faq').delete().eq('service_page_id', page.id);
+          await supabase.from('service_faq').delete().eq('service_page_id', servicePageId);
           
           const faqToInsert = page.faq.map((faq, index) => ({
-            service_page_id: page.id,
+            service_page_id: servicePageId,
             question: faq.question || '',
             answer: faq.answer || '',
             display_order: index
@@ -326,10 +340,10 @@ export const useSupabaseServicePages = () => {
         // Salvar depoimentos
         if (page.testimonials && page.testimonials.length > 0) {
           console.log('💾 Salvando depoimentos...');
-          await supabase.from('service_testimonials').delete().eq('service_page_id', page.id);
+          await supabase.from('service_testimonials').delete().eq('service_page_id', servicePageId);
           
           const testimonialsToInsert = page.testimonials.map((testimonial, index) => ({
-            service_page_id: page.id,
+            service_page_id: servicePageId,
             name: testimonial.name || '',
             text: testimonial.text || '',
             role: testimonial.role || '',
@@ -353,13 +367,19 @@ export const useSupabaseServicePages = () => {
 
       console.log('🎉 TODAS AS PÁGINAS FORAM SALVAS COM SUCESSO NO SUPABASE!');
 
+      // Atualizar os IDs nas páginas locais com os novos UUIDs
+      const updatedPages = cleanPages.map(page => ({
+        ...page,
+        id: idMapping.get(page.id) || page.id
+      }));
+
       // Backup em admin_settings
       try {
         console.log('💾 Fazendo backup em admin_settings...');
         const { error: adminError } = await supabase
           .from('admin_settings')
           .upsert({
-            service_pages: cleanPages as any
+            service_pages: updatedPages as any
           });
 
         if (adminError) {
@@ -371,18 +391,18 @@ export const useSupabaseServicePages = () => {
         console.warn('⚠️ Erro no backup:', backupError);
       }
       
-      setServicePages([...cleanPages]);
+      setServicePages([...updatedPages]);
       
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
-        detail: { pages: cleanPages } 
+        detail: { pages: updatedPages } 
       }));
       
       window.dispatchEvent(new CustomEvent('routesNeedUpdate', { 
-        detail: { pages: cleanPages } 
+        detail: { pages: updatedPages } 
       }));
 
       console.log('🏁 PROCESSO COMPLETO - Páginas salvas e eventos disparados!');
-      return cleanPages;
+      return updatedPages;
 
     } catch (error) {
       console.error('❌ ERRO CRÍTICO no salvamento:', error);
