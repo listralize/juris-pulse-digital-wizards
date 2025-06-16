@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -35,7 +36,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
-  const handleInputChange = (field: keyof PageTexts, value: string) => {
+  const handleInputChange = async (field: keyof PageTexts, value: string) => {
     console.log('📝 Alterando campo:', field, 'para:', value);
     const updatedTexts = {
       ...pageTexts,
@@ -43,13 +44,45 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     };
     onUpdatePageTexts(updatedTexts);
     
+    // Salvar no Supabase
+    try {
+      const { supabase } = await import('../../integrations/supabase/client');
+      
+      const { data: existing } = await supabase
+        .from('site_settings')
+        .select('id')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const dataToSave = {
+        [field.replace(/([A-Z])/g, '_$1').toLowerCase()]: value,
+        updated_at: new Date().toISOString()
+      };
+
+      if (existing) {
+        await supabase
+          .from('site_settings')
+          .update(dataToSave)
+          .eq('id', existing.id);
+      } else {
+        await supabase
+          .from('site_settings')
+          .insert(dataToSave);
+      }
+
+      console.log('✅ Campo salvo no Supabase:', field);
+    } catch (error) {
+      console.error('❌ Erro ao salvar no Supabase:', error);
+    }
+    
     // Disparar evento para atualizar componentes em tempo real
     window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
       detail: updatedTexts 
     }));
   };
 
-  const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
+  const handleNestedChange = async (parent: keyof PageTexts, field: string, value: string) => {
     console.log('📝 Alterando campo aninhado:', parent, field, 'para:', value);
     const parentObject = pageTexts[parent] || {};
     const updatedTexts = {
@@ -61,11 +94,66 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     };
     onUpdatePageTexts(updatedTexts);
     
-    // Disparar eventos específicos
-    if (parent === 'contactTexts') {
-      window.dispatchEvent(new CustomEvent('contactInfoUpdated', { 
-        detail: { [field]: value }
-      }));
+    // Salvar no Supabase dependendo do tipo
+    try {
+      const { supabase } = await import('../../integrations/supabase/client');
+      
+      if (parent === 'contactTexts') {
+        const { data: existing } = await supabase
+          .from('contact_info')
+          .select('id')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const dataToSave = {
+          [field]: value,
+          updated_at: new Date().toISOString()
+        };
+
+        if (existing) {
+          await supabase
+            .from('contact_info')
+            .update(dataToSave)
+            .eq('id', existing.id);
+        } else {
+          await supabase
+            .from('contact_info')
+            .insert(dataToSave);
+        }
+
+        // Disparar evento específico para contato
+        window.dispatchEvent(new CustomEvent('contactInfoUpdated', { 
+          detail: { [field]: value }
+        }));
+      } else if (parent === 'footerTexts') {
+        const { data: existing } = await supabase
+          .from('footer_info')
+          .select('id')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const dataToSave = {
+          [field.replace(/([A-Z])/g, '_$1').toLowerCase()]: value,
+          updated_at: new Date().toISOString()
+        };
+
+        if (existing) {
+          await supabase
+            .from('footer_info')
+            .update(dataToSave)
+            .eq('id', existing.id);
+        } else {
+          await supabase
+            .from('footer_info')
+            .insert(dataToSave);
+        }
+      }
+
+      console.log('✅ Campo aninhado salvo no Supabase:', parent, field);
+    } catch (error) {
+      console.error('❌ Erro ao salvar campo aninhado no Supabase:', error);
     }
     
     window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 

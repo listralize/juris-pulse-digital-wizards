@@ -105,6 +105,7 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
+          map_embed_url: string | null
           phone: string
           updated_at: string | null
           whatsapp: string
@@ -114,6 +115,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
+          map_embed_url?: string | null
           phone?: string
           updated_at?: string | null
           whatsapp?: string
@@ -123,6 +125,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
+          map_embed_url?: string | null
           phone?: string
           updated_at?: string | null
           whatsapp?: string
@@ -411,6 +414,7 @@ export type Database = {
         Row: {
           about_description: string
           about_image: string | null
+          about_media_type: string | null
           about_title: string
           areas_title: string
           client_area_description: string
@@ -429,6 +433,7 @@ export type Database = {
         Insert: {
           about_description?: string
           about_image?: string | null
+          about_media_type?: string | null
           about_title?: string
           areas_title?: string
           client_area_description?: string
@@ -447,6 +452,7 @@ export type Database = {
         Update: {
           about_description?: string
           about_image?: string | null
+          about_media_type?: string | null
           about_title?: string
           areas_title?: string
           client_area_description?: string

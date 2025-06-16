@@ -19,16 +19,16 @@ const LocationMap = () => {
         
         const { data: contact } = await supabase
           .from('contact_info')
-          .select('address')
+          .select('address, map_embed_url')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (contact?.address) {
-          console.log('🗺️ LocationMap: Endereço carregado:', contact.address);
+        if (contact) {
+          console.log('🗺️ LocationMap: Dados carregados do Supabase:', contact);
           setMapConfig(prev => ({
-            ...prev,
-            location: contact.address
+            embedUrl: contact.map_embed_url || prev.embedUrl,
+            location: contact.address || prev.location
           }));
         }
       } catch (error) {
@@ -43,18 +43,10 @@ const LocationMap = () => {
   useEffect(() => {
     const handleMapUpdate = (event: CustomEvent) => {
       console.log('🗺️ LocationMap: Recebendo atualização:', event.detail);
-      if (event.detail.address) {
-        setMapConfig(prev => ({
-          ...prev,
-          location: event.detail.address
-        }));
-      }
-      if (event.detail.mapEmbedUrl) {
-        setMapConfig(prev => ({
-          ...prev,
-          embedUrl: event.detail.mapEmbedUrl
-        }));
-      }
+      setMapConfig(prev => ({
+        embedUrl: event.detail.mapEmbedUrl || prev.embedUrl,
+        location: event.detail.address || prev.location
+      }));
     };
 
     window.addEventListener('contactInfoUpdated', handleMapUpdate as EventListener);
