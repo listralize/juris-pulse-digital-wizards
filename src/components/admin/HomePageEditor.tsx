@@ -38,23 +38,23 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const handleSave = async () => {
     try {
-      console.log('💾 Salvando dados no HomePageEditor...', pageTexts);
+      console.log('💾 [HomePageEditor] Salvando dados...', { pageTexts });
       await onSaveAll();
-      toast.success('Todas as alterações foram salvas no Supabase!');
+      toast.success('Todas as alterações foram salvas com sucesso!');
       
-      // Dispatch immediate event to update site content
-      console.log('📡 Disparando evento pageTextsUpdated...', pageTexts);
+      // Force immediate update of the site
+      console.log('📡 [HomePageEditor] Forçando atualização do site...');
       window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: pageTexts }));
       
     } catch (error) {
-      console.error('❌ Erro ao salvar:', error);
+      console.error('❌ [HomePageEditor] Erro ao salvar:', error);
       toast.error('Erro ao salvar alterações');
     }
   };
 
   const updatePageTexts = (updates: Partial<PageTexts>) => {
     const updatedTexts = { ...pageTexts, ...updates };
-    console.log('📝 Atualizando pageTexts...', updates, updatedTexts);
+    console.log('📝 [HomePageEditor] Atualizando pageTexts...', { updates, updatedTexts });
     onUpdatePageTexts(updatedTexts);
   };
 
@@ -83,7 +83,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           </CardTitle>
           <Button onClick={handleSave} size="sm" variant="outline">
             <Save className="w-4 h-4 mr-2" />
-            Salvar Tudo no Supabase
+            Salvar Tudo
           </Button>
         </div>
       </CardHeader>
