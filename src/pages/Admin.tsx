@@ -68,15 +68,15 @@ const Admin = () => {
   };
 
   const handleUpdatePageTexts = (texts: PageTexts) => {
+    console.log('🔄 Admin: Atualizando pageTexts:', texts);
     setPageTexts(texts);
   };
 
   const handleSavePageTexts = async () => {
     try {
+      console.log('💾 Admin: Salvando pageTexts:', pageTexts);
       await savePageTexts(pageTexts);
       toast.success('Textos das páginas salvos com sucesso!');
-      // Força reload da página para refletir mudanças
-      window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: pageTexts }));
     } catch (error) {
       console.error('Erro ao salvar textos:', error);
       toast.error('Erro ao salvar textos das páginas');
@@ -85,8 +85,14 @@ const Admin = () => {
 
   const handleSaveTeamMembers = async () => {
     try {
+      console.log('💾 Admin: Salvando teamMembers:', teamMembers);
       await saveTeamMembers(teamMembers);
       toast.success('Equipe salva com sucesso!');
+      
+      // Disparar evento para atualizar a seção Partners
+      window.dispatchEvent(new CustomEvent('teamMembersUpdated', { 
+        detail: teamMembers 
+      }));
     } catch (error) {
       console.error('Erro ao salvar equipe:', error);
       toast.error('Erro ao salvar equipe');
@@ -103,17 +109,23 @@ const Admin = () => {
       image: '/lovable-uploads/placeholder-member.jpg',
       description: 'Descrição do membro da equipe'
     };
-    setTeamMembers([...teamMembers, newMember]);
+    const updatedMembers = [...teamMembers, newMember];
+    setTeamMembers(updatedMembers);
+    console.log('➕ Admin: Adicionando novo membro:', newMember);
   };
 
   const handleRemoveTeamMember = (id: string) => {
-    setTeamMembers(teamMembers.filter(member => member.id !== id));
+    const updatedMembers = teamMembers.filter(member => member.id !== id);
+    setTeamMembers(updatedMembers);
+    console.log('🗑️ Admin: Removendo membro:', id);
   };
 
   const handleUpdateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
-    setTeamMembers(teamMembers.map(member => 
+    const updatedMembers = teamMembers.map(member => 
       member.id === id ? { ...member, [field]: value } : member
-    ));
+    );
+    setTeamMembers(updatedMembers);
+    console.log('✏️ Admin: Atualizando membro:', id, field, value);
   };
 
   const handleSaveBlogPosts = async (posts: BlogPost[]) => {
@@ -150,15 +162,15 @@ const Admin = () => {
               </p>
             </div>
 
-            <Tabs defaultValue="service-pages" className="space-y-6">
+            <Tabs defaultValue="content" className="space-y-6">
               <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
-                <TabsTrigger value="service-pages" className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  Páginas de Serviços ({servicePages?.length || 0})
-                </TabsTrigger>
                 <TabsTrigger value="content" className="flex items-center gap-2">
                   <Edit className="w-4 h-4" />
                   Conteúdo Geral
+                </TabsTrigger>
+                <TabsTrigger value="service-pages" className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Páginas de Serviços ({servicePages?.length || 0})
                 </TabsTrigger>
                 <TabsTrigger value="blog" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
@@ -170,18 +182,6 @@ const Admin = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="service-pages">
-                <ServicePagesManager 
-                  servicePages={servicePages || []}
-                  categories={categories || []}
-                  pageTexts={validPageTexts}
-                  onSave={handleSaveServicePages}
-                  onSaveCategories={handleSaveCategories}
-                  onSavePageTexts={handleSavePageTexts}
-                  onUpdatePageTexts={handleUpdatePageTexts}
-                />
-              </TabsContent>
-
               <TabsContent value="content">
                 <ContentManagement 
                   teamMembers={validTeamMembers}
@@ -192,6 +192,18 @@ const Admin = () => {
                   onSaveTeamMembers={handleSaveTeamMembers}
                   onUpdatePageTexts={handleUpdatePageTexts}
                   onSavePageTexts={handleSavePageTexts}
+                />
+              </TabsContent>
+
+              <TabsContent value="service-pages">
+                <ServicePagesManager 
+                  servicePages={servicePages || []}
+                  categories={categories || []}
+                  pageTexts={validPageTexts}
+                  onSave={handleSaveServicePages}
+                  onSaveCategories={handleSaveCategories}
+                  onSavePageTexts={handleSavePageTexts}
+                  onUpdatePageTexts={handleUpdatePageTexts}
                 />
               </TabsContent>
 

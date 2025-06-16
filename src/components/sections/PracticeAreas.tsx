@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -15,6 +16,28 @@ const PracticeAreas = () => {
   const { theme } = useTheme();
   const { pageTexts, categories, servicePages, isLoading } = useSupabaseDataNew();
   const isDark = theme === 'dark';
+
+  // Estado local para receber atualizações em tempo real
+  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+
+  // Atualizar quando pageTexts muda
+  useEffect(() => {
+    setLocalPageTexts(pageTexts);
+  }, [pageTexts]);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📱 PracticeAreas: Recebendo atualização de textos:', event.detail);
+      setLocalPageTexts(event.detail);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
 
   console.log('🔍 PracticeAreas DADOS:', {
     categoriesCount: categories?.length || 0,
@@ -132,6 +155,8 @@ const PracticeAreas = () => {
 
   console.log('🎯 Renderizando áreas:', practiceAreas.length);
 
+  const areasTitle = localPageTexts?.areasTitle || 'Áreas de Atuação';
+
   return (
     <section 
       id="areas"
@@ -144,7 +169,7 @@ const PracticeAreas = () => {
           ref={titleRef}
           className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center ${isDark ? 'text-white' : 'text-black'} mb-8 md:mb-12`}
         >
-          {pageTexts.areasTitle || 'Áreas de Atuação'}
+          {areasTitle}
         </h2>
         
         <div className="flex-1 flex items-center">

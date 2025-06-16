@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
@@ -17,6 +17,28 @@ const ClientArea = () => {
   const { theme } = useTheme();
   const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
+  
+  // Estado local para receber atualizações em tempo real
+  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+
+  // Atualizar quando pageTexts muda
+  useEffect(() => {
+    setLocalPageTexts(pageTexts);
+  }, [pageTexts]);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📱 ClientArea: Recebendo atualização de textos:', event.detail);
+      setLocalPageTexts(event.detail);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
   
   useEffect(() => {
     if (isLoading) return;
@@ -113,8 +135,10 @@ const ClientArea = () => {
     );
   }
 
-  const whatsappNumber = pageTexts.contactTexts.whatsapp || '5562994594496';
-  const clientPortalLink = pageTexts.clientPortalLink || '#';
+  const whatsappNumber = localPageTexts?.contactTexts?.whatsapp || '5562994594496';
+  const clientPortalLink = localPageTexts?.clientPortalLink || '#';
+  const clientAreaTitle = localPageTexts?.clientAreaTitle || 'Área do Cliente';
+  const clientAreaDescription = localPageTexts?.clientAreaDescription || 'Acesse sua área restrita para acompanhar seus processos';
 
   return (
     <section 
@@ -143,14 +167,14 @@ const ClientArea = () => {
               ref={titleRef} 
               className={`text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
-              {pageTexts.clientAreaTitle}
+              {clientAreaTitle}
             </h2>
             
             <p 
               ref={textRef} 
               className={`text-base md:text-lg lg:text-xl xl:text-2xl mb-6 md:mb-8 font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
             >
-              {pageTexts.clientAreaDescription}
+              {clientAreaDescription}
             </p>
             
             <div className="flex flex-col space-y-3 md:space-y-4">

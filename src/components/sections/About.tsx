@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
@@ -13,6 +13,28 @@ const About = () => {
   const { theme } = useTheme();
   const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
+  
+  // Estado local para receber atualizações em tempo real
+  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+
+  // Atualizar quando pageTexts muda
+  useEffect(() => {
+    setLocalPageTexts(pageTexts);
+  }, [pageTexts]);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📱 About: Recebendo atualização de textos:', event.detail);
+      setLocalPageTexts(event.detail);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -66,8 +88,8 @@ const About = () => {
     );
   }
 
-  const aboutTitle = pageTexts?.aboutTitle || 'Sobre Nós';
-  const aboutDescription = pageTexts?.aboutDescription || 'Descrição sobre o escritório';
+  const aboutTitle = localPageTexts?.aboutTitle || 'Sobre Nós';
+  const aboutDescription = localPageTexts?.aboutDescription || 'Descrição sobre o escritório';
 
   return (
     <section 

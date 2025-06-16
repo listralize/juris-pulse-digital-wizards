@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -20,6 +20,28 @@ const Contact = () => {
   const isDark = theme === 'dark';
   const { pageTexts } = useAdminData();
   
+  // Estado local para receber atualizações em tempo real
+  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+
+  // Atualizar quando pageTexts muda
+  useEffect(() => {
+    setLocalPageTexts(pageTexts);
+  }, [pageTexts]);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📱 Contact: Recebendo atualização de textos:', event.detail);
+      setLocalPageTexts(event.detail);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
+  
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
@@ -39,6 +61,9 @@ const Contact = () => {
     };
   }, []);
 
+  const contactTitle = localPageTexts?.contactTitle || 'Entre em Contato';
+  const contactSubtitle = localPageTexts?.contactSubtitle || 'Estamos prontos para ajudá-lo';
+
   return (
     <div 
       ref={sectionRef}
@@ -48,11 +73,11 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto">
         <div ref={titleRef} className="mb-6 text-center">
           <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            {pageTexts.contactTitle}
+            {contactTitle}
           </h2>
           <div className={`w-20 h-1 mx-auto mt-2 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
           <p className={`mt-2 text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
-            {pageTexts.contactSubtitle}
+            {contactSubtitle}
           </p>
         </div>
         
