@@ -59,10 +59,19 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
       return false;
     }
     
-    // Usar category_id se disponível, senão usar category como fallback
-    const categoryToMatch = page.category_id || page.category;
+    // Usar category como está definido no tipo ServicePage
+    const categoryToMatch = page.category;
     
     console.log(`🔍 Comparando: "${categoryToMatch}" === "${areaKey}" = ${categoryToMatch === areaKey}`);
+    console.log('🔍 Página completa:', {
+      id: page.id,
+      title: page.title,
+      category: page.category,
+      benefits: page.benefits?.length || 0,
+      process: page.process?.length || 0,
+      faq: page.faq?.length || 0,
+      testimonials: page.testimonials?.length || 0
+    });
     
     return categoryToMatch === areaKey;
   }) || [];
@@ -72,8 +81,13 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     servicos: areaServices.map(s => ({ 
       title: s?.title || 'Sem título', 
       category: s?.category || 'Sem categoria',
-      category_id: s?.category_id || 'Sem category_id',
-      id: s?.id || 'Sem ID'
+      id: s?.id || 'Sem ID',
+      hasContent: {
+        benefits: s?.benefits?.length || 0,
+        process: s?.process?.length || 0,
+        faq: s?.faq?.length || 0,
+        testimonials: s?.testimonials?.length || 0
+      }
     }))
   });
 
@@ -126,6 +140,12 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                     <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
                       {service.description || 'Sem descrição'}
                     </p>
+                    
+                    {/* Debug: Mostrar se tem conteúdo */}
+                    <div className={`text-xs mb-3 p-2 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <p>Debug: Benefits: {service.benefits?.length || 0} | Process: {service.process?.length || 0} | FAQ: {service.faq?.length || 0} | Testimonials: {service.testimonials?.length || 0}</p>
+                    </div>
+                    
                     <p className={`text-sm font-medium ${isDark ? 'text-blue-300' : 'text-blue-600'} group-hover:underline`}>
                       Saiba mais →
                     </p>
@@ -144,7 +164,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                 Debug: Área: {areaKey} | Categoria encontrada: {targetCategory?.name || 'N/A'} | Total de páginas no sistema: {servicePages?.length || 0}
               </p>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs mt-2`}>
-                Categorias disponíveis: {servicePages?.map(p => p?.category_id || p?.category).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || 'Nenhuma'}
+                Categorias disponíveis: {servicePages?.map(p => p?.category).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || 'Nenhuma'}
               </p>
             </div>
           </div>
