@@ -17,8 +17,9 @@ import NotFound from './pages/NotFound';
 
 // Dynamic routes
 import DynamicServiceRoutes from './components/DynamicServiceRoutes';
+import DynamicCategoryRoutes from './components/areas/DynamicCategoryRoutes';
 
-// Area pages
+// Area pages (static fallbacks)
 import Familia from './pages/areas/Familia';
 import Tributario from './pages/areas/Tributario';
 import Empresarial from './pages/areas/Empresarial';
@@ -47,7 +48,7 @@ function App() {
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/obrigado" element={<Obrigado />} />
                 
-                {/* Area pages */}
+                {/* Static area pages (fallbacks for existing URLs) */}
                 <Route path="/areas/familia" element={<Familia />} />
                 <Route path="/areas/tributario" element={<Tributario />} />
                 <Route path="/areas/empresarial" element={<Empresarial />} />
@@ -58,7 +59,10 @@ function App() {
                 <Route path="/areas/constitucional" element={<Constitucional />} />
                 <Route path="/areas/administrativo" element={<Administrativo />} />
                 
-                {/* Dynamic service pages - IMPORTANTE: usar /* para capturar subrotas */}
+                {/* Dynamic area pages - Para todas as categorias do Supabase */}
+                <Route path="/areas/*" element={<DynamicCategoryRoutes />} />
+                
+                {/* Dynamic service pages */}
                 <Route path="/services/*" element={<DynamicServiceRoutes />} />
                 <Route path="/servicos/*" element={<DynamicServiceRoutes />} />
                 
