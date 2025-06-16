@@ -34,21 +34,12 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Encontrar a categoria correspondente
-  const targetCategory = categories?.find(cat => 
-    cat && cat.value === areaKey
-  );
-
   // Filtrar serviços da categoria específica
   const areaServices = servicePages?.filter(page => {
     if (!page || !page.category) {
       return false;
     }
-    
-    // Usar category como está definido no tipo ServicePage
-    const categoryToMatch = page.category;
-    
-    return categoryToMatch === areaKey;
+    return page.category === areaKey;
   }) || [];
 
   return (
