@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../../../integrations/supabase/client';
+import { useFormConfig } from '../../../hooks/useFormConfig';
 
 interface ContactFormData {
   name: string;
@@ -10,9 +11,11 @@ interface ContactFormData {
   message: string;
   service: string;
   isUrgent: boolean;
+  [key: string]: any; // Para campos personalizados
 }
 
 export const useContactForm = () => {
+  const { formConfig } = useFormConfig();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -25,7 +28,7 @@ export const useContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const updateField = (field: keyof ContactFormData, value: string | boolean) => {
+  const updateField = (field: keyof ContactFormData | string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -40,13 +43,32 @@ export const useContactForm = () => {
       return;
     }
 
+    // Verificar campos personalizados obrigatórios
+    const missingRequiredFields = formConfig.customFields?.filter(field => 
+      field.required && (!formData[field.name] || formData[field.name].toString().trim() === '')
+    );
+
+    if (missingRequiredFields && missingRequiredFields.length > 0) {
+      toast.error(`Por favor, preencha o campo obrigatório: ${missingRequiredFields[0].label}`);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       console.log('📤 Enviando formulário via edge function segura...');
 
+      // Incluir campos personalizados nos dados enviados
+      const submitData = {
+        ...formData,
+        customFields: formConfig.customFields?.reduce((acc, field) => {
+          acc[field.name] = formData[field.name] || '';
+          return acc;
+        }, {} as { [key: string]: any }) || {}
+      };
+
       const { data, error } = await supabase.functions.invoke('contact-form', {
-        body: formData
+        body: submitData
       });
 
       if (error) {
@@ -56,22 +78,29 @@ export const useContactForm = () => {
 
       console.log('✅ Resposta da edge function:', data);
       
-      toast.success('Mensagem enviada com sucesso! Entraremos em contato em breve.');
+      toast.success(formConfig.formTexts.successMessage);
       setIsSubmitted(true);
       
       // Reset form
-      setFormData({
+      const resetData: ContactFormData = {
         name: '',
         email: '',
         phone: '',
         message: '',
         service: '',
         isUrgent: false
+      };
+
+      // Reset campos personalizados
+      formConfig.customFields?.forEach(field => {
+        resetData[field.name] = field.type === 'checkbox' ? false : '';
       });
+
+      setFormData(resetData);
 
     } catch (error) {
       console.error('❌ Erro ao enviar formulário:', error);
-      toast.error('Erro ao enviar mensagem. Tente novamente.');
+      toast.error(formConfig.formTexts.errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -79,14 +108,21 @@ export const useContactForm = () => {
 
   const resetForm = () => {
     setIsSubmitted(false);
-    setFormData({
+    const resetData: ContactFormData = {
       name: '',
       email: '',
       phone: '',
       message: '',
       service: '',
       isUrgent: false
+    };
+
+    // Reset campos personalizados
+    formConfig.customFields?.forEach(field => {
+      resetData[field.name] = field.type === 'checkbox' ? false : '';
     });
+
+    setFormData(resetData);
   };
 
   return {

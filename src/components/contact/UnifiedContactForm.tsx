@@ -1,16 +1,11 @@
 
 import React from 'react';
 import { useContactForm } from "./form/useContactForm";
+import { useFormConfig } from "../../hooks/useFormConfig";
+import { DynamicCustomFields } from './form/DynamicCustomFields';
 
 // Componentes modulares
 import ContactFormContainer from './form/ContactFormContainer';
-import FormHeader from './form/FormHeader';
-import NamePhoneFields from './form/NamePhoneFields';
-import EmailField from './form/EmailField';
-import ServiceSelectField from './form/ServiceSelectField';
-import MessageField from './form/MessageField';
-import UrgentCheckbox from './form/UrgentCheckbox';
-import SubmitButton from './form/SubmitButton';
 
 interface UnifiedContactFormProps {
   preselectedService?: string;
@@ -21,6 +16,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   preselectedService,
   darkBackground = false
 }) => {
+  const { formConfig, isLoading } = useFormConfig();
   const { formData, isSubmitting, updateField, handleSubmit } = useContactForm();
 
   // Pre-selecionar serviço se fornecido
@@ -30,15 +26,38 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     }
   }, [preselectedService, formData.service, updateField]);
 
+  if (isLoading) {
+    return (
+      <ContactFormContainer darkBackground={darkBackground}>
+        <div className="flex items-center justify-center py-8">
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
+            darkBackground ? 'border-white' : 'border-black'
+          }`}></div>
+        </div>
+      </ContactFormContainer>
+    );
+  }
+
   return (
     <ContactFormContainer darkBackground={darkBackground}>
-      <FormHeader darkBackground={darkBackground} />
+      <div className="mb-6">
+        <h3 className={`text-xl md:text-2xl font-canela mb-2 ${
+          darkBackground ? 'text-white' : 'text-black'
+        }`}>
+          {formConfig.formTexts.headerTitle}
+        </h3>
+        <p className={`text-sm ${
+          darkBackground ? 'text-white/70' : 'text-gray-600'
+        }`}>
+          {formConfig.formTexts.headerSubtitle}
+        </p>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-              Nome *
+              {formConfig.formTexts.nameLabel}
             </label>
             <input
               type="text"
@@ -54,7 +73,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
           
           <div>
             <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-              Telefone
+              {formConfig.formTexts.phoneLabel}
             </label>
             <input
               type="tel"
@@ -70,7 +89,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
         <div>
           <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            E-mail *
+            {formConfig.formTexts.emailLabel}
           </label>
           <input
             type="email"
@@ -86,7 +105,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
         <div>
           <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            Qual problema você precisa resolver?
+            {formConfig.formTexts.serviceLabel}
           </label>
           <select
             value={formData.service}
@@ -96,20 +115,17 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
               : 'bg-white border-gray-300 text-black'}`}
           >
             <option value="">Selecione seu problema jurídico</option>
-            <option value="familia">Divórcio e questões familiares</option>
-            <option value="tributario">Consultoria tributária</option>
-            <option value="empresarial">Direito empresarial</option>
-            <option value="trabalho">Direito trabalhista</option>
-            <option value="constitucional">Direitos fundamentais</option>
-            <option value="administrativo">Direito administrativo</option>
-            <option value="previdenciario">Direito previdenciário</option>
-            <option value="consumidor">Direito do consumidor</option>
+            {formConfig.serviceOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
           <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            Detalhes do seu caso *
+            {formConfig.formTexts.messageLabel}
           </label>
           <textarea
             value={formData.message}
@@ -123,6 +139,14 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
           />
         </div>
 
+        {/* Campos personalizados dinâmicos */}
+        <DynamicCustomFields
+          customFields={formConfig.customFields || []}
+          formData={formData}
+          updateField={updateField}
+          darkBackground={darkBackground}
+        />
+
         <div className="flex items-start space-x-3">
           <input
             type="checkbox"
@@ -132,11 +156,31 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
             className={`mt-1 ${darkBackground ? 'border-white/40' : ''}`}
           />
           <label htmlFor="urgent" className={`text-sm ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            Preciso de atendimento urgente
+            {formConfig.formTexts.urgentLabel}
           </label>
         </div>
 
-        <SubmitButton isSubmitting={isSubmitting} darkBackground={darkBackground} />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`w-full flex items-center justify-center py-3 px-6 rounded-md font-medium transition-all ${
+            darkBackground 
+              ? 'bg-white text-black hover:bg-white/90' 
+              : 'bg-black text-white hover:bg-black/90'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
+        >
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Enviando...
+            </span>
+          ) : (
+            formConfig.formTexts.submitButton
+          )}
+        </button>
       </form>
     </ContactFormContainer>
   );
