@@ -72,37 +72,71 @@ export const ContactFormManagement: React.FC = () => {
 
   const loadFormConfig = async () => {
     try {
+      console.log('🔄 Carregando configurações do formulário...');
+      
       const { data, error } = await supabase
         .from('admin_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao carregar configurações:', error);
+      console.log('📊 Dados carregados:', { data, error });
+
+      if (error) {
+        console.error('❌ Erro ao carregar configurações:', error);
+        toast.error('Erro ao carregar configurações do formulário');
         return;
       }
 
       if (data && data.form_config) {
         const savedConfig = data.form_config as any;
-        setFormConfig({ ...defaultFormConfig, ...savedConfig });
+        console.log('✅ Configurações encontradas:', savedConfig);
+        
+        // Merge com as configurações padrão para garantir que todos os campos existam
+        const mergedConfig = {
+          ...defaultFormConfig,
+          ...savedConfig,
+          formTexts: {
+            ...defaultFormConfig.formTexts,
+            ...(savedConfig.formTexts || {})
+          },
+          serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions
+        };
+        
+        setFormConfig(mergedConfig);
+        console.log('🔧 Configurações aplicadas:', mergedConfig);
+      } else {
+        console.log('⚠️ Nenhuma configuração encontrada, usando padrões');
+        setFormConfig(defaultFormConfig);
       }
     } catch (error) {
-      console.error('Erro ao carregar configurações do formulário:', error);
+      console.error('💥 Erro crítico ao carregar configurações:', error);
+      toast.error('Erro crítico ao carregar configurações');
     }
   };
 
   const saveFormConfig = async () => {
     setIsSaving(true);
     try {
-      // First check if there's an existing record
-      const { data: existingData } = await supabase
+      console.log('💾 Iniciando salvamento das configurações:', formConfig);
+      
+      // Primeiro verifica se existe um registro
+      const { data: existingData, error: selectError } = await supabase
         .from('admin_settings')
         .select('id')
-        .single();
+        .maybeSingle();
+
+      console.log('🔍 Verificação de registro existente:', { existingData, selectError });
+
+      if (selectError) {
+        console.error('❌ Erro ao verificar registro existente:', selectError);
+        throw selectError;
+      }
 
       if (existingData) {
-        // Update existing record
-        const { error } = await supabase
+        // Atualiza o registro existente
+        console.log('🔄 Atualizando registro existente com ID:', existingData.id);
+        
+        const { error: updateError } = await supabase
           .from('admin_settings')
           .update({
             form_config: formConfig as any,
@@ -110,23 +144,40 @@ export const ContactFormManagement: React.FC = () => {
           })
           .eq('id', existingData.id);
 
-        if (error) throw error;
+        if (updateError) {
+          console.error('❌ Erro ao atualizar registro:', updateError);
+          throw updateError;
+        }
+        
+        console.log('✅ Registro atualizado com sucesso');
       } else {
-        // Create new record
-        const { error } = await supabase
+        // Cria um novo registro
+        console.log('➕ Criando novo registro');
+        
+        const { error: insertError } = await supabase
           .from('admin_settings')
           .insert({
             form_config: formConfig as any,
             updated_at: new Date().toISOString()
           });
 
-        if (error) throw error;
+        if (insertError) {
+          console.error('❌ Erro ao criar registro:', insertError);
+          throw insertError;
+        }
+        
+        console.log('✅ Novo registro criado com sucesso');
       }
 
       toast.success('Configurações do formulário salvas com sucesso!');
+      console.log('🎉 Salvamento concluído com sucesso');
+      
+      // Recarrega as configurações para confirmar que foram salvas
+      await loadFormConfig();
+      
     } catch (error) {
-      console.error('Erro ao salvar:', error);
-      toast.error('Erro ao salvar configurações');
+      console.error('💥 Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações do formulário');
     } finally {
       setIsSaving(false);
     }
