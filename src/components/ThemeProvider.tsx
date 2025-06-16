@@ -47,16 +47,16 @@ export function ThemeProvider({
     root.classList.add(themeToApply);
     body.classList.add(themeToApply);
     
-    // Set explicit styles
+    // Set color scheme but don't force background colors
     if (themeToApply === 'dark') {
       root.style.colorScheme = 'dark';
-      body.style.backgroundColor = '#000000';
-      body.style.color = '#ffffff';
     } else {
       root.style.colorScheme = 'light';
-      body.style.backgroundColor = '#f5f5f5';
-      body.style.color = '#000000';
     }
+    
+    // Remove any forced background/color styles
+    body.style.backgroundColor = '';
+    body.style.color = '';
   };
 
   // Apply theme on mount and when theme changes

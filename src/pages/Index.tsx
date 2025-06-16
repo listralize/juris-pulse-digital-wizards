@@ -52,8 +52,8 @@ const Index = () => {
     <div 
       className={`h-screen w-full transition-colors duration-300 overflow-hidden ${
         isDark 
-          ? 'bg-black text-white' 
-          : 'bg-[#f5f5f5] text-black'
+          ? 'bg-neutral-900 text-white' 
+          : 'bg-neutral-100 text-black'
       }`}
       style={{ 
         scrollbarWidth: 'none', 
