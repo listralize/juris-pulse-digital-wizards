@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, Edit, Globe } from 'lucide-react';
+import { ArrowLeft, Edit, Mail } from 'lucide-react';
 import { HomePageEditor } from './HomePageEditor';
-import { AreasTextsManagement } from './AreasTextsManagement';
+import { ContactFormManagement } from './ContactFormManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
 
 interface ContentManagementProps {
@@ -42,11 +42,11 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
       color: 'bg-blue-500'
     },
     {
-      id: 'areas-texts',
-      title: 'Textos das Áreas Específicas',
-      description: 'Editar textos detalhados das páginas de áreas de atuação',
-      icon: <Globe className="w-8 h-8" />,
-      color: 'bg-purple-500'
+      id: 'contact-form',
+      title: 'Formulário de Contato',
+      description: 'Gerenciar webhook, opções do formulário e configurações de envio',
+      icon: <Mail className="w-8 h-8" />,
+      color: 'bg-green-500'
     }
   ];
 
@@ -88,12 +88,8 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
             />
           )}
           
-          {selectedSection === 'areas-texts' && (
-            <AreasTextsManagement
-              pageTexts={pageTexts}
-              onUpdatePageTexts={onUpdatePageTexts}
-              onSave={onSavePageTexts}
-            />
+          {selectedSection === 'contact-form' && (
+            <ContactFormManagement />
           )}
         </CardContent>
       </Card>
