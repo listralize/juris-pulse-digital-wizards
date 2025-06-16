@@ -46,6 +46,10 @@ export interface PageTexts {
   heroTitle: string;
   heroSubtitle: string;
   heroBackgroundImage?: string;
+  heroPrimaryButtonText?: string;
+  heroSecondaryButtonText?: string;
+  heroPrimaryButtonLink?: string;
+  heroSecondaryButtonLink?: string;
   aboutTitle: string;
   aboutDescription: string;
   aboutImage?: string;
@@ -81,13 +85,18 @@ export interface PageTexts {
 }
 
 export interface Testimonial {
+  id?: string;
   name: string;
   text: string;
+  quote?: string;
   role?: string;
+  title?: string;
   image?: string;
+  content?: string;
 }
 
 export interface Benefit {
+  id?: string;
   title: string;
   description: string;
   icon?: string;
