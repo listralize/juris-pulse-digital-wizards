@@ -26,18 +26,6 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
 
-  console.log('🎯 DynamicAreaPage DADOS:', {
-    areaKey,
-    totalServicePages: servicePages?.length || 0,
-    categoriesCount: categories?.length || 0,
-    paginasPorCategoria: servicePages?.reduce((acc, page) => {
-      if (page && page.category) {
-        acc[page.category] = (acc[page.category] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>) || {}
-  });
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -51,9 +39,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     cat && cat.value === areaKey
   );
 
-  console.log('🎯 Categoria encontrada:', targetCategory);
-
-  // Filtrar serviços da categoria específica - correção da lógica de filtragem
+  // Filtrar serviços da categoria específica
   const areaServices = servicePages?.filter(page => {
     if (!page || !page.category) {
       return false;
@@ -62,34 +48,8 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     // Usar category como está definido no tipo ServicePage
     const categoryToMatch = page.category;
     
-    console.log(`🔍 Comparando: "${categoryToMatch}" === "${areaKey}" = ${categoryToMatch === areaKey}`);
-    console.log('🔍 Página completa:', {
-      id: page.id,
-      title: page.title,
-      category: page.category,
-      benefits: page.benefits?.length || 0,
-      process: page.process?.length || 0,
-      faq: page.faq?.length || 0,
-      testimonials: page.testimonials?.length || 0
-    });
-    
     return categoryToMatch === areaKey;
   }) || [];
-
-  console.log(`📄 SERVIÇOS FILTRADOS para ${areaKey}:`, {
-    total: areaServices.length,
-    servicos: areaServices.map(s => ({ 
-      title: s?.title || 'Sem título', 
-      category: s?.category || 'Sem categoria',
-      id: s?.id || 'Sem ID',
-      hasContent: {
-        benefits: s?.benefits?.length || 0,
-        process: s?.process?.length || 0,
-        faq: s?.faq?.length || 0,
-        testimonials: s?.testimonials?.length || 0
-      }
-    }))
-  });
 
   return (
     <PracticeAreaLayout
@@ -141,11 +101,6 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                       {service.description || 'Sem descrição'}
                     </p>
                     
-                    {/* Debug: Mostrar se tem conteúdo */}
-                    <div className={`text-xs mb-3 p-2 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                      <p>Debug: Benefits: {service.benefits?.length || 0} | Process: {service.process?.length || 0} | FAQ: {service.faq?.length || 0} | Testimonials: {service.testimonials?.length || 0}</p>
-                    </div>
-                    
                     <p className={`text-sm font-medium ${isDark ? 'text-blue-300' : 'text-blue-600'} group-hover:underline`}>
                       Saiba mais →
                     </p>
@@ -159,14 +114,6 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Nenhum serviço encontrado para esta área.
             </p>
-            <div className={`text-sm mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Debug: Área: {areaKey} | Categoria encontrada: {targetCategory?.name || 'N/A'} | Total de páginas no sistema: {servicePages?.length || 0}
-              </p>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-xs mt-2`}>
-                Categorias disponíveis: {servicePages?.map(p => p?.category).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || 'Nenhuma'}
-              </p>
-            </div>
           </div>
         )}
       </div>
