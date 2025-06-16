@@ -5,7 +5,7 @@ import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
 import { CategoryInfo, ServicePage } from '../../types/adminTypes';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import NotFound from '../../pages/NotFound';
 import PracticeAreaLayout from '../PracticeAreaLayout';
 

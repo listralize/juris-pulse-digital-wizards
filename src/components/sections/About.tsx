@@ -26,7 +26,7 @@ const About = () => {
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('about_title, about_description, about_image, about_media_type')
+          .select('about_title, about_description, about_image')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -36,7 +36,6 @@ const About = () => {
           setAboutTitle(settings.about_title || 'Sobre Nós');
           setAboutDescription(settings.about_description || 'Descrição sobre o escritório');
           setAboutMedia(settings.about_image || '');
-          setAboutMediaType(settings.about_media_type || 'image');
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados da seção About:', error);

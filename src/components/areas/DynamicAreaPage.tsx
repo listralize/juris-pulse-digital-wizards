@@ -2,7 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PracticeAreaLayout from '../PracticeAreaLayout';
-import { Card, CardContent } from '../ui/card';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 
@@ -71,9 +70,9 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
               }
               
               return (
-                <Card 
+                <div 
                   key={`${service.id}-${serviceIndex}`}
-                  className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border hover:shadow-lg transition-all duration-300 cursor-pointer group`}
+                  className={`p-6 rounded-lg border ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-white border-gray-200 hover:border-gray-400'} transition-all duration-300 group-hover:scale-105 h-full cursor-pointer group`}
                   onClick={() => {
                     if (service.href) {
                       const href = service.href.startsWith('/') ? service.href : `/servicos/${service.href}`;
@@ -81,19 +80,17 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
                     }
                   }}
                 >
-                  <CardContent className="p-6">
-                    <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
-                      {service.title || 'Sem título'}
-                    </h4>
-                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
-                      {service.description || 'Sem descrição'}
-                    </p>
-                    
-                    <p className={`text-sm font-medium ${isDark ? 'text-blue-300' : 'text-blue-600'} group-hover:underline`}>
-                      Saiba mais →
-                    </p>
-                  </CardContent>
-                </Card>
+                  <h4 className={`text-lg font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
+                    {service.title || 'Sem título'}
+                  </h4>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed mb-4`}>
+                    {service.description || 'Sem descrição'}
+                  </p>
+                  
+                  <p className={`text-sm font-medium ${isDark ? 'text-blue-300' : 'text-blue-600'} group-hover:underline`}>
+                    Ver detalhes →
+                  </p>
+                </div>
               );
             })}
           </div>
