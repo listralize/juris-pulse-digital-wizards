@@ -7,7 +7,6 @@ import { ArrowLeft, Edit, Globe } from 'lucide-react';
 import { HomePageEditor } from './HomePageEditor';
 import { AreasTextsManagement } from './AreasTextsManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
-import { toast } from 'sonner';
 
 interface ContentManagementProps {
   teamMembers: TeamMember[];
@@ -15,9 +14,9 @@ interface ContentManagementProps {
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
-  onSaveTeamMembers: () => Promise<void>;
+  onSaveTeamMembers: () => void;
   onUpdatePageTexts: (texts: PageTexts) => void;
-  onSavePageTexts: () => Promise<void>;
+  onSavePageTexts: () => void;
 }
 
 export const ContentManagement: React.FC<ContentManagementProps> = ({
@@ -51,26 +50,9 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
     }
   ];
 
-  const handleSaveAll = async () => {
-    try {
-      console.log('💾 [ContentManagement] Salvando todos os dados...', { pageTexts, teamMembers });
-      
-      await onSaveTeamMembers();
-      console.log('✅ [ContentManagement] Equipe salva com sucesso');
-      
-      await onSavePageTexts();
-      console.log('✅ [ContentManagement] Textos das páginas salvos com sucesso');
-      
-      toast.success('Todos os dados foram salvos com sucesso!');
-      
-      // Force update of site content
-      window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: pageTexts }));
-      
-    } catch (error) {
-      console.error('❌ [ContentManagement] Erro ao salvar dados:', error);
-      toast.error('Erro ao salvar dados');
-      throw error;
-    }
+  const handleSaveAll = () => {
+    onSaveTeamMembers();
+    onSavePageTexts();
   };
 
   if (selectedSection) {
@@ -124,9 +106,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
         <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
           Gerenciamento de Conteúdo
         </CardTitle>
-        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Edite textos e conteúdo das seções do site. As alterações são salvas no Supabase automaticamente.
-        </p>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
