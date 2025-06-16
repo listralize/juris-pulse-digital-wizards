@@ -331,11 +331,11 @@ export const useSupabaseServicePages = () => {
 
       console.log('✅ [useSupabaseServicePages] Todas as páginas salvas nas tabelas normalizadas!');
 
-      // Também salvar no admin_settings como backup
+      // Também salvar no admin_settings como backup (cast para any para resolver erro de tipo)
       const { error: adminError } = await supabase
         .from('admin_settings')
         .upsert({
-          service_pages: cleanPages
+          service_pages: cleanPages as any
         });
 
       if (adminError) {

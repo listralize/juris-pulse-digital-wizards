@@ -24,14 +24,18 @@ export const useSupabasePageTexts = () => {
         setPageTexts(defaultPageTexts);
       } else if (settings) {
         const loadedTexts: PageTexts = {
+          ...defaultPageTexts,
           heroTitle: settings.hero_title || defaultPageTexts.heroTitle,
           heroSubtitle: settings.hero_subtitle || defaultPageTexts.heroSubtitle,
+          heroBackgroundImage: settings.hero_background_image || defaultPageTexts.heroBackgroundImage,
           aboutTitle: settings.about_title || defaultPageTexts.aboutTitle,
           aboutDescription: settings.about_description || defaultPageTexts.aboutDescription,
+          aboutImage: settings.about_image || defaultPageTexts.aboutImage,
           areasTitle: settings.areas_title || defaultPageTexts.areasTitle,
           teamTitle: settings.team_title || defaultPageTexts.teamTitle,
           clientAreaTitle: settings.client_area_title || defaultPageTexts.clientAreaTitle,
           clientAreaDescription: settings.client_area_description || defaultPageTexts.clientAreaDescription,
+          clientPortalLink: settings.client_portal_link || defaultPageTexts.clientPortalLink,
           contactTitle: settings.contact_title || defaultPageTexts.contactTitle,
           contactSubtitle: settings.contact_subtitle || defaultPageTexts.contactSubtitle
         };
@@ -59,12 +63,15 @@ export const useSupabasePageTexts = () => {
         .upsert({
           hero_title: texts.heroTitle,
           hero_subtitle: texts.heroSubtitle,
+          hero_background_image: texts.heroBackgroundImage,
           about_title: texts.aboutTitle,
           about_description: texts.aboutDescription,
+          about_image: texts.aboutImage,
           areas_title: texts.areasTitle,
           team_title: texts.teamTitle,
           client_area_title: texts.clientAreaTitle,
           client_area_description: texts.clientAreaDescription,
+          client_portal_link: texts.clientPortalLink,
           contact_title: texts.contactTitle,
           contact_subtitle: texts.contactSubtitle
         });

@@ -87,6 +87,17 @@ const defaultCategories: CategoryInfo[] = [
   }
 ];
 
+const validateCategories = (data: unknown): CategoryInfo[] => {
+  if (!Array.isArray(data)) return defaultCategories;
+  
+  return data.filter((item): item is CategoryInfo => {
+    return typeof item === 'object' && 
+           item !== null && 
+           typeof (item as any).id === 'string' &&
+           typeof (item as any).name === 'string';
+  });
+};
+
 export const useSupabaseCategories = () => {
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -112,8 +123,11 @@ export const useSupabaseCategories = () => {
 
       if (rows) {
         recordId = rows.id;
-        if (rows.categories && Array.isArray(rows.categories)) {
-          finalCategories = rows.categories;
+        if (rows.categories) {
+          const validatedCategories = validateCategories(rows.categories);
+          if (validatedCategories.length > 0) {
+            finalCategories = validatedCategories;
+          }
         }
       }
       
@@ -135,7 +149,7 @@ export const useSupabaseCategories = () => {
     
     try {
       const upsertData: any = {
-        categories: cats
+        categories: cats as any
       };
 
       if (adminSettingsId) {
