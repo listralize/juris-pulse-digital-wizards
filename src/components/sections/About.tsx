@@ -38,7 +38,14 @@ const About = () => {
           setAboutTitle(settings.about_title || 'Sobre Nós');
           setAboutDescription(settings.about_description || 'Descrição sobre o escritório');
           setAboutMedia(settings.about_image || '');
-          setAboutMediaType(settings.about_media_type || 'image');
+          
+          // Corrigir o tipo para aceitar apenas os valores válidos
+          const mediaType = settings.about_media_type;
+          if (mediaType === 'video' || mediaType === 'image') {
+            setAboutMediaType(mediaType);
+          } else {
+            setAboutMediaType('image');
+          }
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados iniciais:', error);
@@ -68,7 +75,9 @@ const About = () => {
       }
       if (newMediaType !== undefined) {
         console.log('📱 About: Atualizando tipo de mídia:', newMediaType);
-        setAboutMediaType(newMediaType);
+        if (newMediaType === 'video' || newMediaType === 'image') {
+          setAboutMediaType(newMediaType);
+        }
       }
     };
 
@@ -139,6 +148,19 @@ const About = () => {
 
   console.log('🔍 About renderizando com:', { aboutTitle, aboutDescription, aboutMedia, aboutMediaType });
 
+  // Função para converter URL do YouTube para embed
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return url; // Se já for uma URL de embed ou outro formato
+  };
+
   return (
     <section 
       id="about" 
@@ -163,14 +185,15 @@ const About = () => {
         {aboutMedia && (
           <div ref={mediaRef} className="mt-8 max-w-2xl mx-auto">
             {aboutMediaType === 'video' ? (
-              <video
-                src={aboutMedia}
-                controls
-                className="w-full h-auto rounded-lg shadow-lg"
-                style={{ maxHeight: '400px' }}
-              >
-                Seu navegador não suporta o elemento de vídeo.
-              </video>
+              <div className="relative w-full h-0 pb-[56.25%] rounded-lg overflow-hidden shadow-lg">
+                <iframe
+                  src={getYouTubeEmbedUrl(aboutMedia)}
+                  className="absolute top-0 left-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Vídeo sobre nós"
+                />
+              </div>
             ) : (
               <img
                 src={aboutMedia}

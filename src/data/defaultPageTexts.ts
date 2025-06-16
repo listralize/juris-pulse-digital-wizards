@@ -2,12 +2,17 @@
 import { PageTexts } from '../types/adminTypes';
 
 export const defaultPageTexts: PageTexts = {
-  heroTitle: "Excelência em Advocacia",
-  heroSubtitle: "Defendemos seus direitos com dedicação e expertise",
+  heroTitle: "Soluções Jurídicas Inovadoras",
+  heroSubtitle: "Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.",
   heroBackgroundImage: "",
+  heroPrimaryButtonText: "Fale Conosco no WhatsApp",
+  heroPrimaryButtonLink: "https://api.whatsapp.com/send?phone=5562994594496",
+  heroSecondaryButtonText: "Conheça Nossas Áreas de Atuação",
+  heroSecondaryButtonLink: "#areas",
   aboutTitle: "Sobre Nós",
   aboutDescription: "Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.",
   aboutImage: "",
+  aboutMediaType: "image",
   contactTitle: "Entre em Contato",
   contactSubtitle: "Estamos prontos para ajudar você",
   teamTitle: "Nossa Equipe",
@@ -34,14 +39,15 @@ export const defaultPageTexts: PageTexts = {
   civilTitle: "Direito Civil",
   civilDescription: "Questões cíveis em geral",
   contactTexts: {
-    phone: "(11) 9999-9999",
-    email: "contato@exemplo.com",
-    address: "Rua Exemplo, 123 - São Paulo, SP",
-    whatsapp: "5511999999999"
+    phone: "(62) 99459-4496",
+    email: "contato@stadv.com",
+    address: "World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040",
+    whatsapp: "5562994594496",
+    mapEmbedUrl: ""
   },
   footerTexts: {
-    companyName: "Escritório de Advocacia",
-    description: "Excelência jurídica com mais de 20 anos de experiência"
+    companyName: "Serafim & Trombela Advocacia",
+    description: "A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes."
   },
   categoryTexts: [
     {

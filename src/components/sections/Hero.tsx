@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
@@ -16,6 +16,68 @@ const Hero = () => {
   const bgRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  // Estados para os textos editáveis
+  const [heroTitle, setHeroTitle] = useState('Soluções Jurídicas Inovadoras');
+  const [heroSubtitle, setHeroSubtitle] = useState('Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.');
+  const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco no WhatsApp');
+  const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
+  const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
+  const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
+
+  // Carregar dados do Supabase
+  useEffect(() => {
+    const loadHeroData = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('hero_title, hero_subtitle')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (settings) {
+          console.log('🦸 Hero: Dados carregados do Supabase:', settings);
+          setHeroTitle(settings.hero_title || 'Soluções Jurídicas Inovadoras');
+          setHeroSubtitle(settings.hero_subtitle || 'Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados do Hero:', error);
+      }
+    };
+
+    loadHeroData();
+  }, []);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('🦸 Hero: Recebendo atualização de textos:', event.detail);
+      const { 
+        heroTitle: newTitle, 
+        heroSubtitle: newSubtitle,
+        heroPrimaryButtonText,
+        heroPrimaryButtonLink,
+        heroSecondaryButtonText,
+        heroSecondaryButtonLink
+      } = event.detail;
+      
+      if (newTitle !== undefined) setHeroTitle(newTitle);
+      if (newSubtitle !== undefined) setHeroSubtitle(newSubtitle);
+      if (heroPrimaryButtonText !== undefined) setPrimaryButtonText(heroPrimaryButtonText);
+      if (heroPrimaryButtonLink !== undefined) setPrimaryButtonLink(heroPrimaryButtonLink);
+      if (heroSecondaryButtonText !== undefined) setSecondaryButtonText(heroSecondaryButtonText);
+      if (heroSecondaryButtonLink !== undefined) setSecondaryButtonLink(heroSecondaryButtonLink);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -93,29 +155,29 @@ const Hero = () => {
         </div>
         
         <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
-          Soluções Jurídicas Inovadoras
+          {heroTitle}
         </h1>
         
         <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-4 md:mb-6 text-center max-w-lg mx-auto font-satoshi">
-          Suas questões nas mãos de quem entende. Experiência e excelência a serviço dos seus direitos.
+          {heroSubtitle}
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
           <a 
-            href="https://api.whatsapp.com/send?phone=5562994594496" 
+            href={primaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
             className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            Fale Conosco no WhatsApp
+            {primaryButtonText}
             <ArrowRight className="w-5 h-5" />
           </a>
           
           <a 
-            href="#areas" 
+            href={secondaryButtonLink}
             className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            Conheça Nossas Áreas de Atuação
+            {secondaryButtonText}
             <ArrowRight className="w-5 h-5" />
           </a>
         </div>

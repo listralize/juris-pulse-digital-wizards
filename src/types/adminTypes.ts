@@ -46,6 +46,10 @@ export interface PageTexts {
   heroTitle: string;
   heroSubtitle: string;
   heroBackgroundImage?: string;
+  heroPrimaryButtonText?: string;
+  heroPrimaryButtonLink?: string;
+  heroSecondaryButtonText?: string;
+  heroSecondaryButtonLink?: string;
   aboutTitle: string;
   aboutDescription: string;
   aboutImage?: string;

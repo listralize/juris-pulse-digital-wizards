@@ -98,7 +98,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="about" className="space-y-4">
+        <Tabs defaultValue="hero" className="space-y-4">
           <TabsList className={`grid w-full grid-cols-6 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="hero" className="flex items-center gap-1">
               <Image className="w-3 h-3" />
@@ -135,7 +135,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   value={pageTexts.heroTitle || ''}
                   onChange={(e) => handleInputChange('heroTitle', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Ex: Escritório de Advocacia"
+                  placeholder="Ex: Soluções Jurídicas Inovadoras"
                 />
               </div>
               <div>
@@ -144,8 +144,53 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   value={pageTexts.heroSubtitle || ''}
                   onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Subtítulo da página principal..."
+                  placeholder="Ex: Suas questões nas mãos de quem entende..."
                   rows={3}
+                />
+              </div>
+              <div>
+                <Label>Texto do Primeiro Botão</Label>
+                <Input
+                  value={pageTexts.heroPrimaryButtonText || ''}
+                  onChange={(e) => handleInputChange('heroPrimaryButtonText', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Fale Conosco no WhatsApp"
+                />
+              </div>
+              <div>
+                <Label>Link do Primeiro Botão</Label>
+                <Input
+                  value={pageTexts.heroPrimaryButtonLink || ''}
+                  onChange={(e) => handleInputChange('heroPrimaryButtonLink', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: https://api.whatsapp.com/send?phone=5562994594496"
+                />
+              </div>
+              <div>
+                <Label>Texto do Segundo Botão</Label>
+                <Input
+                  value={pageTexts.heroSecondaryButtonText || ''}
+                  onChange={(e) => handleInputChange('heroSecondaryButtonText', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Conheça Nossas Áreas de Atuação"
+                />
+              </div>
+              <div>
+                <Label>Link do Segundo Botão</Label>
+                <Input
+                  value={pageTexts.heroSecondaryButtonLink || ''}
+                  onChange={(e) => handleInputChange('heroSecondaryButtonLink', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: #areas"
+                />
+              </div>
+              <div>
+                <Label>Imagem de Fundo</Label>
+                <Input
+                  value={pageTexts.heroBackgroundImage || ''}
+                  onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="URL da imagem de fundo"
                 />
               </div>
             </div>
@@ -184,20 +229,25 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="image">Imagem</SelectItem>
-                    <SelectItem value="video">Vídeo</SelectItem>
+                    <SelectItem value="video">Vídeo (YouTube)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>
-                  {pageTexts.aboutMediaType === 'video' ? 'URL do Vídeo' : 'URL da Imagem'}
+                  {pageTexts.aboutMediaType === 'video' ? 'URL do Vídeo do YouTube' : 'URL da Imagem'}
                 </Label>
                 <Input
                   value={pageTexts.aboutImage || ''}
                   onChange={(e) => handleInputChange('aboutImage', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder={pageTexts.aboutMediaType === 'video' ? 'URL do vídeo' : 'URL da imagem'}
+                  placeholder={pageTexts.aboutMediaType === 'video' ? 'https://www.youtube.com/watch?v=...' : 'URL da imagem'}
                 />
+                {pageTexts.aboutMediaType === 'video' && (
+                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Cole a URL completa do YouTube (ex: https://www.youtube.com/watch?v=...)
+                  </p>
+                )}
               </div>
             </div>
           </TabsContent>
