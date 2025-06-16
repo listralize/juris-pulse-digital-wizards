@@ -1,85 +1,59 @@
 
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-import UnifiedContactForm from '../contact/UnifiedContactForm';
-import ContactInfo from '../contact/ContactInfo';
-import LocationMap from '../contact/LocationMap';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
+import { UnifiedContactForm } from '../contact/UnifiedContactForm';
+import { ContactInfo } from '../contact/ContactInfo';
+import { PageTexts } from '../../types/adminTypes';
 
-gsap.registerPlugin(ScrollTrigger);
+interface ContactProps {
+  pageTexts: PageTexts;
+}
 
-const Contact = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  
+const Contact: React.FC<ContactProps> = ({ pageTexts: initialPageTexts }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { pageTexts } = useAdminData();
-  
+  const [pageTexts, setPageTexts] = useState(initialPageTexts);
+
+  // Escutar por atualizações dos pageTexts
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    
-    tl.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 }
-    ).fromTo(
-      contentRef.current,
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.4"
-    );
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('🎯 Contact: Recebendo atualização de pageTexts:', event.detail);
+      setPageTexts(event.detail);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      tl.kill();
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
 
+  // Atualizar quando props mudarem
+  useEffect(() => {
+    setPageTexts(initialPageTexts);
+  }, [initialPageTexts]);
+
+  const contactTitle = pageTexts?.contactTitle || 'Entre em Contato';
+  const contactSubtitle = pageTexts?.contactSubtitle || 'Estamos prontos para ajudá-lo';
+
   return (
-    <div 
-      ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 px-4`}
-      style={{ minHeight: '100vh' }}
-    >
-      <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-6 text-center">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            {pageTexts.contactTitle}
+    <section className={`py-16 px-4 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <div className="container mx-auto">
+        <div className="text-center mb-16">
+          <h2 className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
+            {contactTitle}
           </h2>
-          <div className={`w-20 h-1 mx-auto mt-2 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-          <p className={`mt-2 text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
-            {pageTexts.contactSubtitle}
+          <p className={`text-lg md:text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            {contactSubtitle}
           </p>
         </div>
-        
-        <div 
-          ref={contentRef}
-          className="flex flex-col lg:grid lg:grid-cols-5 gap-4"
-        >
-          <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-            <div className="w-full">
-              <div className="h-40 lg:h-48">
-                <LocationMap />
-              </div>
-            </div>
-            
-            <div className="w-full">
-              <ContactInfo />
-            </div>
-          </div>
-          
-          <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className="w-full">
-              <UnifiedContactForm />
-            </div>
-          </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <UnifiedContactForm />
+          <ContactInfo pageTexts={pageTexts} />
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

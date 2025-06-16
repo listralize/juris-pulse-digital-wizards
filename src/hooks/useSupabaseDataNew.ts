@@ -75,8 +75,12 @@ export const useSupabaseDataNew = () => {
 
   useEffect(() => {
     if (rawPageTexts && typeof rawPageTexts === 'object' && Object.keys(rawPageTexts).length > 0) {
+      console.log('📝 Atualizando pageTexts com dados do Supabase:', rawPageTexts);
       setPageTextsState({ ...rawPageTexts });
+      // Forçar re-render dos componentes
+      window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: rawPageTexts }));
     } else {
+      console.log('📝 Usando pageTexts padrão');
       setPageTextsState(defaultPageTexts);
     }
   }, [rawPageTexts]);
@@ -118,8 +122,21 @@ export const useSupabaseDataNew = () => {
 
   const savePageTexts = async (texts: PageTexts) => {
     try {
+      console.log('💾 Salvando pageTexts no Supabase:', texts);
       await savePageTextsSupabase(texts);
       setPageTextsState({ ...texts });
+      
+      // Atualizar localmente também
+      setPageTextsLocal(texts);
+      
+      // Disparar evento para atualizar componentes
+      window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: texts }));
+      
+      // Forçar refresh dos dados
+      setTimeout(() => {
+        refetchPageTexts();
+      }, 500);
+      
     } catch (error) {
       console.error('Erro ao salvar textos das páginas:', error);
       throw error;
@@ -137,6 +154,7 @@ export const useSupabaseDataNew = () => {
   };
 
   const setPageTexts = (texts: PageTexts) => {
+    console.log('🔄 Atualizando pageTexts localmente:', texts);
     setPageTextsState({ ...texts });
     setPageTextsLocal(texts);
   };
@@ -144,6 +162,7 @@ export const useSupabaseDataNew = () => {
   const refreshData = async () => {
     try {
       setIsLoading(true);
+      console.log('🔄 Recarregando todos os dados...');
       await Promise.all([
         refetchServicePages(),
         refetchCategories(),

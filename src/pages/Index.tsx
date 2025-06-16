@@ -42,7 +42,7 @@ const Index = () => {
         <Contact pageTexts={pageTexts} />
       </main>
       <Footer pageTexts={pageTexts} />
-      <WhatsAppButton />
+      <WhatsAppButton whatsappNumber={pageTexts?.contactTexts?.whatsapp} />
     </div>
   );
 };
