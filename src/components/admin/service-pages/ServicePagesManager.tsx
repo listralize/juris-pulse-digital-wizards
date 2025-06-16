@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -192,6 +191,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               Gerenciar Páginas por Área do Direito
             </CardTitle>
             <div className="flex gap-2">
+              <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Categoria
+              </Button>
               <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
                 <Settings className="w-4 h-4 mr-2" />
                 Editar Categorias

@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent } from '../../ui/card';
+import { Button } from '../../ui/button';
 import { CategoryInfo, ServicePage } from '../../../types/adminTypes';
 import { useTheme } from '../../ThemeProvider';
+import { ExternalLink } from 'lucide-react';
 
 interface CategoryGridProps {
   categories: CategoryInfo[];
@@ -16,6 +18,11 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
 
   const validCategories = categories || [];
   const validServicePages = servicePages || [];
+
+  const handleViewServices = (categoryValue: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(`/areas/${categoryValue}`, '_blank');
+  };
 
   return (
     <div className="space-y-4">
@@ -47,12 +54,22 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
                 <h3 className={`font-semibold text-lg mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                   {category.label}
                 </h3>
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   {categoryPages.length} página{categoryPages.length !== 1 ? 's' : ''} disponível{categoryPages.length !== 1 ? 'eis' : ''}
                 </p>
-                <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                <p className={`text-xs mb-4 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                   {category.description}
                 </p>
+                
+                <Button
+                  onClick={(e) => handleViewServices(category.value, e)}
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Ver Serviços
+                </Button>
               </CardContent>
             </Card>
           );

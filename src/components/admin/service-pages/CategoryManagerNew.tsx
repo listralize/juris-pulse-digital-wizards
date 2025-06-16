@@ -134,6 +134,9 @@ export const CategoryManagerNew: React.FC = () => {
             Nova Área
           </Button>
         </div>
+        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+          💡 Dica: Após criar ou editar categorias, clique em "Salvar" em cada categoria individual para persistir as alterações.
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {localCategories.map((category, index) => (
@@ -152,6 +155,9 @@ export const CategoryManagerNew: React.FC = () => {
                 <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
                   {category.label}
                 </h4>
+                <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                  /{category.value}
+                </span>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -244,6 +250,10 @@ export const CategoryManagerNew: React.FC = () => {
             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Nenhuma área do direito criada ainda.
             </p>
+            <Button onClick={addCategory} className="mt-4">
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Primeira Categoria
+            </Button>
           </div>
         )}
       </CardContent>
