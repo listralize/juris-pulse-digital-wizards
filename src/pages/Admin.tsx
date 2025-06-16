@@ -5,7 +5,9 @@ import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
-import { TeamMember, SpecializedService, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
+import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
+import { TeamMember, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
+import { BlogPost } from '../types/blogTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { ContentManagement } from '../components/admin/ContentManagement';
@@ -13,7 +15,6 @@ import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { defaultPageTexts } from '../data/defaultPageTexts';
-import { defaultBlogPosts } from '../data/defaultBlogPosts';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -26,7 +27,7 @@ const Admin = () => {
     servicePages,
     categories,
     pageTexts,
-    isLoading,
+    isLoading: dataLoading,
     saveServicePages,
     saveCategories,
     saveTeamMembers,
@@ -36,6 +37,15 @@ const Admin = () => {
     setPageTexts,
     refreshData
   } = useSupabaseDataNew();
+
+  const {
+    blogPosts,
+    isLoading: blogLoading,
+    saveBlogPosts,
+    loadBlogPosts
+  } = useSupabaseBlog();
+
+  const isLoading = dataLoading || blogLoading;
 
   const handleSaveServicePages = async (pages: ServicePage[]) => {
     try {
@@ -65,6 +75,8 @@ const Admin = () => {
     try {
       await savePageTexts(pageTexts);
       toast.success('Textos das páginas salvos com sucesso!');
+      // Força reload da página para refletir mudanças
+      window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: pageTexts }));
     } catch (error) {
       console.error('Erro ao salvar textos:', error);
       toast.error('Erro ao salvar textos das páginas');
@@ -104,12 +116,19 @@ const Admin = () => {
     ));
   };
 
-  const handleSaveBlogPosts = async (posts: any[]) => {
-    toast.success('Posts do blog salvos com sucesso!');
+  const handleSaveBlogPosts = async (posts: BlogPost[]) => {
+    try {
+      await saveBlogPosts(posts);
+      toast.success('Posts do blog salvos com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar posts do blog:', error);
+      toast.error('Erro ao salvar posts do blog');
+    }
   };
 
   const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
   const validTeamMembers: TeamMember[] = teamMembers || [];
+  const validBlogPosts: BlogPost[] = blogPosts || [];
 
   return (
     <AdminProtectedRoute>
@@ -127,7 +146,7 @@ const Admin = () => {
                 🔒 Sistema Seguro Ativo: Row Level Security (RLS) implementado em todas as tabelas
               </p>
               <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {validTeamMembers.length}
+                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {validTeamMembers.length} | 📝 Blog: {validBlogPosts.length} posts
               </p>
             </div>
 
@@ -137,17 +156,17 @@ const Admin = () => {
                   <Globe className="w-4 h-4" />
                   Páginas de Serviços ({servicePages?.length || 0})
                 </TabsTrigger>
-                <TabsTrigger value="supabase" className="flex items-center gap-2">
-                  <Database className="w-4 h-4" />
-                  Supabase
-                </TabsTrigger>
                 <TabsTrigger value="content" className="flex items-center gap-2">
                   <Edit className="w-4 h-4" />
                   Conteúdo Geral
                 </TabsTrigger>
                 <TabsTrigger value="blog" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
-                  Blog
+                  Blog ({validBlogPosts.length})
+                </TabsTrigger>
+                <TabsTrigger value="supabase" className="flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  Supabase
                 </TabsTrigger>
               </TabsList>
 
@@ -161,10 +180,6 @@ const Admin = () => {
                   onSavePageTexts={handleSavePageTexts}
                   onUpdatePageTexts={handleUpdatePageTexts}
                 />
-              </TabsContent>
-
-              <TabsContent value="supabase">
-                <SupabaseDataManager />
               </TabsContent>
 
               <TabsContent value="content">
@@ -182,9 +197,13 @@ const Admin = () => {
 
               <TabsContent value="blog">
                 <BlogManagement 
-                  blogPosts={defaultBlogPosts}
+                  blogPosts={validBlogPosts}
                   onSave={handleSaveBlogPosts}
                 />
+              </TabsContent>
+
+              <TabsContent value="supabase">
+                <SupabaseDataManager />
               </TabsContent>
             </Tabs>
           </div>

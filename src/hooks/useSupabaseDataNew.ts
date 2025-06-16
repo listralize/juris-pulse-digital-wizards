@@ -40,7 +40,7 @@ export const useSupabaseDataNew = () => {
     pageTexts: rawPageTexts, 
     isLoading: pageTextsLoading,
     savePageTexts,
-    setPageTexts,
+    setPageTexts: setPageTextsInHook,
     refetch: refetchPageTexts
   } = useSupabasePageTexts();
 
@@ -96,6 +96,21 @@ export const useSupabaseDataNew = () => {
     }
   };
 
+  const savePageTextsWrapper = async (texts: PageTexts) => {
+    try {
+      await savePageTexts(texts);
+      setPageTextsState({ ...texts });
+      setPageTextsInHook(texts);
+    } catch (error) {
+      console.error('Erro ao salvar textos das páginas:', error);
+      throw error;
+    }
+  };
+
+  const setPageTexts = (texts: PageTexts) => {
+    setPageTextsState({ ...texts });
+  };
+
   const refreshData = async () => {
     try {
       setIsLoading(true);
@@ -121,10 +136,10 @@ export const useSupabaseDataNew = () => {
     saveServicePages,
     saveCategories,
     saveTeamMembers,
-    savePageTexts,
+    savePageTexts: savePageTextsWrapper,
     setServicePages,
-    setTeamMembers,
-    setPageTexts: setPageTextsState,
+    setTeamMembers: setTeamMembersState,
+    setPageTexts,
     refreshData,
     refetchServicePages,
     refetchCategories,

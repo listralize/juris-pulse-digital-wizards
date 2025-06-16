@@ -7,7 +7,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
-import { ArrowLeft, Plus, Save, Edit, Trash2, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { BlogPost } from '../../types/blogTypes';
 import { toast } from 'sonner';
 
@@ -27,8 +27,8 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   const [localPosts, setLocalPosts] = useState<BlogPost[]>([]);
 
   useEffect(() => {
-    setLocalPosts(blogPosts);
-    console.log('BlogManagement - Posts loaded:', blogPosts.length);
+    console.log('BlogManagement - Recebendo posts:', blogPosts.length);
+    setLocalPosts([...blogPosts]);
   }, [blogPosts]);
 
   const createNewPost = () => {
@@ -67,7 +67,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
     setSelectedPost(updatedPost);
   };
 
-  const savePost = () => {
+  const savePost = async () => {
     if (!selectedPost) return;
     
     if (!selectedPost.title.trim()) {
@@ -85,31 +85,46 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
     
     if (isNew) {
       updatedPosts = [...localPosts, selectedPost];
-      toast.success('Post criado com sucesso!');
     } else {
       updatedPosts = localPosts.map(p => 
         p.id === selectedPost.id ? selectedPost : p
       );
-      toast.success('Post atualizado com sucesso!');
     }
     
-    setLocalPosts(updatedPosts);
-    onSave(updatedPosts);
-    setIsEditing(false);
-    setSelectedPost(null);
+    try {
+      setLocalPosts(updatedPosts);
+      await onSave(updatedPosts);
+      
+      if (isNew) {
+        toast.success('Post criado e salvo no Supabase!');
+      } else {
+        toast.success('Post atualizado e salvo no Supabase!');
+      }
+      
+      setIsEditing(false);
+      setSelectedPost(null);
+    } catch (error) {
+      console.error('Erro ao salvar post:', error);
+      toast.error('Erro ao salvar post no Supabase');
+    }
   };
 
-  const deletePost = (postId: string) => {
+  const deletePost = async (postId: string) => {
     if (!confirm('Tem certeza que deseja excluir este post?')) return;
     
-    const updatedPosts = localPosts.filter(p => p.id !== postId);
-    setLocalPosts(updatedPosts);
-    onSave(updatedPosts);
-    toast.success('Post excluído com sucesso!');
-    
-    if (selectedPost?.id === postId) {
-      setSelectedPost(null);
-      setIsEditing(false);
+    try {
+      const updatedPosts = localPosts.filter(p => p.id !== postId);
+      setLocalPosts(updatedPosts);
+      await onSave(updatedPosts);
+      toast.success('Post excluído do Supabase!');
+      
+      if (selectedPost?.id === postId) {
+        setSelectedPost(null);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir post:', error);
+      toast.error('Erro ao excluir post do Supabase');
     }
   };
 
@@ -139,7 +154,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
             </div>
             <Button onClick={savePost} size="sm">
               <Save className="w-4 h-4 mr-2" />
-              Salvar
+              Salvar no Supabase
             </Button>
           </div>
         </CardHeader>
@@ -249,13 +264,23 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
               Gerenciar Posts do Blog
             </CardTitle>
             <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {localPosts.length} posts • {featuredCount} em destaque
+              {localPosts.length} posts • {featuredCount} em destaque • Sincronizado com Supabase
             </p>
           </div>
-          <Button onClick={createNewPost} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Post
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline" 
+              size="sm"
+              title="Recarregar dados do Supabase"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+            <Button onClick={createNewPost} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Post
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -280,7 +305,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                           Destaque
                         </span>
                       )}
-                      {post.tags.map(tag => (
+                      {post.tags && post.tags.map(tag => (
                         <span 
                           key={tag}
                           className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
