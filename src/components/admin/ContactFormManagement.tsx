@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -104,14 +105,29 @@ export const ContactFormManagement: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('service_pages')
-          .select('href, title, category')
+          .select('href, title, category_id')
           .eq('is_active', true)
-          .order('category, title');
+          .order('category_id, title');
 
         if (error) {
           console.error('Erro ao carregar páginas de serviços:', error);
           return;
         }
+
+        // Buscar categorias para mapear os IDs
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('law_categories')
+          .select('category_key, name')
+          .eq('is_active', true);
+
+        if (categoriesError) {
+          console.error('Erro ao carregar categorias:', categoriesError);
+        }
+
+        const categoryMap = (categoriesData || []).reduce((acc, cat) => {
+          acc[cat.category_key] = cat.name;
+          return acc;
+        }, {} as Record<string, string>);
 
         const pages = data?.map(page => {
           let cleanHref = page.href || '';
@@ -124,7 +140,7 @@ export const ContactFormManagement: React.FC = () => {
           return {
             value: cleanHref,
             label: page.title,
-            category: page.category || 'Outros'
+            category: page.category_id ? categoryMap[page.category_id] || 'Outros' : 'Outros'
           };
         }) || [];
 
