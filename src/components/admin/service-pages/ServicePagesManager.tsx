@@ -9,6 +9,7 @@ import { CategoryGrid } from './CategoryGrid';
 import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoriesManager } from './CategoriesManager';
+import { CategoryManagerNew } from './CategoryManagerNew';
 import { toast } from 'sonner';
 
 interface ServicePagesManagerProps {
