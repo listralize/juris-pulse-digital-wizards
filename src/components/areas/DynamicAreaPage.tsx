@@ -26,12 +26,6 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   const isDark = theme === 'dark';
   const navigate = useNavigate();
 
-  console.log('🔍 DynamicAreaPage dados:', {
-    areaKey,
-    servicePages: servicePages?.length || 0,
-    allPages: servicePages?.map(p => ({ title: p.title, category: p.category, href: p.href })) || []
-  });
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -40,22 +34,10 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Filtrar serviços da categoria específica
   const areaServices = servicePages?.filter(page => {
     if (!page) return false;
     return page.category === areaKey;
   }) || [];
-
-  console.log('📄 Serviços filtrados:', {
-    areaKey,
-    found: areaServices.length,
-    services: areaServices.map(s => ({ title: s.title, category: s.category, href: s.href, hasContent: {
-      benefits: s.benefits?.length || 0,
-      process: s.process?.length || 0,
-      faq: s.faq?.length || 0,
-      testimonials: s.testimonials?.length || 0
-    }}))
-  });
 
   return (
     <PracticeAreaLayout
@@ -119,9 +101,6 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
           <div className="text-center py-16">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Nenhum serviço encontrado para esta área.
-            </p>
-            <p className={`text-sm mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-              Área procurada: {areaKey}
             </p>
           </div>
         )}

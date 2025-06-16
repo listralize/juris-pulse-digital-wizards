@@ -22,8 +22,6 @@ export const PagesList: React.FC<PagesListProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('📋 PagesList renderizando:', pages.length, 'páginas');
-
   return (
     <div className="space-y-3">
       {pages.length === 0 ? (

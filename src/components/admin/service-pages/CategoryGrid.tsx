@@ -14,14 +14,6 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('🎯 CategoryGrid DADOS RECEBIDOS:', {
-    categoriesCount: categories?.length || 0,
-    servicePagesCount: servicePages?.length || 0,
-    firstCategory: categories?.[0],
-    firstPage: servicePages?.[0]
-  });
-
-  // Garantir que temos arrays válidos
   const validCategories = categories || [];
   const validServicePages = servicePages || [];
 
@@ -31,25 +23,14 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, serviceP
         <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
           📋 Exibindo {validCategories.length} categorias | 📄 Total de {validServicePages.length} páginas de serviços
         </p>
-        {validServicePages.length > 0 && (
-          <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-            ✅ Primeiras páginas: {validServicePages.slice(0, 3).map(p => p.title).join(', ')}...
-          </p>
-        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {validCategories.map((category) => {
-          // Filtrar páginas por categoria usando o valor exato
           const categoryPages = validServicePages.filter(page => {
             const pageCategory = page.category?.toLowerCase().trim();
             const categoryValue = category.value?.toLowerCase().trim();
             return pageCategory === categoryValue;
-          });
-          
-          console.log(`📂 ${category.label}: ${categoryPages.length} páginas`, {
-            categoryValue: category.value,
-            pagesFound: categoryPages.map(p => p.title)
           });
           
           return (

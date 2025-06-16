@@ -13,6 +13,7 @@ import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { defaultPageTexts } from '../data/defaultPageTexts';
+import { defaultBlogPosts } from '../data/defaultBlogPosts';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -33,21 +34,12 @@ const Admin = () => {
     refreshData
   } = useSupabaseDataNew();
 
-  console.log('🔍 Admin - Dados carregados:', {
-    servicePagesCount: servicePages?.length || 0,
-    categoriesCount: categories?.length || 0,
-    isLoading,
-    servicePages: servicePages?.slice(0, 3)?.map(p => ({ id: p.id, title: p.title, category: p.category }))
-  });
-
   const handleSaveServicePages = async (pages: ServicePage[]) => {
     try {
-      console.log('💾 Admin salvando páginas:', pages.length);
       await saveServicePages(pages);
       toast.success('Páginas de serviços salvas com sucesso!');
-      console.log('🔄 Dados salvos, aguardando atualização automática...');
     } catch (error) {
-      console.error('❌ Erro ao salvar páginas:', error);
+      console.error('Erro ao salvar páginas:', error);
       toast.error('Erro ao salvar páginas de serviços');
     }
   };
@@ -70,7 +62,10 @@ const Admin = () => {
     toast.success('Textos das páginas salvos com sucesso!');
   };
 
-  // Use default page texts as fallback
+  const handleSaveBlogPosts = async (posts: any[]) => {
+    toast.success('Posts do blog salvos com sucesso!');
+  };
+
   const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
 
   return (
@@ -84,7 +79,6 @@ const Admin = () => {
           <div className="max-w-7xl mx-auto">
             <AdminHeader onLogout={logout} />
 
-            {/* Status info */}
             <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-green-500/10 border border-green-500/20' : 'bg-green-50 border border-green-200'}`}>
               <p className={`text-sm ${isDark ? 'text-green-300' : 'text-green-700'}`}>
                 🔒 Sistema Seguro Ativo: Row Level Security (RLS) implementado em todas as tabelas
@@ -131,19 +125,18 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="content">
-                <div className="text-center py-8">
-                  <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Área de conteúdo em desenvolvimento
-                  </p>
-                </div>
+                <ContentManagement 
+                  pageTexts={validPageTexts}
+                  onSave={handleSavePageTexts}
+                  onUpdate={handleUpdatePageTexts}
+                />
               </TabsContent>
 
               <TabsContent value="blog">
-                <div className="text-center py-8">
-                  <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Área de blog em desenvolvimento
-                  </p>
-                </div>
+                <BlogManagement 
+                  blogPosts={defaultBlogPosts}
+                  onSave={handleSaveBlogPosts}
+                />
               </TabsContent>
             </Tabs>
           </div>

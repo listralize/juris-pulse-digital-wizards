@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -39,10 +40,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    console.log('🔄 [ServicePagesManager] Sincronizando páginas:', {
-      servicePagesCount: servicePages.length,
-      localPagesCount: localPages.length
-    });
     setLocalPages([...servicePages]);
   }, [servicePages]);
 
@@ -66,8 +63,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   };
 
   const updatePage = (pageId: string, field: keyof ServicePage, value: any) => {
-    console.log('📝 [ServicePagesManager] Atualizando página:', pageId, field, value);
-    
     setLocalPages(pages => pages.map(page => {
       if (page.id === pageId) {
         const updatedPage = { ...page, [field]: value };
@@ -75,7 +70,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         if (field === 'title' && typeof value === 'string') {
           const slug = generateSlugFromTitle(value);
           updatedPage.href = slug;
-          console.log('🔗 Href atualizado para:', slug);
         }
         
         return updatedPage;
@@ -86,27 +80,22 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const handleSave = async () => {
     if (isSaving) {
-      console.log('⏳ Salvamento já em andamento, ignorando...');
       return;
     }
     
-    console.log('🚀 [ServicePagesManager] INICIANDO SALVAMENTO');
     setIsSaving(true);
     
     try {
       await onSave([...localPages]);
-      console.log('✅ SUCESSO! Páginas salvas');
       toast.success('🎉 Páginas salvas com sucesso!');
       
     } catch (error) {
-      console.error('❌ ERRO ao salvar páginas:', error);
+      console.error('Erro ao salvar páginas:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error(`❌ Erro ao salvar: ${errorMessage}`);
     } finally {
-      // Garante que o estado sempre seja resetado
       setTimeout(() => {
         setIsSaving(false);
-        console.log('🔄 Estado de salvamento resetado');
       }, 100);
     }
   };
@@ -155,18 +144,11 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       }]
     };
     
-    console.log('➕ Adicionando nova página:', { 
-      id: newId, 
-      href: baseHref,
-      category: selectedCategory 
-    });
-    
     setLocalPages(prev => [...prev, newServicePage]);
     setSelectedPageId(newId);
   };
 
   const removeServicePage = (pageId: string) => {
-    console.log('🗑️ Removendo página:', pageId);
     setLocalPages(pages => pages.filter(page => page.id !== pageId));
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
