@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
 interface ContactFormData {
@@ -9,6 +10,7 @@ interface ContactFormData {
   message: string;
   service: string;
   isUrgent: boolean;
+  customFields?: { [key: string]: any };
 }
 
 serve(async (req) => {
@@ -18,7 +20,8 @@ serve(async (req) => {
   }
 
   try {
-    const { name, email, phone, message, service, isUrgent }: ContactFormData = await req.json()
+    const formData: ContactFormData = await req.json()
+    const { name, email, phone, message, service, isUrgent, customFields } = formData
 
     // Validação de entrada
     if (!name || !email || !message) {
@@ -43,6 +46,47 @@ serve(async (req) => {
       )
     }
 
+    // Criar cliente Supabase para buscar configurações
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Buscar configurações do formulário para obter webhook URL
+    console.log('🔍 Buscando configurações do formulário...')
+    const { data: settingsData, error: settingsError } = await supabase
+      .from('admin_settings')
+      .select('form_config')
+      .limit(1)
+      .maybeSingle()
+
+    if (settingsError) {
+      console.error('❌ Erro ao buscar configurações:', settingsError)
+      return new Response(
+        JSON.stringify({ error: 'Erro ao buscar configurações do formulário' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Obter webhook URL das configurações
+    let webhookUrl = ''
+    if (settingsData && settingsData.form_config && settingsData.form_config.webhookUrl) {
+      webhookUrl = settingsData.form_config.webhookUrl
+    }
+
+    if (!webhookUrl) {
+      console.error('❌ Webhook URL não configurada no painel admin')
+      return new Response(
+        JSON.stringify({ error: 'Webhook não configurado. Configure o webhook no painel administrativo.' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     // Preparar payload para webhook
     const webhookPayload = {
       name: name.trim(),
@@ -51,21 +95,9 @@ serve(async (req) => {
       message: message.trim(),
       service: service || 'Não especificado',
       isUrgent: Boolean(isUrgent),
+      customFields: customFields || {},
       timestamp: new Date().toISOString(),
       source: 'Website - Formulário de Contato'
-    }
-
-    // Enviar para o webhook que você criou
-    const webhookUrl = Deno.env.get('WEBHOOK_URL')
-    if (!webhookUrl) {
-      console.error('WEBHOOK_URL não configurada')
-      return new Response(
-        JSON.stringify({ error: 'Configuração de webhook não encontrada' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
     }
 
     console.log('📤 Enviando para webhook:', webhookUrl)
