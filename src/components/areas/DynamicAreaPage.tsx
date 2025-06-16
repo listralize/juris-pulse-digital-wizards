@@ -21,10 +21,16 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   icon,
   introText
 }) => {
-  const { servicePages, categories, isLoading } = useSupabaseDataNew();
+  const { servicePages, isLoading } = useSupabaseDataNew();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+
+  console.log('🔍 DynamicAreaPage dados:', {
+    areaKey,
+    servicePages: servicePages?.length || 0,
+    allCategories: servicePages?.map(p => p.category) || []
+  });
 
   if (isLoading) {
     return (
@@ -34,13 +40,20 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Filtrar serviços da categoria específica
+  // Filtrar serviços da categoria específica com verificações de segurança
   const areaServices = servicePages?.filter(page => {
-    if (!page || !page.category) {
-      return false;
-    }
-    return page.category === areaKey;
+    if (!page) return false;
+    
+    // Verificar se a categoria corresponde
+    const pageCategory = page.category_id || page.category;
+    return pageCategory === areaKey;
   }) || [];
+
+  console.log('📄 Serviços filtrados:', {
+    areaKey,
+    found: areaServices.length,
+    services: areaServices.map(s => ({ title: s.title, category: s.category_id || s.category, href: s.href }))
+  });
 
   return (
     <PracticeAreaLayout
@@ -104,6 +117,9 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
           <div className="text-center py-16">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Nenhum serviço encontrado para esta área.
+            </p>
+            <p className={`text-sm mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              Área procurada: {areaKey}
             </p>
           </div>
         )}
