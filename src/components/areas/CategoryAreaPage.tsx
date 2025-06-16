@@ -24,6 +24,7 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
   const [categoryPages, setCategoryPages] = useState<ServicePage[]>([]);
 
   console.log('🔍 CategoryAreaPage: categoria slug:', categorySlug);
+  console.log('🔍 CategoryAreaPage: categorias disponíveis:', categories.map(c => ({ key: c.value, name: c.name })));
 
   useEffect(() => {
     if (!categoriesLoading && categories.length > 0 && categorySlug) {

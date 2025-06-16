@@ -39,6 +39,7 @@ export const useSupabaseLawCategories = () => {
       }));
 
       console.log('✅ [useSupabaseLawCategories] Categorias carregadas:', formattedCategories.length);
+      console.log('📋 [useSupabaseLawCategories] Categorias:', formattedCategories.map(c => ({ key: c.value, name: c.name, hasFullContent: !!c.fullContent })));
       setCategories(formattedCategories);
       
       // Disparar evento para atualizar componentes
@@ -72,6 +73,8 @@ export const useSupabaseLawCategories = () => {
         is_active: true,
         display_order: 0
       };
+
+      console.log('💾 Dados que serão salvos:', categoryData);
 
       const { error } = await supabase
         .from('law_categories')
