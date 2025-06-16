@@ -308,15 +308,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_pages_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "law_categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       service_process_steps: {
         Row: {

@@ -114,7 +114,6 @@ export const useSupabaseServicePages = () => {
     setIsLoading(true);
     
     try {
-      // Primeiro, verificar se há dados nas tabelas normalizadas
       console.log('🔍 Verificando tabela service_pages...');
       const { data: normalizedPages, error: normalizedError } = await supabase
         .from('service_pages')
@@ -176,7 +175,6 @@ export const useSupabaseServicePages = () => {
         return;
       }
 
-      // Fallback para admin_settings
       console.log('📄 Tentando carregar de admin_settings como fallback...');
       const { data: adminData, error: adminError } = await supabase
         .from('admin_settings')
@@ -209,18 +207,10 @@ export const useSupabaseServicePages = () => {
 
   const saveServicePages = async (pages: ServicePage[]) => {
     const cleanPages = sanitizeServicePages(pages);
-    console.log('💾 [useSupabaseServicePages] INICIANDO SAVE - Salvando', cleanPages.length, 'páginas...');
-    console.log('📝 Páginas a salvar:', cleanPages.map(p => ({ 
-      id: p.id,
-      title: p.title, 
-      category: p.category,
-      href: p.href
-    })));
+    console.log('💾 [useSupabaseServicePages] SALVANDO NO SUPABASE - Total:', cleanPages.length, 'páginas');
     
     try {
-      console.log('🔍 Testando conexão com Supabase...');
-      
-      // Testar conexão básica
+      console.log('🧪 Testando conexão com Supabase...');
       const { data: testData, error: testError } = await supabase
         .from('service_pages')
         .select('count')
@@ -231,28 +221,24 @@ export const useSupabaseServicePages = () => {
         throw new Error(`Erro de conexão: ${testError.message}`);
       }
       
-      console.log('✅ Conexão com Supabase OK');
+      console.log('✅ Conexão OK - Iniciando processo de salvamento');
 
-      // Processar cada página individualmente
       for (let i = 0; i < cleanPages.length; i++) {
         const page = cleanPages[i];
-        console.log(`\n💾 [${i+1}/${cleanPages.length}] Processando página:`, page.title);
+        console.log(`\n💾 [${i+1}/${cleanPages.length}] Salvando página: "${page.title}"`);
         
-        // Preparar dados da página principal
         const pageData = {
           id: page.id,
           title: page.title,
           description: page.description || '',
-          category_id: page.category || '', // String, não UUID
+          category_id: page.category || '',
           href: page.href || '',
           is_active: true,
           display_order: i
         };
 
-        console.log('📝 Dados da página principal:', pageData);
+        console.log('📝 Dados da página:', pageData);
 
-        // 1. Inserir/atualizar página principal
-        console.log('💾 Salvando página principal...');
         const { data: savedPage, error: pageError } = await supabase
           .from('service_pages')
           .upsert(pageData, { onConflict: 'id' })
@@ -261,22 +247,14 @@ export const useSupabaseServicePages = () => {
 
         if (pageError) {
           console.error('❌ ERRO ao salvar página:', page.title, pageError);
-          console.error('📋 Detalhes do erro:', {
-            message: pageError.message,
-            details: pageError.details,
-            hint: pageError.hint,
-            code: pageError.code
-          });
           throw new Error(`Erro ao salvar página ${page.title}: ${pageError.message}`);
         }
 
-        console.log('✅ Página principal salva:', savedPage);
+        console.log('✅ Página principal salva com sucesso:', savedPage.title);
 
-        // 2. Salvar benefícios
+        // Salvar benefícios
         if (page.benefits && page.benefits.length > 0) {
           console.log('💾 Salvando benefícios...');
-          
-          // Primeiro, limpar benefícios existentes
           await supabase.from('service_benefits').delete().eq('service_page_id', page.id);
           
           const benefitsToInsert = page.benefits.map((benefit, index) => ({
@@ -298,10 +276,9 @@ export const useSupabaseServicePages = () => {
           }
         }
 
-        // 3. Salvar processos
+        // Salvar processos
         if (page.process && page.process.length > 0) {
           console.log('💾 Salvando processos...');
-          
           await supabase.from('service_process_steps').delete().eq('service_page_id', page.id);
           
           const processToInsert = page.process.map((step, index) => ({
@@ -323,10 +300,9 @@ export const useSupabaseServicePages = () => {
           }
         }
 
-        // 4. Salvar FAQ
+        // Salvar FAQ
         if (page.faq && page.faq.length > 0) {
           console.log('💾 Salvando FAQ...');
-          
           await supabase.from('service_faq').delete().eq('service_page_id', page.id);
           
           const faqToInsert = page.faq.map((faq, index) => ({
@@ -347,10 +323,9 @@ export const useSupabaseServicePages = () => {
           }
         }
 
-        // 5. Salvar depoimentos
+        // Salvar depoimentos
         if (page.testimonials && page.testimonials.length > 0) {
           console.log('💾 Salvando depoimentos...');
-          
           await supabase.from('service_testimonials').delete().eq('service_page_id', page.id);
           
           const testimonialsToInsert = page.testimonials.map((testimonial, index) => ({
@@ -373,14 +348,14 @@ export const useSupabaseServicePages = () => {
           }
         }
 
-        console.log(`✅ Página completa salva: ${page.title}`);
+        console.log(`✅ Página "${page.title}" salva completamente!`);
       }
 
-      console.log('🎉 SUCESSO! Todas as páginas foram salvas nas tabelas normalizadas');
+      console.log('🎉 TODAS AS PÁGINAS FORAM SALVAS COM SUCESSO NO SUPABASE!');
 
       // Backup em admin_settings
       try {
-        console.log('💾 Salvando backup em admin_settings...');
+        console.log('💾 Fazendo backup em admin_settings...');
         const { error: adminError } = await supabase
           .from('admin_settings')
           .upsert({
@@ -388,18 +363,16 @@ export const useSupabaseServicePages = () => {
           });
 
         if (adminError) {
-          console.warn('⚠️ Erro ao salvar backup:', adminError);
+          console.warn('⚠️ Erro ao fazer backup:', adminError);
         } else {
-          console.log('✅ Backup salvo em admin_settings');
+          console.log('✅ Backup realizado com sucesso');
         }
       } catch (backupError) {
         console.warn('⚠️ Erro no backup:', backupError);
       }
       
-      // Atualizar estado local
       setServicePages([...cleanPages]);
       
-      // Disparar eventos
       window.dispatchEvent(new CustomEvent('servicePagesUpdated', { 
         detail: { pages: cleanPages } 
       }));
@@ -408,12 +381,11 @@ export const useSupabaseServicePages = () => {
         detail: { pages: cleanPages } 
       }));
 
-      console.log('🎉 SAVE CONCLUÍDO COM SUCESSO!');
+      console.log('🏁 PROCESSO COMPLETO - Páginas salvas e eventos disparados!');
       return cleanPages;
 
     } catch (error) {
-      console.error('❌ ERRO CRÍTICO no save:', error);
-      console.error('📋 Stack trace:', error instanceof Error ? error.stack : 'N/A');
+      console.error('❌ ERRO CRÍTICO no salvamento:', error);
       throw error;
     }
   };

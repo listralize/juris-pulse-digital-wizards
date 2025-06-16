@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -39,11 +38,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sincronizar localPages quando servicePages mudar
   useEffect(() => {
-    console.log('🔄 [ServicePagesManager] Props servicePages mudaram:', {
-      count: servicePages.length,
-      pages: servicePages.map(p => ({ id: p.id, title: p.title, href: p.href }))
+    console.log('🔄 [ServicePagesManager] Sincronizando páginas:', {
+      servicePagesCount: servicePages.length,
+      localPagesCount: localPages.length
     });
     setLocalPages([...servicePages]);
   }, [servicePages]);
@@ -60,10 +58,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     return title
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-      .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-      .replace(/\s+/g, '-') // Substitui espaços por hífens
-      .replace(/-+/g, '-') // Remove hífens duplos
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
       .trim();
   };
 
@@ -74,12 +72,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       if (page.id === pageId) {
         const updatedPage = { ...page, [field]: value };
         
-        // Se estiver alterando o título, ajustar o href automaticamente
         if (field === 'title' && typeof value === 'string') {
           const slug = generateSlugFromTitle(value);
           updatedPage.href = slug;
-          console.log('🔗 Href atualizado automaticamente:', slug);
-          console.log('🌐 URL da página será:', `/services/${slug}`);
+          console.log('🔗 Href atualizado para:', slug);
         }
         
         return updatedPage;
@@ -89,10 +85,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   };
 
   const handleSave = async () => {
-    console.log('🚀 [ServicePagesManager] INICIANDO SAVE PROCESS');
-    console.log('📊 Estado atual:', {
-      localPagesCount: localPages.length,
-      samplePages: localPages.slice(0, 3).map(p => ({
+    console.log('🚀 [ServicePagesManager] INICIANDO SALVAMENTO NO SUPABASE');
+    console.log('📊 Páginas para salvar:', {
+      total: localPages.length,
+      amostras: localPages.slice(0, 3).map(p => ({
         id: p.id,
         title: p.title,
         category: p.category,
@@ -103,21 +99,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     setIsSaving(true);
     
     try {
-      console.log('💾 [ServicePagesManager] Chamando onSave com', localPages.length, 'páginas');
-      
+      console.log('💾 Chamando função onSave...');
       await onSave([...localPages]);
       
-      console.log('✅ [ServicePagesManager] onSave concluído com sucesso');
-      toast.success('Páginas salvas com sucesso no Supabase!');
+      console.log('✅ SUCESSO! Páginas salvas no Supabase');
+      toast.success('🎉 Páginas salvas com sucesso no Supabase!');
       
     } catch (error) {
-      console.error('❌ [ServicePagesManager] ERRO no save:', error);
-      console.error('📋 Detalhes do erro:', {
-        message: error instanceof Error ? error.message : 'Erro desconhecido',
-        stack: error instanceof Error ? error.stack : 'N/A'
-      });
-      
-      toast.error(`Erro ao salvar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('❌ ERRO ao salvar páginas:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast.error(`❌ Erro ao salvar: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }
@@ -167,10 +158,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       }]
     };
     
-    console.log('➕ [ServicePagesManager] Adicionando nova página:', { 
+    console.log('➕ Adicionando nova página:', { 
       id: newId, 
       href: baseHref,
-      fullURL: `/services/${baseHref}`,
       category: selectedCategory 
     });
     
@@ -179,14 +169,13 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   };
 
   const removeServicePage = (pageId: string) => {
-    console.log('🗑️ [ServicePagesManager] Removendo página:', pageId);
+    console.log('🗑️ Removendo página:', pageId);
     setLocalPages(pages => pages.filter(page => page.id !== pageId));
     if (selectedPageId === pageId) {
       setSelectedPageId(null);
     }
   };
 
-  // Se está editando categorias
   if (showCategoryEditor) {
     return (
       <div className="space-y-4">
@@ -211,7 +200,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     );
   }
 
-  // Se nenhuma categoria selecionada, mostra grid de categorias
   if (!selectedCategory) {
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -232,7 +220,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             </div>
           </div>
           <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            Total de páginas: {localPages.length} | Local: {localPages.length} | Supabase: {servicePages.length}
+            📊 Total de páginas locais: {localPages.length} | Supabase: {servicePages.length}
           </p>
         </CardHeader>
         <CardContent>
@@ -246,7 +234,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     );
   }
 
-  // Se categoria selecionada mas nenhuma página, mostra lista de páginas
   if (selectedCategory && !selectedPageId) {  
     const categoryInfo = categories.find(c => c.value === selectedCategory);
     
@@ -291,7 +278,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     );
   }
 
-  // Se página selecionada, mostra editor completo
   if (selectedPage) {
     const categoryInfo = categories.find(c => c.value === selectedCategory);
     
@@ -318,7 +304,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             </Button>
           </div>
           <p className={`text-sm mt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            URL da página: /services/{selectedPage.href || 'sem-url'}
+            🌐 URL da página: /services/{selectedPage.href || 'sem-url'}
           </p>
         </CardHeader>
         <CardContent>
