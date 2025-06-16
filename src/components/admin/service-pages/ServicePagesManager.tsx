@@ -85,6 +85,11 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   };
 
   const handleSave = async () => {
+    if (isSaving) {
+      console.log('⏳ Salvamento já em andamento, ignorando...');
+      return;
+    }
+    
     console.log('🚀 [ServicePagesManager] INICIANDO SALVAMENTO NO SUPABASE');
     console.log('📊 Páginas para salvar:', {
       total: localPages.length,
@@ -213,7 +218,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 <Settings className="w-4 h-4 mr-2" />
                 Editar Categorias
               </Button>
-              <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
+              <Button 
+                onClick={handleSave} 
+                size="sm" 
+                variant="outline" 
+                disabled={isSaving}
+              >
                 <Save className="w-4 h-4 mr-2" />
                 {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
               </Button>
@@ -259,7 +269,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Página
               </Button>
-              <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
+              <Button 
+                onClick={handleSave} 
+                size="sm" 
+                variant="outline" 
+                disabled={isSaving}
+              >
                 <Save className="w-4 h-4 mr-2" />
                 {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
               </Button>
@@ -298,7 +313,12 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
                 {categoryInfo?.label} › {selectedPage.title || 'Nova Página'}
               </CardTitle>
             </div>
-            <Button onClick={handleSave} size="sm" variant="outline" disabled={isSaving}>
+            <Button 
+              onClick={handleSave} 
+              size="sm" 
+              variant="outline" 
+              disabled={isSaving}
+            >
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? 'Salvando...' : 'Salvar no Supabase'}
             </Button>
