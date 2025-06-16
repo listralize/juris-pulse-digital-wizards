@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -37,16 +36,20 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const handleInputChange = (field: keyof PageTexts, value: string) => {
     console.log('📝 Alterando campo:', field, 'para:', value);
-    const updatedTexts = { ...pageTexts, [field]: value };
+    const updatedTexts = {
+      ...pageTexts,
+      [field]: value
+    };
     onUpdatePageTexts(updatedTexts);
   };
 
   const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
     console.log('📝 Alterando campo aninhado:', parent, field, 'para:', value);
+    const parentObject = pageTexts[parent] || {};
     const updatedTexts = {
       ...pageTexts,
       [parent]: {
-        ...pageTexts[parent as keyof PageTexts],
+        ...parentObject,
         [field]: value
       }
     };
@@ -55,6 +58,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const handleSaveAndNotify = async () => {
     try {
+      console.log('💾 Salvando alterações...', pageTexts);
       await onSaveAll();
       toast.success('Alterações salvas com sucesso!');
     } catch (error) {
@@ -77,7 +81,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="hero" className="space-y-4">
+        <Tabs defaultValue="about" className="space-y-4">
           <TabsList className={`grid w-full grid-cols-6 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
             <TabsTrigger value="hero" className="flex items-center gap-1">
               <Image className="w-3 h-3" />
@@ -105,39 +109,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="hero" className="space-y-4">
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Hero</h3>
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label>Título Principal</Label>
-                <Input
-                  value={pageTexts.heroTitle || ''}
-                  onChange={(e) => handleInputChange('heroTitle', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Ex: Excelência em Advocacia"
-                />
-              </div>
-              <div>
-                <Label>Subtítulo</Label>
-                <Input
-                  value={pageTexts.heroSubtitle || ''}
-                  onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Ex: Defendemos seus direitos com dedicação"
-                />
-              </div>
-              <div>
-                <Label>Imagem de Fundo do Hero</Label>
-                <Input
-                  value={pageTexts.heroBackgroundImage || ''}
-                  onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="URL da imagem de fundo"
-                />
-              </div>
-            </div>
-          </TabsContent>
-
           <TabsContent value="about" className="space-y-4">
             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Sobre Nós</h3>
             <div className="grid grid-cols-1 gap-4">
@@ -147,6 +118,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   value={pageTexts.aboutTitle || ''}
                   onChange={(e) => handleInputChange('aboutTitle', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Sobre Nós"
                 />
               </div>
               <div>
@@ -156,6 +128,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   onChange={(e) => handleInputChange('aboutDescription', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Descrição completa sobre o escritório..."
+                  rows={4}
                 />
               </div>
               <div>

@@ -17,12 +17,13 @@ const About = () => {
   // Estado local para receber atualizações em tempo real
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
 
-  // Atualizar quando pageTexts muda
+  // Atualizar quando pageTexts muda (do hook principal)
   useEffect(() => {
+    console.log('📱 About: pageTexts mudou:', pageTexts);
     setLocalPageTexts(pageTexts);
   }, [pageTexts]);
 
-  // Escutar eventos de atualização
+  // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('📱 About: Recebendo atualização de textos:', event.detail);
@@ -90,6 +91,8 @@ const About = () => {
 
   const aboutTitle = localPageTexts?.aboutTitle || 'Sobre Nós';
   const aboutDescription = localPageTexts?.aboutDescription || 'Descrição sobre o escritório';
+
+  console.log('🔍 About renderizando com:', { aboutTitle, aboutDescription });
 
   return (
     <section 

@@ -109,13 +109,13 @@ export const useSupabasePageTexts = () => {
 
       let result;
       if (existing) {
-        // Atualizar registro existente
+        console.log('📝 Atualizando registro existente:', existing.id);
         result = await supabase
           .from('site_settings')
           .update(dataToSave)
           .eq('id', existing.id);
       } else {
-        // Inserir novo registro
+        console.log('➕ Inserindo novo registro');
         result = await supabase
           .from('site_settings')
           .insert(dataToSave);
@@ -126,10 +126,11 @@ export const useSupabasePageTexts = () => {
         throw result.error;
       }
 
-      setPageTexts({ ...texts });
+      setPageTexts(texts);
       console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
       
       // Disparar evento customizado para atualizar as seções em tempo real
+      console.log('📡 Disparando evento pageTextsUpdated');
       window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
         detail: texts 
       }));
