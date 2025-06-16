@@ -36,35 +36,49 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
     onUpdateFormFields([...formFields, newField]);
   };
 
-  const updateField = (index: number, updates: Partial<FormField>) => {
-    const updatedFields = [...formFields];
-    updatedFields[index] = { ...updatedFields[index], ...updates };
+  const updateField = (fieldId: string, updates: Partial<FormField>) => {
+    const updatedFields = formFields.map(field => 
+      field.id === fieldId ? { ...field, ...updates } : field
+    );
     onUpdateFormFields(updatedFields);
   };
 
-  const removeField = (index: number) => {
-    const field = formFields[index];
+  const removeField = (fieldId: string) => {
+    const field = formFields.find(f => f.id === fieldId);
+    if (!field) return;
+
     if (field.isDefault) {
-      // Para campos padrão, apenas ocultar/desabilitar
-      updateField(index, { required: false });
-      return;
+      // Para campos padrão, não remover mas desabilitar
+      const updatedFields = formFields.map(f => 
+        f.id === fieldId ? { ...f, required: false } : f
+      );
+      onUpdateFormFields(updatedFields);
+    } else {
+      // Para campos personalizados, remover completamente
+      const updatedFields = formFields.filter(f => f.id !== fieldId);
+      // Reordenar os campos restantes
+      const reorderedFields = updatedFields.map((field, index) => ({
+        ...field,
+        order: index
+      }));
+      onUpdateFormFields(reorderedFields);
     }
-    // Para campos personalizados, remover completamente
-    const updatedFields = formFields.filter((_, i) => i !== index);
-    onUpdateFormFields(updatedFields);
   };
 
-  const moveField = (index: number, direction: 'up' | 'down') => {
+  const moveField = (fieldId: string, direction: 'up' | 'down') => {
+    const fieldIndex = formFields.findIndex(f => f.id === fieldId);
+    if (fieldIndex === -1) return;
+
     if (
-      (direction === 'up' && index === 0) ||
-      (direction === 'down' && index === formFields.length - 1)
+      (direction === 'up' && fieldIndex === 0) ||
+      (direction === 'down' && fieldIndex === formFields.length - 1)
     ) {
       return;
     }
 
     const updatedFields = [...formFields];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    [updatedFields[index], updatedFields[targetIndex]] = [updatedFields[targetIndex], updatedFields[index]];
+    const targetIndex = direction === 'up' ? fieldIndex - 1 : fieldIndex + 1;
+    [updatedFields[fieldIndex], updatedFields[targetIndex]] = [updatedFields[targetIndex], updatedFields[fieldIndex]];
     
     // Atualiza a ordem
     updatedFields.forEach((field, i) => {
@@ -74,26 +88,32 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
     onUpdateFormFields(updatedFields);
   };
 
-  const addSelectOption = (fieldIndex: number) => {
-    const field = formFields[fieldIndex];
+  const addSelectOption = (fieldId: string) => {
+    const field = formFields.find(f => f.id === fieldId);
+    if (!field) return;
+
     const newOptions = [
       ...(field.options || []),
       { value: `opcao_${(field.options?.length || 0) + 1}`, label: 'Nova Opção' }
     ];
-    updateField(fieldIndex, { options: newOptions });
+    updateField(fieldId, { options: newOptions });
   };
 
-  const updateSelectOption = (fieldIndex: number, optionIndex: number, updates: { value?: string; label?: string }) => {
-    const field = formFields[fieldIndex];
+  const updateSelectOption = (fieldId: string, optionIndex: number, updates: { value?: string; label?: string }) => {
+    const field = formFields.find(f => f.id === fieldId);
+    if (!field) return;
+
     const updatedOptions = [...(field.options || [])];
     updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], ...updates };
-    updateField(fieldIndex, { options: updatedOptions });
+    updateField(fieldId, { options: updatedOptions });
   };
 
-  const removeSelectOption = (fieldIndex: number, optionIndex: number) => {
-    const field = formFields[fieldIndex];
+  const removeSelectOption = (fieldId: string, optionIndex: number) => {
+    const field = formFields.find(f => f.id === fieldId);
+    if (!field) return;
+
     const updatedOptions = field.options?.filter((_, i) => i !== optionIndex) || [];
-    updateField(fieldIndex, { options: updatedOptions });
+    updateField(fieldId, { options: updatedOptions });
   };
 
   // Ordena os campos pela propriedade order
@@ -132,7 +152,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => moveField(index, 'up')}
+                    onClick={() => moveField(field.id, 'up')}
                     disabled={index === 0}
                     size="sm"
                     variant="outline"
@@ -140,7 +160,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                     <MoveUp className="w-4 h-4" />
                   </Button>
                   <Button
-                    onClick={() => moveField(index, 'down')}
+                    onClick={() => moveField(field.id, 'down')}
                     disabled={index === sortedFields.length - 1}
                     size="sm"
                     variant="outline"
@@ -148,9 +168,10 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                     <MoveDown className="w-4 h-4" />
                   </Button>
                   <Button
-                    onClick={() => removeField(index)}
+                    onClick={() => removeField(field.id)}
                     size="sm"
                     variant="destructive"
+                    title={field.isDefault ? 'Desabilitar campo padrão' : 'Deletar campo personalizado'}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -162,7 +183,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                   <Label>Nome do Campo</Label>
                   <Input
                     value={field.name}
-                    onChange={(e) => updateField(index, { name: e.target.value })}
+                    onChange={(e) => updateField(field.id, { name: e.target.value })}
                     placeholder="nome_do_campo"
                     disabled={field.isDefault}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} ${
@@ -174,7 +195,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                   <Label>Rótulo Exibido</Label>
                   <Input
                     value={field.label}
-                    onChange={(e) => updateField(index, { label: e.target.value })}
+                    onChange={(e) => updateField(field.id, { label: e.target.value })}
                     placeholder="Rótulo do campo"
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   />
@@ -183,7 +204,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                   <Label>Tipo do Campo</Label>
                   <Select
                     value={field.type}
-                    onValueChange={(value: any) => updateField(index, { type: value })}
+                    onValueChange={(value: any) => updateField(field.id, { type: value })}
                     disabled={field.isDefault}
                   >
                     <SelectTrigger className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} ${
@@ -205,7 +226,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                   <Label>Placeholder</Label>
                   <Input
                     value={field.placeholder || ''}
-                    onChange={(e) => updateField(index, { placeholder: e.target.value })}
+                    onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                     placeholder="Texto de ajuda"
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   />
@@ -216,7 +237,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                 <Checkbox
                   id={`required-${field.id}`}
                   checked={field.required}
-                  onCheckedChange={(checked) => updateField(index, { required: checked as boolean })}
+                  onCheckedChange={(checked) => updateField(field.id, { required: checked as boolean })}
                 />
                 <Label htmlFor={`required-${field.id}`}>Campo obrigatório</Label>
               </div>
@@ -226,7 +247,7 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                   <div className="flex justify-between items-center">
                     <Label>Opções de Seleção</Label>
                     <Button
-                      onClick={() => addSelectOption(index)}
+                      onClick={() => addSelectOption(field.id)}
                       size="sm"
                       variant="outline"
                     >
@@ -239,17 +260,17 @@ export const FormFieldsManager: React.FC<FormFieldsManagerProps> = ({
                       <Input
                         placeholder="Valor"
                         value={option.value}
-                        onChange={(e) => updateSelectOption(index, optionIndex, { value: e.target.value })}
+                        onChange={(e) => updateSelectOption(field.id, optionIndex, { value: e.target.value })}
                         className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       />
                       <Input
                         placeholder="Texto exibido"
                         value={option.label}
-                        onChange={(e) => updateSelectOption(index, optionIndex, { label: e.target.value })}
+                        onChange={(e) => updateSelectOption(field.id, optionIndex, { label: e.target.value })}
                         className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       />
                       <Button
-                        onClick={() => removeSelectOption(index, optionIndex)}
+                        onClick={() => removeSelectOption(field.id, optionIndex)}
                         size="sm"
                         variant="destructive"
                       >

@@ -5,9 +5,8 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
-import { Save, TestTube, AlertCircle, CheckCircle } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
@@ -99,25 +98,50 @@ const defaultFormConfig: FormConfig = {
   ]
 };
 
-const availablePages = [
-  { value: 'home', label: 'Página Inicial' },
-  { value: 'contato', label: 'Página de Contato' },
-  { value: 'sobre', label: 'Sobre Nós' },
-  { value: 'servicos', label: 'Serviços' },
-  { value: 'blog', label: 'Blog' },
-  { value: 'areas', label: 'Áreas de Atuação' }
-];
-
 export const ContactFormManagement: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const { multipleFormsConfig, setMultipleFormsConfig } = useFormConfig();
   const [currentFormIndex, setCurrentFormIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [testResult, setTestResult] = useState<string | null>(null);
+  const [availablePages, setAvailablePages] = useState<Array<{ value: string; label: string }>>([]);
 
   const currentForm = multipleFormsConfig.forms[currentFormIndex] || defaultFormConfig;
+
+  // Carregar páginas de serviços disponíveis
+  useEffect(() => {
+    const loadServicePages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('service_pages')
+          .select('href, title')
+          .eq('is_active', true)
+          .order('title');
+
+        if (error) {
+          console.error('Erro ao carregar páginas de serviços:', error);
+          return;
+        }
+
+        const pages = data?.map(page => ({
+          value: page.href || '',
+          label: page.title
+        })) || [];
+
+        // Adicionar páginas principais
+        const mainPages = [
+          { value: 'home', label: 'Página Inicial' },
+          { value: 'contato', label: 'Página de Contato' }
+        ];
+
+        setAvailablePages([...mainPages, ...pages]);
+      } catch (error) {
+        console.error('Erro ao carregar páginas:', error);
+      }
+    };
+
+    loadServicePages();
+  }, []);
 
   const updateCurrentForm = (updates: Partial<FormConfig>) => {
     const updatedForms = [...multipleFormsConfig.forms];
@@ -165,20 +189,9 @@ export const ContactFormManagement: React.FC = () => {
   };
 
   const updateFormFields = (fields: FormField[]) => {
-    // Garantir que o campo de serviço use as opções corretas
-    const updatedFields = fields.map(field => {
-      if (field.name === 'service' && field.isDefault) {
-        return {
-          ...field,
-          options: currentForm.serviceOptions
-        };
-      }
-      return field;
-    });
-
     updateCurrentForm({ 
-      allFields: updatedFields,
-      customFields: updatedFields.filter(f => !f.isDefault)
+      allFields: fields,
+      customFields: fields.filter(f => !f.isDefault)
     });
   };
 
@@ -245,51 +258,6 @@ export const ContactFormManagement: React.FC = () => {
       toast.error('Erro ao salvar configurações dos formulários');
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const testWebhook = async () => {
-    if (!currentForm.webhookUrl) {
-      toast.error('Por favor, configure o webhook primeiro');
-      return;
-    }
-
-    setIsTesting(true);
-    setTestResult(null);
-
-    try {
-      const testData = {
-        name: 'Teste do Sistema',
-        email: 'teste@exemplo.com',
-        phone: '(11) 99999-9999',
-        message: 'Esta é uma mensagem de teste do sistema administrativo.',
-        service: 'Teste',
-        isUrgent: false,
-        timestamp: new Date().toISOString(),
-        source: 'Admin - Teste de Webhook'
-      };
-
-      const response = await fetch(currentForm.webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(testData)
-      });
-
-      if (response.ok) {
-        setTestResult('success');
-        toast.success('Webhook testado com sucesso!');
-      } else {
-        setTestResult('error');
-        toast.error(`Erro no webhook: ${response.status}`);
-      }
-    } catch (error) {
-      setTestResult('error');
-      console.error('Erro ao testar webhook:', error);
-      toast.error('Erro ao testar webhook');
-    } finally {
-      setIsTesting(false);
     }
   };
 
@@ -449,65 +417,6 @@ export const ContactFormManagement: React.FC = () => {
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Service Options for this form */}
-      <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-              ⚖️ Opções de Serviços deste Formulário
-            </CardTitle>
-            <Button 
-              onClick={() => {
-                const newOptions = [
-                  ...currentForm.serviceOptions,
-                  { value: 'nova-opcao', label: 'Nova Opção' }
-                ];
-                updateCurrentForm({ serviceOptions: newOptions });
-              }} 
-              size="sm"
-            >
-              + Adicionar Opção
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {currentForm.serviceOptions.map((option, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <Input
-                placeholder="Valor (ex: familia)"
-                value={option.value}
-                onChange={(e) => {
-                  const newOptions = [...currentForm.serviceOptions];
-                  newOptions[index] = { ...newOptions[index], value: e.target.value };
-                  updateCurrentForm({ serviceOptions: newOptions });
-                }}
-                className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-              <Input
-                placeholder="Texto exibido"
-                value={option.label}
-                onChange={(e) => {
-                  const newOptions = [...currentForm.serviceOptions];
-                  newOptions[index] = { ...newOptions[index], label: e.target.value };
-                  updateCurrentForm({ serviceOptions: newOptions });
-                }}
-                className={`flex-2 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-              <Button
-                onClick={() => {
-                  const newOptions = currentForm.serviceOptions.filter((_, i) => i !== index);
-                  updateCurrentForm({ serviceOptions: newOptions });
-                }}
-                size="sm"
-                variant="destructive"
-              >
-                Remover
-              </Button>
-            </div>
-          ))}
         </CardContent>
       </Card>
 
