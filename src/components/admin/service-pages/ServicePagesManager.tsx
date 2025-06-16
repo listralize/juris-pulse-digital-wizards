@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServicePage, PageTexts, CategoryInfo } from '../../../types/adminTypes';
 import { Button } from '../../ui/button';
@@ -9,6 +10,7 @@ import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoriesManager } from './CategoriesManager';
 import { CategoryManagerNew } from './CategoryManagerNew';
+import { useSupabaseLawCategories } from '../../../hooks/supabase/useSupabaseLawCategories';
 import { toast } from 'sonner';
 
 interface ServicePagesManagerProps {
@@ -23,7 +25,6 @@ interface ServicePagesManagerProps {
 
 export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   servicePages,
-  categories,
   pageTexts,
   onSave,
   onSaveCategories,
@@ -32,6 +33,9 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  
+  // Use categories from Supabase instead of props
+  const { categories: supabaseCategories, isLoading: categoriesLoading, refetch: refetchCategories } = useSupabaseLawCategories();
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
@@ -42,6 +46,17 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   useEffect(() => {
     setLocalPages([...servicePages]);
   }, [servicePages]);
+
+  // Listen for category updates and refresh
+  useEffect(() => {
+    const handleCategoriesUpdated = () => {
+      console.log('🔄 Categorias atualizadas, recarregando...');
+      refetchCategories();
+    };
+
+    window.addEventListener('categoriesUpdated', handleCategoriesUpdated);
+    return () => window.removeEventListener('categoriesUpdated', handleCategoriesUpdated);
+  }, [refetchCategories]);
 
   const filteredPages = selectedCategory 
     ? localPages.filter(page => page.category === selectedCategory)
@@ -112,7 +127,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
 
   const addNewServicePage = () => {
     if (!selectedCategory) return;
-    const categoryInfo = categories.find(c => c.value === selectedCategory);
+    const categoryInfo = supabaseCategories.find(c => c.value === selectedCategory);
     const newId = crypto.randomUUID();
     
     const newTitle = `Novo Serviço - ${categoryInfo?.label || selectedCategory}`;
@@ -182,6 +197,14 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     );
   }
 
+  if (categoriesLoading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   if (!selectedCategory) {
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -216,7 +239,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
         </CardHeader>
         <CardContent>
           <CategoryGrid 
-            categories={categories}
+            categories={supabaseCategories}
             servicePages={localPages} 
             onCategorySelect={setSelectedCategory} 
           />
@@ -226,7 +249,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   }
 
   if (selectedCategory && !selectedPageId) {  
-    const categoryInfo = categories.find(c => c.value === selectedCategory);
+    const categoryInfo = supabaseCategories.find(c => c.value === selectedCategory);
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -275,7 +298,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   }
 
   if (selectedPage) {
-    const categoryInfo = categories.find(c => c.value === selectedCategory);
+    const categoryInfo = supabaseCategories.find(c => c.value === selectedCategory);
     
     return (
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
