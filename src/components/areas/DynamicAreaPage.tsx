@@ -29,7 +29,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
   console.log('🔍 DynamicAreaPage dados:', {
     areaKey,
     servicePages: servicePages?.length || 0,
-    allCategories: servicePages?.map(p => p.category) || []
+    allPages: servicePages?.map(p => ({ title: p.title, category: p.category, href: p.href })) || []
   });
 
   if (isLoading) {
@@ -40,19 +40,21 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
     );
   }
 
-  // Filtrar serviços da categoria específica com verificações de segurança
+  // Filtrar serviços da categoria específica
   const areaServices = servicePages?.filter(page => {
     if (!page) return false;
-    
-    // Verificar se a categoria corresponde
-    const pageCategory = page.category_id || page.category;
-    return pageCategory === areaKey;
+    return page.category === areaKey;
   }) || [];
 
   console.log('📄 Serviços filtrados:', {
     areaKey,
     found: areaServices.length,
-    services: areaServices.map(s => ({ title: s.title, category: s.category_id || s.category, href: s.href }))
+    services: areaServices.map(s => ({ title: s.title, category: s.category, href: s.href, hasContent: {
+      benefits: s.benefits?.length || 0,
+      process: s.process?.length || 0,
+      faq: s.faq?.length || 0,
+      testimonials: s.testimonials?.length || 0
+    }}))
   });
 
   return (
