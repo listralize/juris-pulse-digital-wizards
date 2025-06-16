@@ -89,23 +89,35 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   };
 
   const handleSave = async () => {
+    console.log('🚀 [ServicePagesManager] INICIANDO SAVE PROCESS');
+    console.log('📊 Estado atual:', {
+      localPagesCount: localPages.length,
+      samplePages: localPages.slice(0, 3).map(p => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        href: p.href
+      }))
+    });
+
     setIsSaving(true);
+    
     try {
-      console.log('💾 [ServicePagesManager] Iniciando save de', localPages.length, 'páginas');
-      console.log('📄 URLs das páginas a salvar:', localPages.map(p => ({ 
-        title: p.title, 
-        href: p.href,
-        fullURL: p.href ? `/services/${p.href}` : 'sem-href'
-      })));
+      console.log('💾 [ServicePagesManager] Chamando onSave com', localPages.length, 'páginas');
       
       await onSave([...localPages]);
-      console.log('✅ [ServicePagesManager] Save concluído com sucesso');
       
-      toast.success('Páginas salvas com sucesso! As rotas foram atualizadas.');
+      console.log('✅ [ServicePagesManager] onSave concluído com sucesso');
+      toast.success('Páginas salvas com sucesso no Supabase!');
       
     } catch (error) {
-      console.error('❌ [ServicePagesManager] Erro no save:', error);
-      toast.error('Erro ao salvar páginas no Supabase');
+      console.error('❌ [ServicePagesManager] ERRO no save:', error);
+      console.error('📋 Detalhes do erro:', {
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
+        stack: error instanceof Error ? error.stack : 'N/A'
+      });
+      
+      toast.error(`Erro ao salvar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
       setIsSaving(false);
     }
