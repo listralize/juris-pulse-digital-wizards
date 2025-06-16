@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
@@ -8,89 +8,87 @@ import { useAdminData } from '../../hooks/useAdminData';
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
+  const { pageTexts } = useAdminData();
+  const [currentPageTexts, setCurrentPageTexts] = useState(pageTexts);
 
+  // Listen for page texts updates
   useEffect(() => {
-    if (isLoading) return;
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('About: Recebendo atualização de pageTexts', event.detail);
+      setCurrentPageTexts(event.detail);
+    };
 
-    try {
-      gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, scaleY: 0.9 },
-        {
-          opacity: 1,
-          scaleY: 1,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-      
-      gsap.fromTo(
-        textRef.current,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: textRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    } catch (error) {
-      console.error('❌ Erro na animação About:', error);
-    }
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, [isLoading]);
+  }, []);
 
-  if (isLoading) {
-    return (
-      <section id="about" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
-        <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-        </div>
-      </section>
+  // Update local state when pageTexts prop changes
+  useEffect(() => {
+    setCurrentPageTexts(pageTexts);
+  }, [pageTexts]);
+
+  useEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    
+    tl.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
+    ).fromTo(
+      contentRef.current,
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.4"
     );
-  }
+    
+    return () => {
+      tl.kill();
+    };
+  }, []);
 
-  const aboutTitle = pageTexts?.aboutTitle || 'Sobre Nós';
-  const aboutDescription = pageTexts?.aboutDescription || 'Descrição sobre o escritório';
+  const aboutImage = currentPageTexts.aboutImage || '/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png';
 
   return (
-    <section 
-      id="about" 
-      className={`h-full flex flex-col justify-center items-center px-4 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
+    <div 
+      ref={sectionRef}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-4 px-4`}
       style={{ minHeight: '100vh' }}
     >
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 
-          ref={titleRef} 
-          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
-        >
-          {aboutTitle}
-        </h2>
+      <div className="max-w-7xl mx-auto flex flex-col justify-center" style={{ minHeight: '100vh' }}>
+        <div ref={titleRef} className="mb-6 text-center">
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+            {currentPageTexts.aboutTitle}
+          </h2>
+          <div className={`w-20 h-1 mx-auto mt-2 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+        </div>
         
-        <p 
-          ref={textRef} 
-          className={`text-lg md:text-xl lg:text-2xl xl:text-3xl leading-relaxed font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-        >
-          {aboutDescription}
-        </p>
+        <div ref={contentRef} className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
+          <div className="w-full lg:w-1/2">
+            <div className="relative overflow-hidden rounded-lg">
+              <img
+                src={aboutImage}
+                alt="Sobre nós"
+                className="w-full h-64 md:h-80 lg:h-96 object-cover"
+              />
+            </div>
+          </div>
+          
+          <div className="w-full lg:w-1/2 space-y-4">
+            <p className={`text-base md:text-lg lg:text-xl leading-relaxed ${isDark ? 'text-white/80' : 'text-black/80'}`}>
+              {currentPageTexts.aboutDescription}
+            </p>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

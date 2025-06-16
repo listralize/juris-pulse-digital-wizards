@@ -14,9 +14,9 @@ interface ContentManagementProps {
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
-  onSaveTeamMembers: () => void;
+  onSaveTeamMembers: () => Promise<void>;
   onUpdatePageTexts: (texts: PageTexts) => void;
-  onSavePageTexts: () => void;
+  onSavePageTexts: () => Promise<void>;
 }
 
 export const ContentManagement: React.FC<ContentManagementProps> = ({
@@ -50,9 +50,13 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
     }
   ];
 
-  const handleSaveAll = () => {
-    onSaveTeamMembers();
-    onSavePageTexts();
+  const handleSaveAll = async () => {
+    try {
+      await onSaveTeamMembers();
+      await onSavePageTexts();
+    } catch (error) {
+      console.error('Erro ao salvar dados:', error);
+    }
   };
 
   if (selectedSection) {
@@ -106,6 +110,9 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
         <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
           Gerenciamento de Conteúdo
         </CardTitle>
+        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          Edite textos e conteúdo das seções do site. As alterações são salvas no Supabase automaticamente.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
