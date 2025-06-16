@@ -14,8 +14,8 @@ export const useSupabaseDataNew = () => {
     servicePages: rawServicePages, 
     categories: rawCategories, 
     isLoading: servicePagesLoading,
-    saveServicePages: saveServicePagesSupabase,
-    setServicePages: setServicePagesLocal,
+    saveServicePages,
+    setServicePages,
     loadServicePages,
     refetch: refetchServicePages
   } = useSupabaseServicePages();
@@ -23,24 +23,24 @@ export const useSupabaseDataNew = () => {
   const { 
     categories: additionalCategories, 
     isLoading: categoriesLoading,
-    saveCategories: saveCategoriesSupabase,
-    setCategories: setCategoriesLocal,
+    saveCategories: saveCategoriesOnly,
+    setCategories,
     refetch: refetchCategories
   } = useSupabaseCategories();
 
   const { 
     teamMembers: rawTeamMembers, 
     isLoading: teamLoading,
-    saveTeamMembers: saveTeamMembersSupabase,
-    setTeamMembers: setTeamMembersLocal,
+    saveTeamMembers,
+    setTeamMembers,
     refetch: refetchTeam
   } = useSupabaseTeamMembers();
 
   const { 
     pageTexts: rawPageTexts, 
     isLoading: pageTextsLoading,
-    savePageTexts: savePageTextsSupabase,
-    setPageTexts: setPageTextsLocal,
+    savePageTexts,
+    setPageTexts,
     refetch: refetchPageTexts
   } = useSupabasePageTexts();
 
@@ -86,59 +86,14 @@ export const useSupabaseDataNew = () => {
     setIsLoading(!allLoaded);
   }, [servicePagesLoading, categoriesLoading, teamLoading, pageTextsLoading]);
 
-  const saveServicePages = async (pages: ServicePage[]) => {
-    try {
-      await saveServicePagesSupabase(pages);
-      setServicePagesState([...pages]);
-    } catch (error) {
-      console.error('Erro ao salvar páginas de serviços:', error);
-      throw error;
-    }
-  };
-
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
-      await saveCategoriesSupabase(cats);
+      await saveCategoriesOnly(cats);
       setCategoriesState([...cats]);
     } catch (error) {
       console.error('Erro ao salvar categorias:', error);
       throw error;
     }
-  };
-
-  const saveTeamMembers = async (members: TeamMember[]) => {
-    try {
-      await saveTeamMembersSupabase(members);
-      setTeamMembersState([...members]);
-    } catch (error) {
-      console.error('Erro ao salvar membros da equipe:', error);
-      throw error;
-    }
-  };
-
-  const savePageTexts = async (texts: PageTexts) => {
-    try {
-      await savePageTextsSupabase(texts);
-      setPageTextsState({ ...texts });
-    } catch (error) {
-      console.error('Erro ao salvar textos das páginas:', error);
-      throw error;
-    }
-  };
-
-  const setServicePages = (pages: ServicePage[]) => {
-    setServicePagesState([...pages]);
-    setServicePagesLocal(pages);
-  };
-
-  const setTeamMembers = (members: TeamMember[]) => {
-    setTeamMembersState([...members]);
-    setTeamMembersLocal(members);
-  };
-
-  const setPageTexts = (texts: PageTexts) => {
-    setPageTextsState({ ...texts });
-    setPageTextsLocal(texts);
   };
 
   const refreshData = async () => {
@@ -169,7 +124,7 @@ export const useSupabaseDataNew = () => {
     savePageTexts,
     setServicePages,
     setTeamMembers,
-    setPageTexts,
+    setPageTexts: setPageTextsState,
     refreshData,
     refetchServicePages,
     refetchCategories,

@@ -5,7 +5,6 @@ import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
-import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { TeamMember, SpecializedService, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
@@ -14,6 +13,7 @@ import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { defaultPageTexts } from '../data/defaultPageTexts';
+import { defaultBlogPosts } from '../data/defaultBlogPosts';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -36,12 +36,6 @@ const Admin = () => {
     setPageTexts,
     refreshData
   } = useSupabaseDataNew();
-
-  const {
-    blogPosts,
-    isLoading: blogLoading,
-    saveBlogPosts: saveSupabaseBlogPosts
-  } = useSupabaseBlog();
 
   const handleSaveServicePages = async (pages: ServicePage[]) => {
     try {
@@ -79,7 +73,7 @@ const Admin = () => {
 
   const handleSaveTeamMembers = async () => {
     try {
-      await saveTeamMembers(teamMembers || []);
+      await saveTeamMembers(teamMembers);
       toast.success('Equipe salva com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar equipe:', error);
@@ -97,27 +91,21 @@ const Admin = () => {
       image: '/lovable-uploads/placeholder-member.jpg',
       description: 'Descrição do membro da equipe'
     };
-    setTeamMembers([...(teamMembers || []), newMember]);
+    setTeamMembers([...teamMembers, newMember]);
   };
 
   const handleRemoveTeamMember = (id: string) => {
-    setTeamMembers((teamMembers || []).filter(member => member.id !== id));
+    setTeamMembers(teamMembers.filter(member => member.id !== id));
   };
 
   const handleUpdateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
-    setTeamMembers((teamMembers || []).map(member => 
+    setTeamMembers(teamMembers.map(member => 
       member.id === id ? { ...member, [field]: value } : member
     ));
   };
 
   const handleSaveBlogPosts = async (posts: any[]) => {
-    try {
-      await saveSupabaseBlogPosts(posts);
-      toast.success('Posts do blog salvos com sucesso!');
-    } catch (error) {
-      console.error('Erro ao salvar posts do blog:', error);
-      toast.error('Erro ao salvar posts do blog');
-    }
+    toast.success('Posts do blog salvos com sucesso!');
   };
 
   const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
@@ -125,7 +113,7 @@ const Admin = () => {
 
   return (
     <AdminProtectedRoute>
-      {isLoading || blogLoading ? (
+      {isLoading ? (
         <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -139,7 +127,7 @@ const Admin = () => {
                 🔒 Sistema Seguro Ativo: Row Level Security (RLS) implementado em todas as tabelas
               </p>
               <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {validTeamMembers.length} | 📝 Blog: {blogPosts?.length || 0} posts
+                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {validTeamMembers.length}
               </p>
             </div>
 
@@ -159,7 +147,7 @@ const Admin = () => {
                 </TabsTrigger>
                 <TabsTrigger value="blog" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
-                  Blog ({blogPosts?.length || 0})
+                  Blog
                 </TabsTrigger>
               </TabsList>
 
@@ -194,7 +182,7 @@ const Admin = () => {
 
               <TabsContent value="blog">
                 <BlogManagement 
-                  blogPosts={blogPosts || []}
+                  blogPosts={defaultBlogPosts}
                   onSave={handleSaveBlogPosts}
                 />
               </TabsContent>

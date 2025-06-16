@@ -18,6 +18,10 @@ const Blog = () => {
   const featuredPosts = blogPosts.filter(post => post.featured);
   const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : blogPosts.slice(0, 6);
 
+  console.log('Blog posts loaded from Supabase:', blogPosts.length);
+  console.log('Featured posts:', featuredPosts.length);
+  console.log('Display posts:', displayPosts.length);
+
   if (isLoading) {
     return (
       <section className={`py-8 ${isDark ? 'bg-black' : 'bg-white'}`} style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
@@ -75,6 +79,7 @@ const Blog = () => {
                                 alt={post.title}
                                 className="w-full h-40 md:h-48 object-cover"
                                 onError={(e) => {
+                                  console.log('Image failed to load:', post.banner);
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
