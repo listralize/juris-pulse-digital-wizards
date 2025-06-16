@@ -5,219 +5,206 @@ export interface TeamMember {
   title: string;
   oab: string;
   email: string;
-  image?: string;
+  image: string;
   description?: string;
 }
 
-export interface ServicePage {
+export interface CategoryTexts {
   id: string;
   title: string;
-  description?: string;
-  href?: string;
-  categoryId?: string;
-  displayOrder?: number;
-  isActive?: boolean;
-  benefits?: Benefit[];
-  process?: ProcessStep[];
-  testimonials?: Testimonial[];
-  faq?: FAQ[];
+  description: string;
 }
 
 export interface CategoryInfo {
   id: string;
+  value: string;
+  label: string;
   name: string;
-  categoryKey: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  displayOrder?: number;
-  isActive?: boolean;
-  titleOverride?: string;
-  descriptionOverride?: string;
+  description: string;
+  icon: string;
+  color: string;
   bannerTitle?: string;
   bannerSubtitle?: string;
   fullContent?: string;
-  label?: string;
-  value?: string;
 }
 
-export interface CategoryTexts {
-  [key: string]: {
-    title: string;
-    description: string;
-  };
+export interface ContactTexts {
+  phone: string;
+  email: string;
+  address: string;
+  whatsapp: string;
+  mapEmbedUrl?: string;
+}
+
+export interface FooterTexts {
+  companyName: string;
+  description: string;
+  copyright?: string;
 }
 
 export interface PageTexts {
   heroTitle: string;
   heroSubtitle: string;
   heroBackgroundImage?: string;
-  heroPrimaryButtonText?: string;
-  heroSecondaryButtonText?: string;
-  heroPrimaryButtonLink?: string;
-  heroSecondaryButtonLink?: string;
   aboutTitle: string;
   aboutDescription: string;
   aboutImage?: string;
   aboutMediaType?: 'image' | 'video';
   areasTitle: string;
+  familiaTitle: string;
+  familiaDescription: string;
+  tributarioTitle: string;
+  tributarioDescription: string;
+  empresarialTitle: string;
+  empresarialDescription: string;
+  trabalhoTitle: string;
+  trabalhoDescription: string;
+  civilTitle?: string;
+  civilDescription?: string;
+  previdenciarioTitle?: string;
+  previdenciarioDescription?: string;
+  consumidorTitle?: string;
+  consumidorDescription?: string;
+  constitucionalTitle?: string;
+  constitucionalDescription?: string;
+  administrativoTitle?: string;
+  administrativoDescription?: string;
   teamTitle: string;
   clientAreaTitle: string;
   clientAreaDescription: string;
   clientPortalLink?: string;
   contactTitle: string;
   contactSubtitle: string;
-  contactTexts?: {
-    whatsapp: string;
-  };
-  categoryTexts?: CategoryTexts;
-  familiaTitle?: string;
-  familiaDescription?: string;
-  tributarioTitle?: string;
-  tributarioDescription?: string;
-  empresarialTitle?: string;
-  empresarialDescription?: string;
-  trabalhoTitle?: string;
-  trabalhoDescription?: string;
-  constitucionalTitle?: string;
-  constitucionalDescription?: string;
-  administrativoTitle?: string;
-  administrativoDescription?: string;
-  previdenciarioTitle?: string;
-  previdenciarioDescription?: string;
-  consumidorTitle?: string;
-  consumidorDescription?: string;
-  civilTitle?: string;
-  civilDescription?: string;
+  categoryTexts: CategoryTexts[];
+  contactTexts: ContactTexts;
+  footerTexts: FooterTexts;
+}
+
+export interface Testimonial {
+  name: string;
+  text: string;
+  role?: string;
+  image?: string;
 }
 
 export interface Benefit {
-  id: string;
   title: string;
   description: string;
   icon?: string;
 }
 
 export interface ProcessStep {
-  id: string;
-  stepNumber: number;
+  step: number;
   title: string;
   description: string;
 }
 
-export interface Testimonial {
-  id: string;
-  name: string;
-  title?: string;
-  content: string;
-  image?: string;
-  role?: string;
-}
-
 export interface FAQ {
-  id: string;
   question: string;
   answer: string;
+}
+
+export interface ServicePage {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  href?: string;
+  benefits?: Benefit[];
+  process?: ProcessStep[];
+  testimonials?: Testimonial[];
+  faq?: FAQ[];
 }
 
 export interface SpecializedService {
   id: string;
   title: string;
   description: string;
-  icon?: string;
-  href?: string;
+  icon: string;
+  category: string;
+  href: string;
 }
 
-// Default categories export
 export const categories: CategoryInfo[] = [
-  { 
+  {
     id: 'familia',
-    name: 'Direito de Família',
-    categoryKey: 'familia',
-    label: 'Direito de Família', 
     value: 'familia',
+    label: 'Direito de Família',
+    name: 'Direito de Família',
     description: 'Proteção e orientação em questões familiares',
-    icon: '👨‍👩‍👧‍👦',
-    color: '#E11D48'
+    icon: 'Heart',
+    color: 'bg-rose-500'
   },
-  { 
+  {
     id: 'tributario',
-    name: 'Direito Tributário',
-    categoryKey: 'tributario',
-    label: 'Direito Tributário', 
     value: 'tributario',
-    description: 'Planejamento e consultoria tributária',
-    icon: '💰',
-    color: '#059669'
+    label: 'Direito Tributário',
+    name: 'Direito Tributário',
+    description: 'Consultoria e planejamento tributário',
+    icon: 'Calculator',
+    color: 'bg-blue-500'
   },
-  { 
+  {
     id: 'empresarial',
-    name: 'Direito Empresarial',
-    categoryKey: 'empresarial',
-    label: 'Direito Empresarial', 
     value: 'empresarial',
-    description: 'Assessoria para empresas',
-    icon: '🏢',
-    color: '#0EA5E9'
+    label: 'Direito Empresarial',
+    name: 'Direito Empresarial',
+    description: 'Suporte jurídico para empresas',
+    icon: 'Building2',
+    color: 'bg-green-500'
   },
-  { 
+  {
     id: 'trabalho',
-    name: 'Direito do Trabalho',
-    categoryKey: 'trabalho',
-    label: 'Direito do Trabalho', 
     value: 'trabalho',
-    description: 'Relações trabalhistas',
-    icon: '👷',
-    color: '#DC2626'
+    label: 'Direito do Trabalho',
+    name: 'Direito do Trabalho',
+    description: 'Defesa dos direitos trabalhistas',
+    icon: 'Users',
+    color: 'bg-orange-500'
   },
-  { 
+  {
     id: 'civil',
-    name: 'Direito Civil',
-    categoryKey: 'civil',
-    label: 'Direito Civil', 
     value: 'civil',
-    description: 'Questões civis diversas',
-    icon: '📄',
-    color: '#7C3AED'
+    label: 'Direito Civil',
+    name: 'Direito Civil',
+    description: 'Proteção de direitos e interesses individuais',
+    icon: 'Scale',
+    color: 'bg-purple-500'
   },
-  { 
+  {
     id: 'previdenciario',
-    name: 'Direito Previdenciário',
-    categoryKey: 'previdenciario',
-    label: 'Direito Previdenciário', 
     value: 'previdenciario',
-    description: 'Benefícios previdenciários',
-    icon: '👴',
-    color: '#EA580C'
+    label: 'Direito Previdenciário',
+    name: 'Direito Previdenciário',
+    description: 'Benefícios e aposentadorias',
+    icon: 'Shield',
+    color: 'bg-indigo-500'
   },
-  { 
+  {
     id: 'consumidor',
-    name: 'Direito do Consumidor',
-    categoryKey: 'consumidor',
-    label: 'Direito do Consumidor', 
     value: 'consumidor',
-    description: 'Proteção do consumidor',
-    icon: '🛡️',
-    color: '#10B981'
+    label: 'Direito do Consumidor',
+    name: 'Direito do Consumidor',
+    description: 'Proteção e defesa do consumidor',
+    icon: 'ShoppingCart',
+    color: 'bg-yellow-500'
   },
-  { 
+  {
     id: 'constitucional',
-    name: 'Direito Constitucional',
-    categoryKey: 'constitucional',
-    label: 'Direito Constitucional', 
     value: 'constitucional',
-    description: 'Direitos fundamentais',
-    icon: '⚖️',
-    color: '#F59E0B'
+    label: 'Direito Constitucional',
+    name: 'Direito Constitucional',
+    description: 'Direitos fundamentais e constitucionalidade',
+    icon: 'BookOpen',
+    color: 'bg-red-500'
   },
-  { 
+  {
     id: 'administrativo',
-    name: 'Direito Administrativo',
-    categoryKey: 'administrativo',
-    label: 'Direito Administrativo', 
     value: 'administrativo',
-    description: 'Questões administrativas',
-    icon: '🏛️',
-    color: '#8B5CF6'
+    label: 'Direito Administrativo',
+    name: 'Direito Administrativo',
+    description: 'Relações com a administração pública',
+    icon: 'FileText',
+    color: 'bg-gray-500'
   }
 ];

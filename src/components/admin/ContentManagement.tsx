@@ -2,37 +2,11 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import HomePageEditor from './HomePageEditor';
-import { ServicesManagement } from './ServicesManagement';
-import { TeamManagement } from './TeamManagement';
-import { BlogManagement } from './BlogManagement';
-import { TeamMember, PageTexts, SpecializedService } from '../../types/adminTypes';
-import { BlogPost } from '../../types/blogTypes';
+import ServicesManagement from './ServicesManagement';
+import TeamManagement from './TeamManagement';
+import BlogManagement from './BlogManagement';
 
-interface ContentManagementProps {
-  teamMembers: TeamMember[];
-  pageTexts: PageTexts;
-  onAddTeamMember: () => void;
-  onRemoveTeamMember: (id: string) => void;
-  onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
-  onSaveTeamMembers: () => void;
-  onUpdatePageTexts: (texts: PageTexts) => void;
-  onSavePageTexts: () => void;
-}
-
-const ContentManagement: React.FC<ContentManagementProps> = ({
-  teamMembers,
-  pageTexts,
-  onAddTeamMember,
-  onRemoveTeamMember,
-  onUpdateTeamMember,
-  onSaveTeamMembers,
-  onUpdatePageTexts,
-  onSavePageTexts
-}) => {
-  // Mock data for components that need it
-  const mockSpecializedServices: SpecializedService[] = [];
-  const mockBlogPosts: BlogPost[] = [];
-
+const ContentManagement = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Gerenciamento de Conteúdo</h2>
@@ -46,38 +20,19 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
         </TabsList>
 
         <TabsContent value="homepage">
-          <HomePageEditor 
-            pageTexts={pageTexts}
-            onUpdatePageTexts={onUpdatePageTexts}
-            onSavePageTexts={onSavePageTexts}
-          />
+          <HomePageEditor />
         </TabsContent>
 
         <TabsContent value="services">
-          <ServicesManagement 
-            specializedServices={mockSpecializedServices}
-            onAddSpecializedService={() => {}}
-            onRemoveSpecializedService={() => {}}
-            onUpdateSpecializedService={() => {}}
-            onSave={() => {}}
-          />
+          <ServicesManagement />
         </TabsContent>
 
         <TabsContent value="team">
-          <TeamManagement 
-            teamMembers={teamMembers}
-            onAddTeamMember={onAddTeamMember}
-            onRemoveTeamMember={onRemoveTeamMember}
-            onUpdateTeamMember={onUpdateTeamMember}
-            onSave={onSaveTeamMembers}
-          />
+          <TeamManagement />
         </TabsContent>
 
         <TabsContent value="blog">
-          <BlogManagement 
-            blogPosts={mockBlogPosts}
-            onSave={() => {}}
-          />
+          <BlogManagement />
         </TabsContent>
       </Tabs>
     </div>
