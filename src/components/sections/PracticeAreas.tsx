@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
+import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,16 +15,23 @@ const PracticeAreas = () => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const { theme } = useTheme();
-  const { pageTexts, categories, servicePages, isLoading } = useSupabaseDataNew();
+  const { pageTexts, servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
+  const { categories: supabaseCategories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const isDark = theme === 'dark';
 
   // Estado local para receber atualizações em tempo real
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+  const [localCategories, setLocalCategories] = useState(supabaseCategories);
 
   // Atualizar quando pageTexts muda
   useEffect(() => {
     setLocalPageTexts(pageTexts);
   }, [pageTexts]);
+
+  // Atualizar quando categories mudam
+  useEffect(() => {
+    setLocalCategories(supabaseCategories);
+  }, [supabaseCategories]);
 
   // Escutar eventos de atualização
   useEffect(() => {
@@ -32,24 +40,31 @@ const PracticeAreas = () => {
       setLocalPageTexts(event.detail);
     };
 
+    const handleCategoriesUpdate = (event: CustomEvent) => {
+      console.log('📱 PracticeAreas: Recebendo atualização de categorias:', event.detail);
+      setLocalCategories(event.detail);
+    };
+
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    window.addEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
     
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
     };
   }, []);
 
   console.log('🔍 PracticeAreas DADOS:', {
-    categoriesCount: categories?.length || 0,
+    categoriesCount: localCategories?.length || 0,
     servicePagesCount: servicePages?.length || 0,
-    isLoading,
-    categories,
+    isLoading: categoriesLoading || pagesLoading,
+    categories: localCategories,
     servicePages
   });
 
   // Gerar áreas de atuação baseadas nas categorias do Supabase
   const practiceAreas = React.useMemo(() => {
-    if (!categories || categories.length === 0) {
+    if (!localCategories || localCategories.length === 0) {
       console.log('⚠️ Nenhuma categoria encontrada, usando áreas padrão');
       // Áreas padrão como fallback
       return [
@@ -74,7 +89,7 @@ const PracticeAreas = () => {
       ];
     }
 
-    return categories.map(category => {
+    return localCategories.map(category => {
       const categoryPages = servicePages?.filter(page => 
         page.category === category.value
       ) || [];
@@ -91,7 +106,9 @@ const PracticeAreas = () => {
         color: category.color
       };
     });
-  }, [categories, servicePages]);
+  }, [localCategories, servicePages]);
+
+  const isLoading = categoriesLoading || pagesLoading;
 
   useEffect(() => {
     if (isLoading) return;
