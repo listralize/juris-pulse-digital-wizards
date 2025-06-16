@@ -143,6 +143,40 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             </div>
           </TabsContent>
 
+          <TabsContent value="hero" className="space-y-4">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Hero</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label>Título Principal</Label>
+                <Input
+                  value={pageTexts.heroTitle || ''}
+                  onChange={(e) => handleInputChange('heroTitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Ex: Escritório de Advocacia"
+                />
+              </div>
+              <div>
+                <Label>Subtítulo</Label>
+                <Textarea
+                  value={pageTexts.heroSubtitle || ''}
+                  onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="Subtítulo da página principal..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Imagem de Fundo</Label>
+                <Input
+                  value={pageTexts.heroBackgroundImage || ''}
+                  onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
+                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  placeholder="URL da imagem de fundo"
+                />
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="areas" className="space-y-4">
             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Áreas de Atuação</h3>
             <div className="grid grid-cols-1 gap-4">

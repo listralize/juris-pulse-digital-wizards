@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,23 +10,43 @@ const About = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const { theme } = useTheme();
-  const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
   
-  // Estado local para receber atualizações em tempo real
-  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+  // Estado local para textos da página
+  const [aboutTitle, setAboutTitle] = useState('Sobre Nós');
+  const [aboutDescription, setAboutDescription] = useState('Descrição sobre o escritório');
 
-  // Atualizar quando pageTexts muda (do hook principal)
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
-    console.log('📱 About: pageTexts mudou:', pageTexts);
-    setLocalPageTexts(pageTexts);
-  }, [pageTexts]);
+    const loadInitialData = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('about_title, about_description')
+          .limit(1)
+          .maybeSingle();
+
+        if (settings) {
+          setAboutTitle(settings.about_title || 'Sobre Nós');
+          setAboutDescription(settings.about_description || 'Descrição sobre o escritório');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados iniciais:', error);
+      }
+    };
+
+    loadInitialData();
+  }, []);
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('📱 About: Recebendo atualização de textos:', event.detail);
-      setLocalPageTexts(event.detail);
+      const { aboutTitle: newTitle, aboutDescription: newDescription } = event.detail;
+      
+      if (newTitle) setAboutTitle(newTitle);
+      if (newDescription) setAboutDescription(newDescription);
     };
 
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
@@ -38,8 +57,6 @@ const About = () => {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
-
     try {
       gsap.fromTo(
         titleRef.current,
@@ -77,20 +94,7 @@ const About = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
     };
-  }, [isLoading]);
-
-  if (isLoading) {
-    return (
-      <section id="about" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
-        <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-        </div>
-      </section>
-    );
-  }
-
-  const aboutTitle = localPageTexts?.aboutTitle || 'Sobre Nós';
-  const aboutDescription = localPageTexts?.aboutDescription || 'Descrição sobre o escritório';
+  }, []);
 
   console.log('🔍 About renderizando com:', { aboutTitle, aboutDescription });
 

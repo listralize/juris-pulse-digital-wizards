@@ -126,14 +126,16 @@ export const useSupabasePageTexts = () => {
         throw result.error;
       }
 
+      // Atualizar estado local imediatamente
       setPageTexts(texts);
       console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
       
       // Disparar evento customizado para atualizar as seções em tempo real
       console.log('📡 Disparando evento pageTextsUpdated');
-      window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
+      const event = new CustomEvent('pageTextsUpdated', { 
         detail: texts 
-      }));
+      });
+      window.dispatchEvent(event);
       
     } catch (error) {
       console.error('❌ Erro crítico ao salvar textos:', error);
