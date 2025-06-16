@@ -8,14 +8,21 @@ import { CategoryInfo, ServicePage } from '../../types/adminTypes';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import NotFound from '../../pages/NotFound';
 
-const CategoryAreaPage: React.FC = () => {
-  const { categorySlug } = useParams<{ categorySlug: string }>();
+interface CategoryAreaPageProps {
+  categorySlug?: string;
+}
+
+const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propCategorySlug }) => {
+  const { '*': urlSlug } = useParams();
+  const categorySlug = propCategorySlug || urlSlug;
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const { servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
   const { categories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const [category, setCategory] = useState<CategoryInfo | null>(null);
   const [categoryPages, setCategoryPages] = useState<ServicePage[]>([]);
+
+  console.log('🔍 CategoryAreaPage: categoria slug:', categorySlug);
 
   useEffect(() => {
     if (!categoriesLoading && categories.length > 0 && categorySlug) {
@@ -44,6 +51,7 @@ const CategoryAreaPage: React.FC = () => {
   }
 
   if (!category) {
+    console.log('❌ Categoria não encontrada para slug:', categorySlug);
     return <NotFound />;
   }
 

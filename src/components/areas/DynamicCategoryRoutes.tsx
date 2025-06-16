@@ -38,14 +38,14 @@ const DynamicCategoryRoutes = () => {
         console.log('🔗 Criando rota para categoria:', { 
           value: category.value, 
           label: category.label,
-          path: `/${category.value}`
+          path: `${category.value}`
         });
         
         return (
           <Route 
             key={category.id || category.value} 
             path={category.value} 
-            element={<CategoryAreaPage />} 
+            element={<CategoryAreaPage categorySlug={category.value} />} 
           />
         );
       })}
