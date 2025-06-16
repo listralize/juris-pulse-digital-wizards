@@ -152,12 +152,15 @@ export type Database = {
       }
       law_categories: {
         Row: {
+          banner_subtitle: string | null
+          banner_title: string | null
           category_key: string
           color: string | null
           created_at: string | null
           description: string | null
           description_override: string | null
           display_order: number | null
+          full_content: string | null
           icon: string | null
           id: string
           is_active: boolean | null
@@ -166,12 +169,15 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          banner_subtitle?: string | null
+          banner_title?: string | null
           category_key: string
           color?: string | null
           created_at?: string | null
           description?: string | null
           description_override?: string | null
           display_order?: number | null
+          full_content?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
@@ -180,12 +186,15 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          banner_subtitle?: string | null
+          banner_title?: string | null
           category_key?: string
           color?: string | null
           created_at?: string | null
           description?: string | null
           description_override?: string | null
           display_order?: number | null
+          full_content?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null

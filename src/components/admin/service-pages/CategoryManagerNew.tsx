@@ -60,7 +60,7 @@ export const CategoryManagerNew: React.FC = () => {
       color: randomColor,
       bannerTitle: 'Nova Categoria',
       bannerSubtitle: 'Assessoria completa e humanizada em questões jurídicas.',
-      fullContent: 'Conteúdo completo da nova categoria de direito. Aqui você pode descrever detalhadamente os serviços oferecidos, a experiência da equipe e como podem ajudar os clientes nesta área específica do direito.'
+      fullContent: 'Conteúdo completo da nova categoria de direito.\n\nAqui você pode descrever detalhadamente os serviços oferecidos, a experiência da equipe e como podem ajudar os clientes nesta área específica do direito.\n\nEste texto aparecerá na página principal da categoria, permitindo que os visitantes entendam melhor como o escritório pode ajudá-los em suas necessidades jurídicas específicas.'
     };
     
     setLocalCategories(prev => [...prev, newCategory]);
@@ -77,6 +77,9 @@ export const CategoryManagerNew: React.FC = () => {
       updated[index].id = slug;
       if (field === 'name') {
         updated[index].label = value;
+        if (!updated[index].bannerTitle || updated[index].bannerTitle === updated[index].name) {
+          updated[index].bannerTitle = value;
+        }
       }
     }
     
@@ -180,7 +183,7 @@ export const CategoryManagerNew: React.FC = () => {
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Informações Básicas */}
               <div>
                 <h5 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
@@ -252,16 +255,16 @@ export const CategoryManagerNew: React.FC = () => {
                   📝 Conteúdo Completo da Página
                 </h5>
                 <div>
-                  <Label>Texto Completo (Markdown suportado)</Label>
+                  <Label>Texto Completo</Label>
                   <Textarea
                     value={category.fullContent || ''}
                     onChange={(e) => updateCategory(index, 'fullContent', e.target.value)}
-                    placeholder="Escreva o conteúdo completo da página aqui. Você pode usar parágrafos, listas e formatação básica..."
+                    placeholder="Escreva o conteúdo completo da página aqui. Use duas quebras de linha para separar parágrafos..."
                     rows={8}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   />
                   <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Este texto aparecerá na seção principal da página da categoria.
+                    Este texto aparecerá na seção principal da página da categoria. Use duas quebras de linha para separar parágrafos.
                   </p>
                 </div>
               </div>
