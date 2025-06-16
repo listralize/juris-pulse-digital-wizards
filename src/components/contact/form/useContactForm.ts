@@ -38,19 +38,15 @@ export const useContactForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-
-    // Verificar campos personalizados obrigatórios
-    const missingRequiredFields = formConfig.customFields?.filter(field => 
-      field.required && (!formData[field.name] || formData[field.name].toString().trim() === '')
-    );
-
-    if (missingRequiredFields && missingRequiredFields.length > 0) {
-      toast.error(`Por favor, preencha o campo obrigatório: ${missingRequiredFields[0].label}`);
-      return;
+    // Validar campos obrigatórios usando a configuração dinâmica
+    const requiredFields = formConfig.allFields?.filter(field => field.required) || [];
+    
+    for (const field of requiredFields) {
+      const value = formData[field.name];
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        toast.error(`Por favor, preencha o campo obrigatório: ${field.label.replace(' *', '')}`);
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -58,13 +54,17 @@ export const useContactForm = () => {
     try {
       console.log('📤 Enviando formulário via edge function segura...');
 
-      // Incluir campos personalizados nos dados enviados
+      // Incluir todos os campos personalizados nos dados enviados
+      const customFieldsData = {};
+      formConfig.allFields?.forEach(field => {
+        if (!field.isDefault) {
+          customFieldsData[field.name] = formData[field.name] || '';
+        }
+      });
+
       const submitData = {
         ...formData,
-        customFields: formConfig.customFields?.reduce((acc, field) => {
-          acc[field.name] = formData[field.name] || '';
-          return acc;
-        }, {} as { [key: string]: any }) || {}
+        customFields: customFieldsData
       };
 
       const { data, error } = await supabase.functions.invoke('contact-form', {
@@ -92,8 +92,10 @@ export const useContactForm = () => {
       };
 
       // Reset campos personalizados
-      formConfig.customFields?.forEach(field => {
-        resetData[field.name] = field.type === 'checkbox' ? false : '';
+      formConfig.allFields?.forEach(field => {
+        if (!field.isDefault) {
+          resetData[field.name] = field.type === 'checkbox' ? false : '';
+        }
       });
 
       setFormData(resetData);
@@ -118,8 +120,10 @@ export const useContactForm = () => {
     };
 
     // Reset campos personalizados
-    formConfig.customFields?.forEach(field => {
-      resetData[field.name] = field.type === 'checkbox' ? false : '';
+    formConfig.allFields?.forEach(field => {
+      if (!field.isDefault) {
+        resetData[field.name] = field.type === 'checkbox' ? false : '';
+      }
     });
 
     setFormData(resetData);

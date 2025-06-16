@@ -8,6 +8,7 @@ export interface FormField {
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   order: number;
+  isDefault?: boolean;
 }
 
 export interface FormConfig {
@@ -19,15 +20,10 @@ export interface FormConfig {
   formTexts: {
     headerTitle: string;
     headerSubtitle: string;
-    nameLabel: string;
-    emailLabel: string;
-    phoneLabel: string;
-    serviceLabel: string;
-    messageLabel: string;
-    urgentLabel: string;
     submitButton: string;
     successMessage: string;
     errorMessage: string;
   };
   customFields?: FormField[];
+  allFields?: FormField[]; // Todos os campos (padrão + personalizados)
 }

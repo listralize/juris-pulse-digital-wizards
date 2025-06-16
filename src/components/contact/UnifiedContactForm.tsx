@@ -2,9 +2,7 @@
 import React from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
-import { DynamicCustomFields } from './form/DynamicCustomFields';
-
-// Componentes modulares
+import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
 
 interface UnifiedContactFormProps {
@@ -54,111 +52,13 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-              {formConfig.formTexts.nameLabel}
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => updateField('name', e.target.value)}
-              placeholder="Seu nome completo"
-              className={`w-full px-3 py-2 border rounded-md ${darkBackground 
-                ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40' 
-                : 'bg-white border-gray-300 text-black'}`}
-              required
-            />
-          </div>
-          
-          <div>
-            <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-              {formConfig.formTexts.phoneLabel}
-            </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => updateField('phone', e.target.value)}
-              placeholder="Seu telefone"
-              className={`w-full px-3 py-2 border rounded-md ${darkBackground 
-                ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40' 
-                : 'bg-white border-gray-300 text-black'}`}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            {formConfig.formTexts.emailLabel}
-          </label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => updateField('email', e.target.value)}
-            placeholder="Seu e-mail"
-            className={`w-full px-3 py-2 border rounded-md ${darkBackground 
-              ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40' 
-              : 'bg-white border-gray-300 text-black'}`}
-            required
-          />
-        </div>
-
-        <div>
-          <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            {formConfig.formTexts.serviceLabel}
-          </label>
-          <select
-            value={formData.service}
-            onChange={(e) => updateField('service', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-md ${darkBackground 
-              ? 'bg-white/5 border-white/20 text-white' 
-              : 'bg-white border-gray-300 text-black'}`}
-          >
-            <option value="">Selecione seu problema jurídico</option>
-            {formConfig.serviceOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={`block text-sm font-medium mb-1 ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            {formConfig.formTexts.messageLabel}
-          </label>
-          <textarea
-            value={formData.message}
-            onChange={(e) => updateField('message', e.target.value)}
-            placeholder="Conte-nos brevemente sobre o seu caso"
-            rows={4}
-            className={`w-full px-3 py-2 border rounded-md resize-vertical ${darkBackground 
-              ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40' 
-              : 'bg-white border-gray-300 text-black'}`}
-            required
-          />
-        </div>
-
-        {/* Campos personalizados dinâmicos */}
-        <DynamicCustomFields
-          customFields={formConfig.customFields || []}
+        <DynamicFormRenderer
+          formFields={formConfig.allFields || []}
+          serviceOptions={formConfig.serviceOptions}
           formData={formData}
           updateField={updateField}
           darkBackground={darkBackground}
         />
-
-        <div className="flex items-start space-x-3">
-          <input
-            type="checkbox"
-            id="urgent"
-            checked={formData.isUrgent}
-            onChange={(e) => updateField('isUrgent', e.target.checked)}
-            className={`mt-1 ${darkBackground ? 'border-white/40' : ''}`}
-          />
-          <label htmlFor="urgent" className={`text-sm ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-            {formConfig.formTexts.urgentLabel}
-          </label>
-        </div>
 
         <button
           type="submit"

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { FormConfig } from '../types/contactFormTypes';
+import { FormConfig, FormField } from '../types/contactFormTypes';
 
 const defaultFormConfig: FormConfig = {
   webhookUrl: '',
@@ -18,17 +18,72 @@ const defaultFormConfig: FormConfig = {
   formTexts: {
     headerTitle: "Como podemos ajudar você?",
     headerSubtitle: "Entre em contato conosco",
-    nameLabel: "Nome *",
-    emailLabel: "E-mail *",
-    phoneLabel: "Telefone",
-    serviceLabel: "Qual problema você precisa resolver?",
-    messageLabel: "Detalhes do seu caso *",
-    urgentLabel: "Preciso de atendimento urgente",
     submitButton: "Enviar mensagem",
     successMessage: "Mensagem enviada com sucesso! Entraremos em contato em breve.",
     errorMessage: "Erro ao enviar mensagem. Tente novamente."
   },
-  customFields: []
+  customFields: [],
+  allFields: [
+    {
+      id: 'name',
+      name: 'name',
+      label: 'Nome *',
+      type: 'text',
+      required: true,
+      placeholder: 'Seu nome completo',
+      order: 0,
+      isDefault: true
+    },
+    {
+      id: 'email',
+      name: 'email',
+      label: 'E-mail *',
+      type: 'email',
+      required: true,
+      placeholder: 'Seu e-mail',
+      order: 1,
+      isDefault: true
+    },
+    {
+      id: 'phone',
+      name: 'phone',
+      label: 'Telefone',
+      type: 'tel',
+      required: false,
+      placeholder: 'Seu telefone',
+      order: 2,
+      isDefault: true
+    },
+    {
+      id: 'service',
+      name: 'service',
+      label: 'Qual problema você precisa resolver?',
+      type: 'select',
+      required: false,
+      placeholder: 'Selecione seu problema jurídico',
+      order: 3,
+      isDefault: true
+    },
+    {
+      id: 'message',
+      name: 'message',
+      label: 'Detalhes do seu caso *',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Conte-nos brevemente sobre o seu caso',
+      order: 4,
+      isDefault: true
+    },
+    {
+      id: 'isUrgent',
+      name: 'isUrgent',
+      label: 'Preciso de atendimento urgente',
+      type: 'checkbox',
+      required: false,
+      order: 5,
+      isDefault: true
+    }
+  ]
 };
 
 export const useFormConfig = () => {
@@ -62,7 +117,8 @@ export const useFormConfig = () => {
             ...(savedConfig.formTexts || {})
           },
           serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
-          customFields: savedConfig.customFields || []
+          customFields: savedConfig.customFields || [],
+          allFields: savedConfig.allFields || defaultFormConfig.allFields
         };
         
         setFormConfig(mergedConfig);

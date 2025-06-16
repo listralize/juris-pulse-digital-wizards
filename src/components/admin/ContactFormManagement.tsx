@@ -1,16 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Save, TestTube, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
-import { CustomFieldsEditor } from './contact-form/CustomFieldsEditor';
-import { FormConfig } from '../../types/contactFormTypes';
+import { FormFieldsManager } from './contact-form/FormFieldsManager';
+import { FormConfig, FormField } from '../../types/contactFormTypes';
 
 const defaultFormConfig: FormConfig = {
   webhookUrl: '',
@@ -27,17 +27,72 @@ const defaultFormConfig: FormConfig = {
   formTexts: {
     headerTitle: "Como podemos ajudar você?",
     headerSubtitle: "Entre em contato conosco",
-    nameLabel: "Nome *",
-    emailLabel: "E-mail *",
-    phoneLabel: "Telefone",
-    serviceLabel: "Qual problema você precisa resolver?",
-    messageLabel: "Detalhes do seu caso *",
-    urgentLabel: "Preciso de atendimento urgente",
     submitButton: "Enviar mensagem",
     successMessage: "Mensagem enviada com sucesso! Entraremos em contato em breve.",
     errorMessage: "Erro ao enviar mensagem. Tente novamente."
   },
-  customFields: []
+  customFields: [],
+  allFields: [
+    {
+      id: 'name',
+      name: 'name',
+      label: 'Nome *',
+      type: 'text',
+      required: true,
+      placeholder: 'Seu nome completo',
+      order: 0,
+      isDefault: true
+    },
+    {
+      id: 'email',
+      name: 'email',
+      label: 'E-mail *',
+      type: 'email',
+      required: true,
+      placeholder: 'Seu e-mail',
+      order: 1,
+      isDefault: true
+    },
+    {
+      id: 'phone',
+      name: 'phone',
+      label: 'Telefone',
+      type: 'tel',
+      required: false,
+      placeholder: 'Seu telefone',
+      order: 2,
+      isDefault: true
+    },
+    {
+      id: 'service',
+      name: 'service',
+      label: 'Qual problema você precisa resolver?',
+      type: 'select',
+      required: false,
+      placeholder: 'Selecione seu problema jurídico',
+      order: 3,
+      isDefault: true
+    },
+    {
+      id: 'message',
+      name: 'message',
+      label: 'Detalhes do seu caso *',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Conte-nos brevemente sobre o seu caso',
+      order: 4,
+      isDefault: true
+    },
+    {
+      id: 'isUrgent',
+      name: 'isUrgent',
+      label: 'Preciso de atendimento urgente',
+      type: 'checkbox',
+      required: false,
+      order: 5,
+      isDefault: true
+    }
+  ]
 };
 
 export const ContactFormManagement: React.FC = () => {
@@ -56,14 +111,11 @@ export const ContactFormManagement: React.FC = () => {
     try {
       console.log('🔄 Carregando configurações do formulário...');
       
-      // Busca apenas o primeiro registro para evitar o erro de múltiplos registros
       const { data, error } = await supabase
         .from('admin_settings')
         .select('*')
         .limit(1)
         .single();
-
-      console.log('📊 Dados carregados:', { data, error });
 
       if (error && error.code !== 'PGRST116') {
         console.error('❌ Erro ao carregar configurações:', error);
@@ -75,7 +127,6 @@ export const ContactFormManagement: React.FC = () => {
         const savedConfig = data.form_config as any;
         console.log('✅ Configurações encontradas:', savedConfig);
         
-        // Merge com as configurações padrão para garantir que todos os campos existam
         const mergedConfig = {
           ...defaultFormConfig,
           ...savedConfig,
@@ -84,7 +135,8 @@ export const ContactFormManagement: React.FC = () => {
             ...(savedConfig.formTexts || {})
           },
           serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
-          customFields: savedConfig.customFields || []
+          customFields: savedConfig.customFields || [],
+          allFields: savedConfig.allFields || defaultFormConfig.allFields
         };
         
         setFormConfig(mergedConfig);
@@ -104,14 +156,11 @@ export const ContactFormManagement: React.FC = () => {
     try {
       console.log('💾 Iniciando salvamento das configurações:', formConfig);
       
-      // Primeiro tenta buscar o primeiro registro
       const { data: existingData, error: selectError } = await supabase
         .from('admin_settings')
         .select('id')
         .limit(1)
         .maybeSingle();
-
-      console.log('🔍 Verificação de registro existente:', { existingData, selectError });
 
       if (selectError && selectError.code !== 'PGRST116') {
         console.error('❌ Erro ao verificar registro existente:', selectError);
@@ -119,7 +168,6 @@ export const ContactFormManagement: React.FC = () => {
       }
 
       if (existingData) {
-        // Atualiza o primeiro registro encontrado
         console.log('🔄 Atualizando primeiro registro com ID:', existingData.id);
         
         const { error: updateError } = await supabase
@@ -137,7 +185,6 @@ export const ContactFormManagement: React.FC = () => {
         
         console.log('✅ Registro atualizado com sucesso');
       } else {
-        // Cria um novo registro
         console.log('➕ Criando novo registro');
         
         const { error: insertError } = await supabase
@@ -274,17 +321,14 @@ export const ContactFormManagement: React.FC = () => {
               </div>
             )}
           </div>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Este webhook receberá todos os dados do formulário de contato quando os usuários enviarem mensagens.
-          </p>
         </CardContent>
       </Card>
 
-      {/* Form Texts */}
+      {/* Form Header Texts */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            📝 Textos do Formulário
+            📝 Textos do Cabeçalho
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -307,72 +351,6 @@ export const ContactFormManagement: React.FC = () => {
                 onChange={(e) => setFormConfig({
                   ...formConfig,
                   formTexts: { ...formConfig.formTexts, headerSubtitle: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Rótulo do Nome</Label>
-              <Input
-                value={formConfig.formTexts.nameLabel}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, nameLabel: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Rótulo do E-mail</Label>
-              <Input
-                value={formConfig.formTexts.emailLabel}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, emailLabel: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Rótulo do Telefone</Label>
-              <Input
-                value={formConfig.formTexts.phoneLabel}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, phoneLabel: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Rótulo do Serviço</Label>
-              <Input
-                value={formConfig.formTexts.serviceLabel}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, serviceLabel: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Rótulo da Mensagem</Label>
-              <Input
-                value={formConfig.formTexts.messageLabel}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, messageLabel: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Rótulo de Urgente</Label>
-              <Input
-                value={formConfig.formTexts.urgentLabel}
-                onChange={(e) => setFormConfig({
-                  ...formConfig,
-                  formTexts: { ...formConfig.formTexts, urgentLabel: e.target.value }
                 })}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
@@ -455,10 +433,14 @@ export const ContactFormManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Custom Fields Editor */}
-      <CustomFieldsEditor
-        customFields={formConfig.customFields || []}
-        onUpdateCustomFields={(fields) => setFormConfig({ ...formConfig, customFields: fields })}
+      {/* Unified Fields Manager */}
+      <FormFieldsManager
+        formFields={formConfig.allFields || []}
+        onUpdateFormFields={(fields) => setFormConfig({ 
+          ...formConfig, 
+          allFields: fields,
+          customFields: fields.filter(f => !f.isDefault)
+        })}
       />
 
       {/* Save Button */}
