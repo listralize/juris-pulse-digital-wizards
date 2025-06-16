@@ -29,7 +29,10 @@ const Admin = () => {
     isLoading,
     saveServicePages,
     saveCategories,
+    saveTeamMembers,
+    savePageTexts,
     setServicePages,
+    setTeamMembers,
     setPageTexts,
     refreshData
   } = useSupabaseDataNew();
@@ -59,7 +62,46 @@ const Admin = () => {
   };
 
   const handleSavePageTexts = async () => {
-    toast.success('Textos das páginas salvos com sucesso!');
+    try {
+      await savePageTexts(pageTexts);
+      toast.success('Textos das páginas salvos com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar textos:', error);
+      toast.error('Erro ao salvar textos das páginas');
+    }
+  };
+
+  const handleSaveTeamMembers = async () => {
+    try {
+      await saveTeamMembers(teamMembers);
+      toast.success('Equipe salva com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar equipe:', error);
+      toast.error('Erro ao salvar equipe');
+    }
+  };
+
+  const handleAddTeamMember = () => {
+    const newMember: TeamMember = {
+      id: crypto.randomUUID(),
+      name: 'Novo Membro',
+      title: 'Advogado(a)',
+      oab: 'OAB/XX XXXXX',
+      email: 'email@exemplo.com',
+      image: '/lovable-uploads/placeholder-member.jpg',
+      description: 'Descrição do membro da equipe'
+    };
+    setTeamMembers([...teamMembers, newMember]);
+  };
+
+  const handleRemoveTeamMember = (id: string) => {
+    setTeamMembers(teamMembers.filter(member => member.id !== id));
+  };
+
+  const handleUpdateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
+    setTeamMembers(teamMembers.map(member => 
+      member.id === id ? { ...member, [field]: value } : member
+    ));
   };
 
   const handleSaveBlogPosts = async (posts: any[]) => {
@@ -67,6 +109,7 @@ const Admin = () => {
   };
 
   const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
+  const validTeamMembers: TeamMember[] = teamMembers || [];
 
   return (
     <AdminProtectedRoute>
@@ -84,7 +127,7 @@ const Admin = () => {
                 🔒 Sistema Seguro Ativo: Row Level Security (RLS) implementado em todas as tabelas
               </p>
               <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {teamMembers?.length || 0}
+                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {validTeamMembers.length}
               </p>
             </div>
 
@@ -126,9 +169,14 @@ const Admin = () => {
 
               <TabsContent value="content">
                 <ContentManagement 
+                  teamMembers={validTeamMembers}
                   pageTexts={validPageTexts}
-                  onSave={handleSavePageTexts}
-                  onUpdate={handleUpdatePageTexts}
+                  onAddTeamMember={handleAddTeamMember}
+                  onRemoveTeamMember={handleRemoveTeamMember}
+                  onUpdateTeamMember={handleUpdateTeamMember}
+                  onSaveTeamMembers={handleSaveTeamMembers}
+                  onUpdatePageTexts={handleUpdatePageTexts}
+                  onSavePageTexts={handleSavePageTexts}
                 />
               </TabsContent>
 

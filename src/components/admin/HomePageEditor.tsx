@@ -22,7 +22,7 @@ interface HomePageEditorProps {
 
 export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   pageTexts,
-  teamMembers,
+  teamMembers = [], // Default to empty array to prevent undefined errors
   onUpdatePageTexts,
   onAddTeamMember,
   onRemoveTeamMember,
@@ -31,6 +31,9 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  // Ensure teamMembers is always an array
+  const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -356,7 +359,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           <TabsContent value="team" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-                Nossa Equipe ({teamMembers.length} membros)
+                Nossa Equipe ({safeTeamMembers.length} membros)
               </h3>
               <Button onClick={onAddTeamMember} size="sm">
                 <Plus className="w-4 h-4 mr-2" />
@@ -367,14 +370,14 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             <div>
               <Label>Título da Seção</Label>
               <Input
-                value={pageTexts.teamTitle}
+                value={pageTexts.teamTitle || ''}
                 onChange={(e) => onUpdatePageTexts({...pageTexts, teamTitle: e.target.value})}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
             </div>
 
             <div className="space-y-4">
-              {teamMembers.map((member) => (
+              {safeTeamMembers.map((member) => (
                 <div key={member.id} className={`p-4 border rounded-lg ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
@@ -392,7 +395,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <div>
                       <Label className="text-sm">Nome</Label>
                       <Input
-                        value={member.name}
+                        value={member.name || ''}
                         onChange={(e) => onUpdateTeamMember(member.id, 'name', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       />
@@ -400,7 +403,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <div>
                       <Label className="text-sm">Cargo</Label>
                       <Input
-                        value={member.title}
+                        value={member.title || ''}
                         onChange={(e) => onUpdateTeamMember(member.id, 'title', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       />
@@ -408,7 +411,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <div>
                       <Label className="text-sm">OAB</Label>
                       <Input
-                        value={member.oab}
+                        value={member.oab || ''}
                         onChange={(e) => onUpdateTeamMember(member.id, 'oab', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       />
@@ -416,7 +419,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <div>
                       <Label className="text-sm">Email</Label>
                       <Input
-                        value={member.email}
+                        value={member.email || ''}
                         onChange={(e) => onUpdateTeamMember(member.id, 'email', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                       />
@@ -424,7 +427,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     <div className="md:col-span-2">
                       <Label className="text-sm">URL da Foto</Label>
                       <Input
-                        value={member.image}
+                        value={member.image || ''}
                         onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
                         className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                         placeholder="/lovable-uploads/foto.png"
