@@ -23,6 +23,9 @@ export interface CategoryInfo {
   description: string;
   icon: string;
   color: string;
+  bannerTitle?: string;
+  bannerSubtitle?: string;
+  fullContent?: string;
 }
 
 export interface ContactTexts {

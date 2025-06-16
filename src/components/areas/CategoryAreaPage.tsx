@@ -7,6 +7,7 @@ import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCat
 import { CategoryInfo, ServicePage } from '../../types/adminTypes';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import NotFound from '../../pages/NotFound';
+import PracticeAreaLayout from '../PracticeAreaLayout';
 
 interface CategoryAreaPageProps {
   categorySlug?: string;
@@ -56,91 +57,72 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
   }
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
-      {/* Header */}
-      <div className={`${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-sm border-b ${isDark ? 'border-white/10' : 'border-gray-200'} py-6`}>
-        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-24">
-          <div className="flex items-center gap-4 mb-4">
-            <Link 
-              to="/"
-              className={`flex items-center gap-2 text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} transition-colors`}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar ao início
-            </Link>
+    <PracticeAreaLayout 
+      title={category.bannerTitle || category.label}
+      description={category.bannerSubtitle || category.description}
+      currentArea={category.label}
+    >
+      {/* Conteúdo Principal */}
+      <div className="mb-12">
+        {category.fullContent ? (
+          <div className="prose prose-lg max-w-none">
+            {category.fullContent.split('\n\n').map((paragraph, index) => (
+              <p key={index} className={`mb-6 text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                {paragraph}
+              </p>
+            ))}
           </div>
-          
-          <div className="flex items-center gap-4">
+        ) : (
+          <p className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            {category.description}
+          </p>
+        )}
+      </div>
+
+      {/* Serviços Especializados */}
+      {categoryPages.length > 0 && (
+        <div>
+          <div className="flex items-center gap-3 mb-8">
             <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+              className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold"
               style={{ backgroundColor: category.color }}
             >
               {category.icon}
             </div>
-            <div>
-              <h1 className={`text-3xl md:text-4xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-                {category.label}
-              </h1>
-              <p className={`text-lg mt-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                {category.description}
-              </p>
-            </div>
+            <h2 className={`text-2xl xl:text-3xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+              Serviços Jurídicos em {category.label}
+            </h2>
+          </div>
+          
+          <p className={`text-lg mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Nossos serviços especializados em {category.label.toLowerCase()} para atender todas as suas necessidades jurídicas.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categoryPages.map((page) => (
+              <Link
+                key={page.id}
+                to={`/services/${page.href}`}
+                className="group block"
+              >
+                <div className={`p-6 rounded-lg border ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-white border-gray-200 hover:border-gray-400'} transition-all duration-300 group-hover:scale-105 h-full`}>
+                  <h3 className={`text-xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                    {page.title}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4 line-clamp-3`}>
+                    {page.description}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-blue-500 group-hover:text-blue-400">
+                    <span>Ver detalhes</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Conteúdo */}
-      <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-24 py-12">
-        {categoryPages.length > 0 ? (
-          <>
-            <h2 className={`text-2xl font-canela mb-8 ${isDark ? 'text-white' : 'text-black'}`}>
-              Serviços Disponíveis ({categoryPages.length})
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categoryPages.map((page) => (
-                <Link
-                  key={page.id}
-                  to={`/services/${page.href}`}
-                  className="group block"
-                >
-                  <div className={`p-6 rounded-lg border ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-white border-gray-200 hover:border-gray-400'} transition-all duration-300 group-hover:scale-105 h-full`}>
-                    <h3 className={`text-xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                      {page.title}
-                    </h3>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4 line-clamp-3`}>
-                      {page.description}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-blue-500 group-hover:text-blue-400">
-                      <span>Ver detalhes</span>
-                      <ExternalLink className="w-4 h-4" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-16">
-            <div className={`text-6xl mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-              {category.icon}
-            </div>
-            <h2 className={`text-2xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
-              Área em Desenvolvimento
-            </h2>
-            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
-              Estamos preparando conteúdo especializado para {category.label}.
-            </p>
-            <Link
-              to="/#areas"
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg ${isDark ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-800'} transition-colors`}
-            >
-              Ver outras áreas
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+    </PracticeAreaLayout>
   );
 };
 

@@ -57,7 +57,10 @@ export const CategoryManagerNew: React.FC = () => {
       name: 'Nova Categoria',
       description: 'Descrição da nova categoria de direito',
       icon: randomIcon,
-      color: randomColor
+      color: randomColor,
+      bannerTitle: 'Nova Categoria',
+      bannerSubtitle: 'Assessoria completa e humanizada em questões jurídicas.',
+      fullContent: 'Conteúdo completo da nova categoria de direito. Aqui você pode descrever detalhadamente os serviços oferecidos, a experiência da equipe e como podem ajudar os clientes nesta área específica do direito.'
     };
     
     setLocalCategories(prev => [...prev, newCategory]);
@@ -135,16 +138,16 @@ export const CategoryManagerNew: React.FC = () => {
           </Button>
         </div>
         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-          💡 Dica: Após criar ou editar categorias, clique em "Salvar" em cada categoria individual para persistir as alterações.
+          💡 Configure banner, título, descrição e conteúdo completo para cada categoria. Clique em "Salvar" em cada categoria para persistir as alterações.
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {localCategories.map((category, index) => (
           <div 
             key={`category-${category.id}-${index}`}
-            className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-white/5' : 'border-gray-200 bg-gray-50'}`}
+            className={`p-6 rounded-lg border ${isDark ? 'border-white/20 bg-white/5' : 'border-gray-200 bg-gray-50'}`}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div 
                   className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold"
@@ -177,68 +180,133 @@ export const CategoryManagerNew: React.FC = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              {/* Informações Básicas */}
               <div>
-                <Label>Nome da Área</Label>
-                <Input
-                  value={category.name}
-                  onChange={(e) => updateCategory(index, 'name', e.target.value)}
-                  placeholder="Ex: Direito de Família"
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
-              </div>
-              <div>
-                <Label>Slug/URL (Gerado automaticamente)</Label>
-                <Input
-                  value={category.value}
-                  onChange={(e) => updateCategory(index, 'value', e.target.value)}
-                  placeholder="Ex: familia"
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Descrição</Label>
-                <Textarea
-                  value={category.description || ''}
-                  onChange={(e) => updateCategory(index, 'description', e.target.value)}
-                  placeholder="Ex: Proteção e orientação em questões familiares"
-                  rows={2}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
-              </div>
-              <div>
-                <Label>Ícone</Label>
-                <div className="flex gap-2 flex-wrap mt-2">
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() => updateCategory(index, 'icon', icon)}
-                      className={`w-8 h-8 rounded border-2 flex items-center justify-center text-lg ${
-                        category.icon === icon 
-                          ? 'border-blue-500 bg-blue-100' 
-                          : `border-gray-300 ${isDark ? 'bg-black hover:bg-gray-800' : 'bg-white hover:bg-gray-50'}`
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
+                <h5 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                  📋 Informações Básicas
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Nome da Área</Label>
+                    <Input
+                      value={category.name}
+                      onChange={(e) => updateCategory(index, 'name', e.target.value)}
+                      placeholder="Ex: Direito de Família"
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Slug/URL (Gerado automaticamente)</Label>
+                    <Input
+                      value={category.value}
+                      onChange={(e) => updateCategory(index, 'value', e.target.value)}
+                      placeholder="Ex: familia"
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Descrição Curta (Para cards e menu)</Label>
+                    <Textarea
+                      value={category.description || ''}
+                      onChange={(e) => updateCategory(index, 'description', e.target.value)}
+                      placeholder="Ex: Proteção e orientação em questões familiares"
+                      rows={2}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Banner da Página */}
               <div>
-                <Label>Cor</Label>
-                <div className="flex gap-2 flex-wrap mt-2">
-                  {colorOptions.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => updateCategory(index, 'color', color)}
-                      className={`w-8 h-8 rounded-full border-2 ${
-                        category.color === color ? 'border-white ring-2 ring-blue-500' : 'border-gray-300'
-                      }`}
-                      style={{ backgroundColor: color }}
+                <h5 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                  🖼️ Banner da Página
+                </h5>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label>Título do Banner</Label>
+                    <Input
+                      value={category.bannerTitle || category.name}
+                      onChange={(e) => updateCategory(index, 'bannerTitle', e.target.value)}
+                      placeholder="Ex: Direito de Família"
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     />
-                  ))}
+                  </div>
+                  <div>
+                    <Label>Subtítulo do Banner</Label>
+                    <Textarea
+                      value={category.bannerSubtitle || ''}
+                      onChange={(e) => updateCategory(index, 'bannerSubtitle', e.target.value)}
+                      placeholder="Ex: Assessoria completa e humanizada em todas as questões que envolvem as relações familiares."
+                      rows={2}
+                      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Conteúdo da Página */}
+              <div>
+                <h5 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                  📝 Conteúdo Completo da Página
+                </h5>
+                <div>
+                  <Label>Texto Completo (Markdown suportado)</Label>
+                  <Textarea
+                    value={category.fullContent || ''}
+                    onChange={(e) => updateCategory(index, 'fullContent', e.target.value)}
+                    placeholder="Escreva o conteúdo completo da página aqui. Você pode usar parágrafos, listas e formatação básica..."
+                    rows={8}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  />
+                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Este texto aparecerá na seção principal da página da categoria.
+                  </p>
+                </div>
+              </div>
+
+              {/* Aparência */}
+              <div>
+                <h5 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                  🎨 Aparência
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Ícone</Label>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {iconOptions.map((icon) => (
+                        <button
+                          key={icon}
+                          type="button"
+                          onClick={() => updateCategory(index, 'icon', icon)}
+                          className={`w-8 h-8 rounded border-2 flex items-center justify-center text-lg ${
+                            category.icon === icon 
+                              ? 'border-blue-500 bg-blue-100' 
+                              : `border-gray-300 ${isDark ? 'bg-black hover:bg-gray-800' : 'bg-white hover:bg-gray-50'}`
+                          }`}
+                        >
+                          {icon}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Cor</Label>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {colorOptions.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => updateCategory(index, 'color', color)}
+                          className={`w-8 h-8 rounded-full border-2 ${
+                            category.color === color ? 'border-white ring-2 ring-blue-500' : 'border-gray-300'
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

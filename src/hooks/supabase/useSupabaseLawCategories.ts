@@ -32,7 +32,10 @@ export const useSupabaseLawCategories = () => {
         name: cat.name,
         description: cat.description_override || cat.description || '',
         icon: cat.icon || '⚖️',
-        color: cat.color || '#6B7280'
+        color: cat.color || '#6B7280',
+        bannerTitle: cat.banner_title || cat.title_override || cat.name,
+        bannerSubtitle: cat.banner_subtitle || '',
+        fullContent: cat.full_content || ''
       }));
 
       console.log('✅ [useSupabaseLawCategories] Categorias carregadas:', formattedCategories.length);
@@ -63,6 +66,9 @@ export const useSupabaseLawCategories = () => {
         color: category.color,
         title_override: category.label !== category.name ? category.label : null,
         description_override: null,
+        banner_title: category.bannerTitle || category.name,
+        banner_subtitle: category.bannerSubtitle || '',
+        full_content: category.fullContent || '',
         is_active: true,
         display_order: 0
       };
