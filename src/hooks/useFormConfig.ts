@@ -64,7 +64,8 @@ const defaultFormConfig: FormConfig = {
       required: false,
       placeholder: 'Selecione seu problema jurídico',
       order: 3,
-      isDefault: true
+      isDefault: true,
+      options: []
     },
     {
       id: 'message',
@@ -86,7 +87,7 @@ const defaultFormConfig: FormConfig = {
       isDefault: true
     }
   ],
-  linkedPages: ['home'] // Páginas onde aparece por padrão
+  linkedPages: ['home']
 };
 
 export const useFormConfig = (formId?: string, pageId?: string) => {
@@ -140,14 +141,27 @@ export const useFormConfig = (formId?: string, pageId?: string) => {
         if (savedConfig.forms) {
           // Novo formato
           setMultipleFormsConfig({
-            forms: savedConfig.forms.map((form: any) => ({
-              ...defaultFormConfig,
-              ...form,
-              allFields: form.allFields?.map((field: any) => ({
-                ...field,
-                isDefault: field.isDefault ?? false
-              })) || defaultFormConfig.allFields
-            })),
+            forms: savedConfig.forms.map((form: any) => {
+              const processedForm = {
+                ...defaultFormConfig,
+                ...form,
+                allFields: form.allFields?.map((field: any) => {
+                  const processedField = {
+                    ...field,
+                    isDefault: field.isDefault ?? false
+                  };
+                  
+                  // Para o campo de serviço, garantir que use as opções corretas
+                  if (field.name === 'service' && field.isDefault) {
+                    processedField.options = form.serviceOptions || [];
+                  }
+                  
+                  return processedField;
+                }) || defaultFormConfig.allFields
+              };
+              
+              return processedForm;
+            }),
             defaultFormId: savedConfig.defaultFormId || 'default'
           });
         } else {
@@ -162,10 +176,19 @@ export const useFormConfig = (formId?: string, pageId?: string) => {
               ...(savedConfig.formTexts || {})
             },
             serviceOptions: savedConfig.serviceOptions || defaultFormConfig.serviceOptions,
-            allFields: (savedConfig.allFields || defaultFormConfig.allFields).map((field: any) => ({
-              ...field,
-              isDefault: field.isDefault ?? false
-            }))
+            allFields: (savedConfig.allFields || defaultFormConfig.allFields).map((field: any) => {
+              const processedField = {
+                ...field,
+                isDefault: field.isDefault ?? false
+              };
+              
+              // Para o campo de serviço, garantir que use as opções corretas
+              if (field.name === 'service' && field.isDefault) {
+                processedField.options = savedConfig.serviceOptions || [];
+              }
+              
+              return processedField;
+            })
           };
           
           setMultipleFormsConfig({

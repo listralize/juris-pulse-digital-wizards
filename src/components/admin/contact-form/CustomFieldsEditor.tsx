@@ -30,7 +30,8 @@ export const CustomFieldsEditor: React.FC<CustomFieldsEditorProps> = ({
       type: 'text',
       required: false,
       placeholder: '',
-      order: customFields.length
+      order: customFields.length,
+      isDefault: false
     };
     onUpdateCustomFields([...customFields, newField]);
   };

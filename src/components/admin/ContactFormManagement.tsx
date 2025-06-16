@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Checkbox } from '../ui/checkbox';
 import { Save, TestTube, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
@@ -71,7 +74,8 @@ const defaultFormConfig: FormConfig = {
       required: false,
       placeholder: 'Selecione seu problema jurídico',
       order: 3,
-      isDefault: true
+      isDefault: true,
+      options: []
     },
     {
       id: 'message',
@@ -94,6 +98,15 @@ const defaultFormConfig: FormConfig = {
     }
   ]
 };
+
+const availablePages = [
+  { value: 'home', label: 'Página Inicial' },
+  { value: 'contato', label: 'Página de Contato' },
+  { value: 'sobre', label: 'Sobre Nós' },
+  { value: 'servicos', label: 'Serviços' },
+  { value: 'blog', label: 'Blog' },
+  { value: 'areas', label: 'Áreas de Atuação' }
+];
 
 export const ContactFormManagement: React.FC = () => {
   const { theme } = useTheme();
@@ -120,7 +133,11 @@ export const ContactFormManagement: React.FC = () => {
       ...defaultFormConfig,
       id: `form_${Date.now()}`,
       name: `Novo Formulário ${multipleFormsConfig.forms.length + 1}`,
-      linkedPages: []
+      linkedPages: [],
+      allFields: defaultFormConfig.allFields.map(field => ({
+        ...field,
+        options: field.name === 'service' ? [] : field.options
+      }))
     };
     
     setMultipleFormsConfig({
@@ -145,6 +162,28 @@ export const ContactFormManagement: React.FC = () => {
     if (currentFormIndex >= updatedForms.length) {
       setCurrentFormIndex(0);
     }
+  };
+
+  const updateFormFields = (fields: FormField[]) => {
+    // Garantir que o campo de serviço use as opções corretas
+    const updatedFields = fields.map(field => {
+      if (field.name === 'service' && field.isDefault) {
+        return {
+          ...field,
+          options: currentForm.serviceOptions
+        };
+      }
+      return field;
+    });
+
+    updateCurrentForm({ 
+      allFields: updatedFields,
+      customFields: updatedFields.filter(f => !f.isDefault)
+    });
+  };
+
+  const updateLinkedPages = (selectedPages: string[]) => {
+    updateCurrentForm({ linkedPages: selectedPages });
   };
 
   const saveFormConfig = async () => {
@@ -321,16 +360,29 @@ export const ContactFormManagement: React.FC = () => {
               />
             </div>
           </div>
+          
           <div>
-            <Label>Páginas Vinculadas (separadas por vírgula)</Label>
-            <Input
-              value={currentForm.linkedPages?.join(', ') || ''}
-              onChange={(e) => updateCurrentForm({ 
-                linkedPages: e.target.value.split(',').map(p => p.trim()).filter(Boolean)
-              })}
-              placeholder="home, contato, sobre"
-              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-            />
+            <Label>Páginas Vinculadas</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+              {availablePages.map((page) => (
+                <div key={page.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`page-${page.value}`}
+                    checked={currentForm.linkedPages?.includes(page.value) || false}
+                    onCheckedChange={(checked) => {
+                      const currentPages = currentForm.linkedPages || [];
+                      const updatedPages = checked
+                        ? [...currentPages, page.value]
+                        : currentPages.filter(p => p !== page.value);
+                      updateLinkedPages(updatedPages);
+                    }}
+                  />
+                  <Label htmlFor={`page-${page.value}`} className="text-sm">
+                    {page.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -462,10 +514,7 @@ export const ContactFormManagement: React.FC = () => {
       {/* Unified Fields Manager */}
       <FormFieldsManager
         formFields={currentForm.allFields || []}
-        onUpdateFormFields={(fields) => updateCurrentForm({ 
-          allFields: fields,
-          customFields: fields.filter(f => !f.isDefault)
-        })}
+        onUpdateFormFields={updateFormFields}
       />
 
       {/* Save Button */}
