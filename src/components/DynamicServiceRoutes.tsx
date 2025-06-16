@@ -89,17 +89,29 @@ const DynamicServiceRoutes = () => {
           return null;
         }
         
-        // Normalizar o path - remover prefixos
+        // Normalizar o path - garantir que não há duplicação de prefixos
         let path = page.href;
         
+        // Remover todos os prefixos conhecidos
         if (path.startsWith('/services/')) {
           path = path.replace('/services/', '');
-        }
-        if (path.startsWith('/servicos/')) {
+        } else if (path.startsWith('/servicos/')) {
           path = path.replace('/servicos/', '');
+        } else if (path.startsWith('services/')) {
+          path = path.replace('services/', '');
+        } else if (path.startsWith('servicos/')) {
+          path = path.replace('servicos/', '');
         }
+        
+        // Remover barra inicial se existir
         if (path.startsWith('/')) {
           path = path.substring(1);
+        }
+        
+        // Garantir que não está vazio
+        if (!path) {
+          console.warn('⚠️ Path vazio após normalização para página:', page.title);
+          return null;
         }
         
         console.log('🔗 Criando rota:', { 
@@ -112,7 +124,7 @@ const DynamicServiceRoutes = () => {
         
         return (
           <Route 
-            key={`${page.id}-${page.href}`} 
+            key={`${page.id}-${path}`} 
             path={path} 
             element={<DynamicServicePage pageData={page} categories={categories || []} />} 
           />

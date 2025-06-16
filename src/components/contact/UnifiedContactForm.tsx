@@ -24,8 +24,14 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     if (pathname === '/' || pathname === '/home') return 'home';
     if (pathname === '/contato') return 'contato';
     if (pathname.startsWith('/services/')) {
-      const serviceSlug = pathname.replace('/services/', '');
-      return serviceSlug;
+      // Normalizar o slug do serviço removendo barras duplas
+      const cleanPath = pathname.replace('/services/', '').replace(/\/+/g, '/').replace(/\/$/, '');
+      return cleanPath;
+    }
+    if (pathname.startsWith('/servicos/')) {
+      // Normalizar o slug do serviço removendo barras duplas
+      const cleanPath = pathname.replace('/servicos/', '').replace(/\/+/g, '/').replace(/\/$/, '');
+      return cleanPath;
     }
     return 'home'; // fallback
   })();
