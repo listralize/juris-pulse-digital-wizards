@@ -94,6 +94,11 @@ export interface ProcessStep {
   description: string;
 }
 
+export interface FAQ {
+  question: string;
+  answer: string;
+}
+
 export interface ServicePage {
   id: string;
   title: string;
@@ -103,7 +108,7 @@ export interface ServicePage {
   benefits?: Benefit[];
   process?: ProcessStep[];
   testimonials?: Testimonial[];
-  faq?: Array<{ question: string; answer: string; }>;
+  faq?: FAQ[];
 }
 
 export interface SpecializedService {

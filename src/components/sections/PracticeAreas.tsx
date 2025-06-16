@@ -86,7 +86,9 @@ const PracticeAreas = () => {
         title: category.label || category.name,
         description: category.description || `Serviços especializados em ${category.label}`,
         href: `/areas/${category.value}`,
-        pageCount: categoryPages.length
+        pageCount: categoryPages.length,
+        icon: category.icon,
+        color: category.color
       };
     });
   }, [categories, servicePages]);
@@ -185,9 +187,19 @@ const PracticeAreas = () => {
                   className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/90 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4`}
                   ref={el => cardsRef.current[index] = el}
                 >
-                  <h3 className={`text-lg font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                    {area.title}
-                  </h3>
+                  <div className="flex items-center gap-3 mb-2">
+                    {area.icon && (
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                        style={{ backgroundColor: area.color }}
+                      >
+                        {area.icon}
+                      </div>
+                    )}
+                    <h3 className={`text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                      {area.title}
+                    </h3>
+                  </div>
                   <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {area.description}
                   </p>
@@ -214,9 +226,19 @@ const PracticeAreas = () => {
                     className={`${isDark ? 'bg-black/80 border-white/10' : 'bg-white/90 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6`}
                     ref={el => cardsRef.current[index] = el}
                   >
-                    <h3 className={`text-xl xl:text-2xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
-                      {area.title}
-                    </h3>
+                    <div className="flex items-center gap-3 mb-3">
+                      {area.icon && (
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-semibold"
+                          style={{ backgroundColor: area.color }}
+                        >
+                          {area.icon}
+                        </div>
+                      )}
+                      <h3 className={`text-xl xl:text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                        {area.title}
+                      </h3>
+                    </div>
                     <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {area.description}
                     </p>

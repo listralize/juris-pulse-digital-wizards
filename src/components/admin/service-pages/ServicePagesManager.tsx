@@ -168,13 +168,16 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
             Voltar
           </Button>
           <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-            Editar Categorias
+            Gerenciar Áreas do Direito
           </h2>
         </div>
-        <CategoriesManager 
-          categories={categories}
-          onSave={onSaveCategories}
-        />
+        <div className="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
+          <p className="text-sm text-blue-700">
+            ⚠️ <strong>Importante:</strong> Ao criar novas categorias, páginas dinâmicas serão automaticamente criadas em /areas/[categoria]. 
+            Certifique-se de que o slug da categoria seja único e válido para URLs.
+          </p>
+        </div>
+        <CategoryManagerNew />
       </div>
     );
   }
