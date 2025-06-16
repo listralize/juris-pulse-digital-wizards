@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-import { useSupabaseData } from '../hooks/useSupabaseData';
 
-const WhatsAppButton = () => {
-  const { pageTexts } = useSupabaseData();
-  const whatsappNumber = pageTexts.contactTexts.whatsapp || '5562994594496';
-  
+interface WhatsAppButtonProps {
+  whatsappNumber?: string;
+}
+
+const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ whatsappNumber = '5562994594496' }) => {
   return (
     <a 
       href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`}

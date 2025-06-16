@@ -4,8 +4,8 @@ import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { Hero, About, PracticeAreas, Partners, ClientArea, Contact, Footer } from '../components/sections';
 import Blog from '../components/sections/Blog';
 import Navbar from '../components/navbar';
-import { Loading } from '../components/Loading';
-import { WhatsAppButton } from '../components/WhatsAppButton';
+import Loading from '../components/Loading';
+import WhatsAppButton from '../components/WhatsAppButton';
 import Team from '../components/sections/Team';
 
 const Index = () => {
@@ -42,7 +42,7 @@ const Index = () => {
         <Contact pageTexts={pageTexts} />
       </main>
       <Footer pageTexts={pageTexts} />
-      <WhatsAppButton whatsappNumber={pageTexts?.contactTexts?.whatsapp || ''} />
+      <WhatsAppButton />
     </div>
   );
 };
