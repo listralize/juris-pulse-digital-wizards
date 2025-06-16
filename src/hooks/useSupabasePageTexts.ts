@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { PageTexts } from '../../types/adminTypes';
-import { supabase } from '../../integrations/supabase/client';
-import { defaultPageTexts } from '../../data/defaultPageTexts';
+import { PageTexts } from '../types/adminTypes';
+import { supabase } from '../integrations/supabase/client';
+import { defaultPageTexts } from '../data/defaultPageTexts';
 
 export const useSupabasePageTexts = () => {
   const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);

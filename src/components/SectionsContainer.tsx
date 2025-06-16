@@ -1,108 +1,116 @@
 
-import React, { useEffect } from 'react';
-import { useSectionTransition } from '../hooks/useSectionTransition';
-import Section from './Section';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { 
+  Hero, 
+  About, 
+  PracticeAreas, 
+  Team,
+  ClientArea, 
+  Contact, 
+  Footer, 
+  Blog, 
+  Partners 
+} from './sections';
 
-// Import Sections
-import Hero from './sections/Hero';
-import About from './sections/About';
-import PracticeAreas from './sections/PracticeAreas';
-import Partners from './sections/Partners';
-import ClientArea from './sections/ClientArea';
-import Blog from './sections/Blog';
-import Contact from './sections/Contact';
-import Footer from './sections/Footer';
+gsap.registerPlugin(ScrollTrigger);
 
-const SectionsContainer: React.FC = () => {
-  const sections = [
-    { id: 'home', component: Hero },
-    { id: 'about', component: About },
-    { id: 'areas', component: PracticeAreas },
-    { id: 'socios', component: Partners }, 
-    { id: 'cliente', component: ClientArea },
-    { id: 'blog', component: Blog },
-    { id: 'contact', component: Contact }
-  ];
-  
-  const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
+const SectionsContainer = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<HTMLDivElement>(null);
 
-  console.log('SectionsContainer render:', { 
-    activeSection, 
-    activeSectionIndex, 
-    sectionsLength: sections.length, 
-    isInitialized
-  });
-
-  // Listener para eventos de mudança de seção
   useEffect(() => {
-    const handleSectionChange = (event: CustomEvent) => {
-      const targetSection = event.detail;
-      console.log('SectionsContainer: Evento de mudança de seção recebido:', targetSection);
+    const container = containerRef.current;
+    const sections = sectionsRef.current;
+    
+    if (!container || !sections) return;
+
+    // Get all section elements
+    const sectionElements = sections.children;
+    const numSections = sectionElements.length;
+
+    if (numSections === 0) return;
+
+    // Set up horizontal scrolling
+    const totalWidth = numSections * 100;
+    
+    gsap.set(sections, {
+      width: `${totalWidth}vw`,
+      display: 'flex'
+    });
+
+    // Set each section to take full viewport
+    gsap.set(sectionElements, {
+      width: '100vw',
+      height: '100vh',
+      flexShrink: 0
+    });
+
+    // Create horizontal scroll animation
+    const scrollAnimation = gsap.to(sections, {
+      x: () => -(totalWidth - 100) + 'vw',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: container,
+        start: 'top top',
+        end: () => `+=${(numSections - 1) * window.innerHeight}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true
+      }
+    });
+
+    // Handle wheel events for horizontal scrolling
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
       
-      const sectionExists = sections.find(s => s.id === targetSection);
-      if (sectionExists) {
-        transitionToSection(targetSection);
-      } else {
-        console.warn('SectionsContainer: Seção inválida solicitada:', targetSection);
+      const scrollProgress = scrollAnimation.progress();
+      const delta = e.deltaY * 0.001;
+      const newProgress = Math.max(0, Math.min(1, scrollProgress + delta));
+      
+      scrollAnimation.progress(newProgress);
+    };
+
+    // Handle keyboard navigation
+    const handleKeydown = (e: KeyboardEvent) => {
+      const scrollProgress = scrollAnimation.progress();
+      const step = 1 / (numSections - 1);
+      
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const newProgress = Math.min(1, scrollProgress + step);
+        scrollAnimation.progress(newProgress);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const newProgress = Math.max(0, scrollProgress - step);
+        scrollAnimation.progress(newProgress);
       }
     };
 
-    window.addEventListener('sectionChange', handleSectionChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('sectionChange', handleSectionChange as EventListener);
-    };
-  }, [transitionToSection, sections]);
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeydown);
 
-  if (!isInitialized) {
-    return (
-      <div className="w-full h-screen bg-white flex items-center justify-center">
-        <div className="text-black opacity-50">Carregando seções...</div>
-      </div>
-    );
-  }
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeydown);
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-white">
-      <div 
-        ref={containerRef}
-        className="flex h-full bg-white"
-        style={{ 
-          width: `${sections.length * 100}vw`,
-          willChange: 'transform'
-        }}
-      >
-        {sections.map((section, index) => {
-          const Component = section.component;
-          const allowScroll = section.id === 'contact' || section.id === 'socios';
-          const isActive = activeSectionIndex === index;
-          
-          return (
-            <div
-              key={section.id}
-              className="w-screen h-full flex-shrink-0 relative bg-white"
-              style={{ 
-                width: '100vw',
-                minWidth: '100vw'
-              }}
-            >
-              <Section 
-                id={section.id} 
-                isActive={isActive}
-                allowScroll={allowScroll}
-                ref={el => {
-                  if (el) {
-                    sectionsRef.current[index] = el;
-                  }
-                }}
-                className={section.id === 'contact' ? 'pb-0' : ''}
-              >
-                <Component />
-                {section.id === 'contact' && <Footer />}
-              </Section>
-            </div>
-          );
-        })}
+    <div ref={containerRef} className="relative">
+      <div ref={sectionsRef} className="flex">
+        <Hero />
+        <About />
+        <PracticeAreas />
+        <Team />
+        <ClientArea />
+        <Blog />
+        <Partners />
+        <Contact />
+        <Footer />
       </div>
     </div>
   );

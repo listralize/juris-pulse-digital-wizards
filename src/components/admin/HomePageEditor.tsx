@@ -38,19 +38,40 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const handleSave = async () => {
     try {
+      console.log('💾 Salvando dados no HomePageEditor...', pageTexts);
       await onSaveAll();
       toast.success('Todas as alterações foram salvas no Supabase!');
-      // Dispatch event to update site content
+      
+      // Dispatch immediate event to update site content
+      console.log('📡 Disparando evento pageTextsUpdated...', pageTexts);
       window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: pageTexts }));
+      
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('❌ Erro ao salvar:', error);
       toast.error('Erro ao salvar alterações');
     }
   };
 
   const updatePageTexts = (updates: Partial<PageTexts>) => {
     const updatedTexts = { ...pageTexts, ...updates };
+    console.log('📝 Atualizando pageTexts...', updates, updatedTexts);
     onUpdatePageTexts(updatedTexts);
+  };
+
+  const updateContactTexts = (field: string, value: string) => {
+    const currentContactTexts = pageTexts.contactTexts || {
+      phone: '',
+      email: '',
+      address: '',
+      whatsapp: ''
+    };
+    
+    const updatedContactTexts = {
+      ...currentContactTexts,
+      [field]: value
+    };
+    
+    updatePageTexts({ contactTexts: updatedContactTexts });
   };
 
   return (
@@ -327,9 +348,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <Label>Telefone</Label>
                 <Input
                   value={pageTexts.contactTexts?.phone || ''}
-                  onChange={(e) => updatePageTexts({
-                    contactTexts: { ...pageTexts.contactTexts, phone: e.target.value }
-                  })}
+                  onChange={(e) => updateContactTexts('phone', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="(11) 9999-9999"
                 />
@@ -338,9 +357,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <Label>Email</Label>
                 <Input
                   value={pageTexts.contactTexts?.email || ''}
-                  onChange={(e) => updatePageTexts({
-                    contactTexts: { ...pageTexts.contactTexts, email: e.target.value }
-                  })}
+                  onChange={(e) => updateContactTexts('email', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="contato@exemplo.com"
                 />
@@ -349,9 +366,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <Label>Endereço</Label>
                 <Input
                   value={pageTexts.contactTexts?.address || ''}
-                  onChange={(e) => updatePageTexts({
-                    contactTexts: { ...pageTexts.contactTexts, address: e.target.value }
-                  })}
+                  onChange={(e) => updateContactTexts('address', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Rua Exemplo, 123 - São Paulo, SP"
                 />
@@ -360,9 +375,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <Label>WhatsApp (números apenas)</Label>
                 <Input
                   value={pageTexts.contactTexts?.whatsapp || ''}
-                  onChange={(e) => updatePageTexts({
-                    contactTexts: { ...pageTexts.contactTexts, whatsapp: e.target.value }
-                  })}
+                  onChange={(e) => updateContactTexts('whatsapp', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="5511999999999"
                 />
