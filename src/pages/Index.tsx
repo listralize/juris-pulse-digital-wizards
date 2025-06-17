@@ -16,19 +16,21 @@ const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  // Setup horizontal scroll behavior
   useEffect(() => {
     try {
       const body = document.body;
       const html = document.documentElement;
       
-      // Disable scroll for horizontal navigation
+      // Configurar overflow para navegação horizontal
       body.style.overflow = 'hidden';
       html.style.overflow = 'hidden';
       body.style.height = '100vh';
       html.style.height = '100vh';
       
-      // Disable scroll restoration
+      // Garantir que o background seja visível
+      body.style.margin = '0';
+      body.style.padding = '0';
+      
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
@@ -52,28 +54,10 @@ const Index = () => {
     <div 
       className={`h-screen w-full transition-colors duration-300 overflow-hidden ${
         isDark 
-          ? 'bg-neutral-900 text-white' 
-          : 'bg-neutral-100 text-black'
+          ? 'bg-black text-white' 
+          : 'bg-white text-black'
       }`}
-      style={{ 
-        scrollbarWidth: 'none', 
-        msOverflowStyle: 'none'
-      }}
     >
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        body, html {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-        body::-webkit-scrollbar,
-        html::-webkit-scrollbar {
-          display: none !important;
-        }
-      `}</style>
-      
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />

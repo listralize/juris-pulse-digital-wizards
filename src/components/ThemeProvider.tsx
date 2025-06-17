@@ -32,34 +32,25 @@ export function ThemeProvider({
     return defaultTheme;
   });
   
-  // Apply theme to DOM
   const applyTheme = (themeToApply: Theme) => {
     if (typeof window === 'undefined') return;
     
     const root = document.documentElement;
     const body = document.body;
     
-    // Remove existing theme classes
     root.classList.remove('light', 'dark');
     body.classList.remove('light', 'dark');
     
-    // Add new theme class
     root.classList.add(themeToApply);
     body.classList.add(themeToApply);
     
-    // Set color scheme but don't force background colors
-    if (themeToApply === 'dark') {
-      root.style.colorScheme = 'dark';
-    } else {
-      root.style.colorScheme = 'light';
-    }
+    root.style.colorScheme = themeToApply;
     
-    // Remove any forced background/color styles
+    // Evitar sobrescrever estilos necessários
     body.style.backgroundColor = '';
     body.style.color = '';
   };
 
-  // Apply theme on mount and when theme changes
   useEffect(() => {
     applyTheme(theme);
     if (typeof window !== 'undefined') {

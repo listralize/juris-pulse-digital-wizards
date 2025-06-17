@@ -149,8 +149,8 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {/* Full-width marble banner background - sempre em preto independente do tema */}
+    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
+      {/* Background com marble banner */}
       <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.2)' }}>
         <MarbleBanner />
       </div>
