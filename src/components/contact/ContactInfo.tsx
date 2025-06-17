@@ -48,7 +48,7 @@ const ContactInfo = () => {
   // Escutar eventos de atualização
   useEffect(() => {
     const handleContactUpdate = (event: CustomEvent) => {
-      console.log('📞 ContactInfo: Recebendo atualização:', event.detail);
+      console.log('📞 ContactInfo: Recebendo atualização direta:', event.detail);
       setContactData(prev => ({
         ...prev,
         ...event.detail
@@ -57,14 +57,20 @@ const ContactInfo = () => {
 
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('📞 ContactInfo: Recebendo atualização via pageTexts:', event.detail);
+      // Atualizar com dados de contactTexts se existirem
       if (event.detail.contactTexts) {
+        const { phone, email, address, whatsapp } = event.detail.contactTexts;
         setContactData(prev => ({
           ...prev,
-          ...event.detail.contactTexts
+          ...(phone && { phone }),
+          ...(email && { email }),
+          ...(address && { address }),
+          ...(whatsapp && { whatsapp })
         }));
       }
     };
 
+    // Escutar ambos os tipos de eventos
     window.addEventListener('contactInfoUpdated', handleContactUpdate as EventListener);
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     

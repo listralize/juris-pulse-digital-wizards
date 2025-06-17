@@ -19,16 +19,17 @@ const LocationMap = () => {
         
         const { data: contact } = await supabase
           .from('contact_info')
-          .select('address')
+          .select('address, map_embed_url')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (contact?.address) {
-          console.log('🗺️ LocationMap: Endereço carregado:', contact.address);
+        if (contact) {
+          console.log('🗺️ LocationMap: Dados carregados:', contact);
           setMapConfig(prev => ({
             ...prev,
-            location: contact.address
+            location: contact.address || prev.location,
+            embedUrl: contact.map_embed_url || prev.embedUrl
           }));
         }
       } catch (error) {
@@ -41,26 +42,44 @@ const LocationMap = () => {
 
   // Escutar eventos de atualização
   useEffect(() => {
-    const handleMapUpdate = (event: CustomEvent) => {
-      console.log('🗺️ LocationMap: Recebendo atualização:', event.detail);
+    const handleContactUpdate = (event: CustomEvent) => {
+      console.log('🗺️ LocationMap: Recebendo atualização direta:', event.detail);
       if (event.detail.address) {
         setMapConfig(prev => ({
           ...prev,
           location: event.detail.address
         }));
       }
-      if (event.detail.mapEmbedUrl) {
+      if (event.detail.map_embed_url) {
         setMapConfig(prev => ({
           ...prev,
-          embedUrl: event.detail.mapEmbedUrl
+          embedUrl: event.detail.map_embed_url
         }));
       }
     };
 
-    window.addEventListener('contactInfoUpdated', handleMapUpdate as EventListener);
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('🗺️ LocationMap: Recebendo atualização via pageTexts:', event.detail);
+      if (event.detail.contactTexts?.address) {
+        setMapConfig(prev => ({
+          ...prev,
+          location: event.detail.contactTexts.address
+        }));
+      }
+      if (event.detail.contactTexts?.mapEmbedUrl) {
+        setMapConfig(prev => ({
+          ...prev,
+          embedUrl: event.detail.contactTexts.mapEmbedUrl
+        }));
+      }
+    };
+
+    window.addEventListener('contactInfoUpdated', handleContactUpdate as EventListener);
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('contactInfoUpdated', handleMapUpdate as EventListener);
+      window.removeEventListener('contactInfoUpdated', handleContactUpdate as EventListener);
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
 
