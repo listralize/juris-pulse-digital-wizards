@@ -17,6 +17,14 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     
     console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
     
+    // A seção Hero sempre tem background preto, outras seguem o tema
+    const getBackgroundClass = () => {
+      if (id === 'home') {
+        return 'bg-black text-white'; // Hero sempre preto
+      }
+      return isDark ? 'bg-black text-white' : 'bg-white text-black';
+    };
+    
     return (
       <div 
         id={id} 
@@ -24,7 +32,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full h-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} ${className}`}
+        className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',

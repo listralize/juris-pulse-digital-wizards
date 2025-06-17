@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,25 +6,26 @@ import { useTheme } from '../ThemeProvider';
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
+  
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  // Estado local para textos da página
-  const [aboutTitle, setAboutTitle] = useState('Sobre Nós');
-  const [aboutDescription, setAboutDescription] = useState('Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.');
-  const [aboutMedia, setAboutMedia] = useState('');
-  const [aboutMediaType, setAboutMediaType] = useState<'image' | 'video'>('image');
+  // Estados para os textos editáveis
+  const [aboutTitle, setAboutTitle] = useState('Quem Somos');
+  const [aboutDescription, setAboutDescription] = useState('Uma equipe dedicada à excelência jurídica');
+  const [aboutImage, setAboutImage] = useState('/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
+  const [mediaType, setMediaType] = useState('image');
 
-  // Carregar dados iniciais do Supabase
+  // Carregar dados do Supabase
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadAboutData = async () => {
       try {
         const { supabase } = await import('../../integrations/supabase/client');
         
-        // Buscar apenas o registro mais recente
         const { data: settings } = await supabase
           .from('site_settings')
           .select('about_title, about_description, about_image, about_media_type')
@@ -34,50 +34,46 @@ const About = () => {
           .maybeSingle();
 
         if (settings) {
-          console.log('📱 About: Dados carregados do Supabase:', settings);
-          setAboutTitle(settings.about_title || 'Sobre Nós');
-          setAboutDescription(settings.about_description || 'Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.');
-          setAboutMedia(settings.about_image || '');
-          
-          // Corrigir o tipo para aceitar apenas os valores válidos
-          const mediaType = settings.about_media_type;
-          if (mediaType === 'video' || mediaType === 'image') {
-            setAboutMediaType(mediaType);
-          } else {
-            setAboutMediaType('image');
-          }
+          console.log('ℹ️ About: Dados carregados do Supabase:', settings);
+          setAboutTitle(settings.about_title || 'Quem Somos');
+          setAboutDescription(settings.about_description || 'Uma equipe dedicada à excelência jurídica');
+          setAboutImage(settings.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
+          setMediaType(settings.about_media_type || 'image');
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados iniciais:', error);
+        console.error('❌ Erro ao carregar dados do About:', error);
       }
     };
 
-    loadInitialData();
+    loadAboutData();
   }, []);
 
-  // Escutar eventos de atualização em tempo real
+  // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📱 About: Recebendo atualização de textos via evento:', event.detail);
-      const { aboutTitle: newTitle, aboutDescription: newDescription, aboutImage: newMedia, aboutMediaType: newMediaType } = event.detail;
+      console.log('ℹ️ About: Recebendo atualização de textos:', event.detail);
+      const { 
+        aboutTitle: newTitle, 
+        aboutDescription: newDescription,
+        aboutImage: newImage,
+        aboutMediaType: newMediaType
+      } = event.detail;
       
       if (newTitle !== undefined) {
-        console.log('📱 About: Atualizando título:', newTitle);
+        console.log('ℹ️ About: Atualizando título:', newTitle);
         setAboutTitle(newTitle);
       }
       if (newDescription !== undefined) {
-        console.log('📱 About: Atualizando descrição:', newDescription);
+        console.log('ℹ️ About: Atualizando descrição:', newDescription);
         setAboutDescription(newDescription);
       }
-      if (newMedia !== undefined) {
-        console.log('📱 About: Atualizando mídia:', newMedia);
-        setAboutMedia(newMedia);
+      if (newImage !== undefined) {
+        console.log('ℹ️ About: Atualizando imagem:', newImage);
+        setAboutImage(newImage);
       }
       if (newMediaType !== undefined) {
-        console.log('📱 About: Atualizando tipo de mídia:', newMediaType);
-        if (newMediaType === 'video' || newMediaType === 'image') {
-          setAboutMediaType(newMediaType);
-        }
+        console.log('ℹ️ About: Atualizando tipo de mídia:', newMediaType);
+        setMediaType(newMediaType);
       }
     };
 
@@ -88,127 +84,88 @@ const About = () => {
     };
   }, []);
 
-  useEffect(() => {
-    try {
-      gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, scaleY: 0.9 },
-        {
-          opacity: 1,
-          scaleY: 1,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-      
-      gsap.fromTo(
-        textRef.current,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: textRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-
-      if (aboutMedia) {
-        gsap.fromTo(
-          mediaRef.current,
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            delay: 0.3,
-            scrollTrigger: {
-              trigger: mediaRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      }
-    } catch (error) {
-      console.error('❌ Erro na animação About:', error);
-    }
-    
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
-    };
-  }, [aboutMedia]);
-
-  console.log('🔍 About renderizando com:', { aboutTitle, aboutDescription, aboutMedia, aboutMediaType });
-
   // Função para converter URL do YouTube para embed
   const getYouTubeEmbedUrl = (url: string) => {
-    if (url.includes('youtube.com/watch?v=')) {
-      const videoId = url.split('v=')[1]?.split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+    const match = url.match(regex);
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`;
     }
-    if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+    return url;
+  };
+
+  useEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    
+    tl.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
+    ).fromTo(
+      [contentRef.current, mediaRef.current],
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 },
+      "-=0.4"
+    );
+    
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  const renderMedia = () => {
+    if (mediaType === 'video' && aboutImage) {
+      const embedUrl = getYouTubeEmbedUrl(aboutImage);
+      console.log('🎥 About: Renderizando vídeo:', { originalUrl: aboutImage, embedUrl });
+      
+      return (
+        <div className="w-full h-64 md:h-80 lg:h-96">
+          <iframe
+            src={embedUrl}
+            title="About Us Video"
+            className="w-full h-full rounded-lg"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      );
     }
-    if (url.includes('youtube.com/embed/')) {
-      return url; // Já é uma URL de embed
-    }
-    return url; // Se for outro formato
+    
+    return (
+      <img 
+        src={aboutImage} 
+        alt="Sobre nós" 
+        className="w-full h-64 md:h-80 lg:h-96 object-cover rounded-lg"
+      />
+    );
   };
 
   return (
-    <section 
-      id="about" 
-      className={`h-full flex flex-col justify-center items-center px-4 md:px-6 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
-      style={{ minHeight: '100vh' }}
+    <div 
+      ref={sectionRef}
+      className={`w-full min-h-screen py-16 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 
-          ref={titleRef} 
-          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-6 md:mb-8 font-canela ${isDark ? 'text-white' : 'text-black'}`}
-        >
-          {aboutTitle}
-        </h2>
+      <div className="max-w-7xl mx-auto">
+        <div ref={titleRef} className="mb-12 text-center">
+          <h2 className={`text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+            {aboutTitle}
+          </h2>
+          <div className={`w-20 h-1 mx-auto mt-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+        </div>
         
-        <p 
-          ref={textRef} 
-          className={`text-lg md:text-xl lg:text-2xl xl:text-3xl leading-relaxed font-satoshi mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-        >
-          {aboutDescription}
-        </p>
-
-        {aboutMedia && (
-          <div ref={mediaRef} className="mt-8 max-w-2xl mx-auto">
-            {aboutMediaType === 'video' ? (
-              <div className="relative w-full h-0 pb-[56.25%] rounded-lg overflow-hidden shadow-lg">
-                <iframe
-                  src={getYouTubeEmbedUrl(aboutMedia)}
-                  className="absolute top-0 left-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="Vídeo sobre nós"
-                />
-              </div>
-            ) : (
-              <img
-                src={aboutMedia}
-                alt="Sobre nós"
-                className="w-full h-auto rounded-lg shadow-lg object-cover"
-                style={{ maxHeight: '400px' }}
-              />
-            )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div ref={contentRef}>
+            <p className={`text-lg md:text-xl lg:text-2xl leading-relaxed font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}>
+              {aboutDescription}
+            </p>
           </div>
-        )}
+          
+          <div ref={mediaRef}>
+            {renderMedia()}
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 
