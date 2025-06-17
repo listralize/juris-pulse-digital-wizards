@@ -11,6 +11,7 @@ export const useSupabasePageTexts = () => {
     aboutTitle: 'Sobre Nós',
     aboutDescription: 'Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.',
     aboutImage: '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png',
+    aboutMediaType: 'image' as 'image' | 'video',
     areasTitle: 'Áreas de Atuação',
     teamTitle: 'Nossa Equipe',
     clientAreaTitle: 'Área do Cliente',
@@ -94,7 +95,7 @@ export const useSupabasePageTexts = () => {
         }
 
         // Montar objeto de dados completo
-        const loadedData = {
+        const loadedData: PageTexts = {
           ...pageTexts,
           ...(settings && {
             heroTitle: settings.hero_title || pageTexts.heroTitle,
@@ -103,7 +104,7 @@ export const useSupabasePageTexts = () => {
             aboutTitle: settings.about_title || pageTexts.aboutTitle,
             aboutDescription: settings.about_description || pageTexts.aboutDescription,
             aboutImage: settings.about_image || pageTexts.aboutImage,
-            aboutMediaType: settings.about_media_type || 'image',
+            aboutMediaType: (settings.about_media_type === 'video' ? 'video' : 'image') as 'image' | 'video',
             areasTitle: settings.areas_title || pageTexts.areasTitle,
             teamTitle: settings.team_title || pageTexts.teamTitle,
             clientAreaTitle: settings.client_area_title || pageTexts.clientAreaTitle,
