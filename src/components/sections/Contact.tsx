@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -30,7 +29,7 @@ const Contact = () => {
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('contact_title, contact_subtitle')
+          .select('*')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();

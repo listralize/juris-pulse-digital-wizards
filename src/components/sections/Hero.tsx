@@ -33,7 +33,7 @@ const Hero = () => {
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('hero_title, hero_subtitle')
+          .select('*')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();

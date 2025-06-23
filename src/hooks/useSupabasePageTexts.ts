@@ -277,6 +277,8 @@ export const useSupabasePageTexts = () => {
       }
 
       console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
+      
+      // Atualizar estado local imediatamente
       setPageTexts(newTexts);
       
       // Disparar evento geral de atualização
