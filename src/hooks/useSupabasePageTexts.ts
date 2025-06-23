@@ -281,11 +281,19 @@ export const useSupabasePageTexts = () => {
       // Atualizar estado local imediatamente
       setPageTexts(newTexts);
       
-      // Disparar evento geral de atualização
-      console.log('📡 Disparando evento pageTextsUpdated');
-      window.dispatchEvent(new CustomEvent('pageTextsUpdated', {
-        detail: newTexts
-      }));
+      // Disparar evento geral de atualização com delay para garantir sincronização
+      setTimeout(() => {
+        console.log('📡 Disparando evento pageTextsUpdated com dados:', {
+          heroTitle: newTexts.heroTitle,
+          heroSubtitle: newTexts.heroSubtitle,
+          contactTitle: newTexts.contactTitle,
+          contactSubtitle: newTexts.contactSubtitle
+        });
+        
+        window.dispatchEvent(new CustomEvent('pageTextsUpdated', {
+          detail: newTexts
+        }));
+      }, 100);
 
     } catch (error) {
       console.error('❌ [useSupabasePageTexts] Erro ao salvar textos:', error);

@@ -57,36 +57,16 @@ const Hero = () => {
       console.log('🦸 Hero: Recebendo atualização de textos:', event.detail);
       const { 
         heroTitle: newTitle, 
-        heroSubtitle: newSubtitle,
-        heroPrimaryButtonText,
-        heroPrimaryButtonLink,
-        heroSecondaryButtonText,
-        heroSecondaryButtonLink
+        heroSubtitle: newSubtitle
       } = event.detail;
       
-      if (newTitle !== undefined) {
+      if (newTitle !== undefined && newTitle !== heroTitle) {
         console.log('🦸 Hero: Atualizando título:', newTitle);
         setHeroTitle(newTitle);
       }
-      if (newSubtitle !== undefined) {
+      if (newSubtitle !== undefined && newSubtitle !== heroSubtitle) {
         console.log('🦸 Hero: Atualizando subtítulo:', newSubtitle);
         setHeroSubtitle(newSubtitle);
-      }
-      if (heroPrimaryButtonText !== undefined) {
-        console.log('🦸 Hero: Atualizando texto do botão primário:', heroPrimaryButtonText);
-        setPrimaryButtonText(heroPrimaryButtonText);
-      }
-      if (heroPrimaryButtonLink !== undefined) {
-        console.log('🦸 Hero: Atualizando link do botão primário:', heroPrimaryButtonLink);
-        setPrimaryButtonLink(heroPrimaryButtonLink);
-      }
-      if (heroSecondaryButtonText !== undefined) {
-        console.log('🦸 Hero: Atualizando texto do botão secundário:', heroSecondaryButtonText);
-        setSecondaryButtonText(heroSecondaryButtonText);
-      }
-      if (heroSecondaryButtonLink !== undefined) {
-        console.log('🦸 Hero: Atualizando link do botão secundário:', heroSecondaryButtonLink);
-        setSecondaryButtonLink(heroSecondaryButtonLink);
       }
     };
 
@@ -95,7 +75,7 @@ const Hero = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, []);
+  }, [heroTitle, heroSubtitle]);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });

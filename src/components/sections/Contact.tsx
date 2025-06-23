@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -53,11 +54,11 @@ const Contact = () => {
       console.log('📞 Contact: Recebendo atualização de textos:', event.detail);
       const { contactTitle: newTitle, contactSubtitle: newSubtitle } = event.detail;
       
-      if (newTitle !== undefined) {
+      if (newTitle !== undefined && newTitle !== contactTitle) {
         console.log('📞 Contact: Atualizando título:', newTitle);
         setContactTitle(newTitle);
       }
-      if (newSubtitle !== undefined) {
+      if (newSubtitle !== undefined && newSubtitle !== contactSubtitle) {
         console.log('📞 Contact: Atualizando subtítulo:', newSubtitle);
         setContactSubtitle(newSubtitle);
       }
@@ -68,7 +69,7 @@ const Contact = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, []);
+  }, [contactTitle, contactSubtitle]);
   
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
