@@ -11,28 +11,25 @@ import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface ContentManagementProps {
   teamMembers: TeamMember[];
-  pageTexts: PageTexts;
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
   onSaveTeamMembers: () => void;
-  onUpdatePageTexts: (texts: PageTexts) => void;
-  onSavePageTexts: () => void;
 }
 
 export const ContentManagement: React.FC<ContentManagementProps> = ({
   teamMembers,
-  pageTexts,
   onAddTeamMember,
   onRemoveTeamMember,
   onUpdateTeamMember,
-  onSaveTeamMembers,
-  onUpdatePageTexts,
-  onSavePageTexts
+  onSaveTeamMembers
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  
+  // Usar o hook unificado
+  const { pageTexts, savePageTexts } = useSupabasePageTexts();
 
   const sections = [
     {
@@ -51,10 +48,15 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
     }
   ];
 
+  const handleUpdatePageTexts = (texts: PageTexts) => {
+    console.log('📝 ContentManagement: Atualizando page texts:', texts);
+    // O pageTexts será atualizado automaticamente pelo hook
+  };
+
   const handleSaveAll = async () => {
     try {
       await onSaveTeamMembers();
-      await onSavePageTexts();
+      await savePageTexts(pageTexts);
     } catch (error) {
       console.error('❌ Erro ao salvar dados:', error);
     }
@@ -85,7 +87,7 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
             <HomePageEditor
               pageTexts={pageTexts}
               teamMembers={teamMembers}
-              onUpdatePageTexts={onUpdatePageTexts}
+              onUpdatePageTexts={handleUpdatePageTexts}
               onAddTeamMember={onAddTeamMember}
               onRemoveTeamMember={onRemoveTeamMember}
               onUpdateTeamMember={onUpdateTeamMember}
