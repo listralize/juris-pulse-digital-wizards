@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSupabaseServicePages } from './supabase/useSupabaseServicePages';
 import { useSupabaseCategories } from './supabase/useSupabaseCategories';
 import { useSupabaseTeamMembers } from './supabase/useSupabaseTeamMembers';
-import { useSupabasePageTexts } from './supabase/useSupabasePageTexts';
+import { useSupabasePageTexts } from './useSupabasePageTexts';
 import { TeamMember, ServicePage, CategoryInfo, PageTexts } from '../types/adminTypes';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 
