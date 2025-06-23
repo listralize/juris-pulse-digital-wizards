@@ -11,7 +11,7 @@ import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 
 import { TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
-import { useSupabasePageTexts } from '../../hooks/supabase/useSupabasePageTexts';
+import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface HomePageEditorProps {
   teamMembers: TeamMember[];
@@ -40,7 +40,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       ...pageTexts,
       [field]: value
     };
-    console.log('📝 HomePageEditor: Novos pageTexts:', updatedTexts);
+    console.log('📝 HomePageEditor: Novos pageTexts locais:', updatedTexts);
     setPageTexts(updatedTexts);
   };
 
@@ -54,19 +54,19 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         [field]: value
       }
     };
-    console.log('📝 HomePageEditor: Novos pageTexts aninhados:', updatedTexts);
+    console.log('📝 HomePageEditor: Novos pageTexts aninhados locais:', updatedTexts);
     setPageTexts(updatedTexts);
   };
 
   const handleSaveAndNotify = async () => {
     try {
-      console.log('💾 HomePageEditor: Iniciando salvamento...', pageTexts);
+      console.log('💾 HomePageEditor: Iniciando salvamento completo...', pageTexts);
       
-      // Primeiro salvar no Supabase
+      // Salvar no Supabase usando o hook consolidado
       await savePageTexts(pageTexts);
-      console.log('✅ HomePageEditor: Salvamento no Supabase concluído');
+      console.log('✅ HomePageEditor: Salvamento no Supabase concluído com sucesso');
       
-      // Depois chamar o onSaveAll para salvar outras coisas
+      // Depois chamar o onSaveAll para salvar outras coisas (como team members)
       await onSaveAll();
       console.log('✅ HomePageEditor: onSaveAll concluído');
       
@@ -85,7 +85,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     );
   }
 
-  console.log('🎨 HomePageEditor: Renderizando com pageTexts:', pageTexts);
+  console.log('🎨 HomePageEditor: Renderizando com pageTexts consolidados:', pageTexts);
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>

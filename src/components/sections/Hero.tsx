@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import MarbleBanner from '../MarbleBanner';
-import { useSupabasePageTexts } from '../../hooks/supabase/useSupabasePageTexts';
+import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,21 +17,17 @@ const Hero = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // Usar o hook correto do Supabase
-  const { pageTexts, isLoading, refetch } = useSupabasePageTexts();
+  // Usar apenas o hook consolidado
+  const { pageTexts, isLoading } = useSupabasePageTexts();
 
-  console.log('🦸 Hero: pageTexts carregados:', pageTexts);
+  console.log('🦸 Hero: pageTexts atuais:', pageTexts);
   console.log('🦸 Hero: isLoading:', isLoading);
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
-      // Recarregar dados do Supabase
-      if (refetch) {
-        console.log('🦸 Hero: Recarregando dados...');
-        refetch();
-      }
+      // O estado será atualizado automaticamente pelo hook
     };
 
     // Escutar evento geral
@@ -40,7 +36,7 @@ const Hero = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, [refetch]);
+  }, []);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -101,7 +97,7 @@ const Hero = () => {
     );
   }
 
-  console.log('🦸 Hero: Renderizando com dados:', {
+  console.log('🦸 Hero: Renderizando com dados finais:', {
     heroTitle: pageTexts?.heroTitle,
     heroSubtitle: pageTexts?.heroSubtitle,
     heroPrimaryButtonText: pageTexts?.heroPrimaryButtonText,

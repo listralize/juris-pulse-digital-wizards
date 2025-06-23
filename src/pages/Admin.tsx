@@ -21,6 +21,7 @@ const Admin = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
+  // Usar apenas o hook consolidado useSupabaseDataNew
   const {
     teamMembers,
     servicePages,
