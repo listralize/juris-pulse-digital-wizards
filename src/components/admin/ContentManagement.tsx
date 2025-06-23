@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -6,10 +5,11 @@ import { Button } from '../ui/button';
 import { ArrowLeft, Edit, Mail } from 'lucide-react';
 import { HomePageEditor } from './HomePageEditor';
 import { ContactFormManagement } from './ContactFormManagement';
-import { TeamMember } from '../../types/adminTypes';
+import { TeamMember, PageTexts } from '../../types/adminTypes';
 
 interface ContentManagementProps {
   teamMembers: TeamMember[];
+  pageTexts: PageTexts;
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
@@ -18,6 +18,7 @@ interface ContentManagementProps {
 
 export const ContentManagement: React.FC<ContentManagementProps> = ({
   teamMembers,
+  pageTexts,
   onAddTeamMember,
   onRemoveTeamMember,
   onUpdateTeamMember,
