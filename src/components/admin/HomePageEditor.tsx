@@ -7,14 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
-import { PageTexts, TeamMember } from '../../types/adminTypes';
+import { TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
+import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface HomePageEditorProps {
-  pageTexts: PageTexts;
   teamMembers: TeamMember[];
-  onUpdatePageTexts: (texts: PageTexts) => void;
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
@@ -22,9 +21,7 @@ interface HomePageEditorProps {
 }
 
 export const HomePageEditor: React.FC<HomePageEditorProps> = ({
-  pageTexts,
   teamMembers = [],
-  onUpdatePageTexts,
   onAddTeamMember,
   onRemoveTeamMember,
   onUpdateTeamMember,
@@ -32,21 +29,22 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { pageTexts, setPageTexts, savePageTexts, isLoading } = useSupabasePageTexts();
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
-  const handleInputChange = (field: keyof PageTexts, value: string) => {
+  const handleInputChange = (field: string, value: string) => {
     console.log('📝 HomePageEditor: Alterando campo:', field, 'para:', value);
     const updatedTexts = {
       ...pageTexts,
       [field]: value
     };
-    onUpdatePageTexts(updatedTexts);
+    setPageTexts(updatedTexts);
   };
 
-  const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
+  const handleNestedChange = (parent: string, field: string, value: string) => {
     console.log('📝 HomePageEditor: Alterando campo aninhado:', parent, field, 'para:', value);
-    const parentObject = pageTexts[parent] || {};
+    const parentObject = pageTexts[parent as keyof typeof pageTexts] || {};
     const updatedTexts = {
       ...pageTexts,
       [parent]: {
@@ -54,12 +52,13 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         [field]: value
       }
     };
-    onUpdatePageTexts(updatedTexts);
+    setPageTexts(updatedTexts);
   };
 
   const handleSaveAndNotify = async () => {
     try {
       console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
+      await savePageTexts(pageTexts);
       await onSaveAll();
       toast.success('Alterações salvas com sucesso!');
     } catch (error) {
@@ -67,6 +66,14 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       toast.error('Erro ao salvar alterações');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
+    );
+  }
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>

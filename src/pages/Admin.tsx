@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
-import { TeamMember, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
+import { TeamMember, ServicePage, CategoryInfo } from '../types/adminTypes';
 import { BlogPost } from '../types/blogTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
@@ -14,7 +14,6 @@ import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
-import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -34,7 +33,6 @@ const Admin = () => {
     savePageTexts,
     setServicePages,
     setTeamMembers,
-    setPageTexts,
     refreshData
   } = useSupabaseDataNew();
 
@@ -64,22 +62,6 @@ const Admin = () => {
     } catch (error) {
       console.error('Erro ao salvar categorias:', error);
       toast.error('Erro ao salvar categorias');
-    }
-  };
-
-  const handleUpdatePageTexts = (texts: PageTexts) => {
-    console.log('🔄 Admin: Atualizando pageTexts:', texts);
-    setPageTexts(texts);
-  };
-
-  const handleSavePageTexts = async () => {
-    try {
-      console.log('💾 Admin: Salvando pageTexts:', pageTexts);
-      await savePageTexts(pageTexts);
-      toast.success('Textos das páginas salvos com sucesso!');
-    } catch (error) {
-      console.error('Erro ao salvar textos:', error);
-      toast.error('Erro ao salvar textos das páginas');
     }
   };
 
@@ -138,7 +120,6 @@ const Admin = () => {
     }
   };
 
-  const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
   const validTeamMembers: TeamMember[] = teamMembers || [];
   const validBlogPosts: BlogPost[] = blogPosts || [];
 
@@ -185,13 +166,10 @@ const Admin = () => {
               <TabsContent value="content">
                 <ContentManagement 
                   teamMembers={validTeamMembers}
-                  pageTexts={validPageTexts}
                   onAddTeamMember={handleAddTeamMember}
                   onRemoveTeamMember={handleRemoveTeamMember}
                   onUpdateTeamMember={handleUpdateTeamMember}
                   onSaveTeamMembers={handleSaveTeamMembers}
-                  onUpdatePageTexts={handleUpdatePageTexts}
-                  onSavePageTexts={handleSavePageTexts}
                 />
               </TabsContent>
 
@@ -199,11 +177,11 @@ const Admin = () => {
                 <ServicePagesManager 
                   servicePages={servicePages || []}
                   categories={categories || []}
-                  pageTexts={validPageTexts}
+                  pageTexts={pageTexts || {}}
                   onSave={handleSaveServicePages}
                   onSaveCategories={handleSaveCategories}
-                  onSavePageTexts={handleSavePageTexts}
-                  onUpdatePageTexts={handleUpdatePageTexts}
+                  onSavePageTexts={savePageTexts}
+                  onUpdatePageTexts={() => {}}
                 />
               </TabsContent>
 

@@ -6,29 +6,22 @@ import { Button } from '../ui/button';
 import { ArrowLeft, Edit, Mail } from 'lucide-react';
 import { HomePageEditor } from './HomePageEditor';
 import { ContactFormManagement } from './ContactFormManagement';
-import { TeamMember, PageTexts } from '../../types/adminTypes';
-import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
+import { TeamMember } from '../../types/adminTypes';
 
 interface ContentManagementProps {
   teamMembers: TeamMember[];
-  pageTexts: PageTexts;
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
   onSaveTeamMembers: () => void;
-  onUpdatePageTexts: (texts: PageTexts) => void;
-  onSavePageTexts: () => void;
 }
 
 export const ContentManagement: React.FC<ContentManagementProps> = ({
   teamMembers,
-  pageTexts,
   onAddTeamMember,
   onRemoveTeamMember,
   onUpdateTeamMember,
-  onSaveTeamMembers,
-  onUpdatePageTexts,
-  onSavePageTexts
+  onSaveTeamMembers
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -54,7 +47,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
   const handleSaveAll = async () => {
     try {
       await onSaveTeamMembers();
-      await onSavePageTexts();
     } catch (error) {
       console.error('❌ Erro ao salvar dados:', error);
     }
@@ -83,9 +75,7 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
         <CardContent>
           {selectedSection === 'home-page' && (
             <HomePageEditor
-              pageTexts={pageTexts}
               teamMembers={teamMembers}
-              onUpdatePageTexts={onUpdatePageTexts}
               onAddTeamMember={onAddTeamMember}
               onRemoveTeamMember={onRemoveTeamMember}
               onUpdateTeamMember={onUpdateTeamMember}
