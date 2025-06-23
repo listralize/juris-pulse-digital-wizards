@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -8,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
-import { TeamMember } from '../../types/adminTypes';
+import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
-import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface HomePageEditorProps {
+  pageTexts: PageTexts;
   teamMembers: TeamMember[];
+  onUpdatePageTexts: (texts: PageTexts) => void;
   onAddTeamMember: () => void;
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
@@ -22,7 +22,9 @@ interface HomePageEditorProps {
 }
 
 export const HomePageEditor: React.FC<HomePageEditorProps> = ({
+  pageTexts,
   teamMembers = [],
+  onUpdatePageTexts,
   onAddTeamMember,
   onRemoveTeamMember,
   onUpdateTeamMember,
@@ -30,23 +32,21 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { pageTexts, setPageTexts, savePageTexts, isLoading } = useSupabasePageTexts();
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof PageTexts, value: string) => {
     console.log('📝 HomePageEditor: Alterando campo:', field, 'para:', value);
     const updatedTexts = {
       ...pageTexts,
       [field]: value
     };
-    console.log('📝 HomePageEditor: Novos pageTexts locais:', updatedTexts);
-    setPageTexts(updatedTexts);
+    onUpdatePageTexts(updatedTexts);
   };
 
-  const handleNestedChange = (parent: string, field: string, value: string) => {
+  const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
     console.log('📝 HomePageEditor: Alterando campo aninhado:', parent, field, 'para:', value);
-    const parentObject = pageTexts[parent as keyof typeof pageTexts] || {};
+    const parentObject = pageTexts[parent] || {};
     const updatedTexts = {
       ...pageTexts,
       [parent]: {
@@ -54,38 +54,19 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         [field]: value
       }
     };
-    console.log('📝 HomePageEditor: Novos pageTexts aninhados locais:', updatedTexts);
-    setPageTexts(updatedTexts);
+    onUpdatePageTexts(updatedTexts);
   };
 
   const handleSaveAndNotify = async () => {
     try {
-      console.log('💾 HomePageEditor: Iniciando salvamento completo...', pageTexts);
-      
-      // Salvar no Supabase usando o hook consolidado
-      await savePageTexts(pageTexts);
-      console.log('✅ HomePageEditor: Salvamento no Supabase concluído com sucesso');
-      
-      // Depois chamar o onSaveAll para salvar outras coisas (como team members)
+      console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
       await onSaveAll();
-      console.log('✅ HomePageEditor: onSaveAll concluído');
-      
       toast.success('Alterações salvas com sucesso!');
     } catch (error) {
       console.error('❌ HomePageEditor: Erro ao salvar:', error);
-      toast.error('Erro ao salvar alterações: ' + (error as Error).message);
+      toast.error('Erro ao salvar alterações');
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-      </div>
-    );
-  }
-
-  console.log('🎨 HomePageEditor: Renderizando com pageTexts consolidados:', pageTexts);
 
   return (
     <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
@@ -135,7 +116,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Título Principal</Label>
                 <Input
-                  value={pageTexts?.heroTitle || ''}
+                  value={pageTexts.heroTitle || ''}
                   onChange={(e) => handleInputChange('heroTitle', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Ex: Soluções Jurídicas Inovadoras"
@@ -144,7 +125,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Subtítulo</Label>
                 <Textarea
-                  value={pageTexts?.heroSubtitle || ''}
+                  value={pageTexts.heroSubtitle || ''}
                   onChange={(e) => handleInputChange('heroSubtitle', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Ex: Suas questões nas mãos de quem entende..."
@@ -154,7 +135,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Texto do Primeiro Botão</Label>
                 <Input
-                  value={pageTexts?.heroPrimaryButtonText || ''}
+                  value={pageTexts.heroPrimaryButtonText || ''}
                   onChange={(e) => handleInputChange('heroPrimaryButtonText', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Ex: Fale Conosco no WhatsApp"
@@ -163,7 +144,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Link do Primeiro Botão</Label>
                 <Input
-                  value={pageTexts?.heroPrimaryButtonLink || ''}
+                  value={pageTexts.heroPrimaryButtonLink || ''}
                   onChange={(e) => handleInputChange('heroPrimaryButtonLink', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Ex: https://api.whatsapp.com/send?phone=5562994594496"
@@ -172,7 +153,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Texto do Segundo Botão</Label>
                 <Input
-                  value={pageTexts?.heroSecondaryButtonText || ''}
+                  value={pageTexts.heroSecondaryButtonText || ''}
                   onChange={(e) => handleInputChange('heroSecondaryButtonText', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Ex: Conheça Nossas Áreas de Atuação"
@@ -181,7 +162,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Link do Segundo Botão</Label>
                 <Input
-                  value={pageTexts?.heroSecondaryButtonLink || ''}
+                  value={pageTexts.heroSecondaryButtonLink || ''}
                   onChange={(e) => handleInputChange('heroSecondaryButtonLink', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="Ex: #areas"
@@ -190,7 +171,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               <div>
                 <Label>Imagem de Fundo</Label>
                 <Input
-                  value={pageTexts?.heroBackgroundImage || ''}
+                  value={pageTexts.heroBackgroundImage || ''}
                   onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder="URL da imagem de fundo"

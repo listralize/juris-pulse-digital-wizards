@@ -424,10 +424,6 @@ export type Database = {
           contact_title: string
           created_at: string | null
           hero_background_image: string | null
-          hero_primary_button_link: string | null
-          hero_primary_button_text: string | null
-          hero_secondary_button_link: string | null
-          hero_secondary_button_text: string | null
           hero_subtitle: string
           hero_title: string
           id: string
@@ -447,10 +443,6 @@ export type Database = {
           contact_title?: string
           created_at?: string | null
           hero_background_image?: string | null
-          hero_primary_button_link?: string | null
-          hero_primary_button_text?: string | null
-          hero_secondary_button_link?: string | null
-          hero_secondary_button_text?: string | null
           hero_subtitle?: string
           hero_title?: string
           id?: string
@@ -470,10 +462,6 @@ export type Database = {
           contact_title?: string
           created_at?: string | null
           hero_background_image?: string | null
-          hero_primary_button_link?: string | null
-          hero_primary_button_text?: string | null
-          hero_secondary_button_link?: string | null
-          hero_secondary_button_text?: string | null
           hero_subtitle?: string
           hero_title?: string
           id?: string

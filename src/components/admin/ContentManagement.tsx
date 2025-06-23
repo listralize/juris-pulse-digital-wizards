@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -6,6 +7,7 @@ import { ArrowLeft, Edit, Mail } from 'lucide-react';
 import { HomePageEditor } from './HomePageEditor';
 import { ContactFormManagement } from './ContactFormManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
+import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface ContentManagementProps {
   teamMembers: TeamMember[];
@@ -14,6 +16,7 @@ interface ContentManagementProps {
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
   onSaveTeamMembers: () => void;
+  onUpdatePageTexts: (texts: PageTexts) => void;
   onSavePageTexts: () => void;
 }
 
@@ -24,6 +27,7 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
   onRemoveTeamMember,
   onUpdateTeamMember,
   onSaveTeamMembers,
+  onUpdatePageTexts,
   onSavePageTexts
 }) => {
   const { theme } = useTheme();
@@ -79,7 +83,9 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
         <CardContent>
           {selectedSection === 'home-page' && (
             <HomePageEditor
+              pageTexts={pageTexts}
               teamMembers={teamMembers}
+              onUpdatePageTexts={onUpdatePageTexts}
               onAddTeamMember={onAddTeamMember}
               onRemoveTeamMember={onRemoveTeamMember}
               onUpdateTeamMember={onUpdateTeamMember}
