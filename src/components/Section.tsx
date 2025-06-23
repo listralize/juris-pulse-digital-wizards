@@ -41,10 +41,12 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           minHeight: '100vh',
           maxHeight: id === 'contact' ? 'auto' : '100vh',
           overflow: allowScroll || id === 'contact' ? 'auto' : 'hidden',
-          WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto'
+          WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto',
+          opacity: 1,
+          visibility: 'visible'
         }}
       >
-        <div className="w-full h-full">
+        <div className="w-full h-full" style={{ opacity: 1, visibility: 'visible' }}>
           {children}
         </div>
       </div>

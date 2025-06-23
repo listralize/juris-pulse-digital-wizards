@@ -31,6 +31,9 @@ const Index = () => {
       body.style.margin = '0';
       body.style.padding = '0';
       
+      // Garantir que não há background preto forçado
+      body.style.backgroundColor = '';
+      
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
@@ -40,6 +43,7 @@ const Index = () => {
         html.style.overflow = '';
         body.style.height = '';
         html.style.height = '';
+        body.style.backgroundColor = '';
         
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'auto';
@@ -52,11 +56,15 @@ const Index = () => {
   
   return (
     <div 
-      className={`h-screen w-full transition-colors duration-300 overflow-hidden ${
+      className={`min-h-screen w-full transition-colors duration-300 overflow-hidden ${
         isDark 
           ? 'bg-black text-white' 
           : 'bg-white text-black'
       }`}
+      style={{ 
+        height: '100vh',
+        position: 'relative'
+      }}
     >
       <CustomCursor />
       <Navbar />
