@@ -31,9 +31,6 @@ const Index = () => {
       body.style.margin = '0';
       body.style.padding = '0';
       
-      // Garantir background padrão
-      body.style.backgroundColor = isDark ? '#000000' : '#ffffff';
-      
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
@@ -43,7 +40,6 @@ const Index = () => {
         html.style.overflow = '';
         body.style.height = '';
         html.style.height = '';
-        body.style.backgroundColor = '';
         
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'auto';
@@ -52,7 +48,7 @@ const Index = () => {
     } catch (error) {
       console.error('❌ Erro ao configurar scroll:', error);
     }
-  }, [isDark]);
+  }, []);
   
   return (
     <div 

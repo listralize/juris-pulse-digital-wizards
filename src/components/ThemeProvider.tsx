@@ -46,9 +46,9 @@ export function ThemeProvider({
     
     root.style.colorScheme = themeToApply;
     
-    // Aplicar background baseado no tema
-    body.style.backgroundColor = themeToApply === 'dark' ? '#000000' : '#ffffff';
-    body.style.color = themeToApply === 'dark' ? '#ffffff' : '#000000';
+    // Limpar estilos inline para evitar conflitos
+    body.style.backgroundColor = '';
+    body.style.color = '';
   };
 
   useEffect(() => {
