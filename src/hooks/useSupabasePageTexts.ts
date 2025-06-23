@@ -39,7 +39,7 @@ export const useSupabasePageTexts = () => {
           aboutTitle: settings.about_title || defaultPageTexts.aboutTitle,
           aboutDescription: settings.about_description || defaultPageTexts.aboutDescription,
           aboutImage: settings.about_image || defaultPageTexts.aboutImage,
-          aboutMediaType: settings.about_media_type || defaultPageTexts.aboutMediaType,
+          aboutMediaType: (settings.about_media_type === 'video' ? 'video' : 'image') as 'image' | 'video',
           areasTitle: settings.areas_title || defaultPageTexts.areasTitle,
           teamTitle: settings.team_title || defaultPageTexts.teamTitle,
           clientAreaTitle: settings.client_area_title || defaultPageTexts.clientAreaTitle,
