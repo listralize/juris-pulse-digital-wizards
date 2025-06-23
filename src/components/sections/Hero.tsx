@@ -1,9 +1,11 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import MarbleBanner from '../MarbleBanner';
+import { useSupabasePageTexts } from '../../hooks/supabase/useSupabasePageTexts';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,75 +18,14 @@ const Hero = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // Estados para os textos editáveis
-  const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
-  const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
-  const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco no WhatsApp');
-  const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
-  const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
-  const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
-
-  // Carregar dados iniciais do Supabase
-  useEffect(() => {
-    const loadHeroData = async () => {
-      try {
-        console.log('🦸 Hero: Carregando dados iniciais...');
-        const { supabase } = await import('../../integrations/supabase/client');
-        
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('*')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (settings) {
-          console.log('🦸 Hero: Dados carregados do Supabase:', settings);
-          if (settings.hero_title) setHeroTitle(settings.hero_title);
-          if (settings.hero_subtitle) setHeroSubtitle(settings.hero_subtitle);
-        }
-      } catch (error) {
-        console.error('❌ Hero: Erro ao carregar dados:', error);
-      }
-    };
-
-    loadHeroData();
-  }, []);
+  // Usar o hook do Supabase que salva os dados
+  const { pageTexts, isLoading } = useSupabasePageTexts();
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
-      
-      const data = event.detail;
-      
-      if (data.heroTitle) {
-        console.log('🦸 Hero: Atualizando título para:', data.heroTitle);
-        setHeroTitle(data.heroTitle);
-      }
-      
-      if (data.heroSubtitle) {
-        console.log('🦸 Hero: Atualizando subtítulo para:', data.heroSubtitle);
-        setHeroSubtitle(data.heroSubtitle);
-      }
-      
-      if (data.heroPrimaryButtonText) {
-        console.log('🦸 Hero: Atualizando botão primário para:', data.heroPrimaryButtonText);
-        setPrimaryButtonText(data.heroPrimaryButtonText);
-      }
-      
-      if (data.heroPrimaryButtonLink) {
-        setPrimaryButtonLink(data.heroPrimaryButtonLink);
-      }
-      
-      if (data.heroSecondaryButtonText) {
-        console.log('🦸 Hero: Atualizando botão secundário para:', data.heroSecondaryButtonText);
-        setSecondaryButtonText(data.heroSecondaryButtonText);
-      }
-      
-      if (data.heroSecondaryButtonLink) {
-        setSecondaryButtonLink(data.heroSecondaryButtonLink);
-      }
+      // O hook já atualiza automaticamente os pageTexts, não precisamos fazer nada aqui
     };
 
     // Escutar evento geral
@@ -146,6 +87,14 @@ const Hero = () => {
     };
   }, []);
 
+  if (isLoading) {
+    return (
+      <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 border-white`}></div>
+      </section>
+    );
+  }
+
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
       {/* Background com marble banner */}
@@ -171,29 +120,29 @@ const Hero = () => {
         </div>
         
         <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
-          {heroTitle}
+          {pageTexts.heroTitle}
         </h1>
         
         <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-4 md:mb-6 text-center max-w-lg mx-auto font-satoshi">
-          {heroSubtitle}
+          {pageTexts.heroSubtitle}
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
           <a 
-            href={primaryButtonLink}
+            href={pageTexts.heroPrimaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
             className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            {primaryButtonText}
+            {pageTexts.heroPrimaryButtonText}
             <ArrowRight className="w-5 h-5" />
           </a>
           
           <a 
-            href={secondaryButtonLink}
+            href={pageTexts.heroSecondaryButtonLink}
             className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            {secondaryButtonText}
+            {pageTexts.heroSecondaryButtonText}
             <ArrowRight className="w-5 h-5" />
           </a>
         </div>
