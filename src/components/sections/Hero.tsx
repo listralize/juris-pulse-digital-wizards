@@ -21,11 +21,13 @@ const Hero = () => {
   // Usar o hook do Supabase que salva os dados
   const { pageTexts, isLoading } = useSupabasePageTexts();
 
+  console.log('🦸 Hero: pageTexts carregados:', pageTexts);
+
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
-      // O hook já atualiza automaticamente os pageTexts, não precisamos fazer nada aqui
+      // O hook já atualiza automaticamente os pageTexts
     };
 
     // Escutar evento geral

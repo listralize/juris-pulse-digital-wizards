@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -10,7 +11,7 @@ import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 
 import { TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
-import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
+import { useSupabasePageTexts } from '../../hooks/supabase/useSupabasePageTexts';
 
 interface HomePageEditorProps {
   teamMembers: TeamMember[];
