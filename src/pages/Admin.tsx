@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -80,6 +81,16 @@ const Admin = () => {
     }
   };
 
+  const handleSavePageTexts = async () => {
+    try {
+      await savePageTexts(pageTexts);
+      toast.success('Textos das páginas salvos com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar textos das páginas:', error);
+      toast.error('Erro ao salvar textos das páginas');
+    }
+  };
+
   const handleAddTeamMember = () => {
     const newMember: TeamMember = {
       id: crypto.randomUUID(),
@@ -130,8 +141,6 @@ const Admin = () => {
     teamTitle: '',
     clientAreaTitle: '',
     clientAreaDescription: '',
-    contactTitle: '',
-    contactSubtitle: '',
     familiaTitle: '',
     familiaDescription: '',
     tributarioTitle: '',
@@ -212,6 +221,7 @@ const Admin = () => {
                   onRemoveTeamMember={handleRemoveTeamMember}
                   onUpdateTeamMember={handleUpdateTeamMember}
                   onSaveTeamMembers={handleSaveTeamMembers}
+                  onSavePageTexts={handleSavePageTexts}
                 />
               </TabsContent>
 
@@ -222,7 +232,7 @@ const Admin = () => {
                   pageTexts={pageTexts || validPageTexts}
                   onSave={handleSaveServicePages}
                   onSaveCategories={handleSaveCategories}
-                  onSavePageTexts={savePageTexts}
+                  onSavePageTexts={handleSavePageTexts}
                   onUpdatePageTexts={() => {}}
                 />
               </TabsContent>

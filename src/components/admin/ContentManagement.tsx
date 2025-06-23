@@ -14,6 +14,7 @@ interface ContentManagementProps {
   onRemoveTeamMember: (id: string) => void;
   onUpdateTeamMember: (id: string, field: keyof TeamMember, value: string) => void;
   onSaveTeamMembers: () => void;
+  onSavePageTexts: () => void;
 }
 
 export const ContentManagement: React.FC<ContentManagementProps> = ({
@@ -22,7 +23,8 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
   onAddTeamMember,
   onRemoveTeamMember,
   onUpdateTeamMember,
-  onSaveTeamMembers
+  onSaveTeamMembers,
+  onSavePageTexts
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -48,6 +50,7 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
   const handleSaveAll = async () => {
     try {
       await onSaveTeamMembers();
+      await onSavePageTexts();
     } catch (error) {
       console.error('❌ Erro ao salvar dados:', error);
     }
