@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
-import { TeamMember, ServicePage, CategoryInfo } from '../types/adminTypes';
+import { TeamMember, ServicePage, CategoryInfo, PageTexts } from '../types/adminTypes';
 import { BlogPost } from '../types/blogTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
@@ -122,6 +122,48 @@ const Admin = () => {
 
   const validTeamMembers: TeamMember[] = teamMembers || [];
   const validBlogPosts: BlogPost[] = blogPosts || [];
+  const validPageTexts: PageTexts = pageTexts || {
+    heroTitle: '',
+    heroSubtitle: '',
+    aboutTitle: '',
+    aboutDescription: '',
+    areasTitle: '',
+    teamTitle: '',
+    clientAreaTitle: '',
+    clientAreaDescription: '',
+    contactTitle: '',
+    contactSubtitle: '',
+    familiaTitle: '',
+    familiaDescription: '',
+    tributarioTitle: '',
+    tributarioDescription: '',
+    empresarialTitle: '',
+    empresarialDescription: '',
+    trabalhoTitle: '',
+    trabalhoDescription: '',
+    civilTitle: '',
+    civilDescription: '',
+    previdenciarioTitle: '',
+    previdenciarioDescription: '',
+    consumidorTitle: '',
+    consumidorDescription: '',
+    constitucionalTitle: '',
+    constitucionalDescription: '',
+    administrativoTitle: '',
+    administrativoDescription: '',
+    contactTexts: {
+      phone: '',
+      email: '',
+      address: '',
+      whatsapp: '',
+      mapEmbedUrl: ''
+    },
+    footerTexts: {
+      companyName: '',
+      description: ''
+    },
+    categoryTexts: []
+  };
 
   return (
     <AdminProtectedRoute>
@@ -166,6 +208,7 @@ const Admin = () => {
               <TabsContent value="content">
                 <ContentManagement 
                   teamMembers={validTeamMembers}
+                  pageTexts={validPageTexts}
                   onAddTeamMember={handleAddTeamMember}
                   onRemoveTeamMember={handleRemoveTeamMember}
                   onUpdateTeamMember={handleUpdateTeamMember}
@@ -177,7 +220,7 @@ const Admin = () => {
                 <ServicePagesManager 
                   servicePages={servicePages || []}
                   categories={categories || []}
-                  pageTexts={pageTexts || {}}
+                  pageTexts={pageTexts || validPageTexts}
                   onSave={handleSaveServicePages}
                   onSaveCategories={handleSaveCategories}
                   onSavePageTexts={savePageTexts}
