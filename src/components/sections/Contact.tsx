@@ -55,12 +55,12 @@ const Contact = () => {
       
       const data = event.detail;
       
-      if (data.contactTitle) {
+      if (data.contactTitle !== undefined) {
         console.log('📞 Contact: Atualizando título para:', data.contactTitle);
         setContactTitle(data.contactTitle);
       }
       
-      if (data.contactSubtitle) {
+      if (data.contactSubtitle !== undefined) {
         console.log('📞 Contact: Atualizando subtítulo para:', data.contactSubtitle);
         setContactSubtitle(data.contactSubtitle);
       }

@@ -63,7 +63,15 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   const handleSaveAndNotify = async () => {
     try {
       console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
+      
+      // Salvar os textos da página via hook
       await savePageTexts(pageTexts);
+      
+      // Também salvar via prop function (para compatibilidade)
+      if (onSaveAll) {
+        await onSaveAll();
+      }
+      
       toast.success('Alterações salvas com sucesso!');
     } catch (error) {
       console.error('❌ HomePageEditor: Erro ao salvar:', error);

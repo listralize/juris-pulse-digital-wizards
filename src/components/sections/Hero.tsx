@@ -63,31 +63,31 @@ const Hero = () => {
       
       const data = event.detail;
       
-      if (data.heroTitle) {
+      if (data.heroTitle !== undefined) {
         console.log('🦸 Hero: Atualizando título para:', data.heroTitle);
         setHeroTitle(data.heroTitle);
       }
       
-      if (data.heroSubtitle) {
+      if (data.heroSubtitle !== undefined) {
         console.log('🦸 Hero: Atualizando subtítulo para:', data.heroSubtitle);
         setHeroSubtitle(data.heroSubtitle);
       }
       
-      if (data.heroPrimaryButtonText) {
+      if (data.heroPrimaryButtonText !== undefined) {
         console.log('🦸 Hero: Atualizando botão primário para:', data.heroPrimaryButtonText);
         setPrimaryButtonText(data.heroPrimaryButtonText);
       }
       
-      if (data.heroPrimaryButtonLink) {
+      if (data.heroPrimaryButtonLink !== undefined) {
         setPrimaryButtonLink(data.heroPrimaryButtonLink);
       }
       
-      if (data.heroSecondaryButtonText) {
+      if (data.heroSecondaryButtonText !== undefined) {
         console.log('🦸 Hero: Atualizando botão secundário para:', data.heroSecondaryButtonText);
         setSecondaryButtonText(data.heroSecondaryButtonText);
       }
       
-      if (data.heroSecondaryButtonLink) {
+      if (data.heroSecondaryButtonLink !== undefined) {
         setSecondaryButtonLink(data.heroSecondaryButtonLink);
       }
     };
