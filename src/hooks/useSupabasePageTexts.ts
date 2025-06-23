@@ -62,6 +62,7 @@ export const useSupabasePageTexts = () => {
     const loadPageTexts = async () => {
       try {
         console.log('📝 [useSupabasePageTexts] INÍCIO - Carregando textos das páginas...');
+        setIsLoading(true);
         
         // Carregar configurações do site
         const { data: settings, error: settingsError } = await supabase
@@ -285,28 +286,7 @@ export const useSupabasePageTexts = () => {
       // 5. Disparar eventos personalizados para atualização em tempo real
       console.log('📡 Disparando eventos de atualização...');
       
-      // Evento específico para Hero
-      window.dispatchEvent(new CustomEvent('heroTextsUpdated', {
-        detail: {
-          heroTitle: newTexts.heroTitle,
-          heroSubtitle: newTexts.heroSubtitle,
-          heroPrimaryButtonText: newTexts.heroPrimaryButtonText,
-          heroPrimaryButtonLink: newTexts.heroPrimaryButtonLink,
-          heroSecondaryButtonText: newTexts.heroSecondaryButtonText,
-          heroSecondaryButtonLink: newTexts.heroSecondaryButtonLink
-        }
-      }));
-
-      // Evento específico para Contact
-      window.dispatchEvent(new CustomEvent('contactTextsUpdated', {
-        detail: {
-          contactTitle: newTexts.contactTitle,
-          contactSubtitle: newTexts.contactSubtitle,
-          contactTexts: newTexts.contactTexts
-        }
-      }));
-
-      // Evento geral
+      // Evento geral para todas as atualizações
       window.dispatchEvent(new CustomEvent('pageTextsUpdated', {
         detail: newTexts
       }));

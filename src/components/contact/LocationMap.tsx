@@ -43,31 +43,13 @@ const LocationMap = () => {
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
-    const handleContactUpdate = (event: CustomEvent) => {
-      console.log('🗺️ LocationMap: Evento contactTextsUpdated recebido:', event.detail);
-      
-      if (event.detail.contactTexts) {
-        const { address, mapEmbedUrl } = event.detail.contactTexts;
-        if (address) {
-          setMapConfig(prev => ({
-            ...prev,
-            location: address
-          }));
-        }
-        if (mapEmbedUrl) {
-          setMapConfig(prev => ({
-            ...prev,
-            embedUrl: mapEmbedUrl
-          }));
-        }
-      }
-    };
-
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🗺️ LocationMap: Evento pageTextsUpdated recebido:', event.detail);
       
-      if (event.detail.contactTexts) {
-        const { address, mapEmbedUrl } = event.detail.contactTexts;
+      const data = event.detail;
+      
+      if (data.contactTexts) {
+        const { address, mapEmbedUrl } = data.contactTexts;
         if (address) {
           setMapConfig(prev => ({
             ...prev,
@@ -83,12 +65,10 @@ const LocationMap = () => {
       }
     };
 
-    // Escutar ambos os eventos
-    window.addEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
+    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);

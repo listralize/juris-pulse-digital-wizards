@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -51,38 +50,26 @@ const Contact = () => {
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
-    const handleContactUpdate = (event: CustomEvent) => {
-      console.log('📞 Contact: Evento contactTextsUpdated recebido:', event.detail);
-      
-      if (event.detail.contactTitle) {
-        console.log('📞 Contact: Atualizando título para:', event.detail.contactTitle);
-        setContactTitle(event.detail.contactTitle);
-      }
-      
-      if (event.detail.contactSubtitle) {
-        console.log('📞 Contact: Atualizando subtítulo para:', event.detail.contactSubtitle);
-        setContactSubtitle(event.detail.contactSubtitle);
-      }
-    };
-
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('📞 Contact: Evento pageTextsUpdated recebido:', event.detail);
       
-      if (event.detail.contactTitle) {
-        setContactTitle(event.detail.contactTitle);
+      const data = event.detail;
+      
+      if (data.contactTitle) {
+        console.log('📞 Contact: Atualizando título para:', data.contactTitle);
+        setContactTitle(data.contactTitle);
       }
       
-      if (event.detail.contactSubtitle) {
-        setContactSubtitle(event.detail.contactSubtitle);
+      if (data.contactSubtitle) {
+        console.log('📞 Contact: Atualizando subtítulo para:', data.contactSubtitle);
+        setContactSubtitle(data.contactSubtitle);
       }
     };
 
-    // Escutar ambos os eventos
-    window.addEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
+    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);

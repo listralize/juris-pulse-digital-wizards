@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -54,72 +53,44 @@ const Hero = () => {
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
-    const handleHeroUpdate = (event: CustomEvent) => {
-      console.log('🦸 Hero: Evento heroTextsUpdated recebido:', event.detail);
-      
-      if (event.detail.heroTitle) {
-        console.log('🦸 Hero: Atualizando título para:', event.detail.heroTitle);
-        setHeroTitle(event.detail.heroTitle);
-      }
-      
-      if (event.detail.heroSubtitle) {
-        console.log('🦸 Hero: Atualizando subtítulo para:', event.detail.heroSubtitle);
-        setHeroSubtitle(event.detail.heroSubtitle);
-      }
-      
-      if (event.detail.heroPrimaryButtonText) {
-        console.log('🦸 Hero: Atualizando botão primário para:', event.detail.heroPrimaryButtonText);
-        setPrimaryButtonText(event.detail.heroPrimaryButtonText);
-      }
-      
-      if (event.detail.heroPrimaryButtonLink) {
-        setPrimaryButtonLink(event.detail.heroPrimaryButtonLink);
-      }
-      
-      if (event.detail.heroSecondaryButtonText) {
-        console.log('🦸 Hero: Atualizando botão secundário para:', event.detail.heroSecondaryButtonText);
-        setSecondaryButtonText(event.detail.heroSecondaryButtonText);
-      }
-      
-      if (event.detail.heroSecondaryButtonLink) {
-        setSecondaryButtonLink(event.detail.heroSecondaryButtonLink);
-      }
-    };
-
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
       
-      if (event.detail.heroTitle) {
-        setHeroTitle(event.detail.heroTitle);
+      const data = event.detail;
+      
+      if (data.heroTitle) {
+        console.log('🦸 Hero: Atualizando título para:', data.heroTitle);
+        setHeroTitle(data.heroTitle);
       }
       
-      if (event.detail.heroSubtitle) {
-        setHeroSubtitle(event.detail.heroSubtitle);
+      if (data.heroSubtitle) {
+        console.log('🦸 Hero: Atualizando subtítulo para:', data.heroSubtitle);
+        setHeroSubtitle(data.heroSubtitle);
       }
       
-      if (event.detail.heroPrimaryButtonText) {
-        setPrimaryButtonText(event.detail.heroPrimaryButtonText);
+      if (data.heroPrimaryButtonText) {
+        console.log('🦸 Hero: Atualizando botão primário para:', data.heroPrimaryButtonText);
+        setPrimaryButtonText(data.heroPrimaryButtonText);
       }
       
-      if (event.detail.heroPrimaryButtonLink) {
-        setPrimaryButtonLink(event.detail.heroPrimaryButtonLink);
+      if (data.heroPrimaryButtonLink) {
+        setPrimaryButtonLink(data.heroPrimaryButtonLink);
       }
       
-      if (event.detail.heroSecondaryButtonText) {
-        setSecondaryButtonText(event.detail.heroSecondaryButtonText);
+      if (data.heroSecondaryButtonText) {
+        console.log('🦸 Hero: Atualizando botão secundário para:', data.heroSecondaryButtonText);
+        setSecondaryButtonText(data.heroSecondaryButtonText);
       }
       
-      if (event.detail.heroSecondaryButtonLink) {
-        setSecondaryButtonLink(event.detail.heroSecondaryButtonLink);
+      if (data.heroSecondaryButtonLink) {
+        setSecondaryButtonLink(data.heroSecondaryButtonLink);
       }
     };
 
-    // Escutar ambos os eventos
-    window.addEventListener('heroTextsUpdated', handleHeroUpdate as EventListener);
+    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('heroTextsUpdated', handleHeroUpdate as EventListener);
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
