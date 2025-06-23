@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,16 +17,21 @@ const Hero = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // Usar o hook do Supabase que salva os dados
-  const { pageTexts, isLoading } = useSupabasePageTexts();
+  // Usar o hook correto do Supabase
+  const { pageTexts, isLoading, refetch } = useSupabasePageTexts();
 
   console.log('🦸 Hero: pageTexts carregados:', pageTexts);
+  console.log('🦸 Hero: isLoading:', isLoading);
 
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
-      // O hook já atualiza automaticamente os pageTexts
+      // Recarregar dados do Supabase
+      if (refetch) {
+        console.log('🦸 Hero: Recarregando dados...');
+        refetch();
+      }
     };
 
     // Escutar evento geral
@@ -36,7 +40,7 @@ const Hero = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, []);
+  }, [refetch]);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -97,6 +101,15 @@ const Hero = () => {
     );
   }
 
+  console.log('🦸 Hero: Renderizando com dados:', {
+    heroTitle: pageTexts?.heroTitle,
+    heroSubtitle: pageTexts?.heroSubtitle,
+    heroPrimaryButtonText: pageTexts?.heroPrimaryButtonText,
+    heroPrimaryButtonLink: pageTexts?.heroPrimaryButtonLink,
+    heroSecondaryButtonText: pageTexts?.heroSecondaryButtonText,
+    heroSecondaryButtonLink: pageTexts?.heroSecondaryButtonLink
+  });
+
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
       {/* Background com marble banner */}
@@ -122,29 +135,29 @@ const Hero = () => {
         </div>
         
         <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
-          {pageTexts.heroTitle}
+          {pageTexts?.heroTitle || 'Excelência em Advocacia'}
         </h1>
         
         <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-4 md:mb-6 text-center max-w-lg mx-auto font-satoshi">
-          {pageTexts.heroSubtitle}
+          {pageTexts?.heroSubtitle || 'Defendemos seus direitos com dedicação e expertise'}
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
           <a 
-            href={pageTexts.heroPrimaryButtonLink}
+            href={pageTexts?.heroPrimaryButtonLink || 'https://api.whatsapp.com/send?phone=5562994594496'}
             target="_blank"
             rel="noopener noreferrer"
             className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            {pageTexts.heroPrimaryButtonText}
+            {pageTexts?.heroPrimaryButtonText || 'Fale Conosco no WhatsApp'}
             <ArrowRight className="w-5 h-5" />
           </a>
           
           <a 
-            href={pageTexts.heroSecondaryButtonLink}
+            href={pageTexts?.heroSecondaryButtonLink || '#areas'}
             className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            {pageTexts.heroSecondaryButtonText}
+            {pageTexts?.heroSecondaryButtonText || 'Conheça Nossas Áreas de Atuação'}
             <ArrowRight className="w-5 h-5" />
           </a>
         </div>
