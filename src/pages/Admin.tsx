@@ -141,6 +141,8 @@ const Admin = () => {
     teamTitle: '',
     clientAreaTitle: '',
     clientAreaDescription: '',
+    contactTitle: '',
+    contactSubtitle: '',
     familiaTitle: '',
     familiaDescription: '',
     tributarioTitle: '',
