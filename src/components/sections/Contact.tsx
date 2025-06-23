@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -37,8 +36,8 @@ const Contact = () => {
 
         if (settings) {
           console.log('📞 Contact: Dados carregados do Supabase:', settings);
-          setContactTitle(settings.contact_title || 'Entre em Contato');
-          setContactSubtitle(settings.contact_subtitle || 'Estamos prontos para ajudá-lo');
+          if (settings.contact_title) setContactTitle(settings.contact_title);
+          if (settings.contact_subtitle) setContactSubtitle(settings.contact_subtitle);
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados do Contact:', error);
@@ -48,19 +47,19 @@ const Contact = () => {
     loadInitialData();
   }, []);
 
-  // Escutar eventos de atualização
+  // Escutar eventos de atualização - simplificado
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📞 Contact: Recebendo atualização de textos:', event.detail);
-      const { contactTitle: newTitle, contactSubtitle: newSubtitle } = event.detail;
+      console.log('📞 Contact: Evento recebido:', event.detail);
       
-      if (newTitle !== undefined && newTitle !== contactTitle) {
-        console.log('📞 Contact: Atualizando título:', newTitle);
-        setContactTitle(newTitle);
+      if (event.detail.contactTitle) {
+        console.log('📞 Contact: Atualizando título para:', event.detail.contactTitle);
+        setContactTitle(event.detail.contactTitle);
       }
-      if (newSubtitle !== undefined && newSubtitle !== contactSubtitle) {
-        console.log('📞 Contact: Atualizando subtítulo:', newSubtitle);
-        setContactSubtitle(newSubtitle);
+      
+      if (event.detail.contactSubtitle) {
+        console.log('📞 Contact: Atualizando subtítulo para:', event.detail.contactSubtitle);
+        setContactSubtitle(event.detail.contactSubtitle);
       }
     };
 
@@ -69,7 +68,7 @@ const Contact = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, [contactTitle, contactSubtitle]);
+  }, []);
   
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });

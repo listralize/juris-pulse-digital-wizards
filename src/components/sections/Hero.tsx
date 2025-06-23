@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -40,8 +39,8 @@ const Hero = () => {
 
         if (settings) {
           console.log('🦸 Hero: Dados carregados do Supabase:', settings);
-          setHeroTitle(settings.hero_title || 'Excelência em Advocacia');
-          setHeroSubtitle(settings.hero_subtitle || 'Defendemos seus direitos com dedicação e expertise');
+          if (settings.hero_title) setHeroTitle(settings.hero_title);
+          if (settings.hero_subtitle) setHeroSubtitle(settings.hero_subtitle);
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados do Hero:', error);
@@ -51,22 +50,19 @@ const Hero = () => {
     loadHeroData();
   }, []);
 
-  // Escutar eventos de atualização
+  // Escutar eventos de atualização - simplificado
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('🦸 Hero: Recebendo atualização de textos:', event.detail);
-      const { 
-        heroTitle: newTitle, 
-        heroSubtitle: newSubtitle
-      } = event.detail;
+      console.log('🦸 Hero: Evento recebido:', event.detail);
       
-      if (newTitle !== undefined && newTitle !== heroTitle) {
-        console.log('🦸 Hero: Atualizando título:', newTitle);
-        setHeroTitle(newTitle);
+      if (event.detail.heroTitle) {
+        console.log('🦸 Hero: Atualizando título para:', event.detail.heroTitle);
+        setHeroTitle(event.detail.heroTitle);
       }
-      if (newSubtitle !== undefined && newSubtitle !== heroSubtitle) {
-        console.log('🦸 Hero: Atualizando subtítulo:', newSubtitle);
-        setHeroSubtitle(newSubtitle);
+      
+      if (event.detail.heroSubtitle) {
+        console.log('🦸 Hero: Atualizando subtítulo para:', event.detail.heroSubtitle);
+        setHeroSubtitle(event.detail.heroSubtitle);
       }
     };
 
@@ -75,7 +71,7 @@ const Hero = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, [heroTitle, heroSubtitle]);
+  }, []);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
