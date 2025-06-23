@@ -8,6 +8,10 @@ export const useSupabasePageTexts = () => {
     heroTitle: 'Excelência em Advocacia',
     heroSubtitle: 'Defendemos seus direitos com dedicação e expertise',
     heroBackgroundImage: '',
+    heroPrimaryButtonText: 'Fale Conosco no WhatsApp',
+    heroPrimaryButtonLink: 'https://api.whatsapp.com/send?phone=5562994594496',
+    heroSecondaryButtonText: 'Conheça Nossas Áreas de Atuação',
+    heroSecondaryButtonLink: '#areas',
     aboutTitle: 'Sobre Nós',
     aboutDescription: 'Somos um escritório de advocacia com mais de 20 anos de experiência, oferecendo serviços jurídicos de excelência em diversas áreas do direito.',
     aboutImage: '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png',
@@ -17,8 +21,8 @@ export const useSupabasePageTexts = () => {
     clientAreaTitle: 'Área do Cliente',
     clientAreaDescription: 'Acesse informações exclusivas e acompanhe seus processos',
     clientPortalLink: '',
-    contactTitle: 'Fale Conosco',
-    contactSubtitle: 'Estamos prontos para ajudar você',
+    contactTitle: 'Entre em Contato',
+    contactSubtitle: 'Estamos prontos para ajudá-lo',
     familiaTitle: 'Direito de Família',
     familiaDescription: 'Assessoria completa em questões familiares',
     tributarioTitle: 'Direito Tributário',
@@ -42,7 +46,7 @@ export const useSupabasePageTexts = () => {
       email: 'contato@stadv.com',
       address: 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040',
       whatsapp: '5562994594496',
-      mapEmbedUrl: ''
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3821.8377!2d-49.2647!3d-16.6869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935ef1b5d8b00001%3A0x1234567890abcdef!2sWorld%20Trade%20Center%20Goi%C3%A2nia!5e0!3m2!1spt!2sbr!4v1234567890123'
     },
     footerTexts: {
       companyName: 'Serafim & Trombela Advocacia',
@@ -57,8 +61,9 @@ export const useSupabasePageTexts = () => {
   useEffect(() => {
     const loadPageTexts = async () => {
       try {
-        console.log('📝 [useSupabasePageTexts] Carregando textos das páginas...');
+        console.log('📝 [useSupabasePageTexts] INÍCIO - Carregando textos das páginas...');
         
+        // Carregar configurações do site
         const { data: settings, error: settingsError } = await supabase
           .from('site_settings')
           .select('*')
@@ -66,7 +71,7 @@ export const useSupabasePageTexts = () => {
           .limit(1)
           .maybeSingle();
 
-        // Carregar dados de contato separadamente
+        // Carregar dados de contato
         const { data: contactInfo, error: contactError } = await supabase
           .from('contact_info')
           .select('*')
@@ -93,6 +98,8 @@ export const useSupabasePageTexts = () => {
         if (footerError) {
           console.error('❌ Erro ao carregar footer info:', footerError);
         }
+
+        console.log('📊 Dados carregados:', { settings, contactInfo, footerInfo });
 
         // Montar objeto de dados completo
         const loadedData: PageTexts = {
@@ -132,7 +139,7 @@ export const useSupabasePageTexts = () => {
           }
         };
 
-        console.log('📝 [useSupabasePageTexts] Dados carregados:', loadedData);
+        console.log('✅ [useSupabasePageTexts] Dados consolidados:', loadedData);
         setPageTexts(loadedData);
         
       } catch (error) {
@@ -147,9 +154,9 @@ export const useSupabasePageTexts = () => {
 
   const savePageTexts = async (newTexts: PageTexts) => {
     try {
-      console.log('💾 [useSupabasePageTexts] Salvando textos das páginas...', newTexts);
+      console.log('💾 [useSupabasePageTexts] INÍCIO - Salvando textos das páginas...', newTexts);
 
-      // Salvar dados principais do site
+      // 1. Salvar dados principais do site
       const { data: existingSiteSettings, error: selectSiteError } = await supabase
         .from('site_settings')
         .select('id')
@@ -179,7 +186,7 @@ export const useSupabasePageTexts = () => {
       };
 
       if (existingSiteSettings) {
-        console.log('📝 Atualizando registro de site settings existente:', existingSiteSettings.id);
+        console.log('📝 Atualizando site settings:', existingSiteSettings.id);
         const { error: updateSiteError } = await supabase
           .from('site_settings')
           .update(siteData)
@@ -187,7 +194,7 @@ export const useSupabasePageTexts = () => {
 
         if (updateSiteError) throw updateSiteError;
       } else {
-        console.log('➕ Criando novo registro de site settings');
+        console.log('➕ Criando novo site settings');
         const { error: insertSiteError } = await supabase
           .from('site_settings')
           .insert(siteData);
@@ -195,7 +202,7 @@ export const useSupabasePageTexts = () => {
         if (insertSiteError) throw insertSiteError;
       }
 
-      // Salvar dados de contato separadamente
+      // 2. Salvar dados de contato
       if (newTexts.contactTexts) {
         const { data: existingContactInfo, error: selectContactError } = await supabase
           .from('contact_info')
@@ -217,7 +224,7 @@ export const useSupabasePageTexts = () => {
         };
 
         if (existingContactInfo) {
-          console.log('📞 Atualizando registro de contact info existente:', existingContactInfo.id);
+          console.log('📞 Atualizando contact info:', existingContactInfo.id);
           const { error: updateContactError } = await supabase
             .from('contact_info')
             .update(contactData)
@@ -225,22 +232,16 @@ export const useSupabasePageTexts = () => {
 
           if (updateContactError) throw updateContactError;
         } else {
-          console.log('➕ Criando novo registro de contact info');
+          console.log('➕ Criando novo contact info');
           const { error: insertContactError } = await supabase
             .from('contact_info')
             .insert(contactData);
 
           if (insertContactError) throw insertContactError;
         }
-
-        // Disparar evento específico para dados de contato
-        console.log('📡 Disparando evento contactInfoUpdated');
-        window.dispatchEvent(new CustomEvent('contactInfoUpdated', {
-          detail: newTexts.contactTexts
-        }));
       }
 
-      // Salvar dados do footer separadamente
+      // 3. Salvar dados do footer
       if (newTexts.footerTexts) {
         const { data: existingFooterInfo, error: selectFooterError } = await supabase
           .from('footer_info')
@@ -259,7 +260,7 @@ export const useSupabasePageTexts = () => {
         };
 
         if (existingFooterInfo) {
-          console.log('👣 Atualizando registro de footer info existente:', existingFooterInfo.id);
+          console.log('👣 Atualizando footer info:', existingFooterInfo.id);
           const { error: updateFooterError } = await supabase
             .from('footer_info')
             .update(footerData)
@@ -267,7 +268,7 @@ export const useSupabasePageTexts = () => {
 
           if (updateFooterError) throw updateFooterError;
         } else {
-          console.log('➕ Criando novo registro de footer info');
+          console.log('➕ Criando novo footer info');
           const { error: insertFooterError } = await supabase
             .from('footer_info')
             .insert(footerData);
@@ -276,21 +277,41 @@ export const useSupabasePageTexts = () => {
         }
       }
 
-      console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
+      console.log('✅ [useSupabasePageTexts] Dados salvos no Supabase com sucesso!');
       
-      // Atualizar estado local imediatamente
+      // 4. Atualizar estado local imediatamente
       setPageTexts(newTexts);
       
-      // Disparar evento geral de atualização para as seções
-      console.log('📡 Disparando evento pageTextsUpdated direto com dados específicos');
-      window.dispatchEvent(new CustomEvent('pageTextsUpdated', {
+      // 5. Disparar eventos personalizados para atualização em tempo real
+      console.log('📡 Disparando eventos de atualização...');
+      
+      // Evento específico para Hero
+      window.dispatchEvent(new CustomEvent('heroTextsUpdated', {
         detail: {
           heroTitle: newTexts.heroTitle,
           heroSubtitle: newTexts.heroSubtitle,
-          contactTitle: newTexts.contactTitle,
-          contactSubtitle: newTexts.contactSubtitle
+          heroPrimaryButtonText: newTexts.heroPrimaryButtonText,
+          heroPrimaryButtonLink: newTexts.heroPrimaryButtonLink,
+          heroSecondaryButtonText: newTexts.heroSecondaryButtonText,
+          heroSecondaryButtonLink: newTexts.heroSecondaryButtonLink
         }
       }));
+
+      // Evento específico para Contact
+      window.dispatchEvent(new CustomEvent('contactTextsUpdated', {
+        detail: {
+          contactTitle: newTexts.contactTitle,
+          contactSubtitle: newTexts.contactSubtitle,
+          contactTexts: newTexts.contactTexts
+        }
+      }));
+
+      // Evento geral
+      window.dispatchEvent(new CustomEvent('pageTextsUpdated', {
+        detail: newTexts
+      }));
+
+      console.log('📡 Eventos disparados com sucesso!');
 
     } catch (error) {
       console.error('❌ [useSupabasePageTexts] Erro ao salvar textos:', error);

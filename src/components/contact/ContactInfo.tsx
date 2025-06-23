@@ -19,6 +19,7 @@ const ContactInfo = () => {
   useEffect(() => {
     const loadContactInfo = async () => {
       try {
+        console.log('📞 ContactInfo: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: contact } = await supabase
@@ -38,26 +39,18 @@ const ContactInfo = () => {
           });
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar informações de contato:', error);
+        console.error('❌ ContactInfo: Erro ao carregar informações de contato:', error);
       }
     };
 
     loadContactInfo();
   }, []);
 
-  // Escutar eventos de atualização
+  // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handleContactUpdate = (event: CustomEvent) => {
-      console.log('📞 ContactInfo: Recebendo atualização direta:', event.detail);
-      setContactData(prev => ({
-        ...prev,
-        ...event.detail
-      }));
-    };
-
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📞 ContactInfo: Recebendo atualização via pageTexts:', event.detail);
-      // Atualizar com dados de contactTexts se existirem
+      console.log('📞 ContactInfo: Evento contactTextsUpdated recebido:', event.detail);
+      
       if (event.detail.contactTexts) {
         const { phone, email, address, whatsapp } = event.detail.contactTexts;
         setContactData(prev => ({
@@ -70,12 +63,27 @@ const ContactInfo = () => {
       }
     };
 
-    // Escutar ambos os tipos de eventos
-    window.addEventListener('contactInfoUpdated', handleContactUpdate as EventListener);
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📞 ContactInfo: Evento pageTextsUpdated recebido:', event.detail);
+      
+      if (event.detail.contactTexts) {
+        const { phone, email, address, whatsapp } = event.detail.contactTexts;
+        setContactData(prev => ({
+          ...prev,
+          ...(phone && { phone }),
+          ...(email && { email }),
+          ...(address && { address }),
+          ...(whatsapp && { whatsapp })
+        }));
+      }
+    };
+
+    // Escutar ambos os eventos
+    window.addEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('contactInfoUpdated', handleContactUpdate as EventListener);
+      window.removeEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);

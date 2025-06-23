@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -24,10 +25,11 @@ const Hero = () => {
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
 
-  // Carregar dados do Supabase
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
     const loadHeroData = async () => {
       try {
+        console.log('🦸 Hero: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: settings } = await supabase
@@ -43,17 +45,17 @@ const Hero = () => {
           if (settings.hero_subtitle) setHeroSubtitle(settings.hero_subtitle);
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do Hero:', error);
+        console.error('❌ Hero: Erro ao carregar dados:', error);
       }
     };
 
     loadHeroData();
   }, []);
 
-  // Escutar eventos de atualização - simplificado
+  // Escutar eventos de atualização em tempo real
   useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('🦸 Hero: Evento recebido:', event.detail);
+    const handleHeroUpdate = (event: CustomEvent) => {
+      console.log('🦸 Hero: Evento heroTextsUpdated recebido:', event.detail);
       
       if (event.detail.heroTitle) {
         console.log('🦸 Hero: Atualizando título para:', event.detail.heroTitle);
@@ -64,11 +66,60 @@ const Hero = () => {
         console.log('🦸 Hero: Atualizando subtítulo para:', event.detail.heroSubtitle);
         setHeroSubtitle(event.detail.heroSubtitle);
       }
+      
+      if (event.detail.heroPrimaryButtonText) {
+        console.log('🦸 Hero: Atualizando botão primário para:', event.detail.heroPrimaryButtonText);
+        setPrimaryButtonText(event.detail.heroPrimaryButtonText);
+      }
+      
+      if (event.detail.heroPrimaryButtonLink) {
+        setPrimaryButtonLink(event.detail.heroPrimaryButtonLink);
+      }
+      
+      if (event.detail.heroSecondaryButtonText) {
+        console.log('🦸 Hero: Atualizando botão secundário para:', event.detail.heroSecondaryButtonText);
+        setSecondaryButtonText(event.detail.heroSecondaryButtonText);
+      }
+      
+      if (event.detail.heroSecondaryButtonLink) {
+        setSecondaryButtonLink(event.detail.heroSecondaryButtonLink);
+      }
     };
 
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
+      
+      if (event.detail.heroTitle) {
+        setHeroTitle(event.detail.heroTitle);
+      }
+      
+      if (event.detail.heroSubtitle) {
+        setHeroSubtitle(event.detail.heroSubtitle);
+      }
+      
+      if (event.detail.heroPrimaryButtonText) {
+        setPrimaryButtonText(event.detail.heroPrimaryButtonText);
+      }
+      
+      if (event.detail.heroPrimaryButtonLink) {
+        setPrimaryButtonLink(event.detail.heroPrimaryButtonLink);
+      }
+      
+      if (event.detail.heroSecondaryButtonText) {
+        setSecondaryButtonText(event.detail.heroSecondaryButtonText);
+      }
+      
+      if (event.detail.heroSecondaryButtonLink) {
+        setSecondaryButtonLink(event.detail.heroSecondaryButtonLink);
+      }
+    };
+
+    // Escutar ambos os eventos
+    window.addEventListener('heroTextsUpdated', handleHeroUpdate as EventListener);
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
+      window.removeEventListener('heroTextsUpdated', handleHeroUpdate as EventListener);
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);

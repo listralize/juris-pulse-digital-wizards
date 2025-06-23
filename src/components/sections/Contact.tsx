@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -25,6 +26,7 @@ const Contact = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
+        console.log('📞 Contact: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: settings } = await supabase
@@ -40,17 +42,17 @@ const Contact = () => {
           if (settings.contact_subtitle) setContactSubtitle(settings.contact_subtitle);
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do Contact:', error);
+        console.error('❌ Contact: Erro ao carregar dados:', error);
       }
     };
 
     loadInitialData();
   }, []);
 
-  // Escutar eventos de atualização - simplificado
+  // Escutar eventos de atualização em tempo real
   useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📞 Contact: Evento recebido:', event.detail);
+    const handleContactUpdate = (event: CustomEvent) => {
+      console.log('📞 Contact: Evento contactTextsUpdated recebido:', event.detail);
       
       if (event.detail.contactTitle) {
         console.log('📞 Contact: Atualizando título para:', event.detail.contactTitle);
@@ -63,9 +65,24 @@ const Contact = () => {
       }
     };
 
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📞 Contact: Evento pageTextsUpdated recebido:', event.detail);
+      
+      if (event.detail.contactTitle) {
+        setContactTitle(event.detail.contactTitle);
+      }
+      
+      if (event.detail.contactSubtitle) {
+        setContactSubtitle(event.detail.contactSubtitle);
+      }
+    };
+
+    // Escutar ambos os eventos
+    window.addEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
+      window.removeEventListener('contactTextsUpdated', handleContactUpdate as EventListener);
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);

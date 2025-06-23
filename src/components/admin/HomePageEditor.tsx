@@ -36,21 +36,16 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
   const handleInputChange = (field: keyof PageTexts, value: string) => {
-    console.log('📝 Alterando campo:', field, 'para:', value);
+    console.log('📝 HomePageEditor: Alterando campo:', field, 'para:', value);
     const updatedTexts = {
       ...pageTexts,
       [field]: value
     };
     onUpdatePageTexts(updatedTexts);
-    
-    // Disparar evento para atualizar componentes em tempo real
-    window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
-      detail: updatedTexts 
-    }));
   };
 
   const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
-    console.log('📝 Alterando campo aninhado:', parent, field, 'para:', value);
+    console.log('📝 HomePageEditor: Alterando campo aninhado:', parent, field, 'para:', value);
     const parentObject = pageTexts[parent] || {};
     const updatedTexts = {
       ...pageTexts,
@@ -60,26 +55,15 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       }
     };
     onUpdatePageTexts(updatedTexts);
-    
-    // Disparar eventos específicos
-    if (parent === 'contactTexts') {
-      window.dispatchEvent(new CustomEvent('contactInfoUpdated', { 
-        detail: { [field]: value }
-      }));
-    }
-    
-    window.dispatchEvent(new CustomEvent('pageTextsUpdated', { 
-      detail: updatedTexts 
-    }));
   };
 
   const handleSaveAndNotify = async () => {
     try {
-      console.log('💾 Salvando alterações...', pageTexts);
+      console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
       await onSaveAll();
       toast.success('Alterações salvas com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('❌ HomePageEditor: Erro ao salvar:', error);
       toast.error('Erro ao salvar alterações');
     }
   };
