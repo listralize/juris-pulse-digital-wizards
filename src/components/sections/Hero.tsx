@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -42,6 +43,10 @@ const Hero = () => {
           console.log('🦸 Hero: Dados carregados do Supabase:', settings);
           if (settings.hero_title) setHeroTitle(settings.hero_title);
           if (settings.hero_subtitle) setHeroSubtitle(settings.hero_subtitle);
+          if (settings.hero_primary_button_text) setPrimaryButtonText(settings.hero_primary_button_text);
+          if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
+          if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
+          if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
         }
       } catch (error) {
         console.error('❌ Hero: Erro ao carregar dados:', error);
