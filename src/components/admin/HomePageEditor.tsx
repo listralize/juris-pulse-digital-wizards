@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -11,7 +10,6 @@ import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 
 import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
-import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface HomePageEditorProps {
   pageTexts: PageTexts;
@@ -24,7 +22,7 @@ interface HomePageEditorProps {
 }
 
 export const HomePageEditor: React.FC<HomePageEditorProps> = ({
-  pageTexts: externalPageTexts,
+  pageTexts,
   teamMembers = [],
   onUpdatePageTexts,
   onAddTeamMember,
@@ -34,7 +32,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { pageTexts, savePageTexts } = useSupabasePageTexts();
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
@@ -44,7 +41,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       ...pageTexts,
       [field]: value
     };
-    savePageTexts(updatedTexts);
+    onUpdatePageTexts(updatedTexts);
   };
 
   const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
@@ -57,7 +54,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         [field]: value
       }
     };
-    savePageTexts(updatedTexts);
+    onUpdatePageTexts(updatedTexts);
   };
 
   const handleSaveAndNotify = async () => {
