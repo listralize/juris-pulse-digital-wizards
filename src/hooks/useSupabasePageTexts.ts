@@ -73,8 +73,8 @@ export const useSupabasePageTexts = () => {
           categoryTexts: defaultPageTexts.categoryTexts
         };
         
-        setPageTexts(loadedTexts);
         console.log('✅ [useSupabasePageTexts] Textos carregados:', loadedTexts);
+        setPageTexts(loadedTexts);
       } else {
         console.log('ℹ️ [useSupabasePageTexts] Nenhuma configuração encontrada, usando defaults');
         setPageTexts(defaultPageTexts);
@@ -145,11 +145,16 @@ export const useSupabasePageTexts = () => {
       console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
       
       // Disparar evento customizado para atualizar as seções em tempo real
-      console.log('📡 Disparando evento pageTextsUpdated');
-      const event = new CustomEvent('pageTextsUpdated', { 
+      console.log('📡 Disparando evento pageTextsUpdated com dados:', texts);
+      const customEvent = new CustomEvent('pageTextsUpdated', { 
         detail: texts 
       });
-      window.dispatchEvent(event);
+      window.dispatchEvent(customEvent);
+      
+      // Aguardar um pouco e disparar novamente para garantir que chegue
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: texts }));
+      }, 100);
       
     } catch (error) {
       console.error('❌ Erro crítico ao salvar textos:', error);

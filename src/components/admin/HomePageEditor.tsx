@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -11,7 +10,6 @@ import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 
 import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
-import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface HomePageEditorProps {
   pageTexts: PageTexts;
@@ -34,7 +32,6 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { savePageTexts } = useSupabasePageTexts();
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
@@ -64,15 +61,13 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     try {
       console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
       
-      // Salvar os textos da página via hook
-      await savePageTexts(pageTexts);
-      
-      // Também salvar via prop function (para compatibilidade)
+      // Salvar via prop function
       if (onSaveAll) {
         await onSaveAll();
+        toast.success('Alterações salvas com sucesso!');
+      } else {
+        toast.error('Função de salvar não disponível');
       }
-      
-      toast.success('Alterações salvas com sucesso!');
     } catch (error) {
       console.error('❌ HomePageEditor: Erro ao salvar:', error);
       toast.error('Erro ao salvar alterações');
