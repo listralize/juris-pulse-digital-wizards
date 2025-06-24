@@ -164,7 +164,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black' : 'bg-white'} py-8 px-4 md:px-8 lg:px-16 relative overflow-hidden min-h-screen`}
+      className={`${isDark ? 'bg-black' : 'bg-white'} py-8 px-4 md:px-8 lg:px-16 relative overflow-hidden`}
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
@@ -174,104 +174,105 @@ const PracticeAreas = () => {
         }}></div>
       </div>
 
-      <div className="max-w-5xl mx-auto relative z-10 h-full flex flex-col">
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 
             ref={titleRef}
-            className={`text-3xl md:text-4xl lg:text-5xl font-space-grotesk font-medium tracking-tight mb-4 ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-3xl md:text-4xl lg:text-5xl font-inter font-light tracking-tight mb-2 ${isDark ? 'text-white' : 'text-black'}`}
           >
             {areasTitle}
           </h2>
           <div className={`w-16 h-px mx-auto ${isDark ? 'bg-white/30' : 'bg-black/30'}`}></div>
         </div>
         
-        {/* Grid - Permite scroll vertical completo no mobile */}
-        <div className="flex-1 overflow-y-auto">
-          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
-            {practiceAreas.map((area, index) => {
-              const IconComponent = area.icon;
-              
-              return (
-                <Link 
-                  key={area.id}
-                  to={area.href}
-                  className="group block"
-                >
-                  <div className={`
-                    relative h-40 md:h-36 rounded-xl border transition-all duration-300 ease-out
-                    hover:scale-[1.02] hover:-translate-y-1
-                    ${isDark 
-                      ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
-                      : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
-                    }
-                    backdrop-blur-sm overflow-hidden
-                  `}>
+        {/* 3x3 Grid */}
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          {practiceAreas.map((area, index) => {
+            const IconComponent = area.icon;
+            
+            return (
+              <Link 
+                key={area.id}
+                to={area.href}
+                className="group block"
+              >
+                <div className={`
+                  relative h-32 rounded-lg border transition-all duration-300 ease-out
+                  hover:scale-[1.02] hover:-translate-y-1
+                  ${isDark 
+                    ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
+                    : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
+                  }
+                  backdrop-blur-sm overflow-hidden
+                `}>
+                  
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10 p-4 h-full flex flex-col">
                     
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
-                    
-                    {/* Content */}
-                    <div className="relative z-10 p-6 h-full flex flex-col">
-                      
-                      {/* Top Row - Icon, Service Count, and Arrow */}
-                      <div className="flex items-center justify-between mb-4">
-                        {/* Icon */}
-                        <div className={`
-                          w-10 h-10 rounded-full flex items-center justify-center
-                          transition-all duration-300 group-hover:scale-110
-                          ${isDark 
-                            ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
-                            : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
-                          }
-                        `}>
-                          <IconComponent className="w-5 h-5" />
-                        </div>
-                        
-                        {/* Service Count and Arrow */}
-                        <div className="flex items-center gap-3">
-                          <span className={`
-                            text-sm font-medium font-inter
-                            ${isDark ? 'text-white/50' : 'text-black/50'}
-                          `}>
-                            {area.services} serviço{area.services !== 1 ? 's' : ''}
-                          </span>
-                          
-                          <div className={`
-                            w-8 h-8 rounded-full flex items-center justify-center
-                            transition-all duration-300 group-hover:scale-110
-                            ${isDark 
-                              ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
-                              : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
-                            }
-                          `}>
-                            <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                          </div>
-                        </div>
+                    {/* Top Row - Icon, Service Count, and Arrow */}
+                    <div className="flex items-center justify-between mb-3">
+                      {/* Icon */}
+                      <div className={`
+                        w-8 h-8 rounded-full flex items-center justify-center
+                        transition-all duration-300 group-hover:scale-110
+                        ${isDark 
+                          ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
+                          : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
+                        }
+                      `}>
+                        <IconComponent className="w-4 h-4" />
                       </div>
                       
-                      {/* Title */}
-                      <h3 className={`
-                        text-lg font-semibold mb-3 transition-all duration-300 leading-tight font-space-grotesk
-                        ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
-                      `}>
-                        {area.title}
-                      </h3>
-                      
-                      {/* Description */}
-                      <p className={`
-                        text-sm leading-relaxed transition-all duration-300 flex-1 font-inter
-                        ${isDark ? 'text-white/60 group-hover:text-white/70' : 'text-black/60 group-hover:text-black/70'}
-                      `}>
-                        {area.description}
-                      </p>
+                      {/* Service Count and Arrow */}
+                      <div className="flex items-center gap-2">
+                        <span className={`
+                          text-xs font-medium font-inter
+                          ${isDark ? 'text-white/50' : 'text-black/50'}
+                        `}>
+                          {area.services} serviço{area.services !== 1 ? 's' : ''}
+                        </span>
+                        
+                        <div className={`
+                          w-6 h-6 rounded-full flex items-center justify-center
+                          transition-all duration-300 group-hover:scale-110
+                          ${isDark 
+                            ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
+                            : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
+                          }
+                        `}>
+                          <ArrowUpRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </div>
+                      </div>
                     </div>
+                    
+                    {/* Title */}
+                    <h3 className={`
+                      text-sm font-medium mb-2 transition-all duration-300 leading-tight line-clamp-1 font-inter
+                      ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
+                    `}>
+                      {area.title}
+                    </h3>
+                    
+                    {/* Description */}
+                    <p className={`
+                      text-xs leading-relaxed transition-all duration-300 line-clamp-2 flex-1 font-inter
+                      ${isDark ? 'text-white/60 group-hover:text-white/70' : 'text-black/60 group-hover:text-black/70'}
+                    `}>
+                      {area.description}
+                    </p>
                   </div>
-                </Link>
-              );
-            })}
-          </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
+
+        {/* Bottom spacing */}
+        <div className="h-6"></div>
       </div>
     </section>
   );

@@ -42,12 +42,20 @@ const Partners = () => {
     };
   }, []);
 
+  const itemsPerSlide = {
+    mobile: 1,
+    tablet: 2,
+    desktop: 3
+  };
+
+  const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide.desktop);
+
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % teamMembers.length);
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + teamMembers.length) % teamMembers.length);
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
   useEffect(() => {
@@ -76,7 +84,7 @@ const Partners = () => {
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [teamMembers.length]);
+  }, [totalSlides]);
 
   if (isLoading) {
     return (
@@ -100,111 +108,113 @@ const Partners = () => {
       }}
     >
       <div className="max-w-6xl mx-auto w-full">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 md:mb-8">
           <h2 
             ref={titleRef}
-            className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-space-grotesk font-medium tracking-tight ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
           >
             {teamTitle}
           </h2>
           <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
         </div>
         
-        {/* Netflix-style Carousel */}
+        {/* Carousel Container */}
         <div className="relative">
           <div 
             ref={carouselRef} 
-            className="overflow-hidden rounded-lg"
+            className="overflow-hidden"
           >
             <div 
               className="flex transition-transform duration-500 ease-in-out"
               style={{ 
-                transform: `translateX(-${currentSlide * 100}%)`,
+                transform: `translateX(-${currentSlide * (100 / totalSlides)}%)`,
+                width: `${totalSlides * 100}%`
               }}
             >
-              {teamMembers.map((member, index) => (
+              {Array.from({ length: totalSlides }).map((_, slideIndex) => (
                 <div 
-                  key={index}
-                  className="w-full flex-shrink-0 px-2"
+                  key={slideIndex}
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-shrink-0"
+                  style={{ width: `${100 / totalSlides}%` }}
                 >
-                  {/* Netflix-style Card */}
-                  <div className={`relative group overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 ${
-                    isDark ? 'bg-neutral-900/50' : 'bg-white'
-                  } shadow-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-                    
-                    {/* Image Container */}
-                    <div className="relative aspect-[4/5] overflow-hidden">
-                      {member.image ? (
-                        <img 
-                          src={member.image} 
-                          alt={member.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className={`w-full h-full flex items-center justify-center text-6xl ${
-                          isDark ? 'bg-neutral-800 text-white/50' : 'bg-gray-200 text-gray-400'
-                        }`}>
-                          👤
+                  {teamMembers
+                    .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
+                    .map((member, index) => (
+                      <div key={index} className="group">
+                        <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${
+                          isDark ? 'bg-white/5' : 'bg-white'
+                        } shadow-md hover:shadow-xl`}>
+                          <div className="aspect-square relative">
+                            {member.image ? (
+                              <img 
+                                src={member.image} 
+                                alt={member.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center text-3xl ${
+                                isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
+                              }`}>
+                                👤
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          </div>
+                          
+                          <div className="p-3">
+                            <h3 className={`text-sm md:text-base font-semibold mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                              {member.name}
+                            </h3>
+                            <p className={`text-xs mb-1 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                              {member.title || 'Advogado'}
+                            </p>
+                            <p className={`text-xs leading-relaxed line-clamp-2 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                              {member.description}
+                            </p>
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Dark Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-70"></div>
-                    </div>
-                    
-                    {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <h3 className="text-xl md:text-2xl font-bold mb-1 font-space-grotesk">
-                        {member.name}
-                      </h3>
-                      <p className="text-sm md:text-base font-medium mb-2 text-white/80 font-inter">
-                        {member.title || 'Advogado'}
-                      </p>
-                      <p className="text-xs md:text-sm leading-relaxed text-white/70 line-clamp-3 font-inter">
-                        {member.description}
-                      </p>
-                    </div>
-                  </div>
+                      </div>
+                    ))}
                 </div>
               ))}
             </div>
           </div>
 
           {/* Navigation Buttons */}
-          {teamMembers.length > 1 && (
+          {totalSlides > 1 && (
             <>
               <button
                 onClick={prevSlide}
-                className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-10 ${
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
                   isDark 
-                    ? 'bg-black/70 hover:bg-black/90 text-white border border-white/20' 
+                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
                     : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                } shadow-lg hover:scale-110 backdrop-blur-sm`}
+                } shadow-lg hover:scale-110`}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               
               <button
                 onClick={nextSlide}
-                className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-10 ${
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
                   isDark 
-                    ? 'bg-black/70 hover:bg-black/90 text-white border border-white/20' 
+                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
                     : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                } shadow-lg hover:scale-110 backdrop-blur-sm`}
+                } shadow-lg hover:scale-110`}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </>
           )}
 
           {/* Dots Indicator */}
-          {teamMembers.length > 1 && (
-            <div className="flex justify-center mt-6 space-x-2">
-              {teamMembers.map((_, index) => (
+          {totalSlides > 1 && (
+            <div className="flex justify-center mt-4 space-x-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     currentSlide === index
                       ? isDark ? 'bg-white' : 'bg-black'
                       : isDark ? 'bg-white/30' : 'bg-black/30'
