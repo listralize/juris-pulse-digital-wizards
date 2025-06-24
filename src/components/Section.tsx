@@ -37,16 +37,19 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'flex-start',
+          justifyContent: 'center',
+          alignItems: 'center',
           minHeight: '100vh',
           maxHeight: id === 'contact' ? 'auto' : '100vh',
           overflow: allowScroll || id === 'contact' ? 'auto' : 'hidden',
           WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto',
           opacity: 1,
-          visibility: 'visible'
+          visibility: 'visible',
+          padding: '2rem 1rem',
+          paddingBottom: id === 'contact' ? '140px' : '120px'
         }}
       >
-        <div className="w-full h-full" style={{ opacity: 1, visibility: 'visible' }}>
+        <div className="w-full h-full max-w-7xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
           {children}
         </div>
       </div>

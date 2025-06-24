@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -100,40 +99,40 @@ const Contact = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ paddingBottom: '120px' }}>
+    <div className="w-full h-full flex flex-col justify-center">
       <div 
         ref={sectionRef}
-        className={`flex-1 w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
+        className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-8 px-4 md:px-6 lg:px-12`}
       >
-        <div className="max-w-7xl mx-auto">
-          <div ref={titleRef} className="mb-12 text-center">
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="max-w-6xl mx-auto">
+          <div ref={titleRef} className="mb-8 text-center">
+            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
               {contactTitle}
             </h2>
             <div className={`w-20 h-1 mx-auto mb-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-            <p className={`text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+            <p className={`text-base md:text-lg ${isDark ? 'text-white/60' : 'text-black/60'}`}>
               {contactSubtitle}
             </p>
           </div>
           
           <div 
             ref={contentRef}
-            className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-16"
+            className="grid grid-cols-1 lg:grid-cols-5 gap-6"
           >
-            <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+            <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
               <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
-                <div className="h-48 lg:h-56">
+                <div className="h-40 lg:h-48">
                   <LocationMap />
                 </div>
               </div>
               
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-4 shadow-lg border`}>
                 <ContactInfo />
               </div>
             </div>
             
             <div className="lg:col-span-3 order-1 lg:order-2">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-4 shadow-lg border`}>
                 <UnifiedContactForm darkBackground={isDark} pageId="contato" />
               </div>
             </div>

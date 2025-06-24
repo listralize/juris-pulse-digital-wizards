@@ -1,12 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
-import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
 
 const FloatingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [showTimePopup, setShowTimePopup] = useState(false);
 
   // Estados locais para dados editáveis do footer
   const [footerData, setFooterData] = useState({
@@ -108,183 +109,246 @@ const FloatingFooter: React.FC = () => {
     window.open(mapsUrl, '_blank');
   };
 
-  const handleWhatsAppClick = () => {
-    window.open(`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`, '_blank');
+  const handleTimeClick = () => {
+    setShowTimePopup(true);
   };
 
   return (
-    <footer 
-      className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 
-        w-[95%] max-w-4xl mx-auto rounded-2xl shadow-2xl backdrop-blur-md
-        ${isDark 
-          ? 'bg-black/90 border border-white/20 text-white' 
-          : 'bg-white/95 border border-gray-200 text-black'
-        }
-        transition-all duration-300 hover:shadow-3xl`}
-      style={{
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)'
-      }}
-    >
-      <div className="px-4 py-3 sm:px-6 sm:py-4">
-        {/* Desktop Layout */}
-        <div className="hidden md:flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <img 
-              src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
-              alt={`${footerData.companyName} Logo`} 
-              className="h-8 object-contain"
-            />
+    <>
+      <footer 
+        className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 
+          w-[95%] max-w-5xl mx-auto rounded-2xl shadow-2xl backdrop-blur-md
+          ${isDark 
+            ? 'bg-black/90 border border-white/20 text-white' 
+            : 'bg-white/95 border border-gray-200 text-black'
+          }
+          transition-all duration-300 hover:shadow-3xl`}
+        style={{
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)'
+        }}
+      >
+        <div className="px-4 py-4 sm:px-6 sm:py-5">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <img 
+                src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
+                alt={`${footerData.companyName} Logo`} 
+                className="h-12 object-contain"
+              />
+              <div className="flex items-center space-x-6">
+                {/* Ícone do Telefone */}
+                <button
+                  onClick={handlePhoneClick}
+                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                    ${isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white' 
+                      : 'bg-black/10 hover:bg-black/20 text-black'
+                    }`}
+                  title={`Ligar para ${footerData.phone}`}
+                >
+                  <Phone className="h-5 w-5" />
+                </button>
+
+                {/* Ícone do Email */}
+                <button
+                  onClick={handleEmailClick}
+                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                    ${isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white' 
+                      : 'bg-black/10 hover:bg-black/20 text-black'
+                    }`}
+                  title={`Enviar email para ${footerData.email}`}
+                >
+                  <Mail className="h-5 w-5" />
+                </button>
+
+                {/* Ícone da Localização */}
+                <button
+                  onClick={handleLocationClick}
+                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                    ${isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white' 
+                      : 'bg-black/10 hover:bg-black/20 text-black'
+                    }`}
+                  title={`Ver localização: ${footerData.address}`}
+                >
+                  <MapPin className="h-5 w-5" />
+                </button>
+
+                {/* Ícone do Horário */}
+                <button
+                  onClick={handleTimeClick}
+                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                    ${isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white' 
+                      : 'bg-black/10 hover:bg-black/20 text-black'
+                    }`}
+                  title="Ver horário de funcionamento"
+                >
+                  <Clock className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            
             <div className="flex items-center space-x-6">
-              {/* Ícone do Telefone */}
+              <div className="flex items-center space-x-4 text-xs">
+                <a 
+                  href="#" 
+                  className={`hover:underline transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-black/70 hover:text-black'}`}
+                >
+                  Política de Privacidade
+                </a>
+                <span className="text-current/30">|</span>
+                <a 
+                  href="#" 
+                  className={`hover:underline transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-black/70 hover:text-black'}`}
+                >
+                  Termos de Uso
+                </a>
+                <span className="text-current/30">|</span>
+                <a 
+                  href="https://listralize.com.br/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`hover:underline transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-black/70 hover:text-black'}`}
+                >
+                  Desenvolvido por Listralize
+                </a>
+              </div>
+              <div className="text-xs opacity-60">
+                © {currentYear} {footerData.companyName}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Layout */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between mb-4">
+              <img 
+                src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
+                alt={`${footerData.companyName} Logo`} 
+                className="h-8 object-contain"
+              />
+            </div>
+            
+            <div className="flex items-center justify-center space-x-6 mb-4">
+              {/* Ícones Mobile */}
               <button
                 onClick={handlePhoneClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title={`Ligar para ${footerData.phone}`}
               >
-                <Phone className="h-4 w-4" />
+                <Phone className="h-5 w-5" />
               </button>
 
-              {/* Ícone do Email */}
               <button
                 onClick={handleEmailClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title={`Enviar email para ${footerData.email}`}
               >
-                <Mail className="h-4 w-4" />
+                <Mail className="h-5 w-5" />
               </button>
 
-              {/* Ícone da Localização */}
               <button
                 onClick={handleLocationClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title={`Ver localização: ${footerData.address}`}
               >
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-5 w-5" />
               </button>
 
-              {/* Ícone do Horário */}
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full
+              <button
+                onClick={handleTimeClick}
+                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
-                    ? 'bg-white/10 text-white' 
-                    : 'bg-black/10 text-black'
+                    ? 'bg-white/10 hover:bg-white/20 text-white' 
+                    : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
-                title="Horário de funcionamento: Seg-Sex 9:00-18:00"
+                title="Ver horário de funcionamento"
               >
-                <Clock className="h-4 w-4" />
+                <Clock className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="text-center space-y-2 pt-3 border-t border-current/20">
+              <div className="flex items-center justify-center space-x-2 text-xs">
+                <a href="#" className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}>
+                  Política de Privacidade
+                </a>
+                <span className="text-current/30">•</span>
+                <a href="#" className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}>
+                  Termos de Uso
+                </a>
+              </div>
+              <div className="text-xs">
+                <a 
+                  href="https://listralize.com.br/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}
+                >
+                  Desenvolvido por Listralize
+                </a>
+              </div>
+              <div className="text-xs opacity-60">
+                © {currentYear} {footerData.companyName}
               </div>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={handleWhatsAppClick}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105
-                ${isDark 
-                  ? 'bg-white text-black hover:bg-gray-100' 
-                  : 'bg-black text-white hover:bg-gray-800'
-                }`}
+        </div>
+      </footer>
+
+      {/* Popup de Horário */}
+      {showTimePopup && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className={`relative p-6 rounded-2xl shadow-2xl max-w-sm mx-4 ${
+            isDark ? 'bg-black border border-white/20 text-white' : 'bg-white border border-gray-200 text-black'
+          }`}>
+            <button
+              onClick={() => setShowTimePopup(false)}
+              className={`absolute top-4 right-4 p-1 rounded-full transition-colors ${
+                isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'
+              }`}
             >
-              WhatsApp
+              <X className="h-4 w-4" />
             </button>
-            <div className="text-xs opacity-60">
-              © {currentYear} {footerData.companyName}
+            
+            <div className="text-center">
+              <Clock className="h-12 w-12 mx-auto mb-4 opacity-70" />
+              <h3 className="text-lg font-semibold mb-4">Horário de Funcionamento</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Segunda a Sexta:</span>
+                  <span className="font-medium">09:00 - 18:00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Sábado:</span>
+                  <span className="font-medium">09:00 - 12:00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Domingo:</span>
+                  <span className="font-medium">Fechado</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Mobile Layout */}
-        <div className="md:hidden">
-          <div className="flex items-center justify-between mb-3">
-            <img 
-              src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
-              alt={`${footerData.companyName} Logo`} 
-              className="h-6 object-contain"
-            />
-            <button 
-              onClick={handleWhatsAppClick}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 hover:scale-105
-                ${isDark 
-                  ? 'bg-white text-black hover:bg-gray-100' 
-                  : 'bg-black text-white hover:bg-gray-800'
-                }`}
-            >
-              WhatsApp
-            </button>
-          </div>
-          
-          <div className="flex items-center justify-center space-x-6 mb-3">
-            {/* Ícone do Telefone Mobile */}
-            <button
-              onClick={handlePhoneClick}
-              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
-                ${isDark 
-                  ? 'bg-white/10 hover:bg-white/20 text-white' 
-                  : 'bg-black/10 hover:bg-black/20 text-black'
-                }`}
-              title={`Ligar para ${footerData.phone}`}
-            >
-              <Phone className="h-5 w-5" />
-            </button>
-
-            {/* Ícone do Email Mobile */}
-            <button
-              onClick={handleEmailClick}
-              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
-                ${isDark 
-                  ? 'bg-white/10 hover:bg-white/20 text-white' 
-                  : 'bg-black/10 hover:bg-black/20 text-black'
-                }`}
-              title={`Enviar email para ${footerData.email}`}
-            >
-              <Mail className="h-5 w-5" />
-            </button>
-
-            {/* Ícone da Localização Mobile */}
-            <button
-              onClick={handleLocationClick}
-              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
-                ${isDark 
-                  ? 'bg-white/10 hover:bg-white/20 text-white' 
-                  : 'bg-black/10 hover:bg-black/20 text-black'
-                }`}
-              title={`Ver localização: ${footerData.address}`}
-            >
-              <MapPin className="h-5 w-5" />
-            </button>
-
-            {/* Ícone do Horário Mobile */}
-            <div
-              className={`flex items-center justify-center w-12 h-12 rounded-full
-                ${isDark 
-                  ? 'bg-white/10 text-white' 
-                  : 'bg-black/10 text-black'
-                }`}
-              title="Horário de funcionamento: Seg-Sex 9:00-18:00"
-            >
-              <Clock className="h-5 w-5" />
-            </div>
-          </div>
-          
-          <div className="text-center text-xs opacity-60 pt-2 border-t border-current/20">
-            © {currentYear} {footerData.companyName}
-          </div>
-        </div>
-      </div>
-    </footer>
+      )}
+    </>
   );
 };
 
