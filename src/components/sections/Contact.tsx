@@ -1,36 +1,26 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-import UnifiedContactForm from '../contact/UnifiedContactForm';
+import React, { useState, useEffect } from 'react';
+import { useTheme } from '../ThemeProvider';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
-import Footer from './Footer';
-import { useTheme } from '../ThemeProvider';
-
-gsap.registerPlugin(ScrollTrigger);
+import UnifiedContactForm from '../contact/UnifiedContactForm';
 
 const Contact = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  
-  // Estado local para receber atualizações em tempo real
+
+  // Estados para título e subtítulo da página de contato
   const [contactTitle, setContactTitle] = useState('Entre em Contato');
-  const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudá-lo');
+  const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudá-lo com suas questões jurídicas');
 
   // Carregar dados iniciais do Supabase
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadContactPageData = async () => {
       try {
-        console.log('📞 Contact: Carregando dados iniciais...');
+        console.log('📞 Contact: Carregando dados iniciais da página...');
         const { supabase } = await import('../../integrations/supabase/client');
         
-        // Buscar primeiro na tabela site_settings
+        // Buscar dados da site_settings
         const { data: settings } = await supabase
           .from('site_settings')
           .select('contact_title, contact_subtitle')
@@ -39,30 +29,25 @@ const Contact = () => {
           .maybeSingle();
 
         if (settings) {
-          console.log('📞 Contact: Dados carregados da site_settings:', settings);
-          if (settings.contact_title) {
-            setContactTitle(settings.contact_title);
-          }
-          if (settings.contact_subtitle) {
-            setContactSubtitle(settings.contact_subtitle);
-          }
+          console.log('📞 Contact: Dados encontrados:', settings);
+          setContactTitle(settings.contact_title || contactTitle);
+          setContactSubtitle(settings.contact_subtitle || contactSubtitle);
         }
       } catch (error) {
-        console.error('❌ Contact: Erro ao carregar dados:', error);
+        console.error('❌ Contact: Erro ao carregar dados da página:', error);
       }
     };
 
-    loadInitialData();
+    loadContactPageData();
   }, []);
 
-  // Escutar eventos de atualização em tempo real
+  // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('📞 Contact: Evento pageTextsUpdated recebido:', event.detail);
       
       const data = event.detail;
       
-      // Atualizar título e subtítulo de contato
       if (data.contactTitle !== undefined) {
         console.log('📞 Contact: Atualizando título:', data.contactTitle);
         setContactTitle(data.contactTitle);
@@ -80,69 +65,38 @@ const Contact = () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
-  
-  useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    
-    tl.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 }
-    ).fromTo(
-      contentRef.current,
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.4"
-    );
-    
-    return () => {
-      tl.kill();
-    };
-  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div 
-        ref={sectionRef}
-        className={`flex-1 w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
-      >
-        <div className="max-w-7xl mx-auto">
-          <div ref={titleRef} className="mb-12 text-center">
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
-              {contactTitle}
-            </h2>
-            <div className={`w-20 h-1 mx-auto mb-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-            <p className={`text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
-              {contactSubtitle}
-            </p>
+    <div className={`min-h-full w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-300`}>
+      <div className="px-6 md:px-16 lg:px-24 py-8 md:py-12">
+        {/* Header da seção */}
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className={`text-3xl md:text-4xl lg:text-5xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+            {contactTitle}
+          </h1>
+          <p className={`text-lg md:text-xl font-satoshi max-w-2xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            {contactSubtitle}
+          </p>
+        </div>
+
+        {/* Grid de conteúdo */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+          {/* Coluna 1: Informações de Contato */}
+          <div className="lg:col-span-1">
+            <ContactInfo />
           </div>
-          
-          <div 
-            ref={contentRef}
-            className="grid grid-cols-1 lg:grid-cols-5 gap-8"
-          >
-            <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
-                <div className="h-48 lg:h-56">
-                  <LocationMap />
-                </div>
-              </div>
-              
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
-                <ContactInfo />
-              </div>
-            </div>
-            
-            <div className="lg:col-span-3 order-1 lg:order-2">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
-                <UnifiedContactForm darkBackground={isDark} pageId="contato" />
-              </div>
-            </div>
+
+          {/* Coluna 2: Mapa */}
+          <div className="lg:col-span-1">
+            <LocationMap />
+          </div>
+
+          {/* Coluna 3: Formulário */}
+          <div className="lg:col-span-1">
+            <UnifiedContactForm />
           </div>
         </div>
       </div>
-      
-      <Footer respectTheme={true} />
     </div>
   );
 };
