@@ -15,11 +15,42 @@ const ContactInfo = () => {
     whatsapp: '5562994594496'
   });
 
-  // Carregar dados iniciais do Supabase - por enquanto mantém os defaults
+  // Carregar dados iniciais do Supabase da tabela site_settings
   useEffect(() => {
     const loadContactInfo = async () => {
       try {
-        console.log('📞 ContactInfo: Usando dados padrão (aguardando mapeamento completo)');
+        console.log('📞 ContactInfo: Carregando dados iniciais da tabela site_settings...');
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (settings) {
+          console.log('📞 ContactInfo: Dados carregados do Supabase site_settings:', settings);
+          // Por enquanto, apenas buscar da tabela contact_info separada se necessário
+          const { data: contact } = await supabase
+            .from('contact_info')
+            .select('phone, email, address, whatsapp')
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (contact) {
+            console.log('📞 ContactInfo: Dados de contato encontrados:', contact);
+            setContactData({
+              phone: contact.phone || contactData.phone,
+              email: contact.email || contactData.email,
+              address: contact.address || contactData.address,
+              whatsapp: contact.whatsapp || contactData.whatsapp
+            });
+          } else {
+            console.log('📞 ContactInfo: Usando dados padrão');
+          }
+        }
       } catch (error) {
         console.error('❌ ContactInfo: Erro ao carregar informações de contato:', error);
       }

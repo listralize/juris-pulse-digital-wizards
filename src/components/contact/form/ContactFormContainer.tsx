@@ -12,13 +12,13 @@ const ContactFormContainer: React.FC<ContactFormContainerProps> = ({
   darkBackground = false 
 }) => {
   const { theme } = useTheme();
-  const isDark = darkBackground || theme === 'dark';
-  
+  const isDark = theme === 'dark' || darkBackground;
+
   return (
-    <div className={`p-6 rounded-lg ${
+    <div className={`p-6 rounded-lg h-full ${
       isDark 
-      ? 'bg-black/90 border border-white/10' 
-      : 'bg-white border border-gray-200'
+        ? 'bg-black border border-white/20 text-white' 
+        : 'bg-white border border-gray-200 text-black'
     }`}>
       {children}
     </div>

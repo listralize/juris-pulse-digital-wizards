@@ -1,11 +1,17 @@
 
 import React from 'react';
 import { FormField } from '../../../types/contactFormTypes';
+import { NamePhoneFields } from './NamePhoneFields';
+import { EmailField } from './EmailField';
+import { MessageField } from './MessageField';
+import { ServiceSelectField } from './ServiceSelectField';
+import { UrgentCheckbox } from './UrgentCheckbox';
+import { DynamicCustomFields } from './DynamicCustomFields';
 
 interface DynamicFormRendererProps {
   formFields: FormField[];
   serviceOptions: Array<{ value: string; label: string }>;
-  formData: { [key: string]: any };
+  formData: Record<string, any>;
   updateField: (field: string, value: string | boolean) => void;
   darkBackground?: boolean;
 }
@@ -17,152 +23,78 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
   updateField,
   darkBackground = false
 }) => {
-  const baseClassName = `w-full px-3 py-2 border rounded-md ${
-    darkBackground 
-      ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40' 
-      : 'bg-white border-gray-300 text-black'
-  }`;
+  // Separar campos padrão dos personalizados
+  const defaultFields = formFields.filter(field => field.isDefault && !field.disabled);
+  const customFields = formFields.filter(field => !field.isDefault && !field.disabled);
 
-  const labelClassName = `block text-sm font-medium mb-1 ${
-    darkBackground ? 'text-white/80' : 'text-gray-700'
-  }`;
-
-  const renderField = (field: FormField) => {
-    // Verificar se o campo está desabilitado
-    if (field.disabled) {
-      return null;
-    }
-
-    // Layout especial para nome e telefone (lado a lado)
-    if (field.name === 'name') {
-      const phoneField = formFields.find(f => f.name === 'phone' && !f.disabled);
-      if (phoneField) {
-        return (
-          <div key="name-phone-group" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClassName}>
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                value={formData[field.name] || ''}
-                onChange={(e) => updateField(field.name, e.target.value)}
-                placeholder={field.placeholder}
-                required={field.required}
-                className={baseClassName}
-              />
-            </div>
-            <div>
-              <label className={labelClassName}>
-                {phoneField.label}
-              </label>
-              <input
-                type={phoneField.type}
-                value={formData[phoneField.name] || ''}
-                onChange={(e) => updateField(phoneField.name, e.target.value)}
-                placeholder={phoneField.placeholder}
-                required={phoneField.required}
-                className={baseClassName}
-              />
-            </div>
-          </div>
-        );
-      }
-    }
-
-    // Pular o campo de telefone se já foi renderizado com o nome
-    if (field.name === 'phone') {
-      return null;
-    }
-
-    switch (field.type) {
-      case 'text':
-      case 'email':
-      case 'tel':
-        return (
-          <div key={field.id}>
-            <label className={labelClassName}>
-              {field.label}
-            </label>
-            <input
-              type={field.type}
-              value={formData[field.name] || ''}
-              onChange={(e) => updateField(field.name, e.target.value)}
-              placeholder={field.placeholder}
-              required={field.required && !field.disabled}
-              className={baseClassName}
-            />
-          </div>
-        );
-
-      case 'textarea':
-        return (
-          <div key={field.id}>
-            <label className={labelClassName}>
-              {field.label}
-            </label>
-            <textarea
-              value={formData[field.name] || ''}
-              onChange={(e) => updateField(field.name, e.target.value)}
-              placeholder={field.placeholder}
-              required={field.required && !field.disabled}
-              rows={4}
-              className={`${baseClassName} resize-vertical`}
-            />
-          </div>
-        );
-
-      case 'select':
-        return (
-          <div key={field.id}>
-            <label className={labelClassName}>
-              {field.label}
-            </label>
-            <select
-              value={formData[field.name] || ''}
-              onChange={(e) => updateField(field.name, e.target.value)}
-              required={field.required && !field.disabled}
-              className={baseClassName}
-            >
-              <option value="">{field.placeholder || 'Selecione uma opção'}</option>
-              {field.options?.map((option, index) => (
-                <option key={index} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
-
-      case 'checkbox':
-        return (
-          <div key={field.id} className="flex items-start space-x-3">
-            <input
-              type="checkbox"
-              id={field.id}
-              checked={formData[field.name] || false}
-              onChange={(e) => updateField(field.name, e.target.checked)}
-              className={`mt-1 ${darkBackground ? 'border-white/40' : ''}`}
-            />
-            <label htmlFor={field.id} className={`text-sm ${darkBackground ? 'text-white/80' : 'text-gray-700'}`}>
-              {field.label}
-            </label>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  // Ordena os campos pela propriedade order e filtra campos desabilitados
-  const sortedFields = [...formFields]
-    .filter(field => !field.disabled)
-    .sort((a, b) => a.order - b.order);
+  const hasNameField = defaultFields.some(field => field.name === 'name');
+  const hasPhoneField = defaultFields.some(field => field.name === 'phone');
+  const hasEmailField = defaultFields.some(field => field.name === 'email');
+  const hasServiceField = defaultFields.some(field => field.name === 'service');
+  const hasMessageField = defaultFields.some(field => field.name === 'message');
+  const hasUrgentField = defaultFields.some(field => field.name === 'isUrgent');
 
   return (
-    <>
-      {sortedFields.map(renderField).filter(Boolean)}
-    </>
+    <div className="space-y-4">
+      {/* Campos Nome e Telefone */}
+      {(hasNameField || hasPhoneField) && (
+        <NamePhoneFields
+          nameValue={formData.name || ''}
+          phoneValue={formData.phone || ''}
+          onNameChange={(value) => updateField('name', value)}
+          onPhoneChange={(value) => updateField('phone', value)}
+          showName={hasNameField}
+          showPhone={hasPhoneField}
+          darkBackground={darkBackground}
+        />
+      )}
+
+      {/* Campo E-mail */}
+      {hasEmailField && (
+        <EmailField
+          value={formData.email || ''}
+          onChange={(value) => updateField('email', value)}
+          darkBackground={darkBackground}
+        />
+      )}
+
+      {/* Campo Serviço */}
+      {hasServiceField && (
+        <ServiceSelectField
+          value={formData.service || ''}
+          onChange={(value) => updateField('service', value)}
+          options={serviceOptions}
+          darkBackground={darkBackground}
+        />
+      )}
+
+      {/* Campos Personalizados */}
+      {customFields.length > 0 && (
+        <DynamicCustomFields
+          fields={customFields}
+          formData={formData}
+          updateField={updateField}
+          darkBackground={darkBackground}
+        />
+      )}
+
+      {/* Campo Mensagem */}
+      {hasMessageField && (
+        <MessageField
+          value={formData.message || ''}
+          onChange={(value) => updateField('message', value)}
+          darkBackground={darkBackground}
+        />
+      )}
+
+      {/* Checkbox Urgente */}
+      {hasUrgentField && (
+        <UrgentCheckbox
+          checked={formData.isUrgent || false}
+          onChange={(checked) => updateField('isUrgent', checked)}
+          darkBackground={darkBackground}
+        />
+      )}
+    </div>
   );
 };
