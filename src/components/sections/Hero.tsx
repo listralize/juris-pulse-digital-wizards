@@ -99,6 +99,7 @@ const Hero = () => {
     };
   }, []);
 
+  // Parallax effect
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
@@ -132,7 +133,6 @@ const Hero = () => {
       "-=0.5"
     );
     
-    // Parallax effect
     gsap.to(bgRef.current, {
       yPercent: -30,
       ease: "none",
@@ -187,7 +187,7 @@ const Hero = () => {
             href={primaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
           >
             {primaryButtonText}
             <ArrowRight className="w-5 h-5" />
@@ -195,7 +195,7 @@ const Hero = () => {
           
           <a 
             href={secondaryButtonLink}
-            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-transparent text-white border border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
           >
             {secondaryButtonText}
             <ArrowRight className="w-5 h-5" />
