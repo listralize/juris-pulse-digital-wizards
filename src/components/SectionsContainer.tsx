@@ -74,14 +74,17 @@ const SectionsContainer: React.FC = () => {
           const Component = section.component;
           const allowScroll = section.id === 'contact' || section.id === 'socios';
           const isActive = activeSectionIndex === index;
+          const isContactSection = section.id === 'contact';
           
           return (
             <div
               key={section.id}
-              className="w-screen h-full flex-shrink-0 relative"
+              className="w-screen flex-shrink-0 relative"
               style={{ 
                 width: '100vw',
-                minWidth: '100vw'
+                minWidth: '100vw',
+                height: isContactSection ? 'auto' : '100vh',
+                minHeight: isContactSection ? '100vh' : '100vh'
               }}
             >
               <Section 
@@ -93,7 +96,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className="h-full"
+                className={isContactSection ? "min-h-screen" : "h-full"}
               >
                 <Component />
               </Section>
