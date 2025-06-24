@@ -103,6 +103,7 @@
     height: 100%;
     margin: 0;
     padding: 0;
+    padding-top: 0; /* Remove padding top to fix mobile navbar issues */
     overflow-x: hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -160,6 +161,20 @@
 
   .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Mobile scroll fixes */
+  @media (max-width: 768px) {
+    body {
+      padding-top: 0;
+      position: relative;
+    }
+    
+    /* Ensure sections can scroll properly on mobile */
+    #areas, #contact, #blog {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 }
 

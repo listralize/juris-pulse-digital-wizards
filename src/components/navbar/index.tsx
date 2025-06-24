@@ -92,8 +92,8 @@ const Navbar = () => {
       {/* Mobile Navigation */}
       <CompactMobileNavbar showLogo={showLogoOnMobile} />
 
-      {/* Desktop Navigation */}
-      <nav className={`hidden md:block ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} sticky top-0 z-50 w-full transition-colors duration-300 backdrop-blur-md`}>
+      {/* Desktop Navigation - Always fixed */}
+      <nav className={`hidden md:block fixed top-0 left-0 right-0 z-50 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} w-full transition-colors duration-300 backdrop-blur-md`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex justify-center items-center relative h-12">
             <div className="flex justify-center items-center w-full">
@@ -105,6 +105,9 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+      
+      {/* Spacer for fixed navbar on desktop */}
+      <div className="hidden md:block h-[60px]"></div>
     </>
   );
 };

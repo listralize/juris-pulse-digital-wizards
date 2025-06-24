@@ -44,7 +44,7 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
 
   return (
     <>
-      <nav className={`md:hidden ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} sticky top-0 z-50 transition-colors duration-300`}>
+      <nav className={`md:hidden fixed top-0 left-0 right-0 z-[100] ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} transition-colors duration-300`}>
         <div className="px-4 h-16 flex items-center justify-between">
           {/* Left side - Logo (conditional) */}
           <div className="flex items-center">
@@ -53,7 +53,7 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
                 <img 
                   src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
                   alt="Logo" 
-                  className="h-8 object-contain"
+                  className="h-10 object-contain"
                 />
               </Link>
             )}
@@ -159,6 +159,15 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
               </button>
 
               <button
+                onClick={() => handleNavigation('/#cliente')}
+                className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                  isDark ? 'text-white/80 hover:bg-white/5' : 'text-black/80 hover:bg-black/5'
+                }`}
+              >
+                Área do Cliente
+              </button>
+
+              <button
                 onClick={() => handleNavigation('/#contact')}
                 className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
                   isDark ? 'text-white/80 hover:bg-white/5' : 'text-black/80 hover:bg-black/5'
@@ -170,6 +179,9 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
           </div>
         )}
       </nav>
+      
+      {/* Spacer for fixed navbar */}
+      <div className="md:hidden h-16"></div>
     </>
   );
 };

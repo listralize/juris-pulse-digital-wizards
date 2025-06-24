@@ -28,14 +28,20 @@ export const useSectionTransition = (sections: Section[]) => {
     isInitialized
   });
 
-  // Função para verificar se o usuário rolou até o final da seção
+  // Função melhorada para verificar se o usuário rolou até o final da seção
   const isAtBottom = (element: HTMLElement) => {
-    return element.scrollTop + element.clientHeight >= element.scrollHeight - 10; // 10px de tolerância
+    const threshold = 50; // Aumentar tolerância
+    return element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
   };
 
-  // Função para verificar se o usuário está no topo da seção
+  // Função melhorada para verificar se o usuário está no topo da seção
   const isAtTop = (element: HTMLElement) => {
-    return element.scrollTop <= 10; // 10px de tolerância
+    return element.scrollTop <= 50; // Aumentar tolerância
+  };
+
+  // Função para verificar se a seção permite scroll interno
+  const sectionAllowsScroll = (sectionId: string) => {
+    return ['areas', 'contact', 'blog'].includes(sectionId);
   };
 
   // Inicialização única
@@ -143,6 +149,11 @@ export const useSectionTransition = (sections: Section[]) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
       
+      // Se estamos em uma seção que permite scroll, não interceptar teclas de navegação
+      if (sectionAllowsScroll(activeSection)) {
+        return;
+      }
+      
       let newIndex = activeSectionIndex;
       
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
@@ -161,18 +172,35 @@ export const useSectionTransition = (sections: Section[]) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized]);
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection]);
 
-  // Navegação por scroll
+  // Navegação por scroll melhorada
   useEffect(() => {
     if (!isInitialized) return;
     
     const handleWheel = (e: WheelEvent) => {
       if (isTransitioning.current) return;
       
-      const isMobile = window.innerWidth <= 768;
       const currentSection = sectionsRef.current[activeSectionIndex];
-      
+      if (!currentSection) return;
+
+      // Se estamos na seção de áreas de atuação, permitir scroll completo
+      if (activeSection === 'areas') {
+        const scrollContainer = currentSection.querySelector('#areas') || currentSection;
+        
+        if (e.deltaY > 0) {
+          // Rolando para baixo - verifica se já chegou ao final
+          if (!isAtBottom(scrollContainer as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        } else {
+          // Rolando para cima - verifica se está no topo
+          if (!isAtTop(scrollContainer as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        }
+      }
+
       // Se estamos na seção de contato
       if (activeSection === 'contact' && currentSection) {
         const contactElement = currentSection.querySelector('#contact') || currentSection;
@@ -189,27 +217,18 @@ export const useSectionTransition = (sections: Section[]) => {
           }
         }
       }
-      
-      // Se estamos na seção de áreas de atuação no desktop
-      if (activeSection === 'areas' && !isMobile && currentSection) {
-        const scrollArea = currentSection.querySelector('[data-radix-scroll-area-viewport]');
+
+      // Se estamos na seção de blog
+      if (activeSection === 'blog' && currentSection) {
+        const blogElement = currentSection.querySelector('#blog') || currentSection;
         
-        if (scrollArea) {
-          const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
-          
-          // Se está rolando para baixo
-          if (scrollDirection === 'down') {
-            // Se não chegou ao final, permite o scroll interno
-            if (!isAtBottom(scrollArea as HTMLElement)) {
-              return; // Permite o scroll interno
-            }
-          } 
-          // Se está rolando para cima
-          else {
-            // Se não está no topo, permite o scroll interno
-            if (!isAtTop(scrollArea as HTMLElement)) {
-              return; // Permite o scroll interno
-            }
+        if (e.deltaY > 0) {
+          if (!isAtBottom(blogElement as HTMLElement)) {
+            return; // Permite o scroll interno
+          }
+        } else {
+          if (!isAtTop(blogElement as HTMLElement)) {
+            return; // Permite o scroll interno
           }
         }
       }
@@ -217,12 +236,12 @@ export const useSectionTransition = (sections: Section[]) => {
       const now = Date.now();
       
       // Throttle para evitar scroll muito rápido
-      if (now - lastScrollTime.current < 600) {
+      if (now - lastScrollTime.current < 800) {
         e.preventDefault();
         return;
       }
 
-      if (Math.abs(e.deltaY) < 30) return;
+      if (Math.abs(e.deltaY) < 50) return;
 
       e.preventDefault();
       lastScrollTime.current = now;

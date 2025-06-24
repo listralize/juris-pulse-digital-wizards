@@ -84,7 +84,11 @@ const Index = () => {
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
-      <FloatingFooter />
+      
+      {/* FloatingFooter only for desktop */}
+      <div className="hidden md:block">
+        <FloatingFooter />
+      </div>
       
       <SectionsContainer />
 
