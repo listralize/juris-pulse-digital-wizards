@@ -146,8 +146,8 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
           </div>
         </div>
 
-        {/* Crédito da Listralize - sempre visível na parte inferior */}
-        <div className={`mt-6 pt-4 border-t ${isDark ? 'border-white/20' : 'border-gray-300'} text-center pb-4`}>
+        {/* Crédito da Listralize */}
+        <div className="mt-6 pt-4 border-t border-gray-300 text-center">
           <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} font-satoshi`}>
             Desenvolvido por{' '}
             <a 
