@@ -151,17 +151,26 @@ export const useSupabasePageTexts = () => {
       console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso! Estado local atualizado.');
       
       // Disparar evento customizado para atualizar as seções em tempo real
-      console.log('📡 [useSupabasePageTexts] Disparando evento pageTextsUpdated com dados:', texts);
+      console.log('📡 [useSupabasePageTexts] Disparando evento pageTextsUpdated com dados completos:', texts);
+      
+      // Preparar dados específicos para cada seção
+      const eventData = {
+        ...texts,
+        // Mapear dados específicos de contato
+        contactTitle: texts.contactTitle,
+        contactSubtitle: texts.contactSubtitle,
+      };
+      
       const customEvent = new CustomEvent('pageTextsUpdated', { 
-        detail: texts 
+        detail: eventData 
       });
       window.dispatchEvent(customEvent);
       
       // Aguardar um pouco e disparar novamente para garantia
       setTimeout(() => {
         console.log('📡 [useSupabasePageTexts] Disparando evento novamente (backup)');
-        window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: texts }));
-      }, 500);
+        window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: eventData }));
+      }, 100);
       
       console.log('🎉 [useSupabasePageTexts] SALVAMENTO CONCLUÍDO COM SUCESSO!');
       

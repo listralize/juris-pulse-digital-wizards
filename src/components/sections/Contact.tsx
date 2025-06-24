@@ -38,8 +38,14 @@ const Contact = () => {
 
         if (settings) {
           console.log('📞 Contact: Dados carregados do Supabase site_settings:', settings);
-          if (settings.contact_title) setContactTitle(settings.contact_title);
-          if (settings.contact_subtitle) setContactSubtitle(settings.contact_subtitle);
+          if (settings.contact_title) {
+            console.log('📞 Contact: Definindo título inicial:', settings.contact_title);
+            setContactTitle(settings.contact_title);
+          }
+          if (settings.contact_subtitle) {
+            console.log('📞 Contact: Definindo subtítulo inicial:', settings.contact_subtitle);
+            setContactSubtitle(settings.contact_subtitle);
+          }
         } else {
           console.log('📞 Contact: Nenhuma configuração encontrada na site_settings, usando defaults');
         }
@@ -58,14 +64,14 @@ const Contact = () => {
       
       const data = event.detail;
       
-      // Atualizar dados diretamente dos campos corretos
+      // Atualizar dados diretamente dos campos de contato
       if (data.contactTitle !== undefined) {
-        console.log('📞 Contact: Atualizando título para:', data.contactTitle);
+        console.log('📞 Contact: Atualizando título de:', contactTitle, 'para:', data.contactTitle);
         setContactTitle(data.contactTitle);
       }
       
       if (data.contactSubtitle !== undefined) {
-        console.log('📞 Contact: Atualizando subtítulo para:', data.contactSubtitle);
+        console.log('📞 Contact: Atualizando subtítulo de:', contactSubtitle, 'para:', data.contactSubtitle);
         setContactSubtitle(data.contactSubtitle);
       }
     };
@@ -77,7 +83,7 @@ const Contact = () => {
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, []);
+  }, [contactTitle, contactSubtitle]);
   
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -97,6 +103,9 @@ const Contact = () => {
       tl.kill();
     };
   }, []);
+
+  // Log para debug
+  console.log('📞 Contact: Renderizando com título:', contactTitle, 'e subtítulo:', contactSubtitle);
 
   return (
     <div 
