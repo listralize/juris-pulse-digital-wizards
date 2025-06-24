@@ -58,6 +58,7 @@ const Contact = () => {
       
       const data = event.detail;
       
+      // Atualizar dados diretamente dos campos corretos
       if (data.contactTitle !== undefined) {
         console.log('📞 Contact: Atualizando título para:', data.contactTitle);
         setContactTitle(data.contactTitle);
@@ -69,9 +70,10 @@ const Contact = () => {
       }
     };
 
-    // Escutar evento geral
+    // Escutar evento geral de atualização de textos das páginas
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
+    // Cleanup
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
@@ -131,7 +133,7 @@ const Contact = () => {
           
           <div className="lg:col-span-3 order-1 lg:order-2">
             <div className="w-full">
-              <UnifiedContactForm darkBackground={isDark} />
+              <UnifiedContactForm darkBackground={isDark} pageId="contato" />
             </div>
           </div>
         </div>

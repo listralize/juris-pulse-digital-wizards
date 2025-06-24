@@ -161,7 +161,7 @@ export const useSupabasePageTexts = () => {
       setTimeout(() => {
         console.log('📡 [useSupabasePageTexts] Disparando evento novamente (backup)');
         window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: texts }));
-      }, 100);
+      }, 500);
       
       console.log('🎉 [useSupabasePageTexts] SALVAMENTO CONCLUÍDO COM SUCESSO!');
       
