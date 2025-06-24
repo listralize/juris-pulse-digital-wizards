@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -172,19 +173,18 @@ export const useSectionTransition = (sections: Section[]) => {
       const isMobile = window.innerWidth <= 768;
       const currentSection = sectionsRef.current[activeSectionIndex];
       
-      // Se estamos na seção de contato
+      // Se estamos na seção de contato, permitir scroll interno
       if (activeSection === 'contact' && currentSection) {
-        const contactElement = currentSection.querySelector('#contact') || currentSection;
+        const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
         
-        if (e.deltaY > 0) {
-          // Rolando para baixo - verifica se já chegou ao final do footer
-          const isAtContactBottom = contactElement.scrollTop + contactElement.clientHeight >= contactElement.scrollHeight - 50;
-          if (!isAtContactBottom) {
+        if (scrollDirection === 'down') {
+          // Verificar se chegou ao final do scroll
+          if (!isAtBottom(currentSection)) {
             return; // Permite o scroll interno
           }
         } else {
-          // Rolando para cima - verifica se está no topo
-          if (!isAtTop(contactElement as HTMLElement)) {
+          // Verificar se está no topo
+          if (!isAtTop(currentSection)) {
             return; // Permite o scroll interno
           }
         }

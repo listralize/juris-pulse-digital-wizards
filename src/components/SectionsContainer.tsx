@@ -64,29 +64,24 @@ const SectionsContainer: React.FC = () => {
     <div className="relative w-full h-screen overflow-hidden">
       <div 
         ref={containerRef}
-        className="flex"
+        className="flex h-full"
         style={{ 
           width: `${sections.length * 100}vw`,
-          willChange: 'transform',
-          height: activeSection === 'contact' ? 'auto' : '100vh',
-          minHeight: '100vh'
+          willChange: 'transform'
         }}
       >
         {sections.map((section, index) => {
           const Component = section.component;
           const allowScroll = section.id === 'contact' || section.id === 'socios';
           const isActive = activeSectionIndex === index;
-          const isContactSection = section.id === 'contact';
           
           return (
             <div
               key={section.id}
-              className="flex-shrink-0 relative"
+              className="w-screen h-full flex-shrink-0 relative"
               style={{ 
                 width: '100vw',
-                minWidth: '100vw',
-                height: isContactSection ? 'auto' : '100vh',
-                minHeight: isContactSection ? '120vh' : '100vh'
+                minWidth: '100vw'
               }}
             >
               <Section 
@@ -98,7 +93,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className={isContactSection ? "min-h-[120vh]" : "h-full"}
+                className="h-full"
               >
                 <Component />
               </Section>

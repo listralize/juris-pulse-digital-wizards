@@ -101,16 +101,10 @@ const Contact = () => {
   }, []);
 
   return (
-    <div 
-      className="w-full flex flex-col"
-      style={{ 
-        minHeight: '120vh',
-        height: 'auto'
-      }}
-    >
+    <div className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} overflow-y-auto`}>
       <div 
         ref={sectionRef}
-        className={`flex-1 w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
+        className="w-full py-16 px-4 md:px-6 lg:px-24"
       >
         <div className="max-w-7xl mx-auto">
           <div ref={titleRef} className="mb-12 text-center">
