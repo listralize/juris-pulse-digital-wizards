@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -146,7 +144,7 @@ const About = () => {
     <div 
       ref={sectionRef}
       className={`w-full min-h-screen px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
-      style={{ paddingTop: '250px', paddingBottom: '100px' }}
+      style={{ paddingTop: '170px', paddingBottom: '100px' }}
     >
       <div className="max-w-7xl mx-auto">
         <div ref={titleRef} className="mb-12 text-center">
@@ -173,4 +171,3 @@ const About = () => {
 };
 
 export default About;
-
