@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -34,6 +34,89 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   const isDark = theme === 'dark';
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
+
+  // Carregar dados atuais do Supabase quando o componente monta
+  useEffect(() => {
+    const loadCurrentData = async () => {
+      try {
+        console.log('🔄 HomePageEditor: Carregando dados atuais do Supabase...');
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        // Carregar dados de contato
+        const { data: contact } = await supabase
+          .from('contact_info')
+          .select('phone, email, address, whatsapp, map_embed_url')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        // Carregar dados do footer
+        const { data: footer } = await supabase
+          .from('footer_info')
+          .select('company_name, description')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        // Carregar configurações do site
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (contact || footer || settings) {
+          console.log('🔄 HomePageEditor: Dados carregados:', { contact, footer, settings });
+          
+          // Atualizar pageTexts com os dados mais recentes
+          const updatedTexts = {
+            ...pageTexts,
+            // Dados de contato
+            contactTexts: {
+              ...pageTexts.contactTexts,
+              ...(contact?.phone && { phone: contact.phone }),
+              ...(contact?.email && { email: contact.email }),
+              ...(contact?.address && { address: contact.address }),
+              ...(contact?.whatsapp && { whatsapp: contact.whatsapp }),
+              ...(contact?.map_embed_url && { mapEmbedUrl: contact.map_embed_url })
+            },
+            // Dados do footer
+            footerTexts: {
+              ...pageTexts.footerTexts,
+              ...(footer?.company_name && { companyName: footer.company_name }),
+              ...(footer?.description && { description: footer.description })
+            },
+            // Configurações gerais
+            ...(settings?.contact_title && { contactTitle: settings.contact_title }),
+            ...(settings?.contact_subtitle && { contactSubtitle: settings.contact_subtitle }),
+            ...(settings?.hero_title && { heroTitle: settings.hero_title }),
+            ...(settings?.hero_subtitle && { heroSubtitle: settings.hero_subtitle }),
+            ...(settings?.hero_primary_button_text && { heroPrimaryButtonText: settings.hero_primary_button_text }),
+            ...(settings?.hero_primary_button_link && { heroPrimaryButtonLink: settings.hero_primary_button_link }),
+            ...(settings?.hero_secondary_button_text && { heroSecondaryButtonText: settings.hero_secondary_button_text }),
+            ...(settings?.hero_secondary_button_link && { heroSecondaryButtonLink: settings.hero_secondary_button_link }),
+            ...(settings?.hero_background_image && { heroBackgroundImage: settings.hero_background_image }),
+            ...(settings?.about_title && { aboutTitle: settings.about_title }),
+            ...(settings?.about_description && { aboutDescription: settings.about_description }),
+            ...(settings?.about_image && { aboutImage: settings.about_image }),
+            ...(settings?.about_media_type && { aboutMediaType: settings.about_media_type }),
+            ...(settings?.areas_title && { areasTitle: settings.areas_title }),
+            ...(settings?.team_title && { teamTitle: settings.team_title }),
+            ...(settings?.client_area_title && { clientAreaTitle: settings.client_area_title }),
+            ...(settings?.client_area_description && { clientAreaDescription: settings.client_area_description }),
+            ...(settings?.client_portal_link && { clientPortalLink: settings.client_portal_link })
+          };
+          
+          onUpdatePageTexts(updatedTexts);
+        }
+      } catch (error) {
+        console.error('❌ HomePageEditor: Erro ao carregar dados atuais:', error);
+      }
+    };
+
+    loadCurrentData();
+  }, []); // Executar apenas uma vez quando o componente monta
 
   const handleInputChange = (field: keyof PageTexts, value: string) => {
     console.log('📝 HomePageEditor: Alterando campo:', field, 'para:', value);

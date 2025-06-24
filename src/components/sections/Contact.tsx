@@ -142,7 +142,10 @@ const Contact = () => {
         </div>
       </div>
       
-      <Footer respectTheme={true} />
+      {/* Rodapé com margem superior de 50px */}
+      <div style={{ marginTop: '50px' }}>
+        <Footer respectTheme={true} />
+      </div>
     </div>
   );
 };
