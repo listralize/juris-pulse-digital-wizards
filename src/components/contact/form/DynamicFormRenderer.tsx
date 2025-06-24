@@ -39,6 +39,12 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
       {/* Campos Nome e Telefone */}
       {(hasNameField || hasPhoneField) && (
         <NamePhoneFields
+          nameValue={formData.name || ''}
+          phoneValue={formData.phone || ''}
+          onNameChange={(value) => updateField('name', value)}
+          onPhoneChange={(value) => updateField('phone', value)}
+          showName={hasNameField}
+          showPhone={hasPhoneField}
           darkBackground={darkBackground}
         />
       )}
@@ -46,6 +52,8 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
       {/* Campo E-mail */}
       {hasEmailField && (
         <EmailField
+          value={formData.email || ''}
+          onChange={(value) => updateField('email', value)}
           darkBackground={darkBackground}
         />
       )}
@@ -53,6 +61,9 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
       {/* Campo Serviço */}
       {hasServiceField && (
         <ServiceSelectField
+          value={formData.service || ''}
+          onChange={(value) => updateField('service', value)}
+          options={serviceOptions}
           darkBackground={darkBackground}
         />
       )}
@@ -70,6 +81,8 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
       {/* Campo Mensagem */}
       {hasMessageField && (
         <MessageField
+          value={formData.message || ''}
+          onChange={(value) => updateField('message', value)}
           darkBackground={darkBackground}
         />
       )}
@@ -77,6 +90,8 @@ export const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({
       {/* Checkbox Urgente */}
       {hasUrgentField && (
         <UrgentCheckbox
+          checked={formData.isUrgent || false}
+          onChange={(checked) => updateField('isUrgent', checked)}
           darkBackground={darkBackground}
         />
       )}
