@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -5,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
-import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -100,7 +100,7 @@ const Contact = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ paddingBottom: '120px' }}>
       <div 
         ref={sectionRef}
         className={`flex-1 w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
@@ -139,11 +139,6 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Rodapé com margem superior menor para que apareça completamente */}
-      <div style={{ marginTop: '80px' }}>
-        <Footer respectTheme={true} />
       </div>
     </div>
   );

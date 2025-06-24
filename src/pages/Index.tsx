@@ -7,6 +7,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
+import FloatingFooter from '../components/FloatingFooter';
 import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
 
@@ -69,6 +70,7 @@ const Index = () => {
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
+      <FloatingFooter />
       
       <SectionsContainer />
     </div>

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import Navbar from './navbar';
 import PageBanner from './PageBanner';
 import WhatsAppButton from './WhatsAppButton';
+import FloatingFooter from './FloatingFooter';
 import Footer from './sections/Footer';
 import { useTheme } from './ThemeProvider';
 import CtaSection from './serviceLanding/CtaSection';
@@ -29,7 +30,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   }, []);
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`} style={{ paddingBottom: '120px' }}>
       <Navbar />
       
       <PageBanner 
@@ -47,6 +48,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       {currentArea && <CtaSection serviceArea={title} respectTheme={true} />}
       
       <WhatsAppButton />
+      <FloatingFooter />
       <Footer respectTheme={true} />
     </div>
   );
