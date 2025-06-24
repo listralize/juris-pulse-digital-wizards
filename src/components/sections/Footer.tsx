@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 
@@ -144,6 +143,21 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
             <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Política de Privacidade</a>
             <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Termos de Uso</a>
           </div>
+        </div>
+        
+        {/* Crédito fixo da Listralize */}
+        <div className={`mt-6 pt-4 border-t ${isDark ? 'border-white/20' : 'border-black/10'} text-center`}>
+          <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} font-satoshi`}>
+            Desenvolvido por{' '}
+            <a 
+              href="https://listralize.com.br/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}
+            >
+              Listralize
+            </a>
+          </p>
         </div>
       </div>
     </footer>

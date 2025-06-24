@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
+import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -108,45 +108,49 @@ const Contact = () => {
   console.log('📞 Contact: Renderizando com título:', contactTitle, 'e subtítulo:', contactSubtitle);
 
   return (
-    <div 
-      ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
-      style={{ minHeight: '100vh' }}
-    >
-      <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-12 text-center">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
-            {contactTitle}
-          </h2>
-          <div className={`w-20 h-1 mx-auto mb-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-          <p className={`text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
-            {contactSubtitle}
-          </p>
-        </div>
-        
-        <div 
-          ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-8"
-        >
-          <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
-            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
-              <div className="h-48 lg:h-56">
-                <LocationMap />
+    <div className="min-h-screen flex flex-col">
+      <div 
+        ref={sectionRef}
+        className={`flex-1 w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div ref={titleRef} className="mb-12 text-center">
+            <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+              {contactTitle}
+            </h2>
+            <div className={`w-20 h-1 mx-auto mb-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+            <p className={`text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+              {contactSubtitle}
+            </p>
+          </div>
+          
+          <div 
+            ref={contentRef}
+            className="grid grid-cols-1 lg:grid-cols-5 gap-8"
+          >
+            <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
+                <div className="h-48 lg:h-56">
+                  <LocationMap />
+                </div>
+              </div>
+              
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
+                <ContactInfo />
               </div>
             </div>
             
-            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
-              <ContactInfo />
-            </div>
-          </div>
-          
-          <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
-              <UnifiedContactForm darkBackground={isDark} pageId="contato" />
+            <div className="lg:col-span-3 order-1 lg:order-2">
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
+                <UnifiedContactForm darkBackground={isDark} pageId="contato" />
+              </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Footer sempre aparece na página de contato */}
+      <Footer respectTheme={true} />
     </div>
   );
 };
