@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -65,20 +66,19 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       if (onSaveAll) {
         await onSaveAll();
         
-        // Disparar evento personalizado para notificar todas as seções com estrutura correta
+        // Salvar dados específicos nas tabelas correspondentes
+        await saveToSupabaseTables();
+        
+        // Disparar evento personalizado para notificar todas as seções
         console.log('📡 HomePageEditor: Disparando evento pageTextsUpdated');
         const event = new CustomEvent('pageTextsUpdated', { 
           detail: {
             ...pageTexts,
-            // Garantir que contactTexts tenha a estrutura correta
             contactTexts: pageTexts.contactTexts || {},
             footerTexts: pageTexts.footerTexts || {}
           }
         });
         window.dispatchEvent(event);
-        
-        // Salvar dados específicos nas tabelas correspondentes
-        await saveToSupabaseTables();
         
         toast.success('Alterações salvas com sucesso!');
       } else {
@@ -104,9 +104,23 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           map_embed_url: pageTexts.contactTexts.mapEmbedUrl || null
         };
         
-        await supabase
+        // Primeiro tentar atualizar registro existente
+        const { data: existingContact } = await supabase
           .from('contact_info')
-          .upsert(contactData, { onConflict: 'id' });
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+        
+        if (existingContact) {
+          await supabase
+            .from('contact_info')
+            .update(contactData)
+            .eq('id', existingContact.id);
+        } else {
+          await supabase
+            .from('contact_info')
+            .insert(contactData);
+        }
         
         console.log('📞 Dados de contato salvos na contact_info:', contactData);
       }
@@ -118,9 +132,23 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           description: pageTexts.footerTexts.description || ''
         };
         
-        await supabase
+        // Primeiro tentar atualizar registro existente
+        const { data: existingFooter } = await supabase
           .from('footer_info')
-          .upsert(footerData, { onConflict: 'id' });
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+        
+        if (existingFooter) {
+          await supabase
+            .from('footer_info')
+            .update(footerData)
+            .eq('id', existingFooter.id);
+        } else {
+          await supabase
+            .from('footer_info')
+            .insert(footerData);
+        }
         
         console.log('🦶 Dados do footer salvos na footer_info:', footerData);
       }
@@ -147,9 +175,23 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         client_portal_link: pageTexts.clientPortalLink || null
       };
       
-      await supabase
+      // Primeiro tentar atualizar registro existente
+      const { data: existingSettings } = await supabase
         .from('site_settings')
-        .upsert(siteData, { onConflict: 'id' });
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+      
+      if (existingSettings) {
+        await supabase
+          .from('site_settings')
+          .update(siteData)
+          .eq('id', existingSettings.id);
+      } else {
+        await supabase
+          .from('site_settings')
+          .insert(siteData);
+      }
       
       console.log('⚙️ Configurações do site salvas na site_settings:', siteData);
       
@@ -508,7 +550,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.phone || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'phone', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="(11) 9999-9999"
+                    placeholder="(62) 99459-4496"
                   />
                 </div>
                 <div>
@@ -517,7 +559,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.email || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'email', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="contato@exemplo.com"
+                    placeholder="contato@stadv.com"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -526,7 +568,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.address || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'address', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="Rua Exemplo, 123 - São Paulo, SP"
+                    placeholder="World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040"
                   />
                 </div>
                 <div>
@@ -535,7 +577,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.whatsapp || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="5511999999999"
+                    placeholder="5562994594496"
                   />
                 </div>
                 <div>
@@ -544,7 +586,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.mapEmbedUrl || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'mapEmbedUrl', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="URL do iframe do Google Maps"
+                    placeholder="https://www.google.com/maps/embed?pb=..."
                   />
                   <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Cole a URL do iframe do Google Maps para personalizar a localização
