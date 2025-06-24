@@ -104,6 +104,7 @@ const Contact = () => {
       className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
       style={{ 
         minHeight: '100vh',
+        height: 'auto',
         overflow: 'visible',
         display: 'flex',
         flexDirection: 'column'

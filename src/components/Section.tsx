@@ -1,3 +1,4 @@
+
 import React, { forwardRef } from 'react';
 import { useTheme } from './ThemeProvider';
 
@@ -34,7 +35,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full ${isContactSection ? 'min-h-screen' : 'h-full'} ${getBackgroundClass()} ${className}`}
+        className={`section-container w-full ${isContactSection ? 'h-auto min-h-screen' : 'h-full'} ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
