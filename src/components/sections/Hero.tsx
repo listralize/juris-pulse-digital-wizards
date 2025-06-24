@@ -1,84 +1,98 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
+import MarbleBanner from '../MarbleBanner';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-
+  const logoRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+  const subheadlineRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // Estados para os textos editáveis  
+  // Estados para os textos editáveis
   const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
   const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
-  const [heroButtonContact, setHeroButtonContact] = useState('Fale Conosco');
-  const [heroButtonServices, setHeroButtonServices] = useState('Conheça Nossas Áreas de Atuação');
+  const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco no WhatsApp');
+  const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
+  const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
+  const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
 
-  // Carregar dados do Supabase
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
     const loadHeroData = async () => {
       try {
+        console.log('🦸 Hero: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('hero_title, hero_subtitle, hero_button_contact, hero_button_services')
+          .select('*')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (settings) {
           console.log('🦸 Hero: Dados carregados do Supabase:', settings);
-          setHeroTitle(settings.hero_title || 'Excelência em Advocacia');
-          setHeroSubtitle(settings.hero_subtitle || 'Defendemos seus direitos com dedicação e expertise');
-          setHeroButtonContact(settings.hero_button_contact || 'Fale Conosco');
-          setHeroButtonServices(settings.hero_button_services || 'Conheça Nossas Áreas de Atuação');
+          if (settings.hero_title) setHeroTitle(settings.hero_title);
+          if (settings.hero_subtitle) setHeroSubtitle(settings.hero_subtitle);
+          if (settings.hero_primary_button_text) setPrimaryButtonText(settings.hero_primary_button_text);
+          if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
+          if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
+          if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do Hero:', error);
+        console.error('❌ Hero: Erro ao carregar dados:', error);
       }
     };
 
     loadHeroData();
   }, []);
 
-  // Escutar eventos de atualização
+  // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('🦸 Hero: Recebendo atualização de textos:', event.detail);
-      const { 
-        heroTitle: newTitle, 
-        heroSubtitle: newSubtitle,
-        heroButtonContact: newButtonContact,
-        heroButtonServices: newButtonServices
-      } = event.detail;
+      console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
       
-      if (newTitle !== undefined) {
-        console.log('🦸 Hero: Atualizando título:', newTitle);
-        setHeroTitle(newTitle);
+      const data = event.detail;
+      
+      if (data.heroTitle !== undefined) {
+        console.log('🦸 Hero: Atualizando título para:', data.heroTitle);
+        setHeroTitle(data.heroTitle);
       }
-      if (newSubtitle !== undefined) {
-        console.log('🦸 Hero: Atualizando subtítulo:', newSubtitle);
-        setHeroSubtitle(newSubtitle);
+      
+      if (data.heroSubtitle !== undefined) {
+        console.log('🦸 Hero: Atualizando subtítulo para:', data.heroSubtitle);
+        setHeroSubtitle(data.heroSubtitle);
       }
-      if (newButtonContact !== undefined) {
-        console.log('🦸 Hero: Atualizando botão contato:', newButtonContact);
-        setHeroButtonContact(newButtonContact);
+      
+      if (data.heroPrimaryButtonText !== undefined) {
+        console.log('🦸 Hero: Atualizando botão primário para:', data.heroPrimaryButtonText);
+        setPrimaryButtonText(data.heroPrimaryButtonText);
       }
-      if (newButtonServices !== undefined) {
-        console.log('🦸 Hero: Atualizando botão serviços:', newButtonServices);
-        setHeroButtonServices(newButtonServices);
+      
+      if (data.heroPrimaryButtonLink !== undefined) {
+        setPrimaryButtonLink(data.heroPrimaryButtonLink);
+      }
+      
+      if (data.heroSecondaryButtonText !== undefined) {
+        console.log('🦸 Hero: Atualizando botão secundário para:', data.heroSecondaryButtonText);
+        setSecondaryButtonText(data.heroSecondaryButtonText);
+      }
+      
+      if (data.heroSecondaryButtonLink !== undefined) {
+        setSecondaryButtonLink(data.heroSecondaryButtonLink);
       }
     };
 
+    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
@@ -90,96 +104,131 @@ const Hero = () => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     tl.fromTo(
-      contentRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1.2 }
-    ).fromTo(
-      buttonsRef.current,
+      bgRef.current, 
+      { opacity: 0 }, 
+      { opacity: 1, duration: 1.5 }
+    )
+    .fromTo(
+      logoRef.current, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 1.5 },
+      "-=1"
+    )
+    .fromTo(
+      headlineRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.6"
+      "-=0.7"
+    )
+    .fromTo(
+      subheadlineRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.5"
+    )
+    .fromTo(
+      ctaRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.5"
     );
+    
+    // Parallax effect
+    gsap.to(bgRef.current, {
+      yPercent: -30,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#home",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+      }
+    });
     
     return () => {
       tl.kill();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return (
-    <div 
-      ref={heroRef}
-      className={`relative w-full h-screen flex items-center justify-center overflow-hidden ${
-        isDark ? 'bg-black text-white' : 'bg-white text-black'
-      }`}
-    >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke={isDark ? "white" : "black"} strokeWidth="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
-      {/* Logo */}
-      <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-10">
-        <img 
-          src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
-          alt="Serafim & Trombela Advocacia Logo"
-          className="h-24 md:h-32 w-auto"
-          style={{
-            filter: isDark 
-              ? 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))'
-              : 'drop-shadow(0 0 25px rgba(0,0,0,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.15))'
-          }}
-        />
+    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
+      {/* Background com marble banner */}
+      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.2)' }}>
+        <MarbleBanner />
       </div>
       
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <div ref={contentRef}>
-          <h1 className={`text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 font-canela tracking-tight ${
-            isDark ? 'text-white' : 'text-black'
-          }`}>
-            {heroTitle}
-          </h1>
-          
-          <p className={`text-lg md:text-xl lg:text-2xl mb-12 font-satoshi max-w-2xl mx-auto ${
-            isDark ? 'text-white/80' : 'text-black/80'
-          }`}>
-            {heroSubtitle}
-          </p>
+      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
+        <div 
+          ref={logoRef} 
+          className="mb-2 md:mb-4 w-full max-w-sm md:max-w-lg mx-auto relative"
+        >
+          <div className="logo-container relative">
+            <img 
+              src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
+              alt="Serafim & Trombela Advocacia Logo"
+              className="w-full h-auto relative z-10"
+              style={{
+                filter: 'drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
+              }}
+            />
+          </div>
         </div>
         
-        <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link 
-            to="/#contact"
-            className={`group inline-flex items-center justify-center px-8 py-4 font-satoshi font-medium transition-all duration-300 rounded-lg ${
-              isDark 
-                ? 'bg-white text-black hover:bg-white/90 hover:shadow-lg' 
-                : 'bg-black text-white hover:bg-black/90 hover:shadow-lg'
-            }`}
+        <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
+          {heroTitle}
+        </h1>
+        
+        <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-4 md:mb-6 text-center max-w-lg mx-auto font-satoshi">
+          {heroSubtitle}
+        </p>
+        
+        <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
+          <a 
+            href={primaryButtonLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            {heroButtonContact}
-            <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+            {primaryButtonText}
+            <ArrowRight className="w-5 h-5" />
+          </a>
           
-          <Link 
-            to="/#areas"
-            className={`group inline-flex items-center justify-center px-8 py-4 font-satoshi font-medium border transition-all duration-300 rounded-lg ${
-              isDark 
-                ? 'border-white/20 text-white hover:bg-white/10 hover:border-white/40' 
-                : 'border-black/20 text-black hover:bg-black/5 hover:border-black/40'
-            }`}
+          <a 
+            href={secondaryButtonLink}
+            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
           >
-            {heroButtonServices}
-            <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+            {secondaryButtonText}
+            <ArrowRight className="w-5 h-5" />
+          </a>
         </div>
       </div>
-    </div>
+      
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+        <svg 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path 
+            d="M7 13L12 18L17 13" 
+            stroke="#FFFFFF"
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+          <path 
+            d="M7 7L12 12L17 7" 
+            stroke="#FFFFFF"
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    </section>
   );
 };
 
