@@ -102,7 +102,7 @@ const Contact = () => {
 
   return (
     <div 
-      className={`w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
       style={{ 
         height: '100vh',
         overflow: 'auto',

@@ -25,7 +25,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
       return isDark ? 'bg-black text-white' : 'bg-white text-black';
     };
     
-    // Para a seção de contato, permitir altura dinâmica
+    // Para a seção de contato, permitir altura dinâmica e scroll
     const isContactSection = id === 'contact';
     
     return (
@@ -35,14 +35,14 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full ${isContactSection ? 'h-screen' : 'h-full'} ${getBackgroundClass()} ${className}`}
+        className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
-          overflow: allowScroll || isContactSection ? 'hidden' : 'hidden',
-          WebkitOverflowScrolling: 'auto',
+          overflow: isContactSection ? 'auto' : 'hidden',
+          WebkitOverflowScrolling: isContactSection ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible'
         }}
