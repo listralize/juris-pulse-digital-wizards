@@ -44,18 +44,19 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
 
   return (
     <>
-      {/* Mobile Navbar - SEMPRE FIXO */}
-      <nav className={`md:hidden fixed top-0 left-0 right-0 z-[100] ${isDark ? 'bg-neutral-950/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} transition-colors duration-300`}>
+      <nav className={`md:hidden ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} sticky top-0 z-50 transition-colors duration-300`}>
         <div className="px-4 h-16 flex items-center justify-between">
-          {/* Left side - Logo (sempre visível) */}
+          {/* Left side - Logo (conditional) */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <img 
-                src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
-                alt="Logo" 
-                className="h-8 object-contain"
-              />
-            </Link>
+            {showLogo && (
+              <Link to="/" className="flex items-center">
+                <img 
+                  src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
+                  alt="Logo" 
+                  className="h-8 object-contain"
+                />
+              </Link>
+            )}
           </div>
 
           {/* Right side - Actions */}
@@ -103,9 +104,9 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
           </div>
         </div>
 
-        {/* Mobile Menu - TAMBÉM FIXO */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className={`fixed top-16 left-0 right-0 z-[99] ${isDark ? 'bg-neutral-950/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} max-h-[calc(100vh-4rem)] overflow-y-auto`}>
+          <div className={`${isDark ? 'bg-black border-neutral-800' : 'bg-white border-neutral-200'} border-t`}>
             <div className="px-4 py-4 space-y-2">
               <button
                 onClick={() => handleNavigation('/')}
@@ -169,9 +170,6 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
           </div>
         )}
       </nav>
-
-      {/* Spacer para compensar a navbar fixa */}
-      <div className="md:hidden h-16"></div>
     </>
   );
 };
