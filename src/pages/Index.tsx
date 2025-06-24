@@ -57,15 +57,15 @@ const Index = () => {
     }
   }, []);
 
-  // Verificar se os termos já foram aceitos e mostrar popup automaticamente
+  // Verificar se os termos já foram aceitos e mostrar popup se necessário
   useEffect(() => {
     const checkTermsAcceptance = () => {
       const accepted = localStorage.getItem('legal-terms-accepted');
       if (!accepted) {
-        // Mostrar popup após 1 segundo
+        // Mostrar popup após 3 segundos
         setTimeout(() => {
           setShowLegalPopup(true);
-        }, 1000);
+        }, 3000);
       }
     };
 
@@ -91,7 +91,7 @@ const Index = () => {
       
       <SectionsContainer />
 
-      {/* Popup Legal automático */}
+      {/* Popup Legal discreto */}
       <LegalPopup 
         isOpen={showLegalPopup} 
         onClose={() => setShowLegalPopup(false)} 

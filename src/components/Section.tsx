@@ -45,8 +45,8 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
-          padding: '1.5rem 1rem',
-          paddingBottom: id === 'contact' ? '120px' : '100px'
+          padding: '0.75rem',
+          paddingBottom: '140px' // Espaço maior para o rodapé
         }}
       >
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>

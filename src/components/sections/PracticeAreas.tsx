@@ -54,19 +54,10 @@ const PracticeAreas = () => {
     };
   }, []);
 
-  console.log('🔍 PracticeAreas DADOS:', {
-    categoriesCount: localCategories?.length || 0,
-    servicePagesCount: servicePages?.length || 0,
-    isLoading: categoriesLoading || pagesLoading,
-    categories: localCategories,
-    servicePages
-  });
-
   // Gerar áreas de atuação baseadas nas categorias do Supabase
   const practiceAreas = React.useMemo(() => {
     if (!localCategories || localCategories.length === 0) {
       console.log('⚠️ Nenhuma categoria encontrada, usando áreas padrão');
-      // Áreas padrão como fallback
       return [
         {
           id: 'familia-fallback',
@@ -93,8 +84,6 @@ const PracticeAreas = () => {
       const categoryPages = servicePages?.filter(page => 
         page.category === category.value
       ) || [];
-
-      console.log(`📂 Categoria ${category.label}: ${categoryPages.length} páginas`);
 
       return {
         id: category.id || category.value,
@@ -123,30 +112,20 @@ const PracticeAreas = () => {
     
     tl.fromTo(
       titleRef.current,
-      {
-        opacity: 0,
-        y: 20
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6
-      }
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.6 }
     );
     
     cardsRef.current.forEach((card, index) => {
       if (card) {
         gsap.fromTo(
           card,
-          {
-            opacity: 0,
-            y: 30
-          },
+          { opacity: 0, y: 30 },
           {
             opacity: 1,
             y: 0,
             duration: 0.6,
-            delay: 0.2 * index,
+            delay: 0.1 * index,
             scrollTrigger: {
               trigger: card,
               start: "top 90%",
@@ -172,105 +151,74 @@ const PracticeAreas = () => {
     );
   }
 
-  console.log('🎯 Renderizando áreas:', practiceAreas.length);
-
   const areasTitle = localPageTexts?.areasTitle || 'Áreas de Atuação';
 
   return (
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col justify-center py-16 px-4 md:px-6 lg:px-24`}
-      style={{ minHeight: '100vh' }}
+      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen flex flex-col justify-center py-8 px-4 md:px-8 lg:px-16`}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto w-full">
         <h2 
           ref={titleRef}
-          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center mb-8 md:mb-12 ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-2xl md:text-3xl lg:text-4xl font-canela text-center mb-6 md:mb-8 ${isDark ? 'text-white' : 'text-black'}`}
         >
           {areasTitle}
         </h2>
         
-        <div className="flex-1 flex items-center">
-          {/* Mobile: Grid compacto */}
-          <div className="md:hidden grid grid-cols-1 gap-4 w-full">
-            {practiceAreas.map((area, index) => (
+        {/* BentoGrid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-6xl mx-auto">
+          {practiceAreas.map((area, index) => {
+            // Define diferentes tamanhos para criar layout BentoGrid
+            const isLarge = index === 0 || index === 4 || index === 7;
+            const isTall = index === 1 || index === 5;
+            
+            return (
               <Link 
                 key={area.id}
                 to={area.href}
-                className="group block"
+                className={`group block ${
+                  isLarge ? 'md:col-span-2' : ''
+                } ${
+                  isTall ? 'md:row-span-2' : ''
+                }`}
               >
                 <div 
-                  className={`${isDark ? 'bg-black border-white/20' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4 rounded-lg border`}
+                  className={`${
+                    isDark ? 'bg-black border-white/10' : 'bg-white border-gray-100'
+                  } backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02] p-4 md:p-5 rounded-lg border h-full min-h-[120px] flex flex-col justify-between`}
                   ref={el => cardsRef.current[index] = el}
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    {area.icon && (
-                      <div 
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                          isDark ? 'bg-white text-black' : 'bg-black text-white'
-                        }`}
-                      >
-                        {area.icon}
-                      </div>
-                    )}
-                    <h3 className={`text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-                      {area.title}
-                    </h3>
-                  </div>
-                  <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {area.description}
-                  </p>
-                  {area.pageCount !== undefined && (
-                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Desktop: Grid sem scroll area */}
-          <div className="hidden md:block w-full">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-              {practiceAreas.map((area, index) => (
-                <Link 
-                  key={area.id}
-                  to={area.href}
-                  className="group block"
-                >
-                  <div 
-                    className={`${isDark ? 'bg-black border-white/20' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6 rounded-lg border`}
-                    ref={el => cardsRef.current[index] = el}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
                       {area.icon && (
                         <div 
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-semibold ${
+                          className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-semibold ${
                             isDark ? 'bg-white text-black' : 'bg-black text-white'
                           }`}
                         >
                           {area.icon}
                         </div>
                       )}
-                      <h3 className={`text-xl xl:text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`text-sm md:text-base lg:text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
                         {area.title}
                       </h3>
                     </div>
-                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <p className={`text-xs md:text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} line-clamp-2`}>
                       {area.description}
                     </p>
-                    {area.pageCount !== undefined && (
-                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
-                      </p>
-                    )}
                   </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+                  
+                  {area.pageCount !== undefined && (
+                    <p className={`text-xs mt-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
