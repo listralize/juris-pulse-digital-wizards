@@ -37,8 +37,18 @@ const Index = () => {
       // Garantir que não há background preto forçado
       body.style.backgroundColor = '';
       
-      // Configurar scroll suave
+      // Configurar scroll suave - MELHORADO PARA MOBILE
       html.style.scrollBehavior = 'smooth';
+      
+      // Mobile specific optimizations
+      if (window.innerWidth <= 768) {
+        // Otimizações para mobile
+        body.style.webkitOverflowScrolling = 'touch';
+        body.style.overscrollBehavior = 'contain';
+        
+        // Adicionar padding-top para compensar navbar fixa
+        body.style.paddingTop = '0px'; // A navbar já adiciona o spacer
+      }
       
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
@@ -74,7 +84,7 @@ const Index = () => {
       className={`min-h-screen w-full transition-colors duration-300 ${
         isDark 
           ? 'bg-neutral-950 text-neutral-100' 
-          : 'bg-white text-neutral-900'
+          : 'bg-gray-50 text-neutral-900'
       }`}
       style={{ 
         position: 'relative',
@@ -84,7 +94,10 @@ const Index = () => {
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
-      <FloatingFooter />
+      {/* Não mostrar FloatingFooter no mobile */}
+      <div className="hidden md:block">
+        <FloatingFooter />
+      </div>
       
       <SectionsContainer />
 
