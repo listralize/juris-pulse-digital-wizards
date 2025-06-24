@@ -8,7 +8,6 @@ import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
-import Footer from '../components/sections/Footer';
 import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -73,11 +72,6 @@ const Index = () => {
       
       <div className="relative h-full">
         <SectionsContainer />
-        
-        {/* Footer fixo na parte inferior */}
-        <div className="fixed bottom-0 left-0 right-0 z-30">
-          <Footer respectTheme={true} />
-        </div>
       </div>
     </div>
   );

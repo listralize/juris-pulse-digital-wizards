@@ -61,7 +61,7 @@ const SectionsContainer: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
+    <div className="relative w-full overflow-hidden h-full">
       <div 
         ref={containerRef}
         className="flex h-full"
