@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -150,8 +149,10 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Footer sempre visível na parte inferior */}
-      <Footer respectTheme={true} />
+      {/* Footer posicionado 150px mais para cima */}
+      <div style={{ marginTop: '-150px' }}>
+        <Footer respectTheme={true} />
+      </div>
     </div>
   );
 };
