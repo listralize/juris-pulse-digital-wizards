@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -103,7 +104,6 @@ const Contact = () => {
       <div 
         ref={sectionRef}
         className="w-full py-16 px-4 md:px-6 lg:px-24"
-        style={{ paddingBottom: '100px' }}
       >
         <div className="max-w-7xl mx-auto">
           <div ref={titleRef} className="mb-12 text-center">

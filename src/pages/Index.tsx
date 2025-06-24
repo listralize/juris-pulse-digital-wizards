@@ -5,18 +5,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 import CustomCursor from '../components/CustomCursor';
-import Navbar from '../components/navbar';
-import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
-import Footer from '../components/sections/Footer';
-import { useTheme } from '../components/ThemeProvider';
+import { MainLayout } from '../components/layout/MainLayout';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Index = () => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-  
   useEffect(() => {
     try {
       const body = document.body;
@@ -56,26 +50,12 @@ const Index = () => {
   }, []);
   
   return (
-    <div 
-      className={`min-h-screen w-full transition-colors duration-300 overflow-hidden ${
-        isDark 
-          ? 'bg-black text-white' 
-          : 'bg-white text-black'
-      }`}
-      style={{ 
-        height: '100vh',
-        position: 'relative'
-      }}
-    >
-      <CustomCursor />
-      <Navbar />
-      <WhatsAppButton />
-      
-      <SectionsContainer />
-      
-      {/* Footer fixo que sempre aparece */}
-      <Footer respectTheme={true} />
-    </div>
+    <MainLayout>
+      <div className="min-h-screen w-full overflow-hidden" style={{ height: '100vh' }}>
+        <CustomCursor />
+        <SectionsContainer />
+      </div>
+    </MainLayout>
   );
 };
 
