@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -33,6 +32,9 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  
+  // Usar o hook diretamente para salvar os textos
+  const { savePageTexts } = useSupabasePageTexts();
 
   const sections = [
     {
@@ -53,10 +55,19 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
 
   const handleSaveAll = async () => {
     try {
+      console.log('💾 ContentManagement: Salvando todos os dados...', { pageTexts, teamMembers });
+      
+      // Salvar textos da página usando o hook diretamente
+      await savePageTexts(pageTexts);
+      console.log('✅ ContentManagement: Textos da página salvos');
+      
+      // Salvar membros da equipe
       await onSaveTeamMembers();
-      await onSavePageTexts();
+      console.log('✅ ContentManagement: Membros da equipe salvos');
+      
     } catch (error) {
-      console.error('❌ Erro ao salvar dados:', error);
+      console.error('❌ ContentManagement: Erro ao salvar dados:', error);
+      throw error;
     }
   };
 

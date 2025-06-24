@@ -88,7 +88,7 @@ export const useSupabasePageTexts = () => {
   };
 
   const savePageTexts = async (texts: PageTexts) => {
-    console.log('💾 [useSupabasePageTexts] Salvando textos das páginas...', texts);
+    console.log('💾 [useSupabasePageTexts] INICIANDO SALVAMENTO dos textos das páginas...', texts);
     
     try {
       // Buscar o registro único (se existe)
@@ -98,6 +98,8 @@ export const useSupabasePageTexts = () => {
         .order('updated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+
+      console.log('🔍 [useSupabasePageTexts] Registro existente:', existing);
 
       const dataToSave = {
         hero_title: texts.heroTitle,
@@ -121,6 +123,8 @@ export const useSupabasePageTexts = () => {
         updated_at: new Date().toISOString()
       };
 
+      console.log('📦 [useSupabasePageTexts] Dados para salvar:', dataToSave);
+
       let result;
       if (existing) {
         console.log('📝 Atualizando registro único existente:', existing.id);
@@ -135,6 +139,8 @@ export const useSupabasePageTexts = () => {
           .insert(dataToSave);
       }
 
+      console.log('🔄 [useSupabasePageTexts] Resultado da operação:', result);
+
       if (result.error) {
         console.error('❌ Erro ao salvar textos:', result.error);
         throw result.error;
@@ -142,22 +148,25 @@ export const useSupabasePageTexts = () => {
 
       // Atualizar estado local imediatamente
       setPageTexts(texts);
-      console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
+      console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso! Estado local atualizado.');
       
       // Disparar evento customizado para atualizar as seções em tempo real
-      console.log('📡 Disparando evento pageTextsUpdated com dados:', texts);
+      console.log('📡 [useSupabasePageTexts] Disparando evento pageTextsUpdated com dados:', texts);
       const customEvent = new CustomEvent('pageTextsUpdated', { 
         detail: texts 
       });
       window.dispatchEvent(customEvent);
       
-      // Aguardar um pouco e disparar novamente para garantir que chegue
+      // Aguardar um pouco e disparar novamente para garantia
       setTimeout(() => {
+        console.log('📡 [useSupabasePageTexts] Disparando evento novamente (backup)');
         window.dispatchEvent(new CustomEvent('pageTextsUpdated', { detail: texts }));
       }, 100);
       
+      console.log('🎉 [useSupabasePageTexts] SALVAMENTO CONCLUÍDO COM SUCESSO!');
+      
     } catch (error) {
-      console.error('❌ Erro crítico ao salvar textos:', error);
+      console.error('❌ [useSupabasePageTexts] Erro crítico ao salvar textos:', error);
       throw error;
     }
   };
