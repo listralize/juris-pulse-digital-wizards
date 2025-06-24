@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -142,8 +141,8 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Rodapé com margem superior de 60px */}
-      <div style={{ marginTop: '60px' }}>
+      {/* Rodapé com margem superior de 120px para garantir que não fique cortado */}
+      <div style={{ marginTop: '120px' }}>
         <Footer respectTheme={true} />
       </div>
     </div>
