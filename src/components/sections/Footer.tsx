@@ -1,8 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
+
 interface FooterProps {
   respectTheme?: boolean;
 }
+
 const Footer: React.FC<FooterProps> = ({
   respectTheme = true
 }) => {
@@ -65,6 +68,7 @@ const Footer: React.FC<FooterProps> = ({
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
+
   return <footer className={`py-10 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
       <div className="mx-auto ">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -100,33 +104,37 @@ const Footer: React.FC<FooterProps> = ({
             <div className="space-y-2">
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>Segunda a Sexta</p>
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi`}>9:00 - 18:00</p>
-              <a href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className={`elegant-button inline-flex mt-4 ${isDark ? 'bg-white text-black hover:bg-black hover:text-white hover:border-white' : 'bg-black text-white hover:bg-white hover:text-black hover:border-black'}`}>
+              <a href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center justify-center px-6 py-3 mt-4 text-sm font-medium transition-all duration-300 rounded-md ${isDark ? 'bg-white text-black hover:bg-black hover:text-white border-2 border-white hover:border-white' : 'bg-black text-white hover:bg-white hover:text-black border-2 border-black hover:border-black'}`}>
                 Atendimento via WhatsApp
               </a>
             </div>
           </div>
         </div>
         
-        <div className={`mt-10 pt-6 border-t ${isDark ? 'border-white/30' : 'border-black/10'} flex flex-col md:flex-row justify-between items-center`}>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi mb-4 md:mb-0`}>
-            © {currentYear} {companyName}. Todos os direitos reservados.
-          </p>
-          <div className="flex space-x-6">
-            <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Política de Privacidade</a>
-            <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Termos de Uso</a>
+        <div className={`mt-10 pt-6 border-t ${isDark ? 'border-white/30' : 'border-black/10'}`}>
+          {/* Crédito da Listralize */}
+          <div className="text-center mb-4">
+            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} font-satoshi`}>
+              Desenvolvido por{' '}
+              <a href="https://listralize.com.br/" target="_blank" rel="noopener noreferrer" className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}>
+                Listralize
+              </a>
+            </p>
           </div>
-        </div>
-        
-        {/* Crédito fixo da Listralize */}
-        <div className={`mt-6 pt-4 border-t ${isDark ? 'border-white/20' : 'border-black/10'} text-center`}>
-          <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} font-satoshi`}>
-            Desenvolvido por{' '}
-            <a href="https://listralize.com.br/" target="_blank" rel="noopener noreferrer" className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}>
-              Listralize
-            </a>
-          </p>
+          
+          {/* Copyright e links */}
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi mb-4 md:mb-0`}>
+              © {currentYear} {companyName}. Todos os direitos reservados.
+            </p>
+            <div className="flex space-x-6">
+              <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Política de Privacidade</a>
+              <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Termos de Uso</a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>;
 };
+
 export default Footer;

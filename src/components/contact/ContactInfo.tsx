@@ -22,19 +22,7 @@ const ContactInfo = () => {
         console.log('📞 ContactInfo: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
-        // Primeiro tentar buscar da site_settings
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('*')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (settings) {
-          console.log('📞 ContactInfo: Dados carregados do site_settings:', settings);
-        }
-
-        // Buscar também da contact_info como fallback
+        // Buscar dados da contact_info
         const { data: contact } = await supabase
           .from('contact_info')
           .select('phone, email, address, whatsapp')

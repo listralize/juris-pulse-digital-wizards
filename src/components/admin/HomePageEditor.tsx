@@ -77,6 +77,9 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         });
         window.dispatchEvent(event);
         
+        // Salvar dados específicos nas tabelas correspondentes
+        await saveToSupabaseTables();
+        
         toast.success('Alterações salvas com sucesso!');
       } else {
         toast.error('Função de salvar não disponível');
@@ -84,6 +87,74 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     } catch (error) {
       console.error('❌ HomePageEditor: Erro ao salvar:', error);
       toast.error('Erro ao salvar alterações');
+    }
+  };
+
+  const saveToSupabaseTables = async () => {
+    try {
+      const { supabase } = await import('../../integrations/supabase/client');
+      
+      // Salvar dados de contato na tabela contact_info
+      if (pageTexts.contactTexts) {
+        const contactData = {
+          phone: pageTexts.contactTexts.phone || '',
+          email: pageTexts.contactTexts.email || '',
+          address: pageTexts.contactTexts.address || '',
+          whatsapp: pageTexts.contactTexts.whatsapp || '',
+          map_embed_url: pageTexts.contactTexts.mapEmbedUrl || null
+        };
+        
+        await supabase
+          .from('contact_info')
+          .upsert(contactData, { onConflict: 'id' });
+        
+        console.log('📞 Dados de contato salvos na contact_info:', contactData);
+      }
+      
+      // Salvar dados do footer na tabela footer_info
+      if (pageTexts.footerTexts) {
+        const footerData = {
+          company_name: pageTexts.footerTexts.companyName || '',
+          description: pageTexts.footerTexts.description || ''
+        };
+        
+        await supabase
+          .from('footer_info')
+          .upsert(footerData, { onConflict: 'id' });
+        
+        console.log('🦶 Dados do footer salvos na footer_info:', footerData);
+      }
+      
+      // Salvar configurações gerais na tabela site_settings
+      const siteData = {
+        contact_title: pageTexts.contactTitle || '',
+        contact_subtitle: pageTexts.contactSubtitle || '',
+        hero_title: pageTexts.heroTitle || '',
+        hero_subtitle: pageTexts.heroSubtitle || '',
+        hero_primary_button_text: pageTexts.heroPrimaryButtonText || '',
+        hero_primary_button_link: pageTexts.heroPrimaryButtonLink || '',
+        hero_secondary_button_text: pageTexts.heroSecondaryButtonText || '',
+        hero_secondary_button_link: pageTexts.heroSecondaryButtonLink || '',
+        hero_background_image: pageTexts.heroBackgroundImage || null,
+        about_title: pageTexts.aboutTitle || '',
+        about_description: pageTexts.aboutDescription || '',
+        about_image: pageTexts.aboutImage || null,
+        about_media_type: pageTexts.aboutMediaType || 'image',
+        areas_title: pageTexts.areasTitle || '',
+        team_title: pageTexts.teamTitle || '',
+        client_area_title: pageTexts.clientAreaTitle || '',
+        client_area_description: pageTexts.clientAreaDescription || '',
+        client_portal_link: pageTexts.clientPortalLink || null
+      };
+      
+      await supabase
+        .from('site_settings')
+        .upsert(siteData, { onConflict: 'id' });
+      
+      console.log('⚙️ Configurações do site salvas na site_settings:', siteData);
+      
+    } catch (error) {
+      console.error('❌ Erro ao salvar nas tabelas do Supabase:', error);
     }
   };
 
@@ -125,7 +196,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             </TabsTrigger>
             <TabsTrigger value="contact" className="flex items-center gap-1">
               <MapPin className="w-3 h-3" />
-              Contato
+              Contato & Footer
             </TabsTrigger>
           </TabsList>
 
@@ -405,94 +476,107 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="contact" className="space-y-4">
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Contato, Localização & Rodapé</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Título Contato</Label>
-                <Input
-                  value={pageTexts.contactTitle || ''}
-                  onChange={(e) => handleInputChange('contactTitle', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
+          <TabsContent value="contact" className="space-y-6">
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Contato & Localização</h3>
+            
+            {/* Seção Contact */}
+            <div className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+              <h4 className={`font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Página de Contato</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Título da Página</Label>
+                  <Input
+                    value={pageTexts.contactTitle || ''}
+                    onChange={(e) => handleInputChange('contactTitle', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="Entre em Contato"
+                  />
+                </div>
+                <div>
+                  <Label>Subtítulo da Página</Label>
+                  <Input
+                    value={pageTexts.contactSubtitle || ''}
+                    onChange={(e) => handleInputChange('contactSubtitle', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="Estamos prontos para ajudá-lo"
+                  />
+                </div>
+                
+                <div>
+                  <Label>Telefone</Label>
+                  <Input
+                    value={pageTexts.contactTexts?.phone || ''}
+                    onChange={(e) => handleNestedChange('contactTexts', 'phone', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="(11) 9999-9999"
+                  />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    value={pageTexts.contactTexts?.email || ''}
+                    onChange={(e) => handleNestedChange('contactTexts', 'email', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="contato@exemplo.com"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label>Endereço</Label>
+                  <Input
+                    value={pageTexts.contactTexts?.address || ''}
+                    onChange={(e) => handleNestedChange('contactTexts', 'address', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="Rua Exemplo, 123 - São Paulo, SP"
+                  />
+                </div>
+                <div>
+                  <Label>WhatsApp (números apenas)</Label>
+                  <Input
+                    value={pageTexts.contactTexts?.whatsapp || ''}
+                    onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="5511999999999"
+                  />
+                </div>
+                <div>
+                  <Label>URL Embed do Google Maps</Label>
+                  <Input
+                    value={pageTexts.contactTexts?.mapEmbedUrl || ''}
+                    onChange={(e) => handleNestedChange('contactTexts', 'mapEmbedUrl', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="URL do iframe do Google Maps"
+                  />
+                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Cole a URL do iframe do Google Maps para personalizar a localização
+                  </p>
+                </div>
               </div>
-              <div>
-                <Label>Subtítulo Contato</Label>
-                <Input
-                  value={pageTexts.contactSubtitle || ''}
-                  onChange={(e) => handleInputChange('contactSubtitle', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
-              </div>
-              
-              <div>
-                <Label>Telefone</Label>
-                <Input
-                  value={pageTexts.contactTexts?.phone || ''}
-                  onChange={(e) => handleNestedChange('contactTexts', 'phone', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="(11) 9999-9999"
-                />
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input
-                  value={pageTexts.contactTexts?.email || ''}
-                  onChange={(e) => handleNestedChange('contactTexts', 'email', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="contato@exemplo.com"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Endereço</Label>
-                <Input
-                  value={pageTexts.contactTexts?.address || ''}
-                  onChange={(e) => handleNestedChange('contactTexts', 'address', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Rua Exemplo, 123 - São Paulo, SP"
-                />
-              </div>
-              <div>
-                <Label>WhatsApp (números apenas)</Label>
-                <Input
-                  value={pageTexts.contactTexts?.whatsapp || ''}
-                  onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="5511999999999"
-                />
-              </div>
-              <div>
-                <Label>URL Embed do Google Maps</Label>
-                <Input
-                  value={pageTexts.contactTexts?.mapEmbedUrl || ''}
-                  onChange={(e) => handleNestedChange('contactTexts', 'mapEmbedUrl', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="URL do iframe do Google Maps"
-                />
-                <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Cole a URL do iframe do Google Maps para personalizar a localização
-                </p>
-              </div>
-              
-              <div className="md:col-span-2">
-                <Label>Nome da Empresa (Rodapé)</Label>
-                <Input
-                  value={pageTexts.footerTexts?.companyName || ''}
-                  onChange={(e) => handleNestedChange('footerTexts', 'companyName', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Serafim & Trombela Advocacia"
-                />
-              </div>
-              
-              <div className="md:col-span-2">
-                <Label>Descrição da Empresa (Rodapé)</Label>
-                <Textarea
-                  value={pageTexts.footerTexts?.description || ''}
-                  onChange={(e) => handleNestedChange('footerTexts', 'description', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  rows={2}
-                  placeholder="Soluções jurídicas inovadoras com foco em resultados..."
-                />
+            </div>
+
+            {/* Seção Footer */}
+            <div className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+              <h4 className={`font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Rodapé</h4>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label>Nome da Empresa</Label>
+                  <Input
+                    value={pageTexts.footerTexts?.companyName || ''}
+                    onChange={(e) => handleNestedChange('footerTexts', 'companyName', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="Serafim & Trombela Advocacia"
+                  />
+                </div>
+                
+                <div>
+                  <Label>Descrição da Empresa</Label>
+                  <Textarea
+                    value={pageTexts.footerTexts?.description || ''}
+                    onChange={(e) => handleNestedChange('footerTexts', 'description', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    rows={3}
+                    placeholder="A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes."
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>

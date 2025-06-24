@@ -1,11 +1,49 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare } from 'lucide-react';
-import { useSupabaseData } from '../hooks/useSupabaseData';
 
 const WhatsAppButton = () => {
-  const { pageTexts } = useSupabaseData();
-  const whatsappNumber = pageTexts.contactTexts.whatsapp || '5562994594496';
+  const [whatsappNumber, setWhatsappNumber] = useState('5562994594496');
+  
+  // Carregar dados do Supabase
+  useEffect(() => {
+    const loadWhatsAppNumber = async () => {
+      try {
+        const { supabase } = await import('../integrations/supabase/client');
+        
+        // Buscar dados da contact_info
+        const { data: contact } = await supabase
+          .from('contact_info')
+          .select('whatsapp')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (contact && contact.whatsapp) {
+          setWhatsappNumber(contact.whatsapp);
+        }
+      } catch (error) {
+        console.error('❌ WhatsAppButton: Erro ao carregar número do WhatsApp:', error);
+      }
+    };
+
+    loadWhatsAppNumber();
+  }, []);
+
+  // Escutar eventos de atualização
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      if (event.detail.contactTexts?.whatsapp) {
+        setWhatsappNumber(event.detail.contactTexts.whatsapp);
+      }
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
   
   return (
     <a 
