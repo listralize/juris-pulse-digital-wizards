@@ -103,8 +103,8 @@ const Contact = () => {
     <div 
       className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
       style={{ 
-        height: '100vh',
-        overflow: 'auto',
+        minHeight: '100vh',
+        overflow: 'visible',
         display: 'flex',
         flexDirection: 'column'
       }}
@@ -149,10 +149,8 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Footer posicionado 150px mais para cima */}
-      <div style={{ marginTop: '-150px' }}>
-        <Footer respectTheme={true} />
-      </div>
+      {/* Footer totalmente visível */}
+      <Footer respectTheme={true} />
     </div>
   );
 };
