@@ -14,7 +14,8 @@ const FloatingFooter: React.FC = () => {
     phone: '(62) 99459-4496',
     email: 'contato@stadv.com',
     address: 'World Trade Center, Goiânia - GO',
-    whatsapp: '5562994594496'
+    whatsapp: '5562994594496',
+    mapUrl: 'https://maps.google.com/?q=World+Trade+Center+Goiânia+GO'
   });
 
   // Carregar dados iniciais do Supabase
@@ -34,7 +35,7 @@ const FloatingFooter: React.FC = () => {
         // Carregar dados do contact_info
         const { data: contact } = await supabase
           .from('contact_info')
-          .select('phone, email, address, whatsapp')
+          .select('phone, email, address, whatsapp, map_embed_url')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -46,7 +47,8 @@ const FloatingFooter: React.FC = () => {
             ...(contact?.phone && { phone: contact.phone }),
             ...(contact?.email && { email: contact.email }),
             ...(contact?.address && { address: contact.address }),
-            ...(contact?.whatsapp && { whatsapp: contact.whatsapp })
+            ...(contact?.whatsapp && { whatsapp: contact.whatsapp }),
+            ...(contact?.map_embed_url && { mapUrl: contact.map_embed_url })
           }));
         }
       } catch (error) {
@@ -91,10 +93,29 @@ const FloatingFooter: React.FC = () => {
     };
   }, []);
 
+  // Funções para ações dos ícones
+  const handlePhoneClick = () => {
+    window.open(`tel:${footerData.phone.replace(/\D/g, '')}`, '_self');
+  };
+
+  const handleEmailClick = () => {
+    window.open(`mailto:${footerData.email}`, '_self');
+  };
+
+  const handleLocationClick = () => {
+    const encodedAddress = encodeURIComponent(footerData.address);
+    const mapsUrl = `https://maps.google.com/?q=${encodedAddress}`;
+    window.open(mapsUrl, '_blank');
+  };
+
+  const handleWhatsAppClick = () => {
+    window.open(`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`, '_blank');
+  };
+
   return (
     <footer 
       className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 
-        w-[95%] max-w-6xl mx-auto rounded-2xl shadow-2xl backdrop-blur-md
+        w-[95%] max-w-4xl mx-auto rounded-2xl shadow-2xl backdrop-blur-md
         ${isDark 
           ? 'bg-black/90 border border-white/20 text-white' 
           : 'bg-white/95 border border-gray-200 text-black'
@@ -114,49 +135,71 @@ const FloatingFooter: React.FC = () => {
               alt={`${footerData.companyName} Logo`} 
               className="h-8 object-contain"
             />
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center space-x-1">
-                <Phone className="h-3 w-3" />
-                <a 
-                  href={`tel:${footerData.phone.replace(/\D/g, '')}`}
-                  className="hover:underline"
-                >
-                  {footerData.phone}
-                </a>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Mail className="h-3 w-3" />
-                <a 
-                  href={`mailto:${footerData.email}`}
-                  className="hover:underline"
-                >
-                  {footerData.email}
-                </a>
-              </div>
-              <div className="flex items-center space-x-1">
-                <MapPin className="h-3 w-3" />
-                <span className="text-xs">{footerData.address}</span>
+            <div className="flex items-center space-x-6">
+              {/* Ícone do Telefone */}
+              <button
+                onClick={handlePhoneClick}
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
+                  ${isDark 
+                    ? 'bg-white/10 hover:bg-white/20 text-white' 
+                    : 'bg-black/10 hover:bg-black/20 text-black'
+                  }`}
+                title={`Ligar para ${footerData.phone}`}
+              >
+                <Phone className="h-4 w-4" />
+              </button>
+
+              {/* Ícone do Email */}
+              <button
+                onClick={handleEmailClick}
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
+                  ${isDark 
+                    ? 'bg-white/10 hover:bg-white/20 text-white' 
+                    : 'bg-black/10 hover:bg-black/20 text-black'
+                  }`}
+                title={`Enviar email para ${footerData.email}`}
+              >
+                <Mail className="h-4 w-4" />
+              </button>
+
+              {/* Ícone da Localização */}
+              <button
+                onClick={handleLocationClick}
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
+                  ${isDark 
+                    ? 'bg-white/10 hover:bg-white/20 text-white' 
+                    : 'bg-black/10 hover:bg-black/20 text-black'
+                  }`}
+                title={`Ver localização: ${footerData.address}`}
+              >
+                <MapPin className="h-4 w-4" />
+              </button>
+
+              {/* Ícone do Horário */}
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-full
+                  ${isDark 
+                    ? 'bg-white/10 text-white' 
+                    : 'bg-black/10 text-black'
+                  }`}
+                title="Horário de funcionamento: Seg-Sex 9:00-18:00"
+              >
+                <Clock className="h-4 w-4" />
               </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1 text-xs">
-              <Clock className="h-3 w-3" />
-              <span>Seg-Sex 9:00-18:00</span>
-            </div>
-            <a 
-              href={`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`px-4 py-2 text-xs font-medium rounded-lg transition-all duration-300
+            <button 
+              onClick={handleWhatsAppClick}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105
                 ${isDark 
                   ? 'bg-white text-black hover:bg-gray-100' 
                   : 'bg-black text-white hover:bg-gray-800'
                 }`}
             >
               WhatsApp
-            </a>
+            </button>
             <div className="text-xs opacity-60">
               © {currentYear} {footerData.companyName}
             </div>
@@ -171,50 +214,72 @@ const FloatingFooter: React.FC = () => {
               alt={`${footerData.companyName} Logo`} 
               className="h-6 object-contain"
             />
-            <a 
-              href={`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-300
+            <button 
+              onClick={handleWhatsAppClick}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 hover:scale-105
                 ${isDark 
                   ? 'bg-white text-black hover:bg-gray-100' 
                   : 'bg-black text-white hover:bg-gray-800'
                 }`}
             >
               WhatsApp
-            </a>
+            </button>
           </div>
           
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="flex items-center space-x-1">
-              <Phone className="h-3 w-3" />
-              <a 
-                href={`tel:${footerData.phone.replace(/\D/g, '')}`}
-                className="hover:underline truncate"
-              >
-                {footerData.phone}
-              </a>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Mail className="h-3 w-3" />
-              <a 
-                href={`mailto:${footerData.email}`}
-                className="hover:underline truncate"
-              >
-                {footerData.email}
-              </a>
-            </div>
-            <div className="flex items-center space-x-1">
-              <MapPin className="h-3 w-3" />
-              <span className="truncate">{footerData.address}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Clock className="h-3 w-3" />
-              <span>Seg-Sex 9:00-18:00</span>
+          <div className="flex items-center justify-center space-x-6 mb-3">
+            {/* Ícone do Telefone Mobile */}
+            <button
+              onClick={handlePhoneClick}
+              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                ${isDark 
+                  ? 'bg-white/10 hover:bg-white/20 text-white' 
+                  : 'bg-black/10 hover:bg-black/20 text-black'
+                }`}
+              title={`Ligar para ${footerData.phone}`}
+            >
+              <Phone className="h-5 w-5" />
+            </button>
+
+            {/* Ícone do Email Mobile */}
+            <button
+              onClick={handleEmailClick}
+              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                ${isDark 
+                  ? 'bg-white/10 hover:bg-white/20 text-white' 
+                  : 'bg-black/10 hover:bg-black/20 text-black'
+                }`}
+              title={`Enviar email para ${footerData.email}`}
+            >
+              <Mail className="h-5 w-5" />
+            </button>
+
+            {/* Ícone da Localização Mobile */}
+            <button
+              onClick={handleLocationClick}
+              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                ${isDark 
+                  ? 'bg-white/10 hover:bg-white/20 text-white' 
+                  : 'bg-black/10 hover:bg-black/20 text-black'
+                }`}
+              title={`Ver localização: ${footerData.address}`}
+            >
+              <MapPin className="h-5 w-5" />
+            </button>
+
+            {/* Ícone do Horário Mobile */}
+            <div
+              className={`flex items-center justify-center w-12 h-12 rounded-full
+                ${isDark 
+                  ? 'bg-white/10 text-white' 
+                  : 'bg-black/10 text-black'
+                }`}
+              title="Horário de funcionamento: Seg-Sex 9:00-18:00"
+            >
+              <Clock className="h-5 w-5" />
             </div>
           </div>
           
-          <div className="text-center text-xs opacity-60 mt-2 pt-2 border-t border-current/20">
+          <div className="text-center text-xs opacity-60 pt-2 border-t border-current/20">
             © {currentYear} {footerData.companyName}
           </div>
         </div>
