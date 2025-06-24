@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -100,19 +101,10 @@ const Contact = () => {
   }, []);
 
   return (
-    <div 
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
-      style={{ 
-        minHeight: '100vh',
-        height: 'auto',
-        overflow: 'visible',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
+    <div className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} overflow-y-auto`}>
       <div 
         ref={sectionRef}
-        className="flex-1 w-full py-16 px-4 md:px-6 lg:px-24"
+        className="w-full py-16 px-4 md:px-6 lg:px-24"
       >
         <div className="max-w-7xl mx-auto">
           <div ref={titleRef} className="mb-12 text-center">
@@ -150,7 +142,7 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Footer totalmente visível */}
+      {/* Footer aparece completamente */}
       <Footer respectTheme={true} />
     </div>
   );
