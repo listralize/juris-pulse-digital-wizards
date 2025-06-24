@@ -60,6 +60,17 @@ const SectionsContainer: React.FC = () => {
     );
   }
 
+  // Para a seção de contato, usar layout diferente
+  const isContactActive = activeSection === 'contact';
+
+  if (isContactActive) {
+    return (
+      <div className="relative w-full min-h-screen">
+        <Contact />
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <div 
@@ -75,13 +86,19 @@ const SectionsContainer: React.FC = () => {
           const allowScroll = section.id === 'contact' || section.id === 'socios';
           const isActive = activeSectionIndex === index;
           
+          // Não renderizar a seção de contato aqui se estiver ativa
+          if (section.id === 'contact') {
+            return null;
+          }
+          
           return (
             <div
               key={section.id}
               className="w-screen h-full flex-shrink-0 relative"
               style={{ 
                 width: '100vw',
-                minWidth: '100vw'
+                minWidth: '100vw',
+                height: '100vh'
               }}
             >
               <Section 

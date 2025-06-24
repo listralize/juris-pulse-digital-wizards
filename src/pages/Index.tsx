@@ -5,12 +5,17 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 import CustomCursor from '../components/CustomCursor';
+import Navbar from '../components/navbar';
+import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
-import { MainLayout } from '../components/layout/MainLayout';
+import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Index = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   useEffect(() => {
     try {
       const body = document.body;
@@ -50,12 +55,23 @@ const Index = () => {
   }, []);
   
   return (
-    <MainLayout>
-      <div className="min-h-screen w-full overflow-hidden" style={{ height: '100vh' }}>
-        <CustomCursor />
-        <SectionsContainer />
-      </div>
-    </MainLayout>
+    <div 
+      className={`min-h-screen w-full transition-colors duration-300 overflow-hidden ${
+        isDark 
+          ? 'bg-black text-white' 
+          : 'bg-white text-black'
+      }`}
+      style={{ 
+        height: '100vh',
+        position: 'relative'
+      }}
+    >
+      <CustomCursor />
+      <Navbar />
+      <WhatsAppButton />
+      
+      <SectionsContainer />
+    </div>
   );
 };
 
