@@ -8,6 +8,7 @@ import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import SectionsContainer from '../components/SectionsContainer';
+import Footer from '../components/sections/Footer';
 import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -71,6 +72,9 @@ const Index = () => {
       <WhatsAppButton />
       
       <SectionsContainer />
+      
+      {/* Footer fixo que sempre aparece */}
+      <Footer respectTheme={true} />
     </div>
   );
 };

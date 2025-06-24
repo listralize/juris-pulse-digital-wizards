@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
-import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -103,7 +102,7 @@ const Contact = () => {
     <div className={`w-full h-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} overflow-y-auto`}>
       <div 
         ref={sectionRef}
-        className="w-full py-16 px-4 md:px-6 lg:px-24 pb-20"
+        className="w-full py-16 px-4 md:px-6 lg:px-24"
         style={{ paddingBottom: '100px' }}
       >
         <div className="max-w-7xl mx-auto">
@@ -141,9 +140,6 @@ const Contact = () => {
           </div>
         </div>
       </div>
-      
-      {/* Footer aparece completamente */}
-      <Footer respectTheme={true} />
     </div>
   );
 };
