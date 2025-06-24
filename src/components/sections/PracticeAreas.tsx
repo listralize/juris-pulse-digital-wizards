@@ -66,6 +66,7 @@ const PracticeAreas = () => {
   const practiceAreas = React.useMemo(() => {
     if (!localCategories || localCategories.length === 0) {
       console.log('⚠️ Nenhuma categoria encontrada, usando áreas padrão');
+      // Áreas padrão como fallback
       return [
         {
           id: 'familia-fallback',
@@ -163,9 +164,9 @@ const PracticeAreas = () => {
 
   if (isLoading) {
     return (
-      <section className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen flex flex-col justify-center py-16 px-6 md:px-16 lg:px-24`}>
+      <section className={`${isDark ? 'bg-black text-white' : 'bg-black text-white'} min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24`}>
         <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
       </section>
     );
@@ -179,79 +180,95 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-16 px-6 md:px-16 lg:px-24`}
+      className={`${isDark ? 'bg-black text-white' : 'bg-black text-white'} flex flex-col justify-center py-8 px-4 md:px-6 lg:px-24`}
       style={{ minHeight: '100vh' }}
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 
-            ref={titleRef}
-            className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}
-          >
-            {areasTitle}
-          </h2>
-          <div className={`w-24 h-1 mx-auto mb-8 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-          <p className={`text-lg md:text-xl max-w-3xl mx-auto ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-            Oferecemos assessoria jurídica especializada em diversas áreas do direito, 
-            com soluções estratégicas para proteger seus direitos e interesses.
-          </p>
-        </div>
+      <div className="max-w-6xl mx-auto">
+        <h2 
+          ref={titleRef}
+          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center text-white mb-8 md:mb-12"
+        >
+          {areasTitle}
+        </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {practiceAreas.map((area, index) => (
-            <Link 
-              key={area.id}
-              to={area.href}
-              className="group block h-full"
-            >
-              <div 
-                className={`p-8 rounded-lg border transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl h-full ${
-                  isDark 
-                    ? 'bg-black/50 border-white/10 hover:border-white/30' 
-                    : 'bg-white/90 border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-lg'
-                }`}
-                ref={el => cardsRef.current[index] = el}
+        <div className="flex-1 flex items-center">
+          {/* Mobile: Grid compacto */}
+          <div className="md:hidden grid grid-cols-1 gap-4 w-full">
+            {practiceAreas.map((area, index) => (
+              <Link 
+                key={area.id}
+                to={area.href}
+                className="group block"
               >
-                <div className="flex items-center gap-4 mb-6">
+                <div 
+                  className="bg-black/80 border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4"
+                  ref={el => cardsRef.current[index] = el}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    {area.icon && (
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                        style={{ backgroundColor: area.color }}
+                      >
+                        {area.icon}
+                      </div>
+                    )}
+                    <h3 className="text-lg font-canela text-white">
+                      {area.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm mb-2 text-gray-300">
+                    {area.description}
+                  </p>
+                  {area.pageCount !== undefined && (
+                    <p className="text-xs text-gray-400">
+                      {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop: Grid sem scroll area */}
+          <div className="hidden md:block w-full">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              {practiceAreas.map((area, index) => (
+                <Link 
+                  key={area.id}
+                  to={area.href}
+                  className="group block"
+                >
                   <div 
-                    className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold transition-colors ${
-                      isDark 
-                        ? 'bg-white/10 text-white' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
+                    className="bg-black/80 border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6"
+                    ref={el => cardsRef.current[index] = el}
                   >
-                    {area.icon}
+                    <div className="flex items-center gap-3 mb-3">
+                      {area.icon && (
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-semibold"
+                          style={{ backgroundColor: area.color }}
+                        >
+                          {area.icon}
+                        </div>
+                      )}
+                      <h3 className="text-xl xl:text-2xl font-canela text-white">
+                        {area.title}
+                      </h3>
+                    </div>
+                    <p className="text-sm mb-3 text-gray-300">
+                      {area.description}
+                    </p>
+                    {area.pageCount !== undefined && (
+                      <p className="text-xs text-gray-400">
+                        {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
+                      </p>
+                    )}
                   </div>
-                  <h3 className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-                    {area.title}
-                  </h3>
-                </div>
-                
-                <p className={`text-base mb-6 leading-relaxed ${
-                  isDark ? 'text-gray-300' : 'text-gray-600'
-                }`}>
-                  {area.description}
-                </p>
-                
-                {area.pageCount !== undefined && (
-                  <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
-                  </div>
-                )}
-                
-                <div className={`mt-6 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  isDark 
-                    ? 'text-blue-400 group-hover:text-blue-300' 
-                    : 'text-blue-600 group-hover:text-blue-500'
-                }`}>
-                  <span>Saiba mais</span>
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            </Link>
-          ))}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
