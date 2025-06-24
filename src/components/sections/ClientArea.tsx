@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -150,13 +149,15 @@ const ClientArea = () => {
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 lg:gap-16">
           <div className="w-full md:w-2/5 order-1 md:order-1">
             <div className="relative mb-4 md:mb-0">
-              <img 
-                ref={imageRef}
-                src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
-                alt="Área do Cliente em Smartphone" 
-                className="w-full h-auto mx-auto"
-                style={{ maxHeight: '700px', objectFit: 'contain' }}
-              />
+              <div className="border-4 border-black rounded-lg overflow-hidden bg-black p-2">
+                <img 
+                  ref={imageRef}
+                  src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
+                  alt="Área do Cliente em Smartphone" 
+                  className="w-full h-auto mx-auto rounded"
+                  style={{ maxHeight: '700px', objectFit: 'contain' }}
+                />
+              </div>
             </div>
           </div>
           

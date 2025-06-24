@@ -2,31 +2,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-import UnifiedContactForm from '../contact/UnifiedContactForm';
-import ContactInfo from '../contact/ContactInfo';
-import LocationMap from '../contact/LocationMap';
 import { useTheme } from '../ThemeProvider';
+import { UnifiedContactForm } from '../contact/UnifiedContactForm';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  
-  // Estado local para receber atualizações em tempo real
-  const [contactTitle, setContactTitle] = useState('Entre em Contato');
-  const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudá-lo');
 
-  // Carregar dados iniciais do Supabase da tabela site_settings
+  // Estados para textos editáveis via admin
+  const [contactTitle, setContactTitle] = useState('Fale Conosco');
+  const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudar você');
+
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadContactData = async () => {
       try {
-        console.log('📞 Contact: Carregando dados iniciais da tabela site_settings...');
+        console.log('📞 Contact: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: settings } = await supabase
@@ -37,24 +33,16 @@ const Contact = () => {
           .maybeSingle();
 
         if (settings) {
-          console.log('📞 Contact: Dados carregados do Supabase site_settings:', settings);
-          if (settings.contact_title) {
-            console.log('📞 Contact: Definindo título inicial:', settings.contact_title);
-            setContactTitle(settings.contact_title);
-          }
-          if (settings.contact_subtitle) {
-            console.log('📞 Contact: Definindo subtítulo inicial:', settings.contact_subtitle);
-            setContactSubtitle(settings.contact_subtitle);
-          }
-        } else {
-          console.log('📞 Contact: Nenhuma configuração encontrada na site_settings, usando defaults');
+          console.log('📞 Contact: Dados carregados do Supabase:', settings);
+          if (settings.contact_title) setContactTitle(settings.contact_title);
+          if (settings.contact_subtitle) setContactSubtitle(settings.contact_subtitle);
         }
       } catch (error) {
         console.error('❌ Contact: Erro ao carregar dados:', error);
       }
     };
 
-    loadInitialData();
+    loadContactData();
   }, []);
 
   // Escutar eventos de atualização em tempo real
@@ -64,90 +52,104 @@ const Contact = () => {
       
       const data = event.detail;
       
-      // Atualizar dados diretamente dos campos de contato
       if (data.contactTitle !== undefined) {
-        console.log('📞 Contact: Atualizando título de:', contactTitle, 'para:', data.contactTitle);
+        console.log('📞 Contact: Atualizando título para:', data.contactTitle);
         setContactTitle(data.contactTitle);
       }
       
       if (data.contactSubtitle !== undefined) {
-        console.log('📞 Contact: Atualizando subtítulo de:', contactSubtitle, 'para:', data.contactSubtitle);
+        console.log('📞 Contact: Atualizando subtítulo para:', data.contactSubtitle);
         setContactSubtitle(data.contactSubtitle);
       }
     };
 
-    // Escutar evento geral de atualização de textos das páginas
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
-    // Cleanup
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
-  }, [contactTitle, contactSubtitle]);
-  
+  }, []);
+
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    
-    tl.fromTo(
+    gsap.fromTo(
       titleRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 }
-    ).fromTo(
-      contentRef.current,
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.4"
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      }
     );
-    
+
+    gsap.fromTo(
+      subtitleRef.current,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 0.2,
+        scrollTrigger: {
+          trigger: subtitleRef.current,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+
+    gsap.fromTo(
+      sectionRef.current?.querySelector('.contact-form-container'),
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 0.4,
+        scrollTrigger: {
+          trigger: sectionRef.current?.querySelector('.contact-form-container'),
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+
     return () => {
-      tl.kill();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
-  // Log para debug
-  console.log('📞 Contact: Renderizando com título:', contactTitle, 'e subtítulo:', contactSubtitle);
-
   return (
-    <div 
+    <section 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
-      style={{ minHeight: '100vh' }}
+      id="contato" 
+      className={`py-16 md:py-24 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
-      <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-12 text-center">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 
+            ref={titleRef}
+            className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+          >
             {contactTitle}
           </h2>
-          <div className={`w-20 h-1 mx-auto mb-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-          <p className={`text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+          <p 
+            ref={subtitleRef}
+            className={`text-lg md:text-xl font-satoshi ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+          >
             {contactSubtitle}
           </p>
         </div>
         
-        <div 
-          ref={contentRef}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-8"
-        >
-          <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
-            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
-              <div className="h-48 lg:h-56">
-                <LocationMap />
-              </div>
-            </div>
-            
-            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
-              <ContactInfo />
-            </div>
-          </div>
-          
-          <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
-              <UnifiedContactForm darkBackground={isDark} pageId="contato" />
-            </div>
-          </div>
+        <div className="contact-form-container">
+          <UnifiedContactForm />
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

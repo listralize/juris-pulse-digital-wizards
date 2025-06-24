@@ -145,6 +145,21 @@ const Footer: React.FC<FooterProps> = ({ respectTheme = true }) => {
             <a href="#" className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi`}>Termos de Uso</a>
           </div>
         </div>
+
+        {/* Crédito da Listralize */}
+        <div className="mt-6 pt-4 border-t border-gray-300 text-center">
+          <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} font-satoshi`}>
+            Desenvolvido por{' '}
+            <a 
+              href="https://listralize.com.br/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline font-medium`}
+            >
+              Listralize
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );
