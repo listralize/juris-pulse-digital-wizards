@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,24 +22,26 @@ const Contact = () => {
   const [contactTitle, setContactTitle] = useState('Entre em Contato');
   const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudá-lo');
 
-  // Carregar dados iniciais do Supabase
+  // Carregar dados iniciais do Supabase da tabela site_settings
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        console.log('📞 Contact: Carregando dados iniciais...');
+        console.log('📞 Contact: Carregando dados iniciais da tabela site_settings...');
         const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('*')
+          .select('contact_title, contact_subtitle')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (settings) {
-          console.log('📞 Contact: Dados carregados do Supabase:', settings);
+          console.log('📞 Contact: Dados carregados do Supabase site_settings:', settings);
           if (settings.contact_title) setContactTitle(settings.contact_title);
           if (settings.contact_subtitle) setContactSubtitle(settings.contact_subtitle);
+        } else {
+          console.log('📞 Contact: Nenhuma configuração encontrada na site_settings, usando defaults');
         }
       } catch (error) {
         console.error('❌ Contact: Erro ao carregar dados:', error);

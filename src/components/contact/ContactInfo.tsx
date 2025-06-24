@@ -15,29 +15,11 @@ const ContactInfo = () => {
     whatsapp: '5562994594496'
   });
 
-  // Carregar dados iniciais do Supabase
+  // Carregar dados iniciais do Supabase - por enquanto mantém os defaults
   useEffect(() => {
     const loadContactInfo = async () => {
       try {
-        console.log('📞 ContactInfo: Carregando dados iniciais...');
-        const { supabase } = await import('../../integrations/supabase/client');
-        
-        const { data: contact } = await supabase
-          .from('contact_info')
-          .select('phone, email, address, whatsapp')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (contact) {
-          console.log('📞 ContactInfo: Dados carregados do Supabase:', contact);
-          setContactData({
-            phone: contact.phone || '(62) 99459-4496',
-            email: contact.email || 'contato@stadv.com',
-            address: contact.address || 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040',
-            whatsapp: contact.whatsapp || '5562994594496'
-          });
-        }
+        console.log('📞 ContactInfo: Usando dados padrão (aguardando mapeamento completo)');
       } catch (error) {
         console.error('❌ ContactInfo: Erro ao carregar informações de contato:', error);
       }
