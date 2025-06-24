@@ -103,7 +103,6 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    padding-top: 0; /* Remove padding top to fix mobile navbar issues */
     overflow-x: hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -163,17 +162,30 @@
     background: rgba(255, 255, 255, 0.4);
   }
 
-  /* Mobile scroll fixes */
+  /* Mobile specific fixes */
   @media (max-width: 768px) {
     body {
-      padding-top: 0;
       position: relative;
+    }
+    
+    /* Fixed positioning for mobile navigation */
+    .mobile-nav-fixed {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 100 !important;
     }
     
     /* Ensure sections can scroll properly on mobile */
     #areas, #contact, #blog {
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Fix viewport issues on mobile */
+    html {
+      scroll-padding-top: 80px;
     }
   }
 }

@@ -42,13 +42,8 @@ const Partners = () => {
     };
   }, []);
 
-  const itemsPerSlide = {
-    mobile: 1,
-    tablet: 2,
-    desktop: 3
-  };
-
-  const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide.desktop);
+  // Apenas um membro por slide
+  const totalSlides = teamMembers.length;
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -107,19 +102,19 @@ const Partners = () => {
         justifyContent: 'center'
       }}
     >
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="text-center mb-6 md:mb-8">
+      <div className="max-w-4xl mx-auto w-full">
+        <div className="text-center mb-8 md:mb-12">
           <h2 
             ref={titleRef}
-            className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-2xl md:text-3xl lg:text-4xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}
           >
             {teamTitle}
           </h2>
           <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
         </div>
         
-        {/* Carousel Container */}
-        <div className="relative">
+        {/* Carousel Container - Um membro por slide */}
+        <div className="relative max-w-md mx-auto">
           <div 
             ref={carouselRef} 
             className="overflow-hidden"
@@ -127,54 +122,50 @@ const Partners = () => {
             <div 
               className="flex transition-transform duration-500 ease-in-out"
               style={{ 
-                transform: `translateX(-${currentSlide * (100 / totalSlides)}%)`,
+                transform: `translateX(-${currentSlide * 100}%)`,
                 width: `${totalSlides * 100}%`
               }}
             >
-              {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+              {teamMembers.map((member, index) => (
                 <div 
-                  key={slideIndex}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-shrink-0"
+                  key={index}
+                  className="w-full flex-shrink-0 px-4"
                   style={{ width: `${100 / totalSlides}%` }}
                 >
-                  {teamMembers
-                    .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
-                    .map((member, index) => (
-                      <div key={index} className="group">
-                        <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${
-                          isDark ? 'bg-white/5' : 'bg-white'
-                        } shadow-md hover:shadow-xl`}>
-                          <div className="aspect-square relative">
-                            {member.image ? (
-                              <img 
-                                src={member.image} 
-                                alt={member.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className={`w-full h-full flex items-center justify-center text-3xl ${
-                                isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
-                              }`}>
-                                👤
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="group">
+                    <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${
+                      isDark ? 'bg-white/5' : 'bg-white'
+                    } shadow-lg hover:shadow-xl`}>
+                      <div className="aspect-[3/4] relative">
+                        {member.image ? (
+                          <img 
+                            src={member.image} 
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full flex items-center justify-center text-6xl ${
+                            isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
+                          }`}>
+                            👤
                           </div>
-                          
-                          <div className="p-3">
-                            <h3 className={`text-sm md:text-base font-semibold mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
-                              {member.name}
-                            </h3>
-                            <p className={`text-xs mb-1 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                              {member.title || 'Advogado'}
-                            </p>
-                            <p className={`text-xs leading-relaxed line-clamp-2 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
-                              {member.description}
-                            </p>
-                          </div>
-                        </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                    ))}
+                      
+                      <div className="p-6">
+                        <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                          {member.name}
+                        </h3>
+                        <p className={`text-sm mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                          {member.title || 'Advogado'}
+                        </p>
+                        <p className={`text-sm leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                          {member.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -185,31 +176,31 @@ const Partners = () => {
             <>
               <button
                 onClick={prevSlide}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                   isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
                     : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                } shadow-lg hover:scale-110`}
+                } shadow-lg hover:scale-110 z-10`}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               
               <button
                 onClick={nextSlide}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                   isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
                     : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                } shadow-lg hover:scale-110`}
+                } shadow-lg hover:scale-110 z-10`}
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </>
           )}
 
           {/* Dots Indicator */}
           {totalSlides > 1 && (
-            <div className="flex justify-center mt-4 space-x-2">
+            <div className="flex justify-center mt-6 space-x-2">
               {Array.from({ length: totalSlides }).map((_, index) => (
                 <button
                   key={index}

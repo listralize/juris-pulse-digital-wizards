@@ -103,11 +103,11 @@ const Contact = () => {
     <div className="w-full h-full flex flex-col justify-center">
       <div 
         ref={sectionRef}
-        className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-8 px-6 md:px-8 lg:px-12`}
+        className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-6 px-4 md:py-8 md:px-8 lg:px-12`}
       >
         <div className="max-w-5xl mx-auto">
           <div ref={titleRef} className="mb-6 text-center">
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+            <h2 className={`text-2xl md:text-4xl lg:text-5xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
               {contactTitle}
             </h2>
             <div className={`w-16 h-0.5 mx-auto mb-3 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
@@ -118,23 +118,24 @@ const Contact = () => {
           
           <div 
             ref={contentRef}
-            className="grid grid-cols-1 lg:grid-cols-5 gap-4"
+            className="flex flex-col lg:grid lg:grid-cols-5 gap-4 lg:gap-6"
           >
-            <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-md border`}>
-                <div className="h-32 lg:h-40">
+            {/* Mobile: Form first, then info */}
+            <div className="lg:col-span-3 order-1">
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-4 md:p-6 shadow-md border`}>
+                <UnifiedContactForm darkBackground={isDark} pageId="contato" />
+              </div>
+            </div>
+            
+            <div className="lg:col-span-2 space-y-4 order-2">
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-2 shadow-md border`}>
+                <div className="h-40 lg:h-48">
                   <LocationMap />
                 </div>
               </div>
               
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-3 shadow-md border`}>
-                <ContactInfo />
-              </div>
-            </div>
-            
-            <div className="lg:col-span-3 order-1 lg:order-2">
               <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-4 shadow-md border`}>
-                <UnifiedContactForm darkBackground={isDark} pageId="contato" />
+                <ContactInfo />
               </div>
             </div>
           </div>
