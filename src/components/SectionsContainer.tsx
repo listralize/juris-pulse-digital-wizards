@@ -93,7 +93,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className={section.id === 'contact' ? 'pb-0' : ''}
+                className="h-full"
               >
                 <Component />
               </Section>

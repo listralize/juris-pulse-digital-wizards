@@ -61,24 +61,24 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     try {
       console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
       
-      // Salvar via prop function
+      // Salvar dados específicos nas tabelas correspondentes PRIMEIRO
+      await saveToSupabaseTables();
+      
+      // Depois salvar via prop function
       if (onSaveAll) {
         await onSaveAll();
         
-        // Disparar evento personalizado para notificar todas as seções com estrutura correta
+        // Disparar evento personalizado para notificar todas as seções
         console.log('📡 HomePageEditor: Disparando evento pageTextsUpdated');
         const event = new CustomEvent('pageTextsUpdated', { 
           detail: {
             ...pageTexts,
-            // Garantir que contactTexts tenha a estrutura correta
+            // Garantir que contactTexts e footerTexts tenham a estrutura correta
             contactTexts: pageTexts.contactTexts || {},
             footerTexts: pageTexts.footerTexts || {}
           }
         });
         window.dispatchEvent(event);
-        
-        // Salvar dados específicos nas tabelas correspondentes
-        await saveToSupabaseTables();
         
         toast.success('Alterações salvas com sucesso!');
       } else {
@@ -101,12 +101,27 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           email: pageTexts.contactTexts.email || '',
           address: pageTexts.contactTexts.address || '',
           whatsapp: pageTexts.contactTexts.whatsapp || '',
-          map_embed_url: pageTexts.contactTexts.mapEmbedUrl || null
+          map_embed_url: pageTexts.contactTexts.mapEmbedUrl || null,
+          updated_at: new Date().toISOString()
         };
         
-        await supabase
+        // Tentar atualizar primeiro, se não existir, inserir
+        const { data: existingContact } = await supabase
           .from('contact_info')
-          .upsert(contactData, { onConflict: 'id' });
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+          
+        if (existingContact) {
+          await supabase
+            .from('contact_info')
+            .update(contactData)
+            .eq('id', existingContact.id);
+        } else {
+          await supabase
+            .from('contact_info')
+            .insert(contactData);
+        }
         
         console.log('📞 Dados de contato salvos na contact_info:', contactData);
       }
@@ -115,12 +130,27 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       if (pageTexts.footerTexts) {
         const footerData = {
           company_name: pageTexts.footerTexts.companyName || '',
-          description: pageTexts.footerTexts.description || ''
+          description: pageTexts.footerTexts.description || '',
+          updated_at: new Date().toISOString()
         };
         
-        await supabase
+        // Tentar atualizar primeiro, se não existir, inserir
+        const { data: existingFooter } = await supabase
           .from('footer_info')
-          .upsert(footerData, { onConflict: 'id' });
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+          
+        if (existingFooter) {
+          await supabase
+            .from('footer_info')
+            .update(footerData)
+            .eq('id', existingFooter.id);
+        } else {
+          await supabase
+            .from('footer_info')
+            .insert(footerData);
+        }
         
         console.log('🦶 Dados do footer salvos na footer_info:', footerData);
       }
@@ -144,17 +174,33 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         team_title: pageTexts.teamTitle || '',
         client_area_title: pageTexts.clientAreaTitle || '',
         client_area_description: pageTexts.clientAreaDescription || '',
-        client_portal_link: pageTexts.clientPortalLink || null
+        client_portal_link: pageTexts.clientPortalLink || null,
+        updated_at: new Date().toISOString()
       };
       
-      await supabase
+      // Tentar atualizar primeiro, se não existir, inserir
+      const { data: existingSite } = await supabase
         .from('site_settings')
-        .upsert(siteData, { onConflict: 'id' });
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+        
+      if (existingSite) {
+        await supabase
+          .from('site_settings')
+          .update(siteData)
+          .eq('id', existingSite.id);
+      } else {
+        await supabase
+          .from('site_settings')
+          .insert(siteData);
+      }
       
       console.log('⚙️ Configurações do site salvas na site_settings:', siteData);
       
     } catch (error) {
       console.error('❌ Erro ao salvar nas tabelas do Supabase:', error);
+      throw error;
     }
   };
 
@@ -508,7 +554,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.phone || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'phone', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="(11) 9999-9999"
+                    placeholder="(62) 99459-4496"
                   />
                 </div>
                 <div>
@@ -517,16 +563,17 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.email || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'email', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="contato@exemplo.com"
+                    placeholder="contato@stadv.com"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label>Endereço</Label>
-                  <Input
+                  <Label>Endereço Completo</Label>
+                  <Textarea
                     value={pageTexts.contactTexts?.address || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'address', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="Rua Exemplo, 123 - São Paulo, SP"
+                    placeholder="World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040"
+                    rows={2}
                   />
                 </div>
                 <div>
@@ -535,7 +582,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     value={pageTexts.contactTexts?.whatsapp || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                    placeholder="5511999999999"
+                    placeholder="5562994594496"
                   />
                 </div>
                 <div>
@@ -568,7 +615,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 </div>
                 
                 <div>
-                  <Label>Descrição da Empresa</Label>
+                  <Label>Texto Descritivo (abaixo da logo)</Label>
                   <Textarea
                     value={pageTexts.footerTexts?.description || ''}
                     onChange={(e) => handleNestedChange('footerTexts', 'description', e.target.value)}

@@ -119,7 +119,7 @@ const Contact = () => {
           
           <div 
             ref={contentRef}
-            className="grid grid-cols-1 lg:grid-cols-5 gap-8"
+            className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-16"
           >
             <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
               <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
