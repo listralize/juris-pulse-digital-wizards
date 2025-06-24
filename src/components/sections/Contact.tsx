@@ -1,8 +1,9 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import UnifiedContactForm from '../contact/UnifiedContactForm';
+import { UnifiedContactForm } from '../contact/UnifiedContactForm';
 
 gsap.registerPlugin(ScrollTrigger);
 
