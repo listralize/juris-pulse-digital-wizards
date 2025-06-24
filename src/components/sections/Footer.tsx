@@ -104,116 +104,70 @@ const Footer: React.FC<FooterProps> = ({
   }, []);
 
   return (
-    <footer className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
+    <footer 
+      className={`fixed bottom-0 left-0 right-0 z-50 py-3 px-6 border-t backdrop-blur-lg ${
+        isDark 
+          ? 'border-white/20 bg-black/90 text-white' 
+          : 'border-gray-200 bg-white/90 text-black'
+      }`}
+      style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.1)' }}
+    >
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Coluna da Logo e Descrição */}
-          <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-3">
+          {/* Logo e Nome da Empresa */}
+          <div className="flex items-center gap-3">
             <img 
               src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
               alt={`${footerData.companyName} Logo`} 
-              className={`h-16 object-contain ${isDark ? 'brightness-150' : 'brightness-90'}`}
-              style={{
-                filter: isDark ? 'drop-shadow(0 0 15px rgba(255,255,255,0.2)) drop-shadow(3px 5px 10px rgba(0,0,0,0.95))' : 'drop-shadow(0 0 10px rgba(0,0,0,0.1))'
-              }} 
+              className={`h-8 object-contain ${isDark ? 'brightness-150' : 'brightness-90'}`}
             />
-            <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi max-w-sm text-sm leading-relaxed`}>
-              {footerData.description}
-            </p>
+            <span className={`font-canela text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+              {footerData.companyName}
+            </span>
           </div>
           
-          {/* Coluna de Contato Rápido */}
-          <div className="space-y-4">
-            <h4 className={`text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-              Contato Rápido
-            </h4>
-            <div className="space-y-3">
-              <div>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi text-sm leading-relaxed`}>
-                  {footerData.address}
-                </p>
-              </div>
-              <div>
-                <a 
-                  href={`mailto:${footerData.email}`} 
-                  className={`${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} hover:underline font-satoshi text-sm block`}
-                >
-                  {footerData.email}
-                </a>
-              </div>
-              <div>
-                <a 
-                  href={`tel:${footerData.phone.replace(/\D/g, '')}`}
-                  className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline font-satoshi text-sm block`}
-                >
-                  {footerData.phone}
-                </a>
-              </div>
-            </div>
+          {/* Informações de Contato */}
+          <div className="flex flex-col lg:flex-row items-center gap-4 text-xs">
+            <a 
+              href={`mailto:${footerData.email}`} 
+              className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline transition-colors`}
+            >
+              {footerData.email}
+            </a>
+            <a 
+              href={`tel:${footerData.phone.replace(/\D/g, '')}`}
+              className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline transition-colors`}
+            >
+              {footerData.phone}
+            </a>
+            <a 
+              href={`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={`px-3 py-1 text-xs font-medium transition-all duration-300 rounded-full ${
+                isDark 
+                  ? 'bg-white text-black hover:bg-gray-200' 
+                  : 'bg-black text-white hover:bg-gray-800'
+              }`}
+            >
+              WhatsApp
+            </a>
           </div>
           
-          {/* Coluna de Atendimento */}
-          <div className="space-y-4">
-            <h4 className={`text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-              Atendimento
-            </h4>
-            <div className="space-y-3">
-              <div>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi text-sm`}>
-                  Segunda a Sexta
-                </p>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi text-sm`}>
-                  9:00 - 18:00
-                </p>
-              </div>
-              <a 
-                href={`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={`inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-300 rounded-md ${isDark ? 'bg-white text-black hover:bg-black hover:text-white border-2 border-white hover:border-white' : 'bg-black text-white hover:bg-white hover:text-black border-2 border-black hover:border-black'}`}
-              >
-                Atendimento via WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        {/* Linha inferior com copyright e créditos */}
-        <div className={`mt-8 pt-6 border-t ${isDark ? 'border-white/30' : 'border-black/10'}`}>
-          {/* Crédito da Listralize */}
-          <div className="text-center mb-4">
-            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} font-satoshi`}>
-              Desenvolvido por{' '}
-              <a 
-                href="https://listralize.com.br/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}
-              >
-                Listralize
-              </a>
-            </p>
-          </div>
-          
-          {/* Copyright e links */}
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi`}>
-              © {currentYear} {footerData.companyName}. Todos os direitos reservados.
-            </p>
-            <div className="flex space-x-6">
-              <a 
-                href="#" 
-                className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi hover:underline`}
-              >
-                Política de Privacidade
-              </a>
-              <a 
-                href="#" 
-                className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi hover:underline`}
-              >
-                Termos de Uso
-              </a>
-            </div>
+          {/* Copyright e Créditos */}
+          <div className="flex flex-col lg:flex-row items-center gap-2 text-xs">
+            <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              © {currentYear} {footerData.companyName}
+            </span>
+            <span className={`hidden lg:block ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>•</span>
+            <a 
+              href="https://listralize.com.br/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={`${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} hover:underline transition-colors`}
+            >
+              Desenvolvido por Listralize
+            </a>
           </div>
         </div>
       </div>

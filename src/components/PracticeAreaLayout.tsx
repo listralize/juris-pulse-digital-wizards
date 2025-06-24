@@ -29,7 +29,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   }, []);
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`} style={{ paddingBottom: '80px' }}>
       <Navbar />
       
       <PageBanner 
