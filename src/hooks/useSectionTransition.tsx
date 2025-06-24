@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -178,8 +177,9 @@ export const useSectionTransition = (sections: Section[]) => {
         const contactElement = currentSection.querySelector('#contact') || currentSection;
         
         if (e.deltaY > 0) {
-          // Rolando para baixo - verifica se já chegou ao final
-          if (!isAtBottom(contactElement as HTMLElement)) {
+          // Rolando para baixo - verifica se já chegou ao final do footer
+          const isAtContactBottom = contactElement.scrollTop + contactElement.clientHeight >= contactElement.scrollHeight - 50;
+          if (!isAtContactBottom) {
             return; // Permite o scroll interno
           }
         } else {

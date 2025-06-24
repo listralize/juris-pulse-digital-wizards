@@ -148,7 +148,7 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Rodapé sem margem superior extra */}
+      {/* Footer aparece completamente */}
       <Footer respectTheme={true} />
     </div>
   );
