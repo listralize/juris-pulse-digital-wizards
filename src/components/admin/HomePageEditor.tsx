@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -64,6 +65,14 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       // Salvar via prop function
       if (onSaveAll) {
         await onSaveAll();
+        
+        // Disparar evento personalizado para notificar todas as seções
+        console.log('📡 HomePageEditor: Disparando evento pageTextsUpdated');
+        const event = new CustomEvent('pageTextsUpdated', { 
+          detail: pageTexts 
+        });
+        window.dispatchEvent(event);
+        
         toast.success('Alterações salvas com sucesso!');
       } else {
         toast.error('Função de salvar não disponível');

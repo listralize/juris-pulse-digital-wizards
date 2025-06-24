@@ -15,13 +15,14 @@ const ContactInfo = () => {
     whatsapp: '5562994594496'
   });
 
-  // Carregar dados iniciais do Supabase da tabela site_settings
+  // Carregar dados iniciais do Supabase
   useEffect(() => {
     const loadContactInfo = async () => {
       try {
-        console.log('📞 ContactInfo: Carregando dados iniciais da tabela site_settings...');
+        console.log('📞 ContactInfo: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
+        // Primeiro tentar buscar da site_settings
         const { data: settings } = await supabase
           .from('site_settings')
           .select('*')
@@ -30,26 +31,25 @@ const ContactInfo = () => {
           .maybeSingle();
 
         if (settings) {
-          console.log('📞 ContactInfo: Dados carregados do Supabase site_settings:', settings);
-          // Por enquanto, apenas buscar da tabela contact_info separada se necessário
-          const { data: contact } = await supabase
-            .from('contact_info')
-            .select('phone, email, address, whatsapp')
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+          console.log('📞 ContactInfo: Dados carregados do site_settings:', settings);
+        }
 
-          if (contact) {
-            console.log('📞 ContactInfo: Dados de contato encontrados:', contact);
-            setContactData({
-              phone: contact.phone || contactData.phone,
-              email: contact.email || contactData.email,
-              address: contact.address || contactData.address,
-              whatsapp: contact.whatsapp || contactData.whatsapp
-            });
-          } else {
-            console.log('📞 ContactInfo: Usando dados padrão');
-          }
+        // Buscar também da contact_info como fallback
+        const { data: contact } = await supabase
+          .from('contact_info')
+          .select('phone, email, address, whatsapp')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (contact) {
+          console.log('📞 ContactInfo: Dados de contato encontrados:', contact);
+          setContactData({
+            phone: contact.phone || contactData.phone,
+            email: contact.email || contactData.email,
+            address: contact.address || contactData.address,
+            whatsapp: contact.whatsapp || contactData.whatsapp
+          });
         }
       } catch (error) {
         console.error('❌ ContactInfo: Erro ao carregar informações de contato:', error);
@@ -68,6 +68,8 @@ const ContactInfo = () => {
       
       if (data.contactTexts) {
         const { phone, email, address, whatsapp } = data.contactTexts;
+        console.log('📞 ContactInfo: Atualizando dados de contato:', data.contactTexts);
+        
         setContactData(prev => ({
           ...prev,
           ...(phone && { phone }),
@@ -78,7 +80,6 @@ const ContactInfo = () => {
       }
     };
 
-    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
