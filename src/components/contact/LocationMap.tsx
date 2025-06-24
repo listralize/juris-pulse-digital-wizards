@@ -11,36 +11,16 @@ const LocationMap = () => {
     location: 'World Trade Center, Goiânia - GO'
   });
 
-  // Carregar configurações do mapa do Supabase
+  // Carregar configurações do mapa do Supabase da tabela site_settings
   useEffect(() => {
     const loadMapConfig = async () => {
       try {
-        console.log('🗺️ LocationMap: Carregando dados iniciais...');
+        console.log('🗺️ LocationMap: Carregando dados iniciais da site_settings...');
         const { supabase } = await import('../../integrations/supabase/client');
         
-        // Buscar na tabela contact_info
-        const { data: contact } = await supabase
-          .from('contact_info')
-          .select('address, map_embed_url')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (contact) {
-          console.log('🗺️ LocationMap: Dados carregados da contact_info:', contact);
-          if (contact.address) {
-            setMapConfig(prev => ({
-              ...prev,
-              location: contact.address
-            }));
-          }
-          if (contact.map_embed_url) {
-            setMapConfig(prev => ({
-              ...prev,
-              embedUrl: contact.map_embed_url
-            }));
-          }
-        }
+        // Não existe mapeamento direto na site_settings para o mapa ainda
+        // Mantendo os defaults por enquanto
+        console.log('🗺️ LocationMap: Usando configurações padrão do mapa');
       } catch (error) {
         console.error('❌ LocationMap: Erro ao carregar configurações do mapa:', error);
       }
@@ -59,14 +39,12 @@ const LocationMap = () => {
       if (data.contactTexts) {
         const { address, mapEmbedUrl } = data.contactTexts;
         if (address) {
-          console.log('🗺️ LocationMap: Atualizando endereço:', address);
           setMapConfig(prev => ({
             ...prev,
             location: address
           }));
         }
         if (mapEmbedUrl) {
-          console.log('🗺️ LocationMap: Atualizando URL do mapa:', mapEmbedUrl);
           setMapConfig(prev => ({
             ...prev,
             embedUrl: mapEmbedUrl
@@ -75,6 +53,7 @@ const LocationMap = () => {
       }
     };
 
+    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
