@@ -11,16 +11,36 @@ const LocationMap = () => {
     location: 'World Trade Center, Goiânia - GO'
   });
 
-  // Carregar configurações do mapa do Supabase da tabela site_settings
+  // Carregar configurações do mapa do Supabase
   useEffect(() => {
     const loadMapConfig = async () => {
       try {
-        console.log('🗺️ LocationMap: Carregando dados iniciais da site_settings...');
+        console.log('🗺️ LocationMap: Carregando dados iniciais...');
         const { supabase } = await import('../../integrations/supabase/client');
         
-        // Não existe mapeamento direto na site_settings para o mapa ainda
-        // Mantendo os defaults por enquanto
-        console.log('🗺️ LocationMap: Usando configurações padrão do mapa');
+        // Buscar dados da contact_info
+        const { data: contact } = await supabase
+          .from('contact_info')
+          .select('address, map_embed_url')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (contact) {
+          console.log('🗺️ LocationMap: Dados carregados:', contact);
+          if (contact.address) {
+            setMapConfig(prev => ({
+              ...prev,
+              location: contact.address
+            }));
+          }
+          if (contact.map_embed_url) {
+            setMapConfig(prev => ({
+              ...prev,
+              embedUrl: contact.map_embed_url
+            }));
+          }
+        }
       } catch (error) {
         console.error('❌ LocationMap: Erro ao carregar configurações do mapa:', error);
       }
