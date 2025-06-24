@@ -87,7 +87,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               ...(footer?.company_name && { companyName: footer.company_name }),
               ...(footer?.description && { description: footer.description })
             },
-            // Configurações gerais
+            // Configurações gerais - garantir que aboutMediaType seja um tipo válido
             ...(settings?.contact_title && { contactTitle: settings.contact_title }),
             ...(settings?.contact_subtitle && { contactSubtitle: settings.contact_subtitle }),
             ...(settings?.hero_title && { heroTitle: settings.hero_title }),
@@ -100,7 +100,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             ...(settings?.about_title && { aboutTitle: settings.about_title }),
             ...(settings?.about_description && { aboutDescription: settings.about_description }),
             ...(settings?.about_image && { aboutImage: settings.about_image }),
-            ...(settings?.about_media_type && { aboutMediaType: settings.about_media_type }),
+            ...(settings?.about_media_type && settings.about_media_type === 'video' ? { aboutMediaType: 'video' as const } : { aboutMediaType: 'image' as const }),
             ...(settings?.areas_title && { areasTitle: settings.areas_title }),
             ...(settings?.team_title && { teamTitle: settings.team_title }),
             ...(settings?.client_area_title && { clientAreaTitle: settings.client_area_title }),
