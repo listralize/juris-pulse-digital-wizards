@@ -6,42 +6,37 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
+import { ArrowUpRight, Scale, Building2, Users, Shield, Briefcase, Gavel, Heart, Coins } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const PracticeAreas = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const { theme } = useTheme();
   const { pageTexts, servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
   const { categories: supabaseCategories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const isDark = theme === 'dark';
 
-  // Estado local para receber atualizações em tempo real
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [localCategories, setLocalCategories] = useState(supabaseCategories);
 
-  // Atualizar quando pageTexts muda
   useEffect(() => {
     setLocalPageTexts(pageTexts);
   }, [pageTexts]);
 
-  // Atualizar quando categories mudam
   useEffect(() => {
     setLocalCategories(supabaseCategories);
   }, [supabaseCategories]);
 
-  // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📱 PracticeAreas: Recebendo atualização de textos:', event.detail);
       setLocalPageTexts(event.detail);
     };
 
     const handleCategoriesUpdate = (event: CustomEvent) => {
-      console.log('📱 PracticeAreas: Recebendo atualização de categorias:', event.detail);
       setLocalCategories(event.detail);
     };
 
@@ -54,28 +49,44 @@ const PracticeAreas = () => {
     };
   }, []);
 
-  // Gerar áreas de atuação baseadas nas categorias do Supabase
+  const iconMapping = {
+    'administrativo': Building2,
+    'tributario': Coins,
+    'empresarial': Briefcase,
+    'trabalho': Users,
+    'previdenciario': Shield,
+    'consumidor': Scale,
+    'constitucional': Gavel,
+    'civil': Scale,
+    'familia': Heart
+  };
+
   const practiceAreas = React.useMemo(() => {
     if (!localCategories || localCategories.length === 0) {
-      console.log('⚠️ Nenhuma categoria encontrada, usando áreas padrão');
       return [
         {
           id: 'familia-fallback',
           title: 'Direito de Família',
-          description: 'Proteção e orientação em questões familiares',
-          href: '/areas/familia'
+          description: 'Proteção e orientação jurídica',
+          href: '/areas/familia',
+          services: 0,
+          icon: Heart
         },
         {
           id: 'tributario-fallback', 
           title: 'Direito Tributário',
-          description: 'Consultoria e planejamento tributário',
-          href: '/areas/tributario'
+          description: 'Consultoria e planejamento',
+          href: '/areas/tributario',
+          services: 0,
+          icon: Coins
         },
         {
           id: 'empresarial-fallback',
           title: 'Direito Empresarial', 
-          description: 'Suporte jurídico para empresas',
-          href: '/areas/empresarial'
+          description: 'Suporte jurídico completo',
+          href: '/areas/empresarial',
+          services: 0,
+          icon: Briefcase
         }
       ];
     }
@@ -85,14 +96,15 @@ const PracticeAreas = () => {
         page.category === category.value
       ) || [];
 
+      const IconComponent = iconMapping[category.value as keyof typeof iconMapping] || Scale;
+
       return {
         id: category.id || category.value,
         title: category.label || category.name,
         description: category.description || `Serviços especializados em ${category.label}`,
         href: `/areas/${category.value}`,
-        pageCount: categoryPages.length,
-        icon: category.icon,
-        color: category.color
+        services: categoryPages.length,
+        icon: IconComponent
       };
     });
   }, [localCategories, servicePages]);
@@ -112,29 +124,23 @@ const PracticeAreas = () => {
     
     tl.fromTo(
       titleRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6 }
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
     );
     
-    cardsRef.current.forEach((card, index) => {
-      if (card) {
-        gsap.fromTo(
-          card,
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            delay: 0.1 * index,
-            scrollTrigger: {
-              trigger: card,
-              start: "top 90%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-      }
-    });
+    tl.fromTo(
+      gridRef.current?.children || [],
+      { opacity: 0, y: 40, scale: 0.95 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power3.out"
+      },
+      "-=0.4"
+    );
     
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -143,9 +149,10 @@ const PracticeAreas = () => {
 
   if (isLoading) {
     return (
-      <section className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24`}>
-        <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      <section className={`${isDark ? 'bg-black' : 'bg-white'} min-h-screen flex items-center justify-center`}>
+        <div className="relative">
+          <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin ${isDark ? 'border-white/20' : 'border-black/20'}`}></div>
+          <div className={`absolute inset-0 w-8 h-8 border-2 border-transparent border-t-current rounded-full animate-spin ${isDark ? 'text-white' : 'text-black'}`}></div>
         </div>
       </section>
     );
@@ -157,69 +164,114 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen flex flex-col justify-center py-8 px-4 md:px-8 lg:px-16`}
+      className={`${isDark ? 'bg-black' : 'bg-white'} min-h-screen py-16 px-4 md:px-8 lg:px-16 relative overflow-hidden`}
     >
-      <div className="max-w-7xl mx-auto w-full">
-        <h2 
-          ref={titleRef}
-          className={`text-2xl md:text-3xl lg:text-4xl font-canela text-center mb-6 md:mb-8 ${isDark ? 'text-white' : 'text-black'}`}
-        >
-          {areasTitle}
-        </h2>
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 
+            ref={titleRef}
+            className={`text-3xl md:text-4xl lg:text-5xl font-light tracking-tight mb-4 ${isDark ? 'text-white' : 'text-black'}`}
+          >
+            {areasTitle}
+          </h2>
+          <div className={`w-12 h-px mx-auto ${isDark ? 'bg-white/30' : 'bg-black/30'}`}></div>
+        </div>
         
-        {/* BentoGrid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-6xl mx-auto">
+        {/* Grid */}
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {practiceAreas.map((area, index) => {
-            // Define diferentes tamanhos para criar layout BentoGrid
-            const isLarge = index === 0 || index === 4 || index === 7;
-            const isTall = index === 1 || index === 5;
+            const IconComponent = area.icon;
             
             return (
               <Link 
                 key={area.id}
                 to={area.href}
-                className={`group block ${
-                  isLarge ? 'md:col-span-2' : ''
-                } ${
-                  isTall ? 'md:row-span-2' : ''
-                }`}
+                className="group block"
               >
-                <div 
-                  className={`${
-                    isDark ? 'bg-black border-white/10' : 'bg-white border-gray-100'
-                  } backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02] p-4 md:p-5 rounded-lg border h-full min-h-[120px] flex flex-col justify-between`}
-                  ref={el => cardsRef.current[index] = el}
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      {area.icon && (
-                        <div 
-                          className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-semibold ${
-                            isDark ? 'bg-white text-black' : 'bg-black text-white'
-                          }`}
-                        >
-                          {area.icon}
-                        </div>
-                      )}
-                      <h3 className={`text-sm md:text-base lg:text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+                <div className={`
+                  relative h-64 rounded-2xl border transition-all duration-500 ease-out
+                  hover:scale-[1.02] hover:-translate-y-1
+                  ${isDark 
+                    ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
+                    : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
+                  }
+                  backdrop-blur-sm
+                `}>
+                  
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-500"></div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10 p-8 h-full flex flex-col justify-between">
+                    
+                    {/* Icon */}
+                    <div className="mb-auto">
+                      <div className={`
+                        w-12 h-12 rounded-full flex items-center justify-center mb-6
+                        transition-all duration-500 group-hover:scale-110
+                        ${isDark 
+                          ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
+                          : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
+                        }
+                      `}>
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className={`
+                        text-xl font-medium mb-3 transition-all duration-300
+                        ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
+                      `}>
                         {area.title}
                       </h3>
+                      
+                      {/* Description */}
+                      <p className={`
+                        text-sm leading-relaxed transition-all duration-300
+                        ${isDark ? 'text-white/60 group-hover:text-white/70' : 'text-black/60 group-hover:text-black/70'}
+                      `}>
+                        {area.description}
+                      </p>
                     </div>
-                    <p className={`text-xs md:text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} line-clamp-2`}>
-                      {area.description}
-                    </p>
+                    
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-4">
+                      <span className={`
+                        text-xs font-medium
+                        ${isDark ? 'text-white/40' : 'text-black/40'}
+                      `}>
+                        {area.services} serviço{area.services !== 1 ? 's' : ''}
+                      </span>
+                      
+                      <div className={`
+                        w-8 h-8 rounded-full flex items-center justify-center
+                        transition-all duration-300 group-hover:scale-110
+                        ${isDark 
+                          ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
+                          : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
+                        }
+                      `}>
+                        <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </div>
+                    </div>
                   </div>
-                  
-                  {area.pageCount !== undefined && (
-                    <p className={`text-xs mt-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''}
-                    </p>
-                  )}
                 </div>
               </Link>
             );
           })}
         </div>
+
+        {/* Bottom spacing */}
+        <div className="h-20"></div>
       </div>
     </section>
   );
