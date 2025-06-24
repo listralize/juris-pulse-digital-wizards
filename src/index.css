@@ -97,6 +97,7 @@
     font-feature-settings: "cv11", "ss01";
     font-variant-numeric: oldstyle-nums;
     scroll-padding-top: 80px;
+    overflow-x: hidden;
   }
 
   body {
@@ -109,6 +110,23 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    /* Improved mobile scrolling */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }
+
+  /* Mobile-specific scroll optimizations */
+  @media (max-width: 768px) {
+    html {
+      scroll-padding-top: 70px;
+    }
+    
+    body {
+      /* Prevent bounce scrolling on iOS */
+      overscroll-behavior-y: none;
+      /* Ensure smooth scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+    }
   }
 
   body.light {
@@ -136,8 +154,8 @@
   
   /* Better scrollbar for webkit browsers */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -161,6 +179,14 @@
   .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.4);
   }
+
+  /* Mobile scrollbar (thinner) */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+    }
+  }
 }
 
 @layer components {
@@ -177,6 +203,7 @@
   /* Layout & Page Structure */
   .min-h-screen {
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
     width: 100%;
     position: relative;
     z-index: 10;
@@ -353,6 +380,19 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    .mobile-padding-top {
+      padding-top: 70px;
+    }
+    
+    .mobile-scroll-container {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+  }
 }
 
 /* Hide scrollbar for certain elements */
@@ -363,4 +403,11 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Mobile viewport fixes */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
 }

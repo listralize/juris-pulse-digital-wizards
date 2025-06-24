@@ -7,7 +7,6 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
-import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
@@ -24,7 +23,7 @@ const Index = () => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Configurar scroll suave e responsivo
+      // Configurar scroll otimizado para mobile
       body.style.overflow = 'auto';
       html.style.overflow = 'auto';
       body.style.height = 'auto';
@@ -40,9 +39,13 @@ const Index = () => {
       // Configurar scroll suave
       html.style.scrollBehavior = 'smooth';
       
+      // Mobile scroll optimizations
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
+      
+      // Prevent bounce scrolling on iOS
+      body.style.overscrollBehavior = 'none';
       
       return () => {
         if ('scrollRestoration' in history) {
@@ -84,7 +87,6 @@ const Index = () => {
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
-      <FloatingFooter />
       
       <SectionsContainer />
 
