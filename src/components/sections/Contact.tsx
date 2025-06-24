@@ -100,19 +100,10 @@ const Contact = () => {
   }, []);
 
   return (
-    <div 
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
-      style={{ 
-        minHeight: '100vh',
-        height: 'auto',
-        overflow: 'visible',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
+    <div className="min-h-screen flex flex-col">
       <div 
         ref={sectionRef}
-        className="flex-1 w-full py-16 px-4 md:px-6 lg:px-24"
+        className={`flex-1 w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
       >
         <div className="max-w-7xl mx-auto">
           <div ref={titleRef} className="mb-12 text-center">
@@ -150,8 +141,10 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Footer totalmente visível */}
-      <Footer respectTheme={true} />
+      {/* Rodapé com margem superior menor para que apareça completamente */}
+      <div style={{ marginTop: '80px' }}>
+        <Footer respectTheme={true} />
+      </div>
     </div>
   );
 };

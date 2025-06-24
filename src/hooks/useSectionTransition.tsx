@@ -173,18 +173,18 @@ export const useSectionTransition = (sections: Section[]) => {
       const isMobile = window.innerWidth <= 768;
       const currentSection = sectionsRef.current[activeSectionIndex];
       
-      // Se estamos na seção de contato, permitir scroll interno
+      // Se estamos na seção de contato
       if (activeSection === 'contact' && currentSection) {
-        const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
+        const contactElement = currentSection.querySelector('#contact') || currentSection;
         
-        if (scrollDirection === 'down') {
-          // Verificar se chegou ao final do scroll
-          if (!isAtBottom(currentSection)) {
+        if (e.deltaY > 0) {
+          // Rolando para baixo - verifica se já chegou ao final
+          if (!isAtBottom(contactElement as HTMLElement)) {
             return; // Permite o scroll interno
           }
         } else {
-          // Verificar se está no topo
-          if (!isAtTop(currentSection)) {
+          // Rolando para cima - verifica se está no topo
+          if (!isAtTop(contactElement as HTMLElement)) {
             return; // Permite o scroll interno
           }
         }
