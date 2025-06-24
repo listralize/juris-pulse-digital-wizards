@@ -2,12 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
+import LegalPopup from './legal/LegalPopup';
 
 const FloatingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showTimePopup, setShowTimePopup] = useState(false);
+  const [showLegalPopup, setShowLegalPopup] = useState(false);
 
   // Estados locais para dados editáveis do footer
   const [footerData, setFooterData] = useState({
@@ -94,6 +96,21 @@ const FloatingFooter: React.FC = () => {
     };
   }, []);
 
+  // Verificar se os termos já foram aceitos
+  useEffect(() => {
+    const checkTermsAcceptance = () => {
+      const accepted = localStorage.getItem('legal-terms-accepted');
+      if (!accepted) {
+        // Mostrar popup após 2 segundos
+        setTimeout(() => {
+          setShowLegalPopup(true);
+        }, 2000);
+      }
+    };
+
+    checkTermsAcceptance();
+  }, []);
+
   // Funções para ações dos ícones
   const handlePhoneClick = () => {
     window.open(`tel:${footerData.phone.replace(/\D/g, '')}`, '_self');
@@ -111,6 +128,10 @@ const FloatingFooter: React.FC = () => {
 
   const handleTimeClick = () => {
     setShowTimePopup(true);
+  };
+
+  const handleLegalClick = () => {
+    setShowLegalPopup(true);
   };
 
   return (
@@ -135,7 +156,7 @@ const FloatingFooter: React.FC = () => {
               <img 
                 src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
                 alt={`${footerData.companyName} Logo`} 
-                className="h-12 object-contain"
+                className="h-14 object-contain"
               />
               <div className="flex items-center space-x-6">
                 {/* Ícone do Telefone */}
@@ -194,19 +215,12 @@ const FloatingFooter: React.FC = () => {
             
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-4 text-xs">
-                <a 
-                  href="#" 
+                <button 
+                  onClick={handleLegalClick}
                   className={`hover:underline transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-black/70 hover:text-black'}`}
                 >
-                  Política de Privacidade
-                </a>
-                <span className="text-current/30">|</span>
-                <a 
-                  href="#" 
-                  className={`hover:underline transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-black/70 hover:text-black'}`}
-                >
-                  Termos de Uso
-                </a>
+                  Termos & Privacidade
+                </button>
                 <span className="text-current/30">|</span>
                 <a 
                   href="https://listralize.com.br/" 
@@ -229,7 +243,7 @@ const FloatingFooter: React.FC = () => {
               <img 
                 src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
                 alt={`${footerData.companyName} Logo`} 
-                className="h-8 object-contain"
+                className="h-10 object-contain"
               />
             </div>
             
@@ -286,15 +300,10 @@ const FloatingFooter: React.FC = () => {
             
             <div className="text-center space-y-2 pt-3 border-t border-current/20">
               <div className="flex items-center justify-center space-x-2 text-xs">
-                <a href="#" className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-                  Política de Privacidade
-                </a>
+                <button onClick={handleLegalClick} className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}>
+                  Termos & Privacidade
+                </button>
                 <span className="text-current/30">•</span>
-                <a href="#" className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-                  Termos de Uso
-                </a>
-              </div>
-              <div className="text-xs">
                 <a 
                   href="https://listralize.com.br/" 
                   target="_blank" 
@@ -348,6 +357,12 @@ const FloatingFooter: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Popup Legal */}
+      <LegalPopup 
+        isOpen={showLegalPopup} 
+        onClose={() => setShowLegalPopup(false)} 
+      />
     </>
   );
 };

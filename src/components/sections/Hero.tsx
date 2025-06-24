@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -99,48 +100,52 @@ const Hero = () => {
     };
   }, []);
 
-  // Parallax effect
+  // Parallax effect with elevated content
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
+    // Animate background first
     tl.fromTo(
       bgRef.current, 
-      { opacity: 0 }, 
-      { opacity: 1, duration: 1.5 }
+      { opacity: 0, scale: 1.1 }, 
+      { opacity: 1, scale: 1, duration: 2 }
     )
+    // Then animate content with more dynamic movement
     .fromTo(
       logoRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 1.5 },
-      "-=1"
+      { opacity: 0, y: 50, scale: 0.8 }, 
+      { opacity: 1, y: 0, scale: 1, duration: 1.2 },
+      "-=1.5"
     )
     .fromTo(
       headlineRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.7"
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 1 },
+      "-=0.8"
     )
     .fromTo(
       subheadlineRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
+      "-=0.6"
     )
     .fromTo(
       ctaRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
+      { opacity: 0, y: 20, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.8 },
+      "-=0.4"
     );
     
+    // Enhanced parallax effect
     gsap.to(bgRef.current, {
-      yPercent: -30,
+      yPercent: -20,
+      scale: 1.05,
       ease: "none",
       scrollTrigger: {
         trigger: "#home",
         start: "top top",
         end: "bottom top",
-        scrub: true
+        scrub: 1
       }
     });
     
@@ -152,80 +157,67 @@ const Hero = () => {
 
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
-      {/* Background com marble banner */}
-      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.2)' }}>
+      {/* Background com marble banner - mais elevado */}
+      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.15) translateY(-5%)' }}>
         <MarbleBanner />
+        {/* Overlay gradient mais suave */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
       </div>
       
-      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
+      {/* Conteúdo mais centralizado e elevado */}
+      <div className="relative z-10 text-center max-w-5xl h-full flex flex-col justify-center items-center -mt-16 md:-mt-20">
         <div 
           ref={logoRef} 
-          className="mb-2 md:mb-4 w-full max-w-sm md:max-w-lg mx-auto relative"
+          className="mb-6 md:mb-8 w-full max-w-md md:max-w-xl mx-auto relative"
         >
           <div className="logo-container relative">
             <img 
               src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
-              className="w-full h-auto relative z-10"
+              className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300"
               style={{
-                filter: 'drop-shadow(5px 8px 12px rgba(0,0,0,0.95))'
+                filter: 'drop-shadow(0 10px 25px rgba(0,0,0,0.8))'
               }}
             />
           </div>
         </div>
         
-        <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 md:mb-3 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
+        <h1 ref={headlineRef} className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 md:mb-6 text-center max-w-4xl mx-auto font-canela tracking-tight text-white">
           {heroTitle}
         </h1>
         
-        <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-4 md:mb-6 text-center max-w-lg mx-auto font-satoshi">
+        <p ref={subheadlineRef} className="text-lg md:text-xl lg:text-2xl text-gray-200 mb-8 md:mb-10 text-center max-w-2xl mx-auto font-satoshi leading-relaxed">
           {heroSubtitle}
         </p>
         
-        <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
+        <div ref={ctaRef} className="flex flex-col md:flex-row gap-4 justify-center">
           <a 
             href={primaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
+            className="group flex items-center justify-center gap-3 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-lg md:text-xl px-8 md:px-10 py-4 md:py-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
           >
             {primaryButtonText}
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </a>
           
           <a 
             href={secondaryButtonLink}
-            className="flex items-center justify-center gap-2 bg-transparent text-white border border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
+            className="group flex items-center justify-center gap-3 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-lg md:text-xl px-8 md:px-10 py-4 md:py-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
           >
             {secondaryButtonText}
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </a>
         </div>
       </div>
       
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path 
-            d="M7 13L12 18L17 13" 
-            stroke="#FFFFFF"
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          />
-          <path 
-            d="M7 7L12 12L17 7" 
-            stroke="#FFFFFF"
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          />
-        </svg>
+      {/* Scroll indicator mais elegante */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="animate-bounce">
+          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+          </div>
+        </div>
       </div>
     </section>
   );
