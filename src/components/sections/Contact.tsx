@@ -141,8 +141,8 @@ const Contact = () => {
         </div>
       </div>
       
-      {/* Rodapé com margem superior de 120px para garantir que não fique cortado */}
-      <div style={{ marginTop: '120px' }}>
+      {/* Rodapé com margem superior de 160px para garantir que não fique cortado */}
+      <div style={{ marginTop: '160px' }}>
         <Footer respectTheme={true} />
       </div>
     </div>
