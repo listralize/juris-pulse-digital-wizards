@@ -45,11 +45,11 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
-          padding: '2rem 1rem',
-          paddingBottom: id === 'contact' ? '140px' : '120px'
+          padding: '1.5rem 1rem',
+          paddingBottom: id === 'contact' ? '120px' : '100px'
         }}
       >
-        <div className="w-full h-full max-w-7xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
+        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
           {children}
         </div>
       </div>

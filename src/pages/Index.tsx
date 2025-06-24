@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -8,6 +8,7 @@ import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import FloatingFooter from '../components/FloatingFooter';
+import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
 
@@ -16,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [showLegalPopup, setShowLegalPopup] = useState(false);
   
   useEffect(() => {
     try {
@@ -54,6 +56,21 @@ const Index = () => {
       console.error('❌ Erro ao configurar scroll:', error);
     }
   }, []);
+
+  // Verificar se os termos já foram aceitos e mostrar popup automaticamente
+  useEffect(() => {
+    const checkTermsAcceptance = () => {
+      const accepted = localStorage.getItem('legal-terms-accepted');
+      if (!accepted) {
+        // Mostrar popup após 1 segundo
+        setTimeout(() => {
+          setShowLegalPopup(true);
+        }, 1000);
+      }
+    };
+
+    checkTermsAcceptance();
+  }, []);
   
   return (
     <div 
@@ -73,6 +90,12 @@ const Index = () => {
       <FloatingFooter />
       
       <SectionsContainer />
+
+      {/* Popup Legal automático */}
+      <LegalPopup 
+        isOpen={showLegalPopup} 
+        onClose={() => setShowLegalPopup(false)} 
+      />
     </div>
   );
 };

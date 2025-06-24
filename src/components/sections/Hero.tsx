@@ -20,7 +20,7 @@ const Hero = () => {
   // Estados para os textos editáveis
   const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
   const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
-  const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco no WhatsApp');
+  const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco');
   const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
@@ -108,38 +108,38 @@ const Hero = () => {
     tl.fromTo(
       bgRef.current, 
       { opacity: 0, scale: 1.1 }, 
-      { opacity: 1, scale: 1, duration: 2 }
+      { opacity: 1, scale: 1, duration: 1.5 }
     )
     // Then animate content with more dynamic movement
     .fromTo(
       logoRef.current, 
-      { opacity: 0, y: 50, scale: 0.8 }, 
-      { opacity: 1, y: 0, scale: 1, duration: 1.2 },
-      "-=1.5"
+      { opacity: 0, y: 30, scale: 0.9 }, 
+      { opacity: 1, y: 0, scale: 1, duration: 1 },
+      "-=1.2"
     )
     .fromTo(
       headlineRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1 },
-      "-=0.8"
-    )
-    .fromTo(
-      subheadlineRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8 },
       "-=0.6"
     )
     .fromTo(
-      ctaRef.current,
-      { opacity: 0, y: 20, scale: 0.95 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8 },
+      subheadlineRef.current,
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6 },
       "-=0.4"
+    )
+    .fromTo(
+      ctaRef.current,
+      { opacity: 0, y: 15, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.6 },
+      "-=0.3"
     );
     
     // Enhanced parallax effect
     gsap.to(bgRef.current, {
-      yPercent: -20,
-      scale: 1.05,
+      yPercent: -15,
+      scale: 1.03,
       ease: "none",
       scrollTrigger: {
         trigger: "#home",
@@ -156,19 +156,19 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-4 relative overflow-hidden bg-black">
+    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
       {/* Background com marble banner - mais elevado */}
-      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.15) translateY(-5%)' }}>
+      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.1) translateY(-3%)' }}>
         <MarbleBanner />
         {/* Overlay gradient mais suave */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
       </div>
       
-      {/* Conteúdo mais centralizado e elevado */}
-      <div className="relative z-10 text-center max-w-5xl h-full flex flex-col justify-center items-center -mt-16 md:-mt-20">
+      {/* Conteúdo mais centralizado e compacto */}
+      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
         <div 
           ref={logoRef} 
-          className="mb-6 md:mb-8 w-full max-w-md md:max-w-xl mx-auto relative"
+          className="mb-6 md:mb-8 w-full max-w-sm md:max-w-lg mx-auto relative"
         >
           <div className="logo-container relative">
             <img 
@@ -176,46 +176,46 @@ const Hero = () => {
               alt="Serafim & Trombela Advocacia Logo"
               className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300"
               style={{
-                filter: 'drop-shadow(0 10px 25px rgba(0,0,0,0.8))'
+                filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.7))'
               }}
             />
           </div>
         </div>
         
-        <h1 ref={headlineRef} className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 md:mb-6 text-center max-w-4xl mx-auto font-canela tracking-tight text-white">
+        <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-5 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
           {heroTitle}
         </h1>
         
-        <p ref={subheadlineRef} className="text-lg md:text-xl lg:text-2xl text-gray-200 mb-8 md:mb-10 text-center max-w-2xl mx-auto font-satoshi leading-relaxed">
+        <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-6 md:mb-8 text-center max-w-xl mx-auto font-satoshi leading-relaxed">
           {heroSubtitle}
         </p>
         
-        <div ref={ctaRef} className="flex flex-col md:flex-row gap-4 justify-center">
+        <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
           <a 
             href={primaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center justify-center gap-3 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-lg md:text-xl px-8 md:px-10 py-4 md:py-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            className="group flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
           >
             {primaryButtonText}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
           <a 
             href={secondaryButtonLink}
-            className="group flex items-center justify-center gap-3 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-lg md:text-xl px-8 md:px-10 py-4 md:py-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
           >
             {secondaryButtonText}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
         </div>
       </div>
       
-      {/* Scroll indicator mais elegante */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+      {/* Scroll indicator mais compacto */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
         <div className="animate-bounce">
-          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+          <div className="w-5 h-8 border-2 border-white rounded-full flex justify-center">
+            <div className="w-0.5 h-2 bg-white rounded-full mt-1.5 animate-pulse"></div>
           </div>
         </div>
       </div>

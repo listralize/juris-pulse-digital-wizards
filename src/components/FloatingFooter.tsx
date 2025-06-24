@@ -2,14 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
-import LegalPopup from './legal/LegalPopup';
 
 const FloatingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showTimePopup, setShowTimePopup] = useState(false);
-  const [showLegalPopup, setShowLegalPopup] = useState(false);
 
   // Estados locais para dados editáveis do footer
   const [footerData, setFooterData] = useState({
@@ -96,21 +94,6 @@ const FloatingFooter: React.FC = () => {
     };
   }, []);
 
-  // Verificar se os termos já foram aceitos
-  useEffect(() => {
-    const checkTermsAcceptance = () => {
-      const accepted = localStorage.getItem('legal-terms-accepted');
-      if (!accepted) {
-        // Mostrar popup após 2 segundos
-        setTimeout(() => {
-          setShowLegalPopup(true);
-        }, 2000);
-      }
-    };
-
-    checkTermsAcceptance();
-  }, []);
-
   // Funções para ações dos ícones
   const handlePhoneClick = () => {
     window.open(`tel:${footerData.phone.replace(/\D/g, '')}`, '_self');
@@ -130,98 +113,87 @@ const FloatingFooter: React.FC = () => {
     setShowTimePopup(true);
   };
 
-  const handleLegalClick = () => {
-    setShowLegalPopup(true);
-  };
-
   return (
     <>
       <footer 
-        className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 
-          w-[95%] max-w-5xl mx-auto rounded-2xl shadow-2xl backdrop-blur-md
+        className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
+          w-[95%] max-w-4xl mx-auto rounded-xl shadow-xl backdrop-blur-md
           ${isDark 
             ? 'bg-black/90 border border-white/20 text-white' 
             : 'bg-white/95 border border-gray-200 text-black'
           }
-          transition-all duration-300 hover:shadow-3xl`}
+          transition-all duration-300 hover:shadow-2xl`}
         style={{
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)'
+          backdropFilter: 'blur(15px)',
+          WebkitBackdropFilter: 'blur(15px)'
         }}
       >
-        <div className="px-4 py-4 sm:px-6 sm:py-5">
+        <div className="px-4 py-3 sm:px-5 sm:py-4">
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center justify-between">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-6">
               <img 
                 src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
                 alt={`${footerData.companyName} Logo`} 
-                className="h-14 object-contain"
+                className="h-10 object-contain"
               />
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4">
                 {/* Ícone do Telefone */}
                 <button
                   onClick={handlePhoneClick}
-                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                     ${isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white' 
                       : 'bg-black/10 hover:bg-black/20 text-black'
                     }`}
                   title={`Ligar para ${footerData.phone}`}
                 >
-                  <Phone className="h-5 w-5" />
+                  <Phone className="h-4 w-4" />
                 </button>
 
                 {/* Ícone do Email */}
                 <button
                   onClick={handleEmailClick}
-                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                     ${isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white' 
                       : 'bg-black/10 hover:bg-black/20 text-black'
                     }`}
                   title={`Enviar email para ${footerData.email}`}
                 >
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-4 w-4" />
                 </button>
 
                 {/* Ícone da Localização */}
                 <button
                   onClick={handleLocationClick}
-                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                     ${isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white' 
                       : 'bg-black/10 hover:bg-black/20 text-black'
                     }`}
                   title={`Ver localização: ${footerData.address}`}
                 >
-                  <MapPin className="h-5 w-5" />
+                  <MapPin className="h-4 w-4" />
                 </button>
 
                 {/* Ícone do Horário */}
                 <button
                   onClick={handleTimeClick}
-                  className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                     ${isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white' 
                       : 'bg-black/10 hover:bg-black/20 text-black'
                     }`}
                   title="Ver horário de funcionamento"
                 >
-                  <Clock className="h-5 w-5" />
+                  <Clock className="h-4 w-4" />
                 </button>
               </div>
             </div>
             
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-4 text-xs">
-                <button 
-                  onClick={handleLegalClick}
-                  className={`hover:underline transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-black/70 hover:text-black'}`}
-                >
-                  Termos & Privacidade
-                </button>
-                <span className="text-current/30">|</span>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 text-xs">
                 <a 
                   href="https://listralize.com.br/" 
                   target="_blank" 
@@ -239,71 +211,67 @@ const FloatingFooter: React.FC = () => {
 
           {/* Mobile Layout */}
           <div className="md:hidden">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <img 
                 src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
                 alt={`${footerData.companyName} Logo`} 
-                className="h-10 object-contain"
+                className="h-8 object-contain"
               />
             </div>
             
-            <div className="flex items-center justify-center space-x-6 mb-4">
+            <div className="flex items-center justify-center space-x-4 mb-3">
               {/* Ícones Mobile */}
               <button
                 onClick={handlePhoneClick}
-                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title={`Ligar para ${footerData.phone}`}
               >
-                <Phone className="h-5 w-5" />
+                <Phone className="h-4 w-4" />
               </button>
 
               <button
                 onClick={handleEmailClick}
-                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title={`Enviar email para ${footerData.email}`}
               >
-                <Mail className="h-5 w-5" />
+                <Mail className="h-4 w-4" />
               </button>
 
               <button
                 onClick={handleLocationClick}
-                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title={`Ver localização: ${footerData.address}`}
               >
-                <MapPin className="h-5 w-5" />
+                <MapPin className="h-4 w-4" />
               </button>
 
               <button
                 onClick={handleTimeClick}
-                className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                   ${isDark 
                     ? 'bg-white/10 hover:bg-white/20 text-white' 
                     : 'bg-black/10 hover:bg-black/20 text-black'
                   }`}
                 title="Ver horário de funcionamento"
               >
-                <Clock className="h-5 w-5" />
+                <Clock className="h-4 w-4" />
               </button>
             </div>
             
-            <div className="text-center space-y-2 pt-3 border-t border-current/20">
+            <div className="text-center space-y-1 pt-2 border-t border-current/20">
               <div className="flex items-center justify-center space-x-2 text-xs">
-                <button onClick={handleLegalClick} className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}>
-                  Termos & Privacidade
-                </button>
-                <span className="text-current/30">•</span>
                 <a 
                   href="https://listralize.com.br/" 
                   target="_blank" 
@@ -324,12 +292,12 @@ const FloatingFooter: React.FC = () => {
       {/* Popup de Horário */}
       {showTimePopup && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className={`relative p-6 rounded-2xl shadow-2xl max-w-sm mx-4 ${
+          <div className={`relative p-5 rounded-xl shadow-2xl max-w-xs mx-4 ${
             isDark ? 'bg-black border border-white/20 text-white' : 'bg-white border border-gray-200 text-black'
           }`}>
             <button
               onClick={() => setShowTimePopup(false)}
-              className={`absolute top-4 right-4 p-1 rounded-full transition-colors ${
+              className={`absolute top-3 right-3 p-1 rounded-full transition-colors ${
                 isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'
               }`}
             >
@@ -337,8 +305,8 @@ const FloatingFooter: React.FC = () => {
             </button>
             
             <div className="text-center">
-              <Clock className="h-12 w-12 mx-auto mb-4 opacity-70" />
-              <h3 className="text-lg font-semibold mb-4">Horário de Funcionamento</h3>
+              <Clock className="h-10 w-10 mx-auto mb-3 opacity-70" />
+              <h3 className="text-lg font-semibold mb-3">Horário de Funcionamento</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Segunda a Sexta:</span>
@@ -357,12 +325,6 @@ const FloatingFooter: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Popup Legal */}
-      <LegalPopup 
-        isOpen={showLegalPopup} 
-        onClose={() => setShowLegalPopup(false)} 
-      />
     </>
   );
 };

@@ -47,14 +47,14 @@ const Partners = () => {
     
     tl.fromTo(
       titleRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1 }
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
     )
     .fromTo(
       gridRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.4"
     );
     
     return () => {
@@ -65,7 +65,7 @@ const Partners = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+        <div className={`animate-spin rounded-full h-6 w-6 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
       </div>
     );
   }
@@ -75,7 +75,7 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`h-full w-full py-8 px-4 md:px-12 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full w-full py-12 px-6 md:px-12 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -83,20 +83,21 @@ const Partners = () => {
         justifyContent: 'center'
       }}
     >
-      <div className="max-w-7xl mx-auto w-full">
-        <div className="text-center mb-12">
+      <div className="max-w-6xl mx-auto w-full">
+        <div className="text-center mb-8">
           <h2 
             ref={titleRef}
-            className={`text-4xl md:text-5xl lg:text-6xl mb-6 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}
           >
             {teamTitle}
           </h2>
+          <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
         </div>
         
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {teamMembers.map((member, index) => (
             <div key={index} className="group">
-              <div className={`relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 ${isDark ? 'bg-white/5' : 'bg-white'} shadow-lg hover:shadow-2xl`}>
+              <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${isDark ? 'bg-white/5' : 'bg-white'} shadow-md hover:shadow-xl`}>
                 <div className="aspect-square relative">
                   {member.image ? (
                     <img 
@@ -105,21 +106,21 @@ const Partners = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className={`w-full h-full flex items-center justify-center text-6xl ${isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'}`}>
+                    <div className={`w-full h-full flex items-center justify-center text-4xl ${isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'}`}>
                       👤
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 
-                <div className="p-6">
-                  <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                <div className="p-4">
+                  <h3 className={`text-lg font-semibold mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
                     {member.name}
                   </h3>
-                  <p className={`text-sm mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                  <p className={`text-sm mb-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
                     {member.title || 'Advogado'}
                   </p>
-                  <p className={`text-sm leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                  <p className={`text-xs leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
                     {member.description}
                   </p>
                 </div>
