@@ -143,84 +143,18 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className="h-full flex flex-col justify-center items-center py-2 px-4 md:py-4 md:px-6 lg:px-24 relative overflow-hidden bg-black text-white"
+      className={`h-full flex flex-col justify-center items-center py-2 px-4 md:py-4 md:px-6 lg:px-24 relative overflow-hidden ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{ minHeight: '100vh' }}
     >
-      {/* Fundo Preto com Efeitos Prateados */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Base preta sólida */}
-        <div className="absolute inset-0 bg-black" />
-        
-        {/* Efeitos prateados - Círculos flutuantes */}
-        <div 
-          className="absolute top-20 left-10 w-40 h-40 rounded-full blur-3xl opacity-15"
-          style={{
-            background: 'radial-gradient(circle, rgba(192,192,192,0.3) 0%, rgba(169,169,169,0.2) 30%, transparent 70%)'
-          }}
-        />
-        
-        <div 
-          className="absolute bottom-32 right-16 w-56 h-56 rounded-full blur-3xl opacity-20"
-          style={{
-            background: 'radial-gradient(circle, rgba(211,211,211,0.25) 0%, rgba(192,192,192,0.15) 40%, transparent 70%)'
-          }}
-        />
-        
-        <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-10"
-          style={{
-            background: 'radial-gradient(circle, rgba(220,220,220,0.2) 0%, rgba(192,192,192,0.1) 50%, transparent 80%)'
-          }}
-        />
-        
-        {/* Linhas diagonais prateadas sutis */}
-        <div 
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `
-              linear-gradient(45deg, transparent 49%, rgba(192,192,192,0.3) 50%, transparent 51%),
-              linear-gradient(-45deg, transparent 49%, rgba(169,169,169,0.2) 50%, transparent 51%)
-            `,
-            backgroundSize: '100px 100px, 150px 150px'
-          }}
-        />
-        
-        {/* Gradiente sutil nas bordas */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `
-              radial-gradient(ellipse at top left, rgba(192,192,192,0.1) 0%, transparent 50%),
-              radial-gradient(ellipse at bottom right, rgba(169,169,169,0.08) 0%, transparent 50%)
-            `
-          }}
-        />
-        
-        {/* Pontos prateados dispersos */}
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(192,192,192,0.4) 1px, transparent 1px), radial-gradient(circle at 75% 75%, rgba(169,169,169,0.3) 1px, transparent 1px)',
-            backgroundSize: '80px 80px, 120px 120px'
-          }}
-        />
-      </div>
-
       <div className="max-w-5xl mx-auto relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 lg:gap-16">
           <div className="w-full md:w-2/5 order-1 md:order-1">
-            <div className="relative mb-4 md:mb-0 bg-black p-3 md:p-6 lg:p-8 rounded-2xl md:rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105 border border-gray-800">
-              {/* Efeitos prateados no container da imagem */}
-              <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 w-20 h-20 md:w-28 md:h-28 rounded-full blur-xl opacity-30"
-                   style={{ background: 'radial-gradient(circle, rgba(192,192,192,0.4) 0%, transparent 70%)' }}></div>
-              <div className="absolute -bottom-3 -left-3 md:-bottom-5 md:-left-5 w-24 h-24 md:w-36 md:h-36 rounded-full blur-xl opacity-25"
-                   style={{ background: 'radial-gradient(circle, rgba(169,169,169,0.3) 0%, transparent 70%)' }}></div>
-              
+            <div className="relative mb-4 md:mb-0">
               <img 
                 ref={imageRef}
                 src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
                 alt="Área do Cliente em Smartphone" 
-                className="relative z-10 w-full h-auto mx-auto"
+                className="w-full h-auto mx-auto"
                 style={{ maxHeight: '700px', objectFit: 'contain' }}
               />
             </div>
@@ -229,14 +163,14 @@ const ClientArea = () => {
           <div className="w-full md:w-3/5 text-center md:text-left order-2 md:order-2">
             <h2 
               ref={titleRef} 
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 font-canela text-white"
+              className={`text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {clientAreaTitle}
             </h2>
             
             <p 
               ref={textRef} 
-              className="text-base md:text-lg lg:text-xl xl:text-2xl mb-6 md:mb-8 font-satoshi leading-relaxed text-gray-300"
+              className={`text-base md:text-lg lg:text-xl xl:text-2xl mb-6 md:mb-8 font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
             >
               {clientAreaDescription}
             </p>
@@ -245,10 +179,14 @@ const ClientArea = () => {
               <a 
                 ref={button1Ref}
                 href={clientPortalLink} 
-                className="group relative overflow-hidden rounded-lg md:rounded-xl bg-white text-black px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base"
+                className={`group relative overflow-hidden rounded-lg md:rounded-xl px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
+                  isDark 
+                    ? 'bg-white text-black hover:bg-gray-100' 
+                    : 'bg-black text-white hover:bg-gray-800'
+                }`}
               >
                 <span className="absolute inset-0 w-0 bg-gradient-to-r from-gray-200 to-gray-300 transition-all duration-500 ease-out group-hover:w-full"></span>
-                <Lock className="mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10 text-black" />
+                <Lock className={`mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10 ${isDark ? 'text-black' : 'text-white'}`} />
                 <span className="font-medium relative z-10">Acessar minha área</span>
                 <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
               </a>
@@ -258,9 +196,15 @@ const ClientArea = () => {
                 href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative overflow-hidden rounded-lg md:rounded-xl border border-white/20 text-white px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base"
+                className={`group relative overflow-hidden rounded-lg md:rounded-xl border px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
+                  isDark 
+                    ? 'border-white/20 text-white hover:bg-white/10' 
+                    : 'border-black/20 text-black hover:bg-black/5'
+                }`}
               >
-                <span className="absolute inset-0 w-0 bg-white/10 transition-all duration-500 ease-out group-hover:w-full"></span>
+                <span className={`absolute inset-0 w-0 transition-all duration-500 ease-out group-hover:w-full ${
+                  isDark ? 'bg-white/10' : 'bg-black/5'
+                }`}></span>
                 <MessageSquare className="mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10" />
                 <span className="font-medium relative z-10">Primeiro acesso via WhatsApp</span>
               </a>
