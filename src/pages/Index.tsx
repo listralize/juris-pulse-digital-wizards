@@ -24,11 +24,11 @@ const Index = () => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Configurar overflow para navegação horizontal
-      body.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
-      body.style.height = '100vh';
-      html.style.height = '100vh';
+      // Configurar scroll suave e responsivo
+      body.style.overflow = 'auto';
+      html.style.overflow = 'auto';
+      body.style.height = 'auto';
+      html.style.height = 'auto';
       
       // Garantir que o background seja visível
       body.style.margin = '0';
@@ -37,17 +37,14 @@ const Index = () => {
       // Garantir que não há background preto forçado
       body.style.backgroundColor = '';
       
+      // Configurar scroll suave
+      html.style.scrollBehavior = 'smooth';
+      
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
       
       return () => {
-        body.style.overflow = '';
-        html.style.overflow = '';
-        body.style.height = '';
-        html.style.height = '';
-        body.style.backgroundColor = '';
-        
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'auto';
         }
@@ -74,14 +71,14 @@ const Index = () => {
   
   return (
     <div 
-      className={`min-h-screen w-full transition-colors duration-300 overflow-hidden ${
+      className={`min-h-screen w-full transition-colors duration-300 ${
         isDark 
-          ? 'bg-black text-white' 
-          : 'bg-white text-black'
+          ? 'bg-neutral-950 text-neutral-100' 
+          : 'bg-white text-neutral-900'
       }`}
       style={{ 
-        height: '100vh',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'visible'
       }}
     >
       <CustomCursor />

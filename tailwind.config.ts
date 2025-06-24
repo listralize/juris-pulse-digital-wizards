@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -73,7 +72,7 @@ export default {
 					700: '#5C5C5C',
 					800: '#2F2F2F',
 					900: '#1E1E1E',
-					950: '#121212',
+					950: '#0A0A0A',
 				}
 			},
 			fontFamily: {
@@ -81,6 +80,7 @@ export default {
 				'canela': ['Canela', 'serif'],
 				'satoshi': ['Satoshi', 'sans-serif'],
 				'inter': ['Inter', 'sans-serif'],
+				'space-grotesk': ['Space Grotesk', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

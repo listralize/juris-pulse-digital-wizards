@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
@@ -115,12 +114,13 @@ const FloatingFooter: React.FC = () => {
 
   return (
     <>
+      {/* Desktop Only Footer */}
       <footer 
-        className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
+        className={`hidden md:block fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
           w-[95%] max-w-4xl mx-auto rounded-xl shadow-xl backdrop-blur-md
           ${isDark 
-            ? 'bg-black/90 border border-white/20 text-white' 
-            : 'bg-white/95 border border-gray-200 text-black'
+            ? 'bg-neutral-950/95 border border-neutral-800/60 text-white' 
+            : 'bg-white/95 border border-neutral-200/60 text-black'
           }
           transition-all duration-300 hover:shadow-2xl`}
         style={{
@@ -128,9 +128,8 @@ const FloatingFooter: React.FC = () => {
           WebkitBackdropFilter: 'blur(15px)'
         }}
       >
-        <div className="px-4 py-3 sm:px-5 sm:py-4">
-          {/* Desktop Layout */}
-          <div className="hidden md:flex items-center justify-between">
+        <div className="px-5 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <img 
                 src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
@@ -208,84 +207,6 @@ const FloatingFooter: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Mobile Layout */}
-          <div className="md:hidden">
-            <div className="flex items-center justify-between mb-3">
-              <img 
-                src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
-                alt={`${footerData.companyName} Logo`} 
-                className="h-8 object-contain"
-              />
-            </div>
-            
-            <div className="flex items-center justify-center space-x-4 mb-3">
-              {/* Ícones Mobile */}
-              <button
-                onClick={handlePhoneClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
-                  ${isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white' 
-                    : 'bg-black/10 hover:bg-black/20 text-black'
-                  }`}
-                title={`Ligar para ${footerData.phone}`}
-              >
-                <Phone className="h-4 w-4" />
-              </button>
-
-              <button
-                onClick={handleEmailClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
-                  ${isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white' 
-                    : 'bg-black/10 hover:bg-black/20 text-black'
-                  }`}
-                title={`Enviar email para ${footerData.email}`}
-              >
-                <Mail className="h-4 w-4" />
-              </button>
-
-              <button
-                onClick={handleLocationClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
-                  ${isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white' 
-                    : 'bg-black/10 hover:bg-black/20 text-black'
-                  }`}
-                title={`Ver localização: ${footerData.address}`}
-              >
-                <MapPin className="h-4 w-4" />
-              </button>
-
-              <button
-                onClick={handleTimeClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
-                  ${isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white' 
-                    : 'bg-black/10 hover:bg-black/20 text-black'
-                  }`}
-                title="Ver horário de funcionamento"
-              >
-                <Clock className="h-4 w-4" />
-              </button>
-            </div>
-            
-            <div className="text-center space-y-1 pt-2 border-t border-current/20">
-              <div className="flex items-center justify-center space-x-2 text-xs">
-                <a 
-                  href="https://listralize.com.br/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={`hover:underline ${isDark ? 'text-white/70' : 'text-black/70'}`}
-                >
-                  Desenvolvido por Listralize
-                </a>
-              </div>
-              <div className="text-xs opacity-60">
-                © {currentYear} {footerData.companyName}
-              </div>
-            </div>
-          </div>
         </div>
       </footer>
 
@@ -293,7 +214,7 @@ const FloatingFooter: React.FC = () => {
       {showTimePopup && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className={`relative p-5 rounded-xl shadow-2xl max-w-xs mx-4 ${
-            isDark ? 'bg-black border border-white/20 text-white' : 'bg-white border border-gray-200 text-black'
+            isDark ? 'bg-neutral-950 border border-neutral-800 text-white' : 'bg-white border border-neutral-200 text-black'
           }`}>
             <button
               onClick={() => setShowTimePopup(false)}
@@ -306,8 +227,8 @@ const FloatingFooter: React.FC = () => {
             
             <div className="text-center">
               <Clock className="h-10 w-10 mx-auto mb-3 opacity-70" />
-              <h3 className="text-lg font-semibold mb-3">Horário de Funcionamento</h3>
-              <div className="space-y-2 text-sm">
+              <h3 className="text-lg font-semibold mb-3 font-space-grotesk">Horário de Funcionamento</h3>
+              <div className="space-y-2 text-sm font-inter">
                 <div className="flex justify-between">
                   <span>Segunda a Sexta:</span>
                   <span className="font-medium">09:00 - 18:00</span>
