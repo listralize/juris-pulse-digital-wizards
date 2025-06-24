@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
+import { useSupabasePageTexts } from '../hooks/useSupabasePageTexts';
 import { TeamMember, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { BlogPost } from '../types/blogTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
@@ -22,19 +23,24 @@ const Admin = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
+  // Usar o hook específico para page texts
+  const {
+    pageTexts,
+    isLoading: pageTextsLoading,
+    savePageTexts,
+    setPageTexts
+  } = useSupabasePageTexts();
+
   const {
     teamMembers,
     servicePages,
     categories,
-    pageTexts,
     isLoading: dataLoading,
     saveServicePages,
     saveCategories,
     saveTeamMembers,
-    savePageTexts,
     setServicePages,
     setTeamMembers,
-    setPageTexts,
     refreshData
   } = useSupabaseDataNew();
 
@@ -45,7 +51,7 @@ const Admin = () => {
     loadBlogPosts
   } = useSupabaseBlog();
 
-  const isLoading = dataLoading || blogLoading;
+  const isLoading = dataLoading || blogLoading || pageTextsLoading;
 
   const handleSaveServicePages = async (pages: ServicePage[]) => {
     try {

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -6,7 +7,6 @@ import { ArrowLeft, Edit, Mail } from 'lucide-react';
 import { HomePageEditor } from './HomePageEditor';
 import { ContactFormManagement } from './ContactFormManagement';
 import { TeamMember, PageTexts } from '../../types/adminTypes';
-import { useSupabasePageTexts } from '../../hooks/useSupabasePageTexts';
 
 interface ContentManagementProps {
   teamMembers: TeamMember[];
@@ -32,9 +32,6 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  
-  // Usar o hook diretamente para salvar os textos
-  const { savePageTexts } = useSupabasePageTexts();
 
   const sections = [
     {
@@ -57,8 +54,8 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
     try {
       console.log('💾 ContentManagement: Salvando todos os dados...', { pageTexts, teamMembers });
       
-      // Salvar textos da página usando o hook diretamente
-      await savePageTexts(pageTexts);
+      // Salvar textos da página
+      await onSavePageTexts();
       console.log('✅ ContentManagement: Textos da página salvos');
       
       // Salvar membros da equipe
