@@ -16,8 +16,6 @@ interface CategoryAreaPageProps {
 const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propCategorySlug }) => {
   const { '*': urlSlug } = useParams();
   const categorySlug = propCategorySlug || urlSlug;
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
   const { servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
   const { categories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const [category, setCategory] = useState<CategoryInfo | null>(null);
@@ -46,8 +44,8 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
@@ -68,13 +66,13 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
         {category.fullContent ? (
           <div className="prose prose-lg max-w-none">
             {category.fullContent.split('\n\n').map((paragraph, index) => (
-              <p key={index} className={`mb-6 text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <p key={index} className="mb-6 text-lg leading-relaxed text-gray-300">
                 {paragraph}
               </p>
             ))}
           </div>
         ) : (
-          <p className={`text-lg leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className="text-lg leading-relaxed text-gray-300">
             {category.description}
           </p>
         )}
@@ -90,12 +88,12 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
             >
               {category.icon}
             </div>
-            <h2 className={`text-2xl xl:text-3xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+            <h2 className="text-2xl xl:text-3xl font-canela text-white">
               Serviços Jurídicos em {category.label}
             </h2>
           </div>
           
-          <p className={`text-lg mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <p className="text-lg mb-8 text-gray-300">
             Nossos serviços especializados em {category.label.toLowerCase()} para atender todas as suas necessidades jurídicas.
           </p>
           
@@ -106,11 +104,11 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
                 to={`/services/${page.href}`}
                 className="group block"
               >
-                <div className={`p-6 rounded-lg border ${isDark ? 'bg-black/50 border-white/10 hover:border-white/30' : 'bg-white border-gray-200 hover:border-gray-400'} transition-all duration-300 group-hover:scale-105 h-full`}>
-                  <h3 className={`text-xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'} group-hover:${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                <div className="p-6 rounded-lg border bg-black/50 border-white/10 hover:border-white/30 transition-all duration-300 group-hover:scale-105 h-full">
+                  <h3 className="text-xl font-canela mb-3 text-white group-hover:text-gray-200">
                     {page.title}
                   </h3>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4 line-clamp-3`}>
+                  <p className="text-sm text-gray-400 mb-4 line-clamp-3">
                     {page.description}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-blue-500 group-hover:text-blue-400">

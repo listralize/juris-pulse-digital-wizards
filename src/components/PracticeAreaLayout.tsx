@@ -21,7 +21,6 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   currentArea = ''
 }) => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
 
   // Add scroll to top on mount
   useEffect(() => {
@@ -29,7 +28,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
   }, []);
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    <div className="min-h-screen bg-black text-white">
       <Navbar />
       
       <PageBanner 
@@ -38,7 +37,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         bgImage="/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"
       />
       
-      <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <section className="px-6 md:px-16 lg:px-24 py-16 bg-black">
         <div className="max-w-6xl mx-auto">
           {children}
         </div>
