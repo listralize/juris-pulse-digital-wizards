@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,7 +14,6 @@ const ClientArea = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
   const button1Ref = useRef<HTMLAnchorElement>(null);
   const button2Ref = useRef<HTMLAnchorElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
@@ -42,14 +42,6 @@ const ClientArea = () => {
   
   useEffect(() => {
     if (isLoading) return;
-
-    // Background animation
-    gsap.to(bgRef.current, {
-      rotation: 360,
-      duration: 120,
-      repeat: -1,
-      ease: "none"
-    });
 
     gsap.fromTo(
       imageRef.current,
@@ -135,7 +127,7 @@ const ClientArea = () => {
 
   if (isLoading) {
     return (
-      <section id="cliente" className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <section className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
         <div className="flex justify-center items-center">
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
@@ -154,53 +146,49 @@ const ClientArea = () => {
       className={`h-full flex flex-col justify-center items-center py-2 px-4 md:py-4 md:px-6 lg:px-24 relative overflow-hidden ${isDark ? 'bg-black' : 'bg-white'} ${isDark ? 'text-white' : 'text-black'}`}
       style={{ minHeight: '100vh' }}
     >
-      {/* Background Effect */}
+      {/* Background Effect - Similar ao da Home */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Gradient Background */}
+        {/* Subtle Gradient */}
         <div 
           className={`absolute inset-0 ${
             isDark 
-              ? 'bg-gradient-to-br from-black via-gray-900/50 to-black' 
-              : 'bg-gradient-to-br from-white via-gray-50/80 to-white'
+              ? 'bg-gradient-to-br from-black via-gray-900/30 to-black' 
+              : 'bg-gradient-to-br from-white via-gray-100/50 to-white'
           }`}
         />
         
-        {/* Animated Background Element */}
+        {/* Floating Elements */}
         <div 
-          ref={bgRef}
-          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full opacity-5 ${
-            isDark ? 'bg-white' : 'bg-black'
+          className={`absolute top-20 left-10 w-32 h-32 rounded-full blur-2xl opacity-20 ${
+            isDark ? 'bg-white/10' : 'bg-black/10'
           }`}
           style={{
             background: isDark 
-              ? 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 50%, transparent 100%)'
-              : 'radial-gradient(circle, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 50%, transparent 100%)'
+              ? 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(0,0,0,0.1) 0%, transparent 70%)'
           }}
         />
         
-        {/* Subtle Grid Pattern */}
         <div 
-          className="absolute inset-0 opacity-20"
+          className={`absolute bottom-20 right-10 w-48 h-48 rounded-full blur-3xl opacity-15 ${
+            isDark ? 'bg-white/10' : 'bg-black/10'
+          }`}
+          style={{
+            background: isDark 
+              ? 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(0,0,0,0.1) 0%, transparent 70%)'
+          }}
+        />
+        
+        {/* Texture Pattern */}
+        <div 
+          className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: isDark 
-              ? 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)'
-              : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0)',
-            backgroundSize: '40px 40px'
+              ? 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)'
+              : 'radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0)',
+            backgroundSize: '50px 50px'
           }}
-        />
-        
-        {/* Corner Accent Elements */}
-        <div 
-          className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-10 ${
-            isDark ? 'bg-white' : 'bg-black'
-          }`}
-          style={{ transform: 'translate(50%, -50%)' }}
-        />
-        <div 
-          className={`absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-10 ${
-            isDark ? 'bg-white' : 'bg-black'
-          }`}
-          style={{ transform: 'translate(-50%, 50%)' }}
         />
       </div>
 

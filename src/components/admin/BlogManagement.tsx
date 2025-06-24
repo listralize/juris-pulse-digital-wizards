@@ -7,7 +7,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
-import { ArrowLeft, Plus, Save, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Edit, Trash2, Eye, RefreshCw, X } from 'lucide-react';
 import { BlogPost } from '../../types/blogTypes';
 import { toast } from 'sonner';
 
@@ -25,6 +25,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localPosts, setLocalPosts] = useState<BlogPost[]>([]);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     console.log('BlogManagement - Recebendo posts:', blogPosts.length);
@@ -63,6 +64,35 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
         .replace(/--+/g, '-')
         .trim();
     }
+    
+    setSelectedPost(updatedPost);
+  };
+
+  const addTag = () => {
+    if (!selectedPost || !newTag.trim()) return;
+    
+    const trimmedTag = newTag.trim();
+    if (selectedPost.tags.includes(trimmedTag)) {
+      toast.error('Tag já existe neste post');
+      return;
+    }
+    
+    const updatedPost = {
+      ...selectedPost,
+      tags: [...selectedPost.tags, trimmedTag]
+    };
+    
+    setSelectedPost(updatedPost);
+    setNewTag('');
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    if (!selectedPost) return;
+    
+    const updatedPost = {
+      ...selectedPost,
+      tags: selectedPost.tags.filter(tag => tag !== tagToRemove)
+    };
     
     setSelectedPost(updatedPost);
   };
@@ -129,6 +159,9 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   };
 
   const featuredCount = localPosts.filter(p => p.featured).length;
+
+  // Obter todas as tags únicas de todos os posts
+  const allTags = Array.from(new Set(localPosts.flatMap(post => post.tags)));
 
   // Se está editando um post
   if (isEditing && selectedPost) {
@@ -235,6 +268,63 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
                   placeholder="url-do-post"
                 />
               </div>
+
+              {/* Gerenciamento de Tags */}
+              <div>
+                <Label>Tags para Filtro</Label>
+                <div className="flex gap-2 mb-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Digite uma tag"
+                    onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                  />
+                  <Button onClick={addTag} size="sm" type="button">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPost.tags.map((tag) => (
+                    <span 
+                      key={tag}
+                      className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="hover:text-red-500"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                {allTags.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500 mb-1">Tags existentes:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {allTags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => {
+                            if (!selectedPost.tags.includes(tag)) {
+                              setSelectedPost({
+                                ...selectedPost,
+                                tags: [...selectedPost.tags, tag]
+                              });
+                            }
+                          }}
+                          className={`text-xs px-2 py-1 rounded border ${isDark ? 'border-white/20 hover:bg-white/10' : 'border-gray-200 hover:bg-gray-100'}`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             
             <div>
@@ -264,7 +354,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
               Gerenciar Posts do Blog
             </CardTitle>
             <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {localPosts.length} posts • {featuredCount} em destaque • Sincronizado com Supabase
+              {localPosts.length} posts • {featuredCount} em destaque • {allTags.length} tags únicas • Sincronizado com Supabase
             </p>
           </div>
           <div className="flex gap-2">
