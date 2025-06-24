@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,73 +8,45 @@ gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const mediaRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
   
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  // Estados para os textos editáveis
-  const [aboutTitle, setAboutTitle] = useState('Quem Somos');
-  const [aboutDescription, setAboutDescription] = useState('Uma equipe dedicada à excelência jurídica');
-  const [aboutImage, setAboutImage] = useState('/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
-  const [mediaType, setMediaType] = useState('image');
+  // Estado local para textos
+  const [aboutTitle, setAboutTitle] = useState('Sobre Nós');
+  const [aboutDescription, setAboutDescription] = useState('Somos um escritório de advocacia comprometido com a excelência jurídica e o atendimento personalizado. Nossa equipe de profissionais altamente qualificados está dedicada a oferecer soluções estratégicas e eficazes para nossos clientes.');
 
-  // Carregar dados do Supabase
+  // Carregar dados iniciais e escutar atualizações
   useEffect(() => {
-    const loadAboutData = async () => {
+    const loadInitialData = async () => {
       try {
         const { supabase } = await import('../../integrations/supabase/client');
-        
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('about_title, about_description, about_image, about_media_type')
+          .select('about_title, about_description')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (settings) {
-          console.log('ℹ️ About: Dados carregados do Supabase:', settings);
-          setAboutTitle(settings.about_title || 'Quem Somos');
-          setAboutDescription(settings.about_description || 'Uma equipe dedicada à excelência jurídica');
-          setAboutImage(settings.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
-          setMediaType(settings.about_media_type || 'image');
+          if (settings.about_title) setAboutTitle(settings.about_title);
+          if (settings.about_description) setAboutDescription(settings.about_description);
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do About:', error);
+        console.error('❌ About: Erro ao carregar dados:', error);
       }
     };
 
-    loadAboutData();
-  }, []);
+    loadInitialData();
 
-  // Escutar eventos de atualização
-  useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('ℹ️ About: Recebendo atualização de textos:', event.detail);
-      const { 
-        aboutTitle: newTitle, 
-        aboutDescription: newDescription,
-        aboutImage: newImage,
-        aboutMediaType: newMediaType
-      } = event.detail;
-      
-      if (newTitle !== undefined) {
-        console.log('ℹ️ About: Atualizando título:', newTitle);
-        setAboutTitle(newTitle);
-      }
-      if (newDescription !== undefined) {
-        console.log('ℹ️ About: Atualizando descrição:', newDescription);
-        setAboutDescription(newDescription);
-      }
-      if (newImage !== undefined) {
-        console.log('ℹ️ About: Atualizando imagem:', newImage);
-        setAboutImage(newImage);
-      }
-      if (newMediaType !== undefined) {
-        console.log('ℹ️ About: Atualizando tipo de mídia:', newMediaType);
-        setMediaType(newMediaType);
+      const data = event.detail;
+      if (data && typeof data === 'object') {
+        if (data.aboutTitle !== undefined) setAboutTitle(data.aboutTitle);
+        if (data.aboutDescription !== undefined) setAboutDescription(data.aboutDescription);
       }
     };
 
@@ -83,89 +56,101 @@ const About = () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
-
-  // Função para converter URL do YouTube para embed
-  const getYouTubeEmbedUrl = (url: string) => {
-    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
-    const match = url.match(regex);
-    if (match) {
-      return `https://www.youtube.com/embed/${match[1]}`;
-    }
-    return url;
-  };
-
+  
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reverse"
+      }
+    });
     
     tl.fromTo(
       titleRef.current,
-      { opacity: 0, y: 20 },
+      { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.8 }
     ).fromTo(
-      [contentRef.current, mediaRef.current],
-      { opacity: 0, y: 15 },
+      [contentRef.current, imageRef.current],
+      { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 },
       "-=0.4"
     );
     
     return () => {
-      tl.kill();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
-  const renderMedia = () => {
-    if (mediaType === 'video' && aboutImage) {
-      const embedUrl = getYouTubeEmbedUrl(aboutImage);
-      console.log('🎥 About: Renderizando vídeo:', { originalUrl: aboutImage, embedUrl });
-      
-      return (
-        <div className="w-full h-64 md:h-80 lg:h-96">
-          <iframe
-            src={embedUrl}
-            title="About Us Video"
-            className="w-full h-full rounded-lg"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      );
-    }
-    
-    return (
-      <img 
-        src={aboutImage} 
-        alt="Sobre nós" 
-        className="w-full h-64 md:h-80 lg:h-96 object-cover rounded-lg"
-      />
-    );
-  };
-
   return (
-    <div 
+    <section 
       ref={sectionRef}
-      className={`w-full min-h-screen py-16 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`py-24 px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
       <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-12 text-center">
-          <h2 className={`text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="text-center mb-16">
+          <h2 
+            ref={titleRef}
+            className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}
+          >
             {aboutTitle}
           </h2>
-          <div className={`w-20 h-1 mx-auto mt-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+          <div className={`w-24 h-1 mx-auto ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div ref={contentRef}>
-            <p className={`text-lg md:text-xl lg:text-2xl leading-relaxed font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}>
-              {aboutDescription}
-            </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div ref={contentRef} className="space-y-8">
+            <div className={`prose prose-lg max-w-none ${isDark ? 'prose-invert' : ''}`}>
+              {aboutDescription.split('\n\n').map((paragraph, index) => (
+                <p key={index} className={`text-lg leading-relaxed ${isDark ? 'text-white/80' : 'text-black/70'}`}>
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+            
+            <div className="gri
+d grid-cols-2 gap-8 pt-8">
+              <div className="text-center">
+                <div className={`text-4xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                  15+
+                </div>
+                <div className={`text-sm font-medium ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+                  Anos de Experiência
+                </div>
+              </div>
+              <div className="text-center">
+                <div className={`text-4xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                  1000+
+                </div>
+                <div className={`text-sm font-medium ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+                  Casos Resolvidos
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div ref={mediaRef}>
-            {renderMedia()}
+          <div ref={imageRef} className="relative">
+            <div className={`aspect-square rounded-2xl overflow-hidden shadow-2xl ${
+              isDark ? 'bg-white/10' : 'bg-black/5'
+            }`}>
+              <img 
+                src="/lovable-uploads/aa4517a5-ce63-4dcf-aebf-16a5da902506.png"
+                alt="Sobre o escritório"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            {/* Elemento decorativo */}
+            <div className={`absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20 ${
+              isDark ? 'bg-white' : 'bg-black'
+            }`}></div>
+            <div className={`absolute -bottom-4 -left-4 w-16 h-16 rounded-full opacity-20 ${
+              isDark ? 'bg-white' : 'bg-black'
+            }`}></div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
