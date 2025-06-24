@@ -103,16 +103,6 @@ const Footer: React.FC<FooterProps> = ({
     };
   }, []);
 
-  // Garantir que os dados não sejam strings vazias
-  const displayData = {
-    companyName: footerData.companyName || 'Serafim & Trombela Advocacia',
-    description: footerData.description || 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.',
-    phone: footerData.phone || '(62) 99459-4496',
-    email: footerData.email || 'contato@stadv.com',
-    address: footerData.address || 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040',
-    whatsapp: footerData.whatsapp || '5562994594496'
-  };
-
   return (
     <footer className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
       <div className="max-w-7xl mx-auto">
@@ -121,14 +111,14 @@ const Footer: React.FC<FooterProps> = ({
           <div className="space-y-4">
             <img 
               src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
-              alt={`${displayData.companyName} Logo`} 
+              alt={`${footerData.companyName} Logo`} 
               className={`h-16 object-contain ${isDark ? 'brightness-150' : 'brightness-90'}`}
               style={{
                 filter: isDark ? 'drop-shadow(0 0 15px rgba(255,255,255,0.2)) drop-shadow(3px 5px 10px rgba(0,0,0,0.95))' : 'drop-shadow(0 0 10px rgba(0,0,0,0.1))'
               }} 
             />
             <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi max-w-sm text-sm leading-relaxed`}>
-              {displayData.description}
+              {footerData.description}
             </p>
           </div>
           
@@ -140,23 +130,23 @@ const Footer: React.FC<FooterProps> = ({
             <div className="space-y-3">
               <div>
                 <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} font-satoshi text-sm leading-relaxed`}>
-                  {displayData.address}
+                  {footerData.address}
                 </p>
               </div>
               <div>
                 <a 
-                  href={`mailto:${displayData.email}`} 
+                  href={`mailto:${footerData.email}`} 
                   className={`${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} hover:underline font-satoshi text-sm block`}
                 >
-                  {displayData.email}
+                  {footerData.email}
                 </a>
               </div>
               <div>
                 <a 
-                  href={`tel:${displayData.phone.replace(/\D/g, '')}`}
+                  href={`tel:${footerData.phone.replace(/\D/g, '')}`}
                   className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline font-satoshi text-sm block`}
                 >
-                  {displayData.phone}
+                  {footerData.phone}
                 </a>
               </div>
             </div>
@@ -177,7 +167,7 @@ const Footer: React.FC<FooterProps> = ({
                 </p>
               </div>
               <a 
-                href={`https://api.whatsapp.com/send?phone=${displayData.whatsapp}`} 
+                href={`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className={`inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-300 rounded-md ${isDark ? 'bg-white text-black hover:bg-black hover:text-white border-2 border-white hover:border-white' : 'bg-black text-white hover:bg-white hover:text-black border-2 border-black hover:border-black'}`}
@@ -208,7 +198,7 @@ const Footer: React.FC<FooterProps> = ({
           {/* Copyright e links */}
           <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi`}>
-              © {currentYear} {displayData.companyName}. Todos os direitos reservados.
+              © {currentYear} {footerData.companyName}. Todos os direitos reservados.
             </p>
             <div className="flex space-x-6">
               <a 

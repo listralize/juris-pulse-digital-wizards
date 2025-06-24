@@ -61,7 +61,7 @@ const SectionsContainer: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full overflow-hidden h-full">
+    <div className="relative w-full h-screen overflow-hidden">
       <div 
         ref={containerRef}
         className="flex h-full"

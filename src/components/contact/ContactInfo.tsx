@@ -75,14 +75,6 @@ const ContactInfo = () => {
     };
   }, []);
 
-  // Garantir que os dados não sejam strings vazias
-  const displayData = {
-    phone: contactData.phone || '(62) 99459-4496',
-    email: contactData.email || 'contato@stadv.com',
-    address: contactData.address || 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040',
-    whatsapp: contactData.whatsapp || '5562994594496'
-  };
-
   return (
     <div className={`p-4 rounded-lg ${isDark ? 'bg-black text-white' : 'bg-white text-black'} h-full`}>
       <h3 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
@@ -95,7 +87,7 @@ const ContactInfo = () => {
           <div>
             <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>Endereço</p>
             <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              {displayData.address}
+              {contactData.address}
             </p>
           </div>
         </div>
@@ -105,10 +97,10 @@ const ContactInfo = () => {
           <div>
             <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>Telefone</p>
             <a 
-              href={`tel:${displayData.phone.replace(/\D/g, '')}`}
+              href={`tel:${contactData.phone.replace(/\D/g, '')}`}
               className={`text-sm ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}
             >
-              {displayData.phone}
+              {contactData.phone}
             </a>
           </div>
         </div>
@@ -118,10 +110,10 @@ const ContactInfo = () => {
           <div>
             <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>E-mail</p>
             <a 
-              href={`mailto:${displayData.email}`}
+              href={`mailto:${contactData.email}`}
               className={`text-sm ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}
             >
-              {displayData.email}
+              {contactData.email}
             </a>
           </div>
         </div>

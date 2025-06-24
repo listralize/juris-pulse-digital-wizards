@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -533,7 +532,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>Título da Página</Label>
                   <Input
-                    value={pageTexts.contactTitle || 'Entre em Contato'}
+                    value={pageTexts.contactTitle || ''}
                     onChange={(e) => handleInputChange('contactTitle', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="Entre em Contato"
@@ -542,7 +541,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>Subtítulo da Página</Label>
                   <Input
-                    value={pageTexts.contactSubtitle || 'Estamos prontos para ajudá-lo'}
+                    value={pageTexts.contactSubtitle || ''}
                     onChange={(e) => handleInputChange('contactSubtitle', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="Estamos prontos para ajudá-lo"
@@ -552,7 +551,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>Telefone</Label>
                   <Input
-                    value={pageTexts.contactTexts?.phone || '(62) 99459-4496'}
+                    value={pageTexts.contactTexts?.phone || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'phone', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="(62) 99459-4496"
@@ -561,7 +560,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>Email</Label>
                   <Input
-                    value={pageTexts.contactTexts?.email || 'contato@stadv.com'}
+                    value={pageTexts.contactTexts?.email || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'email', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="contato@stadv.com"
@@ -570,7 +569,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div className="md:col-span-2">
                   <Label>Endereço Completo</Label>
                   <Textarea
-                    value={pageTexts.contactTexts?.address || 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040'}
+                    value={pageTexts.contactTexts?.address || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'address', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040"
@@ -580,7 +579,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>WhatsApp (números apenas)</Label>
                   <Input
-                    value={pageTexts.contactTexts?.whatsapp || '5562994594496'}
+                    value={pageTexts.contactTexts?.whatsapp || ''}
                     onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="5562994594496"
@@ -608,7 +607,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>Nome da Empresa</Label>
                   <Input
-                    value={pageTexts.footerTexts?.companyName || 'Serafim & Trombela Advocacia'}
+                    value={pageTexts.footerTexts?.companyName || ''}
                     onChange={(e) => handleNestedChange('footerTexts', 'companyName', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="Serafim & Trombela Advocacia"
@@ -618,7 +617,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 <div>
                   <Label>Texto Descritivo (abaixo da logo)</Label>
                   <Textarea
-                    value={pageTexts.footerTexts?.description || 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.'}
+                    value={pageTexts.footerTexts?.description || ''}
                     onChange={(e) => handleNestedChange('footerTexts', 'description', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     rows={3}

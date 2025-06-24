@@ -70,9 +70,7 @@ const Index = () => {
       <Navbar />
       <WhatsAppButton />
       
-      <div className="relative h-full">
-        <SectionsContainer />
-      </div>
+      <SectionsContainer />
     </div>
   );
 };
