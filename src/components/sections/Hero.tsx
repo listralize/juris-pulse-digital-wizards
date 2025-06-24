@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -188,7 +187,7 @@ const Hero = () => {
             href={primaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-black hover:text-white hover:border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg"
+            className="elegant-button flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
           >
             {primaryButtonText}
             <ArrowRight className="w-5 h-5" />
@@ -196,7 +195,7 @@ const Hero = () => {
           
           <a 
             href={secondaryButtonLink}
-            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg"
+            className="elegant-button flex items-center justify-center gap-2 bg-transparent text-white border border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors"
           >
             {secondaryButtonText}
             <ArrowRight className="w-5 h-5" />
