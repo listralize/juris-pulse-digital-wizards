@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -103,9 +104,10 @@ const Contact = () => {
     <div 
       className={`w-full min-h-screen ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'}`}
       style={{ 
+        height: '100vh',
+        overflow: 'auto',
         display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh'
+        flexDirection: 'column'
       }}
     >
       <div 

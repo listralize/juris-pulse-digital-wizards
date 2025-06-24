@@ -35,14 +35,14 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full ${isContactSection ? 'h-auto min-h-screen' : 'h-full'} ${getBackgroundClass()} ${className}`}
+        className={`section-container w-full ${isContactSection ? 'h-screen' : 'h-full'} ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
-          overflow: allowScroll || isContactSection ? 'auto' : 'hidden',
-          WebkitOverflowScrolling: allowScroll || isContactSection ? 'touch' : 'auto',
+          overflow: allowScroll || isContactSection ? 'hidden' : 'hidden',
+          WebkitOverflowScrolling: 'auto',
           opacity: 1,
           visibility: 'visible'
         }}
