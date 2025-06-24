@@ -163,6 +163,18 @@
     background: rgba(255, 255, 255, 0.4);
   }
 
+  /* Desktop section fixes - prevent vertical scroll */
+  @media (min-width: 768px) {
+    #areas {
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    #areas .grid {
+      height: calc(100vh - 200px); /* Adjust based on header height */
+    }
+  }
+
   /* Mobile scroll fixes */
   @media (max-width: 768px) {
     body {
@@ -172,6 +184,8 @@
     
     /* Ensure sections can scroll properly on mobile */
     #areas, #contact, #blog {
+      height: auto;
+      min-height: 100vh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -210,6 +224,8 @@
   .dark .glass-card {
     @apply bg-neutral-900/30 border-neutral-700/30;
   }
+
+  /* ... keep existing premium effects and other components the same */
 
   /* Premium Hover Effects */
   .hover-lift {
