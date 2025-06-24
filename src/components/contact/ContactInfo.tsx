@@ -72,10 +72,10 @@ const ContactInfo = () => {
         
         setContactData(prev => ({
           ...prev,
-          ...(phone && { phone }),
-          ...(email && { email }),
-          ...(address && { address }),
-          ...(whatsapp && { whatsapp })
+          ...(phone !== undefined && { phone }),
+          ...(email !== undefined && { email }),
+          ...(address !== undefined && { address }),
+          ...(whatsapp !== undefined && { whatsapp })
         }));
       }
     };

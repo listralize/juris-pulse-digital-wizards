@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -66,10 +65,15 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
       if (onSaveAll) {
         await onSaveAll();
         
-        // Disparar evento personalizado para notificar todas as seções
+        // Disparar evento personalizado para notificar todas as seções com estrutura correta
         console.log('📡 HomePageEditor: Disparando evento pageTextsUpdated');
         const event = new CustomEvent('pageTextsUpdated', { 
-          detail: pageTexts 
+          detail: {
+            ...pageTexts,
+            // Garantir que contactTexts tenha a estrutura correta
+            contactTexts: pageTexts.contactTexts || {},
+            footerTexts: pageTexts.footerTexts || {}
+          }
         });
         window.dispatchEvent(event);
         

@@ -11,7 +11,6 @@ import Partners from './sections/Partners';
 import ClientArea from './sections/ClientArea';
 import Blog from './sections/Blog';
 import Contact from './sections/Contact';
-import Footer from './sections/Footer';
 
 const SectionsContainer: React.FC = () => {
   const sections = [
@@ -97,7 +96,6 @@ const SectionsContainer: React.FC = () => {
                 className={section.id === 'contact' ? 'pb-0' : ''}
               >
                 <Component />
-                {section.id === 'contact' && <Footer />}
               </Section>
             </div>
           );
