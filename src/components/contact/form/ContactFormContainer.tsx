@@ -17,9 +17,9 @@ const ContactFormContainer: React.FC<ContactFormContainerProps> = ({
   return (
     <div className={`p-6 rounded-lg h-full ${
       isDark 
-        ? 'bg-black border border-white/20 text-white' 
-        : 'bg-white border border-gray-200 text-black'
-    }`}>
+        ? 'bg-black border-white/20 text-white' 
+        : 'bg-white border-gray-200 text-black'
+    } border`}>
       {children}
     </div>
   );

@@ -87,7 +87,7 @@ const ContactInfo = () => {
   }, []);
 
   return (
-    <div className={`p-4 rounded-lg ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'} h-full`}>
+    <div className={`p-4 rounded-lg ${isDark ? 'bg-black text-white' : 'bg-white text-black'} h-full`}>
       <h3 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
         Informações de Contato
       </h3>

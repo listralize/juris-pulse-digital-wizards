@@ -62,7 +62,7 @@ const LocationMap = () => {
   }, []);
 
   return (
-    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'} h-full`}>
+    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} h-full border`}>
       <div className="h-full min-h-[200px]">
         <iframe
           src={mapConfig.embedUrl}

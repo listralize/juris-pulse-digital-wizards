@@ -129,19 +129,19 @@ const Contact = () => {
           className="grid grid-cols-1 lg:grid-cols-5 gap-8"
         >
           <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
-            <div className={`${isDark ? 'bg-gray-900/50' : 'bg-white'} rounded-lg p-1 shadow-lg`}>
+            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-lg border`}>
               <div className="h-48 lg:h-56">
                 <LocationMap />
               </div>
             </div>
             
-            <div className={`${isDark ? 'bg-gray-900/50' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
+            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
               <ContactInfo />
             </div>
           </div>
           
           <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className={`${isDark ? 'bg-gray-900/50' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
+            <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-6 shadow-lg border`}>
               <UnifiedContactForm darkBackground={isDark} pageId="contato" />
             </div>
           </div>

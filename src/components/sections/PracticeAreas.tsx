@@ -201,16 +201,15 @@ const PracticeAreas = () => {
                 className="group block"
               >
                 <div 
-                  className={`${isDark ? 'bg-gray-900/80 border-white/10' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4 rounded-lg border`}
+                  className={`${isDark ? 'bg-black border-white/20' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4 rounded-lg border`}
                   ref={el => cardsRef.current[index] = el}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     {area.icon && (
                       <div 
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                          isDark ? 'text-white' : 'text-white'
+                          isDark ? 'bg-white text-black' : 'bg-black text-white'
                         }`}
-                        style={{ backgroundColor: area.color || (isDark ? '#4F46E5' : '#6366F1') }}
                       >
                         {area.icon}
                       </div>
@@ -242,16 +241,15 @@ const PracticeAreas = () => {
                   className="group block"
                 >
                   <div 
-                    className={`${isDark ? 'bg-gray-900/80 border-white/10' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6 rounded-lg border`}
+                    className={`${isDark ? 'bg-black border-white/20' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6 rounded-lg border`}
                     ref={el => cardsRef.current[index] = el}
                   >
                     <div className="flex items-center gap-3 mb-3">
                       {area.icon && (
                         <div 
                           className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-semibold ${
-                            isDark ? 'text-white' : 'text-white'
+                            isDark ? 'bg-white text-black' : 'bg-black text-white'
                           }`}
-                          style={{ backgroundColor: area.color || (isDark ? '#4F46E5' : '#6366F1') }}
                         >
                           {area.icon}
                         </div>
