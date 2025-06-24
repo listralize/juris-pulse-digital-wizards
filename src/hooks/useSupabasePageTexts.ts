@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { PageTexts } from '../types/adminTypes';
 import { supabase } from '../integrations/supabase/client';
@@ -156,9 +155,21 @@ export const useSupabasePageTexts = () => {
       // Preparar dados específicos para cada seção
       const eventData = {
         ...texts,
-        // Mapear dados específicos de contato
+        // Mapear dados específicos de contato para garantir sincronização
         contactTitle: texts.contactTitle,
         contactSubtitle: texts.contactSubtitle,
+        // Mapear dados do hero
+        heroTitle: texts.heroTitle,
+        heroSubtitle: texts.heroSubtitle,
+        heroPrimaryButtonText: texts.heroPrimaryButtonText,
+        heroPrimaryButtonLink: texts.heroPrimaryButtonLink,
+        heroSecondaryButtonText: texts.heroSecondaryButtonText,
+        heroSecondaryButtonLink: texts.heroSecondaryButtonLink,
+        // Mapear dados do about
+        aboutTitle: texts.aboutTitle,
+        aboutDescription: texts.aboutDescription,
+        aboutImage: texts.aboutImage,
+        aboutMediaType: texts.aboutMediaType,
       };
       
       const customEvent = new CustomEvent('pageTextsUpdated', { 

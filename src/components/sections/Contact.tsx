@@ -110,38 +110,38 @@ const Contact = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-4 px-4`}
+      className={`w-full ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-black'} py-16 px-4 md:px-6 lg:px-24`}
       style={{ minHeight: '100vh' }}
     >
       <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-6 text-center">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+        <div ref={titleRef} className="mb-12 text-center">
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
             {contactTitle}
           </h2>
-          <div className={`w-20 h-1 mx-auto mt-2 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-          <p className={`mt-2 text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+          <div className={`w-20 h-1 mx-auto mb-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
+          <p className={`text-base md:text-lg lg:text-xl ${isDark ? 'text-white/60' : 'text-black/60'}`}>
             {contactSubtitle}
           </p>
         </div>
         
         <div 
           ref={contentRef}
-          className="flex flex-col lg:grid lg:grid-cols-5 gap-4"
+          className="grid grid-cols-1 lg:grid-cols-5 gap-8"
         >
-          <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-            <div className="w-full">
-              <div className="h-40 lg:h-48">
+          <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+            <div className={`${isDark ? 'bg-gray-900/50' : 'bg-white'} rounded-lg p-1 shadow-lg`}>
+              <div className="h-48 lg:h-56">
                 <LocationMap />
               </div>
             </div>
             
-            <div className="w-full">
+            <div className={`${isDark ? 'bg-gray-900/50' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
               <ContactInfo />
             </div>
           </div>
           
           <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className="w-full">
+            <div className={`${isDark ? 'bg-gray-900/50' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
               <UnifiedContactForm darkBackground={isDark} pageId="contato" />
             </div>
           </div>

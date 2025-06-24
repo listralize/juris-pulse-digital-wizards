@@ -164,9 +164,9 @@ const PracticeAreas = () => {
 
   if (isLoading) {
     return (
-      <section className={`${isDark ? 'bg-black text-white' : 'bg-black text-white'} min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24`}>
+      <section className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24`}>
         <div className="flex justify-center items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
       </section>
     );
@@ -180,13 +180,13 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black text-white' : 'bg-black text-white'} flex flex-col justify-center py-8 px-4 md:px-6 lg:px-24`}
+      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col justify-center py-16 px-4 md:px-6 lg:px-24`}
       style={{ minHeight: '100vh' }}
     >
       <div className="max-w-6xl mx-auto">
         <h2 
           ref={titleRef}
-          className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center text-white mb-8 md:mb-12"
+          className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela text-center mb-8 md:mb-12 ${isDark ? 'text-white' : 'text-black'}`}
         >
           {areasTitle}
         </h2>
@@ -201,27 +201,29 @@ const PracticeAreas = () => {
                 className="group block"
               >
                 <div 
-                  className="bg-black/80 border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4"
+                  className={`${isDark ? 'bg-gray-900/80 border-white/10' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 p-4 rounded-lg border`}
                   ref={el => cardsRef.current[index] = el}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     {area.icon && (
                       <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                        style={{ backgroundColor: area.color }}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                          isDark ? 'text-white' : 'text-white'
+                        }`}
+                        style={{ backgroundColor: area.color || (isDark ? '#4F46E5' : '#6366F1') }}
                       >
                         {area.icon}
                       </div>
                     )}
-                    <h3 className="text-lg font-canela text-white">
+                    <h3 className={`text-lg font-canela ${isDark ? 'text-white' : 'text-black'}`}>
                       {area.title}
                     </h3>
                   </div>
-                  <p className="text-sm mb-2 text-gray-300">
+                  <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                     {area.description}
                   </p>
                   {area.pageCount !== undefined && (
-                    <p className="text-xs text-gray-400">
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                       {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
                     </p>
                   )}
@@ -240,27 +242,29 @@ const PracticeAreas = () => {
                   className="group block"
                 >
                   <div 
-                    className="bg-black/80 border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6"
+                    className={`${isDark ? 'bg-gray-900/80 border-white/10' : 'bg-gray-50 border-gray-200'} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-full p-6 rounded-lg border`}
                     ref={el => cardsRef.current[index] = el}
                   >
                     <div className="flex items-center gap-3 mb-3">
                       {area.icon && (
                         <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-semibold"
-                          style={{ backgroundColor: area.color }}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-semibold ${
+                            isDark ? 'text-white' : 'text-white'
+                          }`}
+                          style={{ backgroundColor: area.color || (isDark ? '#4F46E5' : '#6366F1') }}
                         >
                           {area.icon}
                         </div>
                       )}
-                      <h3 className="text-xl xl:text-2xl font-canela text-white">
+                      <h3 className={`text-xl xl:text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
                         {area.title}
                       </h3>
                     </div>
-                    <p className="text-sm mb-3 text-gray-300">
+                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                       {area.description}
                     </p>
                     {area.pageCount !== undefined && (
-                      <p className="text-xs text-gray-400">
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                         {area.pageCount} serviço{area.pageCount !== 1 ? 's' : ''} disponível{area.pageCount !== 1 ? 'eis' : ''}
                       </p>
                     )}
