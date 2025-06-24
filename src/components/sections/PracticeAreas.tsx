@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
@@ -179,7 +178,7 @@ const PracticeAreas = () => {
         <div className="text-center mb-6">
           <h2 
             ref={titleRef}
-            className={`text-xl md:text-2xl font-light tracking-tight mb-2 ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-3xl md:text-4xl lg:text-5xl font-light tracking-tight mb-2 ${isDark ? 'text-white' : 'text-black'}`}
           >
             {areasTitle}
           </h2>
@@ -198,7 +197,7 @@ const PracticeAreas = () => {
                 className="group block"
               >
                 <div className={`
-                  relative h-24 rounded-lg border transition-all duration-300 ease-out
+                  relative h-20 rounded-lg border transition-all duration-300 ease-out
                   hover:scale-[1.02] hover:-translate-y-1
                   ${isDark 
                     ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
@@ -214,44 +213,44 @@ const PracticeAreas = () => {
                   <div className="relative z-10 p-3 h-full flex flex-col">
                     
                     {/* Top Row - Icon, Service Count, and Arrow */}
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1">
                       {/* Icon */}
                       <div className={`
-                        w-6 h-6 rounded-full flex items-center justify-center
+                        w-5 h-5 rounded-full flex items-center justify-center
                         transition-all duration-300 group-hover:scale-110
                         ${isDark 
                           ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
                           : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
                         }
                       `}>
-                        <IconComponent className="w-3 h-3" />
+                        <IconComponent className="w-2.5 h-2.5" />
                       </div>
                       
                       {/* Service Count and Arrow */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span className={`
-                          text-xs font-medium
+                          text-[10px] font-medium
                           ${isDark ? 'text-white/50' : 'text-black/50'}
                         `}>
                           {area.services} serviço{area.services !== 1 ? 's' : ''}
                         </span>
                         
                         <div className={`
-                          w-5 h-5 rounded-full flex items-center justify-center
+                          w-4 h-4 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
                             : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
                           }
                         `}>
-                          <ArrowUpRight className="w-2.5 h-2.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          <ArrowUpRight className="w-2 h-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
                       </div>
                     </div>
                     
                     {/* Title */}
                     <h3 className={`
-                      text-sm font-medium mb-1 transition-all duration-300 leading-tight line-clamp-1
+                      text-xs font-medium mb-1 transition-all duration-300 leading-tight line-clamp-1
                       ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
                     `}>
                       {area.title}
@@ -259,7 +258,7 @@ const PracticeAreas = () => {
                     
                     {/* Description */}
                     <p className={`
-                      text-xs leading-relaxed transition-all duration-300 line-clamp-2 flex-1
+                      text-[10px] leading-relaxed transition-all duration-300 line-clamp-2 flex-1
                       ${isDark ? 'text-white/60 group-hover:text-white/70' : 'text-black/60 group-hover:text-black/70'}
                     `}>
                       {area.description}
