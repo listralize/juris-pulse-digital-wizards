@@ -8,7 +8,7 @@ import { Button } from '../components/ui/button';
 import { Calendar, User, Search, ArrowRight } from 'lucide-react';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
-import Footer from '../components/sections/Footer';
+import FloatingFooter from '../components/FloatingFooter';
 
 const BlogPage = () => {
   const { theme } = useTheme();
@@ -41,29 +41,33 @@ const BlogPage = () => {
             <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
           </div>
         </div>
-        <Footer />
+        <FloatingFooter />
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'}`}>
+    <div className={`min-h-screen relative ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
+      {/* Background gradients */}
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+      
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-20">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className={`text-4xl md:text-5xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="text-center mb-12 opacity-0 animate-fade-in-up" style={{ opacity: 1 }}>
+          <h1 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h1>
-          <div className={`w-24 h-0.5 mx-auto mb-4 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-          <p className={`text-lg max-w-3xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div className={`w-16 h-0.5 mx-auto mb-4 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          <p className={`text-base md:text-lg max-w-3xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Artigos especializados sobre as mais diversas áreas do Direito
           </p>
         </div>
 
         {/* Filtros compactos */}
-        <div className="mb-12">
+        <div className="mb-12 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 1 }}>
           <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -71,10 +75,10 @@ const BlogPage = () => {
                 placeholder="Buscar artigos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-10 h-10 rounded-lg ${
+                className={`pl-10 h-10 rounded-lg backdrop-blur-sm ${
                   isDark 
                     ? 'bg-neutral-900/50 border-neutral-700' 
-                    : 'bg-white border-gray-200'
+                    : 'bg-white/50 border-gray-200'
                 }`}
               />
             </div>
@@ -103,37 +107,47 @@ const BlogPage = () => {
           </div>
         </div>
 
-        {/* Grid compacto de Posts */}
+        {/* Grid de Posts */}
         {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPosts.map((post) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
+            {filteredPosts.map((post, index) => (
               <Card 
                 key={post.id}
-                className={`group cursor-pointer transition-all duration-300 hover:scale-105 ${isDark ? 'bg-neutral-900/50 border-neutral-700/30 hover:border-neutral-600/50' : 'bg-white border-gray-200 hover:border-gray-400'}`}
+                className={`group cursor-pointer transition-all duration-500 hover:scale-105 backdrop-blur-sm border opacity-0 animate-fade-in-up ${
+                  isDark 
+                    ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
+                    : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
+                }`}
+                style={{ animationDelay: `${0.6 + index * 0.1}s`, opacity: 1 }}
                 onClick={() => navigate(`/blog/${post.slug}`)}
               >
-                <CardContent className="p-0">
+                <CardContent className="p-0 h-full flex flex-col">
+                  {/* Gradiente de hover overlay */}
+                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg ${
+                    isDark ? 'bg-gradient-to-br from-indigo-500/5 to-purple-500/5' : 'bg-gradient-to-br from-blue-500/5 to-indigo-500/5'
+                  }`}></div>
+
                   {post.banner && (
-                    <div className="relative overflow-hidden">
+                    <div className="relative overflow-hidden rounded-t-lg">
                       <img
                         src={post.banner}
                         alt={post.title}
-                        className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                        className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       {post.featured && (
                         <div className="absolute top-3 right-3">
-                          <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full">
-                            DESTAQUE
+                          <span className="premium-blog-badge">
+                            ⭐ DESTAQUE
                           </span>
                         </div>
                       )}
                     </div>
                   )}
                   
-                  <div className="p-4">
+                  <div className="p-4 flex-1 flex flex-col relative z-10">
                     <div className="flex items-center gap-3 text-xs mb-2">
                       <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         <Calendar className="w-3 h-3" />
@@ -145,11 +159,11 @@ const BlogPage = () => {
                       </div>
                     </div>
                     
-                    <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors ${isDark ? 'text-white' : 'text-black'}`}>
+                    <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors flex-1 ${isDark ? 'text-white' : 'text-black'}`}>
                       {post.title}
                     </h3>
                     
-                    <p className={`mb-3 line-clamp-2 text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`mb-3 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {post.excerpt}
                     </p>
                     
@@ -166,7 +180,7 @@ const BlogPage = () => {
                       </div>
                     )}
                     
-                    <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600">
+                    <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto">
                       Ler artigo completo <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   </div>
@@ -183,7 +197,7 @@ const BlogPage = () => {
         )}
       </div>
       
-      <Footer />
+      <FloatingFooter />
     </div>
   );
 };

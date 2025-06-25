@@ -45,13 +45,22 @@ const Blog = () => {
         justifyContent: 'center'
       }}
     >
-      <div className="max-w-7xl mx-auto">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        {/* Header padronizado - mesmo padrão de todas as outras seções */}
         <div className="text-center mb-12">
-          <h2 className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h2>
-          <div className={`w-20 h-0.5 mx-auto mb-4 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-          <p className={`text-lg md:text-xl max-w-3xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          <p className={`text-base md:text-lg max-w-3xl mx-auto leading-relaxed mt-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Mantenha-se atualizado com as últimas novidades do mundo jurídico
           </p>
         </div>
@@ -59,7 +68,7 @@ const Blog = () => {
         {displayPosts.length > 0 ? (
           <>
             {/* Carrossel de artigos */}
-            <div className="mb-12">
+            <div className="mb-8">
               <Carousel
                 opts={{
                   align: "start",
@@ -71,35 +80,40 @@ const Blog = () => {
                   {displayPosts.map(post => (
                     <CarouselItem key={post.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                       <Card 
-                        className={`group cursor-pointer transition-all duration-300 hover:scale-105 h-full ${
+                        className={`group cursor-pointer transition-all duration-500 hover:scale-105 h-full border backdrop-blur-sm ${
                           isDark 
-                            ? 'bg-neutral-900/50 border-neutral-700/30 hover:border-neutral-600/50' 
-                            : 'bg-white border-gray-200 hover:border-gray-400'
+                            ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
+                            : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
                         }`}
                         onClick={() => navigate(`/blog/${post.slug}`)}
                       >
                         <CardContent className="p-0 h-full flex flex-col">
+                          {/* Gradiente de hover overlay */}
+                          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg ${
+                            isDark ? 'bg-gradient-to-br from-indigo-500/5 to-purple-500/5' : 'bg-gradient-to-br from-blue-500/5 to-indigo-500/5'
+                          }`}></div>
+                          
                           {post.banner && (
-                            <div className="relative overflow-hidden">
+                            <div className="relative overflow-hidden rounded-t-lg">
                               <img 
                                 src={post.banner} 
                                 alt={post.title}
-                                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                                className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
                               {post.featured && (
                                 <div className="absolute top-3 right-3">
-                                  <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full">
-                                    DESTAQUE
+                                  <span className="premium-blog-badge">
+                                    ⭐ DESTAQUE
                                   </span>
                                 </div>
                               )}
                             </div>
                           )}
                           
-                          <div className="p-4 flex-1 flex flex-col">
+                          <div className="p-4 flex-1 flex flex-col relative z-10">
                             <div className="flex items-center gap-3 text-xs mb-2">
                               <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                 <Calendar className="w-3 h-3" />
@@ -136,10 +150,10 @@ const Blog = () => {
             <div className="text-center">
               <Button 
                 onClick={() => navigate('/blog')}
-                className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 shadow-2xl ${
                   isDark 
-                    ? 'bg-white text-black hover:bg-gray-100' 
-                    : 'bg-black text-white hover:bg-gray-800'
+                    ? 'bg-gradient-to-b from-white to-gray-100 text-black hover:shadow-white/25 hover:scale-105' 
+                    : 'bg-gradient-to-b from-black to-gray-800 text-white hover:shadow-black/25 hover:scale-105'
                 }`}
               >
                 Ver todos os artigos

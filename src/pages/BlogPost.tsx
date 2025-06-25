@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
-import Footer from '../components/sections/Footer';
+import FloatingFooter from '../components/FloatingFooter';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,21 +19,29 @@ const BlogPost = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <div className={`min-h-screen ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
+        {/* Background gradients */}
+        <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+        <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+        
         <Navbar />
         <div className="container mx-auto px-4 py-20">
           <div className="flex justify-center items-center py-12">
             <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
           </div>
         </div>
-        <Footer />
+        <FloatingFooter />
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <div className={`min-h-screen ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
+        {/* Background gradients */}
+        <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+        <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+        
         <Navbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">
@@ -49,13 +57,17 @@ const BlogPost = () => {
             </Button>
           </div>
         </div>
-        <Footer />
+        <FloatingFooter />
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
+      {/* Background gradients */}
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+      
       <Navbar />
       
       <article className="container mx-auto px-4 py-20">
@@ -154,7 +166,7 @@ const BlogPost = () => {
         </div>
       </article>
       
-      <Footer />
+      <FloatingFooter />
     </div>
   );
 };

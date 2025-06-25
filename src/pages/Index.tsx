@@ -39,6 +39,9 @@ const Index = () => {
       // Configurar scroll suave
       html.style.scrollBehavior = 'smooth';
       
+      // Garantir que o cursor seja visível
+      body.style.cursor = 'none';
+      
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
@@ -70,7 +73,7 @@ const Index = () => {
   
   return (
     <div 
-      className={`min-h-screen w-full transition-colors duration-300 ${
+      className={`min-h-screen w-full transition-colors duration-300 relative ${
         isDark 
           ? 'bg-neutral-950 text-neutral-100' 
           : 'bg-white text-neutral-900'
@@ -80,6 +83,10 @@ const Index = () => {
         overflow: 'visible'
       }}
     >
+      {/* Background gradients - similar ao código de referência */}
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+
       <CustomCursor />
       <Navbar />
       <WhatsAppButton />
