@@ -11,42 +11,6 @@ const Partners = () => {
   const [title, setTitle] = useState('Nossa Equipe');
   const [subtitle, setSubtitle] = useState('Profissionais experientes e comprometidos com a excelência');
 
-  useEffect(() => {
-    const loadTexts = async () => {
-      try {
-        const { supabase } = await import('../../integrations/supabase/client');
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('*')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (settings) {
-          if (settings.partners_title) setTitle(settings.partners_title);
-          if (settings.partners_subtitle) setSubtitle(settings.partners_subtitle);
-        }
-      } catch (error) {
-        console.error('❌ Erro ao carregar textos da equipe:', error);
-      }
-    };
-
-    loadTexts();
-  }, []);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      const data = event.detail;
-      if (data.partnersTitle !== undefined) setTitle(data.partnersTitle);
-      if (data.partnersSubtitle !== undefined) setSubtitle(data.partnersSubtitle);
-    };
-
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    };
-  }, []);
-
   if (isLoading) {
     return (
       <section id="socios" className="h-screen w-full flex items-center justify-center px-6">
