@@ -87,10 +87,10 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            color = vec3(0.1, 0.1, 0.1);
+            color = vec3(0.0, 0.0, 0.0);
             color += vec3(0.05, 0.05, 0.05) * sin(3.0 * u_scroll_progress + 1.5);
           } else {
-            color = vec3(0.9, 0.9, 0.9);
+            color = vec3(1.0, 1.0, 1.0);
             color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5);
           }
 
@@ -101,7 +101,8 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       `;
 
       try {
-        const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        const context = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false }) || 
+                       canvas.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: false });
         
         if (!context) {
           console.warn("WebGL não é suportado pelo seu navegador.");
@@ -115,6 +116,10 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
         gl = context;
         console.log('✅ WebGL context criado com sucesso');
+
+        // Enable blending for transparency
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
           const shader = gl.createShader(type);
@@ -201,6 +206,10 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       pointer.x += (pointer.tX - pointer.x) * .2;
       pointer.y += (pointer.tY - pointer.y) * .2;
 
+      // Clear with transparent background
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
       gl.uniform1f(uniforms.u_time, currentTime);
       gl.uniform2f(uniforms.u_pointer_position, pointer.x / window.innerWidth, 1 - pointer.y / window.innerHeight);
       gl.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
@@ -261,6 +270,13 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("click", handleClick);
+      
+      if (gl) {
+        const loseContext = gl.getExtension('WEBGL_lose_context');
+        if (loseContext) {
+          loseContext.loseContext();
+        }
+      }
     };
   }, [inverted]);
 
@@ -269,8 +285,9 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none"
       style={{ 
-        zIndex: -1,
-        opacity: 0.95 
+        zIndex: 0,
+        opacity: 0.95,
+        background: 'transparent'
       }}
     />
   );

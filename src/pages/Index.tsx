@@ -26,8 +26,8 @@ const Index = () => {
       const html = document.documentElement;
       
       // Configurar altura fixa para as páginas iniciais
-      body.style.overflow = 'hidden'; // Remover scroll vertical global
-      html.style.overflow = 'hidden'; // Remover scroll vertical global
+      body.style.overflow = 'hidden';
+      html.style.overflow = 'hidden';
       body.style.height = '100vh';
       html.style.height = '100vh';
       body.style.maxHeight = '100vh';
@@ -36,6 +36,15 @@ const Index = () => {
       // Garantir que o background seja visível
       body.style.margin = '0';
       body.style.padding = '0';
+      
+      // Definir background baseado no tema
+      if (isDark) {
+        body.style.backgroundColor = '#000000';
+        html.style.backgroundColor = '#000000';
+      } else {
+        body.style.backgroundColor = '#ffffff';
+        html.style.backgroundColor = '#ffffff';
+      }
       
       // Garantir que o cursor seja visível no desktop
       if (window.innerWidth >= 768) {
@@ -56,7 +65,7 @@ const Index = () => {
     } catch (error) {
       console.error('❌ Erro ao configurar scroll:', error);
     }
-  }, []);
+  }, [isDark]);
 
   // Verificar se os termos já foram aceitos e mostrar popup se necessário
   useEffect(() => {
@@ -76,17 +85,18 @@ const Index = () => {
     <div 
       className={`h-screen w-full transition-colors duration-300 relative overflow-hidden ${
         isDark 
-          ? 'bg-neutral-950 text-neutral-100' 
-          : 'bg-white text-neutral-900'
+          ? 'bg-black text-white' 
+          : 'bg-white text-black'
       }`}
       style={{ 
         position: 'relative',
         height: '100vh',
-        maxHeight: '100vh'
+        maxHeight: '100vh',
+        backgroundColor: isDark ? '#000000' : '#ffffff'
       }}
     >
       {/* Neural Background para todo o site - sempre visível */}
-      <NeuralBackground inverted={!isDark} />
+      <NeuralBackground inverted={isDark} />
 
       <CustomCursor />
       <Navbar />

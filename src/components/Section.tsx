@@ -17,16 +17,13 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     
     console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
     
-    // A seção Hero sempre tem background preto, outras seguem o tema
+    // Todas as seções seguem o tema global
     const getBackgroundClass = () => {
-      if (id === 'home') {
-        return 'bg-black text-white'; // Hero sempre preto
-      }
       return isDark ? 'bg-black text-white' : 'bg-white text-black';
     };
     
     // Definir quais seções têm altura fixa (não permitem scroll)
-    const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog'].includes(id);
+    const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog', 'partners'].includes(id);
     
     return (
       <div 
@@ -51,10 +48,12 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           visibility: 'visible',
           padding: '0.75rem',
           paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
-          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y'
+          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y',
+          backgroundColor: isDark ? '#000000' : '#ffffff',
+          zIndex: 1
         }}
       >
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
+        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center relative z-10" style={{ opacity: 1, visibility: 'visible' }}>
           {children}
         </div>
       </div>
