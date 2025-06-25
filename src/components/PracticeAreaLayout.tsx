@@ -34,12 +34,16 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} relative`} 
       style={{ paddingBottom: '140px' }}
     >
-      {/* Neural Background only in dark theme */}
-      {isDark && <NeuralBackground />}
+      {/* Neural Background - garantindo que apareça no tema escuro */}
+      {isDark && (
+        <div className="fixed inset-0 w-full h-full -z-10">
+          <NeuralBackground />
+        </div>
+      )}
       
       {/* Background gradients */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-20"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-20"></div>
       
       <Navbar />
       
