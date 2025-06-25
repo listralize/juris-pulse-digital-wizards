@@ -152,8 +152,12 @@ const About = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Neural Background */}
-      {isDark && <NeuralBackground />}
+      {/* Neural Background - garantindo que apareça no tema escuro */}
+      {isDark && (
+        <div className="absolute inset-0 w-full h-full">
+          <NeuralBackground />
+        </div>
+      )}
       
       <div className="max-w-6xl mx-auto w-full relative z-10">
         {/* Container centralizado com padrão uniforme */}
