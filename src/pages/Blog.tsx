@@ -18,8 +18,6 @@ const BlogPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
 
-  console.log('BlogPage - Posts loaded from Supabase:', blogPosts.length);
-
   // Filtrar posts por termo de busca e tag
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,47 +52,48 @@ const BlogPage = () => {
       
       <div className="max-w-7xl mx-auto px-4 py-20">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className={`text-4xl md:text-5xl lg:text-6xl font-canela mb-6 ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="text-center mb-12">
+          <h1 className={`text-4xl md:text-5xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h1>
-          <div className={`w-24 h-0.5 mx-auto mb-6 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-          <p className={`text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Artigos especializados sobre as mais diversas áreas do Direito, 
-            mantendo você sempre atualizado com as novidades jurídicas
+          <div className={`w-24 h-0.5 mx-auto mb-4 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          <p className={`text-lg max-w-3xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Artigos especializados sobre as mais diversas áreas do Direito
           </p>
         </div>
 
-        {/* Filtros */}
-        <div className="mb-16">
-          <div className="flex flex-col md:flex-row gap-6 max-w-5xl mx-auto">
+        {/* Filtros compactos */}
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Buscar artigos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-12 h-12 text-lg rounded-full border-2 ${
+                className={`pl-10 h-10 rounded-lg ${
                   isDark 
-                    ? 'bg-neutral-900/50 border-neutral-700 focus:border-white' 
-                    : 'bg-white border-gray-200 focus:border-black'
+                    ? 'bg-neutral-900/50 border-neutral-700' 
+                    : 'bg-white border-gray-200'
                 }`}
               />
             </div>
             
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               <Button
                 variant={selectedTag === '' ? 'default' : 'outline'}
-                className="rounded-full px-6"
+                size="sm"
+                className="rounded-lg"
                 onClick={() => setSelectedTag('')}
               >
                 Todos
               </Button>
-              {allTags.map((tag) => (
+              {allTags.slice(0, 4).map((tag) => (
                 <Button
                   key={tag}
                   variant={selectedTag === tag ? 'default' : 'outline'}
-                  className="rounded-full px-6"
+                  size="sm"
+                  className="rounded-lg"
                   onClick={() => setSelectedTag(tag)}
                 >
                   {tag}
@@ -104,73 +103,62 @@ const BlogPage = () => {
           </div>
         </div>
 
-        {/* Grid de Posts */}
+        {/* Grid compacto de Posts */}
         {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPosts.map((post) => (
               <Card 
                 key={post.id}
-                className={`group h-full cursor-pointer transition-all duration-500 hover:scale-105 ${
-                  index === 0 && filteredPosts.length > 1 ? 'md:col-span-2 md:row-span-2' : ''
-                } ${isDark ? 'bg-neutral-900/50 border-neutral-700/30 hover:border-neutral-600/50 backdrop-blur-sm' : 'bg-white/80 border-gray-200 hover:border-gray-400 backdrop-blur-sm'}`}
+                className={`group cursor-pointer transition-all duration-300 hover:scale-105 ${isDark ? 'bg-neutral-900/50 border-neutral-700/30 hover:border-neutral-600/50' : 'bg-white border-gray-200 hover:border-gray-400'}`}
                 onClick={() => navigate(`/blog/${post.slug}`)}
               >
-                <CardContent className="p-0 h-full">
+                <CardContent className="p-0">
                   {post.banner && (
                     <div className="relative overflow-hidden">
                       <img
                         src={post.banner}
                         alt={post.title}
-                        className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                          index === 0 && filteredPosts.length > 1 ? 'h-64 md:h-80' : 'h-48'
-                        }`}
+                        className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
                         onError={(e) => {
-                          console.log('Image failed to load:', post.banner);
                           (e.target as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       {post.featured && (
-                        <div className="absolute top-4 right-4">
-                          <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-black text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                        <div className="absolute top-3 right-3">
+                          <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full">
                             DESTAQUE
                           </span>
                         </div>
                       )}
-                      {/* Overlay gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                     </div>
                   )}
                   
-                  <div className={`p-6 ${index === 0 && filteredPosts.length > 1 ? 'md:p-8' : ''}`}>
-                    <div className="flex items-center gap-4 text-sm mb-3">
+                  <div className="p-4">
+                    <div className="flex items-center gap-3 text-xs mb-2">
                       <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="w-3 h-3" />
                         {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
                       </div>
                       <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <User className="w-4 h-4" />
+                        <User className="w-3 h-3" />
                         {post.author}
                       </div>
                     </div>
                     
-                    <h3 className={`font-semibold mb-3 line-clamp-2 group-hover:text-blue-500 transition-colors duration-300 ${
-                      index === 0 && filteredPosts.length > 1 ? 'text-xl md:text-2xl' : 'text-lg'
-                    } ${isDark ? 'text-white' : 'text-black'}`}>
+                    <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors ${isDark ? 'text-white' : 'text-black'}`}>
                       {post.title}
                     </h3>
                     
-                    <p className={`mb-4 line-clamp-3 ${
-                      index === 0 && filteredPosts.length > 1 ? 'text-base' : 'text-sm'
-                    } ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`mb-3 line-clamp-2 text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {post.excerpt}
                     </p>
                     
                     {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {post.tags.slice(0, 3).map((tag) => (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {post.tags.slice(0, 2).map((tag) => (
                           <span 
                             key={tag}
-                            className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                            className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
                           >
                             {tag}
                           </span>
@@ -178,8 +166,8 @@ const BlogPage = () => {
                       </div>
                     )}
                     
-                    <Button variant="link" className="p-0 h-auto font-normal text-blue-500 hover:text-blue-600">
-                      Ler artigo completo <ArrowRight className="w-4 h-4 ml-1" />
+                    <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600">
+                      Ler artigo completo <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   </div>
                 </CardContent>
@@ -188,19 +176,9 @@ const BlogPage = () => {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className={`text-xl mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-lg mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               {searchTerm || selectedTag ? 'Nenhum artigo encontrado com os filtros aplicados.' : 'Nenhum artigo publicado ainda.'}
             </p>
-            <Button 
-              onClick={() => navigate('/admin')}
-              className={`px-8 py-3 rounded-full ${
-                isDark 
-                  ? 'bg-white text-black hover:bg-gray-100' 
-                  : 'bg-black text-white hover:bg-gray-800'
-              }`}
-            >
-              Gerenciar Posts no Admin
-            </Button>
           </div>
         )}
       </div>
