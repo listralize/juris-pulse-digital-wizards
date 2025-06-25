@@ -30,13 +30,13 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Função melhorada para verificar se o usuário rolou até o final da seção
   const isAtBottom = (element: HTMLElement) => {
-    const threshold = 50; // Aumentar tolerância
+    const threshold = 50;
     return element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
   };
 
   // Função melhorada para verificar se o usuário está no topo da seção
   const isAtTop = (element: HTMLElement) => {
-    return element.scrollTop <= 50; // Aumentar tolerância
+    return element.scrollTop <= 50;
   };
 
   // Função para verificar se a seção permite scroll interno
@@ -75,7 +75,7 @@ export const useSectionTransition = (sections: Section[]) => {
     hasInitialized.current = true;
     setIsInitialized(true);
     console.log('useSectionTransition - Inicialização completa');
-  }, []); // Dependências vazias para rodar apenas uma vez
+  }, []);
 
   const transitionToSection = useCallback((sectionId: string) => {
     console.log('transitionToSection chamado:', { 
@@ -174,91 +174,61 @@ export const useSectionTransition = (sections: Section[]) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection]);
 
-  // Navegação por scroll melhorada
+  // Navegação por scroll - APENAS NO MOBILE
   useEffect(() => {
     if (!isInitialized) return;
     
     const handleWheel = (e: WheelEvent) => {
-      if (isTransitioning.current) return;
-      
+      // Verificar se estamos no desktop - se sim, SEMPRE prevenir scroll vertical
+      if (window.innerWidth >= 768) {
+        e.preventDefault();
+        
+        if (isTransitioning.current) return;
+        
+        const now = Date.now();
+        
+        // Throttle para evitar scroll muito rápido
+        if (now - lastScrollTime.current < 800) {
+          return;
+        }
+
+        if (Math.abs(e.deltaY) < 50) return;
+
+        lastScrollTime.current = now;
+        
+        let newIndex = activeSectionIndex;
+        
+        if (e.deltaY > 0) {
+          // Scroll para baixo - próxima seção
+          newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
+        } else {
+          // Scroll para cima - seção anterior
+          newIndex = Math.max(activeSectionIndex - 1, 0);
+        }
+        
+        if (newIndex !== activeSectionIndex && sections[newIndex]) {
+          console.log('Navegação por scroll para:', sections[newIndex].id, 'de', activeSection);
+          transitionToSection(sections[newIndex].id);
+        }
+        return;
+      }
+
+      // Mobile - permitir scroll normal para seções que precisam
       const currentSection = sectionsRef.current[activeSectionIndex];
       if (!currentSection) return;
 
-      // Se estamos na seção de áreas de atuação, permitir scroll completo
-      if (activeSection === 'areas') {
-        const scrollContainer = currentSection.querySelector('#areas') || currentSection;
+      if (sectionAllowsScroll(activeSection)) {
+        const scrollContainer = currentSection.querySelector(`#${activeSection}`) || currentSection;
         
         if (e.deltaY > 0) {
-          // Rolando para baixo - verifica se já chegou ao final
           if (!isAtBottom(scrollContainer as HTMLElement)) {
             return; // Permite o scroll interno
           }
         } else {
-          // Rolando para cima - verifica se está no topo
           if (!isAtTop(scrollContainer as HTMLElement)) {
             return; // Permite o scroll interno
           }
         }
-      }
-
-      // Se estamos na seção de contato
-      if (activeSection === 'contact' && currentSection) {
-        const contactElement = currentSection.querySelector('#contact') || currentSection;
-        
-        if (e.deltaY > 0) {
-          // Rolando para baixo - verifica se já chegou ao final
-          if (!isAtBottom(contactElement as HTMLElement)) {
-            return; // Permite o scroll interno
-          }
-        } else {
-          // Rolando para cima - verifica se está no topo
-          if (!isAtTop(contactElement as HTMLElement)) {
-            return; // Permite o scroll interno
-          }
-        }
-      }
-
-      // Se estamos na seção de blog
-      if (activeSection === 'blog' && currentSection) {
-        const blogElement = currentSection.querySelector('#blog') || currentSection;
-        
-        if (e.deltaY > 0) {
-          if (!isAtBottom(blogElement as HTMLElement)) {
-            return; // Permite o scroll interno
-          }
-        } else {
-          if (!isAtTop(blogElement as HTMLElement)) {
-            return; // Permite o scroll interno
-          }
-        }
-      }
-      
-      const now = Date.now();
-      
-      // Throttle para evitar scroll muito rápido
-      if (now - lastScrollTime.current < 800) {
-        e.preventDefault();
-        return;
-      }
-
-      if (Math.abs(e.deltaY) < 50) return;
-
-      e.preventDefault();
-      lastScrollTime.current = now;
-      
-      let newIndex = activeSectionIndex;
-      
-      if (e.deltaY > 0) {
-        // Scroll para baixo - próxima seção
-        newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
-      } else {
-        // Scroll para cima - seção anterior
-        newIndex = Math.max(activeSectionIndex - 1, 0);
-      }
-      
-      if (newIndex !== activeSectionIndex && sections[newIndex]) {
-        console.log('Navegação por scroll para:', sections[newIndex].id, 'de', activeSection);
-        transitionToSection(sections[newIndex].id);
       }
     };
 

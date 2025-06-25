@@ -93,40 +93,47 @@
 
   html {
     height: 100%;
-    scroll-behavior: smooth;
     font-feature-settings: "cv11", "ss01";
     font-variant-numeric: oldstyle-nums;
-    scroll-padding-top: 80px;
   }
 
   body {
     height: 100%;
     margin: 0;
     padding: 0;
-    padding-top: 0;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
   }
 
-  /* Desktop: Prevent vertical scroll completely */
+  /* Desktop: Bloquear completamente o scroll vertical */
   @media (min-width: 768px) {
     html, body {
-      overflow-x: hidden;
-      overflow-y: hidden;
-      height: 100vh;
+      overflow: hidden !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+    }
+    
+    #root {
+      height: 100vh !important;
+      max-height: 100vh !important;
+      overflow: hidden !important;
     }
   }
 
-  /* Mobile: Allow normal scrolling */
+  /* Mobile: Permitir scroll normal */
   @media (max-width: 767px) {
     html, body {
       overflow-x: hidden;
       overflow-y: auto;
       height: auto;
       -webkit-overflow-scrolling: touch;
+    }
+    
+    #root {
+      height: auto;
+      overflow-y: auto;
     }
   }
 
@@ -180,32 +187,6 @@
   .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.4);
   }
-
-  /* Desktop: Strict height control */
-  @media (min-width: 768px) {
-    #areas {
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    #areas .grid {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-  }
-
-  /* Mobile: Normal flow */
-  @media (max-width: 767px) {
-    #areas {
-      height: auto;
-      min-height: 100vh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-  }
 }
 
 @layer components {
@@ -240,8 +221,6 @@
   .dark .glass-card {
     @apply bg-neutral-900/30 border-neutral-700/30;
   }
-
-  /* ... keep existing premium effects and other components the same */
 
   /* Premium Hover Effects */
   .hover-lift {
