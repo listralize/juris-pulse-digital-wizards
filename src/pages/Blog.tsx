@@ -107,85 +107,86 @@ const BlogPage = () => {
           </div>
         </div>
 
-        {/* Grid de Posts */}
+        {/* Grid de Posts - com padding adequado para o hover */}
         {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
             {filteredPosts.map((post, index) => (
-              <Card 
-                key={post.id}
-                className={`group cursor-pointer transition-all duration-500 hover:scale-105 backdrop-blur-sm border opacity-0 animate-fade-in-up ${
-                  isDark 
-                    ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
-                    : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
-                }`}
-                style={{ animationDelay: `${0.6 + index * 0.1}s`, opacity: 1 }}
-                onClick={() => navigate(`/blog/${post.slug}`)}
-              >
-                <CardContent className="p-0 h-full flex flex-col">
-                  {/* Gradiente de hover overlay */}
-                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg ${
-                    isDark ? 'bg-gradient-to-br from-indigo-500/5 to-purple-500/5' : 'bg-gradient-to-br from-blue-500/5 to-indigo-500/5'
-                  }`}></div>
+              <div key={post.id} className="p-2">
+                <Card 
+                  className={`group cursor-pointer transition-all duration-500 hover:scale-105 backdrop-blur-sm border opacity-0 animate-fade-in-up ${
+                    isDark 
+                      ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
+                      : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
+                  }`}
+                  style={{ animationDelay: `${0.6 + index * 0.1}s`, opacity: 1 }}
+                  onClick={() => navigate(`/blog/${post.slug}`)}
+                >
+                  <CardContent className="p-0 h-full flex flex-col">
+                    {/* Gradiente de hover overlay */}
+                    <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg ${
+                      isDark ? 'bg-gradient-to-br from-indigo-500/5 to-purple-500/5' : 'bg-gradient-to-br from-blue-500/5 to-indigo-500/5'
+                    }`}></div>
 
-                  {post.banner && (
-                    <div className="relative overflow-hidden rounded-t-lg">
-                      <img
-                        src={post.banner}
-                        alt={post.title}
-                        className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                      {post.featured && (
-                        <div className="absolute top-3 right-3">
-                          <span className="premium-blog-badge">
-                            ⭐ DESTAQUE
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="p-4 flex-1 flex flex-col relative z-10">
-                    <div className="flex items-center gap-3 text-xs mb-2">
-                      <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <Calendar className="w-3 h-3" />
-                        {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
-                      </div>
-                      <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <User className="w-3 h-3" />
-                        {post.author}
-                      </div>
-                    </div>
-                    
-                    <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors flex-1 ${isDark ? 'text-white' : 'text-black'}`}>
-                      {post.title}
-                    </h3>
-                    
-                    <p className={`mb-3 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {post.excerpt}
-                    </p>
-                    
-                    {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {post.tags.slice(0, 2).map((tag) => (
-                          <span 
-                            key={tag}
-                            className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                    {post.banner && (
+                      <div className="relative overflow-hidden rounded-t-lg">
+                        <img
+                          src={post.banner}
+                          alt={post.title}
+                          className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                        {post.featured && (
+                          <div className="absolute top-3 right-3">
+                            <span className="premium-blog-badge">
+                              ⭐ DESTAQUE
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                     
-                    <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto">
-                      Ler artigo completo <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="p-4 flex-1 flex flex-col relative z-10">
+                      <div className="flex items-center gap-3 text-xs mb-2">
+                        <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <Calendar className="w-3 h-3" />
+                          {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
+                        </div>
+                        <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <User className="w-3 h-3" />
+                          {post.author}
+                        </div>
+                      </div>
+                      
+                      <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors flex-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                        {post.title}
+                      </h3>
+                      
+                      <p className={`mb-3 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {post.excerpt}
+                      </p>
+                      
+                      {post.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {post.tags.slice(0, 2).map((tag) => (
+                            <span 
+                              key={tag}
+                              className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto">
+                        Ler artigo completo <ArrowRight className="w-3 h-3 ml-1" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             ))}
           </div>
         ) : (
