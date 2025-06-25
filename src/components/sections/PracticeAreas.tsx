@@ -171,19 +171,20 @@ const PracticeAreas = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Header - Bem próximo dos cards */}
-        <div className="text-center mb-3">
-          <h2 
-            ref={titleRef}
-            className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
-          >
-            {areasTitle}
-          </h2>
-          <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-        </div>
-        
-        {/* Grid Container - Espaçamento reduzido para 10px */}
-        <div className="flex-1 flex items-center justify-center">
+        {/* Container centralizado */}
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header centralizado */}
+          <div className="text-center mb-6">
+            <h2 
+              ref={titleRef}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+            >
+              {areasTitle}
+            </h2>
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          </div>
+          
+          {/* Grid Container */}
           <div 
             ref={gridRef} 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-w-4xl w-full"
