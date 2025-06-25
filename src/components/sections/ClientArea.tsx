@@ -126,9 +126,10 @@ const ClientArea = () => {
 
   if (isLoading) {
     return (
-      <section className={`min-h-screen flex flex-col justify-center py-8 px-4 md:px-16 lg:px-24 ${isDark ? 'bg-black' : 'bg-white'}`}>
-        <div className="flex justify-center items-center">
-          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      <section className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex items-center justify-center`}>
+        <div className="relative">
+          <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin ${isDark ? 'border-white/20' : 'border-black/20'}`}></div>
+          <div className={`absolute inset-0 w-8 h-8 border-2 border-transparent border-t-current rounded-full animate-spin ${isDark ? 'text-white' : 'text-black'}`}></div>
         </div>
       </section>
     );
@@ -142,73 +143,80 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className={`h-full flex flex-col justify-center items-center py-2 px-4 md:py-4 md:px-6 lg:px-24 relative overflow-hidden ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
-      style={{ minHeight: '100vh' }}
+      className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
     >
-      <div className="max-w-5xl mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 lg:gap-16">
-          <div className="w-full md:w-2/5 order-1 md:order-1">
-            <div className="relative mb-4 md:mb-0">
-              <div className="border-4 border-black rounded-lg overflow-hidden inline-block">
-                <img 
-                  ref={imageRef}
-                  src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
-                  alt="Área do Cliente em Smartphone" 
-                  className="w-full h-auto"
-                  style={{ maxHeight: '700px', objectFit: 'contain' }}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="w-full md:w-3/5 text-center md:text-left order-2 md:order-2">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
+        {/* Container centralizado com padrão uniforme */}
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header padronizado - mesmo padrão de todas as outras seções */}
+          <div className="text-center mb-8">
             <h2 
-              ref={titleRef} 
-              className={`text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              ref={titleRef}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {clientAreaTitle}
             </h2>
-            
-            <p 
-              ref={textRef} 
-              className={`text-base md:text-lg lg:text-xl xl:text-2xl mb-6 md:mb-8 font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-            >
-              {clientAreaDescription}
-            </p>
-            
-            <div className="flex flex-col space-y-3 md:space-y-4">
-              <a 
-                ref={button1Ref}
-                href={clientPortalLink} 
-                className={`group relative overflow-hidden rounded-lg md:rounded-xl px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
-                  isDark 
-                    ? 'bg-white text-black hover:bg-gray-100' 
-                    : 'bg-black text-white hover:bg-gray-800'
-                }`}
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          </div>
+          
+          {/* Content Grid - padronizado */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full">
+            <div className="flex flex-col justify-center">
+              <p 
+                ref={textRef}
+                className={`text-base md:text-lg leading-relaxed mb-6 font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}
               >
-                <span className="absolute inset-0 w-0 bg-gradient-to-r from-gray-200 to-gray-300 transition-all duration-500 ease-out group-hover:w-full"></span>
-                <Lock className={`mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10 ${isDark ? 'text-black' : 'text-white'}`} />
-                <span className="font-medium relative z-10">Acessar minha área</span>
-                <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
-              </a>
+                {clientAreaDescription}
+              </p>
               
-              <a 
-                ref={button2Ref}
-                href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group relative overflow-hidden rounded-lg md:rounded-xl border px-6 md:px-8 py-3 md:py-4 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
-                  isDark 
-                    ? 'border-white/20 text-white hover:bg-white/10' 
-                    : 'border-black/20 text-black hover:bg-black/5'
-                }`}
-              >
-                <span className={`absolute inset-0 w-0 transition-all duration-500 ease-out group-hover:w-full ${
-                  isDark ? 'bg-white/10' : 'bg-black/5'
-                }`}></span>
-                <MessageSquare className="mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 relative z-10" />
-                <span className="font-medium relative z-10">Primeiro acesso via WhatsApp</span>
-              </a>
+              <div className="flex flex-col space-y-4">
+                <a 
+                  ref={button1Ref}
+                  href={clientPortalLink} 
+                  className={`group relative overflow-hidden rounded-lg px-6 py-3 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
+                    isDark 
+                      ? 'bg-white text-black hover:bg-gray-100' 
+                      : 'bg-black text-white hover:bg-gray-800'
+                  }`}
+                >
+                  <Lock className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                  <span className="font-medium">Acessar minha área</span>
+                  <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+                
+                <a 
+                  ref={button2Ref}
+                  href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group relative overflow-hidden rounded-lg border px-6 py-3 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
+                    isDark 
+                      ? 'border-white/20 text-white hover:bg-white/10' 
+                      : 'border-black/20 text-black hover:bg-black/5'
+                  }`}
+                >
+                  <MessageSquare className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                  <span className="font-medium">Primeiro acesso via WhatsApp</span>
+                </a>
+              </div>
+            </div>
+            
+            <div ref={imageRef} className="flex justify-center items-center">
+              <div className="relative">
+                <img 
+                  src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
+                  alt="Área do Cliente em Smartphone" 
+                  className="w-full max-w-sm h-auto object-contain"
+                />
+              </div>
             </div>
           </div>
         </div>
