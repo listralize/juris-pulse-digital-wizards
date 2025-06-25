@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -140,13 +139,13 @@ const Hero = () => {
         >
           <div className="logo-container relative">
             <img 
-              src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"}
+              src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"}
               alt="Serafim & Trombela Advocacia Logo"
               className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300"
               style={{
                 filter: isDark 
                   ? 'drop-shadow(0 8px 20px rgba(0,0,0,0.7))' 
-                  : 'drop-shadow(0 8px 20px rgba(255,255,255,0.3))'
+                  : 'drop-shadow(0 8px 20px rgba(0,0,0,0.2))'
               }}
             />
           </div>

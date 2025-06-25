@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 interface NeuralBackgroundProps {
@@ -88,19 +87,17 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
           if (u_inverted > 0.5) {
             // Tema escuro - fundo preto com efeitos brancos sutis
-            color = vec3(1.0, 1.0, 1.0);
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - noise * 0.25);
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0) + vec4(1.0, 1.0, 1.0, noise * 0.15);
           } else {
             // Tema claro - fundo branco com efeitos escuros sutis
-            color = vec3(0.0, 0.0, 0.0);
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0 - noise * 0.4);
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0) - vec4(0.0, 0.0, 0.0, noise * 0.2);
           }
         }
       `;
 
       try {
         gl = canvas.getContext("webgl", { 
-          alpha: true, 
+          alpha: false, 
           premultipliedAlpha: false,
           antialias: true,
           preserveDrawingBuffer: false
@@ -111,8 +108,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           return false;
         }
 
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.disable(gl.BLEND);
 
         const createShader = (sourceCode: string, type: number) => {
           const shader = gl!.createShader(type);
@@ -182,8 +178,12 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       pointer.x += (pointer.tX - pointer.x) * 0.2;
       pointer.y += (pointer.tY - pointer.y) * 0.2;
 
-      // Sempre limpar com transparente e deixar o CSS controlar o fundo
-      gl.clearColor(0, 0, 0, 0);
+      // Limpar com cor base do tema
+      if (inverted) {
+        gl.clearColor(0, 0, 0, 1); // Preto para tema escuro
+      } else {
+        gl.clearColor(1, 1, 1, 1); // Branco para tema claro
+      }
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       gl.useProgram(program);
@@ -269,8 +269,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       className="fixed inset-0 w-full h-full pointer-events-none"
       style={{ 
         zIndex: -10,
-        opacity: 1,
-        backgroundColor: inverted ? '#000000' : '#ffffff'
+        opacity: 1
       }}
     />
   );
