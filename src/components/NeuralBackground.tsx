@@ -87,10 +87,10 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            // Dark theme - PRETO E BRANCO apenas
-            color = vec3(1.0, 1.0, 1.0); // Branco puro
+            // Dark theme - PRETO E BRANCO PURO
+            color = vec3(1.0); // Branco puro
           } else {
-            // Light theme - cores azuis/indigo
+            // Light theme - cores azuis/indigo do código original
             color = vec3(0.1, 0.2, 0.8);
             color += vec3(0.0, 0.1, 0.4) * sin(3.0 * u_scroll_progress + 1.5);
           }
@@ -167,7 +167,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
         gl.enableVertexAttribArray(positionLocation);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        console.log('✅ Neural Background shader pronto');
+        console.log('✅ Neural Background shader pronto - PRETO E BRANCO');
         return true;
         
       } catch (error) {
@@ -240,7 +240,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       window.addEventListener("touchmove", handleTouchMove);
       window.addEventListener("click", handleClick);
       
-      console.log('✅ Neural Background inicializado');
+      console.log('✅ Neural Background inicializado - PRETO E BRANCO');
     } else {
       console.error('❌ Falha ao inicializar Neural Background');
     }

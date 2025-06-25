@@ -37,7 +37,7 @@ const Index = () => {
       body.style.margin = '0';
       body.style.padding = '0';
       
-      // Definir background baseado no tema - TRANSPARENTE para ver o neural
+      // Background transparente para mostrar apenas o neural
       body.style.backgroundColor = 'transparent';
       html.style.backgroundColor = 'transparent';
       
@@ -85,11 +85,11 @@ const Index = () => {
         position: 'relative',
         height: '100vh',
         maxHeight: '100vh',
-        backgroundColor: isDark ? '#000000' : '#ffffff',
+        backgroundColor: 'transparent',
         color: isDark ? '#ffffff' : '#000000'
       }}
     >
-      {/* Neural Background - SEMPRE PRIMEIRO, por trás de tudo */}
+      {/* APENAS Neural Background - preto e branco no tema escuro */}
       <NeuralBackground inverted={isDark} />
 
       <CustomCursor />
