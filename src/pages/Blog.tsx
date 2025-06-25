@@ -50,7 +50,7 @@ const BlogPage = () => {
     <div className={`min-h-screen relative ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
       {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 --10"></div>
       
       <Navbar />
       
@@ -107,13 +107,13 @@ const BlogPage = () => {
           </div>
         </div>
 
-        {/* Grid de Posts - com padding adequado para o hover */}
+        {/* Grid de Posts - com altura fixa e padding adequado para hover */}
         {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
             {filteredPosts.map((post, index) => (
-              <div key={post.id} className="p-2">
+              <div key={post.id} className="p-3">
                 <Card 
-                  className={`group cursor-pointer transition-all duration-500 hover:scale-105 backdrop-blur-sm border opacity-0 animate-fade-in-up ${
+                  className={`group cursor-pointer transition-all duration-500 hover:scale-[1.03] backdrop-blur-sm border h-[400px] flex flex-col opacity-0 animate-fade-in-up ${
                     isDark 
                       ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
                       : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
@@ -128,11 +128,11 @@ const BlogPage = () => {
                     }`}></div>
 
                     {post.banner && (
-                      <div className="relative overflow-hidden rounded-t-lg">
+                      <div className="relative overflow-hidden rounded-t-lg h-40 flex-shrink-0">
                         <img
                           src={post.banner}
                           alt={post.title}
-                          className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                           }}
@@ -148,7 +148,7 @@ const BlogPage = () => {
                     )}
                     
                     <div className="p-4 flex-1 flex flex-col relative z-10">
-                      <div className="flex items-center gap-3 text-xs mb-2">
+                      <div className="flex items-center gap-3 text-xs mb-2 flex-shrink-0">
                         <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                           <Calendar className="w-3 h-3" />
                           {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
@@ -159,16 +159,20 @@ const BlogPage = () => {
                         </div>
                       </div>
                       
-                      <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors flex-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-10 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
                         {post.title}
                       </h3>
                       
-                      <p className={`mb-3 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <p className={`mb-3 text-xs flex-1 overflow-hidden ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
                         {post.excerpt}
                       </p>
                       
                       {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-3">
+                        <div className="flex flex-wrap gap-1 mb-3 flex-shrink-0">
                           {post.tags.slice(0, 2).map((tag) => (
                             <span 
                               key={tag}
@@ -180,7 +184,7 @@ const BlogPage = () => {
                         </div>
                       )}
                       
-                      <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto">
+                      <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto flex-shrink-0 justify-start">
                         Ler artigo completo <ArrowRight className="w-3 h-3 ml-1" />
                       </Button>
                     </div>

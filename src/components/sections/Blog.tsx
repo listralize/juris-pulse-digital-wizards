@@ -71,8 +71,8 @@ const Blog = () => {
 
         {displayPosts.length > 0 ? (
           <>
-            {/* Carrossel de artigos - com padding adequado para o hover */}
-            <div className="mb-8 px-4">
+            {/* Carrossel de artigos - com padding adequado para o hover e altura fixa */}
+            <div className="mb-8 px-8">
               <Carousel
                 opts={{
                   align: "start",
@@ -80,12 +80,12 @@ const Blog = () => {
                 }}
                 className="w-full"
               >
-                <CarouselContent className="-ml-2 md:-ml-4">
+                <CarouselContent className="-ml-3 md:-ml-6">
                   {displayPosts.map(post => (
-                    <CarouselItem key={post.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                      <div className="p-2">
+                    <CarouselItem key={post.id} className="pl-3 md:pl-6 md:basis-1/2 lg:basis-1/3">
+                      <div className="p-3">
                         <Card 
-                          className={`group cursor-pointer transition-all duration-500 hover:scale-105 h-full border backdrop-blur-sm ${
+                          className={`group cursor-pointer transition-all duration-500 hover:scale-[1.03] backdrop-blur-sm border h-[360px] flex flex-col ${
                             isDark 
                               ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40' 
                               : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
@@ -104,11 +104,11 @@ const Blog = () => {
                             }`}></div>
                             
                             {post.banner && (
-                              <div className="relative overflow-hidden rounded-t-lg">
+                              <div className="relative overflow-hidden rounded-t-lg h-28 flex-shrink-0">
                                 <img 
                                   src={post.banner} 
                                   alt={post.title}
-                                  className="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110"
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).style.display = 'none';
                                   }}
@@ -124,7 +124,7 @@ const Blog = () => {
                             )}
                             
                             <div className="p-3 flex-1 flex flex-col relative z-10">
-                              <div className="flex items-center gap-2 text-xs mb-2">
+                              <div className="flex items-center gap-2 text-xs mb-2 flex-shrink-0">
                                 <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                   <Calendar className="w-3 h-3" />
                                   {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
@@ -135,15 +135,19 @@ const Blog = () => {
                                 </div>
                               </div>
                               
-                              <h3 className={`font-semibold mb-2 line-clamp-2 text-sm group-hover:text-blue-500 transition-colors flex-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                              <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-10 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
                                 {post.title}
                               </h3>
                               
-                              <p className={`mb-2 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              <p className={`mb-3 text-xs flex-1 overflow-hidden ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical'
+                              }}>
                                 {post.excerpt}
                               </p>
                               
-                              <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto">
+                              <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 mt-auto flex-shrink-0 justify-start">
                                 Ler mais <ArrowRight className="w-3 h-3 ml-1" />
                               </Button>
                             </div>
