@@ -153,7 +153,7 @@ const About = () => {
       }}
     >
       {/* Neural Background */}
-      <NeuralBackground />
+      {isDark && <NeuralBackground />}
       
       <div className="max-w-6xl mx-auto w-full relative z-10">
         {/* Container centralizado com padrão uniforme */}

@@ -7,6 +7,7 @@ import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
 import { ArrowUpRight, Scale, Building2, Users, Shield, Briefcase, Gavel, Heart, Coins } from 'lucide-react';
+import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -162,6 +163,9 @@ const PracticeAreas = () => {
       ref={sectionRef}
       className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
+      {/* Neural Background */}
+      {isDark && <NeuralBackground />}
+
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute inset-0" style={{

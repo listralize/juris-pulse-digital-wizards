@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
 import { Lock, ArrowRight, MessageSquare, Crown } from 'lucide-react';
+import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -146,6 +147,9 @@ const ClientArea = () => {
       id="cliente" 
       className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
     >
+      {/* Neural Background */}
+      {isDark && <NeuralBackground />}
+
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute inset-0" style={{

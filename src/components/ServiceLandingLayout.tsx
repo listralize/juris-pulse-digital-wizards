@@ -17,6 +17,7 @@ import {
 } from './ui/accordion';
 import UnifiedContactForm from './contact/UnifiedContactForm';
 import { useServicePageData } from '../hooks/useServicePageData';
+import NeuralBackground from './NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -136,11 +137,14 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
   }
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
+      {/* Neural Background only in dark theme */}
+      {isDark && <NeuralBackground />}
+      
       <Navbar />
       
       {/* Breadcrumbs */}
-      <div className={`px-6 md:px-16 lg:px-24 py-4 ${isDark ? 'bg-black/80 text-white/80' : 'bg-white/80 text-black/80'} border-b ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+      <div className={`px-6 md:px-16 lg:px-24 py-4 ${isDark ? 'bg-black/80 text-white/80' : 'bg-white/80 text-black/80'} border-b ${isDark ? 'border-white/10' : 'border-black/10'} relative z-10`}>
         <div className="max-w-6xl mx-auto flex items-center text-sm">
           <Link to="/" className="hover:underline">Home</Link>
           <span className="mx-2">/</span>
@@ -151,7 +155,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       </div>
 
       {/* Hero Section */}
-      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f9f9f9]'}`}>
+      <section className={`px-6 md:px-16 lg:px-24 py-16 md:py-24 ${isDark ? 'bg-black' : 'bg-[#f9f9f9]'} relative z-10`}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 ${isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black'}`}>
@@ -416,7 +420,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       )}
       
       <WhatsAppButton />
-      <Footer respectTheme={true} />
+      <Footer />
     </div>
   );
 };

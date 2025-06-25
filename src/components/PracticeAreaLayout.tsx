@@ -57,7 +57,7 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
         </div>
       </section>
       
-      {currentArea && <CtaSection serviceArea={title} respectTheme={true} />}
+      {currentArea && <CtaSection serviceArea={title} />}
       
       <WhatsAppButton />
       <FloatingFooter />
