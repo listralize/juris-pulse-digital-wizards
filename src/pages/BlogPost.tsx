@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
+import Footer from '../components/sections/Footer';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -25,6 +26,7 @@ const BlogPost = () => {
             <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -47,6 +49,7 @@ const BlogPost = () => {
             </Button>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -150,6 +153,8 @@ const BlogPost = () => {
           </div>
         </div>
       </article>
+      
+      <Footer />
     </div>
   );
 };

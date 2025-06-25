@@ -1,9 +1,10 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
-import { Lock, ArrowRight, MessageSquare, Crown } from 'lucide-react';
+import { Lock, ArrowRight, MessageSquare, Star } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -172,11 +173,16 @@ const ClientArea = () => {
             {/* Imagem agora na primeira coluna (esquerda) */}
             <div ref={imageRef} className="flex justify-center items-center order-1 lg:order-1">
               <div className="relative bg-black rounded-2xl p-6">
-                {/* Label de Destaque Prateada */}
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-                  <div className="bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 text-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 border border-gray-400">
-                    <Crown className="w-4 h-4" />
-                    <span className="text-xs font-bold tracking-wide">EXCLUSIVO PARA CLIENTES ST PRIME</span>
+                {/* Label Futurística com Animação */}
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                  <div className="futuristic-badge relative">
+                    <div className="bg-gradient-to-r from-slate-800 via-slate-600 to-slate-800 text-white px-6 py-2 rounded-full shadow-2xl flex items-center gap-2 border border-slate-500/50 backdrop-blur-md">
+                      <Star className="w-4 h-4 animate-pulse" />
+                      <span className="text-xs font-bold tracking-wider uppercase">EXCLUSIVO PARA CLIENTES ST PRIME</span>
+                      <Star className="w-4 h-4 animate-pulse" />
+                    </div>
+                    {/* Efeito de brilho animado */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-shimmer"></div>
                   </div>
                 </div>
                 
