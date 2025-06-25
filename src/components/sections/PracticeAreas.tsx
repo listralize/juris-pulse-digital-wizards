@@ -199,7 +199,7 @@ const PracticeAreas = () => {
                   className="group block"
                 >
                   <div className={`
-                    relative h-28 rounded-xl border transition-all duration-300 ease-out
+                    relative h-32 rounded-xl border transition-all duration-300 ease-out
                     hover:scale-[1.02] hover:-translate-y-1
                     ${isDark 
                       ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
