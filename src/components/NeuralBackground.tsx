@@ -88,12 +88,15 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-
-      if (!gl) {
+      // Fix TypeScript error by properly getting WebGL context
+      const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      
+      if (!context) {
         console.warn("WebGL is not supported by your browser.");
         return null;
       }
+      
+      gl = context as WebGLRenderingContext;
 
       const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
         const shader = gl.createShader(type);
@@ -185,6 +188,7 @@ const NeuralBackground: React.FC = () => {
     const resizeCanvas = () => {
       if (!canvas || !gl || !uniforms) return;
       
+      // Set canvas to full viewport dimensions
       canvas.width = window.innerWidth * devicePixelRatio;
       canvas.height = window.innerHeight * devicePixelRatio;
       gl.uniform1f(uniforms.u_ratio, canvas.width / canvas.height);
@@ -228,8 +232,13 @@ const NeuralBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.4 }}
+      className="fixed inset-0 w-full h-full pointer-events-none -z-10"
+      style={{ 
+        opacity: 0.4,
+        width: '100vw',
+        height: '100vh',
+        maxWidth: 'none'
+      }}
     />
   );
 };
