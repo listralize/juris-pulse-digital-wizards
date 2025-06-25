@@ -160,7 +160,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
+      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} h-screen flex flex-col overflow-hidden relative`}
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">

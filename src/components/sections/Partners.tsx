@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -94,18 +95,19 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`h-full w-full py-8 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'flex-start',
+        paddingTop: '2rem'
       }}
     >
       <div className="max-w-7xl mx-auto w-full">
-        <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado */}
-          <div className="text-center mb-8 lg:mb-12">
+        <div className="flex flex-col items-center justify-start flex-1">
+          {/* Header padronizado - movido mais para cima */}
+          <div className="text-center mb-6 lg:mb-8">
             <h2 
               ref={titleRef}
               className={`text-2xl sm:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}

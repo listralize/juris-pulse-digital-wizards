@@ -154,18 +154,18 @@ const Hero = () => {
 
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
-      {/* Background com marble banner - preenche toda a tela */}
+      {/* Background com marble banner - agora muito maior para preencher toda a tela */}
       <div 
         ref={bgRef} 
         className="absolute inset-0 z-0 w-full h-full"
         style={{ 
-          transform: 'scale(1.3)',
+          transform: 'scale(2.0)',
           minWidth: '100vw',
           minHeight: '100vh',
-          width: '130%',
-          height: '130%',
-          left: '-15%',
-          top: '-15%'
+          width: '200%',
+          height: '200%',
+          left: '-50%',
+          top: '-50%'
         }}
       >
         <MarbleBanner />
