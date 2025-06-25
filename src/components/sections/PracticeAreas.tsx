@@ -171,15 +171,15 @@ const PracticeAreas = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Header - Maior e mais centralizado */}
-        <div className="text-center mb-8 flex-shrink-0">
+        {/* Header - Mesmo estilo do Partners */}
+        <div className="text-center mb-6 md:mb-8">
           <h2 
             ref={titleRef}
-            className={`text-4xl md:text-5xl lg:text-6xl font-space-grotesk font-light tracking-tight mb-4 ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
           >
             {areasTitle}
           </h2>
-          <div className={`w-24 h-px mx-auto ${isDark ? 'bg-white/30' : 'bg-black/30'}`}></div>
+          <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
         </div>
         
         {/* Grid Container - Espaçamento reduzido para 10px */}
