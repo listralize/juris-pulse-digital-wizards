@@ -88,12 +88,14 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-
-      if (!gl) {
+      const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      
+      if (!context) {
         console.warn("WebGL is not supported by your browser.");
         return null;
       }
+
+      gl = context as WebGLRenderingContext;
 
       const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
         const shader = gl.createShader(type);

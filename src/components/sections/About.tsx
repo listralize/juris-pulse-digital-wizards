@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -143,22 +142,25 @@ const About = () => {
   };
 
   return (
-    <div 
+    <section 
       ref={sectionRef}
-      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 relative overflow-hidden ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
-      style={{ 
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-      }}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
       {/* Neural Background */}
       <NeuralBackground />
       
-      <div className="max-w-6xl mx-auto w-full relative z-10">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesmo padrão de todas as outras seções */}
+          {/* Header padronizado - mesma altura que outras páginas */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
@@ -183,7 +185,7 @@ const About = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

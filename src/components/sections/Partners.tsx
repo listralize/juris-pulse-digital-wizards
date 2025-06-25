@@ -92,17 +92,19 @@ const Partners = () => {
   const teamTitle = localPageTexts?.teamTitle || 'Nossa Equipe';
 
   return (
-    <div 
+    <section 
       ref={sectionRef}
-      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
-      style={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-      }}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
-      <div className="max-w-7xl mx-auto w-full">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesma altura que outras páginas */}
           <div className="text-center mb-8 md:mb-12">
@@ -116,7 +118,7 @@ const Partners = () => {
           </div>
           
           {/* Carousel Container com padding adequado */}
-          <div className="relative w-full max-w-6xl px-4 sm:px-8 lg:px-12">
+          <div className="relative w-full max-w-4xl px-4 sm:px-8 lg:px-12">
             <div 
               ref={carouselRef} 
               className="overflow-hidden"
@@ -138,9 +140,17 @@ const Partners = () => {
                       .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
                       .map((member, index) => (
                         <div key={index} className="group p-2 sm:p-3 lg:p-4">
-                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
-                            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
-                          } shadow-md hover:shadow-xl`}>
+                          <div className={`
+                            relative overflow-hidden rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1
+                            ${isDark 
+                              ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
+                              : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
+                            }
+                            backdrop-blur-sm shadow-md hover:shadow-xl
+                          `}>
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
+                            
                             {/* Foto com altura responsiva */}
                             <div className="aspect-[4/3] relative">
                               {member.image ? (
@@ -160,14 +170,14 @@ const Partners = () => {
                             </div>
                             
                             {/* Conteúdo responsivo */}
-                            <div className="p-3 sm:p-4 lg:p-5">
-                              <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                            <div className="p-3 sm:p-4 lg:p-5 relative z-10">
+                              <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 font-space-grotesk ${isDark ? 'text-white' : 'text-black'}`}>
                                 {member.name}
                               </h3>
-                              <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                              <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium font-inter ${isDark ? 'text-white/70' : 'text-black/50'}`}>
                                 {member.title || 'Advogado'}
                               </p>
-                              <p className={`text-xs sm:text-sm leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                              <p className={`text-xs sm:text-sm leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-black/50'}`}>
                                 {member.description}
                               </p>
                             </div>
@@ -225,7 +235,7 @@ const Partners = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
