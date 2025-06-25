@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 interface NeuralBackgroundProps {
@@ -87,9 +86,9 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            // Dark theme - FUNDO PRETO com EFEITOS CLAROS
-            color = vec3(1.0, 1.0, 1.0); // Efeitos brancos/claros
-            gl_FragColor = vec4(color, noise * 0.6);
+            // Dark theme - FUNDO PRETO ABSOLUTO com EFEITOS BRANCOS
+            color = vec3(1.0, 1.0, 1.0); // Efeitos brancos puros
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - noise * 0.7); // Fundo preto absoluto
           } else {
             // Light theme - azuis/indigo do código original
             color = vec3(0.1, 0.2, 0.8);
@@ -167,7 +166,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
         gl.enableVertexAttribArray(positionLocation);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        console.log('✅ Neural Background shader pronto - FUNDO PRETO EFEITOS CLAROS');
+        console.log('✅ Neural Background shader pronto - FUNDO PRETO ABSOLUTO');
         return true;
         
       } catch (error) {
@@ -184,7 +183,12 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       pointer.x += (pointer.tX - pointer.x) * 0.2;
       pointer.y += (pointer.tY - pointer.y) * 0.2;
 
-      gl.clearColor(0, 0, 0, 0);
+      // Fundo preto absoluto para tema escuro
+      if (inverted) {
+        gl.clearColor(0, 0, 0, 1); // Preto absoluto
+      } else {
+        gl.clearColor(0, 0, 0, 0); // Transparente para tema claro
+      }
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       gl.useProgram(program);
@@ -240,7 +244,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       window.addEventListener("touchmove", handleTouchMove);
       window.addEventListener("click", handleClick);
       
-      console.log('✅ Neural Background inicializado - FUNDO PRETO EFEITOS CLAROS');
+      console.log('✅ Neural Background inicializado - FUNDO PRETO ABSOLUTO');
     } else {
       console.error('❌ Falha ao inicializar Neural Background');
     }
@@ -271,7 +275,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       style={{ 
         zIndex: -10,
         opacity: 1,
-        background: 'transparent'
+        background: inverted ? '#000000' : 'transparent' // Fundo preto para tema escuro
       }}
     />
   );
