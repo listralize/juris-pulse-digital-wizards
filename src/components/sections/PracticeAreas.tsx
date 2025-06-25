@@ -18,7 +18,7 @@ const PracticeAreas = () => {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   
-  const { lawCategories, isLoading } = useSupabaseLawCategories();
+  const { categories: lawCategories, isLoading } = useSupabaseLawCategories();
 
   const [hoveredArea, setHoveredArea] = useState<string | null>(null);
 
@@ -104,8 +104,8 @@ const PracticeAreas = () => {
                     ? 'bg-white/5 hover:bg-white/10 border-white/20 hover:border-white/30' 
                     : 'bg-white/80 hover:bg-white border-gray-200/60 hover:border-gray-400/60'
                 } shadow-lg hover:shadow-xl`}
-                onClick={() => handleAreaClick(area.slug)}
-                onMouseEnter={() => setHoveredArea(area.slug)}
+                onClick={() => handleAreaClick(area.value)}
+                onMouseEnter={() => setHoveredArea(area.value)}
                 onMouseLeave={() => setHoveredArea(null)}
               >
                 <CardContent className="p-4 sm:p-6 lg:p-8 text-center h-full flex flex-col relative">
@@ -115,7 +115,7 @@ const PracticeAreas = () => {
                   }`}></div>
                   
                   <div className={`text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 transition-all duration-300 ${
-                    hoveredArea === area.slug ? 'scale-110' : 'scale-100'
+                    hoveredArea === area.value ? 'scale-110' : 'scale-100'
                   } relative z-10`}>
                     {area.icon}
                   </div>
@@ -129,7 +129,7 @@ const PracticeAreas = () => {
                   <p className={`text-xs sm:text-sm leading-relaxed flex-1 relative z-10 ${
                     isDark ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    {area.shortDescription}
+                    {area.description}
                   </p>
                   
                   <div className={`mt-3 sm:mt-4 text-xs sm:text-sm font-medium group-hover:translate-x-1 transition-transform relative z-10 ${

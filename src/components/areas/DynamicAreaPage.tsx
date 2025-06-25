@@ -76,7 +76,7 @@ export const DynamicAreaPage: React.FC<DynamicAreaPageProps> = ({
       <CtaSection serviceArea={title} respectTheme={true} />
       
       <WhatsAppButton />
-      <Footer respectTheme={true} />
+      <Footer />
     </div>
   );
 };

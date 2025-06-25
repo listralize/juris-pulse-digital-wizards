@@ -416,7 +416,7 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
       )}
       
       <WhatsAppButton />
-      <Footer respectTheme={true} />
+      <Footer />
     </div>
   );
 };

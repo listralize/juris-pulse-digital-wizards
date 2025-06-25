@@ -19,7 +19,7 @@ const Footer = () => {
   const navigate = useNavigate();
   
   const { pageTexts, isLoading } = useSupabaseDataNew();
-  const { lawCategories } = useSupabaseLawCategories();
+  const { categories: lawCategories } = useSupabaseLawCategories();
   
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
 
@@ -65,10 +65,10 @@ const Footer = () => {
   }
 
   const contactInfo = {
-    address: localPageTexts?.contactAddress || "Rua Principal, 123 - Centro",
-    phone: localPageTexts?.contactPhone || "(11) 9999-9999",
-    email: localPageTexts?.contactEmail || "contato@exemplo.com",
-    hours: localPageTexts?.contactHours || "Seg-Sex: 9h às 18h"
+    address: localPageTexts?.contactTexts?.address || "Rua Principal, 123 - Centro",
+    phone: localPageTexts?.contactTexts?.phone || "(11) 9999-9999",
+    email: localPageTexts?.contactTexts?.email || "contato@exemplo.com",
+    hours: "Seg-Sex: 9h às 18h"
   };
 
   return (
@@ -100,7 +100,7 @@ const Footer = () => {
               />
             </div>
             <p className={`text-sm leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              {localPageTexts?.footerDescription || "Escritório de advocacia especializado em soluções jurídicas completas e personalizadas."}
+              {localPageTexts?.footerTexts?.description || "Escritório de advocacia especializado em soluções jurídicas completas e personalizadas."}
             </p>
             <div className="flex space-x-4">
               <a href="#" className={`p-2 rounded-full transition-colors ${isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'}`}>
@@ -124,7 +124,7 @@ const Footer = () => {
               {lawCategories.slice(0, 6).map((area) => (
                 <li key={area.id}>
                   <button
-                    onClick={() => navigate(`/areas/${area.slug}`)}
+                    onClick={() => navigate(`/areas/${area.value}`)}
                     className={`text-sm hover:underline transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}
                   >
                     {area.name}
@@ -203,7 +203,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className={`mt-12 pt-8 border-t text-center ${isDark ? 'border-white/20 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
           <p className="text-sm">
-            © {new Date().getFullYear()} {localPageTexts?.siteName || "Escritório de Advocacia"}. Todos os direitos reservados.
+            © {new Date().getFullYear()} {localPageTexts?.footerTexts?.companyName || "Escritório de Advocacia"}. Todos os direitos reservados.
           </p>
         </div>
       </div>
