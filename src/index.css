@@ -194,7 +194,7 @@
   }
 
   .custom-cursor-dot {
-    @apply fixed pointer-events-none z-[9999] w-2 h-2 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-50 ease-out;
+    @apply fixed pointer-events-none z-[9999] w-2 h-2 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out;
     mix-blend-mode: difference;
   }
 
