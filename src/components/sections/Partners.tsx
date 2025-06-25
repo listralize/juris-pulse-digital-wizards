@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -100,17 +99,16 @@ const Partners = () => {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-start',
-        paddingTop: '2rem'
+        justifyContent: 'center'
       }}
     >
       <div className="max-w-7xl mx-auto w-full">
-        <div className="flex flex-col items-center justify-start flex-1">
-          {/* Header padronizado - movido mais para cima */}
-          <div className="text-center mb-6 lg:mb-8">
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header padronizado - mesma altura que outras páginas */}
+          <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
-              className={`text-2xl sm:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {teamTitle}
             </h2>

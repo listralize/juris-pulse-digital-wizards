@@ -160,7 +160,7 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`${isDark ? 'bg-black text-white' : 'bg-white text-black'} h-screen flex flex-col overflow-hidden relative`}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
@@ -173,8 +173,8 @@ const PracticeAreas = () => {
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesmo padrão de todas as outras seções */}
-          <div className="text-center mb-8">
+          {/* Header padronizado - mesma altura que outras páginas */}
+          <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}

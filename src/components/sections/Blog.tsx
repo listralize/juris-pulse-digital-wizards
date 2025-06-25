@@ -48,9 +48,9 @@ const Blog = () => {
       </div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header padronizado */}
-        <div className="text-center mb-8 lg:mb-12">
-          <h2 className={`text-2xl sm:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
+        {/* Header padronizado - mesma altura que outras páginas */}
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h2>
           <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
@@ -73,10 +73,10 @@ const Blog = () => {
                 <CarouselContent className="-ml-2 sm:-ml-4 lg:-ml-6">
                   {displayPosts.map(post => (
                     <CarouselItem key={post.id} className="pl-2 sm:pl-4 lg:pl-6 basis-full sm:basis-1/2 lg:basis-1/3">
-                      {/* Container com padding para hover */}
+                      {/* Container com padding para hover - altura reduzida */}
                       <div className="p-2 sm:p-3 lg:p-4">
                         <Card 
-                          className={`group cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm border h-auto flex flex-col ${
+                          className={`group cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm border h-80 flex flex-col ${
                             isDark 
                               ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/20' 
                               : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-md hover:shadow-xl hover:shadow-blue-500/10'
@@ -90,7 +90,7 @@ const Blog = () => {
                             }`}></div>
                             
                             {post.banner && (
-                              <div className="relative overflow-hidden rounded-t-lg h-36 sm:h-40 lg:h-44 flex-shrink-0">
+                              <div className="relative overflow-hidden rounded-t-lg h-28 sm:h-32 lg:h-36 flex-shrink-0">
                                 <img 
                                   src={post.banner} 
                                   alt={post.title}
@@ -123,7 +123,7 @@ const Blog = () => {
                                 {post.title}
                               </h3>
                               
-                              <p className={`mb-3 sm:mb-4 text-xs sm:text-sm flex-1 line-clamp-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              <p className={`mb-3 sm:mb-4 text-xs sm:text-sm flex-1 line-clamp-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                 {post.excerpt}
                               </p>
                               
