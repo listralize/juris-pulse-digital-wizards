@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
@@ -169,23 +170,23 @@ const PracticeAreas = () => {
         }}></div>
       </div>
 
-      <div className="max-w-5xl mx-auto relative z-10 h-full flex flex-col px-4 md:px-8 lg:px-16">
-        {/* Header - Reduced padding */}
-        <div className="text-center py-4 md:py-6 flex-shrink-0">
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col px-4 md:px-6 lg:px-8">
+        {/* Header - Reduzido ainda mais */}
+        <div className="text-center pt-6 pb-4 flex-shrink-0">
           <h2 
             ref={titleRef}
-            className={`text-2xl md:text-3xl lg:text-4xl font-space-grotesk font-light tracking-tight mb-3 md:mb-4 ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-2xl md:text-3xl lg:text-3xl font-space-grotesk font-light tracking-tight mb-2 ${isDark ? 'text-white' : 'text-black'}`}
           >
             {areasTitle}
           </h2>
           <div className={`w-16 h-px mx-auto ${isDark ? 'bg-white/30' : 'bg-black/30'}`}></div>
         </div>
         
-        {/* Grid Container - Optimized spacing with reduced card height */}
-        <div className="flex-1 overflow-hidden pb-4 md:pb-6">
+        {/* Grid Container - Otimizado para melhor aproveitamento do espaço */}
+        <div className="flex-1 overflow-hidden pb-6">
           <div 
             ref={gridRef} 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 h-full md:overflow-y-auto md:pr-2"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 h-full max-h-full md:overflow-y-auto md:pr-2"
             style={{ 
               scrollbarWidth: 'thin',
               scrollbarColor: isDark ? '#ffffff20 transparent' : '#00000020 transparent'
@@ -201,7 +202,7 @@ const PracticeAreas = () => {
                   className="group block"
                 >
                   <div className={`
-                    relative h-28 md:h-32 lg:h-36 rounded-xl border transition-all duration-300 ease-out
+                    relative h-24 md:h-28 lg:h-32 rounded-xl border transition-all duration-300 ease-out
                     hover:scale-[1.02] hover:-translate-y-1
                     ${isDark 
                       ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
@@ -214,38 +215,38 @@ const PracticeAreas = () => {
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
                     
                     {/* Content */}
-                    <div className="relative z-10 p-4 md:p-5 h-full flex flex-col">
+                    <div className="relative z-10 p-3 md:p-4 h-full flex flex-col">
                       
                       {/* Top Row - Icon and Arrow */}
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         {/* Icon */}
                         <div className={`
-                          w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center
+                          w-7 md:w-8 h-7 md:h-8 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
                             : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
                           }
                         `}>
-                          <IconComponent className="w-4 md:w-5 h-4 md:h-5" />
+                          <IconComponent className="w-3.5 md:w-4 h-3.5 md:h-4" />
                         </div>
                         
                         {/* Arrow */}
                         <div className={`
-                          w-6 md:w-8 h-6 md:h-8 rounded-full flex items-center justify-center
+                          w-6 md:w-7 h-6 md:h-7 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
                             : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
                           }
                         `}>
-                          <ArrowUpRight className="w-3 md:w-4 h-3 md:h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          <ArrowUpRight className="w-3 md:w-3.5 h-3 md:h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
                       </div>
                       
                       {/* Title */}
                       <h3 className={`
-                        text-base md:text-lg font-medium mb-2 transition-all duration-300 leading-tight line-clamp-2 font-space-grotesk flex-1
+                        text-sm md:text-base lg:text-lg font-medium mb-1 transition-all duration-300 leading-tight flex-1 font-space-grotesk
                         ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
                       `}>
                         {area.title}
@@ -254,7 +255,7 @@ const PracticeAreas = () => {
                       {/* Service Count */}
                       <div className="mt-auto">
                         <span className={`
-                          text-xs md:text-sm font-medium font-inter
+                          text-xs font-medium font-inter
                           ${isDark ? 'text-white/50' : 'text-black/50'}
                         `}>
                           {area.services} serviço{area.services !== 1 ? 's' : ''}
