@@ -1,12 +1,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
-import { ArrowUpRight, Scale, Building2, Users, Shield, Briefcase, Gavel, Heart, Coins } from 'lucide-react';
+import { Card, CardContent } from '../ui/card';
+import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,164 +14,69 @@ const PracticeAreas = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-
   const { theme } = useTheme();
-  const { pageTexts, servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
-  const { categories: supabaseCategories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
+  
+  const { lawCategories, isLoading } = useSupabaseLawCategories();
 
-  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
-  const [localCategories, setLocalCategories] = useState(supabaseCategories);
+  const [hoveredArea, setHoveredArea] = useState<string | null>(null);
 
-  useEffect(() => {
-    setLocalPageTexts(pageTexts);
-  }, [pageTexts]);
-
-  useEffect(() => {
-    setLocalCategories(supabaseCategories);
-  }, [supabaseCategories]);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      setLocalPageTexts(event.detail);
-    };
-
-    const handleCategoriesUpdate = (event: CustomEvent) => {
-      setLocalCategories(event.detail);
-    };
-
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    window.addEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
-    };
-  }, []);
-
-  const iconMapping = {
-    'administrativo': Building2,
-    'tributario': Coins,
-    'empresarial': Briefcase,
-    'trabalho': Users,
-    'previdenciario': Shield,
-    'consumidor': Scale,
-    'constitucional': Gavel,
-    'civil': Scale,
-    'familia': Heart
+  const handleAreaClick = (slug: string) => {
+    navigate(`/areas/${slug}`);
   };
 
-  const practiceAreas = React.useMemo(() => {
-    if (!localCategories || localCategories.length === 0) {
-      return [
-        {
-          id: 'familia-fallback',
-          title: 'Direito de Família',
-          href: '/areas/familia',
-          services: 0,
-          icon: Heart
-        },
-        {
-          id: 'tributario-fallback', 
-          title: 'Direito Tributário',
-          href: '/areas/tributario',
-          services: 0,
-          icon: Coins
-        },
-        {
-          id: 'empresarial-fallback',
-          title: 'Direito Empresarial', 
-          href: '/areas/empresarial',
-          services: 0,
-          icon: Briefcase
-        }
-      ];
-    }
-
-    return localCategories.slice(0, 9).map(category => {
-      const categoryPages = servicePages?.filter(page => 
-        page.category === category.value
-      ) || [];
-
-      const IconComponent = iconMapping[category.value as keyof typeof iconMapping] || Scale;
-
-      return {
-        id: category.id || category.value,
-        title: category.label || category.name,
-        href: `/areas/${category.value}`,
-        services: categoryPages.length,
-        icon: IconComponent
-      };
-    });
-  }, [localCategories, servicePages]);
-
-  const isLoading = categoriesLoading || pagesLoading;
-
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || lawCategories.length === 0) return;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 80%",
-        toggleActions: "play none none reverse"
-      }
-    });
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     tl.fromTo(
       titleRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
-    );
-    
-    tl.fromTo(
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
+    )
+    .fromTo(
       gridRef.current?.children || [],
-      { opacity: 0, y: 40, scale: 0.95 },
+      { opacity: 0, y: 15, scale: 0.95 },
       { 
         opacity: 1, 
         y: 0, 
-        scale: 1,
+        scale: 1, 
         duration: 0.6,
-        stagger: 0.1,
-        ease: "power3.out"
+        stagger: 0.1 
       },
       "-=0.4"
     );
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      tl.kill();
     };
-  }, [isLoading, practiceAreas]);
+  }, [isLoading, lawCategories.length]);
 
   if (isLoading) {
     return (
-      <section className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex items-center justify-center`}>
-        <div className="relative">
-          <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin ${isDark ? 'border-white/20' : 'border-black/20'}`}></div>
-          <div className={`absolute inset-0 w-8 h-8 border-2 border-transparent border-t-current rounded-full animate-spin ${isDark ? 'text-white' : 'text-black'}`}></div>
-        </div>
-      </section>
+      <div className="flex justify-center items-center h-full">
+        <div className={`animate-spin rounded-full h-6 w-6 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
     );
   }
 
-  const areasTitle = localPageTexts?.areasTitle || 'Áreas de Atuação';
-
   return (
-    <section 
-      id="areas"
+    <div 
       ref={sectionRef}
-      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} relative`}
+      style={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Container centralizado com padrão uniforme */}
+      {/* Neural Background only in dark theme */}
+      {isDark && <NeuralBackground />}
+      
+      <div className="max-w-7xl mx-auto w-full relative z-10">
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesma altura que outras páginas */}
           <div className="text-center mb-8 md:mb-12">
@@ -179,94 +84,66 @@ const PracticeAreas = () => {
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
-              {areasTitle}
+              Áreas de Atuação
             </h2>
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+            <p className={`text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mt-4 px-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Nossos especialistas oferecem soluções jurídicas completas em diversas áreas do direito
+            </p>
           </div>
-          
-          {/* Grid Container - padronizado */}
+
           <div 
-            ref={gridRef} 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full"
+            ref={gridRef}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full max-w-6xl px-4"
           >
-            {practiceAreas.map((area, index) => {
-              const IconComponent = area.icon;
-              
-              return (
-                <Link 
-                  key={area.id}
-                  to={area.href}
-                  className="group block"
-                >
-                  <div className={`
-                    relative h-32 lg:h-36 rounded-xl border transition-all duration-300 ease-out
-                    hover:scale-[1.02] hover:-translate-y-1
-                    ${isDark 
-                      ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
-                      : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
-                    }
-                    backdrop-blur-sm overflow-hidden
-                  `}>
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
-                    
-                    {/* Content */}
-                    <div className="relative z-10 p-4 lg:p-5 h-full flex flex-col">
-                      
-                      {/* Top Row - Icon and Arrow */}
-                      <div className="flex items-center justify-between mb-2">
-                        {/* Icon */}
-                        <div className={`
-                          w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center
-                          transition-all duration-300 group-hover:scale-110
-                          ${isDark 
-                            ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
-                            : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
-                          }
-                        `}>
-                          <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />
-                        </div>
-                        
-                        {/* Arrow */}
-                        <div className={`
-                          w-7 h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center
-                          transition-all duration-300 group-hover:scale-110
-                          ${isDark 
-                            ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
-                            : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
-                          }
-                        `}>
-                          <ArrowUpRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        </div>
-                      </div>
-                      
-                      {/* Title */}
-                      <h3 className={`
-                        text-base lg:text-lg font-medium mb-1 transition-all duration-300 leading-tight flex-1 font-space-grotesk
-                        ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
-                      `}>
-                        {area.title}
-                      </h3>
-                      
-                      {/* Service Count */}
-                      <div className="mt-auto">
-                        <span className={`
-                          text-xs lg:text-sm font-medium font-inter
-                          ${isDark ? 'text-white/50' : 'text-black/50'}
-                        `}>
-                          {area.services} serviço{area.services !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    </div>
+            {lawCategories.map((area) => (
+              <Card
+                key={area.id}
+                className={`group cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 backdrop-blur-sm border ${
+                  isDark 
+                    ? 'bg-white/5 hover:bg-white/10 border-white/20 hover:border-white/30' 
+                    : 'bg-white/80 hover:bg-white border-gray-200/60 hover:border-gray-400/60'
+                } shadow-lg hover:shadow-xl`}
+                onClick={() => handleAreaClick(area.slug)}
+                onMouseEnter={() => setHoveredArea(area.slug)}
+                onMouseLeave={() => setHoveredArea(null)}
+              >
+                <CardContent className="p-4 sm:p-6 lg:p-8 text-center h-full flex flex-col relative">
+                  {/* Gradiente de hover overlay */}
+                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg ${
+                    isDark ? 'bg-gradient-to-br from-indigo-500/5 to-purple-500/5' : 'bg-gradient-to-br from-blue-500/5 to-indigo-500/5'
+                  }`}></div>
+                  
+                  <div className={`text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 transition-all duration-300 ${
+                    hoveredArea === area.slug ? 'scale-110' : 'scale-100'
+                  } relative z-10`}>
+                    {area.icon}
                   </div>
-                </Link>
-              );
-            })}
+                  
+                  <h3 className={`text-base sm:text-lg lg:text-xl font-semibold mb-2 sm:mb-3 group-hover:text-blue-500 transition-colors relative z-10 ${
+                    isDark ? 'text-white' : 'text-black'
+                  }`}>
+                    {area.name}
+                  </h3>
+                  
+                  <p className={`text-xs sm:text-sm leading-relaxed flex-1 relative z-10 ${
+                    isDark ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    {area.shortDescription}
+                  </p>
+                  
+                  <div className={`mt-3 sm:mt-4 text-xs sm:text-sm font-medium group-hover:translate-x-1 transition-transform relative z-10 ${
+                    isDark ? 'text-blue-400' : 'text-blue-600'
+                  }`}>
+                    Saiba mais →
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

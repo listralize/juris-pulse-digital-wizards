@@ -9,6 +9,7 @@ import { Calendar, User, Search, ArrowRight } from 'lucide-react';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
 import FloatingFooter from '../components/FloatingFooter';
+import NeuralBackground from '../components/NeuralBackground';
 
 const BlogPage = () => {
   const { theme } = useTheme();
@@ -34,7 +35,10 @@ const BlogPage = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-white'} relative`}>
+        {/* Neural Background only in dark theme */}
+        {isDark && <NeuralBackground />}
+        
         <Navbar />
         <div className="container mx-auto px-4 py-20">
           <div className="flex justify-center items-center py-12">
@@ -48,13 +52,16 @@ const BlogPage = () => {
 
   return (
     <div className={`min-h-screen relative ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
+      {/* Neural Background only in dark theme */}
+      {isDark && <NeuralBackground />}
+      
       {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 --10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
       
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 py-20">
+      <div className="max-w-7xl mx-auto px-4 py-20 relative z-10">
         {/* Header */}
         <div className="text-center mb-12 opacity-0 animate-fade-in-up" style={{ opacity: 1 }}>
           <h1 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
