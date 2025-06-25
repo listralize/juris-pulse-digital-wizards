@@ -95,7 +95,13 @@ const NeuralBackground: React.FC = () => {
         return null;
       }
 
-      gl = context as WebGLRenderingContext;
+      // Verificação de tipo mais específica
+      if (!(context instanceof WebGLRenderingContext)) {
+        console.warn("WebGL context is not available.");
+        return null;
+      }
+
+      gl = context;
 
       const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
         const shader = gl.createShader(type);
