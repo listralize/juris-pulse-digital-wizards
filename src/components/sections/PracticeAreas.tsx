@@ -171,8 +171,8 @@ const PracticeAreas = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Header - Mesmo estilo do Partners */}
-        <div className="text-center mb-6 md:mb-8">
+        {/* Header - Bem próximo dos cards */}
+        <div className="text-center mb-3">
           <h2 
             ref={titleRef}
             className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
