@@ -103,13 +103,31 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    padding-top: 0; /* Remove padding top to fix mobile navbar issues */
-    overflow-x: hidden;
+    padding-top: 0;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+  }
+
+  /* Desktop: Prevent vertical scroll completely */
+  @media (min-width: 768px) {
+    html, body {
+      overflow-x: hidden;
+      overflow-y: hidden;
+      height: 100vh;
+    }
+  }
+
+  /* Mobile: Allow normal scrolling */
+  @media (max-width: 767px) {
+    html, body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: auto;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 
   body.light {
@@ -163,27 +181,25 @@
     background: rgba(255, 255, 255, 0.4);
   }
 
-  /* Desktop section fixes - prevent vertical scroll */
+  /* Desktop: Strict height control */
   @media (min-width: 768px) {
     #areas {
       height: 100vh;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
     
     #areas .grid {
-      height: calc(100vh - 200px); /* Adjust based on header height */
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 
-  /* Mobile scroll fixes */
-  @media (max-width: 768px) {
-    body {
-      padding-top: 0;
-      position: relative;
-    }
-    
-    /* Ensure sections can scroll properly on mobile */
-    #areas, #contact, #blog {
+  /* Mobile: Normal flow */
+  @media (max-width: 767px) {
+    #areas {
       height: auto;
       min-height: 100vh;
       overflow-y: auto;
