@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
@@ -15,7 +14,8 @@ const Navbar = () => {
   // Check if we're on home page and at the very top
   const isHomePage = location.pathname === '/';
   const [isAtTop, setIsAtTop] = useState(true);
-  const showLogoOnMobile = !isHomePage || !isAtTop;
+  // Sempre mostrar logo no mobile
+  const showLogoOnMobile = true;
 
   useEffect(() => {
     const handleScroll = () => {

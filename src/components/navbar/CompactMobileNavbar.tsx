@@ -46,17 +46,16 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
     <>
       <nav className={`md:hidden fixed top-0 left-0 right-0 z-[100] ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} transition-colors duration-300`}>
         <div className="px-4 h-16 flex items-center justify-between">
-          {/* Left side - Logo (conditional) */}
+          {/* Left side - Logo */}
           <div className="flex items-center">
-            {showLogo && (
-              <Link to="/" className="flex items-center">
-                <img 
-                  src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
-                  alt="Logo" 
-                  className="h-10 object-contain"
-                />
-              </Link>
-            )}
+            <Link to="/" className="flex items-center">
+              <img 
+                src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"} 
+                alt="Logo" 
+                className="h-10 object-contain"
+                style={{ display: 'block', visibility: 'visible' }}
+              />
+            </Link>
           </div>
 
           {/* Right side - Actions */}

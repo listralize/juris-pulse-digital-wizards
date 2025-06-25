@@ -55,8 +55,8 @@ const SectionsContainer: React.FC = () => {
 
   if (!isInitialized) {
     return (
-      <div className="w-full h-screen bg-white flex items-center justify-center">
-        <div className="text-black opacity-50">Carregando...</div>
+      <div className="w-full h-screen bg-black flex items-center justify-center">
+        <div className="text-white opacity-50">Carregando...</div>
       </div>
     );
   }
@@ -69,7 +69,8 @@ const SectionsContainer: React.FC = () => {
         style={{ 
           width: isMobile ? '100vw' : `${sections.length * 100}vw`,
           height: isMobile ? `${sections.length * 100}vh` : '100vh',
-          willChange: 'transform'
+          willChange: 'transform',
+          backgroundColor: 'transparent'
         }}
       >
         {sections.map((section, index) => {
@@ -85,7 +86,8 @@ const SectionsContainer: React.FC = () => {
                 width: isMobile ? '100vw' : '100vw',
                 height: isMobile ? '100vh' : '100vh',
                 minWidth: isMobile ? '100vw' : '100vw',
-                minHeight: isMobile ? '100vh' : '100vh'
+                minHeight: isMobile ? '100vh' : '100vh',
+                backgroundColor: 'transparent'
               }}
             >
               <Section 
