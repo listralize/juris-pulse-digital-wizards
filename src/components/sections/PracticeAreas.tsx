@@ -199,7 +199,7 @@ const PracticeAreas = () => {
                   className="group block"
                 >
                   <div className={`
-                    relative h-32 rounded-xl border transition-all duration-300 ease-out
+                    relative h-32 lg:h-36 rounded-xl border transition-all duration-300 ease-out
                     hover:scale-[1.02] hover:-translate-y-1
                     ${isDark 
                       ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
@@ -212,38 +212,38 @@ const PracticeAreas = () => {
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
                     
                     {/* Content */}
-                    <div className="relative z-10 p-4 h-full flex flex-col">
+                    <div className="relative z-10 p-4 lg:p-5 h-full flex flex-col">
                       
                       {/* Top Row - Icon and Arrow */}
                       <div className="flex items-center justify-between mb-2">
                         {/* Icon */}
                         <div className={`
-                          w-8 h-8 rounded-full flex items-center justify-center
+                          w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
                             : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
                           }
                         `}>
-                          <IconComponent className="w-4 h-4" />
+                          <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />
                         </div>
                         
                         {/* Arrow */}
                         <div className={`
-                          w-7 h-7 rounded-full flex items-center justify-center
+                          w-7 h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
                             : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
                           }
                         `}>
-                          <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          <ArrowUpRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
                       </div>
                       
                       {/* Title */}
                       <h3 className={`
-                        text-base font-medium mb-1 transition-all duration-300 leading-tight flex-1 font-space-grotesk
+                        text-base lg:text-lg font-medium mb-1 transition-all duration-300 leading-tight flex-1 font-space-grotesk
                         ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
                       `}>
                         {area.title}
@@ -252,7 +252,7 @@ const PracticeAreas = () => {
                       {/* Service Count */}
                       <div className="mt-auto">
                         <span className={`
-                          text-xs font-medium font-inter
+                          text-xs lg:text-sm font-medium font-inter
                           ${isDark ? 'text-white/50' : 'text-black/50'}
                         `}>
                           {area.services} serviço{area.services !== 1 ? 's' : ''}

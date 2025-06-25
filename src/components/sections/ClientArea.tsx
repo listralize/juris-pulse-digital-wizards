@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
-import { Lock, ArrowRight, MessageSquare } from 'lucide-react';
+import { Lock, ArrowRight, MessageSquare, Crown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -169,10 +169,18 @@ const ClientArea = () => {
           </div>
           
           {/* Content Grid - padronizado com ordem invertida */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl w-full">
             {/* Imagem agora na primeira coluna (esquerda) */}
             <div ref={imageRef} className="flex justify-center items-center order-1 lg:order-1">
               <div className="relative bg-black rounded-2xl p-6">
+                {/* Label de Destaque */}
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
+                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                    <Crown className="w-4 h-4" />
+                    <span className="text-xs font-bold tracking-wide">EXCLUSIVO PARA CLIENTES ST PRIME</span>
+                  </div>
+                </div>
+                
                 <img 
                   src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
                   alt="Área do Cliente em Smartphone" 
