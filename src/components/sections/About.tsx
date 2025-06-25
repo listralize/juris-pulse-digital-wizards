@@ -1,7 +1,9 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
+import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -141,14 +143,22 @@ const About = () => {
   };
 
   return (
-    <section 
+    <div 
       ref={sectionRef}
-      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-transparent text-white' : 'bg-transparent text-black'}`}
+      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 relative overflow-hidden ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}
     >
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
+      {/* Neural Background */}
+      <NeuralBackground />
+      
+      <div className="max-w-6xl mx-auto w-full relative z-10">
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesma altura que outras páginas */}
+          {/* Header padronizado - mesmo padrão de todas as outras seções */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
@@ -173,7 +183,7 @@ const About = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

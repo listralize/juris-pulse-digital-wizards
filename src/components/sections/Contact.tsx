@@ -4,16 +4,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
-import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
-
 gsap.registerPlugin(ScrollTrigger);
-
 const Contact = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const { theme } = useTheme();
+  const {
+    theme
+  } = useTheme();
   const isDark = theme === 'dark';
 
   // Estado local para receber atualizações em tempo real
@@ -97,39 +96,32 @@ const Contact = () => {
       tl.kill();
     };
   }, []);
-  return (
-    <div className="w-full min-h-screen flex flex-col">
-      {/* Conteúdo principal da página de contato */}
-      <div ref={sectionRef} className={`flex-1 ${isDark ? 'bg-transparent text-white' : 'bg-transparent text-black'} py-6 px-4 md:px-6 lg:px-8`}>
+  return <div className="w-full h-full flex flex-col justify-center">
+      <div ref={sectionRef} className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-6 px-4 md:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
+          
+          
           <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
-              <div className={`${isDark ? 'bg-black/20 border-white/20' : 'bg-white/20 border-gray-200'} rounded-lg p-1 shadow-md border backdrop-blur-sm`}>
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-md border`}>
                 <div className="h-24 lg:h-32">
                   <LocationMap />
                 </div>
               </div>
               
-              <div className={`${isDark ? 'bg-black/20 border-white/20' : 'bg-white/20 border-gray-200'} rounded-lg p-3 shadow-md border backdrop-blur-sm`}>
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-3 shadow-md border`}>
                 <ContactInfo />
               </div>
             </div>
             
             <div className="lg:col-span-3 order-1 lg:order-2">
-              <div className={`${isDark ? 'bg-black/20 border-white/20' : 'bg-white/20 border-gray-200'} rounded-lg p-3 shadow-md border backdrop-blur-sm`}>
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-3 shadow-md border`}>
                 <UnifiedContactForm darkBackground={isDark} pageId="contato" />
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Rodapé completo apenas no mobile */}
-      <div className="block md:hidden">
-        <Footer respectTheme={true} />
-      </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Contact;
