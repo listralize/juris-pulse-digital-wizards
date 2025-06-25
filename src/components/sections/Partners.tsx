@@ -19,16 +19,13 @@ const Partners = () => {
   
   const { teamMembers, pageTexts, isLoading } = useSupabaseDataNew();
   
-  // Estado local para receber atualizações em tempo real
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Atualizar quando pageTexts muda
   useEffect(() => {
     setLocalPageTexts(pageTexts);
   }, [pageTexts]);
 
-  // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('📱 Partners: Recebendo atualização de textos:', event.detail);
@@ -80,7 +77,6 @@ const Partners = () => {
     };
   }, [isLoading]);
 
-  // Auto-play carousel
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
@@ -108,121 +104,127 @@ const Partners = () => {
       }}
     >
       <div className="max-w-6xl mx-auto w-full">
-        <div className="text-center mb-6 md:mb-8">
-          <h2 
-            ref={titleRef}
-            className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
-          >
-            {teamTitle}
-          </h2>
-          <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-        </div>
-        
-        {/* Carousel Container */}
-        <div className="relative">
-          <div 
-            ref={carouselRef} 
-            className="overflow-hidden"
-          >
-            <div 
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ 
-                transform: `translateX(-${currentSlide * (100 / totalSlides)}%)`,
-                width: `${totalSlides * 100}%`
-              }}
+        {/* Container centralizado com padrão uniforme */}
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header padronizado - mesmo padrão de todas as outras seções */}
+          <div className="text-center mb-8">
+            <h2 
+              ref={titleRef}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
-              {Array.from({ length: totalSlides }).map((_, slideIndex) => (
-                <div 
-                  key={slideIndex}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-shrink-0"
-                  style={{ width: `${100 / totalSlides}%` }}
-                >
-                  {teamMembers
-                    .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
-                    .map((member, index) => (
-                      <div key={index} className="group">
-                        <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${
-                          isDark ? 'bg-white/5' : 'bg-white'
-                        } shadow-md hover:shadow-xl`}>
-                          <div className="aspect-square relative">
-                            {member.image ? (
-                              <img 
-                                src={member.image} 
-                                alt={member.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className={`w-full h-full flex items-center justify-center text-3xl ${
-                                isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
-                              }`}>
-                                👤
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          </div>
-                          
-                          <div className="p-3">
-                            <h3 className={`text-sm md:text-base font-semibold mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
-                              {member.name}
-                            </h3>
-                            <p className={`text-xs mb-1 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                              {member.title || 'Advogado'}
-                            </p>
-                            <p className={`text-xs leading-relaxed line-clamp-2 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
-                              {member.description}
-                            </p>
+              {teamTitle}
+            </h2>
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          </div>
+          
+          {/* Carousel Container */}
+          <div className="relative w-full max-w-4xl">
+            <div 
+              ref={carouselRef} 
+              className="overflow-hidden"
+            >
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ 
+                  transform: `translateX(-${currentSlide * (100 / totalSlides)}%)`,
+                  width: `${totalSlides * 100}%`
+                }}
+              >
+                {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                  <div 
+                    key={slideIndex}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-shrink-0"
+                    style={{ width: `${100 / totalSlides}%` }}
+                  >
+                    {teamMembers
+                      .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
+                      .map((member, index) => (
+                        <div key={index} className="group">
+                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${
+                            isDark ? 'bg-white/5' : 'bg-white'
+                          } shadow-md hover:shadow-xl`}>
+                            {/* Foto reduzida para metade do tamanho */}
+                            <div className="aspect-[4/3] relative">
+                              {member.image ? (
+                                <img 
+                                  src={member.image} 
+                                  alt={member.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className={`w-full h-full flex items-center justify-center text-2xl ${
+                                  isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
+                                }`}>
+                                  👤
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </div>
+                            
+                            {/* Conteúdo padronizado */}
+                            <div className="p-4">
+                              <h3 className={`text-base font-semibold mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                                {member.name}
+                              </h3>
+                              <p className={`text-sm mb-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                                {member.title || 'Advogado'}
+                              </p>
+                              <p className={`text-sm leading-relaxed line-clamp-2 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                                {member.description}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                </div>
-              ))}
+                      ))}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Navigation Buttons */}
-          {totalSlides > 1 && (
-            <>
-              <button
-                onClick={prevSlide}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                    : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                } shadow-lg hover:scale-110`}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              
-              <button
-                onClick={nextSlide}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isDark 
-                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                    : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                } shadow-lg hover:scale-110`}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </>
-          )}
-
-          {/* Dots Indicator */}
-          {totalSlides > 1 && (
-            <div className="flex justify-center mt-4 space-x-2">
-              {Array.from({ length: totalSlides }).map((_, index) => (
+            {/* Navigation Buttons */}
+            {totalSlides > 1 && (
+              <>
                 <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    currentSlide === index
-                      ? isDark ? 'bg-white' : 'bg-black'
-                      : isDark ? 'bg-white/30' : 'bg-black/30'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+                  onClick={prevSlide}
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                      : 'bg-white/90 hover:bg-white text-black border border-gray-200'
+                  } shadow-lg hover:scale-110`}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                
+                <button
+                  onClick={nextSlide}
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                      : 'bg-white/90 hover:bg-white text-black border border-gray-200'
+                  } shadow-lg hover:scale-110`}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
+
+            {/* Dots Indicator */}
+            {totalSlides > 1 && (
+              <div className="flex justify-center mt-6 space-x-2">
+                {Array.from({ length: totalSlides }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      currentSlide === index
+                        ? isDark ? 'bg-white' : 'bg-black'
+                        : isDark ? 'bg-white/30' : 'bg-black/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

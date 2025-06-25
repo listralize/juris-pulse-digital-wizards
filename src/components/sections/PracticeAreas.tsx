@@ -171,10 +171,10 @@ const PracticeAreas = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Container centralizado */}
+        {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header centralizado */}
-          <div className="text-center mb-6">
+          {/* Header padronizado - mesmo padrão de todas as outras seções */}
+          <div className="text-center mb-8">
             <h2 
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
@@ -184,10 +184,10 @@ const PracticeAreas = () => {
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Grid Container */}
+          {/* Grid Container - padronizado */}
           <div 
             ref={gridRef} 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-w-4xl w-full"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full"
           >
             {practiceAreas.map((area, index) => {
               const IconComponent = area.icon;
@@ -199,7 +199,7 @@ const PracticeAreas = () => {
                   className="group block"
                 >
                   <div className={`
-                    relative h-24 md:h-28 lg:h-32 rounded-xl border transition-all duration-300 ease-out
+                    relative h-28 rounded-xl border transition-all duration-300 ease-out
                     hover:scale-[1.02] hover:-translate-y-1
                     ${isDark 
                       ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
@@ -212,38 +212,38 @@ const PracticeAreas = () => {
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
                     
                     {/* Content */}
-                    <div className="relative z-10 p-3 md:p-4 h-full flex flex-col">
+                    <div className="relative z-10 p-4 h-full flex flex-col">
                       
                       {/* Top Row - Icon and Arrow */}
                       <div className="flex items-center justify-between mb-2">
                         {/* Icon */}
                         <div className={`
-                          w-7 md:w-8 h-7 md:h-8 rounded-full flex items-center justify-center
+                          w-8 h-8 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.08] text-white group-hover:bg-white/[0.15]' 
                             : 'bg-black/[0.08] text-black group-hover:bg-black/[0.15]'
                           }
                         `}>
-                          <IconComponent className="w-3.5 md:w-4 h-3.5 md:h-4" />
+                          <IconComponent className="w-4 h-4" />
                         </div>
                         
                         {/* Arrow */}
                         <div className={`
-                          w-6 md:w-7 h-6 md:h-7 rounded-full flex items-center justify-center
+                          w-7 h-7 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.05] text-white/60 group-hover:bg-white/[0.1] group-hover:text-white' 
                             : 'bg-black/[0.05] text-black/60 group-hover:bg-black/[0.1] group-hover:text-black'
                           }
                         `}>
-                          <ArrowUpRight className="w-3 md:w-3.5 h-3 md:h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
                       </div>
                       
                       {/* Title */}
                       <h3 className={`
-                        text-sm md:text-base lg:text-lg font-medium mb-1 transition-all duration-300 leading-tight flex-1 font-space-grotesk
+                        text-base font-medium mb-1 transition-all duration-300 leading-tight flex-1 font-space-grotesk
                         ${isDark ? 'text-white group-hover:text-white/90' : 'text-black group-hover:text-black/90'}
                       `}>
                         {area.title}
