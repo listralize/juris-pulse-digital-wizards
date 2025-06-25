@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
@@ -110,6 +111,20 @@
     cursor: none;
   }
 
+  /* Mobile/Tablet optimizations */
+  @media (max-width: 767px) {
+    body {
+      cursor: auto; /* Restaurar cursor normal no mobile */
+      touch-action: pan-y; /* Permitir scroll vertical no mobile */
+    }
+    
+    /* Melhorar scroll no mobile */
+    html, body {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+  }
+
   /* Permitir scroll em todas as telas */
   html, body {
     overflow: auto !important;
@@ -160,6 +175,14 @@
     height: 8px;
   }
 
+  /* Mobile scrollbar - mais fina */
+  @media (max-width: 767px) {
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+  }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
@@ -184,7 +207,7 @@
 }
 
 @layer components {
-  /* Enhanced Cursor */
+  /* Enhanced Cursor - disabled on mobile */
   .custom-cursor {
     @apply fixed pointer-events-none z-[9999] w-6 h-6 border border-white/50 rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ease-out;
     background-color: rgba(255, 255, 255, 0.1);
@@ -192,9 +215,21 @@
     mix-blend-mode: difference;
   }
 
+  @media (max-width: 767px) {
+    .custom-cursor {
+      display: none;
+    }
+  }
+
   .custom-cursor-dot {
     @apply fixed pointer-events-none z-[9999] w-2 h-2 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out;
     mix-blend-mode: difference;
+  }
+
+  @media (max-width: 767px) {
+    .custom-cursor-dot {
+      display: none;
+    }
   }
 
   /* Premium Badge - Futurística Melhorada */
@@ -269,13 +304,15 @@
     @apply bg-neutral-900/30 border-neutral-700/30;
   }
 
-  /* Premium Hover Effects */
+  /* Premium Hover Effects - mobile safe */
   .hover-lift {
     @apply transition-all duration-500 ease-out;
   }
   
-  .hover-lift:hover {
-    transform: translateY(-2px) scale(1.005);
+  @media (hover: hover) {
+    .hover-lift:hover {
+      transform: translateY(-2px) scale(1.005);
+    }
   }
 
   /* Enhanced Cards */
@@ -284,26 +321,32 @@
     will-change: transform;
   }
   
-  .premium-card:hover {
-    @apply -translate-y-1 scale-[1.01];
+  @media (hover: hover) {
+    .premium-card:hover {
+      @apply -translate-y-1 scale-[1.01];
+    }
   }
   
   .light .premium-card {
     @apply bg-white/60 border-neutral-200/60 shadow-lg;
   }
   
-  .light .premium-card:hover {
-    @apply bg-white/80 border-neutral-300/60 shadow-xl;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  @media (hover: hover) {
+    .light .premium-card:hover {
+      @apply bg-white/80 border-neutral-300/60 shadow-xl;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+    }
   }
   
   .dark .premium-card {
     @apply bg-neutral-900/20 border-neutral-700/30 shadow-lg;
   }
 
-  .dark .premium-card:hover {
-    @apply bg-neutral-800/30 border-neutral-600/40 shadow-xl;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  @media (hover: hover) {
+    .dark .premium-card:hover {
+      @apply bg-neutral-800/30 border-neutral-600/40 shadow-xl;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
   }
 
   /* Navigation */
@@ -332,8 +375,10 @@
     @apply bg-neutral-100;
   }
   
-  .nav-link:hover::after {
-    @apply w-full;
+  @media (hover: hover) {
+    .nav-link:hover::after {
+      @apply w-full;
+    }
   }
 
   /* Premium Buttons */
@@ -350,8 +395,10 @@
     @apply bg-neutral-100 text-neutral-900 hover:bg-neutral-200 hover:shadow-lg;
   }
   
-  .btn-primary:hover {
-    transform: translateY(-1px);
+  @media (hover: hover) {
+    .btn-primary:hover {
+      transform: translateY(-1px);
+    }
   }
 
   .btn-secondary {
@@ -367,8 +414,10 @@
     @apply border-neutral-600 text-neutral-100 hover:border-neutral-500 hover:bg-neutral-800/50;
   }
   
-  .btn-secondary:hover {
-    transform: translateY(-1px);
+  @media (hover: hover) {
+    .btn-secondary:hover {
+      transform: translateY(-1px);
+    }
   }
 
   /* Text Effects */
@@ -379,13 +428,15 @@
     background-clip: text;
   }
 
-  /* Micro-interactions */
+  /* Micro-interactions - mobile safe */
   .micro-interaction {
     @apply transition-all duration-200 ease-out;
   }
   
-  .micro-interaction:hover {
-    @apply scale-105;
+  @media (hover: hover) {
+    .micro-interaction:hover {
+      @apply scale-105;
+    }
   }
   
   .micro-interaction:active {
@@ -466,4 +517,29 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Mobile specific improvements */
+@media (max-width: 767px) {
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+    transform-origin: left top;
+    transform: scale(1);
+  }
+  
+  /* Better touch targets */
+  button, .btn, a {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Improve readability */
+  p, div, span {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }

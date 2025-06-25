@@ -23,13 +23,14 @@ const SectionsContainer: React.FC = () => {
     { id: 'contact', component: Contact }
   ];
   
-  const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
+  const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized, isMobile } = useSectionTransition(sections);
 
   console.log('SectionsContainer render:', { 
     activeSection, 
     activeSectionIndex, 
     sectionsLength: sections.length, 
-    isInitialized
+    isInitialized,
+    isMobile
   });
 
   useEffect(() => {
@@ -64,9 +65,10 @@ const SectionsContainer: React.FC = () => {
     <div className="relative w-full h-screen overflow-hidden">
       <div 
         ref={containerRef}
-        className="flex h-full"
+        className={`${isMobile ? 'flex-col h-full' : 'flex h-full'}`}
         style={{ 
-          width: `${sections.length * 100}vw`,
+          width: isMobile ? '100vw' : `${sections.length * 100}vw`,
+          height: isMobile ? `${sections.length * 100}vh` : '100vh',
           willChange: 'transform'
         }}
       >
@@ -78,10 +80,12 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className="w-screen h-full flex-shrink-0 relative"
+              className={`flex-shrink-0 relative ${isMobile ? 'w-full h-screen' : 'w-screen h-full'}`}
               style={{ 
-                width: '100vw',
-                minWidth: '100vw'
+                width: isMobile ? '100vw' : '100vw',
+                height: isMobile ? '100vh' : '100vh',
+                minWidth: isMobile ? '100vw' : '100vw',
+                minHeight: isMobile ? '100vh' : '100vh'
               }}
             >
               <Section 

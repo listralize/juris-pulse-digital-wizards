@@ -40,13 +40,14 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '100vh',
-          maxHeight: id === 'contact' ? 'auto' : '100vh',
-          overflow: allowScroll || id === 'contact' ? 'auto' : 'hidden',
-          WebkitOverflowScrolling: allowScroll || id === 'contact' ? 'touch' : 'auto',
+          maxHeight: (allowScroll || id === 'contact') ? 'auto' : '100vh',
+          overflow: (allowScroll || id === 'contact') ? 'auto' : 'hidden',
+          WebkitOverflowScrolling: (allowScroll || id === 'contact') ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
-          paddingBottom: '140px' // Espaço maior para o rodapé
+          paddingBottom: window.innerWidth < 768 ? '80px' : '140px', // Menos padding no mobile
+          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y' // Permitir scroll vertical no mobile
         }}
       >
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
