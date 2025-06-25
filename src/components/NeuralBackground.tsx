@@ -1,7 +1,11 @@
 
 import React, { useEffect, useRef } from 'react';
 
-const NeuralBackground: React.FC = () => {
+interface NeuralBackgroundProps {
+  inverted?: boolean;
+}
+
+const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -38,6 +42,7 @@ const NeuralBackground: React.FC = () => {
         uniform float u_ratio;
         uniform vec2 u_pointer_position;
         uniform float u_scroll_progress;
+        uniform float u_inverted;
 
         vec2 rotate(vec2 uv, float th) {
           return mat2(cos(th), sin(th), -sin(th), cos(th)) * uv;
@@ -78,13 +83,20 @@ const NeuralBackground: React.FC = () => {
           noise = max(.0, noise - .5);
           noise *= (1. - length(vUv - .5));
 
-          // Black and white color palette
-          color = vec3(0.8, 0.8, 0.8); // Base white/gray color
-          color += vec3(0.2, 0.2, 0.2) * sin(3.0 * u_scroll_progress + 1.5); // White variation
+          // Cores baseadas no parâmetro inverted
+          if (u_inverted > 0.5) {
+            // Tema claro - preto/cinza
+            color = vec3(0.2, 0.2, 0.2); // Base cinza escuro
+            color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5); // Variação em preto
+          } else {
+            // Tema escuro - branco/cinza claro
+            color = vec3(0.8, 0.8, 0.8); // Base branco/cinza claro
+            color += vec3(0.2, 0.2, 0.2) * sin(3.0 * u_scroll_progress + 1.5); // Variação branca
+          }
 
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.3);
+          gl_FragColor = vec4(color, noise * 0.15);
         }
       `;
 
@@ -185,6 +197,7 @@ const NeuralBackground: React.FC = () => {
       gl.uniform1f(uniforms.u_time, currentTime);
       gl.uniform2f(uniforms.u_pointer_position, pointer.x / window.innerWidth, 1 - pointer.y / window.innerHeight);
       gl.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
+      gl.uniform1f(uniforms.u_inverted, inverted ? 1.0 : 0.0);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       requestAnimationFrame(render);
@@ -231,13 +244,13 @@ const NeuralBackground: React.FC = () => {
       window.removeEventListener("touchmove", () => {});
       window.removeEventListener("click", () => {});
     };
-  }, []);
+  }, [inverted]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.4 }}
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      style={{ opacity: 0.8 }}
     />
   );
 };

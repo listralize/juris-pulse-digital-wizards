@@ -94,20 +94,12 @@ const Partners = () => {
   return (
     <section 
       ref={sectionRef}
-      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-transparent text-white' : 'bg-transparent text-black'}`}
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-start px-4 md:px-6 lg:px-8 pt-16">
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesma altura que outras páginas */}
-          <div className="text-center mb-8 md:mb-12">
+          <div className="text-center mb-6 md:mb-8">
             <h2 
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
@@ -118,7 +110,7 @@ const Partners = () => {
           </div>
           
           {/* Carousel Container com padding adequado */}
-          <div className="relative w-full max-w-4xl px-4 sm:px-8 lg:px-12">
+          <div className="relative w-full max-w-5xl px-4 sm:px-8 lg:px-12">
             <div 
               ref={carouselRef} 
               className="overflow-hidden"
@@ -141,43 +133,42 @@ const Partners = () => {
                       .map((member, index) => (
                         <div key={index} className="group p-2 sm:p-3 lg:p-4">
                           <div className={`
-                            relative overflow-hidden rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1
+                            relative overflow-hidden rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 h-64
                             ${isDark 
                               ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
                               : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
                             }
-                            backdrop-blur-sm shadow-md hover:shadow-xl
+                            backdrop-blur-sm shadow-md hover:shadow-xl flex
                           `}>
                             {/* Gradient Overlay */}
                             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
                             
-                            {/* Foto com altura responsiva */}
-                            <div className="aspect-[4/3] relative">
+                            {/* Foto com largura fixa */}
+                            <div className="w-32 h-full relative flex-shrink-0">
                               {member.image ? (
                                 <img 
                                   src={member.image} 
                                   alt={member.name}
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-l-xl"
                                 />
                               ) : (
-                                <div className={`w-full h-full flex items-center justify-center text-2xl sm:text-3xl ${
+                                <div className={`w-full h-full flex items-center justify-center text-3xl rounded-l-xl ${
                                   isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
                                 }`}>
                                   👤
                                 </div>
                               )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>
                             
-                            {/* Conteúdo responsivo */}
-                            <div className="p-3 sm:p-4 lg:p-5 relative z-10">
-                              <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 font-space-grotesk ${isDark ? 'text-white' : 'text-black'}`}>
+                            {/* Conteúdo */}
+                            <div className="flex-1 p-4 relative z-10 flex flex-col justify-center">
+                              <h3 className={`text-base lg:text-lg font-semibold mb-2 font-space-grotesk ${isDark ? 'text-white' : 'text-black'}`}>
                                 {member.name}
                               </h3>
-                              <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium font-inter ${isDark ? 'text-white/70' : 'text-black/50'}`}>
+                              <p className={`text-sm mb-2 font-medium font-inter ${isDark ? 'text-white/70' : 'text-black/50'}`}>
                                 {member.title || 'Advogado'}
                               </p>
-                              <p className={`text-xs sm:text-sm leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-black/50'}`}>
+                              <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-black/50'}`}>
                                 {member.description}
                               </p>
                             </div>

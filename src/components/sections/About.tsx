@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -144,19 +143,8 @@ const About = () => {
   return (
     <section 
       ref={sectionRef}
-      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-transparent text-white' : 'bg-transparent text-black'}`}
     >
-      {/* Neural Background */}
-      <NeuralBackground />
-      
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">

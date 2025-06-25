@@ -10,6 +10,7 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
+import NeuralBackground from '../components/NeuralBackground';
 import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -84,9 +85,12 @@ const Index = () => {
         maxHeight: '100vh'
       }}
     >
+      {/* Neural Background padrão para todo o site */}
+      <NeuralBackground inverted={!isDark} />
+
       {/* Background gradients - similar ao código de referência */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10 opacity-20"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10 opacity-20"></div>
 
       <CustomCursor />
       <Navbar />

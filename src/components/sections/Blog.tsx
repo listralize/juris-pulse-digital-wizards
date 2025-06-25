@@ -21,7 +21,7 @@ const Blog = () => {
 
   if (isLoading) {
     return (
-      <section className={`h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-white'}`}>
+      <section className={`h-screen flex items-center justify-center ${isDark ? 'bg-transparent' : 'bg-transparent'}`}>
         <div className="container mx-auto px-4">
           <div className="flex justify-center items-center">
             <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
@@ -33,20 +33,8 @@ const Blog = () => {
 
   return (
     <section 
-      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-transparent text-white' : 'bg-transparent text-black'}`}
     >
-      {/* Background gradients */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
-
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesma altura que outras páginas */}
@@ -60,7 +48,7 @@ const Blog = () => {
           {displayPosts.length > 0 ? (
             <>
               {/* Container com padding adequado para hover */}
-              <div className="mb-8 px-4 sm:px-8 lg:px-16 max-w-4xl w-full">
+              <div className="mb-8 px-4 sm:px-8 lg:px-16 max-w-5xl w-full">
                 <Carousel
                   opts={{
                     align: "start",
@@ -70,12 +58,12 @@ const Blog = () => {
                 >
                   <CarouselContent className="-ml-2 sm:-ml-4 lg:-ml-6">
                     {displayPosts.map(post => (
-                      <CarouselItem key={post.id} className="pl-2 sm:pl-4 lg:pl-6 basis-full sm:basis-1/2 lg:basis-1/3">
+                      <CarouselItem key={post.id} className="pl-2 sm:pl-4 lg:pl-6 basis-full sm:basis-1/2 lg:basis-1/2">
                         {/* Container com padding para hover - altura reduzida */}
                         <div className="p-2 sm:p-3 lg:p-4">
                           <Card 
                             className={`
-                              group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 backdrop-blur-sm border h-80 flex flex-col
+                              group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 backdrop-blur-sm border h-64 flex
                               ${isDark 
                                 ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
                                 : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
@@ -84,12 +72,12 @@ const Blog = () => {
                             `}
                             onClick={() => navigate(`/blog/${post.slug}`)}
                           >
-                            <CardContent className="p-0 h-full flex flex-col">
+                            <CardContent className="p-0 h-full flex">
                               {/* Gradiente de hover overlay */}
                               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
                               
                               {post.banner && (
-                                <div className="relative overflow-hidden rounded-t-lg h-28 sm:h-32 lg:h-36 flex-shrink-0">
+                                <div className="relative overflow-hidden rounded-l-lg w-40 flex-shrink-0">
                                   <img 
                                     src={post.banner} 
                                     alt={post.title}
@@ -101,28 +89,25 @@ const Blog = () => {
                                 </div>
                               )}
                               
-                              <div className="p-3 sm:p-4 lg:p-5 flex-1 flex flex-col relative z-10">
-                                <div className="flex items-center gap-2 sm:gap-3 text-xs mb-2 sm:mb-3 flex-shrink-0">
+                              <div className="flex-1 p-4 flex flex-col relative z-10">
+                                <div className="flex items-center gap-2 sm:gap-3 text-xs mb-2 flex-shrink-0">
                                   <div className={`flex items-center gap-1 font-inter ${isDark ? 'text-white/50' : 'text-black/50'}`}>
                                     <Calendar className="w-3 h-3" />
-                                    <span className="hidden sm:inline">
-                                      {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
-                                    </span>
-                                    <span className="sm:hidden">
+                                    <span>
                                       {new Date(post.publishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                                     </span>
                                   </div>
                                   <div className={`flex items-center gap-1 font-inter ${isDark ? 'text-white/50' : 'text-black/50'}`}>
                                     <User className="w-3 h-3" />
-                                    <span className="truncate max-w-20 sm:max-w-none">{post.author}</span>
+                                    <span className="truncate max-w-20">{post.author}</span>
                                   </div>
                                 </div>
                                 
-                                <h3 className={`font-semibold mb-2 sm:mb-3 text-sm sm:text-base group-hover:text-blue-500 transition-colors line-clamp-2 font-space-grotesk ${isDark ? 'text-white' : 'text-black'}`}>
+                                <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors line-clamp-2 font-space-grotesk ${isDark ? 'text-white' : 'text-black'}`}>
                                   {post.title}
                                 </h3>
                                 
-                                <p className={`mb-3 sm:mb-4 text-xs sm:text-sm flex-1 line-clamp-2 ${isDark ? 'text-white/60' : 'text-black/50'}`}>
+                                <p className={`mb-3 text-xs flex-1 line-clamp-3 ${isDark ? 'text-white/60' : 'text-black/50'}`}>
                                   {post.excerpt}
                                 </p>
                                 
