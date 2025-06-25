@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -143,26 +144,38 @@ const About = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full min-h-screen px-6 md:px-16 lg:px-24 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
-      style={{ paddingTop: '170px', paddingBottom: '100px' }}
+      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}
     >
-      <div className="max-w-7xl mx-auto">
-        <div ref={titleRef} className="mb-12 text-center">
-          <h2 className={`text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            {aboutTitle}
-          </h2>
-          <div className={`w-20 h-1 mx-auto mt-4 ${isDark ? 'bg-white/70' : 'bg-black/70'}`}></div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div ref={contentRef}>
-            <p className={`text-lg md:text-xl lg:text-2xl leading-relaxed font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}>
-              {aboutDescription}
-            </p>
+      <div className="max-w-6xl mx-auto w-full">
+        {/* Container centralizado com padrão uniforme */}
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header padronizado - mesmo padrão de todas as outras seções */}
+          <div className="text-center mb-8">
+            <h2 
+              ref={titleRef}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+            >
+              {aboutTitle}
+            </h2>
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          <div ref={mediaRef}>
-            {renderMedia()}
+          {/* Content Grid - padronizado */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full">
+            <div ref={contentRef}>
+              <p className={`text-base md:text-lg leading-relaxed font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}>
+                {aboutDescription}
+              </p>
+            </div>
+            
+            <div ref={mediaRef}>
+              {renderMedia()}
+            </div>
           </div>
         </div>
       </div>
