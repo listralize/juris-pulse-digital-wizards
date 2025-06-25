@@ -87,13 +87,13 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            // Tema escuro - fundo preto absoluto com efeitos brancos de baixa opacidade
-            color = vec3(1.0, 1.0, 1.0); // Efeitos brancos
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - noise * 0.3); // Opacidade reduzida para 30%
+            // Tema escuro - fundo preto com efeitos brancos sutis
+            color = vec3(1.0, 1.0, 1.0);
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - noise * 0.25);
           } else {
-            // Tema claro - cores invertidas (efeitos escuros em fundo claro)
-            color = vec3(0.0, 0.0, 0.0); // Efeitos pretos/escuros
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0 - noise * 0.6); // Fundo branco com efeitos escuros
+            // Tema claro - fundo branco com efeitos escuros sutis
+            color = vec3(0.0, 0.0, 0.0);
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0 - noise * 0.4);
           }
         }
       `;
@@ -103,7 +103,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           alpha: true, 
           premultipliedAlpha: false,
           antialias: true,
-          preserveDrawingBuffer: true
+          preserveDrawingBuffer: false
         }) || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
         
         if (!gl) {
@@ -165,7 +165,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
         gl.enableVertexAttribArray(positionLocation);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        console.log('✅ Neural Background shader pronto - cores invertidas configuradas');
+        console.log('✅ Neural Background shader configurado');
         return true;
         
       } catch (error) {
@@ -182,12 +182,8 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       pointer.x += (pointer.tX - pointer.x) * 0.2;
       pointer.y += (pointer.tY - pointer.y) * 0.2;
 
-      // Fundo baseado no tema
-      if (inverted) {
-        gl.clearColor(0, 0, 0, 1); // Preto absoluto para tema escuro
-      } else {
-        gl.clearColor(1, 1, 1, 1); // Branco para tema claro
-      }
+      // Sempre limpar com transparente e deixar o CSS controlar o fundo
+      gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       gl.useProgram(program);
@@ -243,7 +239,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       window.addEventListener("touchmove", handleTouchMove);
       window.addEventListener("click", handleClick);
       
-      console.log('✅ Neural Background inicializado - cores invertidas');
+      console.log('✅ Neural Background inicializado');
     } else {
       console.error('❌ Falha ao inicializar Neural Background');
     }
@@ -274,7 +270,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       style={{ 
         zIndex: -10,
         opacity: 1,
-        background: inverted ? '#000000' : '#ffffff' // Fundo baseado no tema
+        backgroundColor: inverted ? '#000000' : '#ffffff'
       }}
     />
   );
