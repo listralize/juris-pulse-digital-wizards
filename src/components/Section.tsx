@@ -44,7 +44,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           padding: '0.75rem',
           paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
           touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y',
-          backgroundColor: 'transparent',
+          backgroundColor: 'transparent', // SEMPRE transparente para mostrar o neural
           color: isDark ? '#ffffff' : '#000000',
           zIndex: 1
         }}

@@ -87,16 +87,16 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            // Dark theme - PRETO E BRANCO PURO
-            color = vec3(1.0); // Branco puro
+            // Dark theme - PRETO ABSOLUTO (sem cinza)
+            color = vec3(0.0, 0.0, 0.0); // Preto absoluto
+            gl_FragColor = vec4(color, noise * 0.8);
           } else {
-            // Light theme - cores azuis/indigo do código original
+            // Light theme - azuis/indigo do código original
             color = vec3(0.1, 0.2, 0.8);
             color += vec3(0.0, 0.1, 0.4) * sin(3.0 * u_scroll_progress + 1.5);
+            color = color * noise;
+            gl_FragColor = vec4(color, noise * 0.4);
           }
-
-          color = color * noise;
-          gl_FragColor = vec4(color, noise * 0.95);
         }
       `;
 
@@ -167,7 +167,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
         gl.enableVertexAttribArray(positionLocation);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        console.log('✅ Neural Background shader pronto - PRETO E BRANCO');
+        console.log('✅ Neural Background shader pronto - PRETO ABSOLUTO');
         return true;
         
       } catch (error) {
@@ -240,7 +240,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       window.addEventListener("touchmove", handleTouchMove);
       window.addEventListener("click", handleClick);
       
-      console.log('✅ Neural Background inicializado - PRETO E BRANCO');
+      console.log('✅ Neural Background inicializado - PRETO ABSOLUTO');
     } else {
       console.error('❌ Falha ao inicializar Neural Background');
     }
@@ -270,7 +270,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       className="fixed inset-0 w-full h-full pointer-events-none"
       style={{ 
         zIndex: -10,
-        opacity: 0.95,
+        opacity: 1,
         background: 'transparent'
       }}
     />
