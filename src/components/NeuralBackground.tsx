@@ -12,6 +12,8 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    console.log('🎨 Inicializando Neural Background...');
+    
     const devicePixelRatio = Math.min(window.devicePixelRatio, 2);
 
     const pointer = {
@@ -98,89 +100,97 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
         }
       `;
 
-      const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      
-      if (!context) {
-        console.warn("WebGL is not supported by your browser.");
-        return null;
-      }
-
-      if (!(context instanceof WebGLRenderingContext)) {
-        console.warn("WebGL context is not available.");
-        return null;
-      }
-
-      gl = context;
-
-      const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
-        const shader = gl.createShader(type);
-        if (!shader) return null;
+      try {
+        const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
         
-        gl.shaderSource(shader, sourceCode);
-        gl.compileShader(shader);
-
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-          console.error("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
-          gl.deleteShader(shader);
+        if (!context) {
+          console.warn("WebGL não é suportado pelo seu navegador.");
           return null;
         }
 
-        return shader;
-      };
-
-      const vertexShader = createShader(gl, vsSource, gl.VERTEX_SHADER);
-      const fragmentShader = createShader(gl, fsSource, gl.FRAGMENT_SHADER);
-
-      if (!vertexShader || !fragmentShader) return null;
-
-      const createShaderProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader) => {
-        const program = gl.createProgram();
-        if (!program) return null;
-        
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-          console.error("Unable to initialize the shader program: " + gl.getProgramInfoLog(program));
+        if (!(context instanceof WebGLRenderingContext)) {
+          console.warn("Contexto WebGL não está disponível.");
           return null;
         }
 
-        return program;
-      };
+        gl = context;
+        console.log('✅ WebGL context criado com sucesso');
 
-      const shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
-      if (!shaderProgram) return null;
+        const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
+          const shader = gl.createShader(type);
+          if (!shader) return null;
+          
+          gl.shaderSource(shader, sourceCode);
+          gl.compileShader(shader);
 
-      const getUniforms = (program: WebGLProgram) => {
-        const uniforms: any = {};
-        const uniformCount = gl!.getProgramParameter(program, gl!.ACTIVE_UNIFORMS);
-        for (let i = 0; i < uniformCount; i++) {
-          const uniformInfo = gl!.getActiveUniform(program, i);
-          if (uniformInfo) {
-            uniforms[uniformInfo.name] = gl!.getUniformLocation(program, uniformInfo.name);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.error("Erro ao compilar shaders: " + gl.getShaderInfoLog(shader));
+            gl.deleteShader(shader);
+            return null;
           }
-        }
-        return uniforms;
-      };
 
-      uniforms = getUniforms(shaderProgram);
+          return shader;
+        };
 
-      const vertices = new Float32Array([-1., -1., 1., -1., -1., 1., 1., 1.]);
+        const vertexShader = createShader(gl, vsSource, gl.VERTEX_SHADER);
+        const fragmentShader = createShader(gl, fsSource, gl.FRAGMENT_SHADER);
 
-      const vertexBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        if (!vertexShader || !fragmentShader) return null;
 
-      gl.useProgram(shaderProgram);
+        const createShaderProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader) => {
+          const program = gl.createProgram();
+          if (!program) return null;
+          
+          gl.attachShader(program, vertexShader);
+          gl.attachShader(program, fragmentShader);
+          gl.linkProgram(program);
 
-      const positionLocation = gl.getAttribLocation(shaderProgram, "a_position");
-      gl.enableVertexAttribArray(positionLocation);
+          if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error("Erro ao inicializar o programa shader: " + gl.getProgramInfoLog(program));
+            return null;
+          }
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+          return program;
+        };
 
-      return gl;
+        const shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+        if (!shaderProgram) return null;
+
+        const getUniforms = (program: WebGLProgram) => {
+          const uniforms: any = {};
+          const uniformCount = gl!.getProgramParameter(program, gl!.ACTIVE_UNIFORMS);
+          for (let i = 0; i < uniformCount; i++) {
+            const uniformInfo = gl!.getActiveUniform(program, i);
+            if (uniformInfo) {
+              uniforms[uniformInfo.name] = gl!.getUniformLocation(program, uniformInfo.name);
+            }
+          }
+          return uniforms;
+        };
+
+        uniforms = getUniforms(shaderProgram);
+
+        const vertices = new Float32Array([-1., -1., 1., -1., -1., 1., 1., 1.]);
+
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        gl.useProgram(shaderProgram);
+
+        const positionLocation = gl.getAttribLocation(shaderProgram, "a_position");
+        gl.enableVertexAttribArray(positionLocation);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        console.log('✅ Shaders compilados e programa criado com sucesso');
+        return gl;
+        
+      } catch (error) {
+        console.error('❌ Erro ao inicializar WebGL:', error);
+        return null;
+      }
     };
 
     const render = () => {
@@ -225,17 +235,21 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
     };
 
     const handleClick = (e: MouseEvent) => {
-      updateMousePosition(e.clientX, e.clientY);
+      updateMousePosition(e.clientX, e.clientY);  
     };
 
     // Initialize everything
-    if (initShader()) {
+    const initResult = initShader();
+    if (initResult) {
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
       window.addEventListener("pointermove", handlePointerMove);
       window.addEventListener("touchmove", handleTouchMove);
       window.addEventListener("click", handleClick);
       render();
+      console.log('✅ Neural Background inicializado com sucesso');
+    } else {
+      console.error('❌ Falha ao inicializar Neural Background');
     }
 
     // Cleanup
