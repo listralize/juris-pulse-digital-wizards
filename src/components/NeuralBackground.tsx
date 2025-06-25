@@ -83,20 +83,20 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise = max(.0, noise - .5);
           noise *= (1. - length(vUv - .5));
 
-          // Cores baseadas no parâmetro inverted
+          // Cores baseadas no parâmetro inverted (preto/branco)
           if (u_inverted > 0.5) {
-            // Tema claro - preto/cinza
-            color = vec3(0.2, 0.2, 0.2); // Base cinza escuro
-            color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5); // Variação em preto
+            // Tema claro - preto/cinza escuro
+            color = vec3(0.1, 0.1, 0.1); // Base preto
+            color += vec3(0.05, 0.05, 0.05) * sin(3.0 * u_scroll_progress + 1.5); // Variação em cinza escuro
           } else {
             // Tema escuro - branco/cinza claro
-            color = vec3(0.8, 0.8, 0.8); // Base branco/cinza claro
-            color += vec3(0.2, 0.2, 0.2) * sin(3.0 * u_scroll_progress + 1.5); // Variação branca
+            color = vec3(0.9, 0.9, 0.9); // Base branco
+            color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5); // Variação branca
           }
 
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.15);
+          gl_FragColor = vec4(color, noise * 0.95);
         }
       `;
 
@@ -107,7 +107,6 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
         return null;
       }
 
-      // Verificação de tipo mais específica
       if (!(context instanceof WebGLRenderingContext)) {
         console.warn("WebGL context is not available.");
         return null;
@@ -250,7 +249,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ opacity: 0.8 }}
+      style={{ opacity: 0.95 }}
     />
   );
 };

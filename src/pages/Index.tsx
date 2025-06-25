@@ -85,8 +85,8 @@ const Index = () => {
         maxHeight: '100vh'
       }}
     >
-      {/* Neural Background para todo o site - sempre ativo no tema escuro */}
-      {isDark && <NeuralBackground inverted={false} />}
+      {/* Neural Background para todo o site - sempre visível, mudando com o tema */}
+      <NeuralBackground inverted={!isDark} />
 
       <CustomCursor />
       <Navbar />
