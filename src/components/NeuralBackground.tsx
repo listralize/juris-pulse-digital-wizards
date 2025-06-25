@@ -81,20 +81,18 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           vec3 color = vec3(0.);
 
           float noise = neuro_shape(uv, t, p);
-
           noise = 1.2 * pow(noise, 3.);
           noise += pow(noise, 10.);
           noise = max(.0, noise - .5);
           noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            // Dark theme - cores mais claras/brancas
-            color = vec3(0.8, 0.9, 1.0); // Base white/light blue
-            color += vec3(0.2, 0.3, 0.5) * sin(3.0 * u_scroll_progress + 1.5);
+            // Dark theme - PRETO E BRANCO apenas
+            color = vec3(1.0, 1.0, 1.0); // Branco puro
           } else {
-            // Light theme - cores azuis/indigo como no código original
-            color = vec3(0.1, 0.2, 0.8); // Base blue color
-            color += vec3(0.0, 0.1, 0.4) * sin(3.0 * u_scroll_progress + 1.5); // Indigo variation
+            // Light theme - cores azuis/indigo
+            color = vec3(0.1, 0.2, 0.8);
+            color += vec3(0.0, 0.1, 0.4) * sin(3.0 * u_scroll_progress + 1.5);
           }
 
           color = color * noise;
@@ -114,8 +112,6 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           console.warn("WebGL não suportado");
           return false;
         }
-
-        console.log('✅ WebGL context criado');
 
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -154,7 +150,6 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
         gl.useProgram(program);
 
-        // Get uniforms
         uniforms = {
           u_time: gl.getUniformLocation(program, "u_time"),
           u_ratio: gl.getUniformLocation(program, "u_ratio"),
@@ -211,8 +206,6 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       
       gl.uniform1f(uniforms.u_ratio, canvas.width / canvas.height);
       gl.viewport(0, 0, canvas.width, canvas.height);
-      
-      console.log('🔧 Canvas redimensionado:', canvas.width, 'x', canvas.height);
     };
 
     const updateMousePosition = (eX: number, eY: number) => {
@@ -276,7 +269,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none"
       style={{ 
-        zIndex: -1,
+        zIndex: -10,
         opacity: 0.95,
         background: 'transparent'
       }}
