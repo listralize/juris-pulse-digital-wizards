@@ -30,10 +30,11 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
     const initShader = () => {
       const vsSource = `
-        attribute vec2 a_position;
+        precision mediump float;
         varying vec2 vUv;
+        attribute vec2 a_position;
         void main() {
-          vUv = a_position * 0.5 + 0.5;
+          vUv = .5 * (a_position + 1.);
           gl_Position = vec4(a_position, 0.0, 1.0);
         }
       `;
@@ -61,37 +62,43 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
             sine_acc += sin(layer) + 2.4 * p;
-            res += (0.5 + 0.5 * cos(layer)) / scale;
-            scale *= 1.2;
+            res += (.5 + .5 * cos(layer)) / scale;
+            scale *= (1.2);
           }
           return res.x + res.y;
         }
 
         void main() {
-          vec2 uv = vUv * 0.5;
+          vec2 uv = .5 * vUv;
           uv.x *= u_ratio;
 
           vec2 pointer = vUv - u_pointer_position;
           pointer.x *= u_ratio;
           float p = clamp(length(pointer), 0., 1.);
-          p = 0.5 * pow(1. - p, 2.);
+          p = .5 * pow(1. - p, 2.);
 
-          float t = u_time * 0.001;
+          float t = .001 * u_time;
           vec3 color = vec3(0.);
 
           float noise = neuro_shape(uv, t, p);
+
           noise = 1.2 * pow(noise, 3.);
           noise += pow(noise, 10.);
-          noise = max(0.0, noise - 0.5);
-          noise *= (1. - length(vUv - 0.5));
+          noise = max(.0, noise - .5);
+          noise *= (1. - length(vUv - .5));
 
           if (u_inverted > 0.5) {
-            color = vec3(1.0, 1.0, 1.0) * noise;
+            // Dark theme - cores mais claras/brancas
+            color = vec3(0.8, 0.9, 1.0); // Base white/light blue
+            color += vec3(0.2, 0.3, 0.5) * sin(3.0 * u_scroll_progress + 1.5);
           } else {
-            color = vec3(0.0, 0.0, 0.0) * noise;
+            // Light theme - cores azuis/indigo como no código original
+            color = vec3(0.1, 0.2, 0.8); // Base blue color
+            color += vec3(0.0, 0.1, 0.4) * sin(3.0 * u_scroll_progress + 1.5); // Indigo variation
           }
 
-          gl_FragColor = vec4(color, noise * 0.8);
+          color = color * noise;
+          gl_FragColor = vec4(color, noise * 0.95);
         }
       `;
 
@@ -101,7 +108,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           premultipliedAlpha: false,
           antialias: true,
           preserveDrawingBuffer: true
-        }) as WebGLRenderingContext;
+        }) || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
         
         if (!gl) {
           console.warn("WebGL não suportado");
@@ -147,6 +154,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
         gl.useProgram(program);
 
+        // Get uniforms
         uniforms = {
           u_time: gl.getUniformLocation(program, "u_time"),
           u_ratio: gl.getUniformLocation(program, "u_ratio"),
@@ -229,7 +237,6 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
     // Initialize
     const initResult = initShader();
     if (initResult) {
-      // Pequeno delay para garantir que o canvas esteja renderizado
       setTimeout(() => {
         resizeCanvas();
         render();
@@ -270,9 +277,8 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       className="fixed inset-0 w-full h-full pointer-events-none"
       style={{ 
         zIndex: -1,
-        opacity: 1,
-        background: 'transparent',
-        mixBlendMode: 'normal'
+        opacity: 0.95,
+        background: 'transparent'
       }}
     />
   );
