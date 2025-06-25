@@ -1,100 +1,230 @@
+import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
-import { TeamMember } from '../../types/adminTypes';
-import { useSupabaseTeamMembers } from '../../hooks/supabase/useSupabaseTeamMembers';
+import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Partners = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { teamMembers, isLoading } = useSupabaseTeamMembers();
-  const [title, setTitle] = useState('Nossa Equipe');
-  const [subtitle, setSubtitle] = useState('Profissionais experientes e comprometidos com a excelência');
+  
+  const { teamMembers, pageTexts, isLoading } = useSupabaseDataNew();
+  
+  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    setLocalPageTexts(pageTexts);
+  }, [pageTexts]);
+
+  useEffect(() => {
+    const handlePageTextsUpdate = (event: CustomEvent) => {
+      console.log('📱 Partners: Recebendo atualização de textos:', event.detail);
+      setLocalPageTexts(event.detail);
+    };
+
+    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    };
+  }, []);
+
+  const itemsPerSlide = {
+    mobile: 1,
+    tablet: 2,
+    desktop: 3
+  };
+
+  const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide.desktop);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    
+    tl.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
+    )
+    .fromTo(
+      carouselRef.current,
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.4"
+    );
+    
+    return () => {
+      tl.kill();
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, [totalSlides]);
 
   if (isLoading) {
     return (
-      <section id="socios" className="h-screen w-full flex items-center justify-center px-6">
-        <div className={`text-center ${isDark ? 'text-white' : 'text-black'}`}>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-current mx-auto mb-4"></div>
-          <p>Carregando equipe...</p>
-        </div>
-      </section>
+      <div className="flex justify-center items-center h-full">
+        <div className={`animate-spin rounded-full h-6 w-6 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+      </div>
     );
   }
 
-  return (
-    <section id="socios" className="min-h-screen w-full flex flex-col justify-center items-center px-6 py-16">
-      <div className="max-w-6xl mx-auto w-full">
-        {/* Header centralizado */}
-        <div className="text-center mb-12">
-          <h2 className={`text-4xl md:text-5xl lg:text-6xl mb-6 font-canela tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
-            {title}
-          </h2>
-          <p className={`text-lg md:text-xl max-w-2xl mx-auto font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            {subtitle}
-          </p>
-        </div>
+  const teamTitle = localPageTexts?.teamTitle || 'Nossa Equipe';
 
-        {/* Grid de membros da equipe */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
-          {teamMembers.map((member) => (
-            <div 
-              key={member.id} 
-              className={`w-full max-w-sm rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-                isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-              }`}
+  return (
+    <section 
+      ref={sectionRef}
+      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-transparent text-white' : 'bg-transparent text-black'}`}
+    >
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-start px-4 md:px-6 lg:px-8 pt-16">
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header padronizado - mesma altura que outras páginas */}
+          <div className="text-center mb-6 md:mb-8">
+            <h2 
+              ref={titleRef}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
-              <div className="aspect-square overflow-hidden">
-                <img 
-                  src={member.image || "/lovable-uploads/bd2c20b7-60ee-423e-bf07-0505e25c78a7.png"} 
-                  alt={member.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              <div className="p-6">
-                <h3 className={`text-xl font-canela mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                  {member.name}
-                </h3>
-                
-                <p className={`text-sm font-satoshi mb-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-                  {member.title}
-                </p>
-                
-                <p className={`text-sm font-satoshi mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {member.oab}
-                </p>
-                
-                {member.description && (
-                  <p className={`text-sm font-satoshi leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {member.description}
-                  </p>
-                )}
-                
-                {member.email && (
-                  <a 
-                    href={`mailto:${member.email}`}
-                    className={`inline-block mt-4 text-sm font-satoshi transition-colors ${
-                      isDark 
-                        ? 'text-blue-400 hover:text-blue-300' 
-                        : 'text-blue-600 hover:text-blue-800'
-                    }`}
+              {teamTitle}
+            </h2>
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          </div>
+          
+          {/* Carousel Container com padding adequado */}
+          <div className="relative w-full max-w-5xl px-4 sm:px-8 lg:px-12">
+            <div 
+              ref={carouselRef} 
+              className="overflow-hidden"
+            >
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ 
+                  transform: `translateX(-${currentSlide * (100 / totalSlides)}%)`,
+                  width: `${totalSlides * 100}%`
+                }}
+              >
+                {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                  <div 
+                    key={slideIndex}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full flex-shrink-0 px-2 sm:px-4"
+                    style={{ width: `${100 / totalSlides}%` }}
                   >
-                    {member.email}
-                  </a>
-                )}
+                    {teamMembers
+                      .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
+                      .map((member, index) => (
+                        <div key={index} className="group p-2 sm:p-3 lg:p-4">
+                          <div className={`
+                            relative overflow-hidden rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 h-64
+                            ${isDark 
+                              ? 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.15]' 
+                              : 'bg-black/[0.02] border-black/[0.08] hover:bg-black/[0.04] hover:border-black/[0.15]'
+                            }
+                            backdrop-blur-sm shadow-md hover:shadow-xl flex
+                          `}>
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
+                            
+                            {/* Foto com largura fixa */}
+                            <div className="w-32 h-full relative flex-shrink-0">
+                              {member.image ? (
+                                <img 
+                                  src={member.image} 
+                                  alt={member.name}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-l-xl"
+                                />
+                              ) : (
+                                <div className={`w-full h-full flex items-center justify-center text-3xl rounded-l-xl ${
+                                  isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
+                                }`}>
+                                  👤
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Conteúdo */}
+                            <div className="flex-1 p-4 relative z-10 flex flex-col justify-center">
+                              <h3 className={`text-base lg:text-lg font-semibold mb-2 font-space-grotesk ${isDark ? 'text-white' : 'text-black'}`}>
+                                {member.name}
+                              </h3>
+                              <p className={`text-sm mb-2 font-medium font-inter ${isDark ? 'text-white/70' : 'text-black/50'}`}>
+                                {member.title || 'Advogado'}
+                              </p>
+                              <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-black/50'}`}>
+                                {member.description}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
 
-        {teamMembers.length === 0 && (
-          <div className="text-center py-16">
-            <p className={`text-lg font-satoshi ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Nenhum membro da equipe encontrado.
-            </p>
+            {/* Navigation Buttons */}
+            {totalSlides > 1 && (
+              <>
+                <button
+                  onClick={prevSlide}
+                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                      : 'bg-white/90 hover:bg-white text-black border border-gray-200'
+                  } shadow-lg hover:scale-110 z-10`}
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+                
+                <button
+                  onClick={nextSlide}
+                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isDark 
+                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                      : 'bg-white/90 hover:bg-white text-black border border-gray-200'
+                  } shadow-lg hover:scale-110 z-10`}
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Dots Indicator */}
+            {totalSlides > 1 && (
+              <div className="flex justify-center mt-6 sm:mt-8 space-x-2">
+                {Array.from({ length: totalSlides }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ${
+                      currentSlide === index
+                        ? isDark ? 'bg-white' : 'bg-black'
+                        : isDark ? 'bg-white/30' : 'bg-black/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

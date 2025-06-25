@@ -17,8 +17,16 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     
     console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
     
+    // A seção Hero sempre tem background preto, outras seguem o tema
+    const getBackgroundClass = () => {
+      if (id === 'home') {
+        return 'bg-black text-white'; // Hero sempre preto
+      }
+      return isDark ? 'bg-black text-white' : 'bg-white text-black';
+    };
+    
     // Definir quais seções têm altura fixa (não permitem scroll)
-    const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog', 'partners'].includes(id);
+    const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog'].includes(id);
     
     return (
       <div 
@@ -27,7 +35,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full h-full ${className}`}
+        className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
@@ -43,13 +51,10 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           visibility: 'visible',
           padding: '0.75rem',
           paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
-          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y',
-          backgroundColor: 'transparent', // SEMPRE transparente para mostrar o neural
-          color: isDark ? '#ffffff' : '#000000',
-          zIndex: 1
+          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y'
         }}
       >
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center relative z-10" style={{ opacity: 1, visibility: 'visible' }}>
+        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
           {children}
         </div>
       </div>

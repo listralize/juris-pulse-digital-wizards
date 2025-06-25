@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 
 interface NeuralBackgroundProps {
@@ -11,9 +12,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    console.log('🎨 Inicializando Neural Background - inverted:', inverted);
-    
-    const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const devicePixelRatio = Math.min(window.devicePixelRatio, 2);
 
     const pointer = {
       x: 0,
@@ -24,8 +23,6 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
     let uniforms: any;
     let gl: WebGLRenderingContext | null = null;
-    let animationId: number;
-    let program: WebGLProgram | null = null;
 
     const initShader = () => {
       const vsSource = `
@@ -80,129 +77,137 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           vec3 color = vec3(0.);
 
           float noise = neuro_shape(uv, t, p);
+
           noise = 1.2 * pow(noise, 3.);
           noise += pow(noise, 10.);
           noise = max(.0, noise - .5);
           noise *= (1. - length(vUv - .5));
 
+          // Cores baseadas no parâmetro inverted
           if (u_inverted > 0.5) {
-            // Tema escuro - fundo preto com efeitos brancos sutis
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0) + vec4(1.0, 1.0, 1.0, noise * 0.15);
+            // Tema claro - preto/cinza
+            color = vec3(0.2, 0.2, 0.2); // Base cinza escuro
+            color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5); // Variação em preto
           } else {
-            // Tema claro - fundo branco com efeitos escuros sutis
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0) - vec4(0.0, 0.0, 0.0, noise * 0.2);
+            // Tema escuro - branco/cinza claro
+            color = vec3(0.8, 0.8, 0.8); // Base branco/cinza claro
+            color += vec3(0.2, 0.2, 0.2) * sin(3.0 * u_scroll_progress + 1.5); // Variação branca
           }
+
+          color = color * noise;
+
+          gl_FragColor = vec4(color, noise * 0.15);
         }
       `;
 
-      try {
-        gl = canvas.getContext("webgl", { 
-          alpha: false, 
-          premultipliedAlpha: false,
-          antialias: true,
-          preserveDrawingBuffer: false
-        }) || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
+      const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      
+      if (!context) {
+        console.warn("WebGL is not supported by your browser.");
+        return null;
+      }
+
+      // Verificação de tipo mais específica
+      if (!(context instanceof WebGLRenderingContext)) {
+        console.warn("WebGL context is not available.");
+        return null;
+      }
+
+      gl = context;
+
+      const createShader = (gl: WebGLRenderingContext, sourceCode: string, type: number) => {
+        const shader = gl.createShader(type);
+        if (!shader) return null;
         
-        if (!gl) {
-          console.warn("WebGL não suportado");
-          return false;
+        gl.shaderSource(shader, sourceCode);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
         }
 
-        gl.disable(gl.BLEND);
+        return shader;
+      };
 
-        const createShader = (sourceCode: string, type: number) => {
-          const shader = gl!.createShader(type);
-          if (!shader) return null;
-          
-          gl!.shaderSource(shader, sourceCode);
-          gl!.compileShader(shader);
+      const vertexShader = createShader(gl, vsSource, gl.VERTEX_SHADER);
+      const fragmentShader = createShader(gl, fsSource, gl.FRAGMENT_SHADER);
 
-          if (!gl!.getShaderParameter(shader, gl!.COMPILE_STATUS)) {
-            console.error("Erro shader:", gl!.getShaderInfoLog(shader));
-            gl!.deleteShader(shader);
-            return null;
-          }
-          return shader;
-        };
+      if (!vertexShader || !fragmentShader) return null;
 
-        const vertexShader = createShader(vsSource, gl.VERTEX_SHADER);
-        const fragmentShader = createShader(fsSource, gl.FRAGMENT_SHADER);
-
-        if (!vertexShader || !fragmentShader) return false;
-
-        program = gl.createProgram();
-        if (!program) return false;
+      const createShaderProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader) => {
+        const program = gl.createProgram();
+        if (!program) return null;
         
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-          console.error("Erro programa:", gl.getProgramInfoLog(program));
-          return false;
+          console.error("Unable to initialize the shader program: " + gl.getProgramInfoLog(program));
+          return null;
         }
 
-        gl.useProgram(program);
+        return program;
+      };
 
-        uniforms = {
-          u_time: gl.getUniformLocation(program, "u_time"),
-          u_ratio: gl.getUniformLocation(program, "u_ratio"),
-          u_pointer_position: gl.getUniformLocation(program, "u_pointer_position"),
-          u_scroll_progress: gl.getUniformLocation(program, "u_scroll_progress"),
-          u_inverted: gl.getUniformLocation(program, "u_inverted")
-        };
+      const shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+      if (!shaderProgram) return null;
 
-        const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-        const vertexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+      const getUniforms = (program: WebGLProgram) => {
+        const uniforms: any = {};
+        const uniformCount = gl!.getProgramParameter(program, gl!.ACTIVE_UNIFORMS);
+        for (let i = 0; i < uniformCount; i++) {
+          const uniformInfo = gl!.getActiveUniform(program, i);
+          if (uniformInfo) {
+            uniforms[uniformInfo.name] = gl!.getUniformLocation(program, uniformInfo.name);
+          }
+        }
+        return uniforms;
+      };
 
-        const positionLocation = gl.getAttribLocation(program, "a_position");
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+      uniforms = getUniforms(shaderProgram);
 
-        console.log('✅ Neural Background shader configurado');
-        return true;
-        
-      } catch (error) {
-        console.error('❌ Erro WebGL:', error);
-        return false;
-      }
+      const vertices = new Float32Array([-1., -1., 1., -1., -1., 1., 1., 1.]);
+
+      const vertexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+      gl.useProgram(shaderProgram);
+
+      const positionLocation = gl.getAttribLocation(shaderProgram, "a_position");
+      gl.enableVertexAttribArray(positionLocation);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+      return gl;
     };
 
     const render = () => {
-      if (!gl || !uniforms || !program) return;
+      if (!gl || !uniforms) return;
 
       const currentTime = performance.now();
 
-      pointer.x += (pointer.tX - pointer.x) * 0.2;
-      pointer.y += (pointer.tY - pointer.y) * 0.2;
+      pointer.x += (pointer.tX - pointer.x) * .2;
+      pointer.y += (pointer.tY - pointer.y) * .2;
 
-      // Limpar com cor base do tema
-      if (inverted) {
-        gl.clearColor(0, 0, 0, 1); // Preto para tema escuro
-      } else {
-        gl.clearColor(1, 1, 1, 1); // Branco para tema claro
-      }
-      gl.clear(gl.COLOR_BUFFER_BIT);
-
-      gl.useProgram(program);
       gl.uniform1f(uniforms.u_time, currentTime);
       gl.uniform2f(uniforms.u_pointer_position, pointer.x / window.innerWidth, 1 - pointer.y / window.innerHeight);
       gl.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
       gl.uniform1f(uniforms.u_inverted, inverted ? 1.0 : 0.0);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      animationId = requestAnimationFrame(render);
+      requestAnimationFrame(render);
     };
 
     const resizeCanvas = () => {
       if (!canvas || !gl || !uniforms) return;
       
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * devicePixelRatio;
-      canvas.height = rect.height * devicePixelRatio;
-      
+      canvas.width = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
       gl.uniform1f(uniforms.u_ratio, canvas.width / canvas.height);
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
@@ -212,65 +217,40 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       pointer.tY = eY;
     };
 
-    const handlePointerMove = (e: PointerEvent) => {
-      updateMousePosition(e.clientX, e.clientY);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
+    const setupEvents = () => {
+      window.addEventListener("pointermove", (e) => {
+        updateMousePosition(e.clientX, e.clientY);
+      });
+      window.addEventListener("touchmove", (e) => {
         updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
-      }
+      });
+      window.addEventListener("click", (e) => {
+        updateMousePosition(e.clientX, e.clientY);
+      });
     };
 
-    const handleClick = (e: MouseEvent) => {
-      updateMousePosition(e.clientX, e.clientY);  
-    };
-
-    // Initialize
-    const initResult = initShader();
-    if (initResult) {
-      setTimeout(() => {
-        resizeCanvas();
-        render();
-      }, 100);
-      
+    // Initialize everything
+    if (initShader()) {
+      setupEvents();
+      resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
-      window.addEventListener("pointermove", handlePointerMove);
-      window.addEventListener("touchmove", handleTouchMove);
-      window.addEventListener("click", handleClick);
-      
-      console.log('✅ Neural Background inicializado');
-    } else {
-      console.error('❌ Falha ao inicializar Neural Background');
+      render();
     }
 
+    // Cleanup
     return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
       window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("click", handleClick);
-      
-      if (gl && program) {
-        gl.deleteProgram(program);
-        const loseContext = gl.getExtension('WEBGL_lose_context');
-        if (loseContext) {
-          loseContext.loseContext();
-        }
-      }
+      window.removeEventListener("pointermove", () => {});
+      window.removeEventListener("touchmove", () => {});
+      window.removeEventListener("click", () => {});
     };
   }, [inverted]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
-      style={{ 
-        zIndex: -10,
-        opacity: 1
-      }}
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      style={{ opacity: 0.8 }}
     />
   );
 };

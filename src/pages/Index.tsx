@@ -26,8 +26,8 @@ const Index = () => {
       const html = document.documentElement;
       
       // Configurar altura fixa para as páginas iniciais
-      body.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
+      body.style.overflow = 'hidden'; // Remover scroll vertical global
+      html.style.overflow = 'hidden'; // Remover scroll vertical global
       body.style.height = '100vh';
       html.style.height = '100vh';
       body.style.maxHeight = '100vh';
@@ -36,10 +36,6 @@ const Index = () => {
       // Garantir que o background seja visível
       body.style.margin = '0';
       body.style.padding = '0';
-      
-      // Background transparente para mostrar apenas o neural
-      body.style.backgroundColor = 'transparent';
-      html.style.backgroundColor = 'transparent';
       
       // Garantir que o cursor seja visível no desktop
       if (window.innerWidth >= 768) {
@@ -52,8 +48,6 @@ const Index = () => {
         history.scrollRestoration = 'manual';
       }
       
-      console.log('🎨 Index configurado - tema:', theme);
-      
       return () => {
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'auto';
@@ -62,7 +56,7 @@ const Index = () => {
     } catch (error) {
       console.error('❌ Erro ao configurar scroll:', error);
     }
-  }, [isDark]);
+  }, []);
 
   // Verificar se os termos já foram aceitos e mostrar popup se necessário
   useEffect(() => {
@@ -80,17 +74,23 @@ const Index = () => {
   
   return (
     <div 
-      className="h-screen w-full transition-colors duration-300 relative overflow-hidden"
+      className={`h-screen w-full transition-colors duration-300 relative overflow-hidden ${
+        isDark 
+          ? 'bg-neutral-950 text-neutral-100' 
+          : 'bg-white text-neutral-900'
+      }`}
       style={{ 
         position: 'relative',
         height: '100vh',
-        maxHeight: '100vh',
-        backgroundColor: 'transparent',
-        color: isDark ? '#ffffff' : '#000000'
+        maxHeight: '100vh'
       }}
     >
-      {/* APENAS Neural Background - preto e branco no tema escuro */}
-      <NeuralBackground inverted={isDark} />
+      {/* Neural Background padrão para todo o site */}
+      <NeuralBackground inverted={!isDark} />
+
+      {/* Background gradients - similar ao código de referência */}
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10 opacity-20"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10 opacity-20"></div>
 
       <CustomCursor />
       <Navbar />

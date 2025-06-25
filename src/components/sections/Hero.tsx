@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
+import MarbleBanner from '../MarbleBanner';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,7 @@ const Hero = () => {
   const headlineRef = useRef<HTMLDivElement>(null);
   const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -95,14 +97,22 @@ const Hero = () => {
     };
   }, []);
 
-  // Animações simplificadas sem background
+  // Parallax effect com melhor scaling para monitores grandes
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
+    // Animate background first
     tl.fromTo(
+      bgRef.current, 
+      { opacity: 0, scale: 1.2 }, 
+      { opacity: 1, scale: 1, duration: 1.5 }
+    )
+    // animações do conteúdo
+    .fromTo(
       logoRef.current, 
       { opacity: 0, y: 30, scale: 0.9 }, 
-      { opacity: 1, y: 0, scale: 1, duration: 1 }
+      { opacity: 1, y: 0, scale: 1, duration: 1 },
+      "-=1.2"
     )
     .fromTo(
       headlineRef.current,
@@ -123,6 +133,19 @@ const Hero = () => {
       "-=0.3"
     );
     
+    // Enhanced parallax effect
+    gsap.to(bgRef.current, {
+      yPercent: -15,
+      scale: 1.05,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#home",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1
+      }
+    });
+    
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -130,7 +153,26 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
+      {/* Background com marble banner - agora muito maior para preencher toda a tela */}
+      <div 
+        ref={bgRef} 
+        className="absolute inset-0 z-0 w-full h-full"
+        style={{ 
+          transform: 'scale(2.0)',
+          minWidth: '100vw',
+          minHeight: '100vh',
+          width: '200%',
+          height: '200%',
+          left: '-50%',
+          top: '-50%'
+        }}
+      >
+        <MarbleBanner />
+        {/* Overlay gradient mais suave */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
+      </div>
+      
       {/* conteúdo centralizado */}
       <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
         <div 
@@ -139,23 +181,21 @@ const Hero = () => {
         >
           <div className="logo-container relative">
             <img 
-              src={isDark ? "/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" : "/lovable-uploads/d43d5ba7-bbba-42dd-8cee-0cdd11892e68.png"}
+              src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png"
               alt="Serafim & Trombela Advocacia Logo"
               className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300"
               style={{
-                filter: isDark 
-                  ? 'drop-shadow(0 8px 20px rgba(0,0,0,0.7))' 
-                  : 'drop-shadow(0 8px 20px rgba(0,0,0,0.2))'
+                filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.7))'
               }}
             />
           </div>
         </div>
         
-        <h1 ref={headlineRef} className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-5 text-center max-w-3xl mx-auto font-canela tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
+        <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-5 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
           {heroTitle}
         </h1>
         
-        <p ref={subheadlineRef} className={`text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-center max-w-xl mx-auto font-satoshi leading-relaxed ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+        <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-6 md:mb-8 text-center max-w-xl mx-auto font-satoshi leading-relaxed">
           {heroSubtitle}
         </p>
         
@@ -164,11 +204,7 @@ const Hero = () => {
             href={primaryButtonLink}
             target="_blank"
             rel="noopener noreferrer"
-            className={`group flex items-center justify-center gap-2 text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl ${
-              isDark 
-                ? 'bg-white text-black hover:bg-gray-100 hover:text-black border border-white' 
-                : 'bg-black text-white hover:bg-gray-800 border border-black'
-            }`}
+            className="group flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
           >
             {primaryButtonText}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -176,11 +212,7 @@ const Hero = () => {
           
           <a 
             href={secondaryButtonLink}
-            className={`group flex items-center justify-center gap-2 bg-transparent text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 ${
-              isDark 
-                ? 'text-white border-white hover:bg-white hover:text-black' 
-                : 'text-black border-black hover:bg-black hover:text-white'
-            }`}
+            className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
           >
             {secondaryButtonText}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -191,8 +223,8 @@ const Hero = () => {
       {/* Scroll indicator mais compacto */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
         <div className="animate-bounce">
-          <div className={`w-5 h-8 border-2 rounded-full flex justify-center ${isDark ? 'border-white' : 'border-black'}`}>
-            <div className={`w-0.5 h-2 rounded-full mt-1.5 animate-pulse ${isDark ? 'bg-white' : 'bg-black'}`}></div>
+          <div className="w-5 h-8 border-2 border-white rounded-full flex justify-center">
+            <div className="w-0.5 h-2 bg-white rounded-full mt-1.5 animate-pulse"></div>
           </div>
         </div>
       </div>
