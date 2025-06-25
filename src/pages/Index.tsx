@@ -24,18 +24,17 @@ const Index = () => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Configurar scroll suave e responsivo
+      // Garantir scroll livre em todas as situações
       body.style.overflow = 'auto';
       html.style.overflow = 'auto';
       body.style.height = 'auto';
       html.style.height = 'auto';
+      body.style.maxHeight = 'none';
+      html.style.maxHeight = 'none';
       
       // Garantir que o background seja visível
       body.style.margin = '0';
       body.style.padding = '0';
-      
-      // Garantir que não há background preto forçado
-      body.style.backgroundColor = '';
       
       // Configurar scroll suave
       html.style.scrollBehavior = 'smooth';

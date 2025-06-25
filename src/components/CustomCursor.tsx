@@ -5,6 +5,7 @@ import gsap from 'gsap';
 const CustomCursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
+  const isTouch = useRef(false);
   
   useEffect(() => {
     const cursor = cursorRef.current;
@@ -12,26 +13,46 @@ const CustomCursor = () => {
     
     if (!cursor || !cursorDot) return;
     
+    // Check if device has touch
+    const checkTouch = () => {
+      isTouch.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (isTouch.current) {
+        cursor.style.display = 'none';
+        cursorDot.style.display = 'none';
+        document.body.style.cursor = 'auto';
+        return;
+      }
+    };
+    
+    checkTouch();
+    
+    if (isTouch.current) return;
+    
     const moveCursor = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      
       gsap.to(cursor, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.3,
+        x: x,
+        y: y,
+        duration: 0.15,
         ease: "power2.out"
       });
       
       gsap.to(cursorDot, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.1
+        x: x,
+        y: y,
+        duration: 0.05,
+        ease: "power2.out"
       });
     };
     
     const enlargeCursor = () => {
       gsap.to(cursor, {
-        scale: 1.5,
-        opacity: 0.6,
-        duration: 0.3
+        scale: 2,
+        opacity: 0.8,
+        duration: 0.2,
+        ease: "power2.out"
       });
     };
     
@@ -39,54 +60,96 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 1,
         opacity: 1,
-        duration: 0.3
+        duration: 0.2,
+        ease: "power2.out"
       });
     };
     
-    document.addEventListener('mousemove', moveCursor);
+    const hideCursor = () => {
+      gsap.to([cursor, cursorDot], {
+        opacity: 0,
+        duration: 0.1
+      });
+    };
     
-    document.querySelectorAll('a, button, input, textarea, .hover-effect').forEach(item => {
-      item.addEventListener('mouseenter', enlargeCursor);
-      item.addEventListener('mouseleave', shrinkCursor);
+    const showCursor = () => {
+      gsap.to([cursor, cursorDot], {
+        opacity: 1,
+        duration: 0.1
+      });
+    };
+    
+    // Event listeners
+    document.addEventListener('mousemove', moveCursor);
+    document.addEventListener('mouseleave', hideCursor);
+    document.addEventListener('mouseenter', showCursor);
+    
+    // Add hover effects to interactive elements
+    const interactiveElements = document.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
+    
+    interactiveElements.forEach(element => {
+      element.addEventListener('mouseenter', enlargeCursor);
+      element.addEventListener('mouseleave', shrinkCursor);
+    });
+    
+    // Observer for dynamically added elements
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) { // Element node
+            const element = node as Element;
+            
+            // Check if the added element is interactive
+            if (element.matches('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer')) {
+              element.addEventListener('mouseenter', enlargeCursor);
+              element.addEventListener('mouseleave', shrinkCursor);
+            }
+            
+            // Check for interactive children
+            const interactiveChildren = element.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
+            interactiveChildren.forEach(child => {
+              child.addEventListener('mouseenter', enlargeCursor);
+              child.addEventListener('mouseleave', shrinkCursor);
+            });
+          }
+        });
+      });
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
     });
     
     return () => {
       document.removeEventListener('mousemove', moveCursor);
+      document.removeEventListener('mouseleave', hideCursor);
+      document.removeEventListener('mouseenter', showCursor);
       
-      document.querySelectorAll('a, button, input, textarea, .hover-effect').forEach(item => {
-        item.removeEventListener('mouseenter', enlargeCursor);
-        item.removeEventListener('mouseleave', shrinkCursor);
+      interactiveElements.forEach(element => {
+        element.removeEventListener('mouseenter', enlargeCursor);
+        element.removeEventListener('mouseleave', shrinkCursor);
       });
+      
+      observer.disconnect();
     };
   }, []);
   
   useEffect(() => {
-    // Hide default cursor
-    document.body.style.cursor = 'none';
-    
-    // Fix for mobile devices
-    const handleTouchStart = () => {
-      document.body.style.cursor = 'auto';
-      if (cursorRef.current) {
-        cursorRef.current.style.display = 'none';
-      }
-      if (cursorDotRef.current) {
-        cursorDotRef.current.style.display = 'none';
-      }
-    };
-    
-    window.addEventListener('touchstart', handleTouchStart);
+    // Set cursor style on body
+    if (!isTouch.current) {
+      document.body.style.cursor = 'none';
+    }
     
     return () => {
       document.body.style.cursor = 'auto';
-      window.removeEventListener('touchstart', handleTouchStart);
     };
   }, []);
   
   return (
     <>
-      <div ref={cursorRef} id="cursor" className="custom-cursor"></div>
-      <div ref={cursorDotRef} id="cursor-dot" className="custom-cursor-dot"></div>
+      <div ref={cursorRef} className="custom-cursor"></div>
+      <div ref={cursorDotRef} className="custom-cursor-dot"></div>
     </>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
@@ -155,7 +154,7 @@ const Admin = () => {
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
         </div>
       ) : (
-        <div className={`min-h-screen p-6 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
+        <div className={`min-h-screen p-6 admin-layout ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`} style={{ overflow: 'auto', height: 'auto' }}>
           <div className="max-w-7xl mx-auto">
             <AdminHeader onLogout={logout} />
 

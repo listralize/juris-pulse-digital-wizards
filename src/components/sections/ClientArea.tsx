@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -173,9 +172,9 @@ const ClientArea = () => {
             {/* Imagem agora na primeira coluna (esquerda) */}
             <div ref={imageRef} className="flex justify-center items-center order-1 lg:order-1">
               <div className="relative bg-black rounded-2xl p-6">
-                {/* Label de Destaque */}
+                {/* Label de Destaque Prateada */}
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 text-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 border border-gray-400">
                     <Crown className="w-4 h-4" />
                     <span className="text-xs font-bold tracking-wide">EXCLUSIVO PARA CLIENTES ST PRIME</span>
                   </div>
