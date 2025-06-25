@@ -7,6 +7,7 @@ import { Card, CardContent } from '../ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { useSupabaseBlog } from '../../hooks/supabase/useSupabaseBlog';
+import NeuralBackground from '../NeuralBackground';
 
 const Blog = () => {
   const { theme } = useTheme();
@@ -33,8 +34,11 @@ const Blog = () => {
 
   return (
     <section 
-      className={`h-screen flex items-center justify-center overflow-hidden ${isDark ? 'bg-black' : 'bg-white'}`}
+      className={`h-screen flex items-center justify-center overflow-hidden ${isDark ? 'bg-black' : 'bg-white'} relative`}
     >
+      {/* Neural Background only in dark theme */}
+      {isDark && <NeuralBackground />}
+      
       {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>

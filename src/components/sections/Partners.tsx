@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
+import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -94,7 +95,7 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}
+      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} relative`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
@@ -102,7 +103,10 @@ const Partners = () => {
         justifyContent: 'center'
       }}
     >
-      <div className="max-w-7xl mx-auto w-full">
+      {/* Neural Background only in dark theme */}
+      {isDark && <NeuralBackground />}
+      
+      <div className="max-w-7xl mx-auto w-full relative z-10">
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesma altura que outras páginas */}
           <div className="text-center mb-8 md:mb-12">

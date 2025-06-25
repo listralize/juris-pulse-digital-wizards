@@ -5,7 +5,10 @@ import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
 import { useTheme } from '../ThemeProvider';
+import NeuralBackground from '../NeuralBackground';
+
 gsap.registerPlugin(ScrollTrigger);
+
 const Contact = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -96,11 +99,13 @@ const Contact = () => {
       tl.kill();
     };
   }, []);
-  return <div className="w-full h-full flex flex-col justify-center">
-      <div ref={sectionRef} className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-6 px-4 md:px-6 lg:px-8`}>
+  return (
+    <div className="w-full h-full flex flex-col justify-center relative">
+      {/* Neural Background only in dark theme */}
+      {isDark && <NeuralBackground />}
+      
+      <div ref={sectionRef} className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-6 px-4 md:px-6 lg:px-8 relative z-10`}>
         <div className="max-w-4xl mx-auto">
-          
-          
           <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
               <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-md border`}>
@@ -122,6 +127,8 @@ const Contact = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Contact;
