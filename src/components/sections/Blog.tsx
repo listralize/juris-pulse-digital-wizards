@@ -61,7 +61,7 @@ const Blog = () => {
 
         {displayPosts.length > 0 ? (
           <>
-            {/* Carrossel de artigos - sem padding extra */}
+            {/* Carrossel de artigos */}
             <div className="mb-6">
               <Carousel
                 opts={{
@@ -93,7 +93,7 @@ const Blog = () => {
                           }`}></div>
                           
                           {post.banner && (
-                            <div className="relative overflow-hidden rounded-t-lg h-24 flex-shrink-0">
+                            <div className="relative overflow-hidden rounded-t-lg h-32 flex-shrink-0">
                               <img 
                                 src={post.banner} 
                                 alt={post.title}
@@ -102,13 +102,6 @@ const Blog = () => {
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
-                              {post.featured && (
-                                <div className="absolute top-2 right-2">
-                                  <span className="premium-blog-badge text-xs">
-                                    ⭐ DESTAQUE
-                                  </span>
-                                </div>
-                              )}
                             </div>
                           )}
                           
@@ -124,11 +117,11 @@ const Blog = () => {
                               </div>
                             </div>
                             
-                            <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-8 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
+                            <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-10 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
                               {post.title}
                             </h3>
                             
-                            <p className={`mb-3 text-xs flex-1 overflow-hidden ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{
+                            <p className={`mb-2 text-xs flex-1 overflow-hidden ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{
                               display: '-webkit-box',
                               WebkitLineClamp: 3,
                               WebkitBoxOrient: 'vertical'
