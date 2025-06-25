@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -103,22 +102,21 @@ const Partners = () => {
         justifyContent: 'center'
       }}
     >
-      <div className="max-w-6xl mx-auto w-full">
-        {/* Container centralizado com padrão uniforme */}
+      <div className="max-w-7xl mx-auto w-full">
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesmo padrão de todas as outras seções */}
-          <div className="text-center mb-8">
+          {/* Header padronizado */}
+          <div className="text-center mb-8 lg:mb-12">
             <h2 
               ref={titleRef}
-              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              className={`text-2xl sm:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {teamTitle}
             </h2>
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Carousel Container */}
-          <div className="relative w-full max-w-4xl">
+          {/* Carousel Container com padding adequado */}
+          <div className="relative w-full max-w-6xl px-4 sm:px-8 lg:px-12">
             <div 
               ref={carouselRef} 
               className="overflow-hidden"
@@ -133,26 +131,26 @@ const Partners = () => {
                 {Array.from({ length: totalSlides }).map((_, slideIndex) => (
                   <div 
                     key={slideIndex}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-shrink-0"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full flex-shrink-0 px-2 sm:px-4"
                     style={{ width: `${100 / totalSlides}%` }}
                   >
                     {teamMembers
                       .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
                       .map((member, index) => (
-                        <div key={index} className="group">
-                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 ${
-                            isDark ? 'bg-white/5' : 'bg-white'
+                        <div key={index} className="group p-2 sm:p-3 lg:p-4">
+                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
+                            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
                           } shadow-md hover:shadow-xl`}>
-                            {/* Foto reduzida para metade do tamanho */}
+                            {/* Foto com altura responsiva */}
                             <div className="aspect-[4/3] relative">
                               {member.image ? (
                                 <img 
                                   src={member.image} 
                                   alt={member.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                               ) : (
-                                <div className={`w-full h-full flex items-center justify-center text-2xl ${
+                                <div className={`w-full h-full flex items-center justify-center text-2xl sm:text-3xl ${
                                   isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'
                                 }`}>
                                   👤
@@ -161,15 +159,15 @@ const Partners = () => {
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>
                             
-                            {/* Conteúdo padronizado */}
-                            <div className="p-4">
-                              <h3 className={`text-base font-semibold mb-1 ${isDark ? 'text-white' : 'text-black'}`}>
+                            {/* Conteúdo responsivo */}
+                            <div className="p-3 sm:p-4 lg:p-5">
+                              <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                                 {member.name}
                               </h3>
-                              <p className={`text-sm mb-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                              <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
                                 {member.title || 'Advogado'}
                               </p>
-                              <p className={`text-sm leading-relaxed line-clamp-2 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                              <p className={`text-xs sm:text-sm leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
                                 {member.description}
                               </p>
                             </div>
@@ -186,36 +184,36 @@ const Partners = () => {
               <>
                 <button
                   onClick={prevSlide}
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
                       : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                  } shadow-lg hover:scale-110`}
+                  } shadow-lg hover:scale-110 z-10`}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 
                 <button
                   onClick={nextSlide}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
                       : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                  } shadow-lg hover:scale-110`}
+                  } shadow-lg hover:scale-110 z-10`}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </>
             )}
 
             {/* Dots Indicator */}
             {totalSlides > 1 && (
-              <div className="flex justify-center mt-6 space-x-2">
+              <div className="flex justify-center mt-6 sm:mt-8 space-x-2">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ${
                       currentSlide === index
                         ? isDark ? 'bg-white' : 'bg-black'
                         : isDark ? 'bg-white/30' : 'bg-black/30'
