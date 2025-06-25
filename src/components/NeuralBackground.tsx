@@ -23,6 +23,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
 
     let uniforms: any;
     let gl: WebGLRenderingContext | null = null;
+    let animationId: number;
 
     const initShader = () => {
       const vsSource = `
@@ -83,15 +84,12 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
           noise = max(.0, noise - .5);
           noise *= (1. - length(vUv - .5));
 
-          // Cores baseadas no parâmetro inverted (preto/branco)
           if (u_inverted > 0.5) {
-            // Tema claro - preto/cinza escuro
-            color = vec3(0.1, 0.1, 0.1); // Base preto
-            color += vec3(0.05, 0.05, 0.05) * sin(3.0 * u_scroll_progress + 1.5); // Variação em cinza escuro
+            color = vec3(0.1, 0.1, 0.1);
+            color += vec3(0.05, 0.05, 0.05) * sin(3.0 * u_scroll_progress + 1.5);
           } else {
-            // Tema escuro - branco/cinza claro
-            color = vec3(0.9, 0.9, 0.9); // Base branco
-            color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5); // Variação branca
+            color = vec3(0.9, 0.9, 0.9);
+            color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5);
           }
 
           color = color * noise;
@@ -199,7 +197,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       gl.uniform1f(uniforms.u_inverted, inverted ? 1.0 : 0.0);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      requestAnimationFrame(render);
+      animationId = requestAnimationFrame(render);
     };
 
     const resizeCanvas = () => {
@@ -216,40 +214,50 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ inverted = false })
       pointer.tY = eY;
     };
 
-    const setupEvents = () => {
-      window.addEventListener("pointermove", (e) => {
-        updateMousePosition(e.clientX, e.clientY);
-      });
-      window.addEventListener("touchmove", (e) => {
+    const handlePointerMove = (e: PointerEvent) => {
+      updateMousePosition(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
         updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
-      });
-      window.addEventListener("click", (e) => {
-        updateMousePosition(e.clientX, e.clientY);
-      });
+      }
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      updateMousePosition(e.clientX, e.clientY);
     };
 
     // Initialize everything
     if (initShader()) {
-      setupEvents();
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("click", handleClick);
       render();
     }
 
     // Cleanup
     return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
       window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("pointermove", () => {});
-      window.removeEventListener("touchmove", () => {});
-      window.removeEventListener("click", () => {});
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("click", handleClick);
     };
   }, [inverted]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ opacity: 0.95 }}
+      className="fixed inset-0 w-full h-full pointer-events-none"
+      style={{ 
+        zIndex: -1,
+        opacity: 0.95 
+      }}
     />
   );
 };
