@@ -21,13 +21,9 @@ const Blog = () => {
 
   if (isLoading) {
     return (
-      <section className={`py-8 ${isDark ? 'bg-black' : 'bg-white'}`} style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
+      <section className={`h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center py-12">
+          <div className="flex justify-center items-center">
             <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
           </div>
         </div>
@@ -37,13 +33,7 @@ const Blog = () => {
 
   return (
     <section 
-      className={`py-16 px-4 ${isDark ? 'bg-black' : 'bg-white'}`} 
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-      }}
+      className={`h-screen flex items-center justify-center overflow-hidden ${isDark ? 'bg-black' : 'bg-white'}`}
     >
       {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
@@ -57,9 +47,9 @@ const Blog = () => {
         }}></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="w-full max-w-6xl mx-auto px-4 relative z-10">
         {/* Header padronizado - mesmo padrão de todas as outras seções */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h2>
@@ -71,8 +61,8 @@ const Blog = () => {
 
         {displayPosts.length > 0 ? (
           <>
-            {/* Carrossel de artigos - com padding adequado para o hover e altura fixa */}
-            <div className="mb-8 px-8">
+            {/* Carrossel de artigos - com padding adequado para o hover e altura fixa reduzida */}
+            <div className="mb-6 px-8">
               <Carousel
                 opts={{
                   align: "start",
@@ -80,12 +70,12 @@ const Blog = () => {
                 }}
                 className="w-full"
               >
-                <CarouselContent className="-ml-3 md:-ml-6">
+                <CarouselContent className="-ml-4 md:-ml-6">
                   {displayPosts.map(post => (
-                    <CarouselItem key={post.id} className="pl-3 md:pl-6 md:basis-1/2 lg:basis-1/3">
-                      <div className="p-3">
+                    <CarouselItem key={post.id} className="pl-4 md:pl-6 md:basis-1/2 lg:basis-1/3">
+                      <div className="p-2">
                         <Card 
-                          className={`group cursor-pointer transition-all duration-500 hover:scale-[1.03] backdrop-blur-sm border h-[360px] flex flex-col ${
+                          className={`group cursor-pointer transition-all duration-500 hover:scale-[1.03] backdrop-blur-sm border h-[320px] flex flex-col ${
                             isDark 
                               ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40' 
                               : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
@@ -104,7 +94,7 @@ const Blog = () => {
                             }`}></div>
                             
                             {post.banner && (
-                              <div className="relative overflow-hidden rounded-t-lg h-28 flex-shrink-0">
+                              <div className="relative overflow-hidden rounded-t-lg h-24 flex-shrink-0">
                                 <img 
                                   src={post.banner} 
                                   alt={post.title}
@@ -135,7 +125,7 @@ const Blog = () => {
                                 </div>
                               </div>
                               
-                              <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-10 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
+                              <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-8 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
                                 {post.title}
                               </h3>
                               
@@ -177,7 +167,7 @@ const Blog = () => {
             </div>
           </>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Em breve, novos artigos jurídicos serão publicados aqui.
             </p>
