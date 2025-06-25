@@ -170,27 +170,23 @@ const PracticeAreas = () => {
         }}></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col px-4 md:px-6 lg:px-8">
-        {/* Header - Reduzido ainda mais */}
-        <div className="text-center pt-6 pb-4 flex-shrink-0">
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
+        {/* Header - Maior e mais centralizado */}
+        <div className="text-center mb-8 flex-shrink-0">
           <h2 
             ref={titleRef}
-            className={`text-2xl md:text-3xl lg:text-3xl font-space-grotesk font-light tracking-tight mb-2 ${isDark ? 'text-white' : 'text-black'}`}
+            className={`text-4xl md:text-5xl lg:text-6xl font-space-grotesk font-light tracking-tight mb-4 ${isDark ? 'text-white' : 'text-black'}`}
           >
             {areasTitle}
           </h2>
-          <div className={`w-16 h-px mx-auto ${isDark ? 'bg-white/30' : 'bg-black/30'}`}></div>
+          <div className={`w-24 h-px mx-auto ${isDark ? 'bg-white/30' : 'bg-black/30'}`}></div>
         </div>
         
-        {/* Grid Container - Otimizado para melhor aproveitamento do espaço */}
-        <div className="flex-1 overflow-hidden pb-6">
+        {/* Grid Container - Espaçamento reduzido para 10px */}
+        <div className="flex-1 flex items-center justify-center">
           <div 
             ref={gridRef} 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 h-full max-h-full md:overflow-y-auto md:pr-2"
-            style={{ 
-              scrollbarWidth: 'thin',
-              scrollbarColor: isDark ? '#ffffff20 transparent' : '#00000020 transparent'
-            }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-w-4xl w-full"
           >
             {practiceAreas.map((area, index) => {
               const IconComponent = area.icon;
