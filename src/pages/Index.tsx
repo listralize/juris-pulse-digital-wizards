@@ -24,23 +24,24 @@ const Index = () => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Garantir scroll livre em todas as situações
-      body.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-      body.style.height = 'auto';
-      html.style.height = 'auto';
-      body.style.maxHeight = 'none';
-      html.style.maxHeight = 'none';
+      // Configurar altura fixa para as páginas iniciais
+      body.style.overflow = 'hidden'; // Remover scroll vertical global
+      html.style.overflow = 'hidden'; // Remover scroll vertical global
+      body.style.height = '100vh';
+      html.style.height = '100vh';
+      body.style.maxHeight = '100vh';
+      html.style.maxHeight = '100vh';
       
       // Garantir que o background seja visível
       body.style.margin = '0';
       body.style.padding = '0';
       
-      // Configurar scroll suave
-      html.style.scrollBehavior = 'smooth';
-      
-      // Garantir que o cursor seja visível
-      body.style.cursor = 'none';
+      // Garantir que o cursor seja visível no desktop
+      if (window.innerWidth >= 768) {
+        body.style.cursor = 'none';
+      } else {
+        body.style.cursor = 'auto';
+      }
       
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
@@ -61,7 +62,6 @@ const Index = () => {
     const checkTermsAcceptance = () => {
       const accepted = localStorage.getItem('legal-terms-accepted');
       if (!accepted) {
-        // Mostrar popup após 3 segundos
         setTimeout(() => {
           setShowLegalPopup(true);
         }, 3000);
@@ -73,14 +73,15 @@ const Index = () => {
   
   return (
     <div 
-      className={`min-h-screen w-full transition-colors duration-300 relative ${
+      className={`h-screen w-full transition-colors duration-300 relative overflow-hidden ${
         isDark 
           ? 'bg-neutral-950 text-neutral-100' 
           : 'bg-white text-neutral-900'
       }`}
       style={{ 
         position: 'relative',
-        overflow: 'visible'
+        height: '100vh',
+        maxHeight: '100vh'
       }}
     >
       {/* Background gradients - similar ao código de referência */}

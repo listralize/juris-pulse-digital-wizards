@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -25,7 +24,7 @@ const Hero = () => {
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
 
-  // Carregar dados iniciais do Supabase
+  // Carregar dados do Supabase e event listeners
   useEffect(() => {
     const loadHeroData = async () => {
       try {
@@ -56,7 +55,6 @@ const Hero = () => {
     loadHeroData();
   }, []);
 
-  // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
       console.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
@@ -92,7 +90,6 @@ const Hero = () => {
       }
     };
 
-    // Escutar evento geral
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     
     return () => {
@@ -100,17 +97,17 @@ const Hero = () => {
     };
   }, []);
 
-  // Parallax effect with elevated content
+  // Parallax effect com melhor scaling para monitores grandes
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
     // Animate background first
     tl.fromTo(
       bgRef.current, 
-      { opacity: 0, scale: 1.1 }, 
+      { opacity: 0, scale: 1.2 }, 
       { opacity: 1, scale: 1, duration: 1.5 }
     )
-    // Then animate content with more dynamic movement
+    // animações do conteúdo
     .fromTo(
       logoRef.current, 
       { opacity: 0, y: 30, scale: 0.9 }, 
@@ -139,7 +136,7 @@ const Hero = () => {
     // Enhanced parallax effect
     gsap.to(bgRef.current, {
       yPercent: -15,
-      scale: 1.03,
+      scale: 1.05,
       ease: "none",
       scrollTrigger: {
         trigger: "#home",
@@ -157,14 +154,26 @@ const Hero = () => {
 
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
-      {/* Background com marble banner - mais elevado */}
-      <div ref={bgRef} className="absolute inset-0 z-0 w-full h-full" style={{ transform: 'scale(1.1) translateY(-3%)' }}>
+      {/* Background com marble banner - preenche toda a tela */}
+      <div 
+        ref={bgRef} 
+        className="absolute inset-0 z-0 w-full h-full"
+        style={{ 
+          transform: 'scale(1.3)',
+          minWidth: '100vw',
+          minHeight: '100vh',
+          width: '130%',
+          height: '130%',
+          left: '-15%',
+          top: '-15%'
+        }}
+      >
         <MarbleBanner />
         {/* Overlay gradient mais suave */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
       </div>
       
-      {/* Conteúdo mais centralizado e compacto */}
+      {/* conteúdo centralizado */}
       <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
         <div 
           ref={logoRef} 

@@ -25,6 +25,9 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
       return isDark ? 'bg-black text-white' : 'bg-white text-black';
     };
     
+    // Definir quais seções têm altura fixa (não permitem scroll)
+    const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog'].includes(id);
+    
     return (
       <div 
         id={id} 
@@ -40,14 +43,15 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '100vh',
-          maxHeight: (allowScroll || id === 'contact') ? 'auto' : '100vh',
-          overflow: (allowScroll || id === 'contact') ? 'auto' : 'hidden',
+          maxHeight: isFixedHeightSection ? '100vh' : (allowScroll || id === 'contact') ? 'auto' : '100vh',
+          height: isFixedHeightSection ? '100vh' : 'auto',
+          overflow: isFixedHeightSection ? 'hidden' : (allowScroll || id === 'contact') ? 'auto' : 'hidden',
           WebkitOverflowScrolling: (allowScroll || id === 'contact') ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
-          paddingBottom: window.innerWidth < 768 ? '80px' : '140px', // Menos padding no mobile
-          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y' // Permitir scroll vertical no mobile
+          paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
+          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y'
         }}
       >
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
