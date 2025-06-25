@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -120,7 +119,7 @@ const About = () => {
       console.log('🎥 About: Renderizando vídeo:', { originalUrl: aboutImage, embedUrl });
       
       return (
-        <div className="w-full h-64 md:h-80 lg:h-96">
+        <div className="w-full h-48 md:h-56 lg:h-64">
           <iframe
             src={embedUrl}
             title="About Us Video"
@@ -136,7 +135,7 @@ const About = () => {
       <img 
         src={aboutImage} 
         alt="Sobre nós" 
-        className="w-full h-64 md:h-80 lg:h-96 object-cover rounded-lg"
+        className="w-full h-48 md:h-56 lg:h-64 object-cover rounded-lg"
       />
     );
   };
