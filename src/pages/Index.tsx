@@ -37,14 +37,9 @@ const Index = () => {
       body.style.margin = '0';
       body.style.padding = '0';
       
-      // Definir background baseado no tema
-      if (isDark) {
-        body.style.backgroundColor = '#000000';
-        html.style.backgroundColor = '#000000';
-      } else {
-        body.style.backgroundColor = '#ffffff';
-        html.style.backgroundColor = '#ffffff';
-      }
+      // Definir background baseado no tema - TRANSPARENTE para ver o neural
+      body.style.backgroundColor = 'transparent';
+      html.style.backgroundColor = 'transparent';
       
       // Garantir que o cursor seja visível no desktop
       if (window.innerWidth >= 768) {
@@ -56,6 +51,8 @@ const Index = () => {
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
+      
+      console.log('🎨 Index configurado - tema:', theme);
       
       return () => {
         if ('scrollRestoration' in history) {
@@ -83,19 +80,16 @@ const Index = () => {
   
   return (
     <div 
-      className={`h-screen w-full transition-colors duration-300 relative overflow-hidden ${
-        isDark 
-          ? 'bg-black text-white' 
-          : 'bg-white text-black'
-      }`}
+      className="h-screen w-full transition-colors duration-300 relative overflow-hidden"
       style={{ 
         position: 'relative',
         height: '100vh',
         maxHeight: '100vh',
-        backgroundColor: isDark ? '#000000' : '#ffffff'
+        backgroundColor: isDark ? '#000000' : '#ffffff',
+        color: isDark ? '#ffffff' : '#000000'
       }}
     >
-      {/* Neural Background para todo o site - sempre visível */}
+      {/* Neural Background - SEMPRE PRIMEIRO, por trás de tudo */}
       <NeuralBackground inverted={isDark} />
 
       <CustomCursor />

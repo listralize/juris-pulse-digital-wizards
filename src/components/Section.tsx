@@ -17,11 +17,6 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     
     console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
     
-    // Todas as seções seguem o tema global
-    const getBackgroundClass = () => {
-      return isDark ? 'bg-black text-white' : 'bg-white text-black';
-    };
-    
     // Definir quais seções têm altura fixa (não permitem scroll)
     const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog', 'partners'].includes(id);
     
@@ -32,7 +27,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
+        className={`section-container w-full h-full ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
@@ -49,7 +44,8 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           padding: '0.75rem',
           paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
           touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y',
-          backgroundColor: isDark ? '#000000' : '#ffffff',
+          backgroundColor: 'transparent',
+          color: isDark ? '#ffffff' : '#000000',
           zIndex: 1
         }}
       >
