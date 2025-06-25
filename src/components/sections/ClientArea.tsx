@@ -127,7 +127,7 @@ const ClientArea = () => {
 
   if (isLoading) {
     return (
-      <section className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex items-center justify-center`}>
+      <section className={`bg-transparent h-screen flex items-center justify-center`}>
         <div className="relative">
           <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin ${isDark ? 'border-white/20' : 'border-black/20'}`}></div>
           <div className={`absolute inset-0 w-8 h-8 border-2 border-transparent border-t-current rounded-full animate-spin ${isDark ? 'text-white' : 'text-black'}`}></div>
@@ -144,21 +144,13 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
+      className={`bg-transparent h-screen flex flex-col overflow-hidden relative ${isDark ? 'text-white' : 'text-black'}`}
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-
       <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Container centralizado com padrão uniforme */}
-        <div className="flex flex-col items-center justify-center flex-1">
+        {/* Container centralizado com padrão uniforme - descendo um pouco mais */}
+        <div className="flex flex-col items-center justify-center flex-1 mt-16">
           {/* Header padronizado - mesmo padrão de todas as outras seções */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}

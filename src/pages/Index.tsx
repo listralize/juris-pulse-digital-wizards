@@ -85,12 +85,8 @@ const Index = () => {
         maxHeight: '100vh'
       }}
     >
-      {/* Neural Background para todo o site */}
-      <NeuralBackground inverted={!isDark} />
-
-      {/* Background gradients adicionais */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10 opacity-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/10 via-transparent to-purple-950/10 -z-10 opacity-10"></div>
+      {/* Neural Background para todo o site - sempre ativo no tema escuro */}
+      {isDark && <NeuralBackground inverted={false} />}
 
       <CustomCursor />
       <Navbar />

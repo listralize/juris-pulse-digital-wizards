@@ -98,10 +98,10 @@ const Partners = () => {
       ref={sectionRef}
       className={`h-screen flex flex-col overflow-hidden relative bg-transparent ${isDark ? 'text-white' : 'text-black'}`}
     >
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8 pt-8">
+      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - posição mais alta */}
-          <div className="text-center mb-6 md:mb-8">
+          {/* Header padronizado - mesma altura que Blog */}
+          <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
