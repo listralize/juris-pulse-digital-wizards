@@ -33,6 +33,10 @@ const PracticeAreaLayout: React.FC<PracticeAreaLayoutProps> = ({
       className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`} 
       style={{ paddingBottom: '140px' }}
     >
+      {/* Background gradients */}
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+      
       <Navbar />
       
       <PageBanner 

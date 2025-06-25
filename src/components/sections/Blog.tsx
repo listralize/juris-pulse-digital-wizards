@@ -45,6 +45,10 @@ const Blog = () => {
         justifyContent: 'center'
       }}
     >
+      {/* Background gradients */}
+      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute inset-0" style={{
@@ -67,7 +71,7 @@ const Blog = () => {
 
         {displayPosts.length > 0 ? (
           <>
-            {/* Carrossel de artigos */}
+            {/* Carrossel de artigos - diminuindo o tamanho dos cards */}
             <div className="mb-8">
               <Carousel
                 opts={{
@@ -82,9 +86,14 @@ const Blog = () => {
                       <Card 
                         className={`group cursor-pointer transition-all duration-500 hover:scale-105 h-full border backdrop-blur-sm ${
                           isDark 
-                            ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
+                            ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40' 
                             : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
                         }`}
+                        style={{
+                          boxShadow: isDark 
+                            ? '0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(139, 92, 246, 0.1)' 
+                            : '0 10px 25px rgba(0, 0, 0, 0.1), 0 0 15px rgba(99, 102, 241, 0.1)'
+                        }}
                         onClick={() => navigate(`/blog/${post.slug}`)}
                       >
                         <CardContent className="p-0 h-full flex flex-col">
@@ -98,14 +107,14 @@ const Blog = () => {
                               <img 
                                 src={post.banner} 
                                 alt={post.title}
-                                className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="w-full h-40 object-cover transition-transform duration-700 group-hover:scale-110"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
                               {post.featured && (
-                                <div className="absolute top-3 right-3">
-                                  <span className="premium-blog-badge">
+                                <div className="absolute top-2 right-2">
+                                  <span className="premium-blog-badge text-xs">
                                     ⭐ DESTAQUE
                                   </span>
                                 </div>
@@ -113,8 +122,8 @@ const Blog = () => {
                             </div>
                           )}
                           
-                          <div className="p-4 flex-1 flex flex-col relative z-10">
-                            <div className="flex items-center gap-3 text-xs mb-2">
+                          <div className="p-3 flex-1 flex flex-col relative z-10">
+                            <div className="flex items-center gap-2 text-xs mb-2">
                               <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                 <Calendar className="w-3 h-3" />
                                 {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
@@ -129,7 +138,7 @@ const Blog = () => {
                               {post.title}
                             </h3>
                             
-                            <p className={`mb-3 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <p className={`mb-2 line-clamp-2 text-xs flex-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                               {post.excerpt}
                             </p>
                             
@@ -150,7 +159,7 @@ const Blog = () => {
             <div className="text-center">
               <Button 
                 onClick={() => navigate('/blog')}
-                className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 shadow-2xl ${
+                className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg ${
                   isDark 
                     ? 'bg-gradient-to-b from-white to-gray-100 text-black hover:shadow-white/25 hover:scale-105' 
                     : 'bg-gradient-to-b from-black to-gray-800 text-white hover:shadow-black/25 hover:scale-105'
