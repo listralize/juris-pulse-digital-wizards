@@ -45,11 +45,12 @@ const Blog = () => {
       }}
     >
       <div className="container mx-auto">
-        <div className="text-center mb-6 md:mb-8">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-canela mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+        <div className="text-center mb-6">
+          <h2 className={`text-2xl md:text-3xl lg:text-4xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
             📝 Blog Jurídico
           </h2>
-          <p className={`text-base md:text-lg lg:text-xl xl:text-2xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div className={`w-16 h-0.5 mx-auto mb-3 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+          <p className={`text-sm md:text-base max-w-3xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             Mantenha-se atualizado com as últimas novidades do mundo jurídico através dos nossos artigos especializados
           </p>
         </div>
@@ -62,7 +63,7 @@ const Blog = () => {
                   align: "start",
                   loop: true,
                 }}
-                className="w-full max-w-6xl mx-auto"
+                className="w-full max-w-4xl mx-auto"
               >
                 <CarouselContent className="-ml-1">
                   {displayPosts.map((post) => (
@@ -77,22 +78,22 @@ const Blog = () => {
                               <img
                                 src={post.banner}
                                 alt={post.title}
-                                className="w-full h-40 md:h-48 object-cover"
+                                className="w-full h-32 md:h-40 object-cover"
                                 onError={(e) => {
                                   console.log('Image failed to load:', post.banner);
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
                               {post.featured && (
-                                <span className="absolute top-3 right-3 bg-yellow-500 text-black text-xs px-2 py-1 rounded">
+                                <span className="absolute top-2 right-2 bg-yellow-500 text-black text-xs px-2 py-1 rounded">
                                   Destaque
                                 </span>
                               )}
                             </div>
                           )}
                           
-                          <div className="p-4 md:p-6">
-                            <div className="flex items-center gap-4 text-xs mb-3">
+                          <div className="p-3 md:p-4">
+                            <div className="flex items-center gap-3 text-xs mb-2">
                               <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                 <Calendar className="w-3 h-3" />
                                 {new Date(post.publishedAt).toLocaleDateString('pt-BR')}
@@ -103,16 +104,16 @@ const Blog = () => {
                               </div>
                             </div>
                             
-                            <h3 className={`font-semibold text-base md:text-lg mb-2 line-clamp-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                            <h3 className={`font-semibold text-sm md:text-base mb-2 line-clamp-2 ${isDark ? 'text-white' : 'text-black'}`}>
                               {post.title}
                             </h3>
                             
-                            <p className={`text-xs md:text-sm line-clamp-3 mb-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <p className={`text-xs md:text-sm line-clamp-2 mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                               {post.excerpt}
                             </p>
                             
-                            <Button variant="link" className="p-0 h-auto font-normal text-xs md:text-sm">
-                              Ler mais <ArrowRight className="w-3 h-3 md:w-4 md:h-4 ml-1" />
+                            <Button variant="link" className="p-0 h-auto font-normal text-xs">
+                              Ler mais <ArrowRight className="w-3 h-3 ml-1" />
                             </Button>
                           </div>
                         </CardContent>
@@ -125,11 +126,11 @@ const Blog = () => {
               </Carousel>
             </div>
 
-            <div className="text-center mt-6">
+            <div className="text-center mt-4">
               <Button 
                 onClick={() => navigate('/blog')}
                 variant="outline"
-                size="lg"
+                size="sm"
               >
                 Ver todos os artigos
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -137,14 +138,15 @@ const Blog = () => {
             </div>
           </>
         ) : (
-          <div className="text-center py-12">
-            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <div className="text-center py-8">
+            <p className={`text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Em breve, novos artigos jurídicos serão publicados aqui.
             </p>
             <Button 
               onClick={() => navigate('/admin')}
               variant="outline"
-              className="mt-4"
+              className="mt-3"
+              size="sm"
             >
               Adicionar Posts no Admin
             </Button>

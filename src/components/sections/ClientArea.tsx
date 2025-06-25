@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -157,7 +158,7 @@ const ClientArea = () => {
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesmo padrão de todas as outras seções */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <h2 
               ref={titleRef}
               className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
@@ -167,9 +168,21 @@ const ClientArea = () => {
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Content Grid - padronizado */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full">
-            <div className="flex flex-col justify-center">
+          {/* Content Grid - padronizado com ordem invertida */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl w-full">
+            {/* Imagem agora na primeira coluna (esquerda) */}
+            <div ref={imageRef} className="flex justify-center items-center order-1 lg:order-1">
+              <div className="relative bg-black rounded-2xl p-6">
+                <img 
+                  src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
+                  alt="Área do Cliente em Smartphone" 
+                  className="w-full max-w-sm h-auto object-contain"
+                />
+              </div>
+            </div>
+            
+            {/* Conteúdo agora na segunda coluna (direita) */}
+            <div className="flex flex-col justify-center order-2 lg:order-2">
               <p 
                 ref={textRef}
                 className={`text-base md:text-lg leading-relaxed mb-6 font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}
@@ -206,16 +219,6 @@ const ClientArea = () => {
                   <MessageSquare className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                   <span className="font-medium">Primeiro acesso via WhatsApp</span>
                 </a>
-              </div>
-            </div>
-            
-            <div ref={imageRef} className="flex justify-center items-center">
-              <div className="relative">
-                <img 
-                  src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
-                  alt="Área do Cliente em Smartphone" 
-                  className="w-full max-w-sm h-auto object-contain"
-                />
               </div>
             </div>
           </div>

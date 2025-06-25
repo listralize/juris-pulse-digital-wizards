@@ -103,26 +103,26 @@ const Contact = () => {
     <div className="w-full h-full flex flex-col justify-center">
       <div 
         ref={sectionRef}
-        className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-8 px-6 md:px-8 lg:px-12`}
+        className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-6 px-4 md:px-6 lg:px-8`}
       >
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div ref={titleRef} className="mb-6 text-center">
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+            <h2 className={`text-2xl md:text-3xl lg:text-4xl font-canela mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
               {contactTitle}
             </h2>
             <div className={`w-16 h-0.5 mx-auto mb-3 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-            <p className={`text-sm md:text-base ${isDark ? 'text-white/60' : 'text-black/60'}`}>
+            <p className={`text-sm ${isDark ? 'text-white/60' : 'text-black/60'}`}>
               {contactSubtitle}
             </p>
           </div>
           
           <div 
             ref={contentRef}
-            className="grid grid-cols-1 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-1 lg:grid-cols-5 gap-3"
           >
             <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
               <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-md border`}>
-                <div className="h-32 lg:h-40">
+                <div className="h-24 lg:h-32">
                   <LocationMap />
                 </div>
               </div>
@@ -133,7 +133,7 @@ const Contact = () => {
             </div>
             
             <div className="lg:col-span-3 order-1 lg:order-2">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-4 shadow-md border`}>
+              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-3 shadow-md border`}>
                 <UnifiedContactForm darkBackground={isDark} pageId="contato" />
               </div>
             </div>
