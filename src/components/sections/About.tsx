@@ -152,14 +152,18 @@ const About = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Neural Background - garantindo que apareça no tema escuro */}
+      {/* Neural Background - posicionamento absoluto para aparecer corretamente */}
       {isDark && (
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
           <NeuralBackground />
         </div>
       )}
       
-      <div className="max-w-6xl mx-auto w-full relative z-10">
+      {/* Background gradients */}
+      <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900" style={{ zIndex: 0 }}></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20" style={{ zIndex: 0 }}></div>
+      
+      <div className="max-w-6xl mx-auto w-full relative" style={{ zIndex: 10 }}>
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
           {/* Header padronizado - mesmo padrão de todas as outras seções */}
