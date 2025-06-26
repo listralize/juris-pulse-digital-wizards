@@ -113,10 +113,11 @@ const Contact = () => {
       id="contact"
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // Permitir altura automática no mobile
+        // No mobile: altura automática e scroll natural
         minHeight: isMobile ? 'auto' : '100vh',
-        // Garantir scroll livre no mobile
-        overflowY: 'visible'
+        height: isMobile ? 'auto' : '100vh',
+        // Remover overflow hidden no mobile
+        overflow: isMobile ? 'visible' : 'hidden'
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -126,11 +127,9 @@ const Contact = () => {
         ref={sectionRef} 
         className="w-full py-8 md:py-16 px-4 md:px-6 lg:px-8 relative z-10"
         style={{
-          // Container mais flexível para mobile
           display: 'flex',
           flexDirection: 'column',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          // Altura automática no mobile
           minHeight: isMobile ? 'auto' : '100vh'
         }}
       >

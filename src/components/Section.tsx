@@ -48,15 +48,17 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
+          // Para contato no mobile: altura automática
           minHeight: id === 'contact' && isMobile ? 'auto' : '100vh',
-          maxHeight: isFixedHeightSection && id !== 'contact' ? '100vh' : 'auto',
-          height: isFixedHeightSection && id !== 'contact' ? '100vh' : 'auto',
-          overflow: shouldAllowScroll || (id === 'contact' && isMobile) ? 'visible' : (isFixedHeightSection ? 'hidden' : 'auto'),
+          maxHeight: isFixedHeightSection && id !== 'contact' ? '100vh' : 'none',
+          height: id === 'contact' && isMobile ? 'auto' : (isFixedHeightSection && id !== 'contact' ? '100vh' : 'auto'),
+          // Para contato no mobile: overflow visível
+          overflow: id === 'contact' && isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : (isFixedHeightSection ? 'hidden' : 'auto')),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
-          paddingBottom: isMobile && id === 'contact' ? '0' : (isMobile ? '80px' : '140px'),
+          paddingBottom: isMobile && id !== 'contact' ? '80px' : (isMobile ? '0' : '140px'),
           touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y'
         }}
       >
