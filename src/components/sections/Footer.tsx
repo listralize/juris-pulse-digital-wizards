@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
-import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
 
 interface FooterProps {
   respectTheme?: boolean;
@@ -14,7 +13,6 @@ const Footer: React.FC<FooterProps> = ({
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const isDark = respectTheme ? theme === 'dark' : true;
-  const [showTimePopup, setShowTimePopup] = useState(false);
 
   // Estados locais para todos os dados editáveis do footer
   const [footerData, setFooterData] = useState({
@@ -105,25 +103,6 @@ const Footer: React.FC<FooterProps> = ({
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
-
-  // Funções para ações dos ícones
-  const handlePhoneClick = () => {
-    window.open(`tel:${footerData.phone.replace(/\D/g, '')}`, '_self');
-  };
-
-  const handleEmailClick = () => {
-    window.open(`mailto:${footerData.email}`, '_self');
-  };
-
-  const handleLocationClick = () => {
-    const encodedAddress = encodeURIComponent(footerData.address);
-    const mapsUrl = `https://maps.google.com/?q=${encodedAddress}`;
-    window.open(mapsUrl, '_blank');
-  };
-
-  const handleTimeClick = () => {
-    setShowTimePopup(true);
-  };
 
   return (
     <>
