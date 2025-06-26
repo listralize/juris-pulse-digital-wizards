@@ -102,7 +102,8 @@ const Partners = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        marginTop: '-150px'
+        marginTop: '-100px',
+        paddingTop: '50px'
       }}
     >
       {/* Neural Background only in dark theme */}
