@@ -10,7 +10,6 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
-import Footer from '../components/sections/Footer';
 import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -122,11 +121,6 @@ const Index = () => {
       <FloatingFooter />
       
       <SectionsContainer />
-
-      {/* Footer para mobile - não fixo */}
-      {isMobile && (
-        <Footer respectTheme={true} />
-      )}
 
       {/* Popup Legal discreto */}
       <LegalPopup 

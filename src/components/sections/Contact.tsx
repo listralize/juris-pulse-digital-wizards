@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
+import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
 
@@ -115,8 +116,7 @@ const Contact = () => {
         // Permitir altura automática no mobile
         minHeight: isMobile ? 'auto' : '100vh',
         // Garantir scroll livre no mobile
-        overflowY: 'visible',
-        paddingBottom: isMobile ? '120px' : '0' // Espaço extra para o rodapé no mobile
+        overflowY: 'visible'
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -156,6 +156,11 @@ const Contact = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer para mobile - aparece após o conteúdo de contato */}
+      {isMobile && (
+        <Footer respectTheme={true} />
+      )}
     </section>
   );
 };
