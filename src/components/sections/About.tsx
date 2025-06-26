@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -151,8 +152,12 @@ const About = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Neural Background only in dark theme */}
-      {isDark && <NeuralBackground />}
+      {/* Neural Background only in dark theme and only on desktop */}
+      {isDark && window.innerWidth >= 768 && (
+        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
+          <NeuralBackground />
+        </div>
+      )}
       
       <div className="max-w-6xl mx-auto w-full relative z-10">
         {/* Container centralizado com padrão uniforme */}
