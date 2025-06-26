@@ -28,30 +28,33 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     // Definir quais seções têm altura fixa (não permitem scroll)
     const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog'].includes(id);
     
+    // Para a seção de contato, sempre permitir scroll
+    const shouldAllowScroll = id === 'contact' || allowScroll;
+    
     return (
       <div 
         id={id} 
         ref={ref}
         data-section={id}
         data-active={isActive}
-        data-allow-scroll={allowScroll ? "true" : "false"}
+        data-allow-scroll={shouldAllowScroll ? "true" : "false"}
         className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
           minHeight: '100vh',
-          maxHeight: isFixedHeightSection ? '100vh' : (allowScroll || id === 'contact') ? 'auto' : '100vh',
+          maxHeight: isFixedHeightSection ? '100vh' : 'auto',
           height: isFixedHeightSection ? '100vh' : 'auto',
-          overflow: isFixedHeightSection ? 'hidden' : (allowScroll || id === 'contact') ? 'auto' : 'hidden',
-          WebkitOverflowScrolling: (allowScroll || id === 'contact') ? 'touch' : 'auto',
+          overflow: shouldAllowScroll ? 'auto' : (isFixedHeightSection ? 'hidden' : 'auto'),
+          WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
           paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
-          touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y'
+          touchAction: shouldAllowScroll ? 'auto' : 'pan-y'
         }}
       >
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
