@@ -1,9 +1,10 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
-import MarbleBanner from '../MarbleBanner';
+import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,7 +13,6 @@ const Hero = () => {
   const headlineRef = useRef<HTMLDivElement>(null);
   const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -97,22 +97,14 @@ const Hero = () => {
     };
   }, []);
 
-  // Parallax effect com melhor scaling para monitores grandes
+  // Animações simplificadas
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     
-    // Animate background first
     tl.fromTo(
-      bgRef.current, 
-      { opacity: 0, scale: 1.2 }, 
-      { opacity: 1, scale: 1, duration: 1.5 }
-    )
-    // animações do conteúdo
-    .fromTo(
       logoRef.current, 
       { opacity: 0, y: 30, scale: 0.9 }, 
-      { opacity: 1, y: 0, scale: 1, duration: 1 },
-      "-=1.2"
+      { opacity: 1, y: 0, scale: 1, duration: 1 }
     )
     .fromTo(
       headlineRef.current,
@@ -133,19 +125,6 @@ const Hero = () => {
       "-=0.3"
     );
     
-    // Enhanced parallax effect
-    gsap.to(bgRef.current, {
-      yPercent: -15,
-      scale: 1.05,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "#home",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1
-      }
-    });
-    
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -154,24 +133,13 @@ const Hero = () => {
 
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
-      {/* Background com marble banner - agora muito maior para preencher toda a tela */}
-      <div 
-        ref={bgRef} 
-        className="absolute inset-0 z-0 w-full h-full"
-        style={{ 
-          transform: 'scale(2.0)',
-          minWidth: '100vw',
-          minHeight: '100vh',
-          width: '200%',
-          height: '200%',
-          left: '-50%',
-          top: '-50%'
-        }}
-      >
-        <MarbleBanner />
-        {/* Overlay gradient mais suave */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
+      {/* Neural Background */}
+      <div className="absolute inset-0 z-0 w-full h-full">
+        <NeuralBackground />
       </div>
+      
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 z-5"></div>
       
       {/* conteúdo centralizado */}
       <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">

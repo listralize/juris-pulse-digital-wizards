@@ -77,10 +77,10 @@ const Blog = () => {
                 <CarouselContent className="-ml-2 sm:-ml-4 lg:-ml-6">
                   {displayPosts.map(post => (
                     <CarouselItem key={post.id} className="pl-2 sm:pl-4 lg:pl-6 basis-full sm:basis-1/2 lg:basis-1/3">
-                      {/* Container com padding para hover - altura reduzida */}
+                      {/* Container com padding para hover - altura fixa */}
                       <div className="p-2 sm:p-3 lg:p-4">
                         <Card 
-                          className={`group cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm border h-80 flex flex-col ${
+                          className={`group cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm border h-96 flex flex-col ${
                             isDark 
                               ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/20' 
                               : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-md hover:shadow-xl hover:shadow-blue-500/10'
@@ -94,7 +94,7 @@ const Blog = () => {
                             }`}></div>
                             
                             {post.banner && (
-                              <div className="relative overflow-hidden rounded-t-lg h-28 sm:h-32 lg:h-36 flex-shrink-0">
+                              <div className="relative overflow-hidden rounded-t-lg h-32 flex-shrink-0">
                                 <img 
                                   src={post.banner} 
                                   alt={post.title}
@@ -106,8 +106,8 @@ const Blog = () => {
                               </div>
                             )}
                             
-                            <div className="p-3 sm:p-4 lg:p-5 flex-1 flex flex-col relative z-10">
-                              <div className="flex items-center gap-2 sm:gap-3 text-xs mb-2 sm:mb-3 flex-shrink-0">
+                            <div className="p-4 flex-1 flex flex-col relative z-10">
+                              <div className="flex items-center gap-2 text-xs mb-2 flex-shrink-0">
                                 <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                   <Calendar className="w-3 h-3" />
                                   <span className="hidden sm:inline">
@@ -123,17 +123,19 @@ const Blog = () => {
                                 </div>
                               </div>
                               
-                              <h3 className={`font-semibold mb-2 sm:mb-3 text-sm sm:text-base group-hover:text-blue-500 transition-colors line-clamp-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                              <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors line-clamp-2 flex-shrink-0 ${isDark ? 'text-white' : 'text-black'}`}>
                                 {post.title}
                               </h3>
                               
-                              <p className={`mb-3 sm:mb-4 text-xs sm:text-sm flex-1 line-clamp-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              <p className={`mb-3 text-xs flex-1 line-clamp-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                 {post.excerpt}
                               </p>
                               
-                              <Button variant="link" className="p-0 h-auto text-xs sm:text-sm text-blue-500 hover:text-blue-600 mt-auto flex-shrink-0 justify-start group-hover:translate-x-1 transition-transform">
-                                Ler mais <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                              </Button>
+                              <div className="flex-shrink-0 mt-auto">
+                                <Button variant="link" className="p-0 h-auto text-xs text-blue-500 hover:text-blue-600 justify-start group-hover:translate-x-1 transition-transform">
+                                  Ler mais <ArrowRight className="w-3 h-3 ml-1" />
+                                </Button>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
