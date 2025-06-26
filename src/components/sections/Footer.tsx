@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
+import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 
 interface FooterProps {
@@ -23,6 +25,27 @@ const Footer: React.FC<FooterProps> = ({
     address: 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040',
     whatsapp: '5562994594496'
   });
+
+  // Estado para controlar o popup de horário
+  const [showTimePopup, setShowTimePopup] = useState(false);
+
+  // Funções de handlers
+  const handlePhoneClick = () => {
+    window.open(`tel:${footerData.phone.replace(/\D/g, '')}`, '_self');
+  };
+
+  const handleEmailClick = () => {
+    window.open(`mailto:${footerData.email}`, '_self');
+  };
+
+  const handleLocationClick = () => {
+    const encodedAddress = encodeURIComponent(footerData.address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+  };
+
+  const handleTimeClick = () => {
+    setShowTimePopup(true);
+  };
 
   // Carregar dados iniciais do Supabase
   useEffect(() => {
