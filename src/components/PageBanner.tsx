@@ -1,6 +1,6 @@
 
 import React from 'react';
-import MarbleBanner from './MarbleBanner';
+import NeuralBackground from './NeuralBackground';
 import { useTheme } from './ThemeProvider';
 
 interface PageBannerProps {
@@ -15,9 +15,9 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle, bgImage }) => 
 
   return (
     <div className="relative w-full overflow-hidden bg-black" style={{ height: '450px' }}>
-      {/* Marble Banner Background */}
+      {/* Neural Background */}
       <div className="absolute inset-0 z-0 w-full h-full">
-        <MarbleBanner />
+        <NeuralBackground />
       </div>
       
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-center px-6">
