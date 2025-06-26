@@ -136,7 +136,7 @@ const Hero = () => {
       </div>
       
       {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-transparent to-black/50 z-5"></div>
+      <div className=""></div>
       
       {/* conteúdo centralizado */}
       <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
