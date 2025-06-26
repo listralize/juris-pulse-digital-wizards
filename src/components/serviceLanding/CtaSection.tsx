@@ -28,8 +28,13 @@ const CtaSection: React.FC<CtaSectionProps> = ({ serviceArea, respectTheme = fal
     return serviceMap[area] || 'outro';
   };
 
+  // Check if we're on an areas page to make background transparent
+  const isAreasPage = window.location.pathname.includes('/areas/');
+
   return (
-    <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-white'} relative overflow-hidden`}>
+    <section className={`px-6 md:px-16 lg:px-24 py-16 ${
+      isAreasPage ? 'bg-transparent' : isDark ? 'bg-black' : 'bg-white'
+    } relative overflow-hidden`}>
       <div className={`absolute inset-0 bg-pattern ${isDark ? 'opacity-10' : 'opacity-5'}`}></div>
       
       <div className="max-w-4xl mx-auto relative z-10">
