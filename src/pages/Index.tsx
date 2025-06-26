@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -10,6 +9,7 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
+import Footer from '../components/sections/Footer';
 import { useTheme } from '../components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -18,19 +18,42 @@ const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showLegalPopup, setShowLegalPopup] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     try {
       const body = document.body;
       const html = document.documentElement;
       
-      // Configurar altura fixa para as páginas iniciais
-      body.style.overflow = 'hidden'; // Remover scroll vertical global
-      html.style.overflow = 'hidden'; // Remover scroll vertical global
-      body.style.height = '100vh';
-      html.style.height = '100vh';
-      body.style.maxHeight = '100vh';
-      html.style.maxHeight = '100vh';
+      // Configuração diferente para mobile e desktop
+      if (isMobile) {
+        // Mobile: permitir scroll natural
+        body.style.overflow = 'auto';
+        html.style.overflow = 'auto';
+        body.style.height = 'auto';
+        html.style.height = 'auto';
+        body.style.maxHeight = 'none';
+        html.style.maxHeight = 'none';
+      } else {
+        // Desktop: configuração original
+        body.style.overflow = 'hidden';
+        html.style.overflow = 'hidden';
+        body.style.height = '100vh';
+        html.style.height = '100vh';
+        body.style.maxHeight = '100vh';
+        html.style.maxHeight = '100vh';
+      }
       
       // Garantir que o background seja visível
       body.style.margin = '0';
@@ -55,8 +78,8 @@ const Index = () => {
     } catch (error) {
       console.error('❌ Erro ao configurar scroll:', error);
     }
-  }, []);
-
+  }, [isMobile]);
+  
   // Verificar se os termos já foram aceitos e mostrar popup se necessário
   useEffect(() => {
     const checkTermsAcceptance = () => {
@@ -73,15 +96,17 @@ const Index = () => {
   
   return (
     <div 
-      className={`h-screen w-full transition-colors duration-300 relative overflow-hidden ${
+      className={`transition-colors duration-300 relative ${
         isDark 
           ? 'bg-neutral-950 text-neutral-100' 
           : 'bg-white text-neutral-900'
       }`}
       style={{ 
         position: 'relative',
-        height: '100vh',
-        maxHeight: '100vh'
+        minHeight: isMobile ? 'auto' : '100vh',
+        height: isMobile ? 'auto' : '100vh',
+        maxHeight: isMobile ? 'none' : '100vh',
+        overflow: isMobile ? 'visible' : 'hidden'
       }}
     >
       {/* Background gradients - similar ao código de referência */}
@@ -98,6 +123,11 @@ const Index = () => {
       </div>
       
       <SectionsContainer />
+
+      {/* Footer para mobile */}
+      {isMobile && (
+        <Footer respectTheme={true} />
+      )}
 
       {/* Popup Legal discreto */}
       <LegalPopup 

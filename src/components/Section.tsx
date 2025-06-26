@@ -31,6 +31,9 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     // Para a seção de contato, sempre permitir scroll
     const shouldAllowScroll = id === 'contact' || allowScroll;
     
+    // Detectar mobile
+    const isMobile = window.innerWidth < 768;
+    
     return (
       <div 
         id={id} 
@@ -45,16 +48,16 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
-          minHeight: '100vh',
-          maxHeight: isFixedHeightSection ? '100vh' : 'auto',
-          height: isFixedHeightSection ? '100vh' : 'auto',
-          overflow: shouldAllowScroll ? 'auto' : (isFixedHeightSection ? 'hidden' : 'auto'),
+          minHeight: id === 'contact' && isMobile ? 'auto' : '100vh',
+          maxHeight: isFixedHeightSection && id !== 'contact' ? '100vh' : 'auto',
+          height: isFixedHeightSection && id !== 'contact' ? '100vh' : 'auto',
+          overflow: shouldAllowScroll || (id === 'contact' && isMobile) ? 'visible' : (isFixedHeightSection ? 'hidden' : 'auto'),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
-          paddingBottom: window.innerWidth < 768 ? '80px' : '140px',
-          touchAction: shouldAllowScroll ? 'auto' : 'pan-y'
+          paddingBottom: isMobile && id === 'contact' ? '0' : (isMobile ? '80px' : '140px'),
+          touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y'
         }}
       >
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>

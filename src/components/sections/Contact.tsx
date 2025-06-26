@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -113,13 +112,11 @@ const Contact = () => {
       id="contact"
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // Corrigir altura e scroll no mobile
+        // Permitir altura automática no mobile
         minHeight: isMobile ? 'auto' : '100vh',
         // Garantir scroll livre no mobile
-        overflowY: isMobile ? 'auto' : 'visible',
-        marginTop: isMobile ? '0' : '-50px', // Subiu 50px no desktop
-        // Adicionar padding bottom para garantir espaço para o rodapé no mobile
-        paddingBottom: isMobile ? '0' : '0'
+        overflowY: 'visible',
+        paddingBottom: isMobile ? '120px' : '0' // Espaço extra para o rodapé no mobile
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -129,12 +126,12 @@ const Contact = () => {
         ref={sectionRef} 
         className="w-full py-8 md:py-16 px-4 md:px-6 lg:px-8 relative z-10"
         style={{
-          // Container mais flexível para mobile - REMOVIDO minHeight problemático
+          // Container mais flexível para mobile
           display: 'flex',
           flexDirection: 'column',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          // Garantir altura mínima adequada sem travar o scroll
-          minHeight: isMobile ? 'calc(100vh - 100px)' : '100vh'
+          // Altura automática no mobile
+          minHeight: isMobile ? 'auto' : '100vh'
         }}
       >
         <div className="max-w-4xl mx-auto w-full">
@@ -158,9 +155,6 @@ const Contact = () => {
             </div>
           </div>
         </div>
-
-        {/* Espaçamento adicional REDUZIDO no mobile para não causar problemas de scroll */}
-        {isMobile && <div className="h-20"></div>}
       </div>
     </section>
   );
