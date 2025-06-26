@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
@@ -119,8 +120,8 @@ const FloatingFooter: React.FC = () => {
         className={`hidden md:block fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
           w-[95%] max-w-4xl mx-auto rounded-xl shadow-xl backdrop-blur-md
           ${isDark 
-            ? 'bg-neutral-950/95 border border-neutral-800/60 text-white' 
-            : 'bg-white/95 border border-neutral-200/60 text-black'
+            ? 'bg-neutral-950/70 border border-neutral-800/60 text-white' 
+            : 'bg-white/70 border border-neutral-200/60 text-black'
           }
           transition-all duration-300 hover:shadow-2xl`}
         style={{

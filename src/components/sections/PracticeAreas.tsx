@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
@@ -20,6 +19,18 @@ const PracticeAreas = () => {
   const { pageTexts, servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
   const { categories: supabaseCategories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const isDark = theme === 'dark';
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [localCategories, setLocalCategories] = useState(supabaseCategories);
@@ -164,12 +175,12 @@ const PracticeAreas = () => {
       className={`min-h-screen w-full py-8 md:py-16 relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
         // Permitir scroll vertical no mobile
-        overflowY: window.innerWidth < 768 ? 'auto' : 'hidden',
-        maxHeight: window.innerWidth < 768 ? 'none' : '100vh'
+        overflowY: isMobile ? 'auto' : 'hidden',
+        maxHeight: isMobile ? 'none' : '100vh'
       }}
     >
       {/* Neural Background apenas desktop */}
-      {isDark && window.innerWidth >= 768 && <NeuralBackground />}
+      {isDark && !isMobile && <NeuralBackground />}
 
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
@@ -181,7 +192,7 @@ const PracticeAreas = () => {
 
       <div className="max-w-6xl mx-auto relative z-10 px-4 md:px-6 lg:px-8">
         {/* Container flexível para mobile e centralizado para desktop */}
-        <div className={`${window.innerWidth >= 768 ? 'h-screen flex flex-col justify-center' : 'py-8'}`}>
+        <div className={`${!isMobile ? 'h-screen flex flex-col justify-center' : 'py-8'}`}>
           {/* Header padronizado */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
@@ -275,7 +286,7 @@ const PracticeAreas = () => {
           </div>
 
           {/* Espaçamento adicional no mobile para permitir scroll */}
-          <div className="md:hidden h-16"></div>
+          {isMobile && <div className="h-16"></div>}
         </div>
       </div>
     </section>
