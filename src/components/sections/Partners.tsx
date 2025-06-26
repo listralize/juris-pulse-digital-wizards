@@ -109,7 +109,7 @@ const Partners = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        marginTop: isMobile ? '-100px' : '-160px', // Diminuiu mais 10px no desktop (era -150px)
+        marginTop: isMobile ? '-100px' : '-180px', // Diminuiu mais 20px no desktop (era -160px)
         paddingTop: '50px'
       }}
     >
