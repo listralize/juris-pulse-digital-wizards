@@ -226,8 +226,8 @@ const ClientArea = () => {
                   rel="noopener noreferrer"
                   className={`group relative overflow-hidden rounded-lg border px-6 py-3 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
                     isDark 
-                      ? 'border-white/20 text-white hover:bg-white/10' 
-                      : 'border-black/20 text-black hover:bg-black/5'
+                      ? 'border-white/30 text-white bg-white/5 hover:bg-white/10 hover:border-white/50' 
+                      : 'border-black/30 text-black bg-black/5 hover:bg-black/10 hover:border-black/50'
                   }`}
                 >
                   <MessageSquare className="mr-2 h-4 w-4 md:h-5 md:w-5" />

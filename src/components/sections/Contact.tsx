@@ -111,11 +111,12 @@ const Contact = () => {
   return (
     <section 
       id="contact"
-      className={`min-h-screen w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // Permitir scroll vertical no mobile para alcançar o final da página
-        overflowY: isMobile ? 'auto' : 'hidden',
-        maxHeight: isMobile ? 'none' : '100vh'
+        // Ajustar altura para permitir visualização completa
+        minHeight: isMobile ? 'auto' : '100vh',
+        // Permitir scroll no mobile
+        overflowY: 'visible'
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -123,12 +124,13 @@ const Contact = () => {
       
       <div 
         ref={sectionRef} 
-        className="w-full py-6 px-4 md:px-6 lg:px-8 relative z-10"
+        className="w-full py-8 md:py-16 px-4 md:px-6 lg:px-8 relative z-10"
         style={{
+          // Container mais flexível para mobile
           minHeight: isMobile ? 'calc(100vh - 60px)' : '100vh',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center'
+          justifyContent: isMobile ? 'flex-start' : 'center'
         }}
       >
         <div className="max-w-4xl mx-auto w-full">
@@ -153,8 +155,8 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* Espaçamento adicional no mobile para permitir scroll até o rodapé */}
-        {isMobile && <div className="h-32"></div>}
+        {/* Espaçamento adicional no mobile para garantir scroll até o rodapé */}
+        {isMobile && <div className="h-48"></div>}
       </div>
     </section>
   );

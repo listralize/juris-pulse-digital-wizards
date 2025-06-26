@@ -198,44 +198,44 @@ const Partners = () => {
               </div>
             </div>
 
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons - Minimalista */}
             {totalSlides > 1 && (
               <>
                 <button
                   onClick={prevSlide}
-                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isDark 
-                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                      : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                  } shadow-lg hover:scale-110 z-10`}
+                      ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
+                      : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'
+                  } hover:scale-110 z-10`}
                 >
-                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
                 
                 <button
                   onClick={nextSlide}
-                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isDark 
-                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                      : 'bg-white/90 hover:bg-white text-black border border-gray-200'
-                  } shadow-lg hover:scale-110 z-10`}
+                      ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
+                      : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'
+                  } hover:scale-110 z-10`}
                 >
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </>
             )}
 
-            {/* Dots Indicator */}
+            {/* Dots Indicator - Minimalista */}
             {totalSlides > 1 && (
-              <div className="flex justify-center mt-6 sm:mt-8 space-x-2">
+              <div className="flex justify-center mt-6 sm:mt-8 space-x-1.5">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ${
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${
                       currentSlide === index
                         ? isDark ? 'bg-white' : 'bg-black'
-                        : isDark ? 'bg-white/30' : 'bg-black/30'
+                        : isDark ? 'bg-white/20' : 'bg-black/20'
                     }`}
                   />
                 ))}
