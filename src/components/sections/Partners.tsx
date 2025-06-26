@@ -198,29 +198,37 @@ const Partners = () => {
               </div>
             </div>
 
-            {/* Navigation Buttons - Minimalista */}
+            {/* Navigation Buttons - Minimalista e MENORES no mobile */}
             {totalSlides > 1 && (
               <>
                 <button
                   onClick={prevSlide}
-                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 transition-all duration-300 ${
+                    isMobile 
+                      ? 'w-4 h-4 rounded-full' // MUITO MENOR no mobile
+                      : 'w-6 h-6 sm:w-7 sm:h-7 rounded-full' // Tamanho normal no desktop
+                  } flex items-center justify-center ${
                     isDark 
                       ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
                       : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'
                   } hover:scale-110 z-10`}
                 >
-                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <ChevronLeft className={`${isMobile ? 'w-2 h-2' : 'w-3 h-3 sm:w-4 sm:h-4'}`} />
                 </button>
                 
                 <button
                   onClick={nextSlide}
-                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 transition-all duration-300 ${
+                    isMobile 
+                      ? 'w-4 h-4 rounded-full' // MUITO MENOR no mobile
+                      : 'w-6 h-6 sm:w-7 sm:h-7 rounded-full' // Tamanho normal no desktop
+                  } flex items-center justify-center ${
                     isDark 
                       ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
                       : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'
                   } hover:scale-110 z-10`}
                 >
-                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <ChevronRight className={`${isMobile ? 'w-2 h-2' : 'w-3 h-3 sm:w-4 sm:h-4'}`} />
                 </button>
               </>
             )}
