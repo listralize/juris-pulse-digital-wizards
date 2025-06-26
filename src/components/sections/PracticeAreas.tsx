@@ -195,8 +195,10 @@ const PracticeAreas = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10 px-4 md:px-6 lg:px-8">
-        {/* Container flexível para mobile e centralizado para desktop */}
-        <div className={`${!isMobile ? 'h-screen flex flex-col justify-center' : 'py-8'}`}>
+        {/* Container flexível para mobile e centralizado para desktop com ajuste de posição */}
+        <div className={`${!isMobile ? 'h-screen flex flex-col justify-center' : 'py-8'}`} style={{ 
+          marginTop: !isMobile ? '-100px' : '0' 
+        }}>
           {/* Header padronizado */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
@@ -226,8 +228,8 @@ const PracticeAreas = () => {
                     relative h-32 lg:h-36 rounded-xl border transition-all duration-300 ease-out
                     hover:scale-[1.02] hover:-translate-y-1
                     ${isDark 
-                      ? 'bg-white/[0.08] border-white/[0.15] hover:bg-white/[0.12] hover:border-white/[0.25]' 
-                      : 'bg-black/[0.08] border-black/[0.15] hover:bg-black/[0.12] hover:border-black/[0.25]'
+                      ? 'bg-white/[0.15] border-white/[0.25] hover:bg-white/[0.20] hover:border-white/[0.35]' 
+                      : 'bg-black/[0.15] border-black/[0.25] hover:bg-black/[0.20] hover:border-black/[0.35]'
                     }
                     backdrop-blur-sm overflow-hidden
                   `}>
@@ -245,8 +247,8 @@ const PracticeAreas = () => {
                           w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
-                            ? 'bg-white/[0.15] text-white group-hover:bg-white/[0.25]' 
-                            : 'bg-black/[0.15] text-black group-hover:bg-black/[0.25]'
+                            ? 'bg-white/[0.25] text-white group-hover:bg-white/[0.35]' 
+                            : 'bg-black/[0.25] text-black group-hover:bg-black/[0.35]'
                           }
                         `}>
                           <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -257,8 +259,8 @@ const PracticeAreas = () => {
                           w-7 h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
-                            ? 'bg-white/[0.1] text-white/80 group-hover:bg-white/[0.2] group-hover:text-white' 
-                            : 'bg-black/[0.1] text-black/80 group-hover:bg-black/[0.2] group-hover:text-black'
+                            ? 'bg-white/[0.15] text-white/90 group-hover:bg-white/[0.25] group-hover:text-white' 
+                            : 'bg-black/[0.15] text-black/90 group-hover:bg-black/[0.25] group-hover:text-black'
                           }
                         `}>
                           <ArrowUpRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -277,7 +279,7 @@ const PracticeAreas = () => {
                       <div className="mt-auto">
                         <span className={`
                           text-xs lg:text-sm font-medium font-inter
-                          ${isDark ? 'text-white/70' : 'text-black/70'}
+                          ${isDark ? 'text-white/80' : 'text-black/80'}
                         `}>
                           {area.services} serviço{area.services !== 1 ? 's' : ''}
                         </span>
