@@ -54,6 +54,10 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Função para verificar se a seção permite scroll interno
   const sectionAllowsScroll = (sectionId: string) => {
+    // No mobile, 'areas' também permite scroll para ver todos os cards
+    if (window.innerWidth < 768 && sectionId === 'areas') {
+      return true;
+    }
     return ['areas', 'contact', 'blog', 'socios'].includes(sectionId);
   };
 

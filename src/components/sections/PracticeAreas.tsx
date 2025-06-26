@@ -161,10 +161,15 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`h-screen flex flex-col overflow-hidden relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`min-h-screen w-full py-8 md:py-16 relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      style={{
+        // Permitir scroll vertical no mobile
+        overflowY: window.innerWidth < 768 ? 'auto' : 'hidden',
+        maxHeight: window.innerWidth < 768 ? 'none' : '100vh'
+      }}
     >
-      {/* Neural Background */}
-      {isDark && <NeuralBackground />}
+      {/* Neural Background apenas desktop */}
+      {isDark && window.innerWidth >= 768 && <NeuralBackground />}
 
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
@@ -174,10 +179,10 @@ const PracticeAreas = () => {
         }}></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Container centralizado com padrão uniforme */}
-        <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesma altura que outras páginas */}
+      <div className="max-w-6xl mx-auto relative z-10 px-4 md:px-6 lg:px-8">
+        {/* Container flexível para mobile e centralizado para desktop */}
+        <div className={`${window.innerWidth >= 768 ? 'h-screen flex flex-col justify-center' : 'py-8'}`}>
+          {/* Header padronizado */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
@@ -188,10 +193,10 @@ const PracticeAreas = () => {
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Grid Container - padronizado */}
+          {/* Grid Container - adaptativo para mobile */}
           <div 
             ref={gridRef} 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full mx-auto"
           >
             {practiceAreas.map((area, index) => {
               const IconComponent = area.icon;
@@ -268,6 +273,9 @@ const PracticeAreas = () => {
               );
             })}
           </div>
+
+          {/* Espaçamento adicional no mobile para permitir scroll */}
+          <div className="md:hidden h-16"></div>
         </div>
       </div>
     </section>
