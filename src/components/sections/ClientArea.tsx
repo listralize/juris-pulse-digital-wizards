@@ -158,7 +158,7 @@ const ClientArea = () => {
       id="cliente" 
       className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
       style={{
-        marginTop: isMobile ? '0' : '-50px' // Subiu 50px no desktop
+        marginTop: isMobile ? '0' : '-30px' // Aumentou 20px no desktop (era -50px)
       }}
     >
       {/* Neural Background */}
