@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
@@ -93,7 +94,7 @@ const Navbar = () => {
       <CompactMobileNavbar showLogo={showLogoOnMobile} />
 
       {/* Desktop Navigation - Always fixed */}
-      <nav className={`hidden md:block fixed top-0 left-0 right-0 z-50 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} w-full transition-colors duration-300 backdrop-blur-md`}>
+      <nav className={`hidden md:block fixed top-0 left-0 right-0 z-50 ${isDark ? 'bg-black/60 text-white' : 'bg-[#f5f5f5]/60 text-black'} py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} w-full transition-colors duration-300 backdrop-blur-md`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex justify-center items-center relative h-12">
             <div className="flex justify-center items-center w-full">
