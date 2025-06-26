@@ -1,8 +1,8 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import NeuralBackground from '../NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -144,24 +144,13 @@ const About = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 relative overflow-hidden ${isDark ? 'bg-neutral-950' : 'bg-white text-black'}`}
+      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 relative overflow-hidden ${isDark ? 'bg-transparent' : 'bg-white text-black'}`}
       style={{ 
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center'
       }}
-    >
-      {/* Neural Background - usando fixed para funcionar igual à home */}
-      {isDark && (
-        <div className="fixed inset-0 w-full h-full pointer-events-none -z-10">
-          <NeuralBackground />
-        </div>
-      )}
-      
-      {/* Background gradients - usando fixed também */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-20"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-20"></div>
-      
+    >      
       <div className="max-w-6xl mx-auto w-full relative z-10">
         {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
