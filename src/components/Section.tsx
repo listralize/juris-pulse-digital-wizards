@@ -1,6 +1,7 @@
 
 import React, { forwardRef } from 'react';
 import { useTheme } from './ThemeProvider';
+import NeuralBackground from './NeuralBackground';
 
 interface SectionProps {
   id: string;
@@ -35,7 +36,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={allowScroll ? "true" : "false"}
-        className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
+        className={`section-container w-full h-full ${getBackgroundClass()} ${className} relative`}
         style={{ 
           position: 'relative',
           display: 'flex',
@@ -54,7 +55,14 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           touchAction: (allowScroll || id === 'contact') ? 'auto' : 'pan-y'
         }}
       >
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
+        {/* Neural Background - aparece quando o tema é escuro */}
+        {isDark && (
+          <div className="absolute inset-0 w-full h-full">
+            <NeuralBackground />
+          </div>
+        )}
+        
+        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center relative z-10" style={{ opacity: 1, visibility: 'visible' }}>
           {children}
         </div>
       </div>
