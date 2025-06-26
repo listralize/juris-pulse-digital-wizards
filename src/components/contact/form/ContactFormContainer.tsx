@@ -14,9 +14,14 @@ const ContactFormContainer: React.FC<ContactFormContainerProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark' || darkBackground;
 
+  // Verificar se estamos em uma página de serviço
+  const isServicePage = window.location.pathname.includes('/services/') || window.location.pathname.includes('/servicos/');
+
   return (
     <div className={`p-6 rounded-lg h-full ${
-      isDark 
+      isServicePage && isDark
+        ? 'bg-transparent border-white/20 text-white' 
+        : isDark 
         ? 'bg-black border-white/20 text-white' 
         : 'bg-white border-gray-200 text-black'
     } border`}>
