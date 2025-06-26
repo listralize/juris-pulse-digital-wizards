@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -113,11 +114,11 @@ const Contact = () => {
       id="contact"
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // No mobile: altura automática e scroll natural
+        // Mobile: altura completamente automática
         minHeight: isMobile ? 'auto' : '100vh',
         height: isMobile ? 'auto' : '100vh',
-        // Remover overflow hidden no mobile
-        overflow: isMobile ? 'visible' : 'hidden'
+        // Mobile: sem restrições de overflow
+        overflow: 'visible'
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -130,7 +131,8 @@ const Contact = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          minHeight: isMobile ? 'auto' : '100vh'
+          // Mobile: altura automática sem restrições
+          minHeight: 'auto'
         }}
       >
         <div className="max-w-4xl mx-auto w-full">
@@ -156,9 +158,11 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* Footer para mobile - aparece após o conteúdo de contato */}
+      {/* Footer sempre visível no mobile - após o conteúdo de contato */}
       {isMobile && (
-        <Footer respectTheme={true} />
+        <div className="w-full">
+          <Footer respectTheme={true} />
+        </div>
       )}
     </section>
   );
