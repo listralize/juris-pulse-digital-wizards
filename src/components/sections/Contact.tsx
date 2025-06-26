@@ -116,7 +116,8 @@ const Contact = () => {
         // Ajustar altura para permitir visualização completa
         minHeight: isMobile ? 'auto' : '100vh',
         // Permitir scroll no mobile
-        overflowY: 'visible'
+        overflowY: 'visible',
+        marginTop: isMobile ? '0' : '-50px' // Subiu 50px no desktop
       }}
     >
       {/* Neural Background only in dark theme */}

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,6 +17,7 @@ const ClientArea = () => {
   const { theme } = useTheme();
   const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
+  const [isMobile, setIsMobile] = useState(false);
   
   // Estado local para receber atualizações em tempo real
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
@@ -126,6 +126,17 @@ const ClientArea = () => {
     };
   }, [isLoading]);
 
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   if (isLoading) {
     return (
       <section className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex items-center justify-center`}>
@@ -146,6 +157,9 @@ const ClientArea = () => {
     <section 
       id="cliente" 
       className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
+      style={{
+        marginTop: isMobile ? '0' : '-50px' // Subiu 50px no desktop
+      }}
     >
       {/* Neural Background */}
       {isDark && <NeuralBackground />}
