@@ -22,6 +22,18 @@ const Partners = () => {
   
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     setLocalPageTexts(pageTexts);
@@ -40,13 +52,9 @@ const Partners = () => {
     };
   }, []);
 
-  const itemsPerSlide = {
-    mobile: 1,
-    tablet: 2,
-    desktop: 3
-  };
-
-  const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide.desktop);
+  // Cálculos de slides baseados no dispositivo
+  const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
+  const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -138,13 +146,17 @@ const Partners = () => {
                 {Array.from({ length: totalSlides }).map((_, slideIndex) => (
                   <div 
                     key={slideIndex}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full flex-shrink-0 px-2 sm:px-4"
+                    className={`w-full flex-shrink-0 px-2 sm:px-4 ${
+                      isMobile 
+                        ? 'flex justify-center' 
+                        : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'
+                    }`}
                     style={{ width: `${100 / totalSlides}%` }}
                   >
                     {teamMembers
-                      .slice(slideIndex * itemsPerSlide.desktop, (slideIndex + 1) * itemsPerSlide.desktop)
+                      .slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide)
                       .map((member, index) => (
-                        <div key={index} className="group p-2 sm:p-3 lg:p-4">
+                        <div key={index} className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'w-full max-w-sm' : ''}`}>
                           <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
                             isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
                           } shadow-md hover:shadow-xl`}>

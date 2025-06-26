@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,10 +14,20 @@ const Contact = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const {
-    theme
-  } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Estado local para receber atualizações em tempo real
   const [contactTitle, setContactTitle] = useState('Fale Conosco');
@@ -27,16 +38,16 @@ const Contact = () => {
     const loadInitialData = async () => {
       try {
         console.log('📞 Contact: Carregando dados iniciais...');
-        const {
-          supabase
-        } = await import('../../integrations/supabase/client');
+        const { supabase } = await import('../../integrations/supabase/client');
 
         // Buscar primeiro na tabela site_settings
-        const {
-          data: settings
-        } = await supabase.from('site_settings').select('contact_title, contact_subtitle').order('updated_at', {
-          ascending: false
-        }).limit(1).maybeSingle();
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('contact_title, contact_subtitle')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
         if (settings) {
           console.log('📞 Contact: Dados carregados da site_settings:', settings);
           if (settings.contact_title) {
@@ -69,43 +80,58 @@ const Contact = () => {
         setContactSubtitle(data.contactSubtitle);
       }
     };
+    
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
+
   useEffect(() => {
     const tl = gsap.timeline({
-      defaults: {
-        ease: 'power3.out'
-      }
+      defaults: { ease: 'power3.out' }
     });
-    tl.fromTo(titleRef.current, {
-      opacity: 0,
-      y: 15
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.6
-    }).fromTo(contentRef.current, {
-      opacity: 0,
-      y: 10
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.6
-    }, "-=0.3");
+    
+    tl.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6 }
+    ).fromTo(
+      contentRef.current,
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.3"
+    );
+    
     return () => {
       tl.kill();
     };
   }, []);
+
   return (
-    <div className="w-full h-full flex flex-col justify-center relative">
+    <section 
+      id="contact"
+      className={`min-h-screen w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      style={{
+        // Permitir scroll vertical no mobile para alcançar o final da página
+        overflowY: isMobile ? 'auto' : 'hidden',
+        maxHeight: isMobile ? 'none' : '100vh'
+      }}
+    >
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      <div ref={sectionRef} className={`w-full ${isDark ? 'bg-black text-white' : 'bg-white text-black'} py-6 px-4 md:px-6 lg:px-8 relative z-10`}>
-        <div className="max-w-4xl mx-auto">
+      <div 
+        ref={sectionRef} 
+        className="w-full py-6 px-4 md:px-6 lg:px-8 relative z-10"
+        style={{
+          minHeight: isMobile ? 'calc(100vh - 60px)' : '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }}
+      >
+        <div className="max-w-4xl mx-auto w-full">
           <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
               <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-md border`}>
@@ -126,8 +152,11 @@ const Contact = () => {
             </div>
           </div>
         </div>
+
+        {/* Espaçamento adicional no mobile para permitir scroll até o rodapé */}
+        {isMobile && <div className="h-32"></div>}
       </div>
-    </div>
+    </section>
   );
 };
 
