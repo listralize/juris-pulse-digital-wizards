@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -117,14 +118,12 @@ const Index = () => {
       <Navbar />
       <WhatsAppButton />
       
-      {/* FloatingFooter only for desktop */}
-      <div className="hidden md:block">
-        <FloatingFooter />
-      </div>
+      {/* FloatingFooter apenas para desktop */}
+      <FloatingFooter />
       
       <SectionsContainer />
 
-      {/* Footer para mobile */}
+      {/* Footer para mobile - não fixo */}
       {isMobile && (
         <Footer respectTheme={true} />
       )}

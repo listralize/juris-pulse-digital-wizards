@@ -7,6 +7,18 @@ const FloatingFooter: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showTimePopup, setShowTimePopup] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Estados locais para dados editáveis do footer
   const [footerData, setFooterData] = useState({
@@ -112,11 +124,16 @@ const FloatingFooter: React.FC = () => {
     setShowTimePopup(true);
   };
 
+  // Se for mobile, não renderizar nada
+  if (isMobile) {
+    return null;
+  }
+
   return (
     <>
       {/* Desktop Only Footer */}
       <footer 
-        className={`hidden md:block fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
+        className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
           w-[95%] max-w-4xl mx-auto rounded-xl shadow-xl backdrop-blur-md
           ${isDark 
             ? 'bg-neutral-950/60 border border-neutral-800/60 text-white' 
