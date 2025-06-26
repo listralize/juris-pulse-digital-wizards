@@ -23,6 +23,20 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     
     if (pathname === '/' || pathname === '/home') return 'home';
     if (pathname === '/contato') return 'contato';
+    
+    // Verificar páginas de áreas de direito primeiro
+    if (pathname.startsWith('/areas/')) {
+      let cleanPath = pathname.replace('/areas/', '');
+      // Remover múltiplas barras e normalizar
+      cleanPath = cleanPath.replace(/\/+/g, '/').replace(/\/$/, '');
+      // Remover barra inicial se existir
+      if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+      }
+      console.log('🏛️ [UnifiedContactForm] Área de direito detectada:', cleanPath);
+      return cleanPath;
+    }
+    
     if (pathname.startsWith('/services/')) {
       // Normalizar completamente o slug do serviço
       let cleanPath = pathname.replace('/services/', '');
