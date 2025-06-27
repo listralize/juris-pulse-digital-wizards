@@ -77,13 +77,13 @@ const SectionsContainer: React.FC = () => {
     >
       <div 
         ref={containerRef}
-        className={`${isMobile ? 'flex-col' : 'flex h-full'}`}
+        className={isMobile ? 'block' : 'flex h-full'}
         style={{ 
-          width: isMobile ? '100vw' : `${sections.length * 100}vw`,
+          width: isMobile ? '100%' : `${sections.length * 100}vw`,
           height: isMobile ? 'auto' : '100vh',
           minHeight: isMobile ? 'auto' : '100vh',
           maxHeight: isMobile ? 'none' : '100vh',
-          willChange: 'transform',
+          willChange: isMobile ? 'auto' : 'transform',
           backgroundColor: 'transparent',
           margin: 0,
           padding: 0
@@ -97,11 +97,11 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className={`flex-shrink-0 relative ${isMobile ? 'w-full' : 'w-screen h-full'}`}
+              className={`relative ${isMobile ? 'w-full block' : 'flex-shrink-0 w-screen h-full'}`}
               style={{ 
-                width: '100vw',
+                width: isMobile ? '100%' : '100vw',
                 height: isMobile ? 'auto' : '100vh',
-                minWidth: '100vw',
+                minWidth: isMobile ? 'auto' : '100vw',
                 minHeight: isMobile ? 'auto' : '100vh',
                 maxHeight: isMobile ? 'none' : '100vh',
                 backgroundColor: 'transparent',

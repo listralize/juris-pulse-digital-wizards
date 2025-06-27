@@ -1,3 +1,4 @@
+
 import React, { forwardRef } from 'react';
 import { useTheme } from './ThemeProvider';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -47,6 +48,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
+          // NO MOBILE: altura automática, sem forçar 100vh
           minHeight: isMobile ? 'auto' : '100vh',
           maxHeight: isMobile ? 'none' : '100vh',
           height: isMobile ? 'auto' : '100vh',
@@ -55,7 +57,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           opacity: 1,
           visibility: 'visible',
           padding: isMobile ? '1rem' : '0.75rem',
-          paddingBottom: isMobile ? '0' : '140px', // ZERO padding-bottom no mobile
+          paddingBottom: isMobile ? '0' : '140px',
           touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y',
           margin: 0
         }}

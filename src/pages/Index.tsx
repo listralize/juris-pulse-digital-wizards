@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -26,15 +27,15 @@ const Index = () => {
       const html = document.documentElement;
       
       if (isMobile) {
-        // Mobile: configuração limpa sem alturas forçadas
+        // Mobile: configuração natural sem forçar alturas
         body.style.overflow = 'auto';
         html.style.overflow = 'auto';
         body.style.height = 'auto';
         html.style.height = 'auto';
         body.style.maxHeight = 'none';
         html.style.maxHeight = 'none';
-        body.style.minHeight = '100vh'; // Mínimo para cobrir a tela
-        html.style.minHeight = '100vh';
+        body.style.minHeight = 'auto'; // NÃO FORÇAR MIN-HEIGHT
+        html.style.minHeight = 'auto'; // NÃO FORÇAR MIN-HEIGHT
         body.style.overflowX = 'hidden';
         html.style.overflowX = 'hidden';
         body.style.margin = '0';
@@ -92,10 +93,11 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
-        minHeight: isMobile ? '100vh' : '100vh',
+        // NO MOBILE: não forçar alturas, deixar natural
+        minHeight: isMobile ? 'auto' : '100vh',
         height: isMobile ? 'auto' : '100vh', 
         maxHeight: isMobile ? 'none' : '100vh',
-        overflow: isMobile ? 'auto' : 'hidden', // Mobile: auto, Desktop: hidden
+        overflow: isMobile ? 'auto' : 'hidden',
         margin: 0,
         padding: 0
       }}
