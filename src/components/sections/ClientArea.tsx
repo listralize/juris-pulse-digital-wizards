@@ -157,11 +157,12 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className={`${isDark ? 'bg-black' : 'bg-white'} flex flex-col overflow-hidden relative`}
+      className={`${isDark ? 'bg-black' : 'bg-white'} flex flex-col overflow-visible relative`}
       style={{
-        height: isMobile ? '100vh' : '100vh',
-        minHeight: isMobile ? '100vh' : '100vh',
-        maxHeight: isMobile ? '100vh' : '100vh'
+        height: 'auto',
+        minHeight: 'auto',
+        maxHeight: 'none',
+        padding: isMobile ? '2rem 1rem' : '4rem 2rem'
       }}
     >
       {/* Neural Background */}
@@ -175,48 +176,68 @@ const ClientArea = () => {
         }}></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8">
-        {/* Container centralizado com padrão uniforme */}
-        <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesmo padrão de todas as outras seções */}
-          <div className="text-center mb-6">
+      <div className="max-w-6xl mx-auto relative z-10 w-full">
+        {/* Container centralizado */}
+        <div className="flex flex-col items-center justify-center">
+          {/* Header padronizado */}
+          <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
-              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {clientAreaTitle}
             </h2>
-            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+            <div className={`w-20 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Content Grid - padronizado com ordem invertida */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl w-full">
-            {/* Imagem agora na primeira coluna (esquerda) */}
-            <div ref={imageRef} className="flex justify-center items-center order-1 lg:order-1">
-              <div className="relative bg-black rounded-2xl p-6">
-                {/* Label Melhorada */}
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-                  <div className="premium-badge">
-                    <span className="text-xs font-semibold tracking-wider uppercase px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                      <Crown className="w-3 h-3" />
-                      EXCLUSIVO PARA CLIENTES ST PRIME
-                    </span>
-                  </div>
+          {/* Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl w-full items-center">
+            {/* Imagem com label melhorada */}
+            <div ref={imageRef} className="flex justify-center items-center order-2 lg:order-1">
+              <div className="relative">
+                {/* Container da imagem */}
+                <div className="bg-black rounded-2xl p-6 relative">
+                  <img 
+                    src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
+                    alt="Área do Cliente em Smartphone" 
+                    className="w-full max-w-sm h-auto object-contain"
+                  />
                 </div>
                 
-                <img 
-                  src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
-                  alt="Área do Cliente em Smartphone" 
-                  className="w-full max-w-sm h-auto object-contain"
-                />
+                {/* Label Premium repositionada e melhorada */}
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                  <div className="relative">
+                    {/* Badge principal */}
+                    <div className={`
+                      px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase 
+                      flex items-center gap-2 whitespace-nowrap shadow-lg
+                      ${isDark 
+                        ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 text-black' 
+                        : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-black'
+                      }
+                    `}>
+                      <Crown className="w-3 h-3" />
+                      <span>EXCLUSIVO PARA CLIENTES ST PRIME</span>
+                    </div>
+                    
+                    {/* Glow effect */}
+                    <div className={`
+                      absolute inset-0 rounded-full blur-sm opacity-30
+                      ${isDark 
+                        ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400' 
+                        : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500'
+                      }
+                    `}></div>
+                  </div>
+                </div>
               </div>
             </div>
             
-            {/* Conteúdo agora na segunda coluna (direita) */}
-            <div className="flex flex-col justify-center order-2 lg:order-2">
+            {/* Conteúdo */}
+            <div className="flex flex-col justify-center order-1 lg:order-2">
               <p 
                 ref={textRef}
-                className={`text-base md:text-lg leading-relaxed mb-6 font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}
+                className={`text-lg md:text-xl leading-relaxed mb-8 font-satoshi ${isDark ? 'text-white/90' : 'text-black/90'}`}
               >
                 {clientAreaDescription}
               </p>
@@ -225,15 +246,15 @@ const ClientArea = () => {
                 <a 
                   ref={button1Ref}
                   href={clientPortalLink} 
-                  className={`group relative overflow-hidden rounded-lg px-6 py-3 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
+                  className={`group relative overflow-hidden rounded-lg px-6 py-4 transition-all duration-300 hover:shadow-xl flex items-center justify-center text-base font-medium ${
                     isDark 
-                      ? 'bg-white text-black hover:bg-gray-100' 
-                      : 'bg-black text-white hover:bg-gray-800'
+                      ? 'bg-white text-black hover:bg-gray-100 shadow-lg' 
+                      : 'bg-black text-white hover:bg-gray-800 shadow-lg'
                   }`}
                 >
-                  <Lock className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-                  <span className="font-medium">Acessar minha área</span>
-                  <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  <Lock className="mr-3 h-5 w-5" />
+                  <span>Acessar minha área</span>
+                  <ArrowRight className="ml-3 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                 </a>
                 
                 <a 
@@ -241,14 +262,14 @@ const ClientArea = () => {
                   href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group relative overflow-hidden rounded-lg border px-6 py-3 transition-all duration-300 hover:shadow-lg flex items-center justify-center text-sm md:text-base ${
+                  className={`group relative overflow-hidden rounded-lg border-2 px-6 py-4 transition-all duration-300 hover:shadow-xl flex items-center justify-center text-base font-medium ${
                     isDark 
-                      ? 'border-white/30 text-white bg-white/5 hover:bg-white/10 hover:border-white/50' 
-                      : 'border-black/30 text-black bg-black/5 hover:bg-black/10 hover:border-black/50'
+                      ? 'border-white/40 text-white bg-white/10 hover:bg-white/20 hover:border-white/60 shadow-lg' 
+                      : 'border-black/40 text-black bg-black/10 hover:bg-black/20 hover:border-black/60 shadow-lg'
                   }`}
                 >
-                  <MessageSquare className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-                  <span className="font-medium">Primeiro acesso via WhatsApp</span>
+                  <MessageSquare className="mr-3 h-5 w-5" />
+                  <span>Primeiro acesso via WhatsApp</span>
                 </a>
               </div>
             </div>
