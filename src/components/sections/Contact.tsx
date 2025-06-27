@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -110,13 +109,12 @@ const Contact = () => {
   }, []);
 
   return (
-    <section 
-      id="contact"
+    <div 
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
         // Mobile: altura completamente automática
-        minHeight: isMobile ? 'auto' : '100vh',
-        height: isMobile ? 'auto' : '100vh',
+        minHeight: 'auto',
+        height: 'auto',
         // Mobile: sem restrições de overflow
         overflow: 'visible'
       }}
@@ -131,7 +129,7 @@ const Contact = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          // Mobile: altura automática sem restrições
+          // Altura automática sem restrições
           minHeight: 'auto'
         }}
       >
@@ -164,7 +162,7 @@ const Contact = () => {
           <Footer respectTheme={true} />
         </div>
       )}
-    </section>
+    </div>
   );
 };
 

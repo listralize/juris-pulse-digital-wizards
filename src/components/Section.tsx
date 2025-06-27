@@ -41,7 +41,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         data-section={id}
         data-active={isActive}
         data-allow-scroll={shouldAllowScroll ? "true" : "false"}
-        className={`section-container w-full h-full ${getBackgroundClass()} ${className}`}
+        className={`section-container w-full ${getBackgroundClass()} ${className}`}
         style={{ 
           position: 'relative',
           display: 'flex',
@@ -62,7 +62,11 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y'
         }}
       >
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col justify-center" style={{ opacity: 1, visibility: 'visible' }}>
+        <div className="w-full max-w-6xl mx-auto flex flex-col justify-center" style={{ 
+          opacity: 1, 
+          visibility: 'visible',
+          height: id === 'contact' && isMobile ? 'auto' : '100%'
+        }}>
           {children}
         </div>
       </div>

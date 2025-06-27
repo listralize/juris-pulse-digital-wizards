@@ -62,13 +62,18 @@ const SectionsContainer: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full" style={{ 
+      minHeight: isMobile ? 'auto' : '100vh',
+      height: isMobile ? 'auto' : '100vh',
+      overflow: isMobile ? 'visible' : 'hidden' 
+    }}>
       <div 
         ref={containerRef}
-        className={`${isMobile ? 'flex-col h-full' : 'flex h-full'}`}
+        className={`${isMobile ? 'flex-col' : 'flex h-full'}`}
         style={{ 
           width: isMobile ? '100vw' : `${sections.length * 100}vw`,
-          height: isMobile ? `${sections.length * 100}vh` : '100vh',
+          height: isMobile ? 'auto' : '100vh',
+          minHeight: isMobile ? 'auto' : '100vh',
           willChange: 'transform',
           backgroundColor: 'transparent'
         }}
@@ -81,12 +86,12 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className={`flex-shrink-0 relative ${isMobile ? 'w-full h-screen' : 'w-screen h-full'}`}
+              className={`flex-shrink-0 relative ${isMobile ? 'w-full' : 'w-screen h-full'}`}
               style={{ 
-                width: isMobile ? '100vw' : '100vw',
-                height: isMobile ? '100vh' : '100vh',
-                minWidth: isMobile ? '100vw' : '100vw',
-                minHeight: isMobile ? '100vh' : '100vh',
+                width: '100vw',
+                height: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
+                minWidth: '100vw',
+                minHeight: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
                 backgroundColor: 'transparent'
               }}
             >
