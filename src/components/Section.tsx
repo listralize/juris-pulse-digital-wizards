@@ -48,17 +48,16 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
-          // Mobile: alturas específicas para cada seção
-          minHeight: id === 'contact' && isMobile ? 'auto' : '100vh',
-          maxHeight: id === 'contact' && isMobile ? 'none' : '100vh',
-          height: id === 'contact' && isMobile ? 'auto' : '100vh',
-          // Mobile: overflow controlado - CRÍTICO: sem overflow visible extra
-          overflow: id === 'contact' && isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : 'hidden'),
+          // Mobile: altura completamente automática - SEM altura mínima forçada
+          minHeight: isMobile ? 'auto' : '100vh',
+          maxHeight: isMobile ? 'none' : '100vh',
+          height: isMobile ? 'auto' : '100vh',
+          overflow: shouldAllowScroll ? 'visible' : (isMobile ? 'visible' : 'hidden'),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
-          padding: '0.75rem',
-          paddingBottom: isMobile && id !== 'contact' ? '80px' : (isMobile && id === 'contact' ? '0' : '140px'),
+          padding: isMobile ? '1rem' : '0.75rem',
+          paddingBottom: isMobile ? (id === 'contact' ? '0' : '2rem') : '140px',
           touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y',
           margin: 0
         }}
@@ -68,7 +67,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           style={{ 
             opacity: 1, 
             visibility: 'visible',
-            height: id === 'contact' && isMobile ? 'auto' : '100%',
+            height: isMobile ? 'auto' : '100%',
             margin: 0,
             padding: 0
           }}

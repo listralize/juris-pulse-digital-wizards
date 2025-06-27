@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -80,8 +79,8 @@ const SectionsContainer: React.FC = () => {
         className={`${isMobile ? 'flex-col' : 'flex h-full'}`}
         style={{ 
           width: isMobile ? '100vw' : `${sections.length * 100}vw`,
-          height: isMobile ? 'auto' : '100vh',
-          minHeight: isMobile ? 'auto' : '100vh',
+          height: isMobile ? 'auto' : '100vh', // Mobile: altura automática
+          minHeight: isMobile ? 'auto' : '100vh', // Mobile: sem altura mínima forçada
           maxHeight: isMobile ? 'none' : '100vh',
           willChange: 'transform',
           backgroundColor: 'transparent',
@@ -100,10 +99,11 @@ const SectionsContainer: React.FC = () => {
               className={`flex-shrink-0 relative ${isMobile ? 'w-full' : 'w-screen h-full'}`}
               style={{ 
                 width: '100vw',
-                height: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
+                // Mobile: altura automática para TODAS as seções
+                height: isMobile ? 'auto' : '100vh',
                 minWidth: '100vw',
-                minHeight: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
-                maxHeight: isMobile && section.id === 'contact' ? 'none' : '100vh',
+                minHeight: isMobile ? 'auto' : '100vh', // CRÍTICO: altura automática no mobile
+                maxHeight: isMobile ? 'none' : '100vh',
                 backgroundColor: 'transparent',
                 margin: 0,
                 padding: 0
@@ -118,7 +118,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className={isMobile && section.id !== 'contact' ? 'h-screen' : 'h-full'}
+                className={isMobile ? 'min-h-auto' : 'h-full'}
               >
                 <Component />
               </Section>
