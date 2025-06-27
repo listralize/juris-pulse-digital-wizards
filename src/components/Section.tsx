@@ -52,21 +52,27 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           minHeight: id === 'contact' && isMobile ? 'auto' : '100vh',
           maxHeight: id === 'contact' && isMobile ? 'none' : '100vh',
           height: id === 'contact' && isMobile ? 'auto' : '100vh',
-          // Mobile: overflow controlado
+          // Mobile: overflow controlado - CRÍTICO: sem overflow visible extra
           overflow: id === 'contact' && isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : 'hidden'),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
           paddingBottom: isMobile && id !== 'contact' ? '80px' : (isMobile && id === 'contact' ? '0' : '140px'),
-          touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y'
+          touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y',
+          margin: 0
         }}
       >
-        <div className="w-full max-w-6xl mx-auto flex flex-col justify-center" style={{ 
-          opacity: 1, 
-          visibility: 'visible',
-          height: id === 'contact' && isMobile ? 'auto' : '100%'
-        }}>
+        <div 
+          className="w-full max-w-6xl mx-auto flex flex-col justify-center" 
+          style={{ 
+            opacity: 1, 
+            visibility: 'visible',
+            height: id === 'contact' && isMobile ? 'auto' : '100%',
+            margin: 0,
+            padding: 0
+          }}
+        >
           {children}
         </div>
       </div>

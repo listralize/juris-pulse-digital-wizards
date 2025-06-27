@@ -112,11 +112,13 @@ const Contact = () => {
     <div 
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // Mobile: altura completamente automática, sem espaço extra
-        minHeight: 'auto',
-        height: 'auto',
-        maxHeight: 'none',
-        overflow: 'visible'
+        // Mobile: altura completamente controlada - SEM espaço extra
+        minHeight: isMobile ? 'auto' : 'auto',
+        height: isMobile ? 'auto' : 'auto',
+        maxHeight: isMobile ? 'none' : 'none',
+        overflow: 'visible',
+        margin: 0,
+        padding: 0
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -129,7 +131,9 @@ const Contact = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
-          minHeight: 'auto'
+          minHeight: 'auto',
+          margin: 0,
+          padding: isMobile ? '2rem 1rem' : '4rem 1.5rem'
         }}
       >
         <div className="max-w-4xl mx-auto w-full">
@@ -155,9 +159,16 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* Footer sempre visível no mobile - após o conteúdo de contato */}
+      {/* Footer sempre visível no mobile - FINAL do conteúdo */}
       {isMobile && (
-        <div className="w-full" style={{ marginTop: '0' }}>
+        <div 
+          className="w-full" 
+          style={{ 
+            marginTop: '0',
+            marginBottom: '0',
+            paddingBottom: '0'
+          }}
+        >
           <Footer respectTheme={true} />
         </div>
       )}

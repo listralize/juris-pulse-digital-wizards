@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -26,7 +25,7 @@ const Index = () => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Configuração para mobile - evitar scroll extra
+      // Configuração para mobile - altura limitada sem scroll extra
       if (isMobile) {
         body.style.overflow = 'auto';
         html.style.overflow = 'auto';
@@ -39,6 +38,9 @@ const Index = () => {
         // Evitar scroll bounce no iOS
         body.style.overflowX = 'hidden';
         html.style.overflowX = 'hidden';
+        // Garantir que não haja altura extra
+        body.style.margin = '0';
+        body.style.padding = '0';
       } else {
         // Desktop: configuração original
         body.style.overflow = 'hidden';
@@ -48,9 +50,6 @@ const Index = () => {
         body.style.maxHeight = '100vh';
         html.style.maxHeight = '100vh';
       }
-      
-      body.style.margin = '0';
-      body.style.padding = '0';
       
       if (window.innerWidth >= 768) {
         body.style.cursor = 'none';
@@ -95,10 +94,12 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
-        minHeight: '100vh',
+        minHeight: isMobile ? 'auto' : '100vh',
         height: isMobile ? 'auto' : '100vh',
         maxHeight: isMobile ? 'none' : '100vh',
-        overflow: isMobile ? 'visible' : 'hidden'
+        overflow: isMobile ? 'visible' : 'hidden',
+        margin: 0,
+        padding: 0
       }}
     >
       {/* Background gradients */}

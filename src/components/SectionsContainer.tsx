@@ -70,7 +70,9 @@ const SectionsContainer: React.FC = () => {
         minHeight: isMobile ? 'auto' : '100vh',
         height: isMobile ? 'auto' : '100vh',
         maxHeight: isMobile ? 'none' : '100vh',
-        overflow: isMobile ? 'visible' : 'hidden'
+        overflow: isMobile ? 'visible' : 'hidden',
+        margin: 0,
+        padding: 0
       }}
     >
       <div 
@@ -82,7 +84,9 @@ const SectionsContainer: React.FC = () => {
           minHeight: isMobile ? 'auto' : '100vh',
           maxHeight: isMobile ? 'none' : '100vh',
           willChange: 'transform',
-          backgroundColor: 'transparent'
+          backgroundColor: 'transparent',
+          margin: 0,
+          padding: 0
         }}
       >
         {sections.map((section, index) => {
@@ -99,8 +103,10 @@ const SectionsContainer: React.FC = () => {
                 height: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
                 minWidth: '100vw',
                 minHeight: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
-                maxHeight: isMobile && section.id === 'contact' ? 'none' : (isMobile ? '100vh' : '100vh'),
-                backgroundColor: 'transparent'
+                maxHeight: isMobile && section.id === 'contact' ? 'none' : '100vh',
+                backgroundColor: 'transparent',
+                margin: 0,
+                padding: 0
               }}
             >
               <Section 
