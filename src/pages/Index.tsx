@@ -38,15 +38,15 @@ const Index = () => {
       
       // Configuração diferente para mobile e desktop
       if (isMobile) {
-        // Mobile: permitir scroll natural completo
+        // Mobile: permitir scroll natural completo, mas sem altura extra
         body.style.overflow = 'auto';
         html.style.overflow = 'auto';
         body.style.height = 'auto';
         html.style.height = 'auto';
         body.style.maxHeight = 'none';
         html.style.maxHeight = 'none';
-        body.style.minHeight = 'auto';
-        html.style.minHeight = 'auto';
+        body.style.minHeight = '100vh';
+        html.style.minHeight = '100vh';
       } else {
         // Desktop: configuração original
         body.style.overflow = 'hidden';
@@ -105,8 +105,8 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
-        // Mobile: permitir altura automática
-        minHeight: isMobile ? 'auto' : '100vh',
+        // Mobile: altura mínima sem altura extra
+        minHeight: '100vh',
         height: isMobile ? 'auto' : '100vh',
         maxHeight: isMobile ? 'none' : '100vh',
         // Mobile: scroll visível
