@@ -7,6 +7,7 @@ import { Card, CardContent } from '../ui/card';
 import { Calendar, User, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSupabaseBlog } from '../../hooks/supabase/useSupabaseBlog';
 import NeuralBackground from '../NeuralBackground';
+import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
 
 const Blog = () => {
   const { theme } = useTheme();
@@ -15,24 +16,14 @@ const Blog = () => {
   const { blogPosts, isLoading } = useSupabaseBlog();
   
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detectar mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   const featuredPosts = blogPosts.filter(post => post.featured);
   const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : blogPosts.slice(0, 6);
 
   // Cálculos de slides baseados no dispositivo
-  const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
+  const itemsPerSlide = isMobile ? 1 : isTablet ? 2 : 3; // Mobile: 1 card, Tablet: 2 cards, Desktop: 3 cards
   const totalSlides = Math.ceil(displayPosts.length / itemsPerSlide);
 
   const nextSlide = () => {
@@ -111,7 +102,9 @@ const Blog = () => {
                       className={`w-full flex-shrink-0 px-2 sm:px-4 ${
                         isMobile 
                           ? 'flex justify-center' 
-                          : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'
+                          : isTablet
+                            ? 'grid grid-cols-2 gap-4 sm:gap-6'
+                            : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'
                       }`}
                       style={{ width: `${100 / totalSlides}%` }}
                     >
@@ -120,7 +113,9 @@ const Blog = () => {
                         .map(post => (
                           <div key={post.id} className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'w-full max-w-sm' : ''}`}>
                             <Card 
-                              className={`cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm border h-96 flex flex-col ${
+                              className={`cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm border flex flex-col ${
+                                isTablet ? 'h-80' : 'h-96'
+                              } ${
                                 isDark 
                                   ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/20' 
                                   : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-md hover:shadow-xl hover:shadow-blue-500/10'
@@ -134,7 +129,9 @@ const Blog = () => {
                                 }`}></div>
                                 
                                 {post.banner && (
-                                  <div className="relative overflow-hidden rounded-t-lg h-32 flex-shrink-0">
+                                  <div className={`relative overflow-hidden rounded-t-lg flex-shrink-0 ${
+                                    isTablet ? 'h-24' : 'h-32'
+                                  }`}>
                                     <img 
                                       src={post.banner} 
                                       alt={post.title}
@@ -163,11 +160,15 @@ const Blog = () => {
                                     </div>
                                   </div>
                                   
-                                  <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors line-clamp-2 flex-shrink-0 ${isDark ? 'text-white' : 'text-black'}`}>
+                                  <h3 className={`font-semibold mb-2 group-hover:text-blue-500 transition-colors line-clamp-2 flex-shrink-0 ${
+                                    isTablet ? 'text-xs' : 'text-sm'
+                                  } ${isDark ? 'text-white' : 'text-black'}`}>
                                     {post.title}
                                   </h3>
                                   
-                                  <p className={`mb-3 text-xs flex-1 line-clamp-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  <p className={`mb-3 flex-1 overflow-hidden ${
+                                    isTablet ? 'text-xs line-clamp-2' : 'text-xs line-clamp-3'
+                                  } ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                     {post.excerpt}
                                   </p>
                                   
@@ -194,7 +195,7 @@ const Blog = () => {
                     className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 transition-all duration-300 ${
                       isMobile 
                         ? 'w-4 h-4 rounded-full' // MUITO MENOR no mobile
-                        : 'w-6 h-6 sm:w-7 sm:h-7 rounded-full' // Tamanho normal no desktop
+                        : 'w-6 h-6 sm:w-7 sm:h-7 rounded-full' // Tamanho normal no desktop/tablet
                     } flex items-center justify-center ${
                       isDark 
                         ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
@@ -209,7 +210,7 @@ const Blog = () => {
                     className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 transition-all duration-300 ${
                       isMobile 
                         ? 'w-4 h-4 rounded-full' // MUITO MENOR no mobile
-                        : 'w-6 h-6 sm:w-7 sm:h-7 rounded-full' // Tamanho normal no desktop
+                        : 'w-6 h-6 sm:w-7 sm:h-7 rounded-full' // Tamanho normal no desktop/tablet
                     } flex items-center justify-center ${
                       isDark 
                         ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
