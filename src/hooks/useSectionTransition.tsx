@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -20,6 +19,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const hasInitialized = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   console.log('useSectionTransition - Estado atual:', { 
     activeSection, 
@@ -27,18 +27,21 @@ export const useSectionTransition = (sections: Section[]) => {
     sectionsLength: sections.length,
     sectionIds: sections.map(s => s.id),
     isInitialized,
-    isMobile
+    isMobile,
+    isTablet
   });
 
   // Detectar se é mobile/tablet
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const checkDeviceType = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsTablet(width >= 640 && width < 1024);
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    checkDeviceType();
+    window.addEventListener('resize', checkDeviceType);
+    return () => window.removeEventListener('resize', checkDeviceType);
   }, []);
 
   // Função melhorada para verificar se o usuário rolou até o final da seção
@@ -81,10 +84,10 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex);
     
-    // Posição inicial - NO MOBILE, NÃO USAR TRANSFORMS
+    // Posição inicial - NO MOBILE/TABLET, NÃO USAR TRANSFORMS
     if (containerRef.current) {
-      if (isMobile) {
-        // No mobile, resetar qualquer transform e deixar fluir naturalmente
+      if (isMobile || isTablet) {
+        // No mobile/tablet, resetar qualquer transform e deixar fluir naturalmente
         gsap.set(containerRef.current, { 
           x: 0,
           y: 0,
@@ -104,7 +107,7 @@ export const useSectionTransition = (sections: Section[]) => {
     hasInitialized.current = true;
     setIsInitialized(true);
     console.log('useSectionTransition - Inicialização completa');
-  }, [isMobile]);
+  }, [isMobile, isTablet]);
 
   const transitionToSection = useCallback((sectionId: string) => {
     console.log('transitionToSection chamado:', { 
@@ -112,7 +115,8 @@ export const useSectionTransition = (sections: Section[]) => {
       activeSection, 
       isTransitioning: isTransitioning.current,
       sections: sections.map(s => s.id),
-      isMobile
+      isMobile,
+      isTablet
     });
     
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
@@ -144,13 +148,13 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animar transição - NO MOBILE, SEM ANIMAÇÃO DE TRANSFORM
+    // Animar transição - NO MOBILE/TABLET, SEM ANIMAÇÃO DE TRANSFORM
     if (containerRef.current) {
       // Parar qualquer animação anterior
       gsap.killTweensOf(containerRef.current);
       
-      if (isMobile) {
-        // Mobile: scroll nativo para a seção
+      if (isMobile || isTablet) {
+        // Mobile/Tablet: scroll nativo para a seção
         const targetSection = sectionsRef.current[sectionIndex];
         if (targetSection) {
           targetSection.scrollIntoView({ 
@@ -159,7 +163,7 @@ export const useSectionTransition = (sections: Section[]) => {
           });
         }
         isTransitioning.current = false;
-        console.log('Transição mobile por scroll nativo completada para:', sectionId);
+        console.log('Transição mobile/tablet por scroll nativo completada para:', sectionId);
       } else {
         // Desktop: transição horizontal
         const targetX = -sectionIndex * 100;
@@ -184,11 +188,11 @@ export const useSectionTransition = (sections: Section[]) => {
     } else {
       isTransitioning.current = false;
     }
-  }, [activeSection, activeSectionIndex, sections, location.pathname, isMobile]);
+  }, [activeSection, activeSectionIndex, sections, location.pathname, isMobile, isTablet]);
 
-  // Navegação por teclado - DESABILITADA NO MOBILE
+  // Navegação por teclado - DESABILITADA NO MOBILE/TABLET
   useEffect(() => {
-    if (!isInitialized || isMobile) return;
+    if (!isInitialized || isMobile || isTablet) return;
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
@@ -217,11 +221,11 @@ export const useSectionTransition = (sections: Section[]) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile]);
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet]);
 
-  // Navegação por scroll - DESABILITADA NO MOBILE
+  // Navegação por scroll - DESABILITADA NO MOBILE/TABLET
   useEffect(() => {
-    if (!isInitialized || isMobile) return;
+    if (!isInitialized || isMobile || isTablet) return;
     
     const handleWheel = (e: WheelEvent) => {
       if (isTransitioning.current) return;
@@ -258,10 +262,7 @@ export const useSectionTransition = (sections: Section[]) => {
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile]);
-
-  // Touch navigation - DESABILITADA COMPLETAMENTE
-  // No mobile, deixamos o scroll nativo funcionar
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet]);
 
   return {
     activeSection,

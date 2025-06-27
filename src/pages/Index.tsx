@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,7 +10,7 @@ import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
-import { useIsMobile } from '../hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -20,22 +19,23 @@ const Index = () => {
   const isDark = theme === 'dark';
   const [showLegalPopup, setShowLegalPopup] = useState(false);
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   useEffect(() => {
     try {
       const body = document.body;
       const html = document.documentElement;
       
-      if (isMobile) {
-        // Mobile: configuração natural sem forçar alturas
+      if (isMobile || isTablet) {
+        // Mobile/Tablet: configuração natural sem forçar alturas
         body.style.overflow = 'auto';
         html.style.overflow = 'auto';
         body.style.height = 'auto';
         html.style.height = 'auto';
         body.style.maxHeight = 'none';
         html.style.maxHeight = 'none';
-        body.style.minHeight = 'auto'; // NÃO FORÇAR MIN-HEIGHT
-        html.style.minHeight = 'auto'; // NÃO FORÇAR MIN-HEIGHT
+        body.style.minHeight = 'auto';
+        html.style.minHeight = 'auto';
         body.style.overflowX = 'hidden';
         html.style.overflowX = 'hidden';
         body.style.margin = '0';
@@ -68,7 +68,7 @@ const Index = () => {
     } catch (error) {
       console.error('❌ Erro ao configurar scroll:', error);
     }
-  }, [isMobile]);
+  }, [isMobile, isTablet]);
   
   // Verificar se os termos já foram aceitos e mostrar popup se necessário
   useEffect(() => {
@@ -93,11 +93,11 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
-        // NO MOBILE: não forçar alturas, deixar natural
-        minHeight: isMobile ? 'auto' : '100vh',
-        height: isMobile ? 'auto' : '100vh', 
-        maxHeight: isMobile ? 'none' : '100vh',
-        overflow: isMobile ? 'auto' : 'hidden',
+        // Mobile/Tablet: não forçar alturas, deixar natural
+        minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
+        height: (isMobile || isTablet) ? 'auto' : '100vh', 
+        maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
+        overflow: (isMobile || isTablet) ? 'auto' : 'hidden',
         margin: 0,
         padding: 0
       }}
@@ -111,7 +111,7 @@ const Index = () => {
       <WhatsAppButton />
       
       {/* FloatingFooter apenas para desktop */}
-      <FloatingFooter />
+      {!isMobile && !isTablet && <FloatingFooter />}
       
       <SectionsContainer />
 

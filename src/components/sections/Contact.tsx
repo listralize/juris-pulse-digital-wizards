@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,6 +8,7 @@ import LocationMap from '../contact/LocationMap';
 import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
+import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,18 +18,8 @@ const Contact = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detectar mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   // Estado local para receber atualizações em tempo real
   const [contactTitle, setContactTitle] = useState('Fale Conosco');
@@ -125,32 +117,49 @@ const Contact = () => {
       
       <div 
         ref={sectionRef} 
-        className="w-full py-8 md:py-16 px-4 md:px-6 lg:px-8 relative z-10"
+        className="w-full relative z-10"
         style={{
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
           minHeight: 'auto',
           margin: 0,
-          padding: isMobile ? '2rem 1rem 0 1rem' : '4rem 1.5rem 0 1.5rem'
+          padding: isMobile ? '2rem 1rem 0 1rem' : isTablet ? '3rem 2rem 0 2rem' : '4rem 1.5rem 0 1.5rem'
         }}
       >
-        <div className="max-w-4xl mx-auto w-full">
-          <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-1 shadow-md border`}>
-                <div className="h-24 lg:h-32">
+        <div className={`mx-auto w-full ${
+          isMobile ? 'max-w-lg' : isTablet ? 'max-w-4xl' : 'max-w-4xl'
+        }`}>
+          <div 
+            ref={contentRef} 
+            className={`gap-3 ${
+              isMobile ? 'grid grid-cols-1' : isTablet ? 'grid grid-cols-1 lg:grid-cols-3' : 'grid grid-cols-1 lg:grid-cols-5'
+            }`}
+          >
+            <div className={`space-y-3 order-2 lg:order-1 ${
+              isMobile ? '' : isTablet ? 'lg:col-span-1' : 'lg:col-span-2'
+            }`}>
+              <div className={`rounded-lg border shadow-md ${
+                isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'
+              } ${isTablet ? 'p-2' : 'p-1'}`}>
+                <div className={`${isTablet ? 'h-32' : 'h-24 lg:h-32'}`}>
                   <LocationMap />
                 </div>
               </div>
               
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-3 shadow-md border`}>
+              <div className={`rounded-lg border shadow-md ${
+                isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'
+              } ${isTablet ? 'p-4' : 'p-3'}`}>
                 <ContactInfo />
               </div>
             </div>
             
-            <div className="lg:col-span-3 order-1 lg:order-2">
-              <div className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} rounded-lg p-3 shadow-md border`}>
+            <div className={`order-1 lg:order-2 ${
+              isMobile ? '' : isTablet ? 'lg:col-span-2' : 'lg:col-span-3'
+            }`}>
+              <div className={`rounded-lg border shadow-md ${
+                isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'
+              } ${isTablet ? 'p-4' : 'p-3'}`}>
                 <UnifiedContactForm darkBackground={isDark} pageId="contato" />
               </div>
             </div>
@@ -158,12 +167,12 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* Footer sempre visível no mobile - SEM margens extras */}
-      {isMobile && (
+      {/* Footer sempre visível no mobile/tablet - COM espaçamento adequado */}
+      {(isMobile || isTablet) && (
         <div 
           className="w-full" 
           style={{ 
-            margin: '0',
+            margin: isTablet ? '2rem 0 0 0' : '0',
             padding: '0'
           }}
         >

@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
-import { useIsMobile } from '../hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 import Section from './Section';
 
 // Import Sections
@@ -25,6 +25,7 @@ const SectionsContainer: React.FC = () => {
   ];
   
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
   const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
 
   console.log('SectionsContainer render:', { 
@@ -32,7 +33,8 @@ const SectionsContainer: React.FC = () => {
     activeSectionIndex, 
     sectionsLength: sections.length, 
     isInitialized,
-    isMobile
+    isMobile,
+    isTablet
   });
 
   useEffect(() => {
@@ -67,23 +69,23 @@ const SectionsContainer: React.FC = () => {
     <div 
       className="relative w-full" 
       style={{ 
-        minHeight: isMobile ? 'auto' : '100vh',
-        height: isMobile ? 'auto' : '100vh',
-        maxHeight: isMobile ? 'none' : '100vh',
-        overflow: isMobile ? 'visible' : 'hidden',
+        minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
+        height: (isMobile || isTablet) ? 'auto' : '100vh',
+        maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
+        overflow: (isMobile || isTablet) ? 'visible' : 'hidden',
         margin: 0,
         padding: 0
       }}
     >
       <div 
         ref={containerRef}
-        className={isMobile ? 'block' : 'flex h-full'}
+        className={`${(isMobile || isTablet) ? 'block' : 'flex h-full'}`}
         style={{ 
-          width: isMobile ? '100%' : `${sections.length * 100}vw`,
-          height: isMobile ? 'auto' : '100vh',
-          minHeight: isMobile ? 'auto' : '100vh',
-          maxHeight: isMobile ? 'none' : '100vh',
-          willChange: isMobile ? 'auto' : 'transform',
+          width: (isMobile || isTablet) ? '100%' : `${sections.length * 100}vw`,
+          height: (isMobile || isTablet) ? 'auto' : '100vh',
+          minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
+          maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
+          willChange: (isMobile || isTablet) ? 'auto' : 'transform',
           backgroundColor: 'transparent',
           margin: 0,
           padding: 0
@@ -97,13 +99,15 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className={`relative ${isMobile ? 'w-full block' : 'flex-shrink-0 w-screen h-full'}`}
+              className={`relative ${
+                (isMobile || isTablet) ? 'w-full block' : 'flex-shrink-0 w-screen h-full'
+              }`}
               style={{ 
-                width: isMobile ? '100%' : '100vw',
-                height: isMobile ? 'auto' : '100vh',
-                minWidth: isMobile ? 'auto' : '100vw',
-                minHeight: isMobile ? 'auto' : '100vh',
-                maxHeight: isMobile ? 'none' : '100vh',
+                width: (isMobile || isTablet) ? '100%' : '100vw',
+                height: (isMobile || isTablet) ? 'auto' : '100vh',
+                minWidth: (isMobile || isTablet) ? 'auto' : '100vw',
+                minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
+                maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
                 backgroundColor: 'transparent',
                 margin: 0,
                 padding: 0
@@ -118,7 +122,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className={isMobile ? 'min-h-auto' : 'h-full'}
+                className={(isMobile || isTablet) ? 'min-h-auto' : 'h-full'}
               >
                 <Component />
               </Section>

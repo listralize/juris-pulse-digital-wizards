@@ -1,7 +1,7 @@
 
 import React, { forwardRef } from 'react';
 import { useTheme } from './ThemeProvider';
-import { useIsMobile } from '../hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 
 interface SectionProps {
   id: string;
@@ -16,8 +16,9 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     const isMobile = useIsMobile();
+    const isTablet = useIsTablet();
     
-    console.log(`Section ${id} render:`, { isActive, isDark, allowScroll, isMobile });
+    console.log(`Section ${id} render:`, { isActive, isDark, allowScroll, isMobile, isTablet });
     
     // A seção Hero sempre tem background preto, outras seguem o tema
     const getBackgroundClass = () => {
@@ -48,17 +49,19 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
-          // NO MOBILE: altura automática, sem forçar 100vh
-          minHeight: isMobile ? 'auto' : '100vh',
-          maxHeight: isMobile ? 'none' : '100vh',
-          height: isMobile ? 'auto' : '100vh',
-          overflow: isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : 'hidden'),
+          // Mobile/Tablet: altura automática, sem forçar 100vh
+          minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
+          maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
+          height: (isMobile || isTablet) ? 'auto' : '100vh',
+          overflow: (isMobile || isTablet) ? 'visible' : (shouldAllowScroll ? 'visible' : 'hidden'),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
-          padding: isMobile ? '1rem' : '0.75rem',
-          paddingBottom: isMobile ? '0' : '140px',
-          touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y',
+          padding: (isMobile || isTablet) ? 
+            (isTablet ? '1.5rem' : '1rem') : 
+            '0.75rem',
+          paddingBottom: (isMobile || isTablet) ? '0' : '140px',
+          touchAction: shouldAllowScroll || (id === 'contact' && (isMobile || isTablet)) ? 'auto' : 'pan-y',
           margin: 0
         }}
       >
@@ -67,7 +70,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           style={{ 
             opacity: 1, 
             visibility: 'visible',
-            height: isMobile ? 'auto' : '100%',
+            height: (isMobile || isTablet) ? 'auto' : '100%',
             margin: 0,
             padding: 0
           }}

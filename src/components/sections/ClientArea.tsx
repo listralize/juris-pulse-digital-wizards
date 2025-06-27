@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,6 +5,7 @@ import { useTheme } from '../ThemeProvider';
 import { useAdminData } from '../../hooks/useAdminData';
 import { Lock, ArrowRight, MessageSquare, Crown } from 'lucide-react';
 import NeuralBackground from '../NeuralBackground';
+import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,7 +18,8 @@ const ClientArea = () => {
   const { theme } = useTheme();
   const { pageTexts, isLoading } = useAdminData();
   const isDark = theme === 'dark';
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
   
   // Estado local para receber atualizações em tempo real
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
@@ -127,17 +128,6 @@ const ClientArea = () => {
     };
   }, [isLoading]);
 
-  // Detectar mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   if (isLoading) {
     return (
       <section className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex items-center justify-center`}>
@@ -162,7 +152,7 @@ const ClientArea = () => {
         height: 'auto',
         minHeight: 'auto',
         maxHeight: 'none',
-        padding: isMobile ? '2rem 1rem' : '4rem 2rem'
+        padding: isMobile ? '2rem 1rem' : isTablet ? '4rem 2rem' : '4rem 2rem'
       }}
     >
       {/* Neural Background */}
@@ -177,8 +167,8 @@ const ClientArea = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10 w-full">
-        {/* Mobile: Imagem acima do título */}
-        {isMobile && (
+        {/* Mobile/Tablet: Imagem acima do título */}
+        {(isMobile || isTablet) && (
           <div ref={imageRef} className="flex justify-center items-center mb-8">
             <div className="relative">
               {/* Container da imagem */}
@@ -186,7 +176,9 @@ const ClientArea = () => {
                 <img 
                   src="/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png"
                   alt="Área do Cliente em Smartphone" 
-                  className="w-full max-w-sm h-auto object-contain"
+                  className={`w-full object-contain ${
+                    isMobile ? 'max-w-sm h-auto' : 'max-w-md h-auto'
+                  }`}
                 />
               </div>
               
@@ -195,14 +187,15 @@ const ClientArea = () => {
                 <div className="relative">
                   {/* Badge principal */}
                   <div className={`
-                    px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase 
+                    px-4 py-2 rounded-full font-bold tracking-wider uppercase 
                     flex items-center gap-2 whitespace-nowrap shadow-lg
+                    ${isMobile ? 'text-xs' : 'text-sm'}
                     ${isDark 
                       ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 text-black' 
                       : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-black'
                     }
                   `}>
-                    <Crown className="w-3 h-3" />
+                    <Crown className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
                     <span>EXCLUSIVO PARA CLIENTES ST PRIME</span>
                   </div>
                   
@@ -224,7 +217,9 @@ const ClientArea = () => {
         <div className="text-center mb-8 md:mb-12">
           <h2 
             ref={titleRef}
-            className={`text-3xl md:text-4xl lg:text-5xl mb-4 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+            className={`mb-4 font-canela ${isDark ? 'text-white' : 'text-black'} ${
+              isMobile ? 'text-3xl' : isTablet ? 'text-4xl lg:text-5xl' : 'text-3xl md:text-4xl lg:text-5xl'
+            }`}
           >
             {clientAreaTitle}
           </h2>
@@ -232,9 +227,11 @@ const ClientArea = () => {
         </div>
         
         {/* Content Grid - Desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto w-full items-center">
+        <div className={`max-w-5xl mx-auto w-full items-center ${
+          isMobile || isTablet ? 'block' : 'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12'
+        }`}>
           {/* Imagem - Desktop apenas */}
-          {!isMobile && (
+          {!isMobile && !isTablet && (
             <div ref={imageRef} className="flex justify-center items-center order-2 lg:order-1">
               <div className="relative">
                 {/* Container da imagem */}
@@ -277,19 +274,25 @@ const ClientArea = () => {
           )}
           
           {/* Conteúdo */}
-          <div className={`flex flex-col justify-center ${isMobile ? 'order-1' : 'order-1 lg:order-2'}`}>
+          <div className={`flex flex-col justify-center ${
+            isMobile || isTablet ? 'order-1' : 'order-1 lg:order-2'
+          }`}>
             <p 
               ref={textRef}
-              className={`text-lg md:text-xl leading-relaxed mb-8 font-satoshi ${isDark ? 'text-white/90' : 'text-black/90'}`}
+              className={`leading-relaxed mb-8 font-satoshi ${isDark ? 'text-white/90' : 'text-black/90'} ${
+                isMobile ? 'text-lg' : isTablet ? 'text-xl' : 'text-lg md:text-xl'
+              }`}
             >
               {clientAreaDescription}
             </p>
             
-            <div className="flex flex-col space-y-4">
+            <div className={`flex flex-col space-y-4 ${isTablet ? 'max-w-md mx-auto' : ''}`}>
               <a 
                 ref={button1Ref}
                 href={clientPortalLink} 
-                className={`group relative overflow-hidden rounded-lg px-6 py-4 transition-all duration-300 hover:shadow-xl flex items-center justify-center text-base font-medium ${
+                className={`group relative overflow-hidden rounded-lg px-6 py-4 transition-all duration-300 hover:shadow-xl flex items-center justify-center font-medium ${
+                  isMobile ? 'text-base' : isTablet ? 'text-lg' : 'text-base'
+                } ${
                   isDark 
                     ? 'bg-white text-black hover:bg-gray-100 shadow-lg' 
                     : 'bg-black text-white hover:bg-gray-800 shadow-lg'
@@ -305,7 +308,9 @@ const ClientArea = () => {
                 href={`https://api.whatsapp.com/send?phone=${whatsappNumber}`} 
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group relative overflow-hidden rounded-lg border-2 px-6 py-4 transition-all duration-300 hover:shadow-xl flex items-center justify-center text-base font-medium ${
+                className={`group relative overflow-hidden rounded-lg border-2 px-6 py-4 transition-all duration-300 hover:shadow-xl flex items-center justify-center font-medium ${
+                  isMobile ? 'text-base' : isTablet ? 'text-lg' : 'text-base'
+                } ${
                   isDark 
                     ? 'border-white/40 text-white bg-white/10 hover:bg-white/20 hover:border-white/60 shadow-lg' 
                     : 'border-black/40 text-black bg-black/10 hover:bg-black/20 hover:border-black/60 shadow-lg'
