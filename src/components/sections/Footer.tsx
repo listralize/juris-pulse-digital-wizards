@@ -104,7 +104,14 @@ const Footer: React.FC<FooterProps> = ({
   }, []);
 
   return (
-    <footer className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}>
+    <footer 
+      className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}
+      style={{
+        margin: '0',
+        padding: '2rem 1.5rem 2rem 1.5rem', // Padding controlado, sem margin
+        marginBottom: '0' // ZERO margin-bottom
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Coluna da Logo e Descrição */}

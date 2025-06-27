@@ -112,7 +112,6 @@ const Contact = () => {
     <div 
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // CRÍTICO: altura completamente automática - ZERO altura mínima forçada
         minHeight: 'auto',
         height: 'auto',
         maxHeight: 'none',
@@ -131,9 +130,9 @@ const Contact = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
-          minHeight: 'auto', // CRÍTICO: sem altura mínima
+          minHeight: 'auto',
           margin: 0,
-          padding: isMobile ? '2rem 1rem' : '4rem 1.5rem'
+          padding: isMobile ? '2rem 1rem 0 1rem' : '4rem 1.5rem 0 1.5rem'
         }}
       >
         <div className="max-w-4xl mx-auto w-full">
@@ -159,14 +158,13 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* Footer sempre visível no mobile - FINAL ABSOLUTO do conteúdo */}
+      {/* Footer sempre visível no mobile - SEM margens extras */}
       {isMobile && (
         <div 
           className="w-full" 
           style={{ 
-            marginTop: '0',
-            marginBottom: '0', // CRÍTICO: zero margin bottom
-            paddingBottom: '0' // CRÍTICO: zero padding bottom
+            margin: '0',
+            padding: '0'
           }}
         >
           <Footer respectTheme={true} />

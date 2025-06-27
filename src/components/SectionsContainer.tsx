@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -79,8 +80,8 @@ const SectionsContainer: React.FC = () => {
         className={`${isMobile ? 'flex-col' : 'flex h-full'}`}
         style={{ 
           width: isMobile ? '100vw' : `${sections.length * 100}vw`,
-          height: isMobile ? 'auto' : '100vh', // Mobile: altura automática
-          minHeight: isMobile ? 'auto' : '100vh', // Mobile: sem altura mínima forçada
+          height: isMobile ? 'auto' : '100vh',
+          minHeight: isMobile ? 'auto' : '100vh',
           maxHeight: isMobile ? 'none' : '100vh',
           willChange: 'transform',
           backgroundColor: 'transparent',
@@ -99,10 +100,9 @@ const SectionsContainer: React.FC = () => {
               className={`flex-shrink-0 relative ${isMobile ? 'w-full' : 'w-screen h-full'}`}
               style={{ 
                 width: '100vw',
-                // Mobile: altura automática para TODAS as seções
                 height: isMobile ? 'auto' : '100vh',
                 minWidth: '100vw',
-                minHeight: isMobile ? 'auto' : '100vh', // CRÍTICO: altura automática no mobile
+                minHeight: isMobile ? 'auto' : '100vh',
                 maxHeight: isMobile ? 'none' : '100vh',
                 backgroundColor: 'transparent',
                 margin: 0,
