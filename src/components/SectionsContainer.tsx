@@ -65,6 +65,7 @@ const SectionsContainer: React.FC = () => {
     <div className="relative w-full" style={{ 
       minHeight: isMobile ? 'auto' : '100vh',
       height: isMobile ? 'auto' : '100vh',
+      maxHeight: isMobile ? 'none' : '100vh',
       overflow: isMobile ? 'visible' : 'hidden' 
     }}>
       <div 
@@ -74,6 +75,7 @@ const SectionsContainer: React.FC = () => {
           width: isMobile ? '100vw' : `${sections.length * 100}vw`,
           height: isMobile ? 'auto' : '100vh',
           minHeight: isMobile ? 'auto' : '100vh',
+          maxHeight: isMobile ? 'none' : '100vh',
           willChange: 'transform',
           backgroundColor: 'transparent'
         }}
@@ -89,10 +91,10 @@ const SectionsContainer: React.FC = () => {
               className={`flex-shrink-0 relative ${isMobile ? 'w-full' : 'w-screen h-full'}`}
               style={{ 
                 width: '100vw',
-                height: isMobile && section.id === 'contact' ? 'auto' : '100vh',
+                height: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
                 minWidth: '100vw',
-                minHeight: isMobile && section.id === 'contact' ? 'auto' : '100vh',
-                maxHeight: isMobile && section.id !== 'contact' ? '100vh' : 'none',
+                minHeight: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
+                maxHeight: isMobile && section.id === 'contact' ? 'none' : (isMobile ? '100vh' : '100vh'),
                 backgroundColor: 'transparent'
               }}
             >
