@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,6 +10,7 @@ import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
+import { useIsMobile } from '../hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -18,18 +18,7 @@ const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showLegalPopup, setShowLegalPopup] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  
-  // Detectar mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     try {
@@ -38,11 +27,11 @@ const Index = () => {
       
       // Configuração diferente para mobile e desktop
       if (isMobile) {
-        // Mobile: permitir scroll natural mas evitar altura extra
+        // Mobile: permitir scroll natural mas sem altura extra
         body.style.overflow = 'auto';
         html.style.overflow = 'auto';
-        body.style.height = '100%';
-        html.style.height = '100%';
+        body.style.height = 'auto';
+        html.style.height = 'auto';
         body.style.maxHeight = 'none';
         html.style.maxHeight = 'none';
         body.style.minHeight = '100%';
@@ -105,11 +94,10 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
-        // Mobile: sem altura fixa
-        minHeight: isMobile ? 'auto' : '100vh',
+        // Mobile: altura natural, sem forçar 100vh
+        minHeight: isMobile ? '100%' : '100vh',
         height: isMobile ? 'auto' : '100vh',
         maxHeight: isMobile ? 'none' : '100vh',
-        // Mobile: scroll visível
         overflow: isMobile ? 'visible' : 'hidden'
       }}
     >

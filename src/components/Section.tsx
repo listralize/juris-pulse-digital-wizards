@@ -1,6 +1,7 @@
 
 import React, { forwardRef } from 'react';
 import { useTheme } from './ThemeProvider';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface SectionProps {
   id: string;
@@ -14,6 +15,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
   ({ id, isActive, className = "", children, allowScroll = false }, ref) => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
+    const isMobile = useIsMobile();
     
     console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
     
@@ -30,9 +32,6 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     
     // Para a seção de contato, sempre permitir scroll
     const shouldAllowScroll = id === 'contact' || allowScroll;
-    
-    // Detectar mobile
-    const isMobile = window.innerWidth < 768;
     
     return (
       <div 

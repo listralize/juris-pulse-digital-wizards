@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
+import { useIsMobile } from '../hooks/use-mobile';
 import Section from './Section';
 
 // Import Sections
@@ -23,7 +24,8 @@ const SectionsContainer: React.FC = () => {
     { id: 'contact', component: Contact }
   ];
   
-  const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized, isMobile } = useSectionTransition(sections);
+  const isMobile = useIsMobile();
+  const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
 
   console.log('SectionsContainer render:', { 
     activeSection, 
