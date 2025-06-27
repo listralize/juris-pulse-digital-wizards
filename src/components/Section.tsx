@@ -51,21 +51,21 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           // Para contato no mobile: altura completamente automática
           minHeight: id === 'contact' && isMobile ? 'auto' : '100vh',
           maxHeight: isFixedHeightSection && id !== 'contact' ? '100vh' : 'none',
-          height: id === 'contact' && isMobile ? 'auto' : (isFixedHeightSection && id !== 'contact' ? '100vh' : 'auto'),
+          height: id === 'contact' && isMobile ? 'auto' : (isMobile && isFixedHeightSection ? '100vh' : (isFixedHeightSection ? '100vh' : 'auto')),
           // Para contato no mobile: overflow sempre visível
           overflow: id === 'contact' && isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : (isFixedHeightSection ? 'hidden' : 'auto')),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
           padding: '0.75rem',
-          paddingBottom: isMobile && id !== 'contact' ? '80px' : (isMobile ? '0' : '140px'),
+          paddingBottom: isMobile && id !== 'contact' ? '80px' : (isMobile && id === 'contact' ? '0' : '140px'),
           touchAction: shouldAllowScroll || (id === 'contact' && isMobile) ? 'auto' : 'pan-y'
         }}
       >
         <div className="w-full max-w-6xl mx-auto flex flex-col justify-center" style={{ 
           opacity: 1, 
           visibility: 'visible',
-          height: id === 'contact' && isMobile ? 'auto' : '100%'
+          height: id === 'contact' && isMobile ? 'auto' : (isMobile && isFixedHeightSection ? '100%' : '100%')
         }}>
           {children}
         </div>

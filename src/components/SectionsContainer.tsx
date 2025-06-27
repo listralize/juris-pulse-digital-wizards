@@ -89,9 +89,10 @@ const SectionsContainer: React.FC = () => {
               className={`flex-shrink-0 relative ${isMobile ? 'w-full' : 'w-screen h-full'}`}
               style={{ 
                 width: '100vw',
-                height: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
+                height: isMobile && section.id === 'contact' ? 'auto' : '100vh',
                 minWidth: '100vw',
-                minHeight: isMobile && section.id === 'contact' ? 'auto' : (isMobile ? '100vh' : '100vh'),
+                minHeight: isMobile && section.id === 'contact' ? 'auto' : '100vh',
+                maxHeight: isMobile && section.id !== 'contact' ? '100vh' : 'none',
                 backgroundColor: 'transparent'
               }}
             >
@@ -104,7 +105,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className="h-full"
+                className={isMobile && section.id !== 'contact' ? 'h-screen' : 'h-full'}
               >
                 <Component />
               </Section>

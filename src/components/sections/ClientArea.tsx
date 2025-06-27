@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -156,9 +157,11 @@ const ClientArea = () => {
   return (
     <section 
       id="cliente" 
-      className={`${isDark ? 'bg-black' : 'bg-white'} h-screen flex flex-col overflow-hidden relative`}
+      className={`${isDark ? 'bg-black' : 'bg-white'} flex flex-col overflow-hidden relative`}
       style={{
-        marginTop: isMobile ? '0' : '-30px' // Aumentou 20px no desktop (era -50px)
+        height: isMobile ? '100vh' : '100vh',
+        minHeight: isMobile ? '100vh' : '100vh',
+        maxHeight: isMobile ? '100vh' : '100vh'
       }}
     >
       {/* Neural Background */}
