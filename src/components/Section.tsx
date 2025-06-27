@@ -17,18 +17,19 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const isDark = theme === 'dark';
     const isMobile = useIsMobile();
     
-    console.log(`Section ${id} render:`, { isActive, isDark, allowScroll });
+    console.log(`Section ${id} render:`, { isActive, isDark, allowScroll, isMobile });
     
     // A seção Hero sempre tem background preto, outras seguem o tema
     const getBackgroundClass = () => {
       if (id === 'home') {
         return 'bg-black text-white'; // Hero sempre preto
       }
+      // Área do cliente: sempre seguir tema atual
+      if (id === 'cliente') {
+        return isDark ? 'bg-black text-white' : 'bg-white text-black';
+      }
       return isDark ? 'bg-black text-white' : 'bg-white text-black';
     };
-    
-    // Definir quais seções têm altura fixa (não permitem scroll)
-    const isFixedHeightSection = ['home', 'about', 'areas', 'cliente', 'blog'].includes(id);
     
     // Para a seção de contato, sempre permitir scroll
     const shouldAllowScroll = id === 'contact' || allowScroll;
@@ -47,12 +48,12 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           flexDirection: 'column',
           justifyContent: id === 'contact' ? 'flex-start' : 'center',
           alignItems: 'center',
-          // Para contato no mobile: altura completamente automática
+          // Mobile: alturas específicas para cada seção
           minHeight: id === 'contact' && isMobile ? 'auto' : '100vh',
-          maxHeight: isFixedHeightSection && id !== 'contact' ? '100vh' : 'none',
-          height: id === 'contact' && isMobile ? 'auto' : (isMobile && isFixedHeightSection ? '100vh' : (isFixedHeightSection ? '100vh' : 'auto')),
-          // Para contato no mobile: overflow sempre visível
-          overflow: id === 'contact' && isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : (isFixedHeightSection ? 'hidden' : 'auto')),
+          maxHeight: id === 'contact' && isMobile ? 'none' : '100vh',
+          height: id === 'contact' && isMobile ? 'auto' : '100vh',
+          // Mobile: overflow controlado
+          overflow: id === 'contact' && isMobile ? 'visible' : (shouldAllowScroll ? 'visible' : 'hidden'),
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
@@ -64,7 +65,7 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
         <div className="w-full max-w-6xl mx-auto flex flex-col justify-center" style={{ 
           opacity: 1, 
           visibility: 'visible',
-          height: id === 'contact' && isMobile ? 'auto' : (isMobile && isFixedHeightSection ? '100%' : '100%')
+          height: id === 'contact' && isMobile ? 'auto' : '100%'
         }}>
           {children}
         </div>

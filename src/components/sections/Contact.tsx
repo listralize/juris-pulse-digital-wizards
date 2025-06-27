@@ -112,10 +112,10 @@ const Contact = () => {
     <div 
       className={`w-full relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
-        // Mobile: altura completamente automática
+        // Mobile: altura completamente automática, sem espaço extra
         minHeight: 'auto',
         height: 'auto',
-        // Mobile: sem restrições de overflow
+        maxHeight: 'none',
         overflow: 'visible'
       }}
     >
@@ -128,8 +128,7 @@ const Contact = () => {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: isMobile ? 'flex-start' : 'center',
-          // Altura automática sem restrições
+          justifyContent: 'flex-start',
           minHeight: 'auto'
         }}
       >
@@ -158,7 +157,7 @@ const Contact = () => {
 
       {/* Footer sempre visível no mobile - após o conteúdo de contato */}
       {isMobile && (
-        <div className="w-full">
+        <div className="w-full" style={{ marginTop: '0' }}>
           <Footer respectTheme={true} />
         </div>
       )}

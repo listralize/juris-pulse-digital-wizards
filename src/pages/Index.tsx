@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -25,17 +26,19 @@ const Index = () => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Configuração diferente para mobile e desktop
+      // Configuração para mobile - evitar scroll extra
       if (isMobile) {
-        // Mobile: permitir scroll natural mas sem altura extra
         body.style.overflow = 'auto';
         html.style.overflow = 'auto';
         body.style.height = 'auto';
         html.style.height = 'auto';
         body.style.maxHeight = 'none';
         html.style.maxHeight = 'none';
-        body.style.minHeight = '100%';
-        html.style.minHeight = '100%';
+        body.style.minHeight = '100vh';
+        html.style.minHeight = '100vh';
+        // Evitar scroll bounce no iOS
+        body.style.overflowX = 'hidden';
+        html.style.overflowX = 'hidden';
       } else {
         // Desktop: configuração original
         body.style.overflow = 'hidden';
@@ -46,11 +49,9 @@ const Index = () => {
         html.style.maxHeight = '100vh';
       }
       
-      // Garantir que o background seja visível
       body.style.margin = '0';
       body.style.padding = '0';
       
-      // Garantir que o cursor seja visível no desktop
       if (window.innerWidth >= 768) {
         body.style.cursor = 'none';
       } else {
@@ -94,14 +95,13 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
-        // Mobile: altura natural, sem forçar 100vh
-        minHeight: isMobile ? '100%' : '100vh',
+        minHeight: '100vh',
         height: isMobile ? 'auto' : '100vh',
         maxHeight: isMobile ? 'none' : '100vh',
         overflow: isMobile ? 'visible' : 'hidden'
       }}
     >
-      {/* Background gradients - similar ao código de referência */}
+      {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
 

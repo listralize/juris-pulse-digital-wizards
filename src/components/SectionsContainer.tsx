@@ -64,12 +64,15 @@ const SectionsContainer: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full" style={{ 
-      minHeight: isMobile ? 'auto' : '100vh',
-      height: isMobile ? 'auto' : '100vh',
-      maxHeight: isMobile ? 'none' : '100vh',
-      overflow: isMobile ? 'visible' : 'hidden' 
-    }}>
+    <div 
+      className="relative w-full" 
+      style={{ 
+        minHeight: isMobile ? 'auto' : '100vh',
+        height: isMobile ? 'auto' : '100vh',
+        maxHeight: isMobile ? 'none' : '100vh',
+        overflow: isMobile ? 'visible' : 'hidden'
+      }}
+    >
       <div 
         ref={containerRef}
         className={`${isMobile ? 'flex-col' : 'flex h-full'}`}
