@@ -24,7 +24,7 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Detectar se é mobile/tablet com throttle otimizado
   useEffect(() => {
-    let resizeTimer: number;
+    let resizeTimer: ReturnType<typeof setTimeout>;
     
     const checkDeviceType = () => {
       clearTimeout(resizeTimer);
@@ -177,7 +177,7 @@ export const useSectionTransition = (sections: Section[]) => {
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
-    let keydownTimer: number;
+    let keydownTimer: ReturnType<typeof setTimeout>;
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;

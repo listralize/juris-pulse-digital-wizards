@@ -104,7 +104,7 @@ const CustomCursor = () => {
     
     // Add hover effects to interactive elements - com debounce
     let interactiveElements: NodeListOf<Element>;
-    let debounceTimer: number;
+    let debounceTimer: ReturnType<typeof setTimeout>;
     
     const updateInteractiveElements = () => {
       clearTimeout(debounceTimer);

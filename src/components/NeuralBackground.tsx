@@ -272,7 +272,7 @@ const NeuralBackground: React.FC = () => {
 
     const setupEvents = () => {
       // Throttle eventos no mobile
-      let eventThrottle: number;
+      let eventThrottle: ReturnType<typeof setTimeout>;
       const handlePointerMove = (e: PointerEvent) => {
         if (isMobile) {
           clearTimeout(eventThrottle);
