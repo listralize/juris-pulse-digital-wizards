@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 const NeuralBackground: React.FC = () => {
@@ -14,7 +13,7 @@ const NeuralBackground: React.FC = () => {
     
     // Configurações otimizadas por dispositivo
     const devicePixelRatio = isMobile ? 1 : (isTablet ? 1.5 : Math.min(window.devicePixelRatio, 2));
-    const scaleFactor = isMobile ? 0.5 : (isTablet ? 0.75 : 1);
+    const scaleFactor = isMobile ? 0.75 : (isTablet ? 0.85 : 1); // Aumentado para mobile
     const targetFPS = isMobile ? 24 : (isTablet ? 30 : 60); // 24 FPS no mobile
     const frameInterval = 1000 / targetFPS;
 
@@ -41,7 +40,7 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      // Shader otimizado para mobile com 24fps
+      // Shader otimizado para mobile com maior intensidade
       const fsSource = isMobile ? `
         precision lowp float;
         varying vec2 vUv;
@@ -56,7 +55,7 @@ const NeuralBackground: React.FC = () => {
         float neuro_shape(vec2 uv, float t) {
           vec2 sine_acc = vec2(0.);
           vec2 res = vec2(0.);
-          float scale = 6.;
+          float scale = 5.;
 
           // 6 iterações no mobile para manter qualidade visual com 24fps
           for (int j = 0; j < 6; j++) {
@@ -65,7 +64,7 @@ const NeuralBackground: React.FC = () => {
             vec2 layer = uv * scale + float(j) + sine_acc - t;
             sine_acc += sin(layer);
             res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.12;
+            scale *= 1.15;
           }
           return res.x + res.y;
         }
@@ -74,17 +73,17 @@ const NeuralBackground: React.FC = () => {
           vec2 uv = .5 * vUv;
           uv.x *= u_ratio;
 
-          float t = .0005 * u_time;
+          float t = .0008 * u_time;
           float noise = neuro_shape(uv, t);
 
-          noise = 1.2 * pow(noise, 1.8);
-          noise = max(.0, noise - .35);
+          noise = 1.5 * pow(noise, 1.6); // Maior intensidade
+          noise = max(.0, noise - .25); // Menor threshold
           noise *= (1. - length(vUv - .5));
 
-          vec3 color = vec3(0.65, 0.65, 0.65);
+          vec3 color = vec3(0.85, 0.85, 0.85); // Cor mais clara
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.2);
+          gl_FragColor = vec4(color, noise * 0.4); // Maior opacidade
         }
       ` : (isTablet ? `
         precision mediump float;
@@ -368,7 +367,7 @@ const NeuralBackground: React.FC = () => {
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none -z-10"
       style={{ 
-        opacity: window.innerWidth < 768 ? 0.2 : (window.innerWidth < 1024 ? 0.25 : 0.4),
+        opacity: window.innerWidth < 768 ? 0.5 : (window.innerWidth < 1024 ? 0.35 : 0.4), // Aumentada opacidade mobile
         width: '100vw',
         height: '100vh',
         maxWidth: 'none'
