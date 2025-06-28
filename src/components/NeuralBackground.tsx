@@ -40,7 +40,7 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      // Shader com intensidade aumentada para mais visibilidade
+      // Shader com cores mais escuras e intensidade aumentada
       const fsSource = isMobile ? `
         precision lowp float;
         varying vec2 vUv;
@@ -75,14 +75,14 @@ const NeuralBackground: React.FC = () => {
           float t = .0008 * u_time;
           float noise = neuro_shape(uv, t);
 
-          noise = 2.2 * pow(noise, 1.2);
-          noise = max(.0, noise - .15);
+          noise = 3.5 * pow(noise, 1.0);
+          noise = max(.0, noise - .1);
           noise *= (1. - length(vUv - .5));
 
-          vec3 color = vec3(0.95, 0.95, 0.95);
+          vec3 color = vec3(0.6, 0.6, 0.6);
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.8);
+          gl_FragColor = vec4(color, noise * 1.2);
         }
       ` : (isTablet ? `
         precision mediump float;
@@ -123,15 +123,15 @@ const NeuralBackground: React.FC = () => {
           float t = .0007 * u_time;
           float noise = neuro_shape(uv, t, p);
 
-          noise = 1.8 * pow(noise, 1.5);
-          noise += pow(noise, 4.);
-          noise = max(.0, noise - .2);
+          noise = 2.8 * pow(noise, 1.2);
+          noise += pow(noise, 3.);
+          noise = max(.0, noise - .15);
           noise *= (1. - length(vUv - .5));
 
-          vec3 color = vec3(0.9, 0.9, 0.9);
+          vec3 color = vec3(0.65, 0.65, 0.65);
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.7);
+          gl_FragColor = vec4(color, noise * 1.0);
         }
       ` : `
         precision mediump float;
@@ -175,17 +175,17 @@ const NeuralBackground: React.FC = () => {
 
           float noise = neuro_shape(uv, t, p);
 
-          noise = 1.8 * pow(noise, 2.2);
-          noise += pow(noise, 6.);
-          noise = max(.0, noise - .25);
+          noise = 2.5 * pow(noise, 1.8);
+          noise += pow(noise, 4.);
+          noise = max(.0, noise - .2);
           noise *= (1. - length(vUv - .5));
 
-          color = vec3(0.9, 0.9, 0.9);
+          color = vec3(0.7, 0.7, 0.7);
           color += vec3(0.1, 0.1, 0.1) * sin(3.0 * u_scroll_progress + 1.5);
 
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.8);
+          gl_FragColor = vec4(color, noise * 1.0);
         }
       `);
 
@@ -359,7 +359,7 @@ const NeuralBackground: React.FC = () => {
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none -z-10"
       style={{ 
-        opacity: window.innerWidth < 768 ? 0.8 : (window.innerWidth < 1024 ? 0.7 : 0.8),
+        opacity: window.innerWidth < 768 ? 1.0 : (window.innerWidth < 1024 ? 0.9 : 1.0),
         width: '100vw',
         height: '100vh',
         maxWidth: 'none'
