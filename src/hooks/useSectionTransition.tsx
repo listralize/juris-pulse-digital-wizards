@@ -22,47 +22,38 @@ export const useSectionTransition = (sections: Section[]) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
 
-  // Detectar se é mobile/tablet com throttle otimizado
+  // Detectar se é mobile/tablet - simplificado
   useEffect(() => {
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    
     const checkDeviceType = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const width = window.innerWidth;
-        setIsMobile(width < 640);
-        setIsTablet(width >= 640 && width < 1024);
-      }, 100);
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsTablet(width >= 640 && width < 1024);
     };
     
     checkDeviceType();
-    window.addEventListener('resize', checkDeviceType, { passive: true });
-    return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener('resize', checkDeviceType);
-    };
-  }, []);
-
-  // Função otimizada para verificar se o usuário rolou até o final da seção
-  const isAtBottom = useCallback((element: HTMLElement) => {
-    const threshold = 50;
-    return element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
-  }, []);
-
-  // Função otimizada para verificar se o usuário está no topo da seção
-  const isAtTop = useCallback((element: HTMLElement) => {
-    return element.scrollTop <= 50;
-  }, []);
-
-  // Função para verificar se a seção permite scroll interno
-  const sectionAllowsScroll = useCallback((sectionId: string) => {
-    if (window.innerWidth < 768 && sectionId === 'areas') {
-      return true;
+    
+    // Só adicionar listener se não for mobile para economizar recursos
+    if (window.innerWidth >= 640) {
+      const debouncedCheck = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(checkDeviceType, 150);
+      };
+      let resizeTimer: ReturnType<typeof setTimeout>;
+      
+      window.addEventListener('resize', debouncedCheck, { passive: true });
+      return () => {
+        clearTimeout(resizeTimer);
+        window.removeEventListener('resize', debouncedCheck);
+      };
     }
+  }, []);
+
+  // Função simples para verificar se permite scroll interno
+  const sectionAllowsScroll = useCallback((sectionId: string) => {
     return ['areas', 'contact', 'blog', 'socios'].includes(sectionId);
   }, []);
 
-  // Inicialização única - otimizada para performance
+  // Inicialização simplificada para mobile
   useEffect(() => {
     if (hasInitialized.current) return;
     
@@ -78,25 +69,22 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex);
     
-    // Posição inicial otimizada
-    if (containerRef.current) {
-      requestAnimationFrame(() => {
-        if (isMobile || isTablet) {
-          gsap.set(containerRef.current, { 
-            x: 0,
-            y: 0,
-            clearProps: "all",
-            force3D: false
-          });
-        } else {
+    // Mobile: sem animações GSAP
+    if (isMobile || isTablet) {
+      if (containerRef.current) {
+        containerRef.current.style.transform = 'none';
+      }
+    } else {
+      // Desktop: manter animações originais
+      if (containerRef.current) {
+        requestAnimationFrame(() => {
           gsap.set(containerRef.current, { 
             x: `-${targetIndex * 100}vw`,
             y: 0,
-            force3D: true,
-            willChange: 'transform'
+            force3D: true
           });
-        }
-      });
+        });
+      }
     }
     
     hasInitialized.current = true;
@@ -106,16 +94,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const transitionToSection = useCallback((sectionId: string) => {
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
     
-    if (sectionIndex === -1) {
-      console.warn('Seção não encontrada:', sectionId);
-      return;
-    }
-
-    if (activeSection === sectionId && activeSectionIndex === sectionIndex) {
-      return;
-    }
-    
-    if (isTransitioning.current) {
+    if (sectionIndex === -1 || activeSection === sectionId || isTransitioning.current) {
       return;
     }
     
@@ -130,88 +109,71 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animar transição otimizada
-    if (containerRef.current) {
-      gsap.killTweensOf(containerRef.current);
-      
-      if (isMobile || isTablet) {
-        const targetSection = sectionsRef.current[sectionIndex];
-        if (targetSection) {
-          requestAnimationFrame(() => {
-            targetSection.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'start'
-            });
-          });
-        }
-        setTimeout(() => {
-          isTransitioning.current = false;
-        }, 500);
-      } else {
-        const targetX = -sectionIndex * 100;
+    // Mobile: scroll nativo simples
+    if (isMobile || isTablet) {
+      const targetSection = sectionsRef.current[sectionIndex];
+      if (targetSection) {
+        targetSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+      // Timeout mais curto para mobile
+      setTimeout(() => {
+        isTransitioning.current = false;
+      }, 300);
+    } else {
+      // Desktop: manter animações GSAP
+      if (containerRef.current) {
+        gsap.killTweensOf(containerRef.current);
         
+        const targetX = -sectionIndex * 100;
         gsap.to(containerRef.current, {
           x: `${targetX}vw`,
           y: 0,
           duration: 0.6,
           ease: 'power2.inOut',
           force3D: true,
-          willChange: 'transform',
           onComplete: () => {
             isTransitioning.current = false;
-            if (containerRef.current) {
-              containerRef.current.style.willChange = 'auto';
-            }
           },
           onInterrupt: () => {
             isTransitioning.current = false;
           }
         });
+      } else {
+        isTransitioning.current = false;
       }
-    } else {
-      isTransitioning.current = false;
     }
-  }, [activeSection, activeSectionIndex, sections, location.pathname, isMobile, isTablet]);
+  }, [activeSection, sections, location.pathname, isMobile, isTablet]);
 
-  // Navegação por teclado otimizada - desabilitada no mobile/tablet
+  // Navegação por teclado - APENAS desktop
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
-    let keydownTimer: ReturnType<typeof setTimeout>;
-    
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTransitioning.current) return;
+      if (isTransitioning.current || sectionAllowsScroll(activeSection)) return;
       
-      clearTimeout(keydownTimer);
-      keydownTimer = setTimeout(() => {
-        if (sectionAllowsScroll(activeSection)) {
-          return;
-        }
-        
-        let newIndex = activeSectionIndex;
-        
-        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-          e.preventDefault();
-          newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
-        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-          e.preventDefault();
-          newIndex = Math.max(activeSectionIndex - 1, 0);
-        }
-        
-        if (newIndex !== activeSectionIndex && sections[newIndex]) {
-          transitionToSection(sections[newIndex].id);
-        }
-      }, 50);
+      let newIndex = activeSectionIndex;
+      
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        newIndex = Math.max(activeSectionIndex - 1, 0);
+      }
+      
+      if (newIndex !== activeSectionIndex && sections[newIndex]) {
+        transitionToSection(sections[newIndex].id);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown, { passive: false });
-    return () => {
-      clearTimeout(keydownTimer);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet, sectionAllowsScroll]);
 
-  // Navegação por scroll otimizada - desabilitada no mobile/tablet
+  // Navegação por scroll - APENAS desktop
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
@@ -219,15 +181,11 @@ export const useSectionTransition = (sections: Section[]) => {
       if (isTransitioning.current) return;
       
       const now = Date.now();
-      
-      if (now - lastScrollTime.current < 800) {
+      if (now - lastScrollTime.current < 800 || Math.abs(e.deltaY) < 30) {
         return;
       }
 
       e.preventDefault();
-      
-      if (Math.abs(e.deltaY) < 30) return;
-
       lastScrollTime.current = now;
       
       let newIndex = activeSectionIndex;
@@ -245,7 +203,7 @@ export const useSectionTransition = (sections: Section[]) => {
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet]);
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, isMobile, isTablet]);
 
   return {
     activeSection,
