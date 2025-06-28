@@ -22,7 +22,7 @@ export const useSectionTransition = (sections: Section[]) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
 
-  // Detectar se é mobile/tablet com throttle
+  // Detectar se é mobile/tablet com throttle otimizado
   useEffect(() => {
     let resizeTimer: number;
     
@@ -32,7 +32,7 @@ export const useSectionTransition = (sections: Section[]) => {
         const width = window.innerWidth;
         setIsMobile(width < 640);
         setIsTablet(width >= 640 && width < 1024);
-      }, 100); // Debounce resize events
+      }, 100);
     };
     
     checkDeviceType();
@@ -43,27 +43,26 @@ export const useSectionTransition = (sections: Section[]) => {
     };
   }, []);
 
-  // Função melhorada para verificar se o usuário rolou até o final da seção
-  const isAtBottom = (element: HTMLElement) => {
+  // Função otimizada para verificar se o usuário rolou até o final da seção
+  const isAtBottom = useCallback((element: HTMLElement) => {
     const threshold = 50;
     return element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
-  };
+  }, []);
 
-  // Função melhorada para verificar se o usuário está no topo da seção
-  const isAtTop = (element: HTMLElement) => {
+  // Função otimizada para verificar se o usuário está no topo da seção
+  const isAtTop = useCallback((element: HTMLElement) => {
     return element.scrollTop <= 50;
-  };
+  }, []);
 
   // Função para verificar se a seção permite scroll interno
-  const sectionAllowsScroll = (sectionId: string) => {
-    // No mobile, 'areas' também permite scroll para ver todos os cards
+  const sectionAllowsScroll = useCallback((sectionId: string) => {
     if (window.innerWidth < 768 && sectionId === 'areas') {
       return true;
     }
     return ['areas', 'contact', 'blog', 'socios'].includes(sectionId);
-  };
+  }, []);
 
-  // Inicialização única - otimizada
+  // Inicialização única - otimizada para performance
   useEffect(() => {
     if (hasInitialized.current) return;
     
@@ -79,12 +78,10 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex);
     
-    // Posição inicial - otimizada para mobile
+    // Posição inicial otimizada
     if (containerRef.current) {
-      // Usar requestAnimationFrame para melhor performance
       requestAnimationFrame(() => {
         if (isMobile || isTablet) {
-          // No mobile/tablet, resetar qualquer transform
           gsap.set(containerRef.current, { 
             x: 0,
             y: 0,
@@ -92,7 +89,6 @@ export const useSectionTransition = (sections: Section[]) => {
             force3D: false
           });
         } else {
-          // No desktop, usar scroll horizontal com otimização
           gsap.set(containerRef.current, { 
             x: `-${targetIndex * 100}vw`,
             y: 0,
@@ -105,7 +101,7 @@ export const useSectionTransition = (sections: Section[]) => {
     
     hasInitialized.current = true;
     setIsInitialized(true);
-  }, [isMobile, isTablet]);
+  }, [isMobile, isTablet, location.hash, sections]);
 
   const transitionToSection = useCallback((sectionId: string) => {
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
@@ -125,25 +121,22 @@ export const useSectionTransition = (sections: Section[]) => {
     
     isTransitioning.current = true;
     
-    // Atualizar URL hash - otimizado
+    // Atualizar URL hash
     if (location.pathname === '/') {
       window.history.replaceState(null, '', `#${sectionId}`);
     }
     
-    // Atualizar estado imediatamente
+    // Atualizar estado
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animar transição - otimizada para mobile
+    // Animar transição otimizada
     if (containerRef.current) {
-      // Parar qualquer animação anterior
       gsap.killTweensOf(containerRef.current);
       
       if (isMobile || isTablet) {
-        // Mobile/Tablet: scroll nativo otimizado
         const targetSection = sectionsRef.current[sectionIndex];
         if (targetSection) {
-          // Usar requestAnimationFrame para melhor performance
           requestAnimationFrame(() => {
             targetSection.scrollIntoView({ 
               behavior: 'smooth',
@@ -151,24 +144,21 @@ export const useSectionTransition = (sections: Section[]) => {
             });
           });
         }
-        // Reduzir tempo de bloqueio para mobile
         setTimeout(() => {
           isTransitioning.current = false;
         }, 500);
       } else {
-        // Desktop: transição horizontal otimizada
         const targetX = -sectionIndex * 100;
         
         gsap.to(containerRef.current, {
           x: `${targetX}vw`,
           y: 0,
-          duration: 0.6, // Reduzir duração para melhor performance
+          duration: 0.6,
           ease: 'power2.inOut',
           force3D: true,
           will-change: 'transform',
           onComplete: () => {
             isTransitioning.current = false;
-            // Limpar will-change após animação
             if (containerRef.current) {
               containerRef.current.style.willChange = 'auto';
             }
@@ -183,7 +173,7 @@ export const useSectionTransition = (sections: Section[]) => {
     }
   }, [activeSection, activeSectionIndex, sections, location.pathname, isMobile, isTablet]);
 
-  // Navegação por teclado - otimizada e desabilitada no mobile/tablet
+  // Navegação por teclado otimizada - desabilitada no mobile/tablet
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
@@ -192,17 +182,14 @@ export const useSectionTransition = (sections: Section[]) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
       
-      // Throttle keyboard events
       clearTimeout(keydownTimer);
       keydownTimer = setTimeout(() => {
-        // Se estamos em uma seção que permite scroll, não interceptar teclas de navegação
         if (sectionAllowsScroll(activeSection)) {
           return;
         }
         
         let newIndex = activeSectionIndex;
         
-        // Desktop: usar setas horizontais e verticais
         if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
           e.preventDefault();
           newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
@@ -214,7 +201,7 @@ export const useSectionTransition = (sections: Section[]) => {
         if (newIndex !== activeSectionIndex && sections[newIndex]) {
           transitionToSection(sections[newIndex].id);
         }
-      }, 50); // Throttle de 50ms
+      }, 50);
     };
 
     window.addEventListener('keydown', handleKeyDown, { passive: false });
@@ -222,9 +209,9 @@ export const useSectionTransition = (sections: Section[]) => {
       clearTimeout(keydownTimer);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet]);
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet, sectionAllowsScroll]);
 
-  // Navegação por scroll - muito otimizada e desabilitada no mobile/tablet
+  // Navegação por scroll otimizada - desabilitada no mobile/tablet
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
@@ -233,25 +220,21 @@ export const useSectionTransition = (sections: Section[]) => {
       
       const now = Date.now();
       
-      // Throttle mais agressivo para melhor performance
       if (now - lastScrollTime.current < 800) {
         return;
       }
 
-      // Desktop - sempre prevenir scroll vertical padrão
       e.preventDefault();
       
-      if (Math.abs(e.deltaY) < 30) return; // Aumentar threshold
+      if (Math.abs(e.deltaY) < 30) return;
 
       lastScrollTime.current = now;
       
       let newIndex = activeSectionIndex;
       
       if (e.deltaY > 0) {
-        // Scroll para baixo - próxima seção
         newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
       } else {
-        // Scroll para cima - seção anterior
         newIndex = Math.max(activeSectionIndex - 1, 0);
       }
       
