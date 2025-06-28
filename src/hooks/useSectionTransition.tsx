@@ -93,7 +93,7 @@ export const useSectionTransition = (sections: Section[]) => {
             x: `-${targetIndex * 100}vw`,
             y: 0,
             force3D: true,
-            will-change: 'transform'
+            willChange: 'transform'
           });
         }
       });
@@ -156,7 +156,7 @@ export const useSectionTransition = (sections: Section[]) => {
           duration: 0.6,
           ease: 'power2.inOut',
           force3D: true,
-          will-change: 'transform',
+          willChange: 'transform',
           onComplete: () => {
             isTransitioning.current = false;
             if (containerRef.current) {
