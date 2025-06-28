@@ -7,9 +7,9 @@ const CustomCursor = () => {
   const cursorDotRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Desabilitar completamente no mobile/touch
+    // Desabilitar apenas no mobile/tablet
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobile = window.innerWidth < 1024; // Aumentar threshold
+    const isMobile = window.innerWidth < 768;
     
     if (isTouchDevice || isMobile) {
       return;
@@ -20,7 +20,7 @@ const CustomCursor = () => {
     
     if (!cursor || !cursorDot) return;
     
-    // Throttle agressivo para desktop
+    // Throttle para desktop
     let rafId: number;
     let lastMoveTime = 0;
     
@@ -87,7 +87,7 @@ const CustomCursor = () => {
     document.addEventListener('mouseleave', hideCursor);
     document.addEventListener('mouseenter', showCursor);
     
-    // Elementos interativos simplificados
+    // Elementos interativos
     const interactiveElements = document.querySelectorAll('a, button, [role="button"], [onclick]');
     
     interactiveElements.forEach(element => {
@@ -109,8 +109,8 @@ const CustomCursor = () => {
   }, []);
   
   useEffect(() => {
-    // Apenas desktop
-    if (window.innerWidth >= 1024 && !('ontouchstart' in window)) {
+    // Cursor customizado apenas no desktop
+    if (window.innerWidth >= 768 && !('ontouchstart' in window)) {
       document.body.style.cursor = 'none';
     }
     
@@ -119,8 +119,8 @@ const CustomCursor = () => {
     };
   }, []);
   
-  // Não renderizar nada no mobile
-  if (typeof window !== 'undefined' && (window.innerWidth < 1024 || 'ontouchstart' in window)) {
+  // Não renderizar no mobile/tablet
+  if (typeof window !== 'undefined' && (window.innerWidth < 768 || 'ontouchstart' in window)) {
     return null;
   }
   

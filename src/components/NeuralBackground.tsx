@@ -7,14 +7,14 @@ const NeuralBackground: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Detectar mobile e otimizar drasticamente
+    // Detectar mobile e otimizar
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
     
     // Configurações otimizadas por dispositivo
     const devicePixelRatio = isMobile ? 1 : (isTablet ? 1.5 : Math.min(window.devicePixelRatio, 2));
-    const scaleFactor = isMobile ? 0.75 : (isTablet ? 0.85 : 1); // Aumentado para mobile
-    const targetFPS = isMobile ? 24 : (isTablet ? 30 : 60); // 24 FPS no mobile
+    const scaleFactor = isMobile ? 0.8 : (isTablet ? 0.9 : 1);
+    const targetFPS = isMobile ? 24 : (isTablet ? 30 : 60);
     const frameInterval = 1000 / targetFPS;
 
     const pointer = {
@@ -40,7 +40,7 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      // Shader otimizado para mobile com maior intensidade
+      // Shader com intensidade restaurada
       const fsSource = isMobile ? `
         precision lowp float;
         varying vec2 vUv;
@@ -55,16 +55,15 @@ const NeuralBackground: React.FC = () => {
         float neuro_shape(vec2 uv, float t) {
           vec2 sine_acc = vec2(0.);
           vec2 res = vec2(0.);
-          float scale = 5.;
+          float scale = 6.;
 
-          // 6 iterações no mobile para manter qualidade visual com 24fps
           for (int j = 0; j < 6; j++) {
             uv = rotate(uv, 1.);
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
             sine_acc += sin(layer);
             res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.15;
+            scale *= 1.2;
           }
           return res.x + res.y;
         }
@@ -76,14 +75,14 @@ const NeuralBackground: React.FC = () => {
           float t = .0008 * u_time;
           float noise = neuro_shape(uv, t);
 
-          noise = 1.5 * pow(noise, 1.6); // Maior intensidade
-          noise = max(.0, noise - .25); // Menor threshold
+          noise = 1.8 * pow(noise, 1.4);
+          noise = max(.0, noise - .2);
           noise *= (1. - length(vUv - .5));
 
-          vec3 color = vec3(0.85, 0.85, 0.85); // Cor mais clara
+          vec3 color = vec3(0.9, 0.9, 0.9);
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.4); // Maior opacidade
+          gl_FragColor = vec4(color, noise * 0.6);
         }
       ` : (isTablet ? `
         precision mediump float;
@@ -99,16 +98,15 @@ const NeuralBackground: React.FC = () => {
         float neuro_shape(vec2 uv, float t, float p) {
           vec2 sine_acc = vec2(0.);
           vec2 res = vec2(0.);
-          float scale = 6.;
+          float scale = 7.;
 
-          // 8 iterações no tablet
           for (int j = 0; j < 8; j++) {
             uv = rotate(uv, 1.);
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
             sine_acc += sin(layer) + 1.5 * p;
             res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.15;
+            scale *= 1.2;
           }
           return res.x + res.y;
         }
@@ -125,15 +123,15 @@ const NeuralBackground: React.FC = () => {
           float t = .0007 * u_time;
           float noise = neuro_shape(uv, t, p);
 
-          noise = 1.1 * pow(noise, 2.);
-          noise += pow(noise, 6.);
-          noise = max(.0, noise - .4);
+          noise = 1.3 * pow(noise, 1.8);
+          noise += pow(noise, 5.);
+          noise = max(.0, noise - .3);
           noise *= (1. - length(vUv - .5));
 
-          vec3 color = vec3(0.7, 0.7, 0.7);
+          vec3 color = vec3(0.8, 0.8, 0.8);
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.25);
+          gl_FragColor = vec4(color, noise * 0.4);
         }
       ` : `
         precision mediump float;
@@ -152,13 +150,13 @@ const NeuralBackground: React.FC = () => {
           vec2 res = vec2(0.);
           float scale = 8.;
 
-          for (int j = 0; j < 15; j++) {
+          for (int j = 0; j < 12; j++) {
             uv = rotate(uv, 1.);
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
-            sine_acc += sin(layer) + 2.4 * p;
+            sine_acc += sin(layer) + 2.0 * p;
             res += (.5 + .5 * cos(layer)) / scale;
-            scale *= (1.2);
+            scale *= 1.18;
           }
           return res.x + res.y;
         }
@@ -170,24 +168,24 @@ const NeuralBackground: React.FC = () => {
           vec2 pointer = vUv - u_pointer_position;
           pointer.x *= u_ratio;
           float p = clamp(length(pointer), 0., 1.);
-          p = .5 * pow(1. - p, 2.);
+          p = .4 * pow(1. - p, 2.);
 
-          float t = .001 * u_time;
+          float t = .0009 * u_time;
           vec3 color = vec3(0.);
 
           float noise = neuro_shape(uv, t, p);
 
-          noise = 1.2 * pow(noise, 3.);
-          noise += pow(noise, 10.);
-          noise = max(.0, noise - .5);
+          noise = 1.4 * pow(noise, 2.5);
+          noise += pow(noise, 8.);
+          noise = max(.0, noise - .4);
           noise *= (1. - length(vUv - .5));
 
-          color = vec3(0.8, 0.8, 0.8);
-          color += vec3(0.2, 0.2, 0.2) * sin(3.0 * u_scroll_progress + 1.5);
+          color = vec3(0.85, 0.85, 0.85);
+          color += vec3(0.15, 0.15, 0.15) * sin(3.0 * u_scroll_progress + 1.5);
 
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.3);
+          gl_FragColor = vec4(color, noise * 0.5);
         }
       `);
 
@@ -274,15 +272,13 @@ const NeuralBackground: React.FC = () => {
     const render = (currentTime: number) => {
       if (!gl || !uniforms) return;
 
-      // Throttle para 24fps no mobile
       if (currentTime - lastRenderTime < frameInterval) {
         animationId = requestAnimationFrame(render);
         return;
       }
       lastRenderTime = currentTime;
 
-      // Suavização otimizada por dispositivo
-      const smoothFactor = isMobile ? 0.08 : (isTablet ? 0.12 : 0.2);
+      const smoothFactor = isMobile ? 0.1 : (isTablet ? 0.15 : 0.25);
       pointer.x += (pointer.tX - pointer.x) * smoothFactor;
       pointer.y += (pointer.tY - pointer.y) * smoothFactor;
 
@@ -312,9 +308,8 @@ const NeuralBackground: React.FC = () => {
     };
 
     const setupEvents = () => {
-      // Eventos otimizados por dispositivo
       let eventThrottle: ReturnType<typeof setTimeout>;
-      const throttleTime = isMobile ? 80 : (isTablet ? 50 : 16);
+      const throttleTime = isMobile ? 100 : (isTablet ? 60 : 20);
       
       const handlePointerMove = (e: PointerEvent) => {
         clearTimeout(eventThrottle);
@@ -323,12 +318,10 @@ const NeuralBackground: React.FC = () => {
         }, throttleTime);
       };
 
-      // Desktop tem eventos contínuos
       if (!isMobile) {
         window.addEventListener("pointermove", handlePointerMove);
       }
       
-      // Touch events otimizados
       if (isMobile || isTablet) {
         window.addEventListener("touchstart", (e) => {
           updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
@@ -341,7 +334,6 @@ const NeuralBackground: React.FC = () => {
       setupEvents();
       resizeCanvas();
       
-      // Resize throttled
       let resizeThrottle: ReturnType<typeof setTimeout>;
       const handleResize = () => {
         clearTimeout(resizeThrottle);
@@ -367,7 +359,7 @@ const NeuralBackground: React.FC = () => {
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none -z-10"
       style={{ 
-        opacity: window.innerWidth < 768 ? 0.5 : (window.innerWidth < 1024 ? 0.35 : 0.4), // Aumentada opacidade mobile
+        opacity: window.innerWidth < 768 ? 0.7 : (window.innerWidth < 1024 ? 0.5 : 0.6),
         width: '100vw',
         height: '100vh',
         maxWidth: 'none'
