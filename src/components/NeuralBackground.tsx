@@ -15,7 +15,7 @@ const NeuralBackground: React.FC = () => {
     // Configurações otimizadas por dispositivo
     const devicePixelRatio = isMobile ? 1 : (isTablet ? 1.5 : Math.min(window.devicePixelRatio, 2));
     const scaleFactor = isMobile ? 0.5 : (isTablet ? 0.75 : 1);
-    const targetFPS = isMobile ? 20 : (isTablet ? 30 : 60);
+    const targetFPS = isMobile ? 24 : (isTablet ? 30 : 60); // 24 FPS no mobile
     const frameInterval = 1000 / targetFPS;
 
     const pointer = {
@@ -41,7 +41,7 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      // Shader MUITO simplificado para mobile
+      // Shader otimizado para mobile com 24fps
       const fsSource = isMobile ? `
         precision lowp float;
         varying vec2 vUv;
@@ -56,16 +56,16 @@ const NeuralBackground: React.FC = () => {
         float neuro_shape(vec2 uv, float t) {
           vec2 sine_acc = vec2(0.);
           vec2 res = vec2(0.);
-          float scale = 4.;
+          float scale = 6.;
 
-          // Apenas 4 iterações no mobile
-          for (int j = 0; j < 4; j++) {
+          // 6 iterações no mobile para manter qualidade visual com 24fps
+          for (int j = 0; j < 6; j++) {
             uv = rotate(uv, 1.);
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
             sine_acc += sin(layer);
             res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.1;
+            scale *= 1.12;
           }
           return res.x + res.y;
         }
@@ -74,17 +74,17 @@ const NeuralBackground: React.FC = () => {
           vec2 uv = .5 * vUv;
           uv.x *= u_ratio;
 
-          float t = .0003 * u_time;
+          float t = .0005 * u_time;
           float noise = neuro_shape(uv, t);
 
-          noise = pow(noise, 1.5);
-          noise = max(.0, noise - .3);
+          noise = 1.2 * pow(noise, 1.8);
+          noise = max(.0, noise - .35);
           noise *= (1. - length(vUv - .5));
 
-          vec3 color = vec3(0.6, 0.6, 0.6);
+          vec3 color = vec3(0.65, 0.65, 0.65);
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.15);
+          gl_FragColor = vec4(color, noise * 0.2);
         }
       ` : (isTablet ? `
         precision mediump float;
@@ -275,15 +275,15 @@ const NeuralBackground: React.FC = () => {
     const render = (currentTime: number) => {
       if (!gl || !uniforms) return;
 
-      // Throttle agressivo no mobile
+      // Throttle para 24fps no mobile
       if (currentTime - lastRenderTime < frameInterval) {
         animationId = requestAnimationFrame(render);
         return;
       }
       lastRenderTime = currentTime;
 
-      // Suavização muito lenta no mobile para economizar processamento
-      const smoothFactor = isMobile ? 0.05 : (isTablet ? 0.1 : 0.2);
+      // Suavização otimizada por dispositivo
+      const smoothFactor = isMobile ? 0.08 : (isTablet ? 0.12 : 0.2);
       pointer.x += (pointer.tX - pointer.x) * smoothFactor;
       pointer.y += (pointer.tY - pointer.y) * smoothFactor;
 
@@ -313,9 +313,9 @@ const NeuralBackground: React.FC = () => {
     };
 
     const setupEvents = () => {
-      // Eventos muito throttled no mobile
+      // Eventos otimizados por dispositivo
       let eventThrottle: ReturnType<typeof setTimeout>;
-      const throttleTime = isMobile ? 100 : (isTablet ? 50 : 16);
+      const throttleTime = isMobile ? 80 : (isTablet ? 50 : 16);
       
       const handlePointerMove = (e: PointerEvent) => {
         clearTimeout(eventThrottle);
@@ -324,12 +324,12 @@ const NeuralBackground: React.FC = () => {
         }, throttleTime);
       };
 
-      // Apenas desktop tem eventos contínuos
+      // Desktop tem eventos contínuos
       if (!isMobile) {
         window.addEventListener("pointermove", handlePointerMove);
       }
       
-      // Touch events muito simplificados
+      // Touch events otimizados
       if (isMobile || isTablet) {
         window.addEventListener("touchstart", (e) => {
           updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
@@ -368,7 +368,7 @@ const NeuralBackground: React.FC = () => {
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none -z-10"
       style={{ 
-        opacity: window.innerWidth < 768 ? 0.15 : (window.innerWidth < 1024 ? 0.25 : 0.4),
+        opacity: window.innerWidth < 768 ? 0.2 : (window.innerWidth < 1024 ? 0.25 : 0.4),
         width: '100vw',
         height: '100vh',
         maxWidth: 'none'

@@ -35,9 +35,8 @@ const Index = () => {
       html.style.overflowX = 'hidden';
       body.style.margin = '0';
       body.style.padding = '0';
-      // Otimizações de performance para mobile
-      body.style.webkitOverflowScrolling = 'touch';
-      body.style.webkitTransform = 'translate3d(0,0,0)';
+      // Otimizações de performance para mobile (sem webkit)
+      body.style.transform = 'translate3d(0,0,0)';
     } else {
       // Desktop: configuração original
       body.style.overflow = 'hidden';
@@ -97,9 +96,7 @@ const Index = () => {
         padding: 0,
         // Otimizações CSS para mobile
         ...(isMobile && {
-          webkitBackfaceVisibility: 'hidden',
           backfaceVisibility: 'hidden',
-          webkitPerspective: '1000px',
           perspective: '1000px'
         })
       }}
