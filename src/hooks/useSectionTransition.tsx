@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 
 interface Section {
@@ -10,7 +10,6 @@ interface Section {
 
 export const useSectionTransition = (sections: Section[]) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('home');
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -22,47 +21,19 @@ export const useSectionTransition = (sections: Section[]) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
 
-  // Detectar se é mobile/tablet com throttle otimizado
+  // Detectar dispositivo uma única vez e não ficar verificando
   useEffect(() => {
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    
-    const checkDeviceType = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const width = window.innerWidth;
-        setIsMobile(width < 640);
-        setIsTablet(width >= 640 && width < 1024);
-      }, 100);
-    };
-    
-    checkDeviceType();
-    window.addEventListener('resize', checkDeviceType, { passive: true });
-    return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener('resize', checkDeviceType);
-    };
+    const width = window.innerWidth;
+    setIsMobile(width < 640);
+    setIsTablet(width >= 640 && width < 1024);
   }, []);
 
-  // Função otimizada para verificar se o usuário rolou até o final da seção
-  const isAtBottom = useCallback((element: HTMLElement) => {
-    const threshold = 50;
-    return element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
-  }, []);
-
-  // Função otimizada para verificar se o usuário está no topo da seção
-  const isAtTop = useCallback((element: HTMLElement) => {
-    return element.scrollTop <= 50;
-  }, []);
-
-  // Função para verificar se a seção permite scroll interno
+  // Verificar se seção permite scroll
   const sectionAllowsScroll = useCallback((sectionId: string) => {
-    if (window.innerWidth < 768 && sectionId === 'areas') {
-      return true;
-    }
     return ['areas', 'contact', 'blog', 'socios'].includes(sectionId);
   }, []);
 
-  // Inicialização única - otimizada para performance
+  // Inicialização única e rápida
   useEffect(() => {
     if (hasInitialized.current) return;
     
@@ -78,25 +49,21 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex);
     
-    // Posição inicial otimizada
+    // Posição inicial sem animação
     if (containerRef.current) {
-      requestAnimationFrame(() => {
-        if (isMobile || isTablet) {
-          gsap.set(containerRef.current, { 
-            x: 0,
-            y: 0,
-            clearProps: "all",
-            force3D: false
-          });
-        } else {
-          gsap.set(containerRef.current, { 
-            x: `-${targetIndex * 100}vw`,
-            y: 0,
-            force3D: true,
-            willChange: 'transform'
-          });
-        }
-      });
+      if (isMobile || isTablet) {
+        // Mobile/Tablet: sem transformação
+        gsap.set(containerRef.current, { 
+          clearProps: "all",
+          force3D: false
+        });
+      } else {
+        // Desktop: posição inicial direta
+        gsap.set(containerRef.current, { 
+          x: `-${targetIndex * 100}vw`,
+          force3D: true
+        });
+      }
     }
     
     hasInitialized.current = true;
@@ -106,64 +73,43 @@ export const useSectionTransition = (sections: Section[]) => {
   const transitionToSection = useCallback((sectionId: string) => {
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
     
-    if (sectionIndex === -1) {
-      console.warn('Seção não encontrada:', sectionId);
-      return;
-    }
-
-    if (activeSection === sectionId && activeSectionIndex === sectionIndex) {
-      return;
-    }
-    
-    if (isTransitioning.current) {
+    if (sectionIndex === -1 || activeSection === sectionId || isTransitioning.current) {
       return;
     }
     
     isTransitioning.current = true;
     
-    // Atualizar URL hash
+    // Atualizar URL
     if (location.pathname === '/') {
       window.history.replaceState(null, '', `#${sectionId}`);
     }
     
-    // Atualizar estado
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
-    // Animar transição otimizada
     if (containerRef.current) {
-      gsap.killTweensOf(containerRef.current);
-      
       if (isMobile || isTablet) {
+        // Mobile/Tablet: scroll nativo
         const targetSection = sectionsRef.current[sectionIndex];
         if (targetSection) {
-          requestAnimationFrame(() => {
-            targetSection.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'start'
-            });
+          targetSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
           });
         }
         setTimeout(() => {
           isTransitioning.current = false;
-        }, 500);
+        }, 300);
       } else {
-        const targetX = -sectionIndex * 100;
+        // Desktop: animação GSAP otimizada
+        gsap.killTweensOf(containerRef.current);
         
         gsap.to(containerRef.current, {
-          x: `${targetX}vw`,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.inOut',
+          x: `-${sectionIndex * 100}vw`,
+          duration: 0.5, // Mais rápido
+          ease: 'power2.out', // Ease mais simples
           force3D: true,
-          willChange: 'transform',
           onComplete: () => {
-            isTransitioning.current = false;
-            if (containerRef.current) {
-              containerRef.current.style.willChange = 'auto';
-            }
-          },
-          onInterrupt: () => {
             isTransitioning.current = false;
           }
         });
@@ -171,47 +117,35 @@ export const useSectionTransition = (sections: Section[]) => {
     } else {
       isTransitioning.current = false;
     }
-  }, [activeSection, activeSectionIndex, sections, location.pathname, isMobile, isTablet]);
+  }, [activeSection, sections, location.pathname, isMobile, isTablet]);
 
-  // Navegação por teclado otimizada - desabilitada no mobile/tablet
+  // Navegação por teclado apenas desktop
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
-    let keydownTimer: ReturnType<typeof setTimeout>;
-    
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTransitioning.current) return;
+      if (isTransitioning.current || sectionAllowsScroll(activeSection)) return;
       
-      clearTimeout(keydownTimer);
-      keydownTimer = setTimeout(() => {
-        if (sectionAllowsScroll(activeSection)) {
-          return;
-        }
-        
-        let newIndex = activeSectionIndex;
-        
-        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-          e.preventDefault();
-          newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
-        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-          e.preventDefault();
-          newIndex = Math.max(activeSectionIndex - 1, 0);
-        }
-        
-        if (newIndex !== activeSectionIndex && sections[newIndex]) {
-          transitionToSection(sections[newIndex].id);
-        }
-      }, 50);
+      let newIndex = activeSectionIndex;
+      
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        newIndex = Math.min(activeSectionIndex + 1, sections.length - 1);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        newIndex = Math.max(activeSectionIndex - 1, 0);
+      }
+      
+      if (newIndex !== activeSectionIndex && sections[newIndex]) {
+        transitionToSection(sections[newIndex].id);
+      }
     };
 
-    window.addEventListener('keydown', handleKeyDown, { passive: false });
-    return () => {
-      clearTimeout(keydownTimer);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet, sectionAllowsScroll]);
 
-  // Navegação por scroll otimizada - desabilitada no mobile/tablet
+  // Scroll wheel apenas desktop com throttle pesado
   useEffect(() => {
     if (!isInitialized || isMobile || isTablet) return;
     
@@ -219,15 +153,11 @@ export const useSectionTransition = (sections: Section[]) => {
       if (isTransitioning.current) return;
       
       const now = Date.now();
+      if (now - lastScrollTime.current < 1000) return; // Throttle muito pesado
       
-      if (now - lastScrollTime.current < 800) {
-        return;
-      }
+      if (Math.abs(e.deltaY) < 50) return; // Threshold maior
 
       e.preventDefault();
-      
-      if (Math.abs(e.deltaY) < 30) return;
-
       lastScrollTime.current = now;
       
       let newIndex = activeSectionIndex;
@@ -245,7 +175,7 @@ export const useSectionTransition = (sections: Section[]) => {
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeSectionIndex, sections, transitionToSection, isInitialized, activeSection, isMobile, isTablet]);
+  }, [activeSectionIndex, sections, transitionToSection, isInitialized, isMobile, isTablet]);
 
   return {
     activeSection,
