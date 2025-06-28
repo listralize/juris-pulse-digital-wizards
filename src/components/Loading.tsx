@@ -10,37 +10,38 @@ const Loading = () => {
   const [logoOpacity, setLogoOpacity] = useState(0);
   const [gradientPosition, setGradientPosition] = useState(0);
 
+  // Detectar mobile para otimizações
+  const isMobile = window.innerWidth < 768;
+
   useEffect(() => {
-    // Animate logo entrance
+    // Animate logo entrance - otimizado para mobile
     let timer1 = setTimeout(() => {
       setLogoOpacity(1);
-    }, 200);
+    }, isMobile ? 100 : 200);
     
     let timer2 = setTimeout(() => {
-      setLogoScale(1.2);
-    }, 400);
+      setLogoScale(isMobile ? 1.1 : 1.2); // Menos escala no mobile
+    }, isMobile ? 200 : 400);
 
-    // Animate gradient position - smooth movement without repetition
+    // Animate gradient position - otimizado
     const gradientInterval = setInterval(() => {
       setGradientPosition(prev => {
-        // Move from 0 to 100 and then stop
-        if (prev < 100) return prev + 0.5;
+        if (prev < 100) return prev + (isMobile ? 1 : 0.5); // Mais rápido no mobile
         return 100;
       });
-    }, 50);
+    }, isMobile ? 30 : 50); // Intervalo menor no mobile
 
-    // Progress bar animation - smooth and without repetition
+    // Progress bar animation - otimizado
     const intervalId = setInterval(() => {
       setProgress((oldProgress) => {
-        // Increase progressively and decelerate near the end
         if (oldProgress < 85) {
-          return oldProgress + Math.random() * 5;
+          return oldProgress + Math.random() * (isMobile ? 8 : 5); // Mais rápido no mobile
         } else if (oldProgress < 99) {
-          return oldProgress + Math.random() * 1.5;
+          return oldProgress + Math.random() * (isMobile ? 3 : 1.5);
         }
-        return 100; // Cap at 100%
+        return 100;
       });
-    }, 150);
+    }, isMobile ? 100 : 150); // Intervalo menor no mobile
 
     return () => {
       clearTimeout(timer1);
@@ -48,29 +49,29 @@ const Loading = () => {
       clearInterval(intervalId);
       clearInterval(gradientInterval);
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black overflow-hidden">
-      {/* Animated marbled background veins */}
+      {/* Animated marbled background veins - reduzido no mobile */}
       <div className="absolute inset-0 opacity-20 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(isMobile ? 10 : 20)].map((_, i) => (
           <div 
             key={`vein-main-${i}`} 
             className="absolute bg-white/30"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              height: `${Math.random() * 70 + 30}%`,
+              height: `${Math.random() * (isMobile ? 50 : 70) + 30}%`,
               width: `${Math.random() * 1 + 0.3}%`,
               transform: `rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.5 + 0.8})`,
               opacity: Math.random() * 0.4 + 0.2,
-              filter: 'blur(8px)',
+              filter: isMobile ? 'blur(4px)' : 'blur(8px)',
               transition: 'all 0.5s ease-in-out'
             }}
           />
         ))}
-        {[...Array(30)].map((_, i) => (
+        {[...Array(isMobile ? 15 : 30)].map((_, i) => (
           <div 
             key={`vein-small-${i}`} 
             className="absolute bg-white/20"
@@ -81,54 +82,62 @@ const Loading = () => {
               width: `${Math.random() * 0.5 + 0.1}%`,
               transform: `rotate(${Math.random() * 360}deg)`,
               opacity: Math.random() * 0.3 + 0.1,
-              filter: 'blur(4px)',
+              filter: isMobile ? 'blur(2px)' : 'blur(4px)',
               transition: 'all 0.8s ease-in-out'
             }}
           />
         ))}
       </div>
       
-      {/* Animated gradient overlay */}
+      {/* Animated gradient overlay - simplificado no mobile */}
       <div 
         className="absolute inset-0 opacity-30"
         style={{
-          background: `radial-gradient(circle at ${gradientPosition}% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0) 50%)`,
-          transition: 'background 0.5s ease'
+          background: isMobile ? 
+            `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 70%)` :
+            `radial-gradient(circle at ${gradientPosition}% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0) 50%)`,
+          transition: isMobile ? 'none' : 'background 0.5s ease'
         }}
       />
 
-      {/* Logo with enhanced animation */}
+      {/* Logo with enhanced animation - otimizado */}
       <div 
         className="relative z-10 flex flex-col items-center"
         style={{
           transform: `scale(${logoScale})`,
           opacity: logoOpacity,
-          transition: 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.2s ease-in-out'
+          transition: isMobile ? 
+            'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease-in-out' :
+            'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.2s ease-in-out'
         }}
       >
         <img 
           src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" 
           alt="Serafim & Trombela" 
-          className="w-72 h-auto mb-16 brightness-150" 
+          className={`${isMobile ? 'w-64' : 'w-72'} h-auto mb-16 brightness-150`}
           style={{
-            filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))',
+            filter: isMobile ?
+              'drop-shadow(0 0 15px rgba(255,255,255,0.2)) drop-shadow(3px 5px 10px rgba(0,0,0,0.8))' :
+              'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))',
             objectFit: 'contain'
           }}
         />
         
-        {/* Elegant loading bar with marble-inspired design */}
-        <div className="w-80 h-[2px] bg-white/10 relative overflow-hidden mb-8 rounded-full">
+        {/* Elegant loading bar - otimizado */}
+        <div className={`${isMobile ? 'w-64' : 'w-80'} h-[2px] bg-white/10 relative overflow-hidden mb-8 rounded-full`}>
           <div 
             className="absolute top-0 left-0 h-full rounded-full transition-all duration-300 ease-out" 
             style={{ 
               width: `${progress}%`,
               background: 'linear-gradient(90deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.5) 100%)',
-              boxShadow: '0 0 10px 1px rgba(255,255,255,0.5)'
+              boxShadow: isMobile ? 
+                '0 0 5px 0.5px rgba(255,255,255,0.4)' : 
+                '0 0 10px 1px rgba(255,255,255,0.5)'
             }}
           />
         </div>
         
-        <p className="text-xl font-canela text-white/80">
+        <p className={`${isMobile ? 'text-lg' : 'text-xl'} font-canela text-white/80`}>
           Carregando...
         </p>
       </div>

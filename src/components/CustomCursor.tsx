@@ -6,6 +6,7 @@ const CustomCursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const isTouch = useRef(false);
+  const isMobile = useRef(false);
   
   useEffect(() => {
     const cursor = cursorRef.current;
@@ -13,37 +14,50 @@ const CustomCursor = () => {
     
     if (!cursor || !cursorDot) return;
     
-    // Check if device has touch
-    const checkTouch = () => {
+    // Check if device has touch or is mobile
+    const checkDevice = () => {
       isTouch.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      if (isTouch.current) {
+      isMobile.current = window.innerWidth < 768;
+      
+      if (isTouch.current || isMobile.current) {
         cursor.style.display = 'none';
         cursorDot.style.display = 'none';
         document.body.style.cursor = 'auto';
-        return;
+        return true;
       }
+      return false;
     };
     
-    checkTouch();
+    if (checkDevice()) return;
     
-    if (isTouch.current) return;
+    // Throttle para melhor performance
+    let rafId: number;
+    let lastMoveTime = 0;
     
     const moveCursor = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastMoveTime < 8) return; // ~120fps max
+      lastMoveTime = now;
+      
       const x = e.clientX;
       const y = e.clientY;
       
-      gsap.to(cursor, {
-        x: x,
-        y: y,
-        duration: 0.15,
-        ease: "power2.out"
-      });
+      if (rafId) cancelAnimationFrame(rafId);
       
-      gsap.to(cursorDot, {
-        x: x,
-        y: y,
-        duration: 0.05,
-        ease: "power2.out"
+      rafId = requestAnimationFrame(() => {
+        gsap.to(cursor, {
+          x: x,
+          y: y,
+          duration: 0.1, // Reduzir duração para melhor performance
+          ease: "power1.out"
+        });
+        
+        gsap.to(cursorDot, {
+          x: x,
+          y: y,
+          duration: 0.05,
+          ease: "power1.out"
+        });
       });
     };
     
@@ -51,8 +65,8 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 2,
         opacity: 0.8,
-        duration: 0.2,
-        ease: "power2.out"
+        duration: 0.15, // Reduzir duração
+        ease: "power1.out"
       });
     };
     
@@ -60,8 +74,8 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 1,
         opacity: 1,
-        duration: 0.2,
-        ease: "power2.out"
+        duration: 0.15, // Reduzir duração
+        ease: "power1.out"
       });
     };
     
@@ -79,41 +93,52 @@ const CustomCursor = () => {
       });
     };
     
-    // Event listeners
-    document.addEventListener('mousemove', moveCursor);
+    // Event listeners com throttle
+    const throttledMouseMove = (e: MouseEvent) => {
+      if (!isMobile.current) moveCursor(e);
+    };
+    
+    document.addEventListener('mousemove', throttledMouseMove, { passive: true });
     document.addEventListener('mouseleave', hideCursor);
     document.addEventListener('mouseenter', showCursor);
     
-    // Add hover effects to interactive elements
-    const interactiveElements = document.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
+    // Add hover effects to interactive elements - com debounce
+    let interactiveElements: NodeListOf<Element>;
+    let debounceTimer: number;
     
-    interactiveElements.forEach(element => {
-      element.addEventListener('mouseenter', enlargeCursor);
-      element.addEventListener('mouseleave', shrinkCursor);
-    });
-    
-    // Observer for dynamically added elements
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1) { // Element node
-            const element = node as Element;
-            
-            // Check if the added element is interactive
-            if (element.matches('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer')) {
-              element.addEventListener('mouseenter', enlargeCursor);
-              element.addEventListener('mouseleave', shrinkCursor);
-            }
-            
-            // Check for interactive children
-            const interactiveChildren = element.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
-            interactiveChildren.forEach(child => {
-              child.addEventListener('mouseenter', enlargeCursor);
-              child.addEventListener('mouseleave', shrinkCursor);
-            });
-          }
+    const updateInteractiveElements = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (interactiveElements) {
+          interactiveElements.forEach(element => {
+            element.removeEventListener('mouseenter', enlargeCursor);
+            element.removeEventListener('mouseleave', shrinkCursor);
+          });
+        }
+        
+        interactiveElements = document.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
+        
+        interactiveElements.forEach(element => {
+          element.addEventListener('mouseenter', enlargeCursor, { passive: true });
+          element.addEventListener('mouseleave', shrinkCursor, { passive: true });
         });
+      }, 100);
+    };
+    
+    updateInteractiveElements();
+    
+    // Observer otimizado para elementos dinâmicos
+    const observer = new MutationObserver((mutations) => {
+      let hasChanges = false;
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length > 0) {
+          hasChanges = true;
+        }
       });
+      
+      if (hasChanges) {
+        updateInteractiveElements();
+      }
     });
     
     observer.observe(document.body, {
@@ -122,24 +147,34 @@ const CustomCursor = () => {
     });
     
     return () => {
-      document.removeEventListener('mousemove', moveCursor);
+      if (rafId) cancelAnimationFrame(rafId);
+      clearTimeout(debounceTimer);
+      document.removeEventListener('mousemove', throttledMouseMove);
       document.removeEventListener('mouseleave', hideCursor);
       document.removeEventListener('mouseenter', showCursor);
       
-      interactiveElements.forEach(element => {
-        element.removeEventListener('mouseenter', enlargeCursor);
-        element.removeEventListener('mouseleave', shrinkCursor);
-      });
+      if (interactiveElements) {
+        interactiveElements.forEach(element => {
+          element.removeEventListener('mouseenter', enlargeCursor);
+          element.removeEventListener('mouseleave', shrinkCursor);
+        });
+      }
       
       observer.disconnect();
     };
   }, []);
   
   useEffect(() => {
-    // Set cursor style on body
-    if (!isTouch.current) {
-      document.body.style.cursor = 'none';
-    }
+    // Set cursor style on body - otimizado
+    const checkAndSetCursor = () => {
+      if (!('ontouchstart' in window) && window.innerWidth >= 768) {
+        document.body.style.cursor = 'none';
+      } else {
+        document.body.style.cursor = 'auto';
+      }
+    };
+    
+    checkAndSetCursor();
     
     return () => {
       document.body.style.cursor = 'auto';
