@@ -5,48 +5,45 @@ import gsap from 'gsap';
 const CustomCursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
+  const isTouch = useRef(false);
   
   useEffect(() => {
-    // Não renderizar cursor no mobile/tablet - economia de recursos
-    const isMobile = window.innerWidth < 1024 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    if (isMobile) {
-      return;
-    }
-
     const cursor = cursorRef.current;
     const cursorDot = cursorDotRef.current;
     
     if (!cursor || !cursorDot) return;
     
-    // Performance otimizada apenas para desktop
-    let rafId: number;
-    let lastMoveTime = 0;
+    // Check if device has touch
+    const checkTouch = () => {
+      isTouch.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (isTouch.current) {
+        cursor.style.display = 'none';
+        cursorDot.style.display = 'none';
+        document.body.style.cursor = 'auto';
+        return;
+      }
+    };
+    
+    checkTouch();
+    
+    if (isTouch.current) return;
     
     const moveCursor = (e: MouseEvent) => {
-      const now = Date.now();
-      if (now - lastMoveTime < 16) return; // 60fps max
-      lastMoveTime = now;
-      
       const x = e.clientX;
       const y = e.clientY;
       
-      if (rafId) cancelAnimationFrame(rafId);
+      gsap.to(cursor, {
+        x: x,
+        y: y,
+        duration: 0.15,
+        ease: "power2.out"
+      });
       
-      rafId = requestAnimationFrame(() => {
-        gsap.to(cursor, {
-          x: x,
-          y: y,
-          duration: 0.1,
-          ease: "power1.out"
-        });
-        
-        gsap.to(cursorDot, {
-          x: x,
-          y: y,
-          duration: 0.05,
-          ease: "power1.out"
-        });
+      gsap.to(cursorDot, {
+        x: x,
+        y: y,
+        duration: 0.05,
+        ease: "power2.out"
       });
     };
     
@@ -54,8 +51,8 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 2,
         opacity: 0.8,
-        duration: 0.15,
-        ease: "power1.out"
+        duration: 0.2,
+        ease: "power2.out"
       });
     };
     
@@ -63,8 +60,8 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 1,
         opacity: 1,
-        duration: 0.15,
-        ease: "power1.out"
+        duration: 0.2,
+        ease: "power2.out"
       });
     };
     
@@ -82,20 +79,49 @@ const CustomCursor = () => {
       });
     };
     
-    document.addEventListener('mousemove', moveCursor, { passive: true });
+    // Event listeners
+    document.addEventListener('mousemove', moveCursor);
     document.addEventListener('mouseleave', hideCursor);
     document.addEventListener('mouseenter', showCursor);
     
-    // Elementos interativos - simplificado
+    // Add hover effects to interactive elements
     const interactiveElements = document.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
     
     interactiveElements.forEach(element => {
-      element.addEventListener('mouseenter', enlargeCursor, { passive: true });
-      element.addEventListener('mouseleave', shrinkCursor, { passive: true });
+      element.addEventListener('mouseenter', enlargeCursor);
+      element.addEventListener('mouseleave', shrinkCursor);
+    });
+    
+    // Observer for dynamically added elements
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) { // Element node
+            const element = node as Element;
+            
+            // Check if the added element is interactive
+            if (element.matches('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer')) {
+              element.addEventListener('mouseenter', enlargeCursor);
+              element.addEventListener('mouseleave', shrinkCursor);
+            }
+            
+            // Check for interactive children
+            const interactiveChildren = element.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
+            interactiveChildren.forEach(child => {
+              child.addEventListener('mouseenter', enlargeCursor);
+              child.addEventListener('mouseleave', shrinkCursor);
+            });
+          }
+        });
+      });
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
     });
     
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
       document.removeEventListener('mousemove', moveCursor);
       document.removeEventListener('mouseleave', hideCursor);
       document.removeEventListener('mouseenter', showCursor);
@@ -104,26 +130,21 @@ const CustomCursor = () => {
         element.removeEventListener('mouseenter', enlargeCursor);
         element.removeEventListener('mouseleave', shrinkCursor);
       });
+      
+      observer.disconnect();
     };
   }, []);
   
   useEffect(() => {
-    // Cursor style apenas para desktop
-    if (window.innerWidth >= 1024 && !('ontouchstart' in window)) {
+    // Set cursor style on body
+    if (!isTouch.current) {
       document.body.style.cursor = 'none';
-    } else {
-      document.body.style.cursor = 'auto';
     }
     
     return () => {
       document.body.style.cursor = 'auto';
     };
   }, []);
-  
-  // Não renderizar elementos no mobile
-  if (window.innerWidth < 1024 || 'ontouchstart' in window) {
-    return null;
-  }
   
   return (
     <>

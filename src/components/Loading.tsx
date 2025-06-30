@@ -6,93 +6,129 @@ const Loading = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [progress, setProgress] = useState(0);
+  const [logoScale, setLogoScale] = useState(0.8);
   const [logoOpacity, setLogoOpacity] = useState(0);
-
-  // Detectar mobile para otimizações máximas
-  const isMobile = window.innerWidth < 768;
+  const [gradientPosition, setGradientPosition] = useState(0);
 
   useEffect(() => {
-    // Animações muito simplificadas no mobile
-    const timer1 = setTimeout(() => {
+    // Animate logo entrance
+    let timer1 = setTimeout(() => {
       setLogoOpacity(1);
-    }, isMobile ? 50 : 200);
+    }, 200);
+    
+    let timer2 = setTimeout(() => {
+      setLogoScale(1.2);
+    }, 400);
 
-    // Progress bar mais rápida no mobile
-    const intervalId = setInterval(() => {
-      setProgress((oldProgress) => {
-        if (oldProgress < 85) {
-          return oldProgress + (isMobile ? 15 : 8); // Muito mais rápido no mobile
-        } else if (oldProgress < 99) {
-          return oldProgress + (isMobile ? 5 : 2);
-        }
+    // Animate gradient position - smooth movement without repetition
+    const gradientInterval = setInterval(() => {
+      setGradientPosition(prev => {
+        // Move from 0 to 100 and then stop
+        if (prev < 100) return prev + 0.5;
         return 100;
       });
-    }, isMobile ? 50 : 150); // Intervalo muito menor no mobile
+    }, 50);
+
+    // Progress bar animation - smooth and without repetition
+    const intervalId = setInterval(() => {
+      setProgress((oldProgress) => {
+        // Increase progressively and decelerate near the end
+        if (oldProgress < 85) {
+          return oldProgress + Math.random() * 5;
+        } else if (oldProgress < 99) {
+          return oldProgress + Math.random() * 1.5;
+        }
+        return 100; // Cap at 100%
+      });
+    }, 150);
 
     return () => {
       clearTimeout(timer1);
+      clearTimeout(timer2);
       clearInterval(intervalId);
+      clearInterval(gradientInterval);
     };
-  }, [isMobile]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black overflow-hidden">
-      {/* Background muito simplificado no mobile */}
-      {!isMobile && (
-        <div className="absolute inset-0 opacity-10 overflow-hidden">
-          {[...Array(8)].map((_, i) => (
-            <div 
-              key={`vein-${i}`} 
-              className="absolute bg-white/20"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                height: `${Math.random() * 40 + 20}%`,
-                width: `${Math.random() * 0.8 + 0.2}%`,
-                transform: `rotate(${Math.random() * 360}deg)`,
-                opacity: Math.random() * 0.3 + 0.1,
-                filter: 'blur(3px)'
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* Animated marbled background veins */}
+      <div className="absolute inset-0 opacity-20 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div 
+            key={`vein-main-${i}`} 
+            className="absolute bg-white/30"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              height: `${Math.random() * 70 + 30}%`,
+              width: `${Math.random() * 1 + 0.3}%`,
+              transform: `rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.5 + 0.8})`,
+              opacity: Math.random() * 0.4 + 0.2,
+              filter: 'blur(8px)',
+              transition: 'all 0.5s ease-in-out'
+            }}
+          />
+        ))}
+        {[...Array(30)].map((_, i) => (
+          <div 
+            key={`vein-small-${i}`} 
+            className="absolute bg-white/20"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              height: `${Math.random() * 20 + 5}%`,
+              width: `${Math.random() * 0.5 + 0.1}%`,
+              transform: `rotate(${Math.random() * 360}deg)`,
+              opacity: Math.random() * 0.3 + 0.1,
+              filter: 'blur(4px)',
+              transition: 'all 0.8s ease-in-out'
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* Animated gradient overlay */}
+      <div 
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: `radial-gradient(circle at ${gradientPosition}% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0) 50%)`,
+          transition: 'background 0.5s ease'
+        }}
+      />
 
-      {/* Logo simplificado */}
+      {/* Logo with enhanced animation */}
       <div 
         className="relative z-10 flex flex-col items-center"
         style={{
+          transform: `scale(${logoScale})`,
           opacity: logoOpacity,
-          transition: isMobile ? 'opacity 0.3s ease' : 'opacity 0.8s ease'
+          transition: 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.2s ease-in-out'
         }}
       >
         <img 
           src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" 
           alt="Serafim & Trombela" 
-          className={`${isMobile ? 'w-48' : 'w-72'} h-auto mb-8 brightness-150`}
+          className="w-72 h-auto mb-16 brightness-150" 
           style={{
-            filter: isMobile ?
-              'drop-shadow(0 0 8px rgba(255,255,255,0.2))' :
-              'drop-shadow(0 0 20px rgba(255,255,255,0.3))',
+            filter: 'drop-shadow(0 0 25px rgba(255,255,255,0.3)) drop-shadow(5px 8px 15px rgba(0,0,0,0.95))',
             objectFit: 'contain'
           }}
         />
         
-        {/* Loading bar simplificada */}
-        <div className={`${isMobile ? 'w-48' : 'w-80'} h-[1.5px] bg-white/10 relative overflow-hidden mb-6 rounded-full`}>
+        {/* Elegant loading bar with marble-inspired design */}
+        <div className="w-80 h-[2px] bg-white/10 relative overflow-hidden mb-8 rounded-full">
           <div 
-            className="absolute top-0 left-0 h-full rounded-full transition-all duration-200 ease-out" 
+            className="absolute top-0 left-0 h-full rounded-full transition-all duration-300 ease-out" 
             style={{ 
               width: `${progress}%`,
-              background: 'linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 100%)',
-              boxShadow: isMobile ? 
-                '0 0 3px 0.5px rgba(255,255,255,0.3)' : 
-                '0 0 8px 1px rgba(255,255,255,0.4)'
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.5) 100%)',
+              boxShadow: '0 0 10px 1px rgba(255,255,255,0.5)'
             }}
           />
         </div>
         
-        <p className={`${isMobile ? 'text-base' : 'text-xl'} font-canela text-white/80`}>
+        <p className="text-xl font-canela text-white/80">
           Carregando...
         </p>
       </div>
