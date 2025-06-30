@@ -7,11 +7,10 @@ const CustomCursor = () => {
   const cursorDotRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Desabilitar apenas no mobile/tablet
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobile = window.innerWidth < 768;
+    // Não renderizar cursor no mobile/tablet - economia de recursos
+    const isMobile = window.innerWidth < 1024 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
-    if (isTouchDevice || isMobile) {
+    if (isMobile) {
       return;
     }
 
@@ -20,7 +19,7 @@ const CustomCursor = () => {
     
     if (!cursor || !cursorDot) return;
     
-    // Throttle para desktop
+    // Performance otimizada apenas para desktop
     let rafId: number;
     let lastMoveTime = 0;
     
@@ -38,14 +37,14 @@ const CustomCursor = () => {
         gsap.to(cursor, {
           x: x,
           y: y,
-          duration: 0.08,
+          duration: 0.1,
           ease: "power1.out"
         });
         
         gsap.to(cursorDot, {
           x: x,
           y: y,
-          duration: 0.04,
+          duration: 0.05,
           ease: "power1.out"
         });
       });
@@ -55,7 +54,7 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 2,
         opacity: 0.8,
-        duration: 0.1,
+        duration: 0.15,
         ease: "power1.out"
       });
     };
@@ -64,7 +63,7 @@ const CustomCursor = () => {
       gsap.to(cursor, {
         scale: 1,
         opacity: 1,
-        duration: 0.1,
+        duration: 0.15,
         ease: "power1.out"
       });
     };
@@ -72,14 +71,14 @@ const CustomCursor = () => {
     const hideCursor = () => {
       gsap.to([cursor, cursorDot], {
         opacity: 0,
-        duration: 0.08
+        duration: 0.1
       });
     };
     
     const showCursor = () => {
       gsap.to([cursor, cursorDot], {
         opacity: 1,
-        duration: 0.08
+        duration: 0.1
       });
     };
     
@@ -87,8 +86,8 @@ const CustomCursor = () => {
     document.addEventListener('mouseleave', hideCursor);
     document.addEventListener('mouseenter', showCursor);
     
-    // Elementos interativos
-    const interactiveElements = document.querySelectorAll('a, button, [role="button"], [onclick]');
+    // Elementos interativos - simplificado
+    const interactiveElements = document.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], .hover-effect, .cursor-pointer');
     
     interactiveElements.forEach(element => {
       element.addEventListener('mouseenter', enlargeCursor, { passive: true });
@@ -109,9 +108,11 @@ const CustomCursor = () => {
   }, []);
   
   useEffect(() => {
-    // Cursor customizado apenas no desktop
-    if (window.innerWidth >= 768 && !('ontouchstart' in window)) {
+    // Cursor style apenas para desktop
+    if (window.innerWidth >= 1024 && !('ontouchstart' in window)) {
       document.body.style.cursor = 'none';
+    } else {
+      document.body.style.cursor = 'auto';
     }
     
     return () => {
@@ -119,8 +120,8 @@ const CustomCursor = () => {
     };
   }, []);
   
-  // Não renderizar no mobile/tablet
-  if (typeof window !== 'undefined' && (window.innerWidth < 768 || 'ontouchstart' in window)) {
+  // Não renderizar elementos no mobile
+  if (window.innerWidth < 1024 || 'ontouchstart' in window) {
     return null;
   }
   

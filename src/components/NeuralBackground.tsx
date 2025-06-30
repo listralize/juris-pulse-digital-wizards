@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 
 const NeuralBackground: React.FC = () => {
@@ -7,15 +8,15 @@ const NeuralBackground: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Detectar mobile e otimizar
+    // Detectar mobile e não renderizar se for mobile para economia máxima
     const isMobile = window.innerWidth < 768;
-    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
     
-    // Configurações otimizadas por dispositivo
-    const devicePixelRatio = isMobile ? 1 : (isTablet ? 1.5 : Math.min(window.devicePixelRatio, 2));
-    const scaleFactor = isMobile ? 0.8 : (isTablet ? 0.9 : 1);
-    const targetFPS = isMobile ? 24 : (isTablet ? 30 : 60);
-    const frameInterval = 1000 / targetFPS;
+    if (isMobile) {
+      // No mobile, não renderizar o background neural
+      return;
+    }
+
+    const devicePixelRatio = Math.min(window.devicePixelRatio, 1.5); // Limitar DPR
 
     const pointer = {
       x: 0,
@@ -27,9 +28,9 @@ const NeuralBackground: React.FC = () => {
     let uniforms: any;
     let gl: WebGLRenderingContext | null = null;
     let animationId: number;
-    let lastRenderTime = 0;
 
     const initShader = () => {
+      // Shader otimizado para performance
       const vsSource = `
         precision mediump float;
         varying vec2 vUv;
@@ -40,101 +41,9 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
-      // Shader com intensidade restaurada
-      const fsSource = isMobile ? `
+      // Shader simplificado
+      const fsSource = `
         precision lowp float;
-        varying vec2 vUv;
-        uniform float u_time;
-        uniform float u_ratio;
-        uniform vec2 u_pointer_position;
-
-        vec2 rotate(vec2 uv, float th) {
-          return mat2(cos(th), sin(th), -sin(th), cos(th)) * uv;
-        }
-
-        float neuro_shape(vec2 uv, float t) {
-          vec2 sine_acc = vec2(0.);
-          vec2 res = vec2(0.);
-          float scale = 6.;
-
-          for (int j = 0; j < 6; j++) {
-            uv = rotate(uv, 1.);
-            sine_acc = rotate(sine_acc, 1.);
-            vec2 layer = uv * scale + float(j) + sine_acc - t;
-            sine_acc += sin(layer);
-            res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.2;
-          }
-          return res.x + res.y;
-        }
-
-        void main() {
-          vec2 uv = .5 * vUv;
-          uv.x *= u_ratio;
-
-          float t = .0008 * u_time;
-          float noise = neuro_shape(uv, t);
-
-          noise = 1.8 * pow(noise, 1.4);
-          noise = max(.0, noise - .2);
-          noise *= (1. - length(vUv - .5));
-
-          vec3 color = vec3(0.9, 0.9, 0.9);
-          color = color * noise;
-
-          gl_FragColor = vec4(color, noise * 0.6);
-        }
-      ` : (isTablet ? `
-        precision mediump float;
-        varying vec2 vUv;
-        uniform float u_time;
-        uniform float u_ratio;
-        uniform vec2 u_pointer_position;
-
-        vec2 rotate(vec2 uv, float th) {
-          return mat2(cos(th), sin(th), -sin(th), cos(th)) * uv;
-        }
-
-        float neuro_shape(vec2 uv, float t, float p) {
-          vec2 sine_acc = vec2(0.);
-          vec2 res = vec2(0.);
-          float scale = 7.;
-
-          for (int j = 0; j < 8; j++) {
-            uv = rotate(uv, 1.);
-            sine_acc = rotate(sine_acc, 1.);
-            vec2 layer = uv * scale + float(j) + sine_acc - t;
-            sine_acc += sin(layer) + 1.5 * p;
-            res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.2;
-          }
-          return res.x + res.y;
-        }
-
-        void main() {
-          vec2 uv = .5 * vUv;
-          uv.x *= u_ratio;
-
-          vec2 pointer = vUv - u_pointer_position;
-          pointer.x *= u_ratio;
-          float p = clamp(length(pointer), 0., 1.);
-          p = .3 * pow(1. - p, 2.);
-
-          float t = .0007 * u_time;
-          float noise = neuro_shape(uv, t, p);
-
-          noise = 1.3 * pow(noise, 1.8);
-          noise += pow(noise, 5.);
-          noise = max(.0, noise - .3);
-          noise *= (1. - length(vUv - .5));
-
-          vec3 color = vec3(0.8, 0.8, 0.8);
-          color = color * noise;
-
-          gl_FragColor = vec4(color, noise * 0.4);
-        }
-      ` : `
-        precision mediump float;
         varying vec2 vUv;
         uniform float u_time;
         uniform float u_ratio;
@@ -148,15 +57,16 @@ const NeuralBackground: React.FC = () => {
         float neuro_shape(vec2 uv, float t, float p) {
           vec2 sine_acc = vec2(0.);
           vec2 res = vec2(0.);
-          float scale = 8.;
+          float scale = 4.;
 
-          for (int j = 0; j < 12; j++) {
+          // Reduzir iterações para melhor performance
+          for (int j = 0; j < 6; j++) {
             uv = rotate(uv, 1.);
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
-            sine_acc += sin(layer) + 2.0 * p;
+            sine_acc += sin(layer) + 1.5 * p;
             res += (.5 + .5 * cos(layer)) / scale;
-            scale *= 1.18;
+            scale *= (1.05);
           }
           return res.x + res.y;
         }
@@ -168,28 +78,34 @@ const NeuralBackground: React.FC = () => {
           vec2 pointer = vUv - u_pointer_position;
           pointer.x *= u_ratio;
           float p = clamp(length(pointer), 0., 1.);
-          p = .4 * pow(1. - p, 2.);
+          p = .2 * pow(1. - p, 2.);
 
-          float t = .0009 * u_time;
+          float t = .0003 * u_time;
           vec3 color = vec3(0.);
 
           float noise = neuro_shape(uv, t, p);
 
-          noise = 1.4 * pow(noise, 2.5);
-          noise += pow(noise, 8.);
-          noise = max(.0, noise - .4);
+          noise = 0.8 * pow(noise, 2.);
+          noise += pow(noise, 6.);
+          noise = max(.0, noise - .3);
           noise *= (1. - length(vUv - .5));
 
-          color = vec3(0.85, 0.85, 0.85);
-          color += vec3(0.15, 0.15, 0.15) * sin(3.0 * u_scroll_progress + 1.5);
+          color = vec3(0.6, 0.6, 0.6);
+          color += vec3(0.1, 0.1, 0.1) * sin(1.5 * u_scroll_progress + 1.0);
 
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.5);
+          gl_FragColor = vec4(color, noise * 0.15);
         }
-      `);
+      `;
 
-      const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      const context = canvas.getContext("webgl", {
+        alpha: true,
+        antialias: false, // Desabilitar antialiasing para performance
+        depth: false,
+        stencil: false,
+        powerPreference: "low-power" // Preferir baixo consumo
+      }) || canvas.getContext("experimental-webgl");
       
       if (!context) {
         console.warn("WebGL is not supported by your browser.");
@@ -269,6 +185,11 @@ const NeuralBackground: React.FC = () => {
       return gl;
     };
 
+    // Framerate limitado para desktop
+    let lastRenderTime = 0;
+    const targetFPS = 45; // Reduzir FPS para melhor performance
+    const frameInterval = 1000 / targetFPS;
+
     const render = (currentTime: number) => {
       if (!gl || !uniforms) return;
 
@@ -278,16 +199,14 @@ const NeuralBackground: React.FC = () => {
       }
       lastRenderTime = currentTime;
 
-      const smoothFactor = isMobile ? 0.1 : (isTablet ? 0.15 : 0.25);
+      // Suavizar movimento do pointer
+      const smoothFactor = 0.15;
       pointer.x += (pointer.tX - pointer.x) * smoothFactor;
       pointer.y += (pointer.tY - pointer.y) * smoothFactor;
 
       gl.uniform1f(uniforms.u_time, currentTime);
       gl.uniform2f(uniforms.u_pointer_position, pointer.x / window.innerWidth, 1 - pointer.y / window.innerHeight);
-      
-      if (!isMobile && uniforms.u_scroll_progress) {
-        gl.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
-      }
+      gl.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       animationId = requestAnimationFrame(render);
@@ -296,6 +215,8 @@ const NeuralBackground: React.FC = () => {
     const resizeCanvas = () => {
       if (!canvas || !gl || !uniforms) return;
       
+      // Resolução reduzida para performance
+      const scaleFactor = 0.8;
       canvas.width = window.innerWidth * devicePixelRatio * scaleFactor;
       canvas.height = window.innerHeight * devicePixelRatio * scaleFactor;
       gl.uniform1f(uniforms.u_ratio, canvas.width / canvas.height);
@@ -308,58 +229,51 @@ const NeuralBackground: React.FC = () => {
     };
 
     const setupEvents = () => {
+      // Throttle otimizado
       let eventThrottle: ReturnType<typeof setTimeout>;
-      const throttleTime = isMobile ? 100 : (isTablet ? 60 : 20);
-      
       const handlePointerMove = (e: PointerEvent) => {
         clearTimeout(eventThrottle);
         eventThrottle = setTimeout(() => {
           updateMousePosition(e.clientX, e.clientY);
-        }, throttleTime);
+        }, 32); // ~30fps para eventos
       };
 
-      if (!isMobile) {
-        window.addEventListener("pointermove", handlePointerMove);
-      }
-      
-      if (isMobile || isTablet) {
-        window.addEventListener("touchstart", (e) => {
-          updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
-        });
-      }
+      window.addEventListener("pointermove", handlePointerMove, { passive: true });
+      window.addEventListener("click", (e) => {
+        updateMousePosition(e.clientX, e.clientY);
+      });
     };
 
-    // Initialize
+    // Initialize everything
     if (initShader()) {
       setupEvents();
       resizeCanvas();
-      
-      let resizeThrottle: ReturnType<typeof setTimeout>;
-      const handleResize = () => {
-        clearTimeout(resizeThrottle);
-        resizeThrottle = setTimeout(resizeCanvas, isMobile ? 200 : 100);
-      };
-      
-      window.addEventListener("resize", handleResize);
+      window.addEventListener("resize", resizeCanvas, { passive: true });
       animationId = requestAnimationFrame(render);
     }
 
+    // Cleanup
     return () => {
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
-      window.removeEventListener("resize", () => {});
+      window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("pointermove", () => {});
-      window.removeEventListener("touchstart", () => {});
+      window.removeEventListener("click", () => {});
     };
   }, []);
+
+  // Não renderizar no mobile
+  if (window.innerWidth < 768) {
+    return null;
+  }
 
   return (
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none -z-10"
       style={{ 
-        opacity: window.innerWidth < 768 ? 0.7 : (window.innerWidth < 1024 ? 0.5 : 0.6),
+        opacity: 0.25, // Reduzir opacidade
         width: '100vw',
         height: '100vh',
         maxWidth: 'none'

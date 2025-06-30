@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 import CustomCursor from '../components/CustomCursor';
 import Navbar from '../components/navbar';
@@ -12,7 +12,7 @@ import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Index = () => {
   const { theme } = useTheme();
@@ -22,62 +22,67 @@ const Index = () => {
   const isTablet = useIsTablet();
 
   useEffect(() => {
-    const body = document.body;
-    const html = document.documentElement;
-    
-    if (isMobile || isTablet) {
-      // Mobile/Tablet: configuração natural otimizada
-      body.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-      body.style.height = 'auto';
-      html.style.height = 'auto';
-      body.style.overflowX = 'hidden';
-      html.style.overflowX = 'hidden';
-      body.style.margin = '0';
-      body.style.padding = '0';
-      // Otimizações de performance para mobile (sem webkit)
-      body.style.transform = 'translate3d(0,0,0)';
-    } else {
-      // Desktop: configuração original
-      body.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
-      body.style.height = '100vh';
-      html.style.height = '100vh';
-      body.style.maxHeight = '100vh';
-      html.style.maxHeight = '100vh';
-    }
-    
-    // Cursor apenas desktop
-    if (window.innerWidth >= 1024 && !('ontouchstart' in window)) {
-      body.style.cursor = 'none';
-    } else {
-      body.style.cursor = 'auto';
-    }
-    
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-    
-    return () => {
-      if ('scrollRestoration' in history) {
-        history.scrollRestoration = 'auto';
+    try {
+      const body = document.body;
+      const html = document.documentElement;
+      
+      if (isMobile || isTablet) {
+        // Mobile/Tablet: configuração natural sem forçar alturas
+        body.style.overflow = 'auto';
+        html.style.overflow = 'auto';
+        body.style.height = 'auto';
+        html.style.height = 'auto';
+        body.style.maxHeight = 'none';
+        html.style.maxHeight = 'none';
+        body.style.minHeight = 'auto';
+        html.style.minHeight = 'auto';
+        body.style.overflowX = 'hidden';
+        html.style.overflowX = 'hidden';
+        body.style.margin = '0';
+        body.style.padding = '0';
+      } else {
+        // Desktop: configuração original
+        body.style.overflow = 'hidden';
+        html.style.overflow = 'hidden';
+        body.style.height = '100vh';
+        html.style.height = '100vh';
+        body.style.maxHeight = '100vh';
+        html.style.maxHeight = '100vh';
       }
-    };
+      
+      if (window.innerWidth >= 768) {
+        body.style.cursor = 'none';
+      } else {
+        body.style.cursor = 'auto';
+      }
+      
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      
+      return () => {
+        if ('scrollRestoration' in history) {
+          history.scrollRestoration = 'auto';
+        }
+      };
+    } catch (error) {
+      console.error('❌ Erro ao configurar scroll:', error);
+    }
   }, [isMobile, isTablet]);
   
-  // Legal popup com delay menor no mobile
+  // Verificar se os termos já foram aceitos e mostrar popup se necessário
   useEffect(() => {
     const checkTermsAcceptance = () => {
       const accepted = localStorage.getItem('legal-terms-accepted');
       if (!accepted) {
         setTimeout(() => {
           setShowLegalPopup(true);
-        }, isMobile ? 1500 : 3000); // Delay menor no mobile
+        }, 3000);
       }
     };
 
     checkTermsAcceptance();
-  }, [isMobile]);
+  }, []);
   
   return (
     <div 
@@ -88,34 +93,29 @@ const Index = () => {
       }`}
       style={{ 
         position: 'relative',
+        // Mobile/Tablet: não forçar alturas, deixar natural
         minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
         height: (isMobile || isTablet) ? 'auto' : '100vh', 
         maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
         overflow: (isMobile || isTablet) ? 'auto' : 'hidden',
         margin: 0,
-        padding: 0,
-        // Otimizações CSS para mobile
-        ...(isMobile && {
-          backfaceVisibility: 'hidden',
-          perspective: '1000px'
-        })
+        padding: 0
       }}
     >
-      {/* Background gradients simplificados no mobile */}
+      {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      {!isMobile && (
-        <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
-      )}
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
 
-      {/* Componentes condicionais */}
-      {!isMobile && <CustomCursor />}
+      <CustomCursor />
       <Navbar />
       <WhatsAppButton />
       
+      {/* FloatingFooter apenas para desktop */}
       {!isMobile && !isTablet && <FloatingFooter />}
       
       <SectionsContainer />
 
+      {/* Popup Legal discreto */}
       <LegalPopup 
         isOpen={showLegalPopup} 
         onClose={() => setShowLegalPopup(false)} 
