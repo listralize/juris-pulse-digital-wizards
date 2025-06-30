@@ -8,7 +8,19 @@ const NeuralBackground: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const devicePixelRatio = Math.min(window.devicePixelRatio, 2);
+    // Detectar dispositivo móvel e capacidades
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    // Ajustar qualidade baseado no dispositivo
+    let devicePixelRatio = window.devicePixelRatio || 1;
+    if (isMobile) {
+      // Limitar DPR em dispositivos móveis para melhor performance
+      devicePixelRatio = Math.min(devicePixelRatio, 1.5);
+    } else {
+      devicePixelRatio = Math.min(devicePixelRatio, 2);
+    }
 
     const pointer = {
       x: 0,
@@ -31,8 +43,9 @@ const NeuralBackground: React.FC = () => {
         }
       `;
 
+      // Shader otimizado para mobile com menos iterações
       const fsSource = `
-        precision mediump float;
+        precision ${isMobile ? 'lowp' : 'mediump'} float;
         varying vec2 vUv;
         uniform float u_time;
         uniform float u_ratio;
@@ -47,8 +60,13 @@ const NeuralBackground: React.FC = () => {
           vec2 sine_acc = vec2(0.);
           vec2 res = vec2(0.);
           float scale = 8.;
+          
+          // Menos iterações em mobile para melhor performance
+          int iterations = ${isMobile ? '8' : '12'};
 
-          for (int j = 0; j < 15; j++) {
+          for (int j = 0; j < ${isMobile ? '8' : '12'}; j++) {
+            if (j >= iterations) break;
+            
             uv = rotate(uv, 1.);
             sine_acc = rotate(sine_acc, 1.);
             vec2 layer = uv * scale + float(j) + sine_acc - t;
@@ -68,7 +86,7 @@ const NeuralBackground: React.FC = () => {
           float p = clamp(length(pointer), 0., 1.);
           p = .5 * pow(1. - p, 2.);
 
-          float t = .001 * u_time;
+          float t = .001 * u_time * ${isMobile ? '0.7' : '1.0'}; // Velocidade reduzida no mobile
           vec3 color = vec3(0.);
 
           float noise = neuro_shape(uv, t, p);
@@ -78,18 +96,31 @@ const NeuralBackground: React.FC = () => {
           noise = max(.0, noise - .5);
           noise *= (1. - length(vUv - .5));
 
-          // Black and white color palette
-          color = vec3(0.8, 0.8, 0.8); // Base white/gray color
-          color += vec3(0.2, 0.2, 0.2) * sin(3.0 * u_scroll_progress + 1.5); // White variation
+          // Cores otimizadas
+          color = vec3(0.6, 0.6, 0.6);
+          color += vec3(0.4, 0.4, 0.4) * sin(3.0 * u_scroll_progress + 1.5);
 
           color = color * noise;
 
-          gl_FragColor = vec4(color, noise * 0.3);
+          gl_FragColor = vec4(color, noise * ${isMobile ? '0.5' : '0.4'});
         }
       `;
 
-      // Fix TypeScript error by properly getting WebGL context
-      const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      const context = canvas.getContext("webgl", {
+        alpha: true,
+        antialias: false, // Desabilitar antialiasing em mobile para performance
+        depth: false,
+        stencil: false,
+        preserveDrawingBuffer: false,
+        powerPreference: isMobile ? "default" : "high-performance"
+      }) || canvas.getContext("experimental-webgl", {
+        alpha: true,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        preserveDrawingBuffer: false,
+        powerPreference: isMobile ? "default" : "high-performance"
+      });
       
       if (!context) {
         console.warn("WebGL is not supported by your browser.");
@@ -169,28 +200,40 @@ const NeuralBackground: React.FC = () => {
       return gl;
     };
 
-    const render = () => {
+    let animationId: number;
+    let lastFrameTime = 0;
+    const targetFPS = isMobile ? 30 : 60; // FPS reduzido em mobile
+    const frameInterval = 1000 / targetFPS;
+
+    const render = (currentTime: number = 0) => {
       if (!gl || !uniforms) return;
 
-      const currentTime = performance.now();
+      // Throttle de FPS para dispositivos móveis
+      if (currentTime - lastFrameTime < frameInterval) {
+        animationId = requestAnimationFrame(render);
+        return;
+      }
+      lastFrameTime = currentTime;
 
-      pointer.x += (pointer.tX - pointer.x) * .2;
-      pointer.y += (pointer.tY - pointer.y) * .2;
+      pointer.x += (pointer.tX - pointer.x) * (isMobile ? 0.1 : 0.2);
+      pointer.y += (pointer.tY - pointer.y) * (isMobile ? 0.1 : 0.2);
 
       gl.uniform1f(uniforms.u_time, currentTime);
       gl.uniform2f(uniforms.u_pointer_position, pointer.x / window.innerWidth, 1 - pointer.y / window.innerHeight);
       gl.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      requestAnimationFrame(render);
+      animationId = requestAnimationFrame(render);
     };
 
     const resizeCanvas = () => {
       if (!canvas || !gl || !uniforms) return;
       
-      // Set canvas to full viewport dimensions
-      canvas.width = window.innerWidth * devicePixelRatio;
-      canvas.height = window.innerHeight * devicePixelRatio;
+      // Reduzir resolução em dispositivos móveis
+      const scale = isMobile ? 0.75 : 1;
+      canvas.width = window.innerWidth * devicePixelRatio * scale;
+      canvas.height = window.innerHeight * devicePixelRatio * scale;
+      
       gl.uniform1f(uniforms.u_ratio, canvas.width / canvas.height);
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
@@ -201,15 +244,22 @@ const NeuralBackground: React.FC = () => {
     };
 
     const setupEvents = () => {
+      // Otimizar eventos para mobile
+      const eventOptions = isMobile ? { passive: true } : false;
+      
       window.addEventListener("pointermove", (e) => {
         updateMousePosition(e.clientX, e.clientY);
-      });
+      }, eventOptions);
+      
       window.addEventListener("touchmove", (e) => {
-        updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
-      });
+        if (e.touches.length > 0) {
+          updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, eventOptions);
+      
       window.addEventListener("click", (e) => {
         updateMousePosition(e.clientX, e.clientY);
-      });
+      }, eventOptions);
     };
 
     // Initialize everything
@@ -217,11 +267,14 @@ const NeuralBackground: React.FC = () => {
       setupEvents();
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
-      render();
+      animationId = requestAnimationFrame(render);
     }
 
     // Cleanup
     return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("pointermove", () => {});
       window.removeEventListener("touchmove", () => {});
@@ -234,7 +287,7 @@ const NeuralBackground: React.FC = () => {
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none -z-10"
       style={{ 
-        opacity: 0.4,
+        opacity: 0.6,
         width: '100vw',
         height: '100vh',
         maxWidth: 'none'
