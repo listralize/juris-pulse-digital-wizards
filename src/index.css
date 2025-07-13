@@ -207,30 +207,6 @@
 }
 
 @layer components {
-  /* Enhanced Cursor - disabled on mobile */
-  .custom-cursor {
-    @apply fixed pointer-events-none z-[9999] w-6 h-6 border border-white/50 rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ease-out;
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
-    mix-blend-mode: difference;
-  }
-
-  @media (max-width: 767px) {
-    .custom-cursor {
-      display: none;
-    }
-  }
-
-  .custom-cursor-dot {
-    @apply fixed pointer-events-none z-[9999] w-2 h-2 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out;
-    mix-blend-mode: difference;
-  }
-
-  @media (max-width: 767px) {
-    .custom-cursor-dot {
-      display: none;
-    }
-  }
 
   /* Premium Badge - Futurística Melhorada */
   .premium-badge {
@@ -541,5 +517,31 @@
   p, div, span {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Força cursor padrão em todo o site */
+* {
+  cursor: auto !important;
+}
+
+/* Tablet responsiveness */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  
+  /* Ajustes de texto para tablet */
+  .text-4xl { font-size: 2rem; }
+  .text-5xl { font-size: 2.5rem; }
+  .text-6xl { font-size: 3rem; }
+}
+
+/* Desktop responsiveness */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
   }
 }

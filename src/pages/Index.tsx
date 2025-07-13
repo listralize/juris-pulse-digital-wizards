@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
-import CustomCursor from '../components/CustomCursor';
+
 import Navbar from '../components/navbar';
 import WhatsAppButton from '../components/WhatsAppButton';
 import FloatingFooter from '../components/FloatingFooter';
@@ -50,11 +50,8 @@ const Index = () => {
         html.style.maxHeight = '100vh';
       }
       
-      if (window.innerWidth >= 768) {
-        body.style.cursor = 'none';
-      } else {
-        body.style.cursor = 'auto';
-      }
+      // Usar cursor padrão do navegador em todos os dispositivos
+      body.style.cursor = 'auto';
       
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
@@ -106,7 +103,7 @@ const Index = () => {
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
 
-      <CustomCursor />
+      
       <Navbar />
       <WhatsAppButton />
       

@@ -5,7 +5,7 @@ import Navbar from '../components/navbar';
 import { useTheme } from '../components/ThemeProvider';
 import PageBanner from '../components/PageBanner';
 import { Footer } from '../components/sections';
-import CustomCursor from '../components/CustomCursor';
+
 
 const NotFound = () => {
   const { theme } = useTheme();
@@ -13,7 +13,7 @@ const NotFound = () => {
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`}>
-      <CustomCursor />
+      
       <Navbar />
       
       <PageBanner 
