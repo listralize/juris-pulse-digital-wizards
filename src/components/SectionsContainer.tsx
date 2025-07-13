@@ -67,7 +67,7 @@ const SectionsContainer: React.FC = () => {
 
   return (
     <div 
-      className="relative w-full app-container center-content" 
+      className="relative w-full" 
       style={{ 
         minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
         height: (isMobile || isTablet) ? 'auto' : '100vh',
@@ -79,7 +79,7 @@ const SectionsContainer: React.FC = () => {
     >
       <div 
         ref={containerRef}
-        className={`${(isMobile || isTablet) ? 'block center-content' : 'flex h-full'} responsive-scale`}
+        className={`${(isMobile || isTablet) ? 'block' : 'flex h-full'}`}
         style={{ 
           width: (isMobile || isTablet) ? '100%' : `${sections.length * 100}vw`,
           height: (isMobile || isTablet) ? 'auto' : '100vh',
@@ -99,8 +99,8 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className={`relative center-content ${
-                (isMobile || isTablet) ? 'w-full block responsive-padding' : 'flex-shrink-0 w-screen h-full'
+              className={`relative ${
+                (isMobile || isTablet) ? 'w-full block' : 'flex-shrink-0 w-screen h-full'
               }`}
               style={{ 
                 width: (isMobile || isTablet) ? '100%' : '100vw',
@@ -122,7 +122,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className={`center-content ${(isMobile || isTablet) ? 'min-h-auto responsive-padding' : 'h-full'}`}
+                className={(isMobile || isTablet) ? 'min-h-auto' : 'h-full'}
               >
                 <Component />
               </Section>

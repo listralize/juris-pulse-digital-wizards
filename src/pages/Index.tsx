@@ -82,7 +82,7 @@ const Index = () => {
   
   return (
     <div 
-      className={`transition-colors duration-300 relative app-container center-content ${
+      className={`transition-colors duration-300 relative ${
         isDark 
           ? 'bg-neutral-950 text-neutral-100' 
           : 'bg-white text-neutral-900'
