@@ -109,8 +109,8 @@ const Partners = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        marginTop: isMobile ? '-80px' : '-160px',
-        paddingTop: '50px'
+        marginTop: isMobile ? '-80px' : '-60px', // Diminuiu 100px (era -160px)
+        paddingTop: '150px' // Aumentou 100px (era 50px)
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -165,11 +165,13 @@ const Partners = () => {
                           key={index} 
                           className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'team-card-container' : ''}`}
                         >
-                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
-                            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
-                          } shadow-md hover:shadow-xl`}>
-                            {/* Foto com altura responsiva */}
-                            <div className="aspect-[4/3] relative">
+                          <div 
+                            className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
+                              isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
+                            } shadow-md hover:shadow-xl h-full flex flex-col`}
+                          >
+                            {/* Foto com altura fixa */}
+                            <div className="aspect-[4/3] relative flex-shrink-0">
                               {member.image ? (
                                 <img 
                                   src={member.image} 
@@ -187,17 +189,21 @@ const Partners = () => {
                             </div>
                             
                             
-                            {/* Conteúdo responsivo */}
-                            <div className="team-card-spacing">
-                              <h3 className={`team-fluid-text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                                {member.name}
-                              </h3>
-                              <p className={`team-fluid-text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                                {member.title || 'Advogado'}
-                              </p>
-                              <p className={`team-fluid-text-sm leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
-                                {member.description}
-                              </p>
+                            {/* Conteúdo com altura flexível */}
+                            <div className="team-card-spacing flex-1 flex flex-col justify-between">
+                              <div>
+                                <h3 className={`team-fluid-text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                                  {member.name}
+                                </h3>
+                                <p className={`team-fluid-text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                                  {member.title || 'Advogado'}
+                                </p>
+                              </div>
+                              <div className="flex-1">
+                                <p className={`team-fluid-text-sm leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                                  {member.description}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
