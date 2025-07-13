@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
+import { useIsMobile } from '../../hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +16,7 @@ const About = () => {
   
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const isMobile = useIsMobile();
   
   // Estados para os textos editáveis
   const [aboutTitle, setAboutTitle] = useState('Quem Somos');
@@ -152,8 +154,8 @@ const About = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Neural Background only in dark theme and only on desktop */}
-      {isDark && window.innerWidth >= 768 && (
+      {/* Neural Background apenas no desktop e tema escuro */}
+      {isDark && !isMobile && (
         <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
           <NeuralBackground />
         </div>
