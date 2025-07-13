@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
-import { Phone, MapPin, Menu, X } from 'lucide-react';
+import { MessageSquare, MapPin, Menu, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { practiceAreas } from './practiceAreas';
 
@@ -70,7 +70,7 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
               }`}
               title="WhatsApp"
             >
-              <Phone className="w-4 h-4" />
+              <MessageSquare className="w-4 h-4" />
             </button>
 
             {/* Location Button */}

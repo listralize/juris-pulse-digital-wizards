@@ -5,7 +5,6 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 
 import Navbar from '../components/navbar';
-import WhatsAppButton from '../components/WhatsAppButton';
 import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
@@ -105,7 +104,6 @@ const Index = () => {
 
       
       <Navbar />
-      <WhatsAppButton />
       
       {/* FloatingFooter apenas para desktop */}
       {!isMobile && !isTablet && <FloatingFooter />}
