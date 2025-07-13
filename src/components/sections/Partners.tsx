@@ -103,40 +103,31 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`responsive-container center-absolute ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} relative performance-optimized`}
+      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} relative`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: isMobile ? 'clamp(-80px, -12vw, -60px)' : 'clamp(-200px, -15vw, -140px)',
-        paddingTop: 'clamp(2rem, 8vh, 4rem)',
-        paddingBottom: 'clamp(2rem, 8vh, 4rem)',
-        width: '100%',
-        maxWidth: '100vw',
-        overflow: 'hidden'
+        marginTop: isMobile ? '-80px' : '-160px',
+        paddingTop: '50px'
       }}
     >
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      <div className="responsive-container center-absolute w-full relative z-10">
-        <div className="flex flex-col items-center justify-center flex-1 w-full">
-          {/* Header responsivo e centralizado */}
-          <div className="text-center center-horizontal fluid-spacing-lg w-full">
+      <div className="team-responsive-container w-full relative z-10">
+        <div className="flex flex-col items-center justify-center flex-1">
+          {/* Header responsivo */}
+          <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
-              className={`fluid-text-4xl mb-3 font-canela responsive-transition ${isDark ? 'text-white' : 'text-black'}`}
-              style={{
-                lineHeight: 'clamp(1.2, 1.4, 1.6)',
-                letterSpacing: 'clamp(-0.02em, 0, 0.02em)'
-              }}
+              className={`team-fluid-title mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {teamTitle}
             </h2>
             <div 
-              className={`mx-auto responsive-transition ${isDark ? 'bg-white/50' : 'bg-black/50'}`}
+              className={`mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}
               style={{
                 width: 'clamp(3rem, 8vw, 5rem)',
                 height: 'clamp(1px, 0.2vw, 2px)'
@@ -144,14 +135,8 @@ const Partners = () => {
             ></div>
           </div>
           
-          {/* Carousel Container responsivo e centralizado */}
-          <div 
-            className="relative w-full center-horizontal responsive-transition"
-            style={{
-              maxWidth: 'min(90vw, 1200px)',
-              padding: 'clamp(1rem, 4vw, 3rem)'
-            }}
-          >
+          {/* Carousel Container */}
+          <div className="relative w-full max-w-6xl px-4 sm:px-8 lg:px-12">
             <div 
               ref={carouselRef} 
               className="overflow-hidden"
@@ -165,41 +150,26 @@ const Partners = () => {
               >
                 {Array.from({ length: totalSlides }).map((_, slideIndex) => (
                   <div 
-                     key={slideIndex}
-                    className={`w-full flex-shrink-0 responsive-transition ${
+                    key={slideIndex}
+                    className={`w-full flex-shrink-0 px-2 sm:px-4 ${
                       isMobile 
-                        ? 'flex justify-center center-absolute' 
-                        : 'grid grid-responsive gap-4 sm:gap-6 lg:gap-8 center-horizontal'
+                        ? 'flex justify-center' 
+                        : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'
                     }`}
-                    style={{ 
-                      width: `${100 / totalSlides}%`,
-                      padding: 'clamp(0.5rem, 2vw, 1.5rem)',
-                      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))'
-                    }}
+                    style={{ width: `${100 / totalSlides}%` }}
                   >
                     {teamMembers
                       .slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide)
                       .map((member, index) => (
-                         <div 
-                           key={index} 
-                           className={`group fluid-spacing-sm performance-optimized responsive-transition ${
-                             isMobile ? 'w-full center-horizontal' : 'w-full'
-                           }`}
-                           style={{
-                             maxWidth: isMobile ? 'min(90vw, 400px)' : '100%'
-                           }}
-                         >
-                           <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
-                             isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
-                           } shadow-md hover:shadow-xl aspect-ratio-4-3`}>
-                             {/* Foto com altura responsiva e proporção mantida */}
-                             <div 
-                               className="aspect-ratio-4-3 relative w-full overflow-hidden"
-                               style={{
-                                 minHeight: 'clamp(200px, 30vw, 300px)',
-                                 maxHeight: 'clamp(250px, 35vw, 350px)'
-                               }}
-                             >
+                        <div 
+                          key={index} 
+                          className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'team-card-container' : ''}`}
+                        >
+                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
+                            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
+                          } shadow-md hover:shadow-xl`}>
+                            {/* Foto com altura responsiva */}
+                            <div className="aspect-[4/3] relative">
                               {member.image ? (
                                 <img 
                                   src={member.image} 
@@ -216,39 +186,19 @@ const Partners = () => {
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>
                             
-                             {/* Conteúdo responsivo e bem estruturado */}
-                             <div 
-                               className="fluid-spacing-md"
-                               style={{
-                                 padding: 'clamp(0.75rem, 3vw, 1.5rem)'
-                               }}
-                             >
-                               <h3 
-                                 className={`fluid-text-lg font-semibold responsive-transition ${isDark ? 'text-white' : 'text-black'}`}
-                                 style={{
-                                   marginBottom: 'clamp(0.25rem, 1vw, 0.75rem)',
-                                   lineHeight: 'clamp(1.3, 1.5, 1.7)'
-                                 }}
-                               >
-                                 {member.name}
-                               </h3>
-                               <p 
-                                 className={`fluid-text-sm font-medium responsive-transition ${isDark ? 'text-white/70' : 'text-gray-600'}`}
-                                 style={{
-                                   marginBottom: 'clamp(0.5rem, 2vw, 1rem)'
-                                 }}
-                               >
-                                 {member.title || 'Advogado'}
-                               </p>
-                               <p 
-                                 className={`fluid-text-sm leading-relaxed line-clamp-3 responsive-transition ${isDark ? 'text-white/60' : 'text-gray-700'}`}
-                                 style={{
-                                   lineHeight: 'clamp(1.4, 1.6, 1.8)'
-                                 }}
-                               >
-                                 {member.description}
-                               </p>
-                             </div>
+                            
+                            {/* Conteúdo responsivo */}
+                            <div className="team-card-spacing">
+                              <h3 className={`team-fluid-text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                                {member.name}
+                              </h3>
+                              <p className={`team-fluid-text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                                {member.title || 'Advogado'}
+                              </p>
+                              <p className={`team-fluid-text-sm leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                                {member.description}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -257,75 +207,45 @@ const Partners = () => {
               </div>
             </div>
 
-            {/* Navigation Buttons - Responsivos e proporcionais */}
+            {/* Navigation Buttons - Responsivos */}
             {totalSlides > 1 && (
               <>
                 <button
                   onClick={prevSlide}
-                  className={`absolute top-1/2 -translate-y-1/2 transition-all duration-300 responsive-transition center-absolute performance-optimized ${
+                  className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 transition-all duration-300 team-nav-button rounded-full flex items-center justify-center ${
                     isDark 
                       ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
                       : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'
-                  } hover:scale-110 z-10 rounded-full`}
-                  style={{
-                    left: 'clamp(0.25rem, 2vw, 1rem)',
-                    width: 'clamp(2rem, 5vw, 3rem)',
-                    height: 'clamp(2rem, 5vw, 3rem)'
-                  }}
+                  } hover:scale-110 z-10`}
                 >
-                  <ChevronLeft 
-                    style={{
-                      width: 'clamp(1rem, 3vw, 1.5rem)',
-                      height: 'clamp(1rem, 3vw, 1.5rem)'
-                    }}
-                  />
+                  <ChevronLeft className="team-nav-icon" />
                 </button>
                 
                 <button
                   onClick={nextSlide}
-                  className={`absolute top-1/2 -translate-y-1/2 transition-all duration-300 responsive-transition center-absolute performance-optimized ${
+                  className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 transition-all duration-300 team-nav-button rounded-full flex items-center justify-center ${
                     isDark 
                       ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
                       : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'
-                  } hover:scale-110 z-10 rounded-full`}
-                  style={{
-                    right: 'clamp(0.25rem, 2vw, 1rem)',
-                    width: 'clamp(2rem, 5vw, 3rem)',
-                    height: 'clamp(2rem, 5vw, 3rem)'
-                  }}
+                  } hover:scale-110 z-10`}
                 >
-                  <ChevronRight 
-                    style={{
-                      width: 'clamp(1rem, 3vw, 1.5rem)',
-                      height: 'clamp(1rem, 3vw, 1.5rem)'
-                    }}
-                  />
+                  <ChevronRight className="team-nav-icon" />
                 </button>
               </>
             )}
 
-            {/* Dots Indicator - Responsivo e centralizado */}
+            {/* Dots Indicator - Responsivo */}
             {totalSlides > 1 && (
-              <div 
-                className="flex justify-center center-horizontal responsive-transition"
-                style={{
-                  marginTop: 'clamp(1.5rem, 4vw, 2.5rem)',
-                  gap: 'clamp(0.375rem, 1vw, 0.75rem)'
-                }}
-              >
+              <div className="flex justify-center team-dots-spacing">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`rounded-full transition-all duration-300 responsive-transition performance-optimized ${
+                    className={`team-dot rounded-full transition-all duration-300 ${
                       currentSlide === index
                         ? isDark ? 'bg-white' : 'bg-black'
                         : isDark ? 'bg-white/20' : 'bg-black/20'
                     }`}
-                    style={{
-                      width: 'clamp(0.5rem, 1.5vw, 0.75rem)',
-                      height: 'clamp(0.5rem, 1.5vw, 0.75rem)'
-                    }}
                   />
                 ))}
               </div>

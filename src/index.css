@@ -526,180 +526,74 @@
   box-sizing: border-box;
 }
 
-/* Reset e prevenção de overflow horizontal */
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100vw !important;
-  margin: 0;
-  padding: 0;
+/* Tablet responsiveness */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  
+  /* Ajustes de texto para tablet */
+  .text-4xl { font-size: 2rem; }
+  .text-5xl { font-size: 2.5rem; }
+  .text-6xl { font-size: 3rem; }
 }
 
-/* Container base responsivo com centralização absoluta */
-.main-container {
-  width: 100%;
-  max-width: 100vw;
-  margin: 0 auto;
-  padding: 0;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+/* Desktop responsiveness */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 }
 
-/* Utilitários de centralização */
-.center-absolute {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.center-horizontal {
-  display: flex;
-  justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.center-vertical {
-  display: flex;
-  align-items: center;
-  min-height: 100vh;
-}
-
-/* Responsive containers com breakpoints estratégicos */
-.responsive-container {
+/* Melhorias específicas para equipe responsiva */
+.team-responsive-container {
   width: 100%;
   max-width: min(95vw, 1200px);
   margin: 0 auto;
   padding: clamp(1rem, 4vw, 3rem);
 }
 
-/* Escalonamento fluido para fontes */
-.fluid-text-xs { font-size: clamp(0.7rem, 2vw, 0.875rem); }
-.fluid-text-sm { font-size: clamp(0.8rem, 2.5vw, 1rem); }
-.fluid-text-base { font-size: clamp(0.9rem, 3vw, 1.125rem); }
-.fluid-text-lg { font-size: clamp(1rem, 3.5vw, 1.25rem); }
-.fluid-text-xl { font-size: clamp(1.1rem, 4vw, 1.5rem); }
-.fluid-text-2xl { font-size: clamp(1.3rem, 5vw, 2rem); }
-.fluid-text-3xl { font-size: clamp(1.5rem, 6vw, 2.5rem); }
-.fluid-text-4xl { font-size: clamp(1.8rem, 7vw, 3rem); }
-.fluid-text-5xl { font-size: clamp(2rem, 8vw, 4rem); }
-.fluid-text-6xl { font-size: clamp(2.5rem, 10vw, 5rem); }
-
-/* Escalonamento de espaçamentos */
-.fluid-spacing-xs { padding: clamp(0.25rem, 1vw, 0.5rem); }
-.fluid-spacing-sm { padding: clamp(0.5rem, 2vw, 1rem); }
-.fluid-spacing-md { padding: clamp(1rem, 3vw, 2rem); }
-.fluid-spacing-lg { padding: clamp(1.5rem, 4vw, 3rem); }
-.fluid-spacing-xl { padding: clamp(2rem, 5vw, 4rem); }
-
-/* Breakpoints estratégicos */
-/* Mobile first - até 480px */
-@media (max-width: 480px) {
-  .responsive-container { 
-    padding: clamp(0.75rem, 3vw, 1.5rem);
-    max-width: 100vw;
-  }
-  
-  .grid-responsive { 
-    grid-template-columns: 1fr !important; 
-    gap: clamp(0.5rem, 2vw, 1rem) !important;
-  }
-  
-  .flex-responsive {
-    flex-direction: column !important;
-    gap: clamp(0.5rem, 2vw, 1rem) !important;
-  }
+.team-fluid-title {
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  line-height: clamp(1.2, 1.4, 1.6);
+  letter-spacing: clamp(-0.02em, 0, 0.02em);
 }
 
-/* Mobile landscape - 481px to 768px */
-@media (min-width: 481px) and (max-width: 768px) {
-  .responsive-container { 
-    padding: clamp(1rem, 3.5vw, 2rem);
-    max-width: 95vw;
-  }
-  
-  .grid-responsive { 
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-    gap: clamp(0.75rem, 2.5vw, 1.5rem) !important;
-  }
+.team-card-container {
+  max-width: min(90vw, 400px);
+  margin: 0 auto;
 }
 
-/* Tablet - 769px to 1024px */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .responsive-container { 
-    padding: clamp(1.5rem, 4vw, 2.5rem);
-    max-width: 90vw;
-  }
-  
-  .grid-responsive { 
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
-    gap: clamp(1rem, 3vw, 2rem) !important;
-  }
+.team-card-spacing {
+  padding: clamp(0.75rem, 3vw, 1.5rem);
 }
 
-/* Small desktop - 1025px to 1280px */
-@media (min-width: 1025px) and (max-width: 1280px) {
-  .responsive-container { 
-    padding: clamp(2rem, 4.5vw, 3rem);
-    max-width: 85vw;
-  }
+.team-fluid-text-lg {
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
 }
 
-/* Medium desktop - 1281px to 1440px */
-@media (min-width: 1281px) and (max-width: 1440px) {
-  .responsive-container { 
-    padding: clamp(2.5rem, 5vw, 3.5rem);
-    max-width: 80vw;
-  }
+.team-fluid-text-sm {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
 }
 
-/* Large desktop - 1441px to 1920px */
-@media (min-width: 1441px) and (max-width: 1920px) {
-  .responsive-container { 
-    padding: clamp(3rem, 5.5vw, 4rem);
-    max-width: 75vw;
-  }
+.team-nav-button {
+  width: clamp(2rem, 5vw, 3rem);
+  height: clamp(2rem, 5vw, 3rem);
 }
 
-/* Extra large - acima de 1920px */
-@media (min-width: 1921px) {
-  .responsive-container { 
-    max-width: 1400px;
-    padding: 4rem;
-  }
+.team-nav-icon {
+  width: clamp(1rem, 3vw, 1.5rem);
+  height: clamp(1rem, 3vw, 1.5rem);
 }
 
-/* Prevenção de overflow e scroll horizontal */
-* {
-  max-width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+.team-dots-spacing {
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  gap: clamp(0.375rem, 1vw, 0.75rem);
 }
 
-img, video, iframe {
-  max-width: 100% !important;
-  height: auto !important;
+.team-dot {
+  width: clamp(0.5rem, 1.5vw, 0.75rem);
+  height: clamp(0.5rem, 1.5vw, 0.75rem);
 }
-
-/* Otimizações de performance */
-.performance-optimized {
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-/* Smooth transitions para mudanças responsivas */
-.responsive-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Utilitários para elementos que devem manter proporção */
-.aspect-ratio-16-9 { aspect-ratio: 16 / 9; }
-.aspect-ratio-4-3 { aspect-ratio: 4 / 3; }
-.aspect-ratio-1-1 { aspect-ratio: 1 / 1; }
-.aspect-ratio-3-2 { aspect-ratio: 3 / 2; }
