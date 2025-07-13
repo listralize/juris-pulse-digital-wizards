@@ -75,8 +75,8 @@ const Blog = () => {
             📝 Blog Jurídico
           </h2>
           <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-          <p className={`text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mt-4 px-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Mantenha-se atualizado com as últimas novidades do mundo jurídico
+          <p className={`text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mt-4 px-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            Artigos especializados sobre as mais diversas áreas do Direito
           </p>
         </div>
 
