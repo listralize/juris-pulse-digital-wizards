@@ -109,8 +109,8 @@ const Partners = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        marginTop: isMobile ? '-80px' : '-60px', // Diminuiu 100px (era -160px)
-        paddingTop: '150px' // Aumentou 100px (era 50px)
+        marginTop: isMobile ? '0px' : '0px', // Removeu margem negativa
+        paddingTop: '100px' // Mantém espaçamento do topo
       }}
     >
       {/* Neural Background only in dark theme */}
@@ -122,17 +122,11 @@ const Partners = () => {
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
-              className={`team-fluid-title mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {teamTitle}
             </h2>
-            <div 
-              className={`mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}
-              style={{
-                width: 'clamp(3rem, 8vw, 5rem)',
-                height: 'clamp(1px, 0.2vw, 2px)'
-              }}
-            ></div>
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
           {/* Carousel Container */}
@@ -161,17 +155,15 @@ const Partners = () => {
                     {teamMembers
                       .slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide)
                       .map((member, index) => (
-                        <div 
-                          key={index} 
-                          className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'team-card-container' : ''}`}
-                        >
+                        <div key={index} className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'w-full max-w-sm mx-auto' : ''}`}>
                           <div 
                             className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
                               isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'
-                            } shadow-md hover:shadow-xl h-full flex flex-col`}
+                            } shadow-md hover:shadow-xl`}
+                            style={{ height: '420px' }} // Altura fixa para todos os cards
                           >
                             {/* Foto com altura fixa */}
-                            <div className="aspect-[4/3] relative flex-shrink-0">
+                            <div className="h-48 relative overflow-hidden">
                               {member.image ? (
                                 <img 
                                   src={member.image} 
@@ -189,21 +181,17 @@ const Partners = () => {
                             </div>
                             
                             
-                            {/* Conteúdo com altura flexível */}
-                            <div className="team-card-spacing flex-1 flex flex-col justify-between">
-                              <div>
-                                <h3 className={`team-fluid-text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                                  {member.name}
-                                </h3>
-                                <p className={`team-fluid-text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                                  {member.title || 'Advogado'}
-                                </p>
-                              </div>
-                              <div className="flex-1">
-                                <p className={`team-fluid-text-sm leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
-                                  {member.description}
-                                </p>
-                              </div>
+                            {/* Conteúdo com altura fixa */}
+                            <div className="p-3 sm:p-4 lg:p-5 flex-1">
+                              <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                                {member.name}
+                              </h3>
+                              <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                                {member.title || 'Advogado'}
+                              </p>
+                              <p className={`text-xs sm:text-sm leading-relaxed line-clamp-4 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                                {member.description}
+                              </p>
                             </div>
                           </div>
                         </div>
