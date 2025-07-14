@@ -241,6 +241,8 @@ export function LinkTreeManagement() {
 
   const saveLinkTree = async () => {
     try {
+      console.log('Salvando Link Tree com dados:', linkTreeData);
+      
       // Preparar dados completos para salvar
       const dataToSave = {
         title: linkTreeData.title || 'Meu Link Tree',
@@ -261,26 +263,41 @@ export function LinkTreeManagement() {
         is_active: linkTreeData.is_active !== false
       };
 
+      console.log('Dados preparados para salvar:', dataToSave);
+
       if (linkTree?.id) {
         // Atualizar existente
-        const { error } = await supabase
+        console.log('Atualizando Link Tree existente com ID:', linkTree.id);
+        const { data, error } = await supabase
           .from('link_tree')
           .update(dataToSave)
-          .eq('id', linkTree.id);
+          .eq('id', linkTree.id)
+          .select()
+          .single();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao atualizar:', error);
+          throw error;
+        }
         
+        console.log('Link Tree atualizado com sucesso:', data);
         // Atualizar estado local
-        setLinkTree(prev => prev ? { ...prev, ...dataToSave } as LinkTree : null);
+        setLinkTree(data as LinkTree);
       } else {
         // Criar novo
+        console.log('Criando novo Link Tree');
         const { data, error } = await supabase
           .from('link_tree')
           .insert([dataToSave])
           .select()
           .single();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao criar:', error);
+          throw error;
+        }
+        
+        console.log('Novo Link Tree criado:', data);
         setLinkTree(data as LinkTree);
       }
 
@@ -635,10 +652,18 @@ export function LinkTreeManagement() {
                            type="color"
                            value={linkTreeData.background_color}
                            onChange={(e) => {
-                             setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                             console.log('Mudando cor de fundo para:', e.target.value);
+                             setLinkTreeData(prev => ({ 
+                               ...prev, 
+                               background_color: e.target.value 
+                             }));
                              // Sincronizar com o preview
                              if (linkTree) {
-                               setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                               console.log('Atualizando linkTree com nova cor:', e.target.value);
+                               setLinkTree(prev => ({ 
+                                 ...prev!, 
+                                 background_color: e.target.value 
+                               }));
                              }
                            }}
                            className="w-16 h-10"
@@ -646,10 +671,18 @@ export function LinkTreeManagement() {
                          <Input
                            value={linkTreeData.background_color}
                            onChange={(e) => {
-                             setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                             console.log('Mudando cor de fundo (input text) para:', e.target.value);
+                             setLinkTreeData(prev => ({ 
+                               ...prev, 
+                               background_color: e.target.value 
+                             }));
                              // Sincronizar com o preview
                              if (linkTree) {
-                               setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                               console.log('Atualizando linkTree (input text) com nova cor:', e.target.value);
+                               setLinkTree(prev => ({ 
+                                 ...prev!, 
+                                 background_color: e.target.value 
+                               }));
                              }
                            }}
                            placeholder="#000000"
@@ -1344,23 +1377,27 @@ export function LinkTreeManagement() {
                             <Input
                               type="color"
                               value={linkTreeData.background_color || '#1a1a2e'}
-                              onChange={(e) => {
-                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
-                                // Atualizar o linkTree também para o preview
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
-                                }
-                              }}
+                               onChange={(e) => {
+                                 console.log('Mudando cor de fundo (neural) para:', e.target.value);
+                                 setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                 // Atualizar o linkTree também para o preview
+                                 if (linkTree) {
+                                   console.log('Atualizando linkTree (neural) com nova cor:', e.target.value);
+                                   setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                 }
+                               }}
                               className="w-16 h-10"
                             />
                             <Input
                               value={linkTreeData.background_color || '#1a1a2e'}
-                              onChange={(e) => {
-                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
-                                }
-                              }}
+                               onChange={(e) => {
+                                 console.log('Mudando cor de fundo (solid) para:', e.target.value);
+                                 setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                 if (linkTree) {
+                                   console.log('Atualizando linkTree (solid) com nova cor:', e.target.value);
+                                   setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                 }
+                               }}
                               placeholder="#1a1a2e"
                             />
                           </div>
@@ -1397,22 +1434,26 @@ export function LinkTreeManagement() {
                             <Input
                               type="color"
                               value={linkTreeData.background_color || '#3b82f6'}
-                              onChange={(e) => {
-                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
-                                }
-                              }}
+                               onChange={(e) => {
+                                 console.log('Mudando cor de fundo (solid input) para:', e.target.value);
+                                 setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                 if (linkTree) {
+                                   console.log('Atualizando linkTree (solid input) com nova cor:', e.target.value);
+                                   setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                 }
+                               }}
                               className="w-16 h-10"
                             />
                             <Input
                               value={linkTreeData.background_color || '#3b82f6'}
-                              onChange={(e) => {
-                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
-                                }
-                              }}
+                               onChange={(e) => {
+                                 console.log('Mudando cor de fundo (neural input) para:', e.target.value);
+                                 setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                 if (linkTree) {
+                                   console.log('Atualizando linkTree (neural input) com nova cor:', e.target.value);
+                                   setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                 }
+                               }}
                               placeholder="#3b82f6"
                             />
                           </div>
@@ -1540,7 +1581,7 @@ export function LinkTreeManagement() {
                     background_gradient: linkTreeData.background_gradient,
                     background_image: linkTreeData.background_image,
                     background_video: linkTreeData.background_video,
-                    background_opacity: linkTreeData.background_opacity,
+                    background_opacity: (linkTreeData as any).background_opacity || 0.8,
                     custom_css: linkTreeData.custom_css,
                     animation_style: linkTreeData.animation_style,
                     show_analytics: linkTreeData.show_analytics,
@@ -1555,6 +1596,12 @@ export function LinkTreeManagement() {
                   } as LinkTree}
                   linkTreeItems={items}
                 />
+                {/* Debug info */}
+                <div className="p-2 bg-gray-100 text-xs text-gray-600">
+                  <div>Background Color: {linkTreeData.background_color}</div>
+                  <div>Background Type: {linkTreeData.background_type}</div>
+                  <div>LinkTree ID: {linkTree?.id}</div>
+                </div>
               </div>
             </CardContent>
           </Card>

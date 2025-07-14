@@ -634,9 +634,27 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     const themeGradient = getThemeGradient();
     const themeClass = isNeuralTheme ? '' : `bg-gradient-to-br ${themeGradient}`;
     
+    // Aplicar cor de fundo para neural theme
+    const neuralBackgroundStyle = isNeuralTheme ? {
+      backgroundColor: linkTree.background_color || '#1a1a2e',
+      ...(linkTree.background_opacity ? { opacity: linkTree.background_opacity } : {})
+    } : {};
+    
     return (
-      <div className={`relative min-h-screen text-white overflow-hidden ${themeClass}`} style={getCustomStyles()}>
+      <div className={`relative min-h-screen text-white overflow-hidden ${themeClass}`} style={{...getCustomStyles(), ...neuralBackgroundStyle}}>
         {isNeuralTheme && <NeuralBackground />}
+        
+        {/* Overlay para aplicar cor de fundo no neural theme */}
+        {isNeuralTheme && (
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundColor: linkTree.background_color || '#1a1a2e',
+              opacity: linkTree.background_opacity || 0.8,
+              pointerEvents: 'none'
+            }}
+          />
+        )}
         
         {/* Vídeo de fundo */}
         {linkTree.background_type === 'video' && linkTree.background_video && (
