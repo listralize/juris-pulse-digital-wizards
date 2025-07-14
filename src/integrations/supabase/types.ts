@@ -215,6 +215,95 @@ export type Database = {
         }
         Relationships: []
       }
+      link_tree: {
+        Row: {
+          avatar_url: string | null
+          background_color: string | null
+          button_style: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          text_color: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          background_color?: string | null
+          button_style?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          background_color?: string | null
+          button_style?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      link_tree_items: {
+        Row: {
+          background_color: string | null
+          created_at: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          link_tree_id: string | null
+          text_color: string | null
+          title: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          link_tree_id?: string | null
+          text_color?: string | null
+          title: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          link_tree_id?: string | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_tree_items_link_tree_id_fkey"
+            columns: ["link_tree_id"]
+            isOneToOne: false
+            referencedRelation: "link_tree"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_benefits: {
         Row: {
           created_at: string | null

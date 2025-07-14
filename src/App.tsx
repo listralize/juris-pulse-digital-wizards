@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Obrigado from './pages/Obrigado';
+import LinkTree from './pages/LinkTree';
 import NotFound from './pages/NotFound';
 
 // Dynamic routes
@@ -46,6 +47,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/linktree" element={<LinkTree />} />
                 <Route path="/obrigado" element={<Obrigado />} />
                 
                 {/* Static area pages (fallbacks for existing URLs) */}

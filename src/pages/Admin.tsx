@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { FileText, Briefcase, Globe, Edit, Database } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit, Database, Link } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { useSupabasePageTexts } from '../hooks/useSupabasePageTexts';
@@ -14,6 +14,7 @@ import { ContentManagement } from '../components/admin/ContentManagement';
 import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
+import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 
@@ -168,7 +169,7 @@ const Admin = () => {
             </div>
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+              <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
                 <TabsTrigger value="content" className="flex items-center gap-2">
                   <Edit className="w-4 h-4" />
                   Conteúdo Geral
@@ -180,6 +181,10 @@ const Admin = () => {
                 <TabsTrigger value="blog" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Blog ({validBlogPosts.length})
+                </TabsTrigger>
+                <TabsTrigger value="linktree" className="flex items-center gap-2">
+                  <Link className="w-4 h-4" />
+                  Link Tree
                 </TabsTrigger>
                 <TabsTrigger value="supabase" className="flex items-center gap-2">
                   <Database className="w-4 h-4" />
@@ -217,6 +222,10 @@ const Admin = () => {
                   blogPosts={validBlogPosts}
                   onSave={handleSaveBlogPosts}
                 />
+              </TabsContent>
+
+              <TabsContent value="linktree">
+                <LinkTreeManagement />
               </TabsContent>
 
               <TabsContent value="supabase">
