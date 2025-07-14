@@ -5,6 +5,7 @@ import { Star, ExternalLink, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NeuralBackground from '@/components/NeuralBackground';
 import { FormModal } from '@/components/FormModal';
+import { useFormConfig } from '@/hooks/useFormConfig';
 
 interface LinkTreePreviewProps {
   linkTree: LinkTree;
@@ -13,11 +14,12 @@ interface LinkTreePreviewProps {
 }
 
 export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTreePreviewProps) {
-  const [modalData, setModalData] = useState<{ isOpen: boolean; formType: string; title: string }>({
+  const [modalData, setModalData] = useState<{ isOpen: boolean; formConfig: any; title: string }>({
     isOpen: false,
-    formType: '',
+    formConfig: null,
     title: ''
   });
+  const { multipleFormsConfig } = useFormConfig();
   const handleCardClick = (item: LinkTreeItem) => {
     if (item.url) {
       window.open(item.url, '_blank');
@@ -26,12 +28,17 @@ export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTr
   };
 
   const handleFormClick = (item: LinkTreeItem) => {
-    // Abrir modal do formulário ao invés de redirecionar
-    setModalData({
-      isOpen: true,
-      formType: item.form_id || 'contact',
-      title: item.title
-    });
+    // Buscar o formulário pelo ID nos formulários existentes
+    const formConfig = multipleFormsConfig.forms.find(f => f.id === item.form_id);
+    if (formConfig) {
+      setModalData({
+        isOpen: true,
+        formConfig: formConfig,
+        title: item.title
+      });
+    } else {
+      console.error('Formulário não encontrado:', item.form_id);
+    }
     onItemClick?.(item);
   };
 
@@ -268,12 +275,14 @@ export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTr
       </div>
 
       {/* Modal do Formulário */}
-      <FormModal
-        isOpen={modalData.isOpen}
-        onClose={() => setModalData({ isOpen: false, formType: '', title: '' })}
-        formType={modalData.formType}
-        title={modalData.title}
-      />
+      {modalData.formConfig && (
+        <FormModal
+          isOpen={modalData.isOpen}
+          onClose={() => setModalData({ isOpen: false, formConfig: null, title: '' })}
+          formConfig={modalData.formConfig}
+          title={modalData.title}
+        />
+      )}
     </div>
   );
 }

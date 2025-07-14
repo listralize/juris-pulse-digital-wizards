@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { useLinkTree } from '@/hooks/useLinkTree';
+import { useFormConfig } from '@/hooks/useFormConfig';
 import { LinkTree, LinkTreeItem, FormField } from '@/types/linkTreeTypes';
 import { LinkTreePreview } from '@/components/LinkTreePreview';
 import { Button } from '../ui/button';
@@ -53,14 +54,10 @@ const newItemTypes = [
   { value: 'text', label: '📄 Texto Rico', icon: Type, description: 'Bloco de texto formatado' }
 ];
 
-const availableForms = [
-  { id: 'contact', name: 'Formulário de Contato Principal', description: 'Formulário padrão do site' },
-  { id: 'consultation', name: 'Solicitação de Consulta', description: 'Para agendamento de consultas' },
-  { id: 'quote', name: 'Solicitar Orçamento', description: 'Para solicitar cotações' }
-];
 
 export const LinkTreeManagement = () => {
   const { theme } = useTheme();
+  const { multipleFormsConfig } = useFormConfig();
   
   const {
     linkTree,
@@ -71,6 +68,13 @@ export const LinkTreeManagement = () => {
     updateLinkTreeItem,
     deleteLinkTreeItem
   } = useLinkTree();
+
+  // Formulários disponíveis para seleção
+  const availableForms = multipleFormsConfig.forms.map(form => ({
+    id: form.id,
+    name: form.name,
+    isDefault: multipleFormsConfig.defaultFormId === form.id
+  }));
 
   const [formData, setFormData] = useState<Omit<LinkTree, 'id' | 'created_at' | 'updated_at'>>({
     title: 'Meu Link Tree',
@@ -663,7 +667,7 @@ export const LinkTreeManagement = () => {
                               <SelectItem key={form.id} value={form.id}>
                                 <div>
                                   <div className="font-medium">{form.name}</div>
-                                  <div className="text-xs text-gray-400">{form.description}</div>
+                                  {form.isDefault && <div className="text-xs text-yellow-400">(Principal)</div>}
                                 </div>
                               </SelectItem>
                             ))}
