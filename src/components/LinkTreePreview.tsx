@@ -634,14 +634,15 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     const themeGradient = getThemeGradient();
     const themeClass = isNeuralTheme ? '' : `bg-gradient-to-br ${themeGradient}`;
     
-    // Aplicar cor de fundo para neural theme
-    const neuralBackgroundStyle = isNeuralTheme ? {
-      backgroundColor: linkTree.background_color || '#1a1a2e',
-      ...(linkTree.background_opacity ? { opacity: linkTree.background_opacity } : {})
-    } : {};
+    // Aplicar estilo baseado no tipo de fundo
+    const backgroundStyle = linkTree.background_type === 'solid' 
+      ? { backgroundColor: linkTree.background_color || '#3b82f6' }
+      : isNeuralTheme 
+        ? { backgroundColor: linkTree.background_color || '#1a1a2e', opacity: linkTree.background_opacity || 0.8 }
+        : {};
     
     return (
-      <div className={`relative min-h-screen text-white overflow-hidden ${themeClass}`} style={{...getCustomStyles(), ...neuralBackgroundStyle}}>
+      <div className={`relative min-h-screen text-white overflow-hidden ${linkTree.background_type === 'solid' ? '' : themeClass}`} style={{...getCustomStyles(), ...backgroundStyle}}>
         {isNeuralTheme && <NeuralBackground />}
         
         {/* Overlay para aplicar cor de fundo no neural theme */}
