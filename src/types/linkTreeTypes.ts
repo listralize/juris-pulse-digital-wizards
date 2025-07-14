@@ -23,7 +23,7 @@ export interface LinkTreeItem {
   id: string;
   link_tree_id: string;
   title: string;
-  url: string;
+  url?: string;
   icon?: string;
   background_color: string;
   text_color: string;
@@ -33,6 +33,19 @@ export interface LinkTreeItem {
   click_count: number;
   is_featured: boolean;
   is_active: boolean;
+  item_type: 'link' | 'card' | 'form';
+  card_content?: string;
+  form_fields?: FormField[];
+  form_action?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface FormField {
+  id: string;
+  type: 'text' | 'email' | 'textarea' | 'select' | 'checkbox';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
 }
