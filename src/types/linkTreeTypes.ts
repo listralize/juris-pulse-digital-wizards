@@ -6,7 +6,7 @@ export interface LinkTree {
   text_color: string;
   button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient';
   avatar_url?: string;
-  theme: 'netflix' | 'amazon' | 'landing_page' | 'futurista' | 'spotify' | 'discord' | 'tiktok' | 'instagram' | 'youtube' | 'twitch' | 'linkedin' | 'minimal' | 'neon' | 'glass';
+  theme: string;
   background_type: 'solid' | 'gradient' | 'image' | 'video';
   background_gradient?: string;
   background_image?: string;
@@ -33,7 +33,7 @@ export interface LinkTreeItem {
   click_count: number;
   is_featured: boolean;
   is_active: boolean;
-  item_type: 'link' | 'card' | 'form';
+  item_type: 'link' | 'card' | 'form' | 'social' | 'product' | 'service' | 'contact' | 'video' | 'gallery' | 'text';
   card_content?: string;
   card_image?: string;
   card_price?: string;

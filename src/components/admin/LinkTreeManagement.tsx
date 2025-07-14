@@ -35,106 +35,18 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const themePresets = {
-  netflix: {
-    background_color: '#141414',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'fade' as const,
-    accent: '#e50914'
-  },
-  amazon: {
-    background_color: '#232f3e',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'slide' as const,
-    accent: '#ff9900'
-  },
-  landing_page: {
-    background_color: '#000000',
-    text_color: '#ffffff',
-    button_style: 'gradient' as const,
-    animation_style: 'fade' as const,
-    accent: '#8b5cf6'
-  },
-  futurista: {
-    background_color: '#0a0a0a',
-    text_color: '#00ff88',
-    button_style: 'neon' as const,
-    animation_style: 'glow' as const,
-    accent: '#00ffff'
-  },
-  spotify: {
-    background_color: '#121212',
-    text_color: '#ffffff',
-    button_style: 'pill' as const,
-    animation_style: 'bounce' as const,
-    accent: '#1db954'
-  },
-  discord: {
-    background_color: '#2c2f33',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'pulse' as const,
-    accent: '#7289da'
-  },
-  tiktok: {
-    background_color: '#000000',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'bounce' as const,
-    accent: '#ff0050'
-  },
-  instagram: {
-    background_color: '#000000',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'fade' as const,
-    accent: '#e4405f'
-  },
-  youtube: {
-    background_color: '#000000',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'slide' as const,
-    accent: '#ff0000'
-  },
-  twitch: {
-    background_color: '#9146ff',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'pulse' as const,
-    accent: '#9146ff'
-  },
-  linkedin: {
-    background_color: '#0077b5',
-    text_color: '#ffffff',
-    button_style: 'rounded' as const,
-    animation_style: 'fade' as const,
-    accent: '#0077b5'
-  },
-  minimal: {
-    background_color: '#ffffff',
-    text_color: '#000000',
-    button_style: 'rounded' as const,
-    animation_style: 'fade' as const,
-    accent: '#000000'
-  },
-  neon: {
-    background_color: '#000000',
-    text_color: '#00ffff',
-    button_style: 'neon' as const,
-    animation_style: 'glow' as const,
-    accent: '#00ffff'
-  },
-  glass: {
-    background_color: '#1a1a2e',
-    text_color: '#ffffff',
-    button_style: 'glassmorphism' as const,
-    animation_style: 'fade' as const,
-    accent: '#16213e'
-  }
-};
+const newItemTypes = [
+  { value: 'link', label: '🔗 Link Simples', description: 'Link direto para qualquer URL' },
+  { value: 'card', label: '🎴 Card Premium', description: 'Card visual com imagem e preço' },
+  { value: 'form', label: '📝 Formulário', description: 'Conectar com formulários do site' },
+  { value: 'social', label: '📱 Rede Social', description: 'Links para redes sociais' },
+  { value: 'product', label: '🛒 Produto', description: 'Showcase de produtos' },
+  { value: 'service', label: '⚡ Serviço', description: 'Destaque de serviços' },
+  { value: 'contact', label: '📞 Contato Direto', description: 'WhatsApp, telefone, email' },
+  { value: 'video', label: '🎥 Vídeo', description: 'Embed de vídeos' },
+  { value: 'gallery', label: '🖼️ Galeria', description: 'Galeria de imagens' },
+  { value: 'text', label: '📄 Texto Rico', description: 'Bloco de texto formatado' }
+];
 
 const availableForms = [
   { id: 'contact', name: 'Formulário de Contato Principal', description: 'Formulário padrão do site' },
@@ -162,7 +74,7 @@ export const LinkTreeManagement = () => {
     text_color: '#ffffff',
     button_style: 'rounded',
     avatar_url: '',
-    theme: 'netflix',
+    theme: 'custom',
     background_type: 'solid',
     background_gradient: '',
     background_image: '',
@@ -182,7 +94,7 @@ export const LinkTreeManagement = () => {
     button_style: 'inherit' as const,
     hover_effect: 'scale' as const,
     is_featured: false,
-    item_type: 'link' as ('link' | 'card' | 'form'),
+    item_type: 'link' as ('link' | 'card' | 'form' | 'social' | 'product' | 'service' | 'contact' | 'video' | 'gallery' | 'text'),
     card_content: '',
     card_image: '',
     card_price: '',
@@ -203,7 +115,7 @@ export const LinkTreeManagement = () => {
         text_color: linkTree.text_color,
         button_style: linkTree.button_style,
         avatar_url: linkTree.avatar_url || '',
-        theme: linkTree.theme || 'netflix',
+        theme: linkTree.theme || 'custom',
         background_type: linkTree.background_type || 'solid',
         background_gradient: linkTree.background_gradient || '',
         background_image: linkTree.background_image || '',
@@ -216,17 +128,6 @@ export const LinkTreeManagement = () => {
     }
   }, [linkTree]);
 
-  const applyThemePreset = (themeName: keyof typeof themePresets) => {
-    const preset = themePresets[themeName];
-    setFormData(prev => ({
-      ...prev,
-      theme: themeName,
-      background_color: preset.background_color,
-      text_color: preset.text_color,
-      button_style: preset.button_style,
-      animation_style: preset.animation_style
-    }));
-  };
 
   const handleSave = async () => {
     try {
@@ -382,85 +283,135 @@ export const LinkTreeManagement = () => {
             </TabsList>
 
             <TabsContent value="design" className="space-y-6 mt-6">
-              {/* Temas Revolucionários */}
+              {/* Personalização Total */}
               <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
-                    <Sparkles className="w-5 h-5 text-yellow-500" />
-                    🔥 Themes Revolucionários - Design Autêntico
+                    <Palette className="w-5 h-5 text-purple-500" />
+                    🎨 Personalização Total
                   </CardTitle>
                   <p className="text-gray-400 text-sm">
-                    Cada theme tem layout único e estética completamente diferente
+                    Crie seu design único com controle total sobre cores, layouts e estilos
                   </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {Object.entries(themePresets).map(([name, preset]) => {
-                      const getThemeDisplay = () => {
-                        const displays: Record<string, { emoji: string; title: string; subtitle: string; description: string }> = {
-                          netflix: { emoji: '🎬', title: 'Netflix', subtitle: 'Cinema Style', description: 'Layout estilo streaming premium' },
-                          amazon: { emoji: '📦', title: 'Amazon', subtitle: 'E-commerce Style', description: 'Cards estilo marketplace' },
-                          landing_page: { emoji: '🚀', title: 'Startup', subtitle: 'Modern Style', description: 'Design moderno e conversivo' },
-                          futurista: { emoji: '🤖', title: 'Cyberpunk', subtitle: 'Future Style', description: 'Interface do futuro' },
-                          spotify: { emoji: '🎵', title: 'Spotify', subtitle: 'Music Style', description: 'Interface de streaming' },
-                          discord: { emoji: '💬', title: 'Discord', subtitle: 'Gaming Style', description: 'Interface gamer' },
-                          tiktok: { emoji: '🔥', title: 'TikTok', subtitle: 'Viral Style', description: 'Layout para criadores' },
-                          instagram: { emoji: '📸', title: 'Instagram', subtitle: 'Social Style', description: 'Design social premium' },
-                          youtube: { emoji: '📺', title: 'YouTube', subtitle: 'Creator Style', description: 'Interface para criadores' },
-                          twitch: { emoji: '🎮', title: 'Twitch', subtitle: 'Stream Style', description: 'Layout para streamers' },
-                          linkedin: { emoji: '💼', title: 'LinkedIn', subtitle: 'Professional', description: 'Layout profissional' },
-                          minimal: { emoji: '✨', title: 'Minimal', subtitle: 'Clean Style', description: 'Design limpo e minimalista' },
-                          neon: { emoji: '⚡', title: 'Neon', subtitle: 'Electric Style', description: 'Visual cyberpunk neon' },
-                          glass: { emoji: '🌟', title: 'Glass', subtitle: 'Transparent', description: 'Efeito vidro moderno' }
-                        };
-                        return displays[name] || displays.netflix;
-                      };
+                <CardContent className="space-y-6">
+                  {/* Cores */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="background_color" className="text-white">Cor de Fundo</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="background_color"
+                          type="color"
+                          value={formData.background_color}
+                          onChange={(e) => setFormData(prev => ({ ...prev, background_color: e.target.value }))}
+                          className="w-16 h-10 p-1 border-gray-600 bg-gray-800"
+                        />
+                        <Input
+                          type="text"
+                          value={formData.background_color}
+                          onChange={(e) => setFormData(prev => ({ ...prev, background_color: e.target.value }))}
+                          className="flex-1 bg-gray-800 border-gray-600 text-white"
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="text_color" className="text-white">Cor do Texto</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="text_color"
+                          type="color"
+                          value={formData.text_color}
+                          onChange={(e) => setFormData(prev => ({ ...prev, text_color: e.target.value }))}
+                          className="w-16 h-10 p-1 border-gray-600 bg-gray-800"
+                        />
+                        <Input
+                          type="text"
+                          value={formData.text_color}
+                          onChange={(e) => setFormData(prev => ({ ...prev, text_color: e.target.value }))}
+                          className="flex-1 bg-gray-800 border-gray-600 text-white"
+                          placeholder="#ffffff"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                      const display = getThemeDisplay();
+                  {/* Tipo de Fundo */}
+                  <div>
+                    <Label className="text-white">Tipo de Fundo</Label>
+                    <Select 
+                      value={formData.background_type} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, background_type: value as any }))}
+                    >
+                      <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="solid">🎨 Cor Sólida</SelectItem>
+                        <SelectItem value="gradient">🌈 Gradiente</SelectItem>
+                        <SelectItem value="image">🖼️ Imagem</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                      return (
+                  {/* Gradiente */}
+                  {formData.background_type === 'gradient' && (
+                    <div>
+                      <Label htmlFor="background_gradient" className="text-white">CSS Gradiente</Label>
+                      <Input
+                        id="background_gradient"
+                        value={formData.background_gradient}
+                        onChange={(e) => setFormData(prev => ({ ...prev, background_gradient: e.target.value }))}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        placeholder="linear-gradient(45deg, #ff0000, #0000ff)"
+                      />
+                    </div>
+                  )}
+
+                  {/* Imagem de Fundo */}
+                  {formData.background_type === 'image' && (
+                    <div>
+                      <Label htmlFor="background_image" className="text-white">URL da Imagem</Label>
+                      <Input
+                        id="background_image"
+                        value={formData.background_image}
+                        onChange={(e) => setFormData(prev => ({ ...prev, background_image: e.target.value }))}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        placeholder="https://exemplo.com/imagem.jpg"
+                      />
+                    </div>
+                  )}
+
+                  {/* Estilos de Botão */}
+                  <div>
+                    <Label className="text-white">Estilo dos Botões</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {[
+                        { value: 'rounded', label: '📱 Arredondado', preview: '8px' },
+                        { value: 'square', label: '⬜ Quadrado', preview: '0px' },
+                        { value: 'pill', label: '💊 Pill', preview: '24px' }
+                      ].map((style) => (
                         <div
-                          key={name}
-                          onClick={() => applyThemePreset(name as keyof typeof themePresets)}
-                          className={`group p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
-                            formData.theme === name 
-                              ? 'border-red-500 bg-gradient-to-br from-red-900/20 to-black shadow-lg shadow-red-500/25' 
-                              : 'border-gray-700 bg-gradient-to-br from-gray-900 to-black hover:border-gray-500'
+                          key={style.value}
+                          onClick={() => setFormData(prev => ({ ...prev, button_style: style.value as any }))}
+                          className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                            formData.button_style === style.value
+                              ? 'border-purple-500 bg-purple-900/20'
+                              : 'border-gray-600 bg-gray-800 hover:border-gray-500'
                           }`}
                         >
-                          <div className="space-y-2">
+                          <div className="text-center">
                             <div 
-                              className="w-full h-16 rounded-lg flex flex-col items-center justify-center relative overflow-hidden"
-                              style={{ backgroundColor: preset.background_color }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></div>
-                              <span className="text-white font-bold text-sm relative z-10">
-                                {display.title}
-                              </span>
-                            </div>
-                            <div className="text-center">
-                              <h3 className="font-bold text-xs flex items-center justify-center gap-1" style={{ color: preset.accent }}>
-                                {display.emoji} {display.title}
-                              </h3>
-                              <p className="text-gray-400 text-xs mt-1">
-                                {display.description}
-                              </p>
-                            </div>
-                            <div className="flex justify-center">
-                              <span 
-                                className={`text-xs px-2 py-1 rounded-full transition-all duration-300 ${
-                                  formData.theme === name 
-                                    ? 'bg-red-600 text-white' 
-                                    : 'bg-gray-700 text-gray-300 group-hover:bg-gray-600'
-                                }`}
-                              >
-                                {formData.theme === name ? '✓ Ativo' : 'Ativar'}
-                              </span>
-                            </div>
+                              className="w-full h-8 bg-purple-600 mb-2"
+                              style={{ borderRadius: style.preview }}
+                            />
+                            <span className="text-xs text-white">{style.label}</span>
                           </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
