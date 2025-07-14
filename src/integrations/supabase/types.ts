@@ -222,6 +222,7 @@ export type Database = {
           background_color: string | null
           background_gradient: string | null
           background_image: string | null
+          background_opacity: number | null
           background_type: string | null
           background_video: string | null
           button_style: string | null
@@ -242,6 +243,7 @@ export type Database = {
           background_color?: string | null
           background_gradient?: string | null
           background_image?: string | null
+          background_opacity?: number | null
           background_type?: string | null
           background_video?: string | null
           button_style?: string | null
@@ -262,6 +264,7 @@ export type Database = {
           background_color?: string | null
           background_gradient?: string | null
           background_image?: string | null
+          background_opacity?: number | null
           background_type?: string | null
           background_video?: string | null
           button_style?: string | null

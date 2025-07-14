@@ -1412,6 +1412,7 @@ export function LinkTreeManagement() {
                     background_gradient: linkTreeData.background_gradient,
                     background_image: linkTreeData.background_image,
                     background_video: linkTreeData.background_video,
+                    background_opacity: linkTreeData.background_opacity,
                     custom_css: linkTreeData.custom_css,
                     animation_style: linkTreeData.animation_style,
                     show_analytics: linkTreeData.show_analytics,
