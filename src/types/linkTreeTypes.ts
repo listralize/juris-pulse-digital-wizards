@@ -30,6 +30,8 @@ export interface LinkTreeItem {
   title: string;
   url?: string;
   icon?: string;
+  icon_size?: string;
+  icon_color?: string;
   background_color: string;
   text_color: string;
   button_style?: 'inherit' | 'custom' | 'gradient' | 'glassmorphism' | 'neon';
@@ -38,7 +40,7 @@ export interface LinkTreeItem {
   click_count: number;
   is_featured: boolean;
   is_active: boolean;
-  item_type: 'link' | 'card' | 'form' | 'social' | 'product' | 'service' | 'contact' | 'video' | 'text';
+  item_type: 'link' | 'card' | 'form' | 'social' | 'product' | 'service' | 'contact' | 'video' | 'text' | 'info';
   card_content?: string;
   card_image?: string;
   card_price?: string;

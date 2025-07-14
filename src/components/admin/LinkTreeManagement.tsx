@@ -28,6 +28,8 @@ export function LinkTreeManagement() {
     title: '',
     url: '',
     icon: 'link',
+    icon_size: 'w-5 h-5',
+    icon_color: '#000000',
     background_color: '#ffffff',
     text_color: '#000000',
     button_style: 'inherit' as any,
@@ -340,6 +342,8 @@ export function LinkTreeManagement() {
           title: newItem.title,
           url: newItem.url,
           icon: newItem.icon,
+          icon_size: newItem.icon_size,
+          icon_color: newItem.icon_color,
           background_color: newItem.background_color,
           text_color: newItem.text_color,
           button_style: newItem.button_style,
@@ -370,6 +374,8 @@ export function LinkTreeManagement() {
         title: '',
         url: '',
         icon: 'link',
+        icon_size: 'w-5 h-5',
+        icon_color: '#000000',
         background_color: '#ffffff',
         text_color: '#000000',
         button_style: 'inherit',
@@ -402,6 +408,8 @@ export function LinkTreeManagement() {
       title: item.title,
       url: item.url || '',
       icon: item.icon || 'link',
+      icon_size: item.icon_size || 'w-5 h-5',
+      icon_color: item.icon_color || '#000000',
       background_color: item.background_color || '#ffffff',
       text_color: item.text_color || '#000000',
       button_style: (item.button_style as any) || 'inherit',
@@ -460,6 +468,8 @@ export function LinkTreeManagement() {
         title: '',
         url: '',
         icon: 'link',
+        icon_size: 'w-5 h-5',
+        icon_color: '#000000',
         background_color: '#ffffff',
         text_color: '#000000',
         button_style: 'inherit',
@@ -492,6 +502,8 @@ export function LinkTreeManagement() {
       title: '',
       url: '',
       icon: 'link',
+      icon_size: 'w-5 h-5',
+      icon_color: '#000000',
       background_color: '#ffffff',
       text_color: '#000000',
       button_style: 'inherit',
@@ -988,7 +1000,7 @@ export function LinkTreeManagement() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <IconSelector
                         value={newItem.icon}
@@ -996,6 +1008,40 @@ export function LinkTreeManagement() {
                         label="Ícone"
                       />
                     </div>
+                    <div>
+                      <Label>Tamanho do Ícone</Label>
+                      <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, icon_size: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="w-4 h-4">Pequeno</SelectItem>
+                          <SelectItem value="w-5 h-5">Médio</SelectItem>
+                          <SelectItem value="w-6 h-6">Grande</SelectItem>
+                          <SelectItem value="w-8 h-8">Extra Grande</SelectItem>
+                          <SelectItem value="w-10 h-10">Gigante</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Cor do Ícone</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={newItem.icon_color}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
+                          className="w-16 h-10"
+                        />
+                        <Input
+                          value={newItem.icon_color}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <Label>Efeito de Hover</Label>
                       <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>

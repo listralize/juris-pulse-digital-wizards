@@ -200,37 +200,94 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   };
 
   const getItemIcon = (item: LinkTreeItem) => {
+    // Lista de ícones disponíveis
+    const iconMap: { [key: string]: any } = {
+      'star': Star,
+      'external-link': ExternalLink,
+      'trending-up': TrendingUp,
+      'play': Play,
+      'phone': Phone,
+      'mail': Mail,
+      'map-pin': MapPin,
+      'calendar': Calendar,
+      'download': Download,
+      'share': Share,
+      'heart': Heart,
+      'award': Award,
+      'shield': Shield,
+      'zap': Zap,
+      'briefcase': Briefcase,
+      'scale': Scale,
+      'file-text': FileText,
+      'users': Users,
+      'clock': Clock,
+      'check-circle': CheckCircle,
+      'arrow-right': ArrowRight,
+      'sparkles': Sparkles,
+      'crown': Crown,
+      'diamond': Diamond,
+      'globe': Globe,
+      'camera': Camera,
+      'video': Video,
+      'music': Music,
+      'image': Image,
+      'message-circle': MessageCircle,
+      'instagram': Instagram,
+      'youtube': Youtube,
+      'linkedin': Linkedin,
+      'twitter': Twitter,
+      'facebook': Facebook,
+      'chevron-right': ChevronRight
+    };
+
+    // Se há um ícone personalizado, usar ele
+    if (item.icon && iconMap[item.icon]) {
+      const IconComponent = iconMap[item.icon];
+      const iconSize = item.icon_size || 'w-5 h-5';
+      const iconColor = item.icon_color;
+      
+      return (
+        <IconComponent 
+          className={iconSize}
+          style={{ color: iconColor }}
+        />
+      );
+    }
+
+    // Fallback para ícones automáticos baseados no tipo
+    const defaultSize = 'w-5 h-5';
     switch (item.item_type) {
       case 'contact':
         if (item.url?.includes('whatsapp') || item.url?.includes('wa.me')) {
-          return <MessageCircle className="w-5 h-5" />;
+          return <MessageCircle className={defaultSize} />;
         }
         if (item.url?.includes('mailto') || item.url?.includes('@')) {
-          return <Mail className="w-5 h-5" />;
+          return <Mail className={defaultSize} />;
         }
         if (item.url?.includes('tel:')) {
-          return <Phone className="w-5 h-5" />;
+          return <Phone className={defaultSize} />;
         }
-        return <Phone className="w-5 h-5" />;
+        return <Phone className={defaultSize} />;
       case 'social':
-        if (item.url?.includes('instagram')) return <Instagram className="w-5 h-5" />;
-        if (item.url?.includes('youtube')) return <Youtube className="w-5 h-5" />;
-        if (item.url?.includes('linkedin')) return <Linkedin className="w-5 h-5" />;
-        if (item.url?.includes('twitter') || item.url?.includes('x.com')) return <Twitter className="w-5 h-5" />;
-        if (item.url?.includes('facebook')) return <Facebook className="w-5 h-5" />;
-        return <Globe className="w-5 h-5" />;
+        if (item.url?.includes('instagram')) return <Instagram className={defaultSize} />;
+        if (item.url?.includes('youtube')) return <Youtube className={defaultSize} />;
+        if (item.url?.includes('linkedin')) return <Linkedin className={defaultSize} />;
+        if (item.url?.includes('twitter') || item.url?.includes('x.com')) return <Twitter className={defaultSize} />;
+        if (item.url?.includes('facebook')) return <Facebook className={defaultSize} />;
+        return <Globe className={defaultSize} />;
       case 'video':
-        return <Video className="w-5 h-5" />;
+        return <Video className={defaultSize} />;
       case 'text':
-        return <FileText className="w-5 h-5" />;
+      case 'info':
+        return <FileText className={defaultSize} />;
       case 'form':
-        return <Mail className="w-5 h-5" />;
+        return <Mail className={defaultSize} />;
       case 'product':
-        return <Briefcase className="w-5 h-5" />;
+        return <Briefcase className={defaultSize} />;
       case 'service':
-        return <Scale className="w-5 h-5" />;
+        return <Scale className={defaultSize} />;
       default:
-        return <ExternalLink className="w-5 h-5" />;
+        return <ExternalLink className={defaultSize} />;
     }
   };
 
