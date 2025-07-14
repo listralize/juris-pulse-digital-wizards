@@ -282,12 +282,15 @@ export type Database = {
         Row: {
           background_color: string | null
           button_style: string | null
+          card_button_text: string | null
           card_content: string | null
+          card_image: string | null
+          card_price: string | null
           click_count: number | null
           created_at: string | null
           display_order: number | null
-          form_action: string | null
           form_fields: Json | null
+          form_id: string | null
           hover_effect: string | null
           icon: string | null
           id: string
@@ -303,12 +306,15 @@ export type Database = {
         Insert: {
           background_color?: string | null
           button_style?: string | null
+          card_button_text?: string | null
           card_content?: string | null
+          card_image?: string | null
+          card_price?: string | null
           click_count?: number | null
           created_at?: string | null
           display_order?: number | null
-          form_action?: string | null
           form_fields?: Json | null
+          form_id?: string | null
           hover_effect?: string | null
           icon?: string | null
           id?: string
@@ -324,12 +330,15 @@ export type Database = {
         Update: {
           background_color?: string | null
           button_style?: string | null
+          card_button_text?: string | null
           card_content?: string | null
+          card_image?: string | null
+          card_price?: string | null
           click_count?: number | null
           created_at?: string | null
           display_order?: number | null
-          form_action?: string | null
           form_fields?: Json | null
+          form_id?: string | null
           hover_effect?: string | null
           icon?: string | null
           id?: string

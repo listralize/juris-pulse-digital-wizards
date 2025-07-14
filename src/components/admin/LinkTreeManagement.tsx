@@ -28,48 +28,62 @@ import {
   Layers,
   CreditCard,
   FileText,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Image,
+  DollarSign
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const themePresets = {
-  minimal: {
-    background_color: '#ffffff',
-    text_color: '#000000',
+  netflix: {
+    background_color: '#141414',
+    text_color: '#ffffff',
     button_style: 'rounded' as const,
-    animation_style: 'fade' as const
+    animation_style: 'fade' as const,
+    accent: '#e50914'
   },
-  modern: {
-    background_color: '#0f0f23',
+  amazon: {
+    background_color: '#232f3e',
     text_color: '#ffffff',
-    button_style: 'glassmorphism' as const,
-    animation_style: 'slide' as const
+    button_style: 'rounded' as const,
+    animation_style: 'slide' as const,
+    accent: '#ff9900'
   },
-  neon: {
+  landing_page: {
     background_color: '#000000',
-    text_color: '#00ff88',
-    button_style: 'neon' as const,
-    animation_style: 'glow' as const
-  },
-  glassmorphism: {
-    background_color: 'rgba(255,255,255,0.1)',
-    text_color: '#ffffff',
-    button_style: 'glassmorphism' as const,
-    animation_style: 'fade' as const
-  },
-  gradient: {
-    background_color: '#667eea',
     text_color: '#ffffff',
     button_style: 'gradient' as const,
-    animation_style: 'bounce' as const
+    animation_style: 'fade' as const,
+    accent: '#8b5cf6'
   },
-  retro: {
-    background_color: '#ff6b6b',
-    text_color: '#fff3e0',
+  futurista: {
+    background_color: '#0a0a0a',
+    text_color: '#00ff88',
+    button_style: 'neon' as const,
+    animation_style: 'glow' as const,
+    accent: '#00ffff'
+  },
+  spotify: {
+    background_color: '#121212',
+    text_color: '#ffffff',
     button_style: 'pill' as const,
-    animation_style: 'pulse' as const
+    animation_style: 'bounce' as const,
+    accent: '#1db954'
+  },
+  discord: {
+    background_color: '#2c2f33',
+    text_color: '#ffffff',
+    button_style: 'rounded' as const,
+    animation_style: 'pulse' as const,
+    accent: '#7289da'
   }
 };
+
+const availableForms = [
+  { id: 'contact', name: 'Formulário de Contato Principal', description: 'Formulário padrão do site' },
+  { id: 'consultation', name: 'Solicitação de Consulta', description: 'Para agendamento de consultas' },
+  { id: 'quote', name: 'Solicitar Orçamento', description: 'Para solicitar cotações' }
+];
 
 export const LinkTreeManagement = () => {
   const { theme } = useTheme();
@@ -87,11 +101,11 @@ export const LinkTreeManagement = () => {
   const [formData, setFormData] = useState<Omit<LinkTree, 'id' | 'created_at' | 'updated_at'>>({
     title: 'Meu Link Tree',
     description: '',
-    background_color: '#000000',
+    background_color: '#141414',
     text_color: '#ffffff',
     button_style: 'rounded',
     avatar_url: '',
-    theme: 'modern',
+    theme: 'netflix',
     background_type: 'solid',
     background_gradient: '',
     background_image: '',
@@ -111,8 +125,12 @@ export const LinkTreeManagement = () => {
     button_style: 'inherit' as const,
     hover_effect: 'scale' as const,
     is_featured: false,
-    item_type: 'link' as const,
+    item_type: 'link' as ('link' | 'card' | 'form'),
     card_content: '',
+    card_image: '',
+    card_price: '',
+    card_button_text: 'Saiba Mais',
+    form_id: '',
     form_fields: [] as FormField[]
   });
 
@@ -128,7 +146,7 @@ export const LinkTreeManagement = () => {
         text_color: linkTree.text_color,
         button_style: linkTree.button_style,
         avatar_url: linkTree.avatar_url || '',
-        theme: linkTree.theme || 'modern',
+        theme: linkTree.theme || 'netflix',
         background_type: linkTree.background_type || 'solid',
         background_gradient: linkTree.background_gradient || '',
         background_image: linkTree.background_image || '',
@@ -146,7 +164,10 @@ export const LinkTreeManagement = () => {
     setFormData(prev => ({
       ...prev,
       theme: themeName,
-      ...preset
+      background_color: preset.background_color,
+      text_color: preset.text_color,
+      button_style: preset.button_style,
+      animation_style: preset.animation_style
     }));
   };
 
@@ -166,6 +187,11 @@ export const LinkTreeManagement = () => {
 
     if (newItem.item_type === 'link' && !newItem.url) {
       toast.error('URL é obrigatória para links');
+      return;
+    }
+
+    if (newItem.item_type === 'form' && !newItem.form_id) {
+      toast.error('Selecione um formulário para vincular');
       return;
     }
 
@@ -190,6 +216,10 @@ export const LinkTreeManagement = () => {
         is_active: true,
         item_type: newItem.item_type,
         card_content: newItem.card_content,
+        card_image: newItem.card_image,
+        card_price: newItem.card_price,
+        card_button_text: newItem.card_button_text,
+        form_id: newItem.form_id,
         form_fields: newItem.form_fields
       });
 
@@ -204,42 +234,15 @@ export const LinkTreeManagement = () => {
         is_featured: false,
         item_type: 'link',
         card_content: '',
+        card_image: '',
+        card_price: '',
+        card_button_text: 'Saiba Mais',
+        form_id: '',
         form_fields: []
       });
     } catch (error) {
       console.error('Erro ao adicionar item:', error);
     }
-  };
-
-  const addFormField = () => {
-    const newField: FormField = {
-      id: crypto.randomUUID(),
-      type: 'text',
-      label: 'Novo Campo',
-      placeholder: '',
-      required: false,
-      options: []
-    };
-    setNewItem(prev => ({
-      ...prev,
-      form_fields: [...prev.form_fields, newField]
-    }));
-  };
-
-  const updateFormField = (fieldId: string, updates: Partial<FormField>) => {
-    setNewItem(prev => ({
-      ...prev,
-      form_fields: prev.form_fields.map(field =>
-        field.id === fieldId ? { ...field, ...updates } : field
-      )
-    }));
-  };
-
-  const removeFormField = (fieldId: string) => {
-    setNewItem(prev => ({
-      ...prev,
-      form_fields: prev.form_fields.filter(field => field.id !== fieldId)
-    }));
   };
 
   const copyLinkTreeUrl = () => {
@@ -261,11 +264,11 @@ export const LinkTreeManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-800 pb-6">
         <div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-            ⚡ Link Tree Pro
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-orange-600 bg-clip-text text-transparent">
+            🔥 Link Tree Pro
           </h2>
           <p className="text-gray-400 mt-2">
-            Crie uma página de links profissional com cards e formulários
+            Crie cards profissionais estilo Netflix, Amazon e muito mais
           </p>
         </div>
         <div className="flex gap-3">
@@ -290,7 +293,7 @@ export const LinkTreeManagement = () => {
           <Button 
             onClick={handleSave} 
             size="sm" 
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
           >
             <Save className="w-4 h-4" />
             Salvar Tudo
@@ -303,54 +306,59 @@ export const LinkTreeManagement = () => {
         <div className="xl:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-4 bg-gray-900 border border-gray-700">
-              <TabsTrigger value="design" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="design" className="flex items-center gap-2 text-white data-[state=active]:bg-red-600">
                 <Palette className="w-4 h-4" />
                 Design
               </TabsTrigger>
-              <TabsTrigger value="content" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="content" className="flex items-center gap-2 text-white data-[state=active]:bg-red-600">
                 <Layers className="w-4 h-4" />
                 Conteúdo
               </TabsTrigger>
-              <TabsTrigger value="items" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="items" className="flex items-center gap-2 text-white data-[state=active]:bg-red-600">
                 <Zap className="w-4 h-4" />
                 Items
               </TabsTrigger>
-              <TabsTrigger value="advanced" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="advanced" className="flex items-center gap-2 text-white data-[state=active]:bg-red-600">
                 <Settings className="w-4 h-4" />
                 Avançado
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="design" className="space-y-6 mt-6">
-              {/* Temas Predefinidos */}
+              {/* Temas de Plataformas Famosas */}
               <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Sparkles className="w-5 h-5 text-yellow-500" />
-                    Temas Predefinidos
+                    Temas de Plataformas Famosas
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     {Object.entries(themePresets).map(([name, preset]) => (
                       <button
                         key={name}
                         onClick={() => applyThemePreset(name as keyof typeof themePresets)}
-                        className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                        className={`p-4 rounded-lg border-2 transition-all hover:scale-105 relative overflow-hidden ${
                           formData.theme === name 
-                            ? 'border-purple-500 ring-2 ring-purple-500/20' 
+                            ? 'border-red-500 ring-2 ring-red-500/20' 
                             : 'border-gray-600 hover:border-gray-500'
                         }`}
                         style={{ backgroundColor: preset.background_color }}
                       >
-                        <div className="text-xs font-medium mb-1" style={{ color: preset.text_color }}>
-                          {name.charAt(0).toUpperCase() + name.slice(1)}
+                        <div className="text-sm font-medium mb-2" style={{ color: preset.text_color }}>
+                          {name === 'netflix' && '🎬 Netflix'}
+                          {name === 'amazon' && '📦 Amazon'}
+                          {name === 'landing_page' && '🚀 Landing Page'}
+                          {name === 'futurista' && '🤖 Futurista'}
+                          {name === 'spotify' && '🎵 Spotify'}
+                          {name === 'discord' && '💬 Discord'}
                         </div>
                         <div 
-                          className="w-full h-6 rounded text-xs flex items-center justify-center"
-                          style={{ backgroundColor: preset.text_color, color: preset.background_color }}
+                          className="w-full h-8 rounded text-xs flex items-center justify-center font-semibold"
+                          style={{ backgroundColor: preset.accent, color: preset.background_color }}
                         >
-                          Botão
+                          Preview
                         </div>
                       </button>
                     ))}
@@ -361,7 +369,7 @@ export const LinkTreeManagement = () => {
               {/* Personalização de Cores */}
               <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-white">Cores Personalizadas</CardTitle>
+                  <CardTitle className="text-white">Personalização</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -429,13 +437,16 @@ export const LinkTreeManagement = () => {
                   </div>
 
                   <div>
-                    <Label className="text-gray-300">URL do Avatar</Label>
+                    <Label className="text-gray-300">URL da Imagem/Avatar (formato retangular)</Label>
                     <Input
                       value={formData.avatar_url}
                       onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                      placeholder="https://exemplo.com/avatar.jpg"
+                      placeholder="https://exemplo.com/imagem.jpg"
                       className="mt-1 bg-gray-800 border-gray-600 text-white"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Será exibida em formato retangular sem corte circular
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -455,7 +466,7 @@ export const LinkTreeManagement = () => {
                     <Label className="text-gray-300">Tipo de Item</Label>
                     <Select
                       value={newItem.item_type}
-                      onValueChange={(value: any) => setNewItem({ ...newItem, item_type: value })}
+                      onValueChange={(value: 'link' | 'card' | 'form') => setNewItem({ ...newItem, item_type: value })}
                     >
                       <SelectTrigger className="mt-1 bg-gray-800 border-gray-600 text-white">
                         <SelectValue />
@@ -464,19 +475,19 @@ export const LinkTreeManagement = () => {
                         <SelectItem value="link" className="text-white hover:bg-gray-700">
                           <div className="flex items-center gap-2">
                             <LinkIcon className="w-4 h-4" />
-                            Link
+                            Link Simples
                           </div>
                         </SelectItem>
                         <SelectItem value="card" className="text-white hover:bg-gray-700">
                           <div className="flex items-center gap-2">
                             <CreditCard className="w-4 h-4" />
-                            Card de Conteúdo
+                            Card Netflix/Hotmart
                           </div>
                         </SelectItem>
                         <SelectItem value="form" className="text-white hover:bg-gray-700">
                           <div className="flex items-center gap-2">
                             <FileText className="w-4 h-4" />
-                            Formulário
+                            Formulário Existente
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -489,7 +500,7 @@ export const LinkTreeManagement = () => {
                       <Input
                         value={newItem.title}
                         onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                        placeholder="Ex: Meu Instagram"
+                        placeholder="Ex: Meu Curso Premium"
                         className="mt-1 bg-gray-800 border-gray-600 text-white"
                       />
                     </div>
@@ -507,89 +518,101 @@ export const LinkTreeManagement = () => {
                   </div>
 
                   {newItem.item_type === 'card' && (
-                    <div>
-                      <Label className="text-gray-300">Conteúdo do Card</Label>
-                      <Textarea
-                        value={newItem.card_content}
-                        onChange={(e) => setNewItem({ ...newItem, card_content: e.target.value })}
-                        placeholder="Conteúdo que será exibido no card..."
-                        className="mt-1 bg-gray-800 border-gray-600 text-white"
-                        rows={4}
-                      />
+                    <div className="space-y-4 p-4 border border-gray-600 rounded-lg bg-gray-800">
+                      <h4 className="text-white font-medium flex items-center gap-2">
+                        <CreditCard className="w-4 h-4" />
+                        Configuração do Card (Estilo Netflix/Hotmart)
+                      </h4>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-300">URL da Imagem</Label>
+                          <Input
+                            value={newItem.card_image}
+                            onChange={(e) => setNewItem({ ...newItem, card_image: e.target.value })}
+                            placeholder="https://exemplo.com/curso.jpg"
+                            className="mt-1 bg-gray-700 border-gray-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-300">Preço (opcional)</Label>
+                          <Input
+                            value={newItem.card_price}
+                            onChange={(e) => setNewItem({ ...newItem, card_price: e.target.value })}
+                            placeholder="R$ 297,00"
+                            className="mt-1 bg-gray-700 border-gray-600 text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-gray-300">Descrição do Card</Label>
+                        <Textarea
+                          value={newItem.card_content}
+                          onChange={(e) => setNewItem({ ...newItem, card_content: e.target.value })}
+                          placeholder="Aprenda a dominar as técnicas mais avançadas..."
+                          className="mt-1 bg-gray-700 border-gray-600 text-white"
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-300">Texto do Botão</Label>
+                          <Input
+                            value={newItem.card_button_text}
+                            onChange={(e) => setNewItem({ ...newItem, card_button_text: e.target.value })}
+                            placeholder="Comprar Agora"
+                            className="mt-1 bg-gray-700 border-gray-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-300">URL do Card</Label>
+                          <Input
+                            value={newItem.url}
+                            onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
+                            placeholder="https://hotmart.com/produto"
+                            className="mt-1 bg-gray-700 border-gray-600 text-white"
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {newItem.item_type === 'form' && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-gray-300">Campos do Formulário</Label>
-                        <Button
-                          onClick={addFormField}
-                          size="sm"
-                          variant="outline"
-                          className="border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Adicionar Campo
-                        </Button>
-                      </div>
+                    <div className="space-y-4 p-4 border border-gray-600 rounded-lg bg-gray-800">
+                      <h4 className="text-white font-medium flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        Vincular Formulário Existente
+                      </h4>
                       
-                      {newItem.form_fields.map((field) => (
-                        <div key={field.id} className="p-3 border border-gray-600 rounded-lg bg-gray-800">
-                          <div className="grid grid-cols-3 gap-2 mb-2">
-                            <Input
-                              value={field.label}
-                              onChange={(e) => updateFormField(field.id, { label: e.target.value })}
-                              placeholder="Label do campo"
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                            <Select
-                              value={field.type}
-                              onValueChange={(value: any) => updateFormField(field.id, { type: value })}
-                            >
-                              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-gray-700 border-gray-600">
-                                <SelectItem value="text" className="text-white">Texto</SelectItem>
-                                <SelectItem value="email" className="text-white">Email</SelectItem>
-                                <SelectItem value="textarea" className="text-white">Textarea</SelectItem>
-                                <SelectItem value="select" className="text-white">Select</SelectItem>
-                                <SelectItem value="checkbox" className="text-white">Checkbox</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              onClick={() => removeFormField(field.id)}
-                              size="sm"
-                              variant="destructive"
-                              className="h-10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={field.placeholder || ''}
-                              onChange={(e) => updateFormField(field.id, { placeholder: e.target.value })}
-                              placeholder="Placeholder (opcional)"
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={field.required}
-                                onCheckedChange={(checked) => updateFormField(field.id, { required: checked })}
-                              />
-                              <Label className="text-xs text-gray-400">Obrigatório</Label>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                      <div>
+                        <Label className="text-gray-300">Selecionar Formulário</Label>
+                        <Select
+                          value={newItem.form_id}
+                          onValueChange={(value) => setNewItem({ ...newItem, form_id: value })}
+                        >
+                          <SelectTrigger className="mt-1 bg-gray-700 border-gray-600 text-white">
+                            <SelectValue placeholder="Escolha um formulário do site" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-700 border-gray-600">
+                            {availableForms.map((form) => (
+                              <SelectItem key={form.id} value={form.id} className="text-white hover:bg-gray-600">
+                                <div>
+                                  <div className="font-medium">{form.name}</div>
+                                  <div className="text-xs text-gray-400">{form.description}</div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
 
                   <Button 
                     onClick={handleAddItem}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Item
@@ -604,20 +627,22 @@ export const LinkTreeManagement = () => {
                     <CardTitle className="text-white">Items Atuais ({linkTreeItems.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      {linkTreeItems.map((item, index) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-gray-600">
+                    <div className="space-y-3">
+                      {linkTreeItems.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-600">
                           <div className="flex items-center gap-3">
                             <GripVertical className="w-4 h-4 text-gray-400" />
                             <div>
                               <span className="text-white font-medium">{item.title}</span>
-                              <div className="text-xs text-gray-400 flex items-center gap-2">
+                              <div className="text-xs text-gray-400 flex items-center gap-2 mt-1">
                                 {item.item_type === 'link' && <LinkIcon className="w-3 h-3" />}
                                 {item.item_type === 'card' && <CreditCard className="w-3 h-3" />}
                                 {item.item_type === 'form' && <FileText className="w-3 h-3" />}
                                 {item.item_type.toUpperCase()}
                                 {item.item_type === 'link' && item.url && ` • ${item.url}`}
-                                {item.click_count > 0 && ` • ${item.click_count} cliques`}
+                                {item.item_type === 'card' && item.card_price && ` • ${item.card_price}`}
+                                {item.item_type === 'form' && item.form_id && ` • Formulário: ${item.form_id}`}
+                                {item.click_count > 0 && ` • ${item.click_count} interações`}
                               </div>
                             </div>
                           </div>
@@ -645,7 +670,7 @@ export const LinkTreeManagement = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="text-gray-300">Exibir Analytics</Label>
-                      <p className="text-xs text-gray-400">Mostra contadores de cliques</p>
+                      <p className="text-xs text-gray-400">Mostra contadores de interações</p>
                     </div>
                     <Switch
                       checked={formData.show_analytics}
@@ -683,7 +708,7 @@ export const LinkTreeManagement = () => {
                     onClick={() => setPreviewMode('mobile')}
                     size="sm"
                     variant={previewMode === 'mobile' ? 'default' : 'outline'}
-                    className={previewMode === 'mobile' ? '' : 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'}
+                    className={previewMode === 'mobile' ? 'bg-red-600' : 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'}
                   >
                     <Smartphone className="w-4 h-4" />
                   </Button>
@@ -691,7 +716,7 @@ export const LinkTreeManagement = () => {
                     onClick={() => setPreviewMode('desktop')}
                     size="sm"
                     variant={previewMode === 'desktop' ? 'default' : 'outline'}
-                    className={previewMode === 'desktop' ? '' : 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'}
+                    className={previewMode === 'desktop' ? 'bg-red-600' : 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'}
                   >
                     <Monitor className="w-4 h-4" />
                   </Button>
@@ -725,7 +750,7 @@ export const LinkTreeManagement = () => {
                   {linkTreeItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-center text-sm">
                       <span className="text-gray-300 truncate">{item.title}</span>
-                      <span className="text-white font-medium">{item.click_count} cliques</span>
+                      <span className="text-white font-medium">{item.click_count} interações</span>
                     </div>
                   ))}
                 </div>
@@ -733,7 +758,7 @@ export const LinkTreeManagement = () => {
                   <div className="flex justify-between items-center font-medium">
                     <span className="text-gray-300">Total</span>
                     <span className="text-white">
-                      {linkTreeItems.reduce((total, item) => total + item.click_count, 0)} cliques
+                      {linkTreeItems.reduce((total, item) => total + item.click_count, 0)} interações
                     </span>
                   </div>
                 </div>
