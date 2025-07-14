@@ -106,5 +106,37 @@ export default function LinkTreePage() {
     );
   }
 
-  return <LinkTreePreview linkTree={linkTree} linkTreeItems={linkTreeItems} onItemClick={handleItemClick} />;
+  return (
+    <div>
+      <LinkTreePreview linkTree={linkTree} linkTreeItems={linkTreeItems} onItemClick={handleItemClick} />
+      
+      {/* Chatbot Widget */}
+      <script dangerouslySetInnerHTML={{
+        __html: `
+          (function(e, t, n) {
+            let a = document.createElement("ra-chatbot-widget");
+            a.id = "ra_wc_chatbot";
+            a.setAttribute("slug", "UqsKfRy78ib0ZrKsUhtIv3BxhH6yYr8LUfFRjPi4");
+            document.body.appendChild(a);
+            
+            let d = e.scripts[e.scripts.length - 1],
+                r = e.createElement("script");
+
+            r.id = "ra_chatbot" + Math.floor(200 * Math.random());
+            r.defer = true;
+            r.src = "https://sitewidget.net/chatbot-sdk.js";
+
+            r.onload = r.onreadystatechange = function() {
+              let e = this.readyState;
+              if (!e || e === "complete" || e === "loaded") {
+                // Callback after script load (if needed)
+              }
+            };
+
+            d.parentElement.insertBefore(r, d.nextSibling);
+          })(document);
+        `
+      }} />
+    </div>
+  );
 }
