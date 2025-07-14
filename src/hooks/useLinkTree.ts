@@ -27,10 +27,6 @@ export const useLinkTree = () => {
       }
 
       if (linkTreeData) {
-        // Garantir que footer_social_links seja um array válido
-        if (linkTreeData.footer_social_links && typeof linkTreeData.footer_social_links === 'string') {
-          linkTreeData.footer_social_links = JSON.parse(linkTreeData.footer_social_links);
-        }
         setLinkTree(linkTreeData as LinkTree);
 
         // Carregar itens do link tree
