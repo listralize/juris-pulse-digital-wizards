@@ -384,11 +384,17 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
               )}
               
               <div className="space-y-4">
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+                <h1 
+                  className={`${linkTree.title_size || 'text-5xl'} ${linkTree.title_font || 'font-bold'} bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent`}
+                  style={{ color: linkTree.title_color || linkTree.text_color }}
+                >
                   {linkTree.title}
                 </h1>
                 {linkTree.description && (
-                  <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                  <p 
+                    className={`${linkTree.description_size || 'text-xl'} text-gray-300 max-w-2xl mx-auto leading-relaxed`}
+                    style={{ color: linkTree.description_color || linkTree.text_color }}
+                  >
                     {linkTree.description}
                   </p>
                 )}
@@ -448,11 +454,17 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
         )}
         
         <div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: linkTree.text_color }}>
+          <h1 
+            className={`${linkTree.title_size || 'text-3xl'} ${linkTree.title_font || 'font-bold'} mb-2`} 
+            style={{ color: linkTree.title_color || linkTree.text_color }}
+          >
             {linkTree.title}
           </h1>
           {linkTree.description && (
-            <p className="text-lg opacity-80" style={{ color: linkTree.text_color }}>
+            <p 
+              className={`${linkTree.description_size || 'text-lg'} opacity-80`} 
+              style={{ color: linkTree.description_color || linkTree.text_color }}
+            >
               {linkTree.description}
             </p>
           )}

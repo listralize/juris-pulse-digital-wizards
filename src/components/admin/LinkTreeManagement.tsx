@@ -37,7 +37,9 @@ export function LinkTreeManagement() {
     card_image: '',
     card_price: '',
     card_button_text: 'Saiba Mais',
-    form_id: ''
+    form_id: '',
+    card_size: 'medium',
+    card_format: 'rounded'
   });
 
   // Estados do Link Tree
@@ -56,7 +58,12 @@ export function LinkTreeManagement() {
     custom_css: '',
     animation_style: 'glow' as LinkTree['animation_style'],
     show_analytics: false,
-    is_active: true
+    is_active: true,
+    title_size: 'text-3xl',
+    title_font: 'font-bold',
+    title_color: '#ffffff',
+    description_size: 'text-base',
+    description_color: '#ffffff'
   });
 
   const itemTypeOptions = [
@@ -160,8 +167,13 @@ export function LinkTreeManagement() {
           background_video: linkTreeData.background_video || '',
           custom_css: linkTreeData.custom_css || '',
           animation_style: (linkTreeData.animation_style as LinkTree['animation_style']) || 'glow',
-          show_analytics: linkTreeData.show_analytics || false,
-          is_active: linkTreeData.is_active || true
+          show_analytics: false, // Remove analytics
+          is_active: linkTreeData.is_active || true,
+          title_size: 'text-3xl',
+          title_font: 'font-bold',
+          title_color: linkTreeData.text_color || '#ffffff',
+          description_size: 'text-base',
+          description_color: linkTreeData.text_color || '#ffffff'
         });
 
         // Buscar itens
@@ -354,7 +366,9 @@ export function LinkTreeManagement() {
       card_image: '',
       card_price: '',
       card_button_text: 'Saiba Mais',
-      form_id: ''
+      form_id: '',
+      card_size: 'medium',
+      card_format: 'rounded'
     });
   };
 
@@ -562,6 +576,94 @@ export function LinkTreeManagement() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personalização do Conteúdo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Tamanho do Título</Label>
+                    <Select value={linkTreeData.title_size || 'text-3xl'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_size: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text-lg">Pequeno</SelectItem>
+                        <SelectItem value="text-xl">Médio</SelectItem>
+                        <SelectItem value="text-2xl">Grande</SelectItem>
+                        <SelectItem value="text-3xl">Extra Grande</SelectItem>
+                        <SelectItem value="text-4xl">Gigante</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Fonte do Título</Label>
+                    <Select value={linkTreeData.title_font || 'font-bold'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_font: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="font-normal">Normal</SelectItem>
+                        <SelectItem value="font-medium">Médio</SelectItem>
+                        <SelectItem value="font-semibold">Semi Negrito</SelectItem>
+                        <SelectItem value="font-bold">Negrito</SelectItem>
+                        <SelectItem value="font-extrabold">Extra Negrito</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Cor do Título</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={linkTreeData.title_color || linkTreeData.text_color}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
+                        className="w-16 h-10"
+                      />
+                      <Input
+                        value={linkTreeData.title_color || linkTreeData.text_color}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Tamanho da Descrição</Label>
+                    <Select value={linkTreeData.description_size || 'text-base'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, description_size: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text-sm">Pequeno</SelectItem>
+                        <SelectItem value="text-base">Médio</SelectItem>
+                        <SelectItem value="text-lg">Grande</SelectItem>
+                        <SelectItem value="text-xl">Extra Grande</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Cor da Descrição</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={linkTreeData.description_color || linkTreeData.text_color}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
+                        className="w-16 h-10"
+                      />
+                      <Input
+                        value={linkTreeData.description_color || linkTreeData.text_color}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="items" className="space-y-6">
@@ -658,20 +760,78 @@ export function LinkTreeManagement() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Ícone</Label>
+                      <Input
+                        value={newItem.icon}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, icon: e.target.value }))}
+                        placeholder="link, phone, mail, etc."
+                      />
+                    </div>
+                    <div>
+                      <Label>Efeito de Hover</Label>
+                      <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hoverEffectOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div>
-                    <Label>Efeito de Hover</Label>
-                    <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>
+                    <Label>Estilo do Botão</Label>
+                    <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, button_style: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {hoverEffectOptions.map(option => (
+                        <SelectItem value="inherit">Herdar do Tema</SelectItem>
+                        {buttonStyleOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Tamanho do Card</Label>
+                      <Select value={newItem.card_size || 'medium'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_size: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">Pequeno</SelectItem>
+                          <SelectItem value="medium">Médio</SelectItem>
+                          <SelectItem value="large">Grande</SelectItem>
+                          <SelectItem value="full">Largura Total</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Formato do Card</Label>
+                      <Select value={newItem.card_format || 'rounded'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_format: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="rounded">Arredondado</SelectItem>
+                          <SelectItem value="square">Quadrado</SelectItem>
+                          <SelectItem value="circle">Circular</SelectItem>
+                          <SelectItem value="pill">Pílula</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   {(newItem.item_type as string) === 'card' && (
@@ -838,14 +998,6 @@ export function LinkTreeManagement() {
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="analytics"
-                      checked={linkTreeData.show_analytics}
-                      onCheckedChange={(checked) => setLinkTreeData(prev => ({ ...prev, show_analytics: checked }))}
-                    />
-                    <Label htmlFor="analytics">Mostrar Analytics</Label>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

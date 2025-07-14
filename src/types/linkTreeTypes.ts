@@ -15,6 +15,11 @@ export interface LinkTree {
   animation_style: 'none' | 'fade' | 'slide' | 'bounce' | 'pulse' | 'glow';
   show_analytics: boolean;
   is_active: boolean;
+  title_size?: string;
+  title_font?: string;
+  title_color?: string;
+  description_size?: string;
+  description_color?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -40,6 +45,8 @@ export interface LinkTreeItem {
   card_button_text?: string;
   form_id?: string;
   form_fields?: any;
+  card_size?: string;
+  card_format?: string;
   created_at?: string;
   updated_at?: string;
 }
