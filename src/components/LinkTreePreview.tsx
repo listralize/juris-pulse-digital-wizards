@@ -346,10 +346,31 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       'custom': '',
       'gradient': 'bg-gradient-to-r from-primary to-secondary',
       'glassmorphism': 'backdrop-blur-md bg-white/10',
-      'neon': 'shadow-lg shadow-primary/50'
+      'neon': 'shadow-lg shadow-primary/50',
+      'rounded': 'rounded-lg',
+      'square': 'rounded-none',
+      'pill': 'rounded-full'
     };
     
-    return `${baseClasses} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
+    const formatClasses = {
+      'rounded': 'rounded-lg',
+      'square': 'rounded-none',
+      'circle': 'rounded-full',
+      'pill': 'rounded-full',
+      'standard': 'rounded-lg'
+    };
+    
+    const sizeClasses = {
+      'small': 'min-h-[60px] text-sm py-3',
+      'medium': 'min-h-[80px] text-base py-4',
+      'large': 'min-h-[120px] text-lg py-6',
+      'full': 'min-h-[100px] text-base py-4'
+    };
+    
+    const formatClass = formatClasses[item.card_format || 'rounded'] || 'rounded-lg';
+    const sizeClass = sizeClasses[item.card_size || 'medium'] || 'min-h-[80px] text-base py-4';
+    
+    return `${baseClasses} ${formatClass} ${sizeClass} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
   };
 
   const renderListItem = (item: LinkTreeItem) => (
@@ -406,7 +427,25 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       'neon': 'shadow-lg shadow-primary/50'
     };
     
-    return `${baseClasses} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
+    const formatClasses = {
+      'rounded': 'rounded-lg',
+      'square': 'rounded-none',
+      'circle': 'rounded-full',
+      'pill': 'rounded-full',
+      'standard': 'rounded-lg'
+    };
+    
+    const sizeClasses = {
+      'small': 'min-h-[60px] text-sm',
+      'medium': 'min-h-[80px] text-base',
+      'large': 'min-h-[120px] text-lg',
+      'full': 'min-h-[100px] text-base'
+    };
+    
+    const formatClass = formatClasses[item.card_format || 'rounded'] || 'rounded-lg';
+    const sizeClass = sizeClasses[item.card_size || 'medium'] || 'min-h-[80px] text-base';
+    
+    return `${baseClasses} ${formatClass} ${sizeClass} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
   };
 
   const renderGridItem = (item: LinkTreeItem) => (

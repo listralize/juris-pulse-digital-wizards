@@ -21,7 +21,7 @@ export function LinkTreeManagement() {
   const [items, setItems] = useState<LinkTreeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { formConfig } = useFormConfig();
+  const { formConfig, multipleFormsConfig } = useFormConfig();
 
   // Estados para o novo item
   const [newItem, setNewItem] = useState({
@@ -116,7 +116,8 @@ export function LinkTreeManagement() {
     { value: 'pill', label: '💊 Pílula' },
     { value: 'glassmorphism', label: '💎 Glassmorphism' },
     { value: 'neon', label: '⚡ Neon' },
-    { value: 'gradient', label: '🌈 Gradiente' }
+    { value: 'gradient', label: '🌈 Gradiente' },
+    { value: 'custom', label: '🎨 Personalizado' }
   ];
 
   const animationOptions = [
@@ -1412,10 +1413,13 @@ export function LinkTreeManagement() {
                           <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                             <SelectValue placeholder="Selecione um formulário" />
                           </SelectTrigger>
-                          <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                            <SelectItem value="contact" className="text-white hover:bg-white/10">Formulário de Contato</SelectItem>
-                            <SelectItem value="consultation" className="text-white hover:bg-white/10">Formulário de Consulta</SelectItem>
-                          </SelectContent>
+                           <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                             {multipleFormsConfig.forms.map(form => (
+                               <SelectItem key={form.id} value={form.id} className="text-white hover:bg-white/10">
+                                 {form.name}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
                         </Select>
                       </div>
                     </div>
