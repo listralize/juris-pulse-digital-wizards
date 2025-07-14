@@ -1029,8 +1029,7 @@ export function LinkTreeManagement() {
                           }`}
                           style={{ background: theme.color }}
                         >
-                          <div className="text-white font-semibold text-sm flex items-center gap-2">
-                            <span className="text-lg">{theme.icon}</span>
+                          <div className="text-white font-semibold text-sm">
                             {theme.label}
                           </div>
                         </button>
@@ -1057,6 +1056,20 @@ export function LinkTreeManagement() {
                         onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_image: e.target.value }))}
                         placeholder="https://exemplo.com/background.jpg"
                       />
+                    </div>
+                  )}
+
+                  {linkTreeData.background_type === 'video' && (
+                    <div>
+                      <Label>URL do Vídeo de Fundo (MP4)</Label>
+                      <Input
+                        value={linkTreeData.background_video}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_video: e.target.value }))}
+                        placeholder="https://exemplo.com/background.mp4"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Vídeo será reproduzido sem áudio e em loop
+                      </p>
                     </div>
                   )}
 
