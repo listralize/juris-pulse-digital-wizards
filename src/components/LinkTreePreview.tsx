@@ -453,11 +453,12 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     return (
       <Card 
         key={item.id} 
-        className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden ${sizeClass}`}
+        className={`${getCardStyle(item)} ${sizeClass}`}
         onClick={() => handleItemClick(item)}
         style={{
-          backgroundColor: item.background_color,
+          backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
           color: item.text_color,
+          borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
           backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -489,10 +490,11 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderTextItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id} 
-      className="relative overflow-hidden border-2 border-dashed border-gray-300"
+      className={`${getCardStyle(item)} border-2 border-dashed border-gray-300`}
       style={{
-        backgroundColor: item.background_color,
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
         backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -523,11 +525,12 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderVideoItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id} 
-      className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden"
+      className={getCardStyle(item)}
       onClick={() => handleItemClick(item)}
       style={{
-        backgroundColor: item.background_color,
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
         backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -557,11 +560,12 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderMasonryItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id}
-      className="cursor-pointer transition-all duration-300 hover:scale-105 break-inside-avoid mb-6 relative overflow-hidden"
+      className={getCardStyle(item)}
       onClick={() => handleItemClick(item)}
       style={{
-        backgroundColor: item.background_color,
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
         backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -592,14 +596,13 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderCarouselItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id}
-      className="cursor-pointer transition-all duration-300 hover:scale-105 flex-shrink-0 w-72 sm:w-80 snap-center relative overflow-hidden"
+      className={`${getCardStyle(item)} flex-shrink-0 w-72 sm:w-80 snap-center break-inside-avoid mb-6`}
       onClick={() => handleItemClick(item)}
       style={{
-        backgroundColor: item.background_color,
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
-        backgroundImage: item.card_image 
-          ? `url(${item.card_image})` 
-          : 'none',
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -632,13 +635,12 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     return (
       <Card 
         key={item.id}
-        className={`cursor-pointer transition-all duration-300 hover:scale-105 relative overflow-hidden ${
-          isLarge ? 'lg:row-span-2' : ''
-        }`}
+        className={`${getCardStyle(item)} ${isLarge ? 'lg:row-span-2' : ''}`}
         onClick={() => handleItemClick(item)}
         style={{
-          backgroundColor: item.background_color,
+          backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
           color: item.text_color,
+          borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
           backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -670,8 +672,17 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderPortfolioItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id}
-      className="cursor-pointer transition-all duration-300 hover:scale-105 group"
+      className={`${getCardStyle(item)} group`}
       onClick={() => handleItemClick(item)}
+      style={{
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+        color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
       <CardContent className="p-0">
         <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
