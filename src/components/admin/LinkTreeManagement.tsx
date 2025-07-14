@@ -1015,15 +1015,24 @@ export function LinkTreeManagement() {
                       {themeOptions.map(theme => (
                         <button
                           key={theme.value}
-                          onClick={() => setLinkTreeData(prev => ({ ...prev, theme: theme.value as LinkTree['theme'] }))}
-                          className={`p-3 border rounded-lg text-left transition-all ${
+                          onClick={() => {
+                            setLinkTreeData(prev => ({ ...prev, theme: theme.value as LinkTree['theme'] }));
+                            toast({
+                              title: "Tema aplicado",
+                              description: `Tema ${theme.label} foi aplicado com sucesso!`
+                            });
+                          }}
+                          className={`p-3 border-2 rounded-lg text-left transition-all ${
                             linkTreeData.theme === theme.value 
-                              ? 'border-primary bg-primary/10' 
-                              : 'border-border hover:border-primary/50'
+                              ? 'border-white bg-white/20 scale-105' 
+                              : 'border-gray-600 hover:border-white/50 hover:scale-102'
                           }`}
                           style={{ background: theme.color }}
                         >
-                          <div className="text-white font-semibold text-sm">{theme.label}</div>
+                          <div className="text-white font-semibold text-sm flex items-center gap-2">
+                            <span className="text-lg">{theme.icon}</span>
+                            {theme.label}
+                          </div>
                         </button>
                       ))}
                     </div>
