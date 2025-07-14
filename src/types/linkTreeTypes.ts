@@ -11,6 +11,7 @@ export interface LinkTree {
   background_gradient?: string;
   background_image?: string;
   background_video?: string;
+  background_opacity?: number;
   custom_css?: string;
   animation_style: 'none' | 'fade' | 'slide' | 'bounce' | 'pulse' | 'glow';
   show_analytics: boolean;

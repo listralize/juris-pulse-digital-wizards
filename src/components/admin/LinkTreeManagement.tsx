@@ -58,6 +58,7 @@ export function LinkTreeManagement() {
     background_gradient: '',
     background_image: '',
     background_video: '',
+    background_opacity: 0.5,
     custom_css: '',
     animation_style: 'glow' as LinkTree['animation_style'],
     show_analytics: false,
@@ -171,6 +172,7 @@ export function LinkTreeManagement() {
           background_gradient: linkTreeData.background_gradient || '',
           background_image: linkTreeData.background_image || '',
           background_video: linkTreeData.background_video || '',
+          background_opacity: linkTreeData.background_opacity || 0.5,
           custom_css: linkTreeData.custom_css || '',
           animation_style: (linkTreeData.animation_style as LinkTree['animation_style']) || 'glow',
           show_analytics: false, // Remove analytics
@@ -1340,6 +1342,21 @@ export function LinkTreeManagement() {
                       <p className="text-xs text-muted-foreground mt-1">
                         Vídeo será reproduzido sem áudio e em loop
                       </p>
+                    </div>
+                  )}
+
+                  {(linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video') && (
+                    <div>
+                      <Label>Opacidade do Fundo ({Math.round((linkTreeData.background_opacity || 0.5) * 100)}%)</Label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={linkTreeData.background_opacity || 0.5}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_opacity: parseFloat(e.target.value) }))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      />
                     </div>
                   )}
 

@@ -115,6 +115,10 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       baseStyles.backgroundSize = 'cover';
       baseStyles.backgroundPosition = 'center';
       baseStyles.backgroundRepeat = 'no-repeat';
+      // Aplicar overlay de opacidade se definido
+      if (linkTree.background_opacity !== undefined) {
+        baseStyles.position = 'relative';
+      }
     } else if (linkTree.background_type === 'video' && linkTree.background_video) {
       // Para vídeo de fundo será aplicado separadamente
       baseStyles.backgroundColor = linkTree.background_color || '#000';
@@ -628,9 +632,12 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
           </video>
         )}
         
-        {/* Overlay para vídeo */}
-        {linkTree.background_type === 'video' && (
-          <div className="absolute inset-0 bg-black/50 z-5"></div>
+        {/* Overlay para vídeo ou imagem com opacidade */}
+        {(linkTree.background_type === 'video' || linkTree.background_type === 'image') && linkTree.background_opacity !== undefined && (
+          <div 
+            className="absolute inset-0 bg-black z-5" 
+            style={{ opacity: 1 - linkTree.background_opacity }}
+          ></div>
         )}
         
         <div className="relative z-10 p-8">
@@ -667,32 +674,32 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
                 )}
               </div>
 
-              {/* Badge Premium baseado no tema */}
-              {isPremiumTheme && (
+              {/* Badge Premium baseado no tema - NÃO exibir para neural */}
+              {isPremiumTheme && !isNeuralTheme && (
                 <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold px-6 py-3 text-lg">
                   <Crown className="w-5 h-5 mr-2" />
                   ESCRITÓRIO PREMIUM
                 </Badge>
               )}
-              {isCorporateTheme && (
+              {isCorporateTheme && !isNeuralTheme && (
                 <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold px-6 py-3 text-lg">
                   <Shield className="w-5 h-5 mr-2" />
                   CORPORATIVO
                 </Badge>
               )}
-              {isGoldTheme && (
+              {isGoldTheme && !isNeuralTheme && (
                 <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold px-6 py-3 text-lg">
                   <Crown className="w-5 h-5 mr-2" />
                   GOLD PREMIUM
                 </Badge>
               )}
-              {isPlatinumTheme && (
+              {isPlatinumTheme && !isNeuralTheme && (
                 <Badge className="bg-gradient-to-r from-gray-400 to-gray-500 text-white font-bold px-6 py-3 text-lg">
                   <Diamond className="w-5 h-5 mr-2" />
                   PLATINUM
                 </Badge>
               )}
-              {isDarkTheme && (
+              {isDarkTheme && !isNeuralTheme && (
                 <Badge className="bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold px-6 py-3 text-lg">
                   <Zap className="w-5 h-5 mr-2" />
                   DARK ELITE
