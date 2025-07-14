@@ -249,10 +249,20 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       'chevron-right': ChevronRight
     };
 
+    // Mapear tamanhos para classes CSS
+    const getSizeClass = (size?: string) => {
+      switch (size) {
+        case 'small': return 'w-4 h-4';
+        case 'medium': return 'w-6 h-6';
+        case 'large': return 'w-8 h-8';
+        default: return 'w-5 h-5';
+      }
+    };
+
     // Se há um ícone personalizado, usar ele
     if (item.icon && iconMap[item.icon]) {
       const IconComponent = iconMap[item.icon];
-      const iconSize = item.icon_size || 'w-5 h-5';
+      const iconSize = getSizeClass(item.icon_size);
       const iconColor = item.icon_color;
       
       return (

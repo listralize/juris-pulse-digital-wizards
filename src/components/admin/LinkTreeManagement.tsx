@@ -172,7 +172,7 @@ export function LinkTreeManagement() {
           background_gradient: linkTreeData.background_gradient || '',
           background_image: linkTreeData.background_image || '',
           background_video: linkTreeData.background_video || '',
-          background_opacity: linkTreeData.background_opacity || 0.5,
+          background_opacity: (linkTreeData as any).background_opacity || 0.5,
           custom_css: linkTreeData.custom_css || '',
           animation_style: (linkTreeData.animation_style as LinkTree['animation_style']) || 'glow',
           show_analytics: false, // Remove analytics
