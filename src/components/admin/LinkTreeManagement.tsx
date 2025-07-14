@@ -1269,7 +1269,7 @@ export function LinkTreeManagement() {
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
-                            <Image className="w-6 h-6 text-white" />
+                            <ImageIcon className="w-6 h-6 text-white" />
                           </div>
                           <div>
                             <h3 className="font-semibold text-white">Imagem ou Vídeo</h3>
@@ -1336,7 +1336,7 @@ export function LinkTreeManagement() {
                             onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'image' }))}
                             className="w-full"
                           >
-                            <Image className="w-4 h-4 mr-2" />
+                            <ImageIcon className="w-4 h-4 mr-2" />
                             Imagem
                           </Button>
                           <Button
