@@ -21,6 +21,16 @@ export interface LinkTree {
   title_color?: string;
   description_size?: string;
   description_color?: string;
+  footer_enabled?: boolean;
+  footer_text?: string;
+  footer_social_links?: Array<{
+    platform: string;
+    url: string;
+    icon?: string;
+  }>;
+  footer_background_color?: string;
+  footer_text_color?: string;
+  footer_style?: 'minimal' | 'modern' | 'complete';
   created_at?: string;
   updated_at?: string;
 }

@@ -67,7 +67,13 @@ export function LinkTreeManagement() {
     title_font: 'font-bold',
     title_color: '#ffffff',
     description_size: 'text-base',
-    description_color: '#ffffff'
+    description_color: '#ffffff',
+    footer_enabled: true,
+    footer_text: '',
+    footer_social_links: [] as Array<{platform: string; url: string; icon?: string}>,
+    footer_background_color: '#1a1a1a',
+    footer_text_color: '#ffffff',
+    footer_style: 'minimal' as 'minimal' | 'modern' | 'complete'
   });
 
   // Estado para edição de item
@@ -178,7 +184,13 @@ export function LinkTreeManagement() {
           title_font: 'font-bold',
           title_color: linkTreeData.text_color || '#ffffff',
           description_size: 'text-base',
-          description_color: linkTreeData.text_color || '#ffffff'
+          description_color: linkTreeData.text_color || '#ffffff',
+          footer_enabled: (linkTreeData as any).footer_enabled ?? true,
+          footer_text: (linkTreeData as any).footer_text || '',
+          footer_social_links: (linkTreeData as any).footer_social_links || [],
+          footer_background_color: (linkTreeData as any).footer_background_color || '#1a1a1a',
+          footer_text_color: (linkTreeData as any).footer_text_color || '#ffffff',
+          footer_style: (linkTreeData as any).footer_style || 'minimal'
         });
 
         // Buscar itens
@@ -257,7 +269,13 @@ export function LinkTreeManagement() {
         custom_css: linkTreeData.custom_css || '',
         animation_style: linkTreeData.animation_style || 'glow',
         show_analytics: linkTreeData.show_analytics || false,
-        is_active: linkTreeData.is_active !== false
+        is_active: linkTreeData.is_active !== false,
+        footer_enabled: linkTreeData.footer_enabled,
+        footer_text: linkTreeData.footer_text,
+        footer_social_links: linkTreeData.footer_social_links,
+        footer_background_color: linkTreeData.footer_background_color,
+        footer_text_color: linkTreeData.footer_text_color,
+        footer_style: linkTreeData.footer_style
       };
 
       if (linkTree?.id) {
@@ -1133,6 +1151,171 @@ export function LinkTreeManagement() {
                     </div>
                   </CardContent>
                 </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings2 className="w-5 h-5" />
+                      Configurações do Rodapé
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Configure o rodapé personalizado do seu Link Tree
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm font-medium">Habilitar Rodapé</Label>
+                        <p className="text-xs text-muted-foreground">Mostrar rodapé no Link Tree</p>
+                      </div>
+                      <Switch
+                        checked={linkTreeData.footer_enabled ?? true}
+                        onCheckedChange={(checked) => setLinkTreeData(prev => ({ ...prev, footer_enabled: checked }))}
+                      />
+                    </div>
+
+                    {linkTreeData.footer_enabled && (
+                      <div className="space-y-6">
+                        <div>
+                          <Label>Texto do Rodapé</Label>
+                          <Textarea
+                            value={linkTreeData.footer_text || ''}
+                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text: e.target.value }))}
+                            placeholder="© 2024 Meu Nome - Todos os direitos reservados"
+                            rows={3}
+                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium mb-3 block">Estilo do Rodapé</Label>
+                          <div className="grid grid-cols-3 gap-3">
+                            {[
+                              { value: 'minimal', label: 'Minimalista', description: 'Texto simples centralizado' },
+                              { value: 'modern', label: 'Moderno', description: 'Com divisores e espaçamento' },
+                              { value: 'complete', label: 'Completo', description: 'Texto + redes sociais' }
+                            ].map(style => (
+                              <button
+                                key={style.value}
+                                onClick={() => setLinkTreeData(prev => ({ ...prev, footer_style: style.value as 'minimal' | 'modern' | 'complete' }))}
+                                className={`p-3 rounded-lg border text-left transition-all ${
+                                  linkTreeData.footer_style === style.value 
+                                    ? 'border-primary bg-primary/10 text-white' 
+                                    : 'border-white/20 bg-white/5 text-white/70 hover:border-primary/50 hover:bg-white/10'
+                                }`}
+                              >
+                                <div className="font-medium text-sm">{style.label}</div>
+                                <div className="text-xs opacity-70 mt-1">{style.description}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Cor de Fundo</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={linkTreeData.footer_background_color || '#1a1a1a'}
+                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_background_color: e.target.value }))}
+                                className="w-12 h-8 p-0 border-0 rounded-md"
+                              />
+                              <Input
+                                value={linkTreeData.footer_background_color || '#1a1a1a'}
+                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_background_color: e.target.value }))}
+                                className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white"
+                                placeholder="#1a1a1a"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Cor do Texto</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={linkTreeData.footer_text_color || '#ffffff'}
+                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
+                                className="w-12 h-8 p-0 border-0 rounded-md"
+                              />
+                              <Input
+                                value={linkTreeData.footer_text_color || '#ffffff'}
+                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
+                                className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white"
+                                placeholder="#ffffff"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium mb-3 block">Redes Sociais</Label>
+                          <div className="space-y-3">
+                            {(linkTreeData.footer_social_links || []).map((social, index) => (
+                              <div key={index} className="flex gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                                <Select 
+                                  value={social.platform} 
+                                  onValueChange={(value) => {
+                                    const newSocials = [...(linkTreeData.footer_social_links || [])];
+                                    newSocials[index] = { ...social, platform: value };
+                                    setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
+                                  }}
+                                >
+                                  <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                                    <SelectItem value="instagram" className="text-white hover:bg-white/10">📷 Instagram</SelectItem>
+                                    <SelectItem value="facebook" className="text-white hover:bg-white/10">📘 Facebook</SelectItem>
+                                    <SelectItem value="twitter" className="text-white hover:bg-white/10">🐦 Twitter</SelectItem>
+                                    <SelectItem value="linkedin" className="text-white hover:bg-white/10">💼 LinkedIn</SelectItem>
+                                    <SelectItem value="youtube" className="text-white hover:bg-white/10">📺 YouTube</SelectItem>
+                                    <SelectItem value="tiktok" className="text-white hover:bg-white/10">🎵 TikTok</SelectItem>
+                                    <SelectItem value="whatsapp" className="text-white hover:bg-white/10">💬 WhatsApp</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  value={social.url}
+                                  onChange={(e) => {
+                                    const newSocials = [...(linkTreeData.footer_social_links || [])];
+                                    newSocials[index] = { ...social, url: e.target.value };
+                                    setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
+                                  }}
+                                  placeholder="https://..."
+                                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newSocials = [...(linkTreeData.footer_social_links || [])];
+                                    newSocials.splice(index, 1);
+                                    setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
+                                  }}
+                                  className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const newSocials = [...(linkTreeData.footer_social_links || []), { platform: 'instagram', url: '' }];
+                                setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
+                              }}
+                              className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Adicionar Rede Social
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
             </TabsContent>
 
             <TabsContent value="items" className="space-y-6">
@@ -1669,6 +1852,12 @@ export function LinkTreeManagement() {
                     title_color: linkTreeData.title_color,
                     description_size: linkTreeData.description_size,
                     description_color: linkTreeData.description_color,
+                    footer_enabled: linkTreeData.footer_enabled,
+                    footer_text: linkTreeData.footer_text,
+                    footer_social_links: linkTreeData.footer_social_links,
+                    footer_background_color: linkTreeData.footer_background_color,
+                    footer_text_color: linkTreeData.footer_text_color,
+                    footer_style: linkTreeData.footer_style,
                     created_at: linkTree?.created_at || new Date().toISOString(),
                     updated_at: new Date().toISOString()
                   } as LinkTree}

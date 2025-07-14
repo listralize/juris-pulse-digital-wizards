@@ -229,6 +229,12 @@ export type Database = {
           created_at: string | null
           custom_css: string | null
           description: string | null
+          footer_background_color: string | null
+          footer_enabled: boolean | null
+          footer_social_links: Json | null
+          footer_style: string | null
+          footer_text: string | null
+          footer_text_color: string | null
           id: string
           is_active: boolean | null
           show_analytics: boolean | null
@@ -250,6 +256,12 @@ export type Database = {
           created_at?: string | null
           custom_css?: string | null
           description?: string | null
+          footer_background_color?: string | null
+          footer_enabled?: boolean | null
+          footer_social_links?: Json | null
+          footer_style?: string | null
+          footer_text?: string | null
+          footer_text_color?: string | null
           id?: string
           is_active?: boolean | null
           show_analytics?: boolean | null
@@ -271,6 +283,12 @@ export type Database = {
           created_at?: string | null
           custom_css?: string | null
           description?: string | null
+          footer_background_color?: string | null
+          footer_enabled?: boolean | null
+          footer_social_links?: Json | null
+          footer_style?: string | null
+          footer_text?: string | null
+          footer_text_color?: string | null
           id?: string
           is_active?: boolean | null
           show_analytics?: boolean | null

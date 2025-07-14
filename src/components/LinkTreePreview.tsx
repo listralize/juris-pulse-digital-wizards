@@ -947,6 +947,82 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
             </div>
           </div>
         )}
+
+        {/* Rodapé Personalizado */}
+        {linkTree.footer_enabled && (
+          <footer 
+            className="w-full mt-12 py-6 px-4"
+            style={{
+              backgroundColor: linkTree.footer_background_color || '#1a1a1a',
+              color: linkTree.footer_text_color || '#ffffff'
+            }}
+          >
+            <div className="max-w-2xl mx-auto">
+              {linkTree.footer_style === 'minimal' && (
+                <div className="text-center">
+                  {linkTree.footer_text && (
+                    <p className="text-sm opacity-80">{linkTree.footer_text}</p>
+                  )}
+                </div>
+              )}
+
+              {linkTree.footer_style === 'modern' && (
+                <div className="text-center space-y-4">
+                  {linkTree.footer_text && (
+                    <>
+                      <div className="w-16 h-px bg-current opacity-30 mx-auto"></div>
+                      <p className="text-sm opacity-80">{linkTree.footer_text}</p>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {linkTree.footer_style === 'complete' && (
+                <div className="space-y-4">
+                  {/* Redes Sociais */}
+                  {linkTree.footer_social_links && linkTree.footer_social_links.length > 0 && (
+                    <div className="flex justify-center gap-4">
+                      {linkTree.footer_social_links.map((social, index) => {
+                        const getSocialIcon = (platform: string) => {
+                          switch (platform) {
+                            case 'instagram': return '📷';
+                            case 'facebook': return '📘';
+                            case 'twitter': return '🐦';
+                            case 'linkedin': return '💼';
+                            case 'youtube': return '📺';
+                            case 'tiktok': return '🎵';
+                            case 'whatsapp': return '💬';
+                            default: return '🔗';
+                          }
+                        };
+
+                        return social.url ? (
+                          <a
+                            key={index}
+                            href={social.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-2xl hover:scale-110 transition-transform duration-200"
+                            title={social.platform}
+                          >
+                            {getSocialIcon(social.platform)}
+                          </a>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+
+                  {/* Texto do rodapé */}
+                  {linkTree.footer_text && (
+                    <div className="text-center border-t border-current border-opacity-20 pt-4">
+                      <p className="text-sm opacity-80">{linkTree.footer_text}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </footer>
+        )}
       </div>
 
       <FormModal
