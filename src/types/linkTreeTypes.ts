@@ -4,10 +4,10 @@ export interface LinkTree {
   description?: string;
   background_color: string;
   text_color: string;
-  button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient' | 'grid' | 'list' | 'masonry' | 'carousel' | 'magazine' | 'portfolio';
+  button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient' | 'grid' | 'list' | 'masonry' | 'carousel' | 'magazine' | 'portfolio' | 'bento';
   avatar_url?: string;
   theme: 'modern' | 'minimal' | 'colorful' | 'dark' | 'corporate' | 'premium' | 'gold' | 'platinum' | 'custom';
-  background_type: 'solid' | 'gradient' | 'image' | 'video';
+  background_type: 'solid' | 'gradient' | 'image' | 'video' | 'neural';
   background_gradient?: string;
   background_image?: string;
   background_video?: string;
@@ -33,13 +33,13 @@ export interface LinkTreeItem {
   click_count: number;
   is_featured: boolean;
   is_active: boolean;
-  item_type: 'link' | 'card' | 'form' | 'social' | 'product' | 'service' | 'contact' | 'video' | 'gallery' | 'text';
+  item_type: 'link' | 'card' | 'form' | 'social' | 'product' | 'service' | 'contact' | 'video' | 'text';
   card_content?: string;
   card_image?: string;
   card_price?: string;
   card_button_text?: string;
-  form_id?: string; // ID do formulário existente para vincular
-  form_fields?: FormField[];
+  form_id?: string;
+  form_fields?: any;
   created_at?: string;
   updated_at?: string;
 }
