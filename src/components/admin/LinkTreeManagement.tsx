@@ -87,10 +87,8 @@ export function LinkTreeManagement() {
   const layoutOptions = [
     { value: 'list', label: '☰ Lista Elegante', description: 'Lista vertical tradicional' },
     { value: 'grid', label: '⊞ Grid Premium', description: 'Layout em grade organizada' },
-    { value: 'masonry', label: '⌬ Masonry', description: 'Layout tipo Pinterest' },
     { value: 'bento', label: '⊡ Bento Grid', description: 'Grid estilo Bento moderno' },
-    { value: 'carousel', label: '⟵⟶ Carrossel', description: 'Navegação por slides' },
-    { value: 'magazine', label: '📰 Magazine', description: 'Layout editorial sofisticado' }
+    { value: 'carousel', label: '⟵⟶ Carrossel', description: 'Navegação por slides' }
   ];
 
   const themeOptions = [
@@ -243,19 +241,24 @@ export function LinkTreeManagement() {
 
   const saveLinkTree = async () => {
     try {
-      // Combinar todos os dados do estado
+      // Preparar dados completos para salvar
       const dataToSave = {
-        ...linkTreeData,
-        background_opacity: (linkTreeData as any).background_opacity || 0.8,
-        // Garantir que todos os campos estão sendo salvos
         title: linkTreeData.title || 'Meu Link Tree',
         description: linkTreeData.description || '',
         background_color: linkTreeData.background_color || '#000000',
         text_color: linkTreeData.text_color || '#ffffff',
-        background_type: linkTreeData.background_type || 'neural',
-        theme: linkTreeData.theme || 'modern',
         button_style: linkTreeData.button_style || 'list',
-        animation_style: linkTreeData.animation_style || 'glow'
+        avatar_url: linkTreeData.avatar_url || '',
+        theme: linkTreeData.theme || 'modern',
+        background_type: linkTreeData.background_type || 'neural',
+        background_gradient: linkTreeData.background_gradient || '',
+        background_image: linkTreeData.background_image || '',
+        background_video: linkTreeData.background_video || '',
+        background_opacity: (linkTreeData as any).background_opacity || 0.8,
+        custom_css: linkTreeData.custom_css || '',
+        animation_style: linkTreeData.animation_style || 'glow',
+        show_analytics: linkTreeData.show_analytics || false,
+        is_active: linkTreeData.is_active !== false
       };
 
       if (linkTree?.id) {
@@ -266,6 +269,9 @@ export function LinkTreeManagement() {
           .eq('id', linkTree.id);
         
         if (error) throw error;
+        
+        // Atualizar estado local
+        setLinkTree(prev => prev ? { ...prev, ...dataToSave } as LinkTree : null);
       } else {
         // Criar novo
         const { data, error } = await supabase
@@ -280,16 +286,14 @@ export function LinkTreeManagement() {
 
       toast({
         title: "Sucesso",
-        description: "Link Tree atualizado com sucesso!"
+        description: "Configurações salvas com sucesso!"
       });
 
-      // Recarregar dados
-      await loadLinkTree();
     } catch (error) {
       console.error('Erro ao salvar Link Tree:', error);
       toast({
         title: "Erro",
-        description: "Falha ao salvar Link Tree",
+        description: "Falha ao salvar configurações",
         variant: "destructive"
       });
     }
@@ -623,60 +627,64 @@ export function LinkTreeManagement() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="bg-color">Cor de Fundo</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="bg-color"
-                          type="color"
-                          value={linkTreeData.background_color}
-                          onChange={(e) => {
-                            setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
-                            if (linkTree) {
-                              setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
-                            }
-                          }}
-                          className="w-16 h-10"
-                        />
-                        <Input
-                          value={linkTreeData.background_color}
-                          onChange={(e) => {
-                            setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
-                            if (linkTree) {
-                              setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
-                            }
-                          }}
-                          placeholder="#000000"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="text-color">Cor do Texto</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="text-color"
-                          type="color"
-                          value={linkTreeData.text_color}
-                          onChange={(e) => {
-                            setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
-                            if (linkTree) {
-                              setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
-                            }
-                          }}
-                          className="w-16 h-10"
-                        />
-                        <Input
-                          value={linkTreeData.text_color}
-                          onChange={(e) => {
-                            setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
-                            if (linkTree) {
-                              setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
-                            }
-                          }}
-                          placeholder="#ffffff"
-                        />
-                      </div>
-                    </div>
+                     <div>
+                       <Label htmlFor="bg-color">Cor de Fundo</Label>
+                       <div className="flex gap-2">
+                         <Input
+                           id="bg-color"
+                           type="color"
+                           value={linkTreeData.background_color}
+                           onChange={(e) => {
+                             setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                             // Sincronizar com o preview
+                             if (linkTree) {
+                               setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                             }
+                           }}
+                           className="w-16 h-10"
+                         />
+                         <Input
+                           value={linkTreeData.background_color}
+                           onChange={(e) => {
+                             setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                             // Sincronizar com o preview
+                             if (linkTree) {
+                               setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                             }
+                           }}
+                           placeholder="#000000"
+                         />
+                       </div>
+                     </div>
+                     <div>
+                       <Label htmlFor="text-color">Cor do Texto</Label>
+                       <div className="flex gap-2">
+                         <Input
+                           id="text-color"
+                           type="color"
+                           value={linkTreeData.text_color}
+                           onChange={(e) => {
+                             setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
+                             // Sincronizar com o preview
+                             if (linkTree) {
+                               setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
+                             }
+                           }}
+                           className="w-16 h-10"
+                         />
+                         <Input
+                           value={linkTreeData.text_color}
+                           onChange={(e) => {
+                             setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
+                             // Sincronizar com o preview
+                             if (linkTree) {
+                               setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
+                             }
+                           }}
+                           placeholder="#ffffff"
+                         />
+                       </div>
+                     </div>
                   </div>
 
                   <div>
