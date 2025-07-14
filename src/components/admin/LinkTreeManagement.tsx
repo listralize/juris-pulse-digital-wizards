@@ -274,6 +274,45 @@ export function LinkTreeManagement() {
     }
   };
 
+  const moveItem = async (itemId: string, direction: 'up' | 'down') => {
+    const currentIndex = items.findIndex(item => item.id === itemId);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= items.length) return;
+
+    const newItems = [...items];
+    [newItems[currentIndex], newItems[newIndex]] = [newItems[newIndex], newItems[currentIndex]];
+
+    // Atualizar display_order no banco
+    try {
+      const updates = newItems.map((item, index) => ({
+        id: item.id,
+        display_order: index
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('link_tree_items')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+      }
+
+      setItems(newItems);
+      toast({
+        title: "Sucesso",
+        description: "Ordem dos itens atualizada!"
+      });
+    } catch (error) {
+      console.error('Erro ao reordenar itens:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao reordenar itens",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleAddItem = async () => {
     if (!newItem.title || !linkTree) return;
 
@@ -293,7 +332,7 @@ export function LinkTreeManagement() {
       card_price: newItem.card_price,
       card_button_text: newItem.card_button_text,
       form_id: newItem.form_id,
-      display_order: 0,
+      display_order: items.length,
       is_active: true,
       click_count: 0
     };
@@ -688,26 +727,48 @@ export function LinkTreeManagement() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {items.map((item) => (
+                      {items.map((item, index) => (
                         <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="font-medium">{item.title}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {item.item_type} • {item.click_count} cliques
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => moveItem(item.id, 'up')}
+                                disabled={index === 0}
+                              >
+                                ↑
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => moveItem(item.id, 'down')}
+                                disabled={index === items.length - 1}
+                              >
+                                ↓
+                              </Button>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-medium">{item.title}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {item.item_type} • {item.click_count} cliques
+                              </div>
                             </div>
                           </div>
-                          {item.is_featured && (
-                            <Badge variant="secondary" className="mr-2">
-                              Destaque
-                            </Badge>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteItem(item.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            {item.is_featured && (
+                              <Badge variant="secondary">
+                                Destaque
+                              </Badge>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteItem(item.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -790,9 +851,17 @@ export function LinkTreeManagement() {
             </TabsContent>
           </Tabs>
 
-          <Button onClick={saveLinkTree} className="w-full" size="lg">
-            Salvar Configurações
-          </Button>
+          <div className="flex gap-4">
+            <Button onClick={saveLinkTree} className="flex-1" size="lg">
+              Salvar Configurações
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <a href="/linktree" target="_blank" rel="noopener noreferrer">
+                <Eye className="w-4 h-4 mr-2" />
+                Ver Página
+              </a>
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">

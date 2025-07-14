@@ -27,7 +27,8 @@ const premiumLayouts = {
   masonry: 'masonry',
   carousel: 'carousel',
   magazine: 'magazine',
-  portfolio: 'portfolio'
+  portfolio: 'portfolio',
+  bento: 'bento'
 };
 
 const legalThemes = {
@@ -49,9 +50,9 @@ const legalThemes = {
     accent: '#059669',
     gradient: 'from-amber-900 via-yellow-800 to-amber-900'
   },
-  platinum: {
-    primary: '#475569',
-    secondary: '#f8fafc',
+  dark: {
+    primary: '#374151',
+    secondary: '#f9fafb',
     accent: '#dc2626',
     gradient: 'from-slate-800 via-gray-700 to-slate-800'
   }
@@ -74,69 +75,35 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
           formConfig: formConfig,
           title: item.title
         });
+        return;
       }
+    }
+    
+    if (onItemClick) {
+      onItemClick(item);
     } else if (item.url) {
       window.open(item.url, '_blank');
     }
-    onItemClick?.(item);
-  };
-
-  const getItemIcon = (item: LinkTreeItem) => {
-    const iconMap: Record<string, React.ComponentType<any>> = {
-      // Serviços Jurídicos Premium
-      'legal-consultation': Scale,
-      'contract-review': FileText,
-      'litigation': Shield,
-      'compliance': CheckCircle,
-      'business-law': Briefcase,
-      'family-law': Heart,
-      'criminal-defense': Award,
-      'real-estate': MapPin,
-      
-      // Contato Premium
-      'whatsapp-vip': Phone,
-      'email-premium': Mail,
-      'video-call': Video,
-      'appointment': Calendar,
-      
-      // Mídia & Social
-      'instagram': Instagram,
-      'youtube': Youtube,
-      'linkedin': Linkedin,
-      'twitter': Twitter,
-      'facebook': Facebook,
-      
-      // Recursos
-      'download': Download,
-      'portfolio': Crown,
-      'testimonials': Star,
-      'awards': Diamond,
-      'blog': Globe,
-      'gallery': Camera,
-      'music': Music,
-      'image': Image,
-      'message': MessageCircle,
-      
-      // Padrões
-      'link': ExternalLink,
-      'card': Sparkles,
-      'form': FileText,
-      'social': Users,
-      'product': Zap,
-      'service': Award,
-      'contact': Phone,
-      'video': Play,
-      'text': FileText
-    };
-
-    const IconComponent = iconMap[item.icon || item.item_type || 'link'];
-    return IconComponent || ExternalLink;
   };
 
   const getThemeColors = () => {
-    const theme = linkTree.theme || 'corporate';
+    const theme = linkTree.theme || 'modern';
     return legalThemes[theme as keyof typeof legalThemes] || legalThemes.corporate;
   };
+
+  const getThemeGradient = () => {
+    const theme = linkTree.theme || 'modern';
+    if (theme === 'corporate') return 'from-blue-900 via-slate-900 to-blue-900';
+    if (theme === 'premium') return 'from-purple-900 via-indigo-900 to-purple-900';
+    if (theme === 'gold') return 'from-amber-900 via-yellow-800 to-amber-900';
+    if (theme === 'dark') return 'from-gray-900 via-slate-800 to-gray-900';
+    return 'from-slate-900 via-blue-900 to-slate-900';
+  };
+
+  const isNeuralTheme = linkTree.background_type === 'neural';
+  const isCorporateTheme = linkTree.theme === 'corporate';
+  const isPremiumTheme = linkTree.theme === 'premium';
+  const isGoldTheme = linkTree.theme === 'gold';
 
   const colors = getThemeColors();
   
@@ -188,336 +155,334 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
         
       case 'portfolio':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {sortedItems.map((item) => renderPortfolioItem(item))}
+          </div>
+        );
+        
+      case 'bento':
+        return (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-min">
+            {sortedItems.map((item, index) => renderBentoItem(item, index))}
           </div>
         );
         
       case 'list':
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-md mx-auto">
             {sortedItems.map((item) => renderListItem(item))}
           </div>
         );
         
       default: // grid
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {sortedItems.map((item) => renderGridItem(item))}
           </div>
         );
     }
   };
 
-  const renderGridItem = (item: LinkTreeItem) => {
-    const IconComponent = getItemIcon(item);
-    
-    if (item.item_type === 'card') {
-      return (
-        <Card 
-          key={item.id} 
-          className="group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
-          onClick={() => handleItemClick(item)}
-        >
-          {item.card_image && (
-            <div className="relative h-48 overflow-hidden">
-              <img 
-                src={item.card_image} 
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-              {item.is_featured && (
-                <Badge className="absolute top-3 right-3 bg-yellow-500 text-black font-bold">
-                  <Crown className="w-3 h-3 mr-1" />
-                  PREMIUM
-                </Badge>
-              )}
-            </div>
-          )}
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                <IconComponent className="w-6 h-6" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-white text-lg mb-2">{item.title}</h3>
-                {item.card_content && (
-                  <p className="text-gray-300 text-sm leading-relaxed mb-4">{item.card_content}</p>
-                )}
-                {item.card_price && (
-                  <div className="text-2xl font-bold text-yellow-400 mb-4">{item.card_price}</div>
-                )}
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold">
-                  {item.card_button_text || 'Saiba Mais'}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      );
+  const getItemIcon = (item: LinkTreeItem) => {
+    switch (item.item_type) {
+      case 'contact':
+        if (item.url?.includes('whatsapp') || item.url?.includes('wa.me')) {
+          return <MessageCircle className="w-5 h-5" />;
+        }
+        if (item.url?.includes('mailto') || item.url?.includes('@')) {
+          return <Mail className="w-5 h-5" />;
+        }
+        if (item.url?.includes('tel:')) {
+          return <Phone className="w-5 h-5" />;
+        }
+        return <Phone className="w-5 h-5" />;
+      case 'social':
+        if (item.url?.includes('instagram')) return <Instagram className="w-5 h-5" />;
+        if (item.url?.includes('youtube')) return <Youtube className="w-5 h-5" />;
+        if (item.url?.includes('linkedin')) return <Linkedin className="w-5 h-5" />;
+        if (item.url?.includes('twitter') || item.url?.includes('x.com')) return <Twitter className="w-5 h-5" />;
+        if (item.url?.includes('facebook')) return <Facebook className="w-5 h-5" />;
+        return <Globe className="w-5 h-5" />;
+      case 'video':
+        return <Video className="w-5 h-5" />;
+      case 'text':
+        return <FileText className="w-5 h-5" />;
+      case 'form':
+        return <Mail className="w-5 h-5" />;
+      case 'product':
+        return <Briefcase className="w-5 h-5" />;
+      case 'service':
+        return <Scale className="w-5 h-5" />;
+      default:
+        return <ExternalLink className="w-5 h-5" />;
     }
+  };
 
-    // Item padrão melhorado
+  const renderListItem = (item: LinkTreeItem) => (
+    <Button
+      key={item.id}
+      onClick={() => handleItemClick(item)}
+      className="w-full justify-between p-6 h-auto"
+      style={{
+        backgroundColor: item.background_color,
+        color: item.text_color,
+        borderColor: item.background_color
+      }}
+    >
+      <div className="flex items-center gap-3">
+        {getItemIcon(item)}
+        <span className="font-medium">{item.title}</span>
+      </div>
+      {item.is_featured && <Star className="w-5 h-5 fill-current" />}
+    </Button>
+  );
+
+  const renderGridItem = (item: LinkTreeItem) => (
+    <Card 
+      key={item.id} 
+      className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg"
+      onClick={() => handleItemClick(item)}
+    >
+      <CardContent className="p-6 text-center">
+        <div className="mb-4 flex justify-center">
+          {getItemIcon(item)}
+        </div>
+        <h3 className="font-semibold mb-2">{item.title}</h3>
+        {item.item_type === 'text' && item.card_content && (
+          <p className="text-sm text-muted-foreground">{item.card_content}</p>
+        )}
+        {item.is_featured && (
+          <Badge className="mt-2 bg-yellow-500 text-black">⭐ Destaque</Badge>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderBentoItem = (item: LinkTreeItem, index: number) => {
+    const sizes = ['col-span-2 row-span-2', 'col-span-1 row-span-1', 'col-span-2 row-span-1', 'col-span-1 row-span-2'];
+    const sizeClass = sizes[index % sizes.length];
+    
     return (
       <Card 
         key={item.id}
-        className="group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-500 hover:scale-105"
+        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${sizeClass}`}
+        onClick={() => handleItemClick(item)}
+        style={{
+          backgroundColor: item.background_color,
+          color: item.text_color
+        }}
+      >
+        <CardContent className="p-4 h-full flex flex-col justify-center items-center text-center">
+          <div className="mb-2">
+            {getItemIcon(item)}
+          </div>
+          <h3 className="font-semibold text-sm">{item.title}</h3>
+          {item.item_type === 'text' && item.card_content && (
+            <p className="text-xs mt-1 opacity-80">{item.card_content}</p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderMasonryItem = (item: LinkTreeItem) => (
+    <Card 
+      key={item.id}
+      className="cursor-pointer transition-all duration-300 hover:scale-105 break-inside-avoid mb-6"
+      onClick={() => handleItemClick(item)}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3 mb-3">
+          {getItemIcon(item)}
+          <h3 className="font-semibold">{item.title}</h3>
+        </div>
+        {item.item_type === 'text' && item.card_content && (
+          <p className="text-sm text-muted-foreground">{item.card_content}</p>
+        )}
+        {item.is_featured && (
+          <Badge className="mt-2 bg-yellow-500 text-black">⭐ Destaque</Badge>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderCarouselItem = (item: LinkTreeItem) => (
+    <Card 
+      key={item.id}
+      className="cursor-pointer transition-all duration-300 hover:scale-105 flex-shrink-0 w-64 snap-center"
+      onClick={() => handleItemClick(item)}
+    >
+      <CardContent className="p-6 text-center">
+        <div className="mb-4 flex justify-center">
+          {getItemIcon(item)}
+        </div>
+        <h3 className="font-semibold mb-2">{item.title}</h3>
+        {item.item_type === 'text' && item.card_content && (
+          <p className="text-sm text-muted-foreground">{item.card_content}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderMagazineItem = (item: LinkTreeItem, index: number) => {
+    const isLarge = index % 3 === 0;
+    
+    return (
+      <Card 
+        key={item.id}
+        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${isLarge ? 'lg:row-span-2' : ''}`}
         onClick={() => handleItemClick(item)}
       >
         <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white group-hover:scale-110 transition-transform">
-              <IconComponent className="w-6 h-6" />
+          <div className="flex items-center gap-3 mb-3">
+            {getItemIcon(item)}
+            <h3 className="font-semibold">{item.title}</h3>
+          </div>
+          {item.item_type === 'text' && item.card_content && (
+            <p className="text-sm text-muted-foreground">{item.card_content}</p>
+          )}
+          {item.is_featured && (
+            <Badge className="mt-2 bg-yellow-500 text-black">⭐ Destaque</Badge>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderPortfolioItem = (item: LinkTreeItem) => (
+    <Card 
+      key={item.id}
+      className="cursor-pointer transition-all duration-300 hover:scale-105 group"
+      onClick={() => handleItemClick(item)}
+    >
+      <CardContent className="p-0">
+        <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+          <div className="text-center">
+            <div className="mb-4 flex justify-center text-primary">
+              {getItemIcon(item)}
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-white group-hover:text-blue-300 transition-colors">{item.title}</h3>
-              {item.is_featured && (
-                <Badge className="mt-2 bg-yellow-500 text-black">
-                  <Star className="w-3 h-3 mr-1" />
-                  Destaque
+            <h3 className="font-semibold px-4">{item.title}</h3>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (isNeuralTheme) {
+    return (
+      <div className="relative min-h-screen text-white overflow-hidden" style={getCustomStyles()}>
+        {linkTree.background_type === 'neural' && <NeuralBackground />}
+        
+        <div className="relative z-10 p-8">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Header Premium */}
+            <div className="space-y-6">
+              {linkTree.avatar_url && (
+                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white/20 shadow-2xl">
+                  <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                </div>
+              )}
+              
+              <div className="space-y-4">
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+                  {linkTree.title}
+                </h1>
+                {linkTree.description && (
+                  <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                    {linkTree.description}
+                  </p>
+                )}
+              </div>
+
+              {isPremiumTheme && (
+                <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold px-6 py-3 text-lg">
+                  <Crown className="w-5 h-5 mr-2" />
+                  ESCRITÓRIO PREMIUM
                 </Badge>
               )}
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
-  const renderListItem = (item: LinkTreeItem) => {
-    const IconComponent = getItemIcon(item);
-    
-    return (
-      <Card 
-        key={item.id}
-        className="group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300"
-        onClick={() => handleItemClick(item)}
-      >
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              <IconComponent className="w-5 h-5" />
+            {/* Items Container */}
+            <div className="max-w-4xl mx-auto">
+              {renderItemsByLayout()}
             </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-white">{item.title}</h3>
-            </div>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
-  const renderMasonryItem = (item: LinkTreeItem) => {
-    const IconComponent = getItemIcon(item);
-    const height = item.card_image ? 'h-64' : item.card_content ? 'h-48' : 'h-32';
-    
-    return (
-      <Card 
-        key={item.id}
-        className={`group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-500 ${height} break-inside-avoid mb-6`}
-        onClick={() => handleItemClick(item)}
-      >
-        {item.card_image && (
-          <div className="h-32 overflow-hidden">
-            <img 
-              src={item.card_image} 
-              alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-          </div>
-        )}
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              <IconComponent className="w-4 h-4" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-white text-sm">{item.title}</h3>
-              {item.card_content && (
-                <p className="text-gray-300 text-xs mt-2">{item.card_content}</p>
+            {/* Footer Premium */}
+            <div className="text-center mt-16 pt-8 border-t border-white/10">
+              <p className="text-gray-400 text-sm">
+                ⚖️ Excelência Jurídica • Tradição • Inovação
+              </p>
+              {linkTree.show_analytics && (
+                <div className="mt-4 flex justify-center gap-6 text-xs text-gray-500">
+                  <span>{linkTreeItems.reduce((total, item) => total + (item.click_count || 0), 0)} cliques totais</span>
+                  <span>{linkTreeItems.length} links ativos</span>
+                </div>
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderCarouselItem = (item: LinkTreeItem) => {
-    const IconComponent = getItemIcon(item);
-    
-    return (
-      <Card 
-        key={item.id}
-        className="group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-500 min-w-80 snap-center"
-        onClick={() => handleItemClick(item)}
-      >
-        {item.card_image && (
-          <div className="h-40 overflow-hidden">
-            <img 
-              src={item.card_image} 
-              alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-          </div>
-        )}
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              <IconComponent className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-white">{item.title}</h3>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderMagazineItem = (item: LinkTreeItem, index: number) => {
-    const IconComponent = getItemIcon(item);
-    const isLarge = index === 0;
-    
-    return (
-      <Card 
-        key={item.id}
-        className={`group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-500 ${isLarge ? 'lg:col-span-2 lg:row-span-2' : ''}`}
-        onClick={() => handleItemClick(item)}
-      >
-        {item.card_image && (
-          <div className={`overflow-hidden ${isLarge ? 'h-64' : 'h-32'}`}>
-            <img 
-              src={item.card_image} 
-              alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-          </div>
-        )}
-        <CardContent className={`${isLarge ? 'p-6' : 'p-4'}`}>
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              <IconComponent className={`${isLarge ? 'w-6 h-6' : 'w-4 h-4'}`} />
-            </div>
-            <div className="flex-1">
-              <h3 className={`font-semibold text-white ${isLarge ? 'text-lg' : 'text-sm'}`}>{item.title}</h3>
-              {item.card_content && isLarge && (
-                <p className="text-gray-300 text-sm mt-2">{item.card_content}</p>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderPortfolioItem = (item: LinkTreeItem) => {
-    const IconComponent = getItemIcon(item);
-    
-    return (
-      <Card 
-        key={item.id}
-        className="group cursor-pointer overflow-hidden bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-500 hover:scale-105"
-        onClick={() => handleItemClick(item)}
-      >
-        {item.card_image && (
-          <div className="h-48 overflow-hidden relative">
-            <img 
-              src={item.card_image} 
-              alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <h3 className="font-bold text-white text-lg">{item.title}</h3>
-            </div>
-          </div>
-        )}
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                <IconComponent className="w-4 h-4" />
-              </div>
-              {!item.card_image && (
-                <h3 className="font-semibold text-white">{item.title}</h3>
-              )}
-            </div>
-            <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  return (
-    <div className="relative min-h-screen overflow-hidden" style={getCustomStyles()}>
-      {/* Neural Background - Sempre visível */}
-      <div className="absolute inset-0 z-0">
-        <NeuralBackground />
-      </div>
-      
-      {/* Overlay para melhor contraste */}
-      <div className="absolute inset-0 bg-black/30 z-10"></div>
-      
-      {/* Conteúdo Principal */}
-      <div className="relative z-20 container mx-auto px-6 py-12">
-        {/* Header Premium */}
-        <div className="text-center mb-12">
-          {linkTree.avatar_url && (
-            <div className="mb-6">
-              <img 
-                src={linkTree.avatar_url} 
-                alt="Avatar"
-                className="w-24 h-24 mx-auto rounded-2xl object-cover border-4 border-white/20 shadow-2xl"
-              />
-            </div>
-          )}
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            {linkTree.title}
-          </h1>
-          
-          {linkTree.description && (
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              {linkTree.description}
-            </p>
-          )}
-          
-          {/* Badge Premium */}
-          <div className="mt-6">
-            <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold px-4 py-2 text-sm">
-              <Crown className="w-4 h-4 mr-2" />
-              ESCRITÓRIO PREMIUM
-            </Badge>
-          </div>
         </div>
 
-        {/* Items Container */}
-        <div className="max-w-6xl mx-auto">
-          {renderItemsByLayout()}
-        </div>
-
-        {/* Footer Premium */}
-        <div className="text-center mt-16 pt-8 border-t border-white/10">
-          <p className="text-gray-400 text-sm">
-            ⚖️ Excelência Jurídica • Tradição • Inovação
-          </p>
-        </div>
-      </div>
-
-      {/* Modal do Formulário */}
-      {modalData.formConfig && (
         <FormModal
           isOpen={modalData.isOpen}
           onClose={() => setModalData({ isOpen: false, formConfig: null, title: '' })}
           formConfig={modalData.formConfig}
           title={modalData.title}
         />
+
+        {linkTree.custom_css && (
+          <style dangerouslySetInnerHTML={{ __html: linkTree.custom_css }} />
+        )}
+      </div>
+    );
+  }
+
+  // Layout padrão para outros temas
+  return (
+    <div className="min-h-screen p-8" style={getCustomStyles()}>
+      <div className="max-w-2xl mx-auto text-center space-y-8">
+        {/* Header */}
+        {linkTree.avatar_url && (
+          <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-white/20">
+            <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+          </div>
+        )}
+        
+        <div>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: linkTree.text_color }}>
+            {linkTree.title}
+          </h1>
+          {linkTree.description && (
+            <p className="text-lg opacity-80" style={{ color: linkTree.text_color }}>
+              {linkTree.description}
+            </p>
+          )}
+        </div>
+
+        {/* Items */}
+        <div className="space-y-6">
+          {renderItemsByLayout()}
+        </div>
+
+        {/* Analytics */}
+        {linkTree.show_analytics && (
+          <div className="text-center text-sm opacity-60" style={{ color: linkTree.text_color }}>
+            <div className="flex justify-center gap-4">
+              <span>{linkTreeItems.reduce((total, item) => total + (item.click_count || 0), 0)} cliques totais</span>
+              <span>{linkTreeItems.length} links ativos</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <FormModal
+        isOpen={modalData.isOpen}
+        onClose={() => setModalData({ isOpen: false, formConfig: null, title: '' })}
+        formConfig={modalData.formConfig}
+        title={modalData.title}
+      />
+
+      {linkTree.custom_css && (
+        <style dangerouslySetInnerHTML={{ __html: linkTree.custom_css }} />
       )}
     </div>
   );
