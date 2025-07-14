@@ -42,7 +42,7 @@ export const useLinkTree = () => {
           return;
         }
 
-        setLinkTreeItems(itemsData || []);
+        setLinkTreeItems((itemsData || []) as LinkTreeItem[]);
       }
     } catch (error) {
       console.error('Erro ao carregar link tree:', error);
@@ -94,7 +94,7 @@ export const useLinkTree = () => {
 
       if (error) throw error;
       
-      setLinkTreeItems(prev => [...prev, newItem].sort((a, b) => a.display_order - b.display_order));
+      setLinkTreeItems(prev => [...prev, newItem as LinkTreeItem].sort((a, b) => a.display_order - b.display_order));
       toast.success('Item adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar item:', error);

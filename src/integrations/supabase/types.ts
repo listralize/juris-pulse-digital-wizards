@@ -217,38 +217,62 @@ export type Database = {
       }
       link_tree: {
         Row: {
+          animation_style: string | null
           avatar_url: string | null
           background_color: string | null
+          background_gradient: string | null
+          background_image: string | null
+          background_type: string | null
+          background_video: string | null
           button_style: string | null
           created_at: string | null
+          custom_css: string | null
           description: string | null
           id: string
           is_active: boolean | null
+          show_analytics: boolean | null
           text_color: string | null
+          theme: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          animation_style?: string | null
           avatar_url?: string | null
           background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          background_type?: string | null
+          background_video?: string | null
           button_style?: string | null
           created_at?: string | null
+          custom_css?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          show_analytics?: boolean | null
           text_color?: string | null
+          theme?: string | null
           title?: string
           updated_at?: string | null
         }
         Update: {
+          animation_style?: string | null
           avatar_url?: string | null
           background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          background_type?: string | null
+          background_video?: string | null
           button_style?: string | null
           created_at?: string | null
+          custom_css?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          show_analytics?: boolean | null
           text_color?: string | null
+          theme?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -257,11 +281,15 @@ export type Database = {
       link_tree_items: {
         Row: {
           background_color: string | null
+          button_style: string | null
+          click_count: number | null
           created_at: string | null
           display_order: number | null
+          hover_effect: string | null
           icon: string | null
           id: string
           is_active: boolean | null
+          is_featured: boolean | null
           link_tree_id: string | null
           text_color: string | null
           title: string
@@ -270,11 +298,15 @@ export type Database = {
         }
         Insert: {
           background_color?: string | null
+          button_style?: string | null
+          click_count?: number | null
           created_at?: string | null
           display_order?: number | null
+          hover_effect?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          is_featured?: boolean | null
           link_tree_id?: string | null
           text_color?: string | null
           title: string
@@ -283,11 +315,15 @@ export type Database = {
         }
         Update: {
           background_color?: string | null
+          button_style?: string | null
+          click_count?: number | null
           created_at?: string | null
           display_order?: number | null
+          hover_effect?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          is_featured?: boolean | null
           link_tree_id?: string | null
           text_color?: string | null
           title?: string
