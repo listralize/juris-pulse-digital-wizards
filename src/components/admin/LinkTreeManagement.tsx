@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, Eye, Settings2, Palette, Sparkles } from 'lucide-react';
+import { Trash2, Plus, Eye, Settings2, Palette, Sparkles, Zap, Image as ImageIcon, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { LinkTree, LinkTreeItem } from '@/types/linkTreeTypes';
 import { LinkTreePreview } from '@/components/LinkTreePreview';
@@ -1208,157 +1208,190 @@ export function LinkTreeManagement() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5" />
-                    Configurações Avançadas
+                    Configurações de Fundo
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label>Tema Premium</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      {themeOptions.map(theme => (
-                        <button
-                          key={theme.value}
-                          onClick={() => {
-                            setLinkTreeData(prev => ({ ...prev, theme: theme.value as LinkTree['theme'] }));
-                            toast({
-                              title: "Tema aplicado",
-                              description: `Tema ${theme.label} foi aplicado com sucesso!`
-                            });
-                          }}
-                          className={`p-3 border-2 rounded-lg text-left transition-all ${
-                            linkTreeData.theme === theme.value 
-                              ? 'border-white bg-white/20 scale-105' 
-                              : 'border-gray-600 hover:border-white/50 hover:scale-102'
-                          }`}
-                          style={{ background: theme.color }}
-                        >
-                          <div className="text-white font-semibold text-sm">
-                            {theme.label}
+                  <div className="space-y-4">
+                    <Label>Tipo de Fundo</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {/* Fundo Neural */}
+                      <div 
+                        onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'neural' }))}
+                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          linkTreeData.background_type === 'neural' 
+                            ? 'border-white bg-white/20 scale-105' 
+                            : 'border-gray-600 hover:border-white/50 hover:scale-102'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-white" />
                           </div>
-                        </button>
-                      ))}
+                          <div>
+                            <h3 className="font-semibold text-white">Fundo Neural</h3>
+                            <p className="text-sm text-gray-300">Animação neural moderna</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Cor Personalizada */}
+                      <div 
+                        onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'solid' }))}
+                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          linkTreeData.background_type === 'solid' 
+                            ? 'border-white bg-white/20 scale-105' 
+                            : 'border-gray-600 hover:border-white/50 hover:scale-102'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-12 h-12 rounded-lg flex items-center justify-center"
+                            style={{ backgroundColor: linkTreeData.background_color || '#3b82f6' }}
+                          >
+                            <Palette className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-white">Cor Personalizada</h3>
+                            <p className="text-sm text-gray-300">Escolha sua cor de fundo</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Imagem ou Vídeo */}
+                      <div 
+                        onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'image' }))}
+                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video'
+                            ? 'border-white bg-white/20 scale-105' 
+                            : 'border-gray-600 hover:border-white/50 hover:scale-102'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
+                            <Image className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-white">Imagem ou Vídeo</h3>
+                            <p className="text-sm text-gray-300">Use sua própria mídia de fundo</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Configurações específicas por tipo */}
+                    {linkTreeData.background_type === 'neural' && (
+                      <div className="space-y-4 mt-6 p-4 bg-gray-800/50 rounded-lg">
+                        <h4 className="font-semibold text-white">Configurações do Fundo Neural</h4>
+                        
+                        <div>
+                          <Label>Cor do Fundo Neural</Label>
+                          <Input
+                            type="color"
+                            value={linkTreeData.background_color || '#1a1a2e'}
+                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }))}
+                            className="w-full h-12"
+                          />
+                        </div>
+
+                        <div>
+                          <Label>Opacidade do Fundo ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value={(linkTreeData as any).background_opacity || 0.8}
+                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_opacity: parseFloat(e.target.value) }))}
+                            className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {linkTreeData.background_type === 'solid' && (
+                      <div className="space-y-4 mt-6 p-4 bg-gray-800/50 rounded-lg">
+                        <h4 className="font-semibold text-white">Configurações da Cor</h4>
+                        
+                        <div>
+                          <Label>Cor de Fundo</Label>
+                          <Input
+                            type="color"
+                            value={linkTreeData.background_color || '#3b82f6'}
+                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }))}
+                            className="w-full h-12"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {(linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video') && (
+                      <div className="space-y-4 mt-6 p-4 bg-gray-800/50 rounded-lg">
+                        <h4 className="font-semibold text-white">Configurações de Mídia</h4>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            type="button"
+                            variant={linkTreeData.background_type === 'image' ? 'default' : 'outline'}
+                            onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'image' }))}
+                            className="w-full"
+                          >
+                            <Image className="w-4 h-4 mr-2" />
+                            Imagem
+                          </Button>
+                          <Button
+                            type="button"
+                            variant={linkTreeData.background_type === 'video' ? 'default' : 'outline'}
+                            onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'video' }))}
+                            className="w-full"
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Vídeo
+                          </Button>
+                        </div>
+
+                        {linkTreeData.background_type === 'image' && (
+                          <div>
+                            <Label>URL da Imagem de Fundo</Label>
+                            <Input
+                              type="url"
+                              placeholder="https://exemplo.com/imagem.jpg"
+                              value={linkTreeData.background_image || ''}
+                              onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_image: e.target.value }))}
+                            />
+                          </div>
+                        )}
+
+                        {linkTreeData.background_type === 'video' && (
+                          <div>
+                            <Label>URL do Vídeo de Fundo</Label>
+                            <Input
+                              type="url"
+                              placeholder="https://exemplo.com/video.mp4"
+                              value={linkTreeData.background_video || ''}
+                              onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_video: e.target.value }))}
+                            />
+                            <p className="text-xs text-gray-400 mt-1">
+                              Vídeo será reproduzido sem áudio e em loop
+                            </p>
+                          </div>
+                        )}
+
+                        <div>
+                          <Label>Opacidade do Fundo ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value={(linkTreeData as any).background_opacity || 0.8}
+                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_opacity: parseFloat(e.target.value) }))}
+                            className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {linkTreeData.background_type === 'gradient' && (
-                    <div className="space-y-4">
-                      <Label>Cores do Gradiente</Label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Cor Inicial</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value="#667eea"
-                              onChange={(e) => {
-                                const endColor = linkTreeData.background_gradient?.includes('#') 
-                                  ? linkTreeData.background_gradient.split('#')[2]?.slice(0,6) || '764ba2'
-                                  : '764ba2';
-                                setLinkTreeData(prev => ({ 
-                                  ...prev, 
-                                  background_gradient: `linear-gradient(135deg, ${e.target.value} 0%, #${endColor} 100%)`
-                                }));
-                              }}
-                              className="w-16 h-10"
-                            />
-                            <Input
-                              value="#667eea"
-                              onChange={(e) => {
-                                const endColor = linkTreeData.background_gradient?.includes('#') 
-                                  ? linkTreeData.background_gradient.split('#')[2]?.slice(0,6) || '764ba2'
-                                  : '764ba2';
-                                setLinkTreeData(prev => ({ 
-                                  ...prev, 
-                                  background_gradient: `linear-gradient(135deg, ${e.target.value} 0%, #${endColor} 100%)`
-                                }));
-                              }}
-                              placeholder="#667eea"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Cor Final</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value="#764ba2"
-                              onChange={(e) => {
-                                const startColor = linkTreeData.background_gradient?.includes('#') 
-                                  ? linkTreeData.background_gradient.split('#')[1]?.slice(0,6) || '667eea'
-                                  : '667eea';
-                                setLinkTreeData(prev => ({ 
-                                  ...prev, 
-                                  background_gradient: `linear-gradient(135deg, #${startColor} 0%, ${e.target.value} 100%)`
-                                }));
-                              }}
-                              className="w-16 h-10"
-                            />
-                            <Input
-                              value="#764ba2"
-                              onChange={(e) => {
-                                const startColor = linkTreeData.background_gradient?.includes('#') 
-                                  ? linkTreeData.background_gradient.split('#')[1]?.slice(0,6) || '667eea'
-                                  : '667eea';
-                                setLinkTreeData(prev => ({ 
-                                  ...prev, 
-                                  background_gradient: `linear-gradient(135deg, #${startColor} 0%, ${e.target.value} 100%)`
-                                }));
-                              }}
-                              placeholder="#764ba2"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Gradiente Personalizado (CSS)</Label>
-                        <Input
-                          value={linkTreeData.background_gradient}
-                          onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_gradient: e.target.value }))}
-                          placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {linkTreeData.background_type === 'image' && (
-                    <div>
-                      <Label>URL da Imagem de Fundo</Label>
-                      <Input
-                        value={linkTreeData.background_image}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_image: e.target.value }))}
-                        placeholder="https://exemplo.com/background.jpg"
-                      />
-                    </div>
-                  )}
-
-                  {linkTreeData.background_type === 'video' && (
-                    <div>
-                      <Label>URL do Vídeo de Fundo (MP4)</Label>
-                      <Input
-                        value={linkTreeData.background_video}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_video: e.target.value }))}
-                        placeholder="https://exemplo.com/background.mp4"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Vídeo será reproduzido sem áudio e em loop
-                      </p>
-                    </div>
-                  )}
-
-                  {(linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video') && (
-                    <div>
-                      <Label>Opacidade do Fundo ({Math.round((linkTreeData.background_opacity || 0.5) * 100)}%)</Label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={linkTreeData.background_opacity || 0.5}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_opacity: parseFloat(e.target.value) }))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                  )}
 
                   <div>
                     <Label>CSS Personalizado</Label>
