@@ -1193,13 +1193,82 @@ export function LinkTreeManagement() {
                   </div>
 
                   {linkTreeData.background_type === 'gradient' && (
-                    <div>
-                      <Label>Gradiente Personalizado</Label>
-                      <Input
-                        value={linkTreeData.background_gradient}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_gradient: e.target.value }))}
-                        placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                      />
+                    <div className="space-y-4">
+                      <Label>Cores do Gradiente</Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Cor Inicial</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value="#667eea"
+                              onChange={(e) => {
+                                const endColor = linkTreeData.background_gradient?.includes('#') 
+                                  ? linkTreeData.background_gradient.split('#')[2]?.slice(0,6) || '764ba2'
+                                  : '764ba2';
+                                setLinkTreeData(prev => ({ 
+                                  ...prev, 
+                                  background_gradient: `linear-gradient(135deg, ${e.target.value} 0%, #${endColor} 100%)`
+                                }));
+                              }}
+                              className="w-16 h-10"
+                            />
+                            <Input
+                              value="#667eea"
+                              onChange={(e) => {
+                                const endColor = linkTreeData.background_gradient?.includes('#') 
+                                  ? linkTreeData.background_gradient.split('#')[2]?.slice(0,6) || '764ba2'
+                                  : '764ba2';
+                                setLinkTreeData(prev => ({ 
+                                  ...prev, 
+                                  background_gradient: `linear-gradient(135deg, ${e.target.value} 0%, #${endColor} 100%)`
+                                }));
+                              }}
+                              placeholder="#667eea"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Cor Final</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value="#764ba2"
+                              onChange={(e) => {
+                                const startColor = linkTreeData.background_gradient?.includes('#') 
+                                  ? linkTreeData.background_gradient.split('#')[1]?.slice(0,6) || '667eea'
+                                  : '667eea';
+                                setLinkTreeData(prev => ({ 
+                                  ...prev, 
+                                  background_gradient: `linear-gradient(135deg, #${startColor} 0%, ${e.target.value} 100%)`
+                                }));
+                              }}
+                              className="w-16 h-10"
+                            />
+                            <Input
+                              value="#764ba2"
+                              onChange={(e) => {
+                                const startColor = linkTreeData.background_gradient?.includes('#') 
+                                  ? linkTreeData.background_gradient.split('#')[1]?.slice(0,6) || '667eea'
+                                  : '667eea';
+                                setLinkTreeData(prev => ({ 
+                                  ...prev, 
+                                  background_gradient: `linear-gradient(135deg, #${startColor} 0%, ${e.target.value} 100%)`
+                                }));
+                              }}
+                              placeholder="#764ba2"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Gradiente Personalizado (CSS)</Label>
+                        <Input
+                          value={linkTreeData.background_gradient}
+                          onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_gradient: e.target.value }))}
+                          placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                        />
+                      </div>
                     </div>
                   )}
 
