@@ -6,7 +6,7 @@ export interface LinkTree {
   text_color: string;
   button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient';
   avatar_url?: string;
-  theme: 'netflix' | 'amazon' | 'landing_page' | 'futurista' | 'spotify' | 'discord';
+  theme: 'netflix' | 'amazon' | 'landing_page' | 'futurista' | 'spotify' | 'discord' | 'tiktok' | 'instagram' | 'youtube' | 'twitch' | 'linkedin' | 'minimal' | 'neon' | 'glass';
   background_type: 'solid' | 'gradient' | 'image' | 'video';
   background_gradient?: string;
   background_image?: string;

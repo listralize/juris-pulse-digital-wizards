@@ -77,6 +77,62 @@ const themePresets = {
     button_style: 'rounded' as const,
     animation_style: 'pulse' as const,
     accent: '#7289da'
+  },
+  tiktok: {
+    background_color: '#000000',
+    text_color: '#ffffff',
+    button_style: 'rounded' as const,
+    animation_style: 'bounce' as const,
+    accent: '#ff0050'
+  },
+  instagram: {
+    background_color: '#000000',
+    text_color: '#ffffff',
+    button_style: 'rounded' as const,
+    animation_style: 'fade' as const,
+    accent: '#e4405f'
+  },
+  youtube: {
+    background_color: '#000000',
+    text_color: '#ffffff',
+    button_style: 'rounded' as const,
+    animation_style: 'slide' as const,
+    accent: '#ff0000'
+  },
+  twitch: {
+    background_color: '#9146ff',
+    text_color: '#ffffff',
+    button_style: 'rounded' as const,
+    animation_style: 'pulse' as const,
+    accent: '#9146ff'
+  },
+  linkedin: {
+    background_color: '#0077b5',
+    text_color: '#ffffff',
+    button_style: 'rounded' as const,
+    animation_style: 'fade' as const,
+    accent: '#0077b5'
+  },
+  minimal: {
+    background_color: '#ffffff',
+    text_color: '#000000',
+    button_style: 'rounded' as const,
+    animation_style: 'fade' as const,
+    accent: '#000000'
+  },
+  neon: {
+    background_color: '#000000',
+    text_color: '#00ffff',
+    button_style: 'neon' as const,
+    animation_style: 'glow' as const,
+    accent: '#00ffff'
+  },
+  glass: {
+    background_color: '#1a1a2e',
+    text_color: '#ffffff',
+    button_style: 'glassmorphism' as const,
+    animation_style: 'fade' as const,
+    accent: '#16213e'
   }
 };
 
@@ -338,78 +394,73 @@ export const LinkTreeManagement = () => {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    {Object.entries(themePresets).map(([name, preset]) => (
-                      <div
-                        key={name}
-                        onClick={() => applyThemePreset(name as keyof typeof themePresets)}
-                        className={`group p-6 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl ${
-                          formData.theme === name 
-                            ? `border-${preset.accent.replace('#', '')} bg-gradient-to-br from-${preset.accent.replace('#', '')}/10 to-black shadow-2xl shadow-${preset.accent.replace('#', '')}/25` 
-                            : 'border-gray-700 bg-gradient-to-br from-gray-900 to-black hover:border-gray-500'
-                        }`}
-                      >
-                        <div className="space-y-3">
-                          <div 
-                            className="w-full h-20 rounded-xl flex flex-col items-center justify-center relative overflow-hidden"
-                            style={{ backgroundColor: preset.background_color }}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
-                            <span className="text-white font-bold text-lg relative z-10">
-                              {name === 'netflix' && 'NETFLIX'}
-                              {name === 'amazon' && 'AMAZON'}
-                              {name === 'landing_page' && 'STARTUP'}
-                              {name === 'futurista' && 'CYBER'}
-                              {name === 'spotify' && 'SPOTIFY'}
-                              {name === 'discord' && 'DISCORD'}
-                            </span>
-                            <span className="text-white/80 text-xs relative z-10">
-                              {name === 'netflix' && 'Cinema Style'}
-                              {name === 'amazon' && 'E-commerce Style'}
-                              {name === 'landing_page' && 'Startup Style'}
-                              {name === 'futurista' && 'Cyberpunk Style'}
-                              {name === 'spotify' && 'Music Style'}
-                              {name === 'discord' && 'Gaming Style'}
-                            </span>
-                          </div>
-                          <div className="text-center">
-                            <h3 className="font-bold text-sm" style={{ color: preset.accent }}>
-                              {name === 'netflix' && '🎬 Cinematográfico'}
-                              {name === 'amazon' && '📦 E-commerce Pro'}
-                              {name === 'landing_page' && '🚀 Startup Pro'}
-                              {name === 'futurista' && '🤖 Cyberpunk'}
-                              {name === 'spotify' && '🎵 Musical'}
-                              {name === 'discord' && '💬 Gaming'}
-                            </h3>
-                            <p className="text-gray-400 text-xs mt-1">
-                              {name === 'netflix' && 'Layout estilo streaming premium'}
-                              {name === 'amazon' && 'Cards estilo marketplace'}
-                              {name === 'landing_page' && 'Design moderno e conversivo'}
-                              {name === 'futurista' && 'Interface do futuro'}
-                              {name === 'spotify' && 'Interface de streaming'}
-                              {name === 'discord' && 'Interface gamer'}
-                            </p>
-                          </div>
-                          <div className="flex justify-center">
-                            <span 
-                              className={`text-xs px-3 py-1 rounded-full transition-all duration-300 ${
-                                formData.theme === name 
-                                  ? 'text-white' 
-                                  : 'bg-gray-700 text-gray-300 group-hover:text-white'
-                              }`}
-                              style={{
-                                backgroundColor: formData.theme === name ? preset.accent : undefined,
-                                ...(formData.theme !== name && {
-                                  '--hover-bg': preset.accent
-                                })
-                              }}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Object.entries(themePresets).map(([name, preset]) => {
+                      const getThemeDisplay = () => {
+                        const displays: Record<string, { emoji: string; title: string; subtitle: string; description: string }> = {
+                          netflix: { emoji: '🎬', title: 'Netflix', subtitle: 'Cinema Style', description: 'Layout estilo streaming premium' },
+                          amazon: { emoji: '📦', title: 'Amazon', subtitle: 'E-commerce Style', description: 'Cards estilo marketplace' },
+                          landing_page: { emoji: '🚀', title: 'Startup', subtitle: 'Modern Style', description: 'Design moderno e conversivo' },
+                          futurista: { emoji: '🤖', title: 'Cyberpunk', subtitle: 'Future Style', description: 'Interface do futuro' },
+                          spotify: { emoji: '🎵', title: 'Spotify', subtitle: 'Music Style', description: 'Interface de streaming' },
+                          discord: { emoji: '💬', title: 'Discord', subtitle: 'Gaming Style', description: 'Interface gamer' },
+                          tiktok: { emoji: '🔥', title: 'TikTok', subtitle: 'Viral Style', description: 'Layout para criadores' },
+                          instagram: { emoji: '📸', title: 'Instagram', subtitle: 'Social Style', description: 'Design social premium' },
+                          youtube: { emoji: '📺', title: 'YouTube', subtitle: 'Creator Style', description: 'Interface para criadores' },
+                          twitch: { emoji: '🎮', title: 'Twitch', subtitle: 'Stream Style', description: 'Layout para streamers' },
+                          linkedin: { emoji: '💼', title: 'LinkedIn', subtitle: 'Professional', description: 'Layout profissional' },
+                          minimal: { emoji: '✨', title: 'Minimal', subtitle: 'Clean Style', description: 'Design limpo e minimalista' },
+                          neon: { emoji: '⚡', title: 'Neon', subtitle: 'Electric Style', description: 'Visual cyberpunk neon' },
+                          glass: { emoji: '🌟', title: 'Glass', subtitle: 'Transparent', description: 'Efeito vidro moderno' }
+                        };
+                        return displays[name] || displays.netflix;
+                      };
+
+                      const display = getThemeDisplay();
+
+                      return (
+                        <div
+                          key={name}
+                          onClick={() => applyThemePreset(name as keyof typeof themePresets)}
+                          className={`group p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
+                            formData.theme === name 
+                              ? 'border-red-500 bg-gradient-to-br from-red-900/20 to-black shadow-lg shadow-red-500/25' 
+                              : 'border-gray-700 bg-gradient-to-br from-gray-900 to-black hover:border-gray-500'
+                          }`}
+                        >
+                          <div className="space-y-2">
+                            <div 
+                              className="w-full h-16 rounded-lg flex flex-col items-center justify-center relative overflow-hidden"
+                              style={{ backgroundColor: preset.background_color }}
                             >
-                              {formData.theme === name ? '✓ Ativo' : 'Ativar'}
-                            </span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></div>
+                              <span className="text-white font-bold text-sm relative z-10">
+                                {display.title}
+                              </span>
+                            </div>
+                            <div className="text-center">
+                              <h3 className="font-bold text-xs flex items-center justify-center gap-1" style={{ color: preset.accent }}>
+                                {display.emoji} {display.title}
+                              </h3>
+                              <p className="text-gray-400 text-xs mt-1">
+                                {display.description}
+                              </p>
+                            </div>
+                            <div className="flex justify-center">
+                              <span 
+                                className={`text-xs px-2 py-1 rounded-full transition-all duration-300 ${
+                                  formData.theme === name 
+                                    ? 'bg-red-600 text-white' 
+                                    : 'bg-gray-700 text-gray-300 group-hover:bg-gray-600'
+                                }`}
+                              >
+                                {formData.theme === name ? '✓ Ativo' : 'Ativar'}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -435,6 +486,10 @@ export const LinkTreeManagement = () => {
                         updated_at: linkTree?.updated_at
                       } as LinkTree}
                       linkTreeItems={linkTreeItems}
+                      onItemClick={(item) => {
+                        // Real-time preview click tracking
+                        console.log('Preview item clicked:', item.title);
+                      }}
                     />
                   </div>
                 </CardContent>
