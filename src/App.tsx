@@ -47,7 +47,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/linktree" element={<LinkTree />} />
+                <Route path="/tree" element={<LinkTree />} />
                 <Route path="/obrigado" element={<Obrigado />} />
                 
                 {/* Static area pages (fallbacks for existing URLs) */}
