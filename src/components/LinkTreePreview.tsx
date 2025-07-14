@@ -298,11 +298,11 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderBentoItem = (item: LinkTreeItem, index: number) => {
     const sizes = ['col-span-2 row-span-2', 'col-span-1 row-span-1', 'col-span-2 row-span-1', 'col-span-1 row-span-2'];
     const sizeClass = sizes[index % sizes.length];
-    
+
     return (
       <Card 
-        key={item.id}
-        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${sizeClass} relative overflow-hidden`}
+        key={item.id} 
+        className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden ${sizeClass}`}
         onClick={() => handleItemClick(item)}
         style={{
           backgroundColor: item.background_color,
@@ -314,23 +314,94 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
         }}
       >
         {item.card_image && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
         )}
-        <CardContent className="p-4 h-full flex flex-col justify-center items-center text-center relative z-10">
-          <div className="mb-2">
+        <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
+          <div className="mb-4 flex justify-center">
             {getItemIcon(item)}
           </div>
-          <h3 className="font-semibold text-sm">{item.title}</h3>
+          <h3 className="font-semibold mb-2">{item.title}</h3>
           {item.card_content && (
-            <p className="text-xs mt-1 opacity-80">{item.card_content}</p>
+            <p className="text-sm opacity-80 mb-2">{item.card_content}</p>
           )}
           {item.card_price && (
-            <Badge className="mt-1 bg-green-500 text-white text-xs">{item.card_price}</Badge>
+            <Badge className="mb-2 bg-green-500 text-white">{item.card_price}</Badge>
+          )}
+          {item.is_featured && (
+            <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>
           )}
         </CardContent>
       </Card>
     );
   };
+
+  const renderTextItem = (item: LinkTreeItem) => (
+    <Card 
+      key={item.id} 
+      className="relative overflow-hidden border-2 border-dashed border-gray-300"
+      style={{
+        backgroundColor: item.background_color,
+        color: item.text_color,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {item.card_image && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      )}
+      <CardContent className="p-6 relative z-10">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-full bg-blue-500/20">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold mb-2">{item.title}</h3>
+            {item.card_content && (
+              <div className="text-sm opacity-90 whitespace-pre-wrap">
+                {item.card_content}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderVideoItem = (item: LinkTreeItem) => (
+    <Card 
+      key={item.id} 
+      className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden"
+      onClick={() => handleItemClick(item)}
+      style={{
+        backgroundColor: item.background_color,
+        color: item.text_color,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {item.card_image && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      )}
+      <CardContent className="p-6 text-center relative z-10">
+        <div className="mb-4 flex justify-center relative">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-red-500 rounded-full p-3">
+              <Play className="w-6 h-6 text-white fill-current" />
+            </div>
+          </div>
+          <Video className="w-12 h-12 opacity-50" />
+        </div>
+        <h3 className="font-semibold mb-2">{item.title}</h3>
+        {item.card_content && (
+          <p className="text-sm opacity-80">{item.card_content}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   const renderMasonryItem = (item: LinkTreeItem) => (
     <Card 
@@ -457,7 +528,19 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
 
             {/* Items Container */}
             <div className="max-w-4xl mx-auto">
-              {renderItemsByLayout()}
+              {linkTreeItems.filter(item => item.is_active).map((item, index) => {
+                if (item.item_type === 'text') {
+                  return renderTextItem(item);
+                } else if (item.item_type === 'video') {
+                  return renderVideoItem(item);
+                } else if (linkTree.button_style === 'bento') {
+                  return renderBentoItem(item, index);
+                } else if (linkTree.button_style === 'grid') {
+                  return renderGridItem(item);
+                } else {
+                  return renderListItem(item);
+                }
+              })}
             </div>
 
             {/* Footer Premium */}
@@ -519,7 +602,19 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
 
         {/* Items */}
         <div className="space-y-6">
-          {renderItemsByLayout()}
+          {linkTreeItems.filter(item => item.is_active).map((item, index) => {
+            if (item.item_type === 'text') {
+              return renderTextItem(item);
+            } else if (item.item_type === 'video') {
+              return renderVideoItem(item);
+            } else if (linkTree.button_style === 'bento') {
+              return renderBentoItem(item, index);
+            } else if (linkTree.button_style === 'grid') {
+              return renderGridItem(item);
+            } else {
+              return renderListItem(item);
+            }
+          })}
         </div>
 
         {/* Analytics */}

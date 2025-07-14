@@ -725,6 +725,98 @@ export function LinkTreeManagement() {
                     </div>
                   )}
 
+                  {(newItem.item_type as string) === 'card' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Conteúdo do Card</Label>
+                        <Textarea
+                          value={newItem.card_content}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
+                          placeholder="Descrição ou conteúdo do card"
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label>Imagem de Fundo do Card</Label>
+                        <Input
+                          value={newItem.card_image}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                          placeholder="https://exemplo.com/imagem.jpg"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Preço (opcional)</Label>
+                          <Input
+                            value={newItem.card_price}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_price: e.target.value }))}
+                            placeholder="R$ 99,99"
+                          />
+                        </div>
+                        <div>
+                          <Label>Texto do Botão</Label>
+                          <Input
+                            value={newItem.card_button_text}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_button_text: e.target.value }))}
+                            placeholder="Saiba Mais"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {(newItem.item_type as string) === 'video' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label>URL do Vídeo</Label>
+                        <Input
+                          value={newItem.url}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
+                          placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
+                        />
+                      </div>
+                      <div>
+                        <Label>Thumbnail do Vídeo (opcional)</Label>
+                        <Input
+                          value={newItem.card_image}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                          placeholder="https://exemplo.com/thumbnail.jpg"
+                        />
+                      </div>
+                      <div>
+                        <Label>Descrição do Vídeo</Label>
+                        <Textarea
+                          value={newItem.card_content}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
+                          placeholder="Descrição do vídeo"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(newItem.item_type as string) === 'text' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Conteúdo Informativo</Label>
+                        <Textarea
+                          value={newItem.card_content}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
+                          placeholder="Texto informativo, horários de funcionamento, etc."
+                          rows={4}
+                        />
+                      </div>
+                      <div>
+                        <Label>Imagem de Fundo (opcional)</Label>
+                        <Input
+                          value={newItem.card_image}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                          placeholder="https://exemplo.com/imagem.jpg"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Cor de Fundo</Label>
@@ -834,56 +926,6 @@ export function LinkTreeManagement() {
                     </div>
                   </div>
 
-                  {(newItem.item_type as string) === 'video' && (
-                    <div className="space-y-3">
-                      <div>
-                        <Label>URL do Vídeo</Label>
-                        <Input
-                          value={newItem.url}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
-                          placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
-                        />
-                      </div>
-                      <div>
-                        <Label>Thumbnail do Vídeo (opcional)</Label>
-                        <Input
-                          value={newItem.card_image}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                          placeholder="https://exemplo.com/thumbnail.jpg"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {(newItem.item_type as string) === 'card' && (
-                    <div className="space-y-3">
-                      <div>
-                        <Label>Conteúdo do Card</Label>
-                        <Textarea
-                          value={newItem.card_content}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                          placeholder="Descrição do card"
-                          rows={3}
-                        />
-                      </div>
-                      <div>
-                        <Label>URL da Imagem</Label>
-                        <Input
-                          value={newItem.card_image}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                          placeholder="https://exemplo.com/imagem.jpg"
-                        />
-                      </div>
-                      <div>
-                        <Label>Preço (opcional)</Label>
-                        <Input
-                          value={newItem.card_price}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_price: e.target.value }))}
-                          placeholder="R$ 150"
-                        />
-                      </div>
-                    </div>
-                  )}
 
                   <div className="flex items-center space-x-2">
                     <Switch
