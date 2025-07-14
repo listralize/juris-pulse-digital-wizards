@@ -251,10 +251,21 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
 
     // Mapear tamanhos para classes CSS
     const getSizeClass = (size?: string) => {
+      // Se já é uma classe CSS, retorna diretamente
+      if (size && (size.includes('w-') || size.includes('h-'))) {
+        return size;
+      }
+      
+      // Mapear valores descritivos para classes CSS
       switch (size) {
         case 'small': return 'w-4 h-4';
         case 'medium': return 'w-6 h-6';
         case 'large': return 'w-8 h-8';
+        case 'w-4 h-4': return 'w-4 h-4';
+        case 'w-5 h-5': return 'w-5 h-5';
+        case 'w-6 h-6': return 'w-6 h-6';
+        case 'w-8 h-8': return 'w-8 h-8';
+        case 'w-10 h-10': return 'w-10 h-10';
         default: return 'w-5 h-5';
       }
     };
@@ -319,15 +330,37 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     }
   };
 
+  const getButtonStyle = (item: LinkTreeItem) => {
+    const baseClasses = "w-full justify-between p-6 h-auto relative overflow-hidden transition-all duration-300";
+    const hoverClasses = {
+      'none': '',
+      'scale': 'hover:scale-105',
+      'glow': 'hover:shadow-lg hover:shadow-primary/50',
+      'lift': 'hover:-translate-y-1 hover:shadow-lg',
+      'bounce': 'hover:animate-bounce',
+      'rotate': 'hover:rotate-1'
+    };
+    
+    const buttonStyleClasses = {
+      'inherit': '',
+      'custom': 'border-2',
+      'gradient': 'bg-gradient-to-r from-primary to-secondary',
+      'glassmorphism': 'backdrop-blur-md bg-white/10 border border-white/20',
+      'neon': 'border-2 border-primary shadow-lg shadow-primary/50'
+    };
+    
+    return `${baseClasses} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
+  };
+
   const renderListItem = (item: LinkTreeItem) => (
     <Button
       key={item.id}
       onClick={() => handleItemClick(item)}
-      className="w-full justify-between p-6 h-auto relative overflow-hidden"
+      className={getButtonStyle(item)}
       style={{
-        backgroundColor: item.background_color,
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
-        borderColor: item.background_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : item.background_color,
         backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -355,14 +388,37 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     </Button>
   );
 
+  const getCardStyle = (item: LinkTreeItem) => {
+    const baseClasses = "cursor-pointer transition-all duration-300 relative overflow-hidden";
+    const hoverClasses = {
+      'none': '',
+      'scale': 'hover:scale-105 hover:shadow-lg',
+      'glow': 'hover:shadow-xl hover:shadow-primary/50',
+      'lift': 'hover:-translate-y-2 hover:shadow-lg',
+      'bounce': 'hover:animate-bounce',
+      'rotate': 'hover:rotate-1'
+    };
+    
+    const buttonStyleClasses = {
+      'inherit': '',
+      'custom': 'border-2',
+      'gradient': 'bg-gradient-to-r from-primary to-secondary',
+      'glassmorphism': 'backdrop-blur-md bg-white/10 border border-white/20',
+      'neon': 'border-2 border-primary shadow-lg shadow-primary/50'
+    };
+    
+    return `${baseClasses} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
+  };
+
   const renderGridItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id} 
-      className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden"
+      className={getCardStyle(item)}
       onClick={() => handleItemClick(item)}
       style={{
-        backgroundColor: item.background_color,
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
         backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',

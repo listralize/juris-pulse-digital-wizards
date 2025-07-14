@@ -475,6 +475,8 @@ export function LinkTreeManagement() {
           title: newItem.title,
           url: newItem.url,
           icon: newItem.icon,
+          icon_size: newItem.icon_size,
+          icon_color: newItem.icon_color,
           background_color: newItem.background_color,
           text_color: newItem.text_color,
           button_style: newItem.button_style,
@@ -485,6 +487,8 @@ export function LinkTreeManagement() {
           card_image: newItem.card_image,
           card_price: newItem.card_price,
           card_button_text: newItem.card_button_text,
+          card_size: newItem.card_size,
+          card_format: newItem.card_format,
           form_id: newItem.item_type === 'form' ? newItem.form_id : null,
           form_fields: newItem.item_type === 'form' && formConfig 
             ? JSON.stringify(formConfig) 
@@ -494,6 +498,34 @@ export function LinkTreeManagement() {
         .eq('id', editingItem.id);
 
       if (error) throw error;
+
+      // Atualizar lista local imediatamente
+      setItems(prev => prev.map(item => 
+        item.id === editingItem.id 
+          ? {
+              ...item,
+              title: newItem.title,
+              url: newItem.url,
+              icon: newItem.icon,
+              icon_size: newItem.icon_size,
+              icon_color: newItem.icon_color,
+              background_color: newItem.background_color,
+              text_color: newItem.text_color,
+              button_style: newItem.button_style,
+              hover_effect: newItem.hover_effect,
+              is_featured: newItem.is_featured,
+              item_type: newItem.item_type,
+              card_content: newItem.card_content,
+              card_image: newItem.card_image,
+              card_price: newItem.card_price,
+              card_button_text: newItem.card_button_text,
+              card_size: newItem.card_size,
+              card_format: newItem.card_format,
+              form_id: newItem.item_type === 'form' ? newItem.form_id : null,
+              updated_at: new Date().toISOString()
+            }
+          : item
+      ));
 
       toast({
         title: "Item atualizado!",
