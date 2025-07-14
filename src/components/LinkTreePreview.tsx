@@ -162,7 +162,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
 
   const renderItemsByLayout = () => {
     const layout = linkTree.button_style || 'grid';
-    const sortedItems = [...linkTreeItems].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    const sortedItems = [...(linkTreeItems || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 
     switch (layout) {
       case 'masonry':
