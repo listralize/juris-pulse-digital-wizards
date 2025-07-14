@@ -394,6 +394,8 @@ export function LinkTreeManagement() {
           card_image: newItem.card_image,
           card_price: newItem.card_price,
           card_button_text: newItem.card_button_text,
+          card_size: newItem.card_size,
+          card_format: newItem.card_format,
           form_id: newItem.item_type === 'form' ? newItem.form_id : null,
           form_fields: newItem.item_type === 'form' && formConfig 
             ? JSON.stringify(formConfig) 
@@ -468,61 +470,54 @@ export function LinkTreeManagement() {
   const handleUpdateItem = async () => {
     if (!editingItem || !newItem.title) return;
 
+    console.log('🔄 Atualizando item:', editingItem.id, newItem);
+
     try {
+      const updateData = {
+        title: newItem.title,
+        url: newItem.url,
+        icon: newItem.icon,
+        icon_size: newItem.icon_size,
+        icon_color: newItem.icon_color,
+        background_color: newItem.background_color,
+        text_color: newItem.text_color,
+        button_style: newItem.button_style,
+        hover_effect: newItem.hover_effect,
+        is_featured: newItem.is_featured,
+        item_type: newItem.item_type,
+        card_content: newItem.card_content,
+        card_image: newItem.card_image,
+        card_price: newItem.card_price,
+        card_button_text: newItem.card_button_text,
+        card_size: newItem.card_size,
+        card_format: newItem.card_format,
+        form_id: newItem.item_type === 'form' ? newItem.form_id : null,
+        form_fields: newItem.item_type === 'form' && formConfig 
+          ? JSON.stringify(formConfig) 
+          : null,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('📝 Dados a serem atualizados:', updateData);
+
       const { error } = await supabase
         .from('link_tree_items')
-        .update({
-          title: newItem.title,
-          url: newItem.url,
-          icon: newItem.icon,
-          icon_size: newItem.icon_size,
-          icon_color: newItem.icon_color,
-          background_color: newItem.background_color,
-          text_color: newItem.text_color,
-          button_style: newItem.button_style,
-          hover_effect: newItem.hover_effect,
-          is_featured: newItem.is_featured,
-          item_type: newItem.item_type,
-          card_content: newItem.card_content,
-          card_image: newItem.card_image,
-          card_price: newItem.card_price,
-          card_button_text: newItem.card_button_text,
-          card_size: newItem.card_size,
-          card_format: newItem.card_format,
-          form_id: newItem.item_type === 'form' ? newItem.form_id : null,
-          form_fields: newItem.item_type === 'form' && formConfig 
-            ? JSON.stringify(formConfig) 
-            : null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', editingItem.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('✅ Item atualizado no banco');
 
       // Atualizar lista local imediatamente
       setItems(prev => prev.map(item => 
         item.id === editingItem.id 
           ? {
               ...item,
-              title: newItem.title,
-              url: newItem.url,
-              icon: newItem.icon,
-              icon_size: newItem.icon_size,
-              icon_color: newItem.icon_color,
-              background_color: newItem.background_color,
-              text_color: newItem.text_color,
-              button_style: newItem.button_style,
-              hover_effect: newItem.hover_effect,
-              is_featured: newItem.is_featured,
-              item_type: newItem.item_type,
-              card_content: newItem.card_content,
-              card_image: newItem.card_image,
-              card_price: newItem.card_price,
-              card_button_text: newItem.card_button_text,
-              card_size: newItem.card_size,
-              card_format: newItem.card_format,
-              form_id: newItem.item_type === 'form' ? newItem.form_id : null,
-              updated_at: new Date().toISOString()
+              ...updateData
             }
           : item
       ));
@@ -556,9 +551,12 @@ export function LinkTreeManagement() {
         card_format: 'rounded'
       });
 
-      await loadLinkTree();
+      // Recarregar dados para garantir sincronização
+      setTimeout(() => {
+        loadLinkTree();
+      }, 500);
     } catch (error) {
-      console.error('Erro ao atualizar item:', error);
+      console.error('❌ Erro ao atualizar item:', error);
       toast({
         title: "Erro ao atualizar item",
         description: "Ocorreu um erro ao atualizar o item.",
@@ -1138,310 +1136,361 @@ export function LinkTreeManagement() {
             <TabsContent value="items" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Adicionar Novo Item</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    {editingItem ? 'Editar Item' : 'Adicionar Novo Item'}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Interface futurística com controle total sobre a aparência dos itens
+                  </p>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Título</Label>
-                      <Input
-                        value={newItem.title}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="Título do item"
-                      />
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                        <Label className="text-sm font-medium mb-3 block">Informações Básicas</Label>
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Título</Label>
+                            <Input
+                              value={newItem.title}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, title: e.target.value }))}
+                              placeholder="Título do item"
+                              className="bg-background/80 backdrop-blur-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">URL</Label>
+                            <Input
+                              value={newItem.url}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
+                              placeholder="https://exemplo.com"
+                              className="bg-background/80 backdrop-blur-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Tipo de Item</Label>
+                            <Select value={newItem.item_type} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, item_type: value }))}>
+                              <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {itemTypeOptions.map(option => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    <div>
+                                      <div className="font-medium">{option.label}</div>
+                                      <div className="text-xs text-muted-foreground">{option.description}</div>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <Label>URL</Label>
-                      <Input
-                        value={newItem.url}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
-                        placeholder="https://exemplo.com"
-                      />
+
+                    <div className="space-y-4">
+                      <div className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                        <Label className="text-sm font-medium mb-3 block">Configurações de Cores</Label>
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Cor de Fundo</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={newItem.background_color}
+                                onChange={(e) => setNewItem(prev => ({ ...prev, background_color: e.target.value }))}
+                                className="w-12 h-8 p-0 border-0 rounded-md"
+                              />
+                              <Input
+                                value={newItem.background_color}
+                                onChange={(e) => setNewItem(prev => ({ ...prev, background_color: e.target.value }))}
+                                placeholder="#ffffff"
+                                className="bg-background/80 backdrop-blur-sm"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Cor do Texto</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={newItem.text_color}
+                                onChange={(e) => setNewItem(prev => ({ ...prev, text_color: e.target.value }))}
+                                className="w-12 h-8 p-0 border-0 rounded-md"
+                              />
+                              <Input
+                                value={newItem.text_color}
+                                onChange={(e) => setNewItem(prev => ({ ...prev, text_color: e.target.value }))}
+                                placeholder="#000000"
+                                className="bg-background/80 backdrop-blur-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <Label>Tipo de Item</Label>
-                    <Select value={newItem.item_type} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, item_type: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {itemTypeOptions.map(option => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div>
-                              <div className="font-medium">{option.label}</div>
-                              <div className="text-xs text-muted-foreground">{option.description}</div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Configurações do Ícone</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <IconSelector
+                            value={newItem.icon}
+                            onChange={(iconName) => setNewItem(prev => ({ ...prev, icon: iconName }))}
+                            label="Ícone"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Tamanho do Ícone</Label>
+                          <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, icon_size: value }))}>
+                            <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="w-4 h-4">Pequeno</SelectItem>
+                              <SelectItem value="w-5 h-5">Médio</SelectItem>
+                              <SelectItem value="w-6 h-6">Grande</SelectItem>
+                              <SelectItem value="w-8 h-8">Extra Grande</SelectItem>
+                              <SelectItem value="w-10 h-10">Gigante</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Cor do Ícone</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={newItem.icon_color}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
+                              className="w-12 h-8 p-0 border-0 rounded-md"
+                            />
+                            <Input
+                              value={newItem.icon_color}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
+                              placeholder="#000000"
+                              className="bg-background/80 backdrop-blur-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-lg border border-orange-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Estilo do Botão</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Estilo do Botão</Label>
+                          <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, button_style: value }))}>
+                            <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="inherit">Herdar do Tema</SelectItem>
+                              {buttonStyleOptions.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Efeito de Hover</Label>
+                          <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>
+                            <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {hoverEffectOptions.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Configurações do Card</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Tamanho do Card</Label>
+                          <Select value={newItem.card_size || 'medium'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_size: value }))}>
+                            <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">Pequeno</SelectItem>
+                              <SelectItem value="medium">Médio</SelectItem>
+                              <SelectItem value="large">Grande</SelectItem>
+                              <SelectItem value="full">Largura Total</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Formato do Card</Label>
+                          <Select value={newItem.card_format || 'rounded'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_format: value }))}>
+                            <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="rounded">Arredondado</SelectItem>
+                              <SelectItem value="square">Quadrado</SelectItem>
+                              <SelectItem value="circle">Circular</SelectItem>
+                              <SelectItem value="pill">Pílula</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="featured"
+                            checked={newItem.is_featured}
+                            onCheckedChange={(checked) => setNewItem(prev => ({ ...prev, is_featured: checked }))}
+                          />
+                          <Label htmlFor="featured" className="text-xs text-muted-foreground">Item em destaque</Label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {(newItem.item_type as string) === 'form' && formConfig && (
-                    <div>
-                      <Label>Formulário</Label>
-                      <Select value={newItem.form_id} onValueChange={(value) => setNewItem(prev => ({ ...prev, form_id: value }))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um formulário" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="contact">Formulário de Contato</SelectItem>
-                          <SelectItem value="consultation">Formulário de Consulta</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Configurações do Formulário</Label>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Formulário</Label>
+                        <Select value={newItem.form_id} onValueChange={(value) => setNewItem(prev => ({ ...prev, form_id: value }))}>
+                          <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                            <SelectValue placeholder="Selecione um formulário" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="contact">Formulário de Contato</SelectItem>
+                            <SelectItem value="consultation">Formulário de Consulta</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
 
                   {(newItem.item_type as string) === 'card' && (
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Conteúdo do Card</Label>
-                        <Textarea
-                          value={newItem.card_content}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                          placeholder="Descrição ou conteúdo do card"
-                          rows={3}
-                        />
-                      </div>
-                      <div>
-                        <Label>Imagem de Fundo do Card</Label>
-                        <Input
-                          value={newItem.card_image}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                          placeholder="https://exemplo.com/imagem.jpg"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 rounded-lg border border-teal-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Configurações do Card</Label>
+                      <div className="space-y-3">
                         <div>
-                          <Label>Preço (opcional)</Label>
-                          <Input
-                            value={newItem.card_price}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_price: e.target.value }))}
-                            placeholder="R$ 99,99"
+                          <Label className="text-xs text-muted-foreground">Conteúdo do Card</Label>
+                          <Textarea
+                            value={newItem.card_content}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
+                            placeholder="Descrição ou conteúdo do card"
+                            rows={3}
+                            className="bg-background/80 backdrop-blur-sm"
                           />
                         </div>
                         <div>
-                          <Label>Texto do Botão</Label>
+                          <Label className="text-xs text-muted-foreground">Imagem de Fundo do Card</Label>
                           <Input
-                            value={newItem.card_button_text}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_button_text: e.target.value }))}
-                            placeholder="Saiba Mais"
+                            value={newItem.card_image}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                            placeholder="https://exemplo.com/imagem.jpg"
+                            className="bg-background/80 backdrop-blur-sm"
                           />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Preço (opcional)</Label>
+                            <Input
+                              value={newItem.card_price}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, card_price: e.target.value }))}
+                              placeholder="R$ 99,99"
+                              className="bg-background/80 backdrop-blur-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Texto do Botão</Label>
+                            <Input
+                              value={newItem.card_button_text}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, card_button_text: e.target.value }))}
+                              placeholder="Saiba Mais"
+                              className="bg-background/80 backdrop-blur-sm"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                   )}
 
                   {(newItem.item_type as string) === 'video' && (
-                    <div className="space-y-4">
-                      <div>
-                        <Label>URL do Vídeo</Label>
-                        <Input
-                          value={newItem.url}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
-                          placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
-                        />
-                      </div>
-                      <div>
-                        <Label>Thumbnail do Vídeo (opcional)</Label>
-                        <Input
-                          value={newItem.card_image}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                          placeholder="https://exemplo.com/thumbnail.jpg"
-                        />
-                      </div>
-                      <div>
-                        <Label>Descrição do Vídeo</Label>
-                        <Textarea
-                          value={newItem.card_content}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                          placeholder="Descrição do vídeo"
-                          rows={2}
-                        />
+                    <div className="p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-lg border border-violet-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Configurações do Vídeo</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">URL do Vídeo</Label>
+                          <Input
+                            value={newItem.url}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
+                            placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
+                            className="bg-background/80 backdrop-blur-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Thumbnail do Vídeo (opcional)</Label>
+                          <Input
+                            value={newItem.card_image}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                            placeholder="https://exemplo.com/thumbnail.jpg"
+                            className="bg-background/80 backdrop-blur-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Descrição do Vídeo</Label>
+                          <Textarea
+                            value={newItem.card_content}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
+                            placeholder="Descrição do vídeo"
+                            rows={2}
+                            className="bg-background/80 backdrop-blur-sm"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
 
                   {(newItem.item_type as string) === 'text' && (
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Conteúdo Informativo</Label>
-                        <Textarea
-                          value={newItem.card_content}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                          placeholder="Texto informativo, horários de funcionamento, etc."
-                          rows={4}
-                        />
-                      </div>
-                      <div>
-                        <Label>Imagem de Fundo (opcional)</Label>
-                        <Input
-                          value={newItem.card_image}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                          placeholder="https://exemplo.com/imagem.jpg"
-                        />
+                    <div className="p-4 bg-gradient-to-r from-rose-500/10 to-pink-500/10 rounded-lg border border-rose-500/20">
+                      <Label className="text-sm font-medium mb-3 block">Configurações do Texto</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Conteúdo Informativo</Label>
+                          <Textarea
+                            value={newItem.card_content}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
+                            placeholder="Texto informativo, horários de funcionamento, etc."
+                            rows={4}
+                            className="bg-background/80 backdrop-blur-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Imagem de Fundo (opcional)</Label>
+                          <Input
+                            value={newItem.card_image}
+                            onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                            placeholder="https://exemplo.com/imagem.jpg"
+                            className="bg-background/80 backdrop-blur-sm"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Cor de Fundo</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={newItem.background_color}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, background_color: e.target.value }))}
-                          className="w-16 h-10"
-                        />
-                        <Input
-                          value={newItem.background_color}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, background_color: e.target.value }))}
-                          placeholder="#ffffff"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Cor do Texto</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={newItem.text_color}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, text_color: e.target.value }))}
-                          className="w-16 h-10"
-                        />
-                        <Input
-                          value={newItem.text_color}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, text_color: e.target.value }))}
-                          placeholder="#000000"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <IconSelector
-                        value={newItem.icon}
-                        onChange={(iconName) => setNewItem(prev => ({ ...prev, icon: iconName }))}
-                        label="Ícone"
-                      />
-                    </div>
-                    <div>
-                      <Label>Tamanho do Ícone</Label>
-                      <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, icon_size: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="w-4 h-4">Pequeno</SelectItem>
-                          <SelectItem value="w-5 h-5">Médio</SelectItem>
-                          <SelectItem value="w-6 h-6">Grande</SelectItem>
-                          <SelectItem value="w-8 h-8">Extra Grande</SelectItem>
-                          <SelectItem value="w-10 h-10">Gigante</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Cor do Ícone</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={newItem.icon_color}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
-                          className="w-16 h-10"
-                        />
-                        <Input
-                          value={newItem.icon_color}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
-                          placeholder="#000000"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label>Efeito de Hover</Label>
-                      <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {hoverEffectOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Estilo do Botão</Label>
-                    <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, button_style: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="inherit">Herdar do Tema</SelectItem>
-                        {buttonStyleOptions.map(option => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Tamanho do Card</Label>
-                      <Select value={newItem.card_size || 'medium'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_size: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="small">Pequeno</SelectItem>
-                          <SelectItem value="medium">Médio</SelectItem>
-                          <SelectItem value="large">Grande</SelectItem>
-                          <SelectItem value="full">Largura Total</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Formato do Card</Label>
-                      <Select value={newItem.card_format || 'rounded'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_format: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="rounded">Arredondado</SelectItem>
-                          <SelectItem value="square">Quadrado</SelectItem>
-                          <SelectItem value="circle">Circular</SelectItem>
-                          <SelectItem value="pill">Pílula</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured"
-                      checked={newItem.is_featured}
-                      onCheckedChange={(checked) => setNewItem(prev => ({ ...prev, is_featured: checked }))}
-                    />
-                    <Label htmlFor="featured">Item em destaque</Label>
-                  </div>
-
                   <div className="flex gap-2">
                     {editingItem ? (
                       <>
-                        <Button onClick={handleUpdateItem} className="flex-1">
+                        <Button onClick={handleUpdateItem} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
                           Atualizar Item
                         </Button>
                         <Button onClick={cancelEdit} variant="outline" className="flex-1">
@@ -1449,7 +1498,7 @@ export function LinkTreeManagement() {
                         </Button>
                       </>
                     ) : (
-                      <Button onClick={handleAddItem} className="w-full">
+                      <Button onClick={handleAddItem} className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
                         <Plus className="w-4 h-4 mr-2" />
                         Adicionar Item
                       </Button>
