@@ -14,6 +14,7 @@ import { LinkTree, LinkTreeItem } from '@/types/linkTreeTypes';
 import { LinkTreePreview } from '@/components/LinkTreePreview';
 import { useToast } from '@/hooks/use-toast';
 import { useFormConfig } from '@/hooks/useFormConfig';
+import { IconSelector } from './IconSelector';
 
 export function LinkTreeManagement() {
   const [linkTree, setLinkTree] = useState<LinkTree | null>(null);
@@ -989,11 +990,10 @@ export function LinkTreeManagement() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Ícone</Label>
-                      <Input
+                      <IconSelector
                         value={newItem.icon}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, icon: e.target.value }))}
-                        placeholder="link, phone, mail, etc."
+                        onChange={(iconName) => setNewItem(prev => ({ ...prev, icon: iconName }))}
+                        label="Ícone"
                       />
                     </div>
                     <div>
