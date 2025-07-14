@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { useLinkTree } from '@/hooks/useLinkTree';
-import { LinkTree, LinkTreeItem } from '@/types/linkTreeTypes';
+import { LinkTree, LinkTreeItem, FormField } from '@/types/linkTreeTypes';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -25,7 +25,10 @@ import {
   Move,
   Settings,
   Zap,
-  Layers
+  Layers,
+  CreditCard,
+  FileText,
+  Link as LinkIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -70,7 +73,6 @@ const themePresets = {
 
 export const LinkTreeManagement = () => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
   
   const {
     linkTree,
@@ -108,12 +110,14 @@ export const LinkTreeManagement = () => {
     text_color: '#000000',
     button_style: 'inherit' as const,
     hover_effect: 'scale' as const,
-    is_featured: false
+    is_featured: false,
+    item_type: 'link' as const,
+    card_content: '',
+    form_fields: [] as FormField[]
   });
 
   const [activeTab, setActiveTab] = useState('design');
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('mobile');
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (linkTree) {
@@ -155,8 +159,13 @@ export const LinkTreeManagement = () => {
   };
 
   const handleAddItem = async () => {
-    if (!newItem.title || !newItem.url) {
-      toast.error('Título e URL são obrigatórios');
+    if (!newItem.title) {
+      toast.error('Título é obrigatório');
+      return;
+    }
+
+    if (newItem.item_type === 'link' && !newItem.url) {
+      toast.error('URL é obrigatória para links');
       return;
     }
 
@@ -169,7 +178,7 @@ export const LinkTreeManagement = () => {
       await saveLinkTreeItem({
         link_tree_id: linkTree.id,
         title: newItem.title,
-        url: newItem.url,
+        url: newItem.url || '',
         icon: newItem.icon,
         background_color: newItem.background_color,
         text_color: newItem.text_color,
@@ -178,7 +187,10 @@ export const LinkTreeManagement = () => {
         display_order: linkTreeItems.length,
         click_count: 0,
         is_featured: newItem.is_featured,
-        is_active: true
+        is_active: true,
+        item_type: newItem.item_type,
+        card_content: newItem.card_content,
+        form_fields: newItem.form_fields
       });
 
       setNewItem({
@@ -189,11 +201,45 @@ export const LinkTreeManagement = () => {
         text_color: '#000000',
         button_style: 'inherit',
         hover_effect: 'scale',
-        is_featured: false
+        is_featured: false,
+        item_type: 'link',
+        card_content: '',
+        form_fields: []
       });
     } catch (error) {
       console.error('Erro ao adicionar item:', error);
     }
+  };
+
+  const addFormField = () => {
+    const newField: FormField = {
+      id: crypto.randomUUID(),
+      type: 'text',
+      label: 'Novo Campo',
+      placeholder: '',
+      required: false,
+      options: []
+    };
+    setNewItem(prev => ({
+      ...prev,
+      form_fields: [...prev.form_fields, newField]
+    }));
+  };
+
+  const updateFormField = (fieldId: string, updates: Partial<FormField>) => {
+    setNewItem(prev => ({
+      ...prev,
+      form_fields: prev.form_fields.map(field =>
+        field.id === fieldId ? { ...field, ...updates } : field
+      )
+    }));
+  };
+
+  const removeFormField = (fieldId: string) => {
+    setNewItem(prev => ({
+      ...prev,
+      form_fields: prev.form_fields.filter(field => field.id !== fieldId)
+    }));
   };
 
   const copyLinkTreeUrl = () => {
@@ -205,21 +251,21 @@ export const LinkTreeManagement = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-black text-white min-h-screen p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-gray-800 pb-6">
         <div>
-          <h2 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>
-            ✨ Link Tree Pro
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+            ⚡ Link Tree Pro
           </h2>
-          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Crie uma página de links profissional e personalizável
+          <p className="text-gray-400 mt-2">
+            Crie uma página de links profissional com cards e formulários
           </p>
         </div>
         <div className="flex gap-3">
@@ -227,7 +273,7 @@ export const LinkTreeManagement = () => {
             onClick={copyLinkTreeUrl}
             variant="outline"
             size="sm"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-gray-700 bg-gray-900 text-white hover:bg-gray-800"
           >
             <Copy className="w-4 h-4" />
             Copiar URL
@@ -236,12 +282,16 @@ export const LinkTreeManagement = () => {
             onClick={() => window.open('/tree', '_blank')}
             variant="outline"
             size="sm"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-gray-700 bg-gray-900 text-white hover:bg-gray-800"
           >
             <Eye className="w-4 h-4" />
             Visualizar
           </Button>
-          <Button onClick={handleSave} size="sm" className="flex items-center gap-2">
+          <Button 
+            onClick={handleSave} 
+            size="sm" 
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          >
             <Save className="w-4 h-4" />
             Salvar Tudo
           </Button>
@@ -252,20 +302,20 @@ export const LinkTreeManagement = () => {
         {/* Configurações */}
         <div className="xl:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full grid-cols-4 ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
-              <TabsTrigger value="design" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-900 border border-gray-700">
+              <TabsTrigger value="design" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
                 <Palette className="w-4 h-4" />
                 Design
               </TabsTrigger>
-              <TabsTrigger value="content" className="flex items-center gap-2">
+              <TabsTrigger value="content" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
                 <Layers className="w-4 h-4" />
                 Conteúdo
               </TabsTrigger>
-              <TabsTrigger value="links" className="flex items-center gap-2">
+              <TabsTrigger value="items" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
                 <Zap className="w-4 h-4" />
-                Links
+                Items
               </TabsTrigger>
-              <TabsTrigger value="advanced" className="flex items-center gap-2">
+              <TabsTrigger value="advanced" className="flex items-center gap-2 text-white data-[state=active]:bg-purple-600">
                 <Settings className="w-4 h-4" />
                 Avançado
               </TabsTrigger>
@@ -273,9 +323,9 @@ export const LinkTreeManagement = () => {
 
             <TabsContent value="design" className="space-y-6 mt-6">
               {/* Temas Predefinidos */}
-              <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Sparkles className="w-5 h-5 text-yellow-500" />
                     Temas Predefinidos
                   </CardTitle>
@@ -288,8 +338,8 @@ export const LinkTreeManagement = () => {
                         onClick={() => applyThemePreset(name as keyof typeof themePresets)}
                         className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
                           formData.theme === name 
-                            ? 'border-blue-500 ring-2 ring-blue-500/20' 
-                            : 'border-gray-300 hover:border-gray-400'
+                            ? 'border-purple-500 ring-2 ring-purple-500/20' 
+                            : 'border-gray-600 hover:border-gray-500'
                         }`}
                         style={{ backgroundColor: preset.background_color }}
                       >
@@ -309,302 +359,307 @@ export const LinkTreeManagement = () => {
               </Card>
 
               {/* Personalização de Cores */}
-              <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle>Cores Personalizadas</CardTitle>
+                  <CardTitle className="text-white">Cores Personalizadas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Cor de Fundo</Label>
+                      <Label className="text-gray-300">Cor de Fundo</Label>
                       <div className="flex gap-2 mt-1">
                         <Input
                           type="color"
                           value={formData.background_color}
                           onChange={(e) => setFormData({ ...formData, background_color: e.target.value })}
-                          className="w-12 h-10 p-1"
+                          className="w-12 h-10 p-1 bg-gray-800 border-gray-600"
                         />
                         <Input
                           value={formData.background_color}
                           onChange={(e) => setFormData({ ...formData, background_color: e.target.value })}
-                          className="flex-1"
+                          className="flex-1 bg-gray-800 border-gray-600 text-white"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label>Cor do Texto</Label>
+                      <Label className="text-gray-300">Cor do Texto</Label>
                       <div className="flex gap-2 mt-1">
                         <Input
                           type="color"
                           value={formData.text_color}
                           onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
-                          className="w-12 h-10 p-1"
+                          className="w-12 h-10 p-1 bg-gray-800 border-gray-600"
                         />
                         <Input
                           value={formData.text_color}
                           onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
-                          className="flex-1"
+                          className="flex-1 bg-gray-800 border-gray-600 text-white"
                         />
                       </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <Label>Estilo dos Botões</Label>
-                    <Select
-                      value={formData.button_style}
-                      onValueChange={(value: any) => setFormData({ ...formData, button_style: value })}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="rounded">🔲 Arredondado</SelectItem>
-                        <SelectItem value="square">⬜ Quadrado</SelectItem>
-                        <SelectItem value="pill">💊 Pílula</SelectItem>
-                        <SelectItem value="glassmorphism">🪟 Glassmorphism</SelectItem>
-                        <SelectItem value="neon">⚡ Neon</SelectItem>
-                        <SelectItem value="gradient">🌈 Gradiente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Animação</Label>
-                    <Select
-                      value={formData.animation_style}
-                      onValueChange={(value: any) => setFormData({ ...formData, animation_style: value })}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sem animação</SelectItem>
-                        <SelectItem value="fade">✨ Fade</SelectItem>
-                        <SelectItem value="slide">➡️ Slide</SelectItem>
-                        <SelectItem value="bounce">⚡ Bounce</SelectItem>
-                        <SelectItem value="pulse">💓 Pulse</SelectItem>
-                        <SelectItem value="glow">🌟 Glow</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="content" className="space-y-6 mt-6">
-              <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle>Informações Básicas</CardTitle>
+                  <CardTitle className="text-white">Informações Básicas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label>Título</Label>
+                    <Label className="text-gray-300">Título</Label>
                     <Input
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Seu nome ou marca"
-                      className="mt-1"
+                      className="mt-1 bg-gray-800 border-gray-600 text-white"
                     />
                   </div>
 
                   <div>
-                    <Label>Descrição</Label>
+                    <Label className="text-gray-300">Descrição</Label>
                     <Textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Uma breve descrição sobre você"
-                      className="mt-1"
+                      className="mt-1 bg-gray-800 border-gray-600 text-white"
                     />
                   </div>
 
                   <div>
-                    <Label>URL do Avatar</Label>
+                    <Label className="text-gray-300">URL do Avatar</Label>
                     <Input
                       value={formData.avatar_url}
                       onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
                       placeholder="https://exemplo.com/avatar.jpg"
-                      className="mt-1"
+                      className="mt-1 bg-gray-800 border-gray-600 text-white"
                     />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="links" className="space-y-6 mt-6">
-              {/* Adicionar Novo Link */}
-              <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
+            <TabsContent value="items" className="space-y-6 mt-6">
+              {/* Adicionar Novo Item */}
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Plus className="w-5 h-5" />
-                    Adicionar Novo Link
+                    Adicionar Novo Item
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-gray-300">Tipo de Item</Label>
+                    <Select
+                      value={newItem.item_type}
+                      onValueChange={(value: any) => setNewItem({ ...newItem, item_type: value })}
+                    >
+                      <SelectTrigger className="mt-1 bg-gray-800 border-gray-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-600">
+                        <SelectItem value="link" className="text-white hover:bg-gray-700">
+                          <div className="flex items-center gap-2">
+                            <LinkIcon className="w-4 h-4" />
+                            Link
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="card" className="text-white hover:bg-gray-700">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="w-4 h-4" />
+                            Card de Conteúdo
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="form" className="text-white hover:bg-gray-700">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Formulário
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Título</Label>
+                      <Label className="text-gray-300">Título</Label>
                       <Input
                         value={newItem.title}
                         onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                         placeholder="Ex: Meu Instagram"
-                        className="mt-1"
+                        className="mt-1 bg-gray-800 border-gray-600 text-white"
                       />
                     </div>
-                    <div>
-                      <Label>URL</Label>
-                      <Input
-                        value={newItem.url}
-                        onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
-                        placeholder="https://..."
-                        className="mt-1"
-                      />
-                    </div>
+                    {newItem.item_type === 'link' && (
+                      <div>
+                        <Label className="text-gray-300">URL</Label>
+                        <Input
+                          value={newItem.url}
+                          onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
+                          placeholder="https://..."
+                          className="mt-1 bg-gray-800 border-gray-600 text-white"
+                        />
+                      </div>
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  {newItem.item_type === 'card' && (
                     <div>
-                      <Label>Efeito de Hover</Label>
-                      <Select
-                        value={newItem.hover_effect}
-                        onValueChange={(value: any) => setNewItem({ ...newItem, hover_effect: value })}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="scale">📏 Scale</SelectItem>
-                          <SelectItem value="glow">✨ Glow</SelectItem>
-                          <SelectItem value="lift">⬆️ Lift</SelectItem>
-                          <SelectItem value="bounce">⚡ Bounce</SelectItem>
-                          <SelectItem value="rotate">🔄 Rotate</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Cor do Botão</Label>
-                      <Input
-                        type="color"
-                        value={newItem.background_color}
-                        onChange={(e) => setNewItem({ ...newItem, background_color: e.target.value })}
-                        className="mt-1 h-10"
+                      <Label className="text-gray-300">Conteúdo do Card</Label>
+                      <Textarea
+                        value={newItem.card_content}
+                        onChange={(e) => setNewItem({ ...newItem, card_content: e.target.value })}
+                        placeholder="Conteúdo que será exibido no card..."
+                        className="mt-1 bg-gray-800 border-gray-600 text-white"
+                        rows={4}
                       />
                     </div>
-                    <div>
-                      <Label>Cor do Texto</Label>
-                      <Input
-                        type="color"
-                        value={newItem.text_color}
-                        onChange={(e) => setNewItem({ ...newItem, text_color: e.target.value })}
-                        className="mt-1 h-10"
-                      />
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={newItem.is_featured}
-                        onCheckedChange={(checked) => setNewItem({ ...newItem, is_featured: checked })}
-                      />
-                      <Label>Link em destaque</Label>
+                  {newItem.item_type === 'form' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-gray-300">Campos do Formulário</Label>
+                        <Button
+                          onClick={addFormField}
+                          size="sm"
+                          variant="outline"
+                          className="border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Adicionar Campo
+                        </Button>
+                      </div>
+                      
+                      {newItem.form_fields.map((field) => (
+                        <div key={field.id} className="p-3 border border-gray-600 rounded-lg bg-gray-800">
+                          <div className="grid grid-cols-3 gap-2 mb-2">
+                            <Input
+                              value={field.label}
+                              onChange={(e) => updateFormField(field.id, { label: e.target.value })}
+                              placeholder="Label do campo"
+                              className="bg-gray-700 border-gray-600 text-white"
+                            />
+                            <Select
+                              value={field.type}
+                              onValueChange={(value: any) => updateFormField(field.id, { type: value })}
+                            >
+                              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-700 border-gray-600">
+                                <SelectItem value="text" className="text-white">Texto</SelectItem>
+                                <SelectItem value="email" className="text-white">Email</SelectItem>
+                                <SelectItem value="textarea" className="text-white">Textarea</SelectItem>
+                                <SelectItem value="select" className="text-white">Select</SelectItem>
+                                <SelectItem value="checkbox" className="text-white">Checkbox</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              onClick={() => removeFormField(field.id)}
+                              size="sm"
+                              variant="destructive"
+                              className="h-10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={field.placeholder || ''}
+                              onChange={(e) => updateFormField(field.id, { placeholder: e.target.value })}
+                              placeholder="Placeholder (opcional)"
+                              className="bg-gray-700 border-gray-600 text-white"
+                            />
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={field.required}
+                                onCheckedChange={(checked) => updateFormField(field.id, { required: checked })}
+                              />
+                              <Label className="text-xs text-gray-400">Obrigatório</Label>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <Button onClick={handleAddItem} className="ml-auto">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar
-                    </Button>
-                  </div>
+                  )}
+
+                  <Button 
+                    onClick={handleAddItem}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Item
+                  </Button>
                 </CardContent>
               </Card>
 
-              {/* Lista de Links */}
-              <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Links ({linkTreeItems.length})</span>
-                    {formData.show_analytics && (
-                      <BarChart3 className="w-5 h-5 text-blue-500" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {linkTreeItems.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className={`p-4 rounded-lg border transition-all hover:shadow-md ${
-                          isDark ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
+              {/* Lista de Items Existentes */}
+              {linkTreeItems.length > 0 && (
+                <Card className="bg-gray-900 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white">Items Atuais ({linkTreeItems.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {linkTreeItems.map((item, index) => (
+                        <div key={item.id} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-gray-600">
                           <div className="flex items-center gap-3">
-                            <GripVertical className="w-4 h-4 text-gray-400 cursor-move" />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <p className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
-                                  {item.title}
-                                </p>
-                                {item.is_featured && (
-                                  <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded">
-                                    ⭐ Destaque
-                                  </span>
-                                )}
+                            <GripVertical className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <span className="text-white font-medium">{item.title}</span>
+                              <div className="text-xs text-gray-400 flex items-center gap-2">
+                                {item.item_type === 'link' && <LinkIcon className="w-3 h-3" />}
+                                {item.item_type === 'card' && <CreditCard className="w-3 h-3" />}
+                                {item.item_type === 'form' && <FileText className="w-3 h-3" />}
+                                {item.item_type.toUpperCase()}
+                                {item.item_type === 'link' && item.url && ` • ${item.url}`}
+                                {item.click_count > 0 && ` • ${item.click_count} cliques`}
                               </div>
-                              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                {item.url}
-                              </p>
-                              {formData.show_analytics && (
-                                <p className="text-xs text-blue-500 mt-1">
-                                  {item.click_count} cliques
-                                </p>
-                              )}
                             </div>
                           </div>
                           <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={() => deleteLinkTreeItem(item.id)}
-                            className="text-red-500 hover:text-red-700"
+                            size="sm"
+                            variant="destructive"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
-                      </div>
-                    ))}
-
-                    {linkTreeItems.length === 0 && (
-                      <div className="text-center py-8">
-                        <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Nenhum link adicionado ainda.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="advanced" className="space-y-6 mt-6">
-              <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle>Configurações Avançadas</CardTitle>
+                  <CardTitle className="text-white">Configurações Avançadas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-gray-300">Exibir Analytics</Label>
+                      <p className="text-xs text-gray-400">Mostra contadores de cliques</p>
+                    </div>
                     <Switch
                       checked={formData.show_analytics}
                       onCheckedChange={(checked) => setFormData({ ...formData, show_analytics: checked })}
                     />
-                    <Label>Mostrar analytics de cliques</Label>
                   </div>
 
                   <div>
-                    <Label>CSS Personalizado (Avançado)</Label>
+                    <Label className="text-gray-300">CSS Customizado</Label>
                     <Textarea
                       value={formData.custom_css}
                       onChange={(e) => setFormData({ ...formData, custom_css: e.target.value })}
-                      placeholder="/* Adicione seu CSS personalizado aqui */"
-                      className="mt-1 font-mono text-sm"
+                      placeholder="/* Adicione seu CSS customizado aqui */"
+                      className="mt-1 bg-gray-800 border-gray-600 text-white font-mono"
                       rows={6}
                     />
                   </div>
@@ -615,107 +670,76 @@ export const LinkTreeManagement = () => {
         </div>
 
         {/* Preview */}
-        <div className="xl:col-span-1">
-          <Card className={isDark ? 'bg-gray-900 border-gray-700' : 'bg-white'}>
+        <div className="space-y-4">
+          <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center justify-between text-white">
+                <div className="flex items-center gap-2">
                   <Eye className="w-5 h-5" />
                   Preview
-                </CardTitle>
-                <div className="flex gap-1">
+                </div>
+                <div className="flex gap-2">
                   <Button
-                    variant={previewMode === 'mobile' ? 'default' : 'ghost'}
-                    size="sm"
                     onClick={() => setPreviewMode('mobile')}
+                    size="sm"
+                    variant={previewMode === 'mobile' ? 'default' : 'outline'}
+                    className={previewMode === 'mobile' ? '' : 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'}
                   >
                     <Smartphone className="w-4 h-4" />
                   </Button>
                   <Button
-                    variant={previewMode === 'desktop' ? 'default' : 'ghost'}
-                    size="sm"
                     onClick={() => setPreviewMode('desktop')}
+                    size="sm"
+                    variant={previewMode === 'desktop' ? 'default' : 'outline'}
+                    className={previewMode === 'desktop' ? '' : 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'}
                   >
                     <Monitor className="w-4 h-4" />
                   </Button>
                 </div>
-              </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
-                className={`mx-auto rounded-lg border overflow-hidden ${
-                  previewMode === 'mobile' ? 'w-64 h-96' : 'w-full h-80'
-                }`}
-                style={{ backgroundColor: formData.background_color }}
-              >
-                <div className="p-4 h-full overflow-y-auto">
-                  <div className="text-center space-y-3">
-                    {formData.avatar_url && (
-                      <img
-                        src={formData.avatar_url}
-                        alt="Avatar"
-                        className="w-12 h-12 rounded-full mx-auto object-cover"
-                      />
-                    )}
-                    <h1
-                      className="text-lg font-bold"
-                      style={{ color: formData.text_color }}
-                    >
-                      {formData.title}
-                    </h1>
-                    {formData.description && (
-                      <p
-                        className="text-xs opacity-80"
-                        style={{ color: formData.text_color }}
-                      >
-                        {formData.description}
-                      </p>
-                    )}
-                    
-                    <div className="space-y-2 mt-4">
-                      {linkTreeItems.slice(0, 4).map((item) => (
-                        <div
-                          key={item.id}
-                          className={`p-2 text-center text-xs rounded transition-transform ${
-                            formData.animation_style === 'bounce' ? 'hover:animate-bounce' :
-                            formData.animation_style === 'pulse' ? 'hover:animate-pulse' :
-                            'hover:scale-105'
-                          } ${
-                            formData.button_style === 'rounded' ? 'rounded-lg' :
-                            formData.button_style === 'pill' ? 'rounded-full' :
-                            formData.button_style === 'glassmorphism' ? 'rounded-lg backdrop-blur-sm bg-white/10 border border-white/20' :
-                            formData.button_style === 'neon' ? 'rounded-lg border-2 border-current shadow-lg' :
-                            formData.button_style === 'gradient' ? 'rounded-lg bg-gradient-to-r from-blue-500 to-purple-600' :
-                            'rounded-none'
-                          }`}
-                          style={{
-                            backgroundColor: formData.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' :
-                                           formData.button_style === 'gradient' ? '' : item.background_color,
-                            color: item.text_color,
-                            boxShadow: formData.button_style === 'neon' ? `0 0 10px ${item.background_color}` : undefined
-                          }}
-                        >
-                          {item.is_featured && '⭐ '}{item.title}
-                        </div>
-                      ))}
-
-                      {linkTreeItems.length > 4 && (
-                        <p className="text-xs opacity-60" style={{ color: formData.text_color }}>
-                          +{linkTreeItems.length - 4} mais links
-                        </p>
-                      )}
-
-                      {linkTreeItems.length === 0 && (
-                        <p className="text-xs opacity-60" style={{ color: formData.text_color }}>
-                          Adicione alguns links para ver o preview
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              <div className={`mx-auto border-2 border-gray-600 rounded-lg overflow-hidden ${
+                previewMode === 'mobile' ? 'w-80 h-96' : 'w-full h-96'
+              }`}>
+                <iframe
+                  src="/tree"
+                  className="w-full h-full"
+                  title="Link Tree Preview"
+                />
               </div>
             </CardContent>
           </Card>
+
+          {/* Analytics */}
+          {formData.show_analytics && linkTreeItems.length > 0 && (
+            <Card className="bg-gray-900 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <BarChart3 className="w-5 h-5" />
+                  Analytics Rápida
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {linkTreeItems.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center text-sm">
+                      <span className="text-gray-300 truncate">{item.title}</span>
+                      <span className="text-white font-medium">{item.click_count} cliques</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                  <div className="flex justify-between items-center font-medium">
+                    <span className="text-gray-300">Total</span>
+                    <span className="text-white">
+                      {linkTreeItems.reduce((total, item) => total + item.click_count, 0)} cliques
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

@@ -42,7 +42,10 @@ export const useLinkTree = () => {
           return;
         }
 
-        setLinkTreeItems((itemsData || []) as LinkTreeItem[]);
+        setLinkTreeItems((itemsData || []).map(item => ({
+          ...item,
+          form_fields: item.form_fields ? JSON.parse(JSON.stringify(item.form_fields)) : []
+        })) as LinkTreeItem[]);
       }
     } catch (error) {
       console.error('Erro ao carregar link tree:', error);
@@ -88,13 +91,19 @@ export const useLinkTree = () => {
     try {
       const { data: newItem, error } = await supabase
         .from('link_tree_items')
-        .insert([item])
+        .insert([{
+          ...item,
+          form_fields: item.form_fields ? JSON.stringify(item.form_fields) : null
+        }])
         .select()
         .single();
 
       if (error) throw error;
       
-      setLinkTreeItems(prev => [...prev, newItem as LinkTreeItem].sort((a, b) => a.display_order - b.display_order));
+      setLinkTreeItems(prev => [...prev, {
+        ...newItem,
+        form_fields: newItem.form_fields ? JSON.parse(JSON.stringify(newItem.form_fields)) : []
+      } as LinkTreeItem].sort((a, b) => a.display_order - b.display_order));
       toast.success('Item adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar item:', error);
@@ -105,9 +114,13 @@ export const useLinkTree = () => {
 
   const updateLinkTreeItem = async (id: string, data: Partial<LinkTreeItem>) => {
     try {
+      const updateData = {
+        ...data,
+        form_fields: data.form_fields ? JSON.stringify(data.form_fields) : undefined
+      };
       const { error } = await supabase
         .from('link_tree_items')
-        .update(data)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;

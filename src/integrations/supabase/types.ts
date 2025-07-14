@@ -282,53 +282,65 @@ export type Database = {
         Row: {
           background_color: string | null
           button_style: string | null
+          card_content: string | null
           click_count: number | null
           created_at: string | null
           display_order: number | null
+          form_action: string | null
+          form_fields: Json | null
           hover_effect: string | null
           icon: string | null
           id: string
           is_active: boolean | null
           is_featured: boolean | null
+          item_type: string | null
           link_tree_id: string | null
           text_color: string | null
           title: string
           updated_at: string | null
-          url: string
+          url: string | null
         }
         Insert: {
           background_color?: string | null
           button_style?: string | null
+          card_content?: string | null
           click_count?: number | null
           created_at?: string | null
           display_order?: number | null
+          form_action?: string | null
+          form_fields?: Json | null
           hover_effect?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          item_type?: string | null
           link_tree_id?: string | null
           text_color?: string | null
           title: string
           updated_at?: string | null
-          url: string
+          url?: string | null
         }
         Update: {
           background_color?: string | null
           button_style?: string | null
+          card_content?: string | null
           click_count?: number | null
           created_at?: string | null
           display_order?: number | null
+          form_action?: string | null
+          form_fields?: Json | null
           hover_effect?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          item_type?: string | null
           link_tree_id?: string | null
           text_color?: string | null
           title?: string
           updated_at?: string | null
-          url?: string
+          url?: string | null
         }
         Relationships: [
           {

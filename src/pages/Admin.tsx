@@ -169,7 +169,7 @@ const Admin = () => {
             </div>
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-black border border-white/20' : 'bg-white border border-gray-200'}`}>
+              <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-gray-900 border border-gray-700' : 'bg-gray-900 border border-gray-700'}`}>
                 <TabsTrigger value="content" className="flex items-center gap-2">
                   <Edit className="w-4 h-4" />
                   Conteúdo Geral
