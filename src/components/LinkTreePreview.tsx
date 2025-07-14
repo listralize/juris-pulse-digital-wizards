@@ -274,39 +274,48 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     }
 
     // Fallback para ícones automáticos baseados no tipo
-    const defaultSize = 'w-5 h-5';
+    const fallbackSize = getSizeClass(item.icon_size);
+    const fallbackColor = item.icon_color;
+    
+    const renderFallbackIcon = (IconComponent: any) => (
+      <IconComponent 
+        className={fallbackSize}
+        style={{ color: fallbackColor }}
+      />
+    );
+
     switch (item.item_type) {
       case 'contact':
         if (item.url?.includes('whatsapp') || item.url?.includes('wa.me')) {
-          return <MessageCircle className={defaultSize} />;
+          return renderFallbackIcon(MessageCircle);
         }
         if (item.url?.includes('mailto') || item.url?.includes('@')) {
-          return <Mail className={defaultSize} />;
+          return renderFallbackIcon(Mail);
         }
         if (item.url?.includes('tel:')) {
-          return <Phone className={defaultSize} />;
+          return renderFallbackIcon(Phone);
         }
-        return <Phone className={defaultSize} />;
+        return renderFallbackIcon(Phone);
       case 'social':
-        if (item.url?.includes('instagram')) return <Instagram className={defaultSize} />;
-        if (item.url?.includes('youtube')) return <Youtube className={defaultSize} />;
-        if (item.url?.includes('linkedin')) return <Linkedin className={defaultSize} />;
-        if (item.url?.includes('twitter') || item.url?.includes('x.com')) return <Twitter className={defaultSize} />;
-        if (item.url?.includes('facebook')) return <Facebook className={defaultSize} />;
-        return <Globe className={defaultSize} />;
+        if (item.url?.includes('instagram')) return renderFallbackIcon(Instagram);
+        if (item.url?.includes('youtube')) return renderFallbackIcon(Youtube);
+        if (item.url?.includes('linkedin')) return renderFallbackIcon(Linkedin);
+        if (item.url?.includes('twitter') || item.url?.includes('x.com')) return renderFallbackIcon(Twitter);
+        if (item.url?.includes('facebook')) return renderFallbackIcon(Facebook);
+        return renderFallbackIcon(Globe);
       case 'video':
-        return <Video className={defaultSize} />;
+        return renderFallbackIcon(Video);
       case 'text':
       case 'info':
-        return <FileText className={defaultSize} />;
+        return renderFallbackIcon(FileText);
       case 'form':
-        return <Mail className={defaultSize} />;
+        return renderFallbackIcon(Mail);
       case 'product':
-        return <Briefcase className={defaultSize} />;
+        return renderFallbackIcon(Briefcase);
       case 'service':
-        return <Scale className={defaultSize} />;
+        return renderFallbackIcon(Scale);
       default:
-        return <ExternalLink className={defaultSize} />;
+        return renderFallbackIcon(ExternalLink);
     }
   };
 
