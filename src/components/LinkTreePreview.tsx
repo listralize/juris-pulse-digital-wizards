@@ -17,7 +17,7 @@ import { useFormConfig } from '@/hooks/useFormConfig';
 
 interface LinkTreePreviewProps {
   linkTree: LinkTree;
-  linkTreeItems: LinkTreeItem[];
+  linkTreeItems?: LinkTreeItem[];
   onItemClick?: (item: LinkTreeItem) => void;
 }
 
@@ -57,7 +57,7 @@ const legalThemes = {
   }
 };
 
-export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTreePreviewProps) {
+export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: LinkTreePreviewProps) {
   const [modalData, setModalData] = useState<{ isOpen: boolean; formConfig: any; title: string }>({
     isOpen: false,
     formConfig: null,

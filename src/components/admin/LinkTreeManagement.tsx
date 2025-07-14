@@ -807,6 +807,7 @@ export function LinkTreeManagement() {
               <div className="border rounded-lg overflow-hidden max-h-[600px]">
                 <LinkTreePreview 
                   linkTree={{ ...linkTree, ...linkTreeData } as LinkTree}
+                  linkTreeItems={items}
                 />
               </div>
             </CardContent>
