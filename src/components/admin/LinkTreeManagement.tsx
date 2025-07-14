@@ -717,7 +717,7 @@ export function LinkTreeManagement() {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center shadow-lg">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg">
                             <ImageIcon className="w-6 h-6 text-white" />
                           </div>
                           <div>
@@ -992,93 +992,115 @@ export function LinkTreeManagement() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personalização do Conteúdo</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Tamanho do Título</Label>
-                    <Select value={linkTreeData.title_size || 'text-3xl'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_size: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="text-lg">Pequeno</SelectItem>
-                        <SelectItem value="text-xl">Médio</SelectItem>
-                        <SelectItem value="text-2xl">Grande</SelectItem>
-                        <SelectItem value="text-3xl">Extra Grande</SelectItem>
-                        <SelectItem value="text-4xl">Gigante</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings2 className="w-5 h-5" />
+                      Personalização Avançada 2050
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Interface futurista com controle total sobre a aparência
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                          <Label className="text-sm font-medium mb-3 block">Configurações do Título</Label>
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Tamanho</Label>
+                              <Select value={linkTreeData.title_size || 'text-3xl'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_size: value }))}>
+                                <SelectTrigger className="h-8 bg-background/80 backdrop-blur-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="text-xl">Compacto</SelectItem>
+                                  <SelectItem value="text-2xl">Médio</SelectItem>
+                                  <SelectItem value="text-3xl">Grande</SelectItem>
+                                  <SelectItem value="text-4xl">Extra Grande</SelectItem>
+                                  <SelectItem value="text-5xl">Gigante</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Peso da Fonte</Label>
+                              <Select value={linkTreeData.title_font || 'font-bold'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_font: value }))}>
+                                <SelectTrigger className="h-8 bg-background/80 backdrop-blur-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="font-light">Leve</SelectItem>
+                                  <SelectItem value="font-normal">Normal</SelectItem>
+                                  <SelectItem value="font-medium">Médio</SelectItem>
+                                  <SelectItem value="font-semibold">Semi Bold</SelectItem>
+                                  <SelectItem value="font-bold">Bold</SelectItem>
+                                  <SelectItem value="font-black">Black</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Cor do Título</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  value={linkTreeData.title_color || linkTreeData.text_color}
+                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
+                                  className="w-12 h-8 p-0 border-0 rounded-md"
+                                />
+                                <Input
+                                  value={linkTreeData.title_color || linkTreeData.text_color}
+                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
+                                  className="h-8 bg-background/80 backdrop-blur-sm"
+                                  placeholder="#ffffff"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div>
-                    <Label>Fonte do Título</Label>
-                    <Select value={linkTreeData.title_font || 'font-bold'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_font: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="font-normal">Normal</SelectItem>
-                        <SelectItem value="font-medium">Médio</SelectItem>
-                        <SelectItem value="font-semibold">Semi Negrito</SelectItem>
-                        <SelectItem value="font-bold">Negrito</SelectItem>
-                        <SelectItem value="font-extrabold">Extra Negrito</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Cor do Título</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        value={linkTreeData.title_color || linkTreeData.text_color}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
-                        className="w-16 h-10"
-                      />
-                      <Input
-                        value={linkTreeData.title_color || linkTreeData.text_color}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
-                        placeholder="#ffffff"
-                      />
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                          <Label className="text-sm font-medium mb-3 block">Configurações da Descrição</Label>
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Tamanho</Label>
+                              <Select value={linkTreeData.description_size || 'text-base'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, description_size: value }))}>
+                                <SelectTrigger className="h-8 bg-background/80 backdrop-blur-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="text-sm">Pequeno</SelectItem>
+                                  <SelectItem value="text-base">Médio</SelectItem>
+                                  <SelectItem value="text-lg">Grande</SelectItem>
+                                  <SelectItem value="text-xl">Extra Grande</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Cor da Descrição</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="color"
+                                  value={linkTreeData.description_color || linkTreeData.text_color}
+                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
+                                  className="w-12 h-8 p-0 border-0 rounded-md"
+                                />
+                                <Input
+                                  value={linkTreeData.description_color || linkTreeData.text_color}
+                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
+                                  className="h-8 bg-background/80 backdrop-blur-sm"
+                                  placeholder="#ffffff"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <Label>Tamanho da Descrição</Label>
-                    <Select value={linkTreeData.description_size || 'text-base'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, description_size: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="text-sm">Pequeno</SelectItem>
-                        <SelectItem value="text-base">Médio</SelectItem>
-                        <SelectItem value="text-lg">Grande</SelectItem>
-                        <SelectItem value="text-xl">Extra Grande</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Cor da Descrição</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        value={linkTreeData.description_color || linkTreeData.text_color}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
-                        className="w-16 h-10"
-                      />
-                      <Input
-                        value={linkTreeData.description_color || linkTreeData.text_color}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
-                        placeholder="#ffffff"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
             </TabsContent>
 
             <TabsContent value="items" className="space-y-6">
