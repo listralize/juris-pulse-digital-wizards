@@ -115,6 +115,9 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       baseStyles.backgroundSize = 'cover';
       baseStyles.backgroundPosition = 'center';
       baseStyles.backgroundRepeat = 'no-repeat';
+    } else if (linkTree.background_type === 'video' && linkTree.background_video) {
+      // Para vídeo de fundo será aplicado separadamente
+      baseStyles.backgroundColor = linkTree.background_color || '#000';
     }
     
     // Aplicar cor do texto
@@ -406,41 +409,99 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   const renderMasonryItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id}
-      className="cursor-pointer transition-all duration-300 hover:scale-105 break-inside-avoid mb-6"
+      className="cursor-pointer transition-all duration-300 hover:scale-105 break-inside-avoid mb-6 relative overflow-hidden"
       onClick={() => handleItemClick(item)}
+      style={{
+        backgroundColor: item.background_color,
+        color: item.text_color,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
-      <CardContent className="p-4">
+      {item.card_image && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      )}
+      <CardContent className="p-4 relative z-10">
         <div className="flex items-center gap-3 mb-3">
           {getItemIcon(item)}
           <h3 className="font-semibold">{item.title}</h3>
         </div>
-        {item.item_type === 'text' && item.card_content && (
-          <p className="text-sm text-muted-foreground">{item.card_content}</p>
+        {item.card_content && (
+          <p className="text-sm opacity-80 mb-2">{item.card_content}</p>
+        )}
+        {item.card_price && (
+          <Badge className="mb-2 bg-green-500 text-white">{item.card_price}</Badge>
         )}
         {item.is_featured && (
-          <Badge className="mt-2 bg-yellow-500 text-black">⭐ Destaque</Badge>
+          <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>
         )}
       </CardContent>
     </Card>
   );
 
-  const renderCarouselItem = (item: LinkTreeItem) => (
-    <Card 
-      key={item.id}
-      className="cursor-pointer transition-all duration-300 hover:scale-105 flex-shrink-0 w-64 snap-center"
-      onClick={() => handleItemClick(item)}
-    >
-      <CardContent className="p-6 text-center">
-        <div className="mb-4 flex justify-center">
-          {getItemIcon(item)}
+  const renderCarouselItem = (item: LinkTreeItem) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    
+    return (
+      <div className="relative w-full max-w-4xl mx-auto">
+        <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory scrollbar-hide">
+          {linkTreeItems.map((carouselItem, index) => (
+            <Card 
+              key={carouselItem.id}
+              className={`cursor-pointer transition-all duration-300 hover:scale-105 flex-shrink-0 w-80 snap-center relative overflow-hidden ${
+                index === currentIndex ? 'ring-2 ring-white/30' : ''
+              }`}
+              onClick={() => handleItemClick(carouselItem)}
+              style={{
+                backgroundColor: carouselItem.background_color,
+                color: carouselItem.text_color,
+                backgroundImage: carouselItem.card_image 
+                  ? `url(${carouselItem.card_image})` 
+                  : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            >
+              {carouselItem.card_image && (
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+              )}
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="mb-4 flex justify-center">
+                  {getItemIcon(carouselItem)}
+                </div>
+                <h3 className="font-semibold mb-2">{carouselItem.title}</h3>
+                {carouselItem.card_content && (
+                  <p className="text-sm opacity-80 mb-2">{carouselItem.card_content}</p>
+                )}
+                {carouselItem.card_price && (
+                  <Badge className="mb-2 bg-green-500 text-white">{carouselItem.card_price}</Badge>
+                )}
+                {carouselItem.is_featured && (
+                  <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <h3 className="font-semibold mb-2">{item.title}</h3>
-        {item.item_type === 'text' && item.card_content && (
-          <p className="text-sm text-muted-foreground">{item.card_content}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
+        
+        {/* Navegação do carrossel */}
+        <div className="flex justify-center mt-4 gap-2">
+          {linkTreeItems.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentIndex ? 'bg-white' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderMagazineItem = (item: LinkTreeItem, index: number) => {
     const isLarge = index % 3 === 0;
@@ -448,19 +509,35 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     return (
       <Card 
         key={item.id}
-        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${isLarge ? 'lg:row-span-2' : ''}`}
+        className={`cursor-pointer transition-all duration-300 hover:scale-105 relative overflow-hidden ${
+          isLarge ? 'lg:row-span-2' : ''
+        }`}
         onClick={() => handleItemClick(item)}
+        style={{
+          backgroundColor: item.background_color,
+          color: item.text_color,
+          backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
       >
-        <CardContent className="p-6">
+        {item.card_image && (
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        )}
+        <CardContent className="p-6 relative z-10">
           <div className="flex items-center gap-3 mb-3">
             {getItemIcon(item)}
             <h3 className="font-semibold">{item.title}</h3>
           </div>
-          {item.item_type === 'text' && item.card_content && (
-            <p className="text-sm text-muted-foreground">{item.card_content}</p>
+          {item.card_content && (
+            <p className="text-sm opacity-80 mb-2">{item.card_content}</p>
+          )}
+          {item.card_price && (
+            <Badge className="mb-2 bg-green-500 text-white">{item.card_price}</Badge>
           )}
           {item.is_featured && (
-            <Badge className="mt-2 bg-yellow-500 text-black">⭐ Destaque</Badge>
+            <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>
           )}
         </CardContent>
       </Card>

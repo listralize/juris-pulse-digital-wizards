@@ -29,10 +29,10 @@ export function LinkTreeManagement() {
     icon: 'link',
     background_color: '#ffffff',
     text_color: '#000000',
-    button_style: 'inherit' as const,
-    hover_effect: 'scale' as const,
+    button_style: 'inherit' as any,
+    hover_effect: 'scale' as any,
     is_featured: false,
-    item_type: 'link' as const,
+    item_type: 'link' as any,
     card_content: '',
     card_image: '',
     card_price: '',
@@ -65,6 +65,9 @@ export function LinkTreeManagement() {
     description_size: 'text-base',
     description_color: '#ffffff'
   });
+
+  // Estado para edição de item
+  const [editingItem, setEditingItem] = useState<LinkTreeItem | null>(null);
 
   const itemTypeOptions = [
     { value: 'link', label: '🔗 Link', description: 'Link básico para qualquer URL' },
@@ -326,32 +329,164 @@ export function LinkTreeManagement() {
   };
 
   const handleAddItem = async () => {
-    if (!newItem.title || !linkTree) return;
+    if (!linkTree || !newItem.title) return;
 
-    const itemData = {
-      link_tree_id: linkTree.id,
-      title: newItem.title,
-      url: newItem.url,
-      icon: newItem.icon,
-      background_color: newItem.background_color,
-      text_color: newItem.text_color,
-      button_style: newItem.button_style,
-      hover_effect: newItem.hover_effect,
-      is_featured: newItem.is_featured,
-      item_type: newItem.item_type,
-      card_content: newItem.card_content,
-      card_image: newItem.card_image,
-      card_price: newItem.card_price,
-      card_button_text: newItem.card_button_text,
-      form_id: newItem.form_id,
-      display_order: items.length,
-      is_active: true,
-      click_count: 0
-    };
+    try {
+      const { error } = await supabase
+        .from('link_tree_items')
+        .insert({
+          link_tree_id: linkTree.id,
+          title: newItem.title,
+          url: newItem.url,
+          icon: newItem.icon,
+          background_color: newItem.background_color,
+          text_color: newItem.text_color,
+          button_style: newItem.button_style,
+          hover_effect: newItem.hover_effect,
+          display_order: items.length,
+          is_featured: newItem.is_featured,
+          item_type: newItem.item_type,
+          card_content: newItem.card_content,
+          card_image: newItem.card_image,
+          card_price: newItem.card_price,
+          card_button_text: newItem.card_button_text,
+          form_id: newItem.item_type === 'form' ? newItem.form_id : null,
+          form_fields: newItem.item_type === 'form' && formConfig 
+            ? JSON.stringify(formConfig) 
+            : null
+        });
 
-    await saveLinkTreeItem(itemData);
-    
-    // Reset form
+      if (error) throw error;
+
+      toast({
+        title: "Item adicionado!",
+        description: "O item foi adicionado com sucesso ao Link Tree.",
+        variant: "default"
+      });
+
+      // Reset form
+      setNewItem({
+        title: '',
+        url: '',
+        icon: 'link',
+        background_color: '#ffffff',
+        text_color: '#000000',
+        button_style: 'inherit',
+        hover_effect: 'scale',
+        is_featured: false,
+        item_type: 'link',
+        card_content: '',
+        card_image: '',
+        card_price: '',
+        card_button_text: 'Saiba Mais',
+        form_id: '',
+        card_size: 'medium',
+        card_format: 'rounded'
+      });
+
+      await loadLinkTree();
+    } catch (error) {
+      console.error('Erro ao adicionar item:', error);
+      toast({
+        title: "Erro ao adicionar item",
+        description: "Ocorreu um erro ao adicionar o item.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditItem = (item: LinkTreeItem) => {
+    setEditingItem(item);
+    setNewItem({
+      title: item.title,
+      url: item.url || '',
+      icon: item.icon || 'link',
+      background_color: item.background_color || '#ffffff',
+      text_color: item.text_color || '#000000',
+      button_style: (item.button_style as any) || 'inherit',
+      hover_effect: (item.hover_effect as any) || 'scale',
+      is_featured: item.is_featured || false,
+      item_type: (item.item_type as any) || 'link',
+      card_content: item.card_content || '',
+      card_image: item.card_image || '',
+      card_price: item.card_price || '',
+      card_button_text: item.card_button_text || 'Saiba Mais',
+      form_id: item.form_id || '',
+      card_size: item.card_size || 'medium',
+      card_format: item.card_format || 'rounded'
+    });
+  };
+
+  const handleUpdateItem = async () => {
+    if (!editingItem || !newItem.title) return;
+
+    try {
+      const { error } = await supabase
+        .from('link_tree_items')
+        .update({
+          title: newItem.title,
+          url: newItem.url,
+          icon: newItem.icon,
+          background_color: newItem.background_color,
+          text_color: newItem.text_color,
+          button_style: newItem.button_style,
+          hover_effect: newItem.hover_effect,
+          is_featured: newItem.is_featured,
+          item_type: newItem.item_type,
+          card_content: newItem.card_content,
+          card_image: newItem.card_image,
+          card_price: newItem.card_price,
+          card_button_text: newItem.card_button_text,
+          form_id: newItem.item_type === 'form' ? newItem.form_id : null,
+          form_fields: newItem.item_type === 'form' && formConfig 
+            ? JSON.stringify(formConfig) 
+            : null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingItem.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Item atualizado!",
+        description: "O item foi atualizado com sucesso.",
+        variant: "default"
+      });
+
+      // Reset form and editing state
+      setEditingItem(null);
+      setNewItem({
+        title: '',
+        url: '',
+        icon: 'link',
+        background_color: '#ffffff',
+        text_color: '#000000',
+        button_style: 'inherit',
+        hover_effect: 'scale',
+        is_featured: false,
+        item_type: 'link',
+        card_content: '',
+        card_image: '',
+        card_price: '',
+        card_button_text: 'Saiba Mais',
+        form_id: '',
+        card_size: 'medium',
+        card_format: 'rounded'
+      });
+
+      await loadLinkTree();
+    } catch (error) {
+      console.error('Erro ao atualizar item:', error);
+      toast({
+        title: "Erro ao atualizar item",
+        description: "Ocorreu um erro ao atualizar o item.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingItem(null);
     setNewItem({
       title: '',
       url: '',
@@ -936,10 +1071,23 @@ export function LinkTreeManagement() {
                     <Label htmlFor="featured">Item em destaque</Label>
                   </div>
 
-                  <Button onClick={handleAddItem} className="w-full">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Item
-                  </Button>
+                  <div className="flex gap-2">
+                    {editingItem ? (
+                      <>
+                        <Button onClick={handleUpdateItem} className="flex-1">
+                          Atualizar Item
+                        </Button>
+                        <Button onClick={cancelEdit} variant="outline" className="flex-1">
+                          Cancelar
+                        </Button>
+                      </>
+                    ) : (
+                      <Button onClick={handleAddItem} className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar Item
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -984,6 +1132,13 @@ export function LinkTreeManagement() {
                                 Destaque
                               </Badge>
                             )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditItem(item)}
+                            >
+                              ✏️
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1093,7 +1248,7 @@ export function LinkTreeManagement() {
               Salvar Configurações
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <a href="/linktree" target="_blank" rel="noopener noreferrer">
+              <a href="/tree" target="_blank" rel="noopener noreferrer">
                 <Eye className="w-4 h-4 mr-2" />
                 Ver Página
               </a>
@@ -1112,7 +1267,31 @@ export function LinkTreeManagement() {
             <CardContent>
               <div className="border rounded-lg overflow-hidden max-h-[600px]">
                 <LinkTreePreview 
-                  linkTree={{ ...linkTree, ...linkTreeData } as LinkTree}
+                  linkTree={{
+                    id: linkTree?.id || '',
+                    title: linkTreeData.title,
+                    description: linkTreeData.description,
+                    background_color: linkTreeData.background_color,
+                    text_color: linkTreeData.text_color,
+                    button_style: linkTreeData.button_style,
+                    avatar_url: linkTreeData.avatar_url,
+                    theme: linkTreeData.theme,
+                    background_type: linkTreeData.background_type,
+                    background_gradient: linkTreeData.background_gradient,
+                    background_image: linkTreeData.background_image,
+                    background_video: linkTreeData.background_video,
+                    custom_css: linkTreeData.custom_css,
+                    animation_style: linkTreeData.animation_style,
+                    show_analytics: linkTreeData.show_analytics,
+                    is_active: linkTreeData.is_active,
+                    title_size: linkTreeData.title_size,
+                    title_font: linkTreeData.title_font,
+                    title_color: linkTreeData.title_color,
+                    description_size: linkTreeData.description_size,
+                    description_color: linkTreeData.description_color,
+                    created_at: linkTree?.created_at || new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  } as LinkTree}
                   linkTreeItems={items}
                 />
               </div>
