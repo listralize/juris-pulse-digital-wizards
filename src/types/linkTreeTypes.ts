@@ -35,8 +35,11 @@ export interface LinkTreeItem {
   is_active: boolean;
   item_type: 'link' | 'card' | 'form';
   card_content?: string;
+  card_image?: string;
+  card_price?: string;
+  card_button_text?: string;
+  form_id?: string; // ID do formulário existente para vincular
   form_fields?: FormField[];
-  form_action?: string;
   created_at?: string;
   updated_at?: string;
 }
