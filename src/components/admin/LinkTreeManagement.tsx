@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeProvider';
 import { useLinkTree } from '@/hooks/useLinkTree';
 import { LinkTree, LinkTreeItem, FormField } from '@/types/linkTreeTypes';
+import { LinkTreePreview } from '@/components/LinkTreePreview';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -325,43 +326,116 @@ export const LinkTreeManagement = () => {
             </TabsList>
 
             <TabsContent value="design" className="space-y-6 mt-6">
-              {/* Temas de Plataformas Famosas */}
+              {/* Temas Revolucionários */}
               <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Sparkles className="w-5 h-5 text-yellow-500" />
-                    Temas de Plataformas Famosas
+                    🔥 Themes Revolucionários - Design Autêntico
                   </CardTitle>
+                  <p className="text-gray-400 text-sm">
+                    Cada theme tem layout único e estética completamente diferente
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                     {Object.entries(themePresets).map(([name, preset]) => (
-                      <button
+                      <div
                         key={name}
                         onClick={() => applyThemePreset(name as keyof typeof themePresets)}
-                        className={`p-4 rounded-lg border-2 transition-all hover:scale-105 relative overflow-hidden ${
+                        className={`group p-6 rounded-2xl border-2 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl ${
                           formData.theme === name 
-                            ? 'border-red-500 ring-2 ring-red-500/20' 
-                            : 'border-gray-600 hover:border-gray-500'
+                            ? `border-${preset.accent.replace('#', '')} bg-gradient-to-br from-${preset.accent.replace('#', '')}/10 to-black shadow-2xl shadow-${preset.accent.replace('#', '')}/25` 
+                            : 'border-gray-700 bg-gradient-to-br from-gray-900 to-black hover:border-gray-500'
                         }`}
-                        style={{ backgroundColor: preset.background_color }}
                       >
-                        <div className="text-sm font-medium mb-2" style={{ color: preset.text_color }}>
-                          {name === 'netflix' && '🎬 Netflix'}
-                          {name === 'amazon' && '📦 Amazon'}
-                          {name === 'landing_page' && '🚀 Landing Page'}
-                          {name === 'futurista' && '🤖 Futurista'}
-                          {name === 'spotify' && '🎵 Spotify'}
-                          {name === 'discord' && '💬 Discord'}
+                        <div className="space-y-3">
+                          <div 
+                            className="w-full h-20 rounded-xl flex flex-col items-center justify-center relative overflow-hidden"
+                            style={{ backgroundColor: preset.background_color }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
+                            <span className="text-white font-bold text-lg relative z-10">
+                              {name === 'netflix' && 'NETFLIX'}
+                              {name === 'amazon' && 'AMAZON'}
+                              {name === 'landing_page' && 'STARTUP'}
+                              {name === 'futurista' && 'CYBER'}
+                              {name === 'spotify' && 'SPOTIFY'}
+                              {name === 'discord' && 'DISCORD'}
+                            </span>
+                            <span className="text-white/80 text-xs relative z-10">
+                              {name === 'netflix' && 'Cinema Style'}
+                              {name === 'amazon' && 'E-commerce Style'}
+                              {name === 'landing_page' && 'Startup Style'}
+                              {name === 'futurista' && 'Cyberpunk Style'}
+                              {name === 'spotify' && 'Music Style'}
+                              {name === 'discord' && 'Gaming Style'}
+                            </span>
+                          </div>
+                          <div className="text-center">
+                            <h3 className="font-bold text-sm" style={{ color: preset.accent }}>
+                              {name === 'netflix' && '🎬 Cinematográfico'}
+                              {name === 'amazon' && '📦 E-commerce Pro'}
+                              {name === 'landing_page' && '🚀 Startup Pro'}
+                              {name === 'futurista' && '🤖 Cyberpunk'}
+                              {name === 'spotify' && '🎵 Musical'}
+                              {name === 'discord' && '💬 Gaming'}
+                            </h3>
+                            <p className="text-gray-400 text-xs mt-1">
+                              {name === 'netflix' && 'Layout estilo streaming premium'}
+                              {name === 'amazon' && 'Cards estilo marketplace'}
+                              {name === 'landing_page' && 'Design moderno e conversivo'}
+                              {name === 'futurista' && 'Interface do futuro'}
+                              {name === 'spotify' && 'Interface de streaming'}
+                              {name === 'discord' && 'Interface gamer'}
+                            </p>
+                          </div>
+                          <div className="flex justify-center">
+                            <span 
+                              className={`text-xs px-3 py-1 rounded-full transition-all duration-300 ${
+                                formData.theme === name 
+                                  ? 'text-white' 
+                                  : 'bg-gray-700 text-gray-300 group-hover:text-white'
+                              }`}
+                              style={{
+                                backgroundColor: formData.theme === name ? preset.accent : undefined,
+                                ...(formData.theme !== name && {
+                                  '--hover-bg': preset.accent
+                                })
+                              }}
+                            >
+                              {formData.theme === name ? '✓ Ativo' : 'Ativar'}
+                            </span>
+                          </div>
                         </div>
-                        <div 
-                          className="w-full h-8 rounded text-xs flex items-center justify-center font-semibold"
-                          style={{ backgroundColor: preset.accent, color: preset.background_color }}
-                        >
-                          Preview
-                        </div>
-                      </button>
+                      </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Preview em Tempo Real */}
+              <Card className="bg-gray-900 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Eye className="w-5 h-5 text-blue-500" />
+                    Preview em Tempo Real
+                  </CardTitle>
+                  <p className="text-gray-400 text-sm">
+                    Visualize as mudanças instantaneamente
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-black rounded-2xl p-4 max-h-96 overflow-y-auto">
+                    <LinkTreePreview 
+                      linkTree={{
+                        ...formData,
+                        id: linkTree?.id || '',
+                        created_at: linkTree?.created_at,
+                        updated_at: linkTree?.updated_at
+                      } as LinkTree}
+                      linkTreeItems={linkTreeItems}
+                    />
                   </div>
                 </CardContent>
               </Card>
