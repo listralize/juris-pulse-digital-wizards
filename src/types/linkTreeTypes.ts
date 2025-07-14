@@ -4,9 +4,9 @@ export interface LinkTree {
   description?: string;
   background_color: string;
   text_color: string;
-  button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient';
+  button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient' | 'grid' | 'list' | 'masonry' | 'carousel' | 'magazine' | 'portfolio';
   avatar_url?: string;
-  theme: string;
+  theme: 'modern' | 'minimal' | 'colorful' | 'dark' | 'corporate' | 'premium' | 'gold' | 'platinum' | 'custom';
   background_type: 'solid' | 'gradient' | 'image' | 'video';
   background_gradient?: string;
   background_image?: string;
