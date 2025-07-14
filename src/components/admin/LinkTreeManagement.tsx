@@ -834,6 +834,27 @@ export function LinkTreeManagement() {
                     </div>
                   </div>
 
+                  {(newItem.item_type as string) === 'video' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label>URL do Vídeo</Label>
+                        <Input
+                          value={newItem.url}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
+                          placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
+                        />
+                      </div>
+                      <div>
+                        <Label>Thumbnail do Vídeo (opcional)</Label>
+                        <Input
+                          value={newItem.card_image}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
+                          placeholder="https://exemplo.com/thumbnail.jpg"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {(newItem.item_type as string) === 'card' && (
                     <div className="space-y-3">
                       <div>

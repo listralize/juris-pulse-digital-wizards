@@ -96,8 +96,33 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     if (theme === 'corporate') return 'from-blue-900 via-slate-900 to-blue-900';
     if (theme === 'premium') return 'from-purple-900 via-indigo-900 to-purple-900';
     if (theme === 'gold') return 'from-amber-900 via-yellow-800 to-amber-900';
+    if (theme === 'platinum') return 'from-gray-400 via-gray-300 to-gray-400';
     if (theme === 'dark') return 'from-gray-900 via-slate-800 to-gray-900';
+    if (theme === 'minimal') return 'from-gray-50 via-white to-gray-50';
     return 'from-slate-900 via-blue-900 to-slate-900';
+  };
+
+  const getCustomStyles = () => {
+    const baseStyles: React.CSSProperties = {};
+    
+    // Aplicar cor de fundo ou gradiente
+    if (linkTree.background_type === 'solid') {
+      baseStyles.backgroundColor = linkTree.background_color;
+    } else if (linkTree.background_type === 'gradient' && linkTree.background_gradient) {
+      baseStyles.background = linkTree.background_gradient;
+    } else if (linkTree.background_type === 'image' && linkTree.background_image) {
+      baseStyles.backgroundImage = `url(${linkTree.background_image})`;
+      baseStyles.backgroundSize = 'cover';
+      baseStyles.backgroundPosition = 'center';
+      baseStyles.backgroundRepeat = 'no-repeat';
+    }
+    
+    // Aplicar cor do texto
+    if (linkTree.text_color) {
+      baseStyles.color = linkTree.text_color;
+    }
+    
+    return baseStyles;
   };
 
   const isNeuralTheme = linkTree.background_type === 'neural';
@@ -107,25 +132,6 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
 
   const colors = getThemeColors();
   
-  const getCustomStyles = () => {
-    const isGradient = linkTree.background_type === 'gradient' && linkTree.background_gradient;
-    const isImage = linkTree.background_type === 'image' && linkTree.background_image;
-    
-    let backgroundStyle: React.CSSProperties = {};
-    
-    if (isGradient) {
-      backgroundStyle.background = linkTree.background_gradient;
-    } else if (isImage) {
-      backgroundStyle.backgroundImage = `url(${linkTree.background_image})`;
-      backgroundStyle.backgroundSize = 'cover';
-      backgroundStyle.backgroundPosition = 'center';
-      backgroundStyle.backgroundRepeat = 'no-repeat';
-    } else {
-      backgroundStyle.backgroundColor = linkTree.background_color;
-    }
-    
-    return backgroundStyle;
-  };
 
   const renderItemsByLayout = () => {
     const layout = linkTree.button_style || 'grid';
@@ -222,37 +228,68 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     <Button
       key={item.id}
       onClick={() => handleItemClick(item)}
-      className="w-full justify-between p-6 h-auto"
+      className="w-full justify-between p-6 h-auto relative overflow-hidden"
       style={{
         backgroundColor: item.background_color,
         color: item.text_color,
-        borderColor: item.background_color
+        borderColor: item.background_color,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="flex items-center gap-3">
+      {item.card_image && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      )}
+      <div className="flex items-center gap-3 relative z-10">
         {getItemIcon(item)}
-        <span className="font-medium">{item.title}</span>
+        <div className="text-left">
+          <span className="font-medium block">{item.title}</span>
+          {item.card_content && (
+            <span className="text-sm opacity-80 block">{item.card_content}</span>
+          )}
+        </div>
       </div>
-      {item.is_featured && <Star className="w-5 h-5 fill-current" />}
+      <div className="flex items-center gap-2 relative z-10">
+        {item.card_price && (
+          <Badge className="bg-green-500 text-white">{item.card_price}</Badge>
+        )}
+        {item.is_featured && <Star className="w-5 h-5 fill-current" />}
+      </div>
     </Button>
   );
 
   const renderGridItem = (item: LinkTreeItem) => (
     <Card 
       key={item.id} 
-      className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg"
+      className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden"
       onClick={() => handleItemClick(item)}
+      style={{
+        backgroundColor: item.background_color,
+        color: item.text_color,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
-      <CardContent className="p-6 text-center">
+      {item.card_image && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      )}
+      <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center">
           {getItemIcon(item)}
         </div>
         <h3 className="font-semibold mb-2">{item.title}</h3>
-        {item.item_type === 'text' && item.card_content && (
-          <p className="text-sm text-muted-foreground">{item.card_content}</p>
+        {item.card_content && (
+          <p className="text-sm opacity-80 mb-2">{item.card_content}</p>
+        )}
+        {item.card_price && (
+          <Badge className="mb-2 bg-green-500 text-white">{item.card_price}</Badge>
         )}
         {item.is_featured && (
-          <Badge className="mt-2 bg-yellow-500 text-black">⭐ Destaque</Badge>
+          <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>
         )}
       </CardContent>
     </Card>
@@ -265,20 +302,30 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     return (
       <Card 
         key={item.id}
-        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${sizeClass}`}
+        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${sizeClass} relative overflow-hidden`}
         onClick={() => handleItemClick(item)}
         style={{
           backgroundColor: item.background_color,
-          color: item.text_color
+          color: item.text_color,
+          backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
       >
-        <CardContent className="p-4 h-full flex flex-col justify-center items-center text-center">
+        {item.card_image && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        )}
+        <CardContent className="p-4 h-full flex flex-col justify-center items-center text-center relative z-10">
           <div className="mb-2">
             {getItemIcon(item)}
           </div>
           <h3 className="font-semibold text-sm">{item.title}</h3>
-          {item.item_type === 'text' && item.card_content && (
+          {item.card_content && (
             <p className="text-xs mt-1 opacity-80">{item.card_content}</p>
+          )}
+          {item.card_price && (
+            <Badge className="mt-1 bg-green-500 text-white text-xs">{item.card_price}</Badge>
           )}
         </CardContent>
       </Card>
