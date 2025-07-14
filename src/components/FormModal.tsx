@@ -21,6 +21,11 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Early return if formConfig is null or undefined
+  if (!formConfig || !formConfig.allFields) {
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
