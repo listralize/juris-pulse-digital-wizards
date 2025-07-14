@@ -129,9 +129,14 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   };
 
   const isNeuralTheme = linkTree.background_type === 'neural';
+  const isPremiumLayout = linkTree.theme === 'corporate' || linkTree.theme === 'premium' || 
+                         linkTree.theme === 'gold' || linkTree.theme === 'platinum' || 
+                         linkTree.theme === 'dark' || linkTree.background_type === 'neural';
   const isCorporateTheme = linkTree.theme === 'corporate';
   const isPremiumTheme = linkTree.theme === 'premium';
   const isGoldTheme = linkTree.theme === 'gold';
+  const isPlatinumTheme = linkTree.theme === 'platinum';
+  const isDarkTheme = linkTree.theme === 'dark';
 
   const colors = getThemeColors();
   
@@ -602,10 +607,13 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     </Card>
   );
 
-  if (isNeuralTheme) {
+  if (isPremiumLayout) {
+    const themeGradient = getThemeGradient();
+    const themeClass = isNeuralTheme ? '' : `bg-gradient-to-br ${themeGradient}`;
+    
     return (
-      <div className="relative min-h-screen text-white overflow-hidden" style={getCustomStyles()}>
-        {linkTree.background_type === 'neural' && <NeuralBackground />}
+      <div className={`relative min-h-screen text-white overflow-hidden ${themeClass}`} style={getCustomStyles()}>
+        {isNeuralTheme && <NeuralBackground />}
         
         {/* Vídeo de fundo */}
         {linkTree.background_type === 'video' && linkTree.background_video && (
@@ -637,7 +645,14 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
               
               <div className="space-y-4">
                 <h1 
-                  className={`${linkTree.title_size || 'text-5xl'} ${linkTree.title_font || 'font-bold'} bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent`}
+                  className={`${linkTree.title_size || 'text-5xl'} ${linkTree.title_font || 'font-bold'} ${
+                    isGoldTheme ? 'bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-600 bg-clip-text text-transparent' :
+                    isPremiumTheme ? 'bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent' :
+                    isCorporateTheme ? 'bg-gradient-to-r from-blue-300 via-blue-400 to-blue-500 bg-clip-text text-transparent' :
+                    isPlatinumTheme ? 'bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500 bg-clip-text text-transparent' :
+                    isDarkTheme ? 'bg-gradient-to-r from-gray-200 via-gray-300 to-gray-400 bg-clip-text text-transparent' :
+                    'bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent'
+                  }`}
                   style={{ color: linkTree.title_color || linkTree.text_color }}
                 >
                   {linkTree.title}
@@ -652,10 +667,35 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
                 )}
               </div>
 
+              {/* Badge Premium baseado no tema */}
               {isPremiumTheme && (
-                <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold px-6 py-3 text-lg">
+                <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold px-6 py-3 text-lg">
                   <Crown className="w-5 h-5 mr-2" />
                   ESCRITÓRIO PREMIUM
+                </Badge>
+              )}
+              {isCorporateTheme && (
+                <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold px-6 py-3 text-lg">
+                  <Shield className="w-5 h-5 mr-2" />
+                  CORPORATIVO
+                </Badge>
+              )}
+              {isGoldTheme && (
+                <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold px-6 py-3 text-lg">
+                  <Crown className="w-5 h-5 mr-2" />
+                  GOLD PREMIUM
+                </Badge>
+              )}
+              {isPlatinumTheme && (
+                <Badge className="bg-gradient-to-r from-gray-400 to-gray-500 text-white font-bold px-6 py-3 text-lg">
+                  <Diamond className="w-5 h-5 mr-2" />
+                  PLATINUM
+                </Badge>
+              )}
+              {isDarkTheme && (
+                <Badge className="bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold px-6 py-3 text-lg">
+                  <Zap className="w-5 h-5 mr-2" />
+                  DARK ELITE
                 </Badge>
               )}
             </div>
