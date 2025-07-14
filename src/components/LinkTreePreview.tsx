@@ -331,7 +331,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   };
 
   const getButtonStyle = (item: LinkTreeItem) => {
-    const baseClasses = "w-full justify-between p-6 h-auto relative overflow-hidden transition-all duration-300";
+    const baseClasses = "w-full justify-between p-6 h-auto relative overflow-hidden transition-all duration-300 border-0";
     const hoverClasses = {
       'none': '',
       'scale': 'hover:scale-105',
@@ -343,10 +343,10 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     
     const buttonStyleClasses = {
       'inherit': '',
-      'custom': 'border-2',
+      'custom': '',
       'gradient': 'bg-gradient-to-r from-primary to-secondary',
-      'glassmorphism': 'backdrop-blur-md bg-white/10 border border-white/20',
-      'neon': 'border-2 border-primary shadow-lg shadow-primary/50'
+      'glassmorphism': 'backdrop-blur-md bg-white/10',
+      'neon': 'shadow-lg shadow-primary/50'
     };
     
     return `${baseClasses} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
@@ -356,11 +356,10 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     <Button
       key={item.id}
       onClick={() => handleItemClick(item)}
-      className={getButtonStyle(item)}
+      className={`${getButtonStyle(item)} border-0`}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
-        borderColor: item.button_style === 'neon' ? 'currentColor' : item.background_color,
         backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -389,7 +388,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
   );
 
   const getCardStyle = (item: LinkTreeItem) => {
-    const baseClasses = "cursor-pointer transition-all duration-300 relative overflow-hidden";
+    const baseClasses = "cursor-pointer transition-all duration-300 relative overflow-hidden border-0";
     const hoverClasses = {
       'none': '',
       'scale': 'hover:scale-105 hover:shadow-lg',
@@ -401,10 +400,10 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
     
     const buttonStyleClasses = {
       'inherit': '',
-      'custom': 'border-2',
+      'custom': '',
       'gradient': 'bg-gradient-to-r from-primary to-secondary',
-      'glassmorphism': 'backdrop-blur-md bg-white/10 border border-white/20',
-      'neon': 'border-2 border-primary shadow-lg shadow-primary/50'
+      'glassmorphism': 'backdrop-blur-md bg-white/10',
+      'neon': 'shadow-lg shadow-primary/50'
     };
     
     return `${baseClasses} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
