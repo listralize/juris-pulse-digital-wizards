@@ -89,7 +89,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
       case 'tel':
         return (
           <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id} className="text-gray-300">
+            <Label htmlFor={field.id} className="text-white/90">
               {field.label}
             </Label>
             <Input
@@ -99,7 +99,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
               onChange={(e) => handleFieldChange(field.name, e.target.value)}
               placeholder={field.placeholder || ''}
               required={field.required}
-              className="bg-gray-800 border-gray-600 text-white"
+              className="backdrop-blur-sm bg-white/10 border border-white/20 text-white placeholder:text-white/50"
             />
           </div>
         );
@@ -107,7 +107,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
       case 'textarea':
         return (
           <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id} className="text-gray-300">
+            <Label htmlFor={field.id} className="text-white/90">
               {field.label}
             </Label>
             <Textarea
@@ -117,7 +117,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
               placeholder={field.placeholder || ''}
               required={field.required}
               rows={4}
-              className="bg-gray-800 border-gray-600 text-white"
+              className="backdrop-blur-sm bg-white/10 border border-white/20 text-white placeholder:text-white/50"
             />
           </div>
         );
@@ -125,23 +125,23 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
       case 'select':
         return (
           <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id} className="text-gray-300">
+            <Label htmlFor={field.id} className="text-white/90">
               {field.label}
             </Label>
             <Select
               value={formData[field.name] || ''}
               onValueChange={(value) => handleFieldChange(field.name, value)}
             >
-              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+              <SelectTrigger className="backdrop-blur-sm bg-white/10 border border-white/20 text-white">
                 <SelectValue placeholder={field.placeholder || 'Selecione uma opção'} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="backdrop-blur-md bg-black/90 border border-white/20">
                 {field.options?.map((option: any) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
                     {option.label}
                   </SelectItem>
                 )) || formConfig.serviceOptions?.map((option: any) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
                     {option.label}
                   </SelectItem>
                 ))}
@@ -158,7 +158,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
               checked={formData[field.name] || false}
               onCheckedChange={(checked) => handleFieldChange(field.name, checked)}
             />
-            <Label htmlFor={field.id} className="text-gray-300">
+            <Label htmlFor={field.id} className="text-white/90">
               {field.label}
             </Label>
           </div>
@@ -174,13 +174,13 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700 text-white">
+      <DialogContent className="sm:max-w-md backdrop-blur-md bg-black/80 border border-white/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-purple-500" />
+            <MessageSquare className="w-5 h-5 text-white/70" />
             {title || formConfig.formTexts.headerTitle}
           </DialogTitle>
-          <p className="text-gray-400 mt-2">
+          <p className="text-white/70 mt-2">
             {formConfig.formTexts.headerSubtitle}
           </p>
         </DialogHeader>
@@ -193,14 +193,14 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
+              className="flex-1 border-white/20 text-white/70 hover:bg-white/10 backdrop-blur-sm"
             >
               <X className="w-4 h-4 mr-2" />
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="flex-1 backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
