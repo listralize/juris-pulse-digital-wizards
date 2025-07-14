@@ -242,23 +242,49 @@ export function LinkTreeManagement() {
   };
 
   const saveLinkTree = async () => {
-    if (!linkTree) return;
-
     try {
-      const { error } = await supabase
-        .from('link_tree')
-        .update(linkTreeData)
-        .eq('id', linkTree.id);
+      // Combinar todos os dados do estado
+      const dataToSave = {
+        ...linkTreeData,
+        background_opacity: (linkTreeData as any).background_opacity || 0.8,
+        // Garantir que todos os campos estão sendo salvos
+        title: linkTreeData.title || 'Meu Link Tree',
+        description: linkTreeData.description || '',
+        background_color: linkTreeData.background_color || '#000000',
+        text_color: linkTreeData.text_color || '#ffffff',
+        background_type: linkTreeData.background_type || 'neural',
+        theme: linkTreeData.theme || 'modern',
+        button_style: linkTreeData.button_style || 'list',
+        animation_style: linkTreeData.animation_style || 'glow'
+      };
 
-      if (error) throw error;
+      if (linkTree?.id) {
+        // Atualizar existente
+        const { error } = await supabase
+          .from('link_tree')
+          .update(dataToSave)
+          .eq('id', linkTree.id);
+        
+        if (error) throw error;
+      } else {
+        // Criar novo
+        const { data, error } = await supabase
+          .from('link_tree')
+          .insert([dataToSave])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        setLinkTree(data as LinkTree);
+      }
 
       toast({
         title: "Sucesso",
         description: "Link Tree atualizado com sucesso!"
       });
 
-      // Atualizar estado local
-      setLinkTree({ ...linkTree, ...linkTreeData } as LinkTree);
+      // Recarregar dados
+      await loadLinkTree();
     } catch (error) {
       console.error('Erro ao salvar Link Tree:', error);
       toast({
@@ -604,12 +630,22 @@ export function LinkTreeManagement() {
                           id="bg-color"
                           type="color"
                           value={linkTreeData.background_color}
-                          onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }))}
+                          onChange={(e) => {
+                            setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                            if (linkTree) {
+                              setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                            }
+                          }}
                           className="w-16 h-10"
                         />
                         <Input
                           value={linkTreeData.background_color}
-                          onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }))}
+                          onChange={(e) => {
+                            setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                            if (linkTree) {
+                              setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                            }
+                          }}
                           placeholder="#000000"
                         />
                       </div>
@@ -621,12 +657,22 @@ export function LinkTreeManagement() {
                           id="text-color"
                           type="color"
                           value={linkTreeData.text_color}
-                          onChange={(e) => setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }))}
+                          onChange={(e) => {
+                            setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
+                            if (linkTree) {
+                              setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
+                            }
+                          }}
                           className="w-16 h-10"
                         />
                         <Input
                           value={linkTreeData.text_color}
-                          onChange={(e) => setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }))}
+                          onChange={(e) => {
+                            setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
+                            if (linkTree) {
+                              setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
+                            }
+                          }}
                           placeholder="#ffffff"
                         />
                       </div>
@@ -1220,17 +1266,17 @@ export function LinkTreeManagement() {
                         onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'neural' }))}
                         className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                           linkTreeData.background_type === 'neural' 
-                            ? 'border-white bg-white/20 scale-105' 
-                            : 'border-gray-600 hover:border-white/50 hover:scale-102'
+                            ? 'border-primary bg-primary/10 shadow-lg' 
+                            : 'border-border hover:border-primary/50 hover:bg-accent/50'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
                             <Zap className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-white">Fundo Neural</h3>
-                            <p className="text-sm text-gray-300">Animação neural moderna</p>
+                            <h3 className="font-semibold text-foreground">Fundo Neural</h3>
+                            <p className="text-sm text-muted-foreground">Animação neural moderna</p>
                           </div>
                         </div>
                       </div>
@@ -1240,20 +1286,20 @@ export function LinkTreeManagement() {
                         onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'solid' }))}
                         className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                           linkTreeData.background_type === 'solid' 
-                            ? 'border-white bg-white/20 scale-105' 
-                            : 'border-gray-600 hover:border-white/50 hover:scale-102'
+                            ? 'border-primary bg-primary/10 shadow-lg' 
+                            : 'border-border hover:border-primary/50 hover:bg-accent/50'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div 
-                            className="w-12 h-12 rounded-lg flex items-center justify-center"
+                            className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg border"
                             style={{ backgroundColor: linkTreeData.background_color || '#3b82f6' }}
                           >
                             <Palette className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-white">Cor Personalizada</h3>
-                            <p className="text-sm text-gray-300">Escolha sua cor de fundo</p>
+                            <h3 className="font-semibold text-foreground">Cor Personalizada</h3>
+                            <p className="text-sm text-muted-foreground">Escolha sua cor de fundo</p>
                           </div>
                         </div>
                       </div>
@@ -1263,17 +1309,17 @@ export function LinkTreeManagement() {
                         onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'image' }))}
                         className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                           linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video'
-                            ? 'border-white bg-white/20 scale-105' 
-                            : 'border-gray-600 hover:border-white/50 hover:scale-102'
+                            ? 'border-primary bg-primary/10 shadow-lg' 
+                            : 'border-border hover:border-primary/50 hover:bg-accent/50'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center shadow-lg">
                             <ImageIcon className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-white">Imagem ou Vídeo</h3>
-                            <p className="text-sm text-gray-300">Use sua própria mídia de fundo</p>
+                            <h3 className="font-semibold text-foreground">Imagem ou Vídeo</h3>
+                            <p className="text-sm text-muted-foreground">Use sua própria mídia de fundo</p>
                           </div>
                         </div>
                       </div>
@@ -1281,17 +1327,35 @@ export function LinkTreeManagement() {
 
                     {/* Configurações específicas por tipo */}
                     {linkTreeData.background_type === 'neural' && (
-                      <div className="space-y-4 mt-6 p-4 bg-gray-800/50 rounded-lg">
-                        <h4 className="font-semibold text-white">Configurações do Fundo Neural</h4>
+                      <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
+                        <h4 className="font-semibold text-foreground">Configurações do Fundo Neural</h4>
                         
                         <div>
                           <Label>Cor do Fundo Neural</Label>
-                          <Input
-                            type="color"
-                            value={linkTreeData.background_color || '#1a1a2e'}
-                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }))}
-                            className="w-full h-12"
-                          />
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={linkTreeData.background_color || '#1a1a2e'}
+                              onChange={(e) => {
+                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                // Atualizar o linkTree também para o preview
+                                if (linkTree) {
+                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                }
+                              }}
+                              className="w-16 h-10"
+                            />
+                            <Input
+                              value={linkTreeData.background_color || '#1a1a2e'}
+                              onChange={(e) => {
+                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                if (linkTree) {
+                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                }
+                              }}
+                              placeholder="#1a1a2e"
+                            />
+                          </div>
                         </div>
 
                         <div>
@@ -1302,25 +1366,48 @@ export function LinkTreeManagement() {
                             max="1"
                             step="0.05"
                             value={(linkTreeData as any).background_opacity || 0.8}
-                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_opacity: parseFloat(e.target.value) }))}
-                            className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                            onChange={(e) => {
+                              const opacity = parseFloat(e.target.value);
+                              setLinkTreeData(prev => ({ ...prev, background_opacity: opacity }));
+                              if (linkTree) {
+                                setLinkTree(prev => ({ ...prev!, background_opacity: opacity } as any));
+                              }
+                            }}
+                            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider"
                           />
                         </div>
                       </div>
                     )}
 
                     {linkTreeData.background_type === 'solid' && (
-                      <div className="space-y-4 mt-6 p-4 bg-gray-800/50 rounded-lg">
-                        <h4 className="font-semibold text-white">Configurações da Cor</h4>
+                      <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
+                        <h4 className="font-semibold text-foreground">Configurações da Cor</h4>
                         
                         <div>
                           <Label>Cor de Fundo</Label>
-                          <Input
-                            type="color"
-                            value={linkTreeData.background_color || '#3b82f6'}
-                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }))}
-                            className="w-full h-12"
-                          />
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={linkTreeData.background_color || '#3b82f6'}
+                              onChange={(e) => {
+                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                if (linkTree) {
+                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                }
+                              }}
+                              className="w-16 h-10"
+                            />
+                            <Input
+                              value={linkTreeData.background_color || '#3b82f6'}
+                              onChange={(e) => {
+                                setLinkTreeData(prev => ({ ...prev, background_color: e.target.value }));
+                                if (linkTree) {
+                                  setLinkTree(prev => ({ ...prev!, background_color: e.target.value }));
+                                }
+                              }}
+                              placeholder="#3b82f6"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
