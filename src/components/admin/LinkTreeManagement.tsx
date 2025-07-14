@@ -77,11 +77,9 @@ export function LinkTreeManagement() {
     { value: 'link', label: '🔗 Link', description: 'Link básico para qualquer URL' },
     { value: 'card', label: '📄 Card Premium', description: 'Card com imagem, texto e botão de ação' },
     { value: 'form', label: '📝 Formulário', description: 'Formulário de contato integrado' },
-    { value: 'social', label: '📱 Social Media', description: 'Link otimizado para redes sociais' },
-    { value: 'contact', label: '📞 Contato Direto', description: 'WhatsApp, telefone ou email' },
     { value: 'video', label: '🎥 Vídeo/Mídia', description: 'Vídeo institucional ou apresentação' },
-    { value: 'product', label: '🛍️ Produto/Serviço', description: 'Showcase de serviços jurídicos' },
-    { value: 'text', label: '📝 Informativo', description: 'Bloco de texto ou aviso importante' }
+    { value: 'text', label: '📝 Informativo', description: 'Bloco de texto ou aviso importante' },
+    { value: 'service', label: '⚖️ Serviços Jurídicos', description: 'Destaque para áreas de atuação' }
   ];
 
   const layoutOptions = [
@@ -375,6 +373,9 @@ export function LinkTreeManagement() {
     if (!linkTree || !newItem.title) return;
 
     try {
+      // Mapear 'text' para 'info' para compatibilidade com constraint
+      const itemType = newItem.item_type === 'text' ? 'info' : newItem.item_type;
+      
       const { error } = await supabase
         .from('link_tree_items')
         .insert({
@@ -390,7 +391,7 @@ export function LinkTreeManagement() {
           hover_effect: newItem.hover_effect,
           display_order: items.length,
           is_featured: newItem.is_featured,
-          item_type: newItem.item_type,
+          item_type: itemType,
           card_content: newItem.card_content,
           card_image: newItem.card_image,
           card_price: newItem.card_price,

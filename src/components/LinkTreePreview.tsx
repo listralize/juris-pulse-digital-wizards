@@ -79,6 +79,11 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       }
     }
     
+    // Para items informativos (text/info), não fazemos nada no clique
+    if (item.item_type === 'text' || item.item_type === 'info') {
+      return;
+    }
+    
     if (onItemClick) {
       onItemClick(item);
     } else if (item.url) {
