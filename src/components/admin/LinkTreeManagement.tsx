@@ -107,29 +107,32 @@ export function LinkTreeManagement() {
     }
   }, [linkTree]);
 
-  const handleSaveLinkTree = async () => {
-    try {
-      await saveLinkTree(linkTreeData as Omit<LinkTree, 'id' | 'created_at' | 'updated_at'>);
-      toast({
-        title: "Sucesso",
-        description: "Configurações salvas com sucesso!"
-      });
-    } catch (error) {
-      console.error('Erro ao salvar:', error);
-    }
-  };
-
   const handleAddItem = async () => {
-    if (!linkTree || !newItem.title) return;
+    if (!newItem.title.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um título para o item.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // Mapear 'text' para 'info' para compatibilidade com constraint
-      const itemType = newItem.item_type === 'text' ? 'info' : newItem.item_type;
+      if (!linkTree?.id) {
+        toast({
+          title: "Erro",
+          description: "Link Tree não encontrado. Salve as configurações primeiro.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const nextOrder = Math.max(...linkTreeItems.map(item => item.display_order), 0) + 1;
       
       await saveLinkTreeItem({
         link_tree_id: linkTree.id,
         title: newItem.title,
-        url: newItem.url,
+        url: newItem.url || null,
         icon: newItem.icon,
         icon_size: newItem.icon_size,
         icon_color: newItem.icon_color,
@@ -137,16 +140,17 @@ export function LinkTreeManagement() {
         text_color: newItem.text_color,
         button_style: newItem.button_style,
         hover_effect: newItem.hover_effect,
-        display_order: linkTreeItems.length,
+        display_order: nextOrder,
         click_count: 0,
         is_featured: newItem.is_featured,
         is_active: true,
-        item_type: itemType,
-        card_content: newItem.card_content,
-        card_image: newItem.card_image,
-        card_price: newItem.card_price,
+        item_type: newItem.item_type,
+        card_content: newItem.card_content || null,
+        card_image: newItem.card_image || null,
+        card_price: newItem.card_price || null,
         card_button_text: newItem.card_button_text,
-        form_id: newItem.form_id,
+        form_id: newItem.form_id || null,
+        form_fields: null,
         card_size: newItem.card_size,
         card_format: newItem.card_format
       });
@@ -160,10 +164,10 @@ export function LinkTreeManagement() {
         icon_color: '#000000',
         background_color: '#ffffff',
         text_color: '#000000',
-        button_style: 'inherit',
-        hover_effect: 'scale',
+        button_style: 'inherit' as any,
+        hover_effect: 'scale' as any,
         is_featured: false,
-        item_type: 'link',
+        item_type: 'link' as any,
         card_content: '',
         card_image: '',
         card_price: '',
@@ -172,40 +176,70 @@ export function LinkTreeManagement() {
         card_size: 'medium',
         card_format: 'rounded'
       });
+
     } catch (error) {
       console.error('Erro ao adicionar item:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar item. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleAddSocialLink = () => {
-    setLinkTreeData({
-      ...linkTreeData,
-      footer_social_links: [
-        ...(linkTreeData.footer_social_links || []),
-        { platform: 'instagram', url: '', icon: 'instagram' }
-      ]
-    });
+  const handleSaveLinkTree = async () => {
+    try {
+      await saveLinkTree({
+        title: linkTreeData.title || 'Meu Link Tree',
+        description: linkTreeData.description || null,
+        background_color: linkTreeData.background_color || '#000000',
+        text_color: linkTreeData.text_color || '#ffffff',
+        button_style: linkTreeData.button_style || 'rounded',
+        avatar_url: linkTreeData.avatar_url || null,
+        theme: linkTreeData.theme || 'modern',
+        background_type: linkTreeData.background_type || 'solid',
+        background_gradient: linkTreeData.background_gradient || null,
+        background_image: linkTreeData.background_image || null,
+        background_video: linkTreeData.background_video || null,
+        background_opacity: linkTreeData.background_opacity || 0.5,
+        custom_css: linkTreeData.custom_css || null,
+        animation_style: linkTreeData.animation_style || 'none',
+        show_analytics: linkTreeData.show_analytics || false,
+        is_active: linkTreeData.is_active ?? true,
+        footer_enabled: linkTreeData.footer_enabled ?? true,
+        footer_text: linkTreeData.footer_text || null,
+        footer_social_links: linkTreeData.footer_social_links || [],
+        footer_background_color: linkTreeData.footer_background_color || '#1a1a1a',
+        footer_text_color: linkTreeData.footer_text_color || '#ffffff',
+        footer_style: linkTreeData.footer_style || 'minimal'
+      });
+    } catch (error) {
+      console.error('Erro ao salvar Link Tree:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar configurações. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleUpdateSocialLink = (index: number, field: 'platform' | 'url', value: string) => {
-    const updatedLinks = [...(linkTreeData.footer_social_links || [])];
+  const addSocialLink = () => {
+    const currentLinks = linkTreeData.footer_social_links || [];
+    const newLinks = [...currentLinks, { platform: 'instagram', url: '', icon: 'instagram' }];
+    setLinkTreeData({ ...linkTreeData, footer_social_links: newLinks });
+  };
+
+  const updateSocialLink = (index: number, field: string, value: string) => {
+    const currentLinks = linkTreeData.footer_social_links || [];
+    const updatedLinks = [...currentLinks];
     updatedLinks[index] = { ...updatedLinks[index], [field]: value };
-    if (field === 'platform') {
-      updatedLinks[index].icon = value;
-    }
-    setLinkTreeData({
-      ...linkTreeData,
-      footer_social_links: updatedLinks
-    });
+    setLinkTreeData({ ...linkTreeData, footer_social_links: updatedLinks });
   };
 
-  const handleRemoveSocialLink = (index: number) => {
-    const updatedLinks = [...(linkTreeData.footer_social_links || [])];
-    updatedLinks.splice(index, 1);
-    setLinkTreeData({
-      ...linkTreeData,
-      footer_social_links: updatedLinks
-    });
+  const removeSocialLink = (index: number) => {
+    const currentLinks = linkTreeData.footer_social_links || [];
+    const newLinks = currentLinks.filter((_, i) => i !== index);
+    setLinkTreeData({ ...linkTreeData, footer_social_links: newLinks });
   };
 
   if (isLoading) {
@@ -213,16 +247,14 @@ export function LinkTreeManagement() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-      {/* Painel de Configuração */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Configurações */}
       <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Zap className="h-6 w-6 text-amber-500" />
-          <h1 className="text-2xl font-bold">Sistema completo de gerenciamento de Link Tree</h1>
-          <Badge variant="secondary" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-            Premium
-          </Badge>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações do Link Tree</CardTitle>
+          </CardHeader>
+        </Card>
 
         <Tabs defaultValue="design" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
@@ -235,7 +267,7 @@ export function LinkTreeManagement() {
               Conteúdo
             </TabsTrigger>
             <TabsTrigger value="items" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
+              <Zap className="h-4 w-4" />
               Items
             </TabsTrigger>
           </TabsList>
@@ -399,21 +431,15 @@ export function LinkTreeManagement() {
                   <Settings2 className="h-5 w-5" />
                   Configurações do Rodapé
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Configure o rodapé personalizado do seu Link Tree
-                </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="footer-enabled">Habilitar Rodapé</Label>
-                    <p className="text-sm text-muted-foreground">Mostrar rodapé no Link Tree</p>
-                  </div>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
                   <Switch
                     id="footer-enabled"
-                    checked={linkTreeData.footer_enabled}
+                    checked={linkTreeData.footer_enabled || false}
                     onCheckedChange={(checked) => setLinkTreeData({ ...linkTreeData, footer_enabled: checked })}
                   />
+                  <Label htmlFor="footer-enabled">Habilitar rodapé</Label>
                 </div>
 
                 {linkTreeData.footer_enabled && (
@@ -424,36 +450,31 @@ export function LinkTreeManagement() {
                         id="footer-text"
                         value={linkTreeData.footer_text || ''}
                         onChange={(e) => setLinkTreeData({ ...linkTreeData, footer_text: e.target.value })}
-                        placeholder="Digite o texto do rodapé..."
-                        className="resize-none"
+                        placeholder="© 2024 Minha Empresa. Todos os direitos reservados."
+                        rows={3}
                       />
                     </div>
 
                     <div>
                       <Label>Estilo do Rodapé</Label>
-                      <div className="grid grid-cols-3 gap-3 mt-2">
-                        {[
-                          { value: 'minimal', label: 'Minimalista', description: 'Texto simples centralizado' },
-                          { value: 'modern', label: 'Moderno', description: 'Com divisores e espaçamento' },
-                          { value: 'complete', label: 'Completo', description: 'Texto + redes sociais' }
-                        ].map((option) => (
-                          <div
-                            key={option.value}
-                            className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-muted/50 ${
-                              linkTreeData.footer_style === option.value ? 'border-primary bg-primary/5' : 'border-border'
-                            }`}
-                            onClick={() => setLinkTreeData({ ...linkTreeData, footer_style: option.value as any })}
-                          >
-                            <p className="text-sm font-medium">{option.label}</p>
-                            <p className="text-xs text-muted-foreground">{option.description}</p>
-                          </div>
-                        ))}
-                      </div>
+                      <Select
+                        value={linkTreeData.footer_style || 'minimal'}
+                        onValueChange={(value) => setLinkTreeData({ ...linkTreeData, footer_style: value as 'minimal' | 'modern' | 'complete' })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="minimal">Minimal</SelectItem>
+                          <SelectItem value="modern">Moderno</SelectItem>
+                          <SelectItem value="complete">Completo</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="footer-bg">Cor de Fundo</Label>
+                        <Label>Cor de Fundo do Rodapé</Label>
                         <div className="flex gap-2">
                           <Input
                             type="color"
@@ -470,7 +491,7 @@ export function LinkTreeManagement() {
                       </div>
 
                       <div>
-                        <Label htmlFor="footer-text-color">Cor do Texto</Label>
+                        <Label>Cor do Texto do Rodapé</Label>
                         <div className="flex gap-2">
                           <Input
                             type="color"
@@ -491,25 +512,23 @@ export function LinkTreeManagement() {
                       <div className="flex items-center justify-between mb-3">
                         <Label>Redes Sociais</Label>
                         <Button
-                          type="button"
                           variant="outline"
                           size="sm"
-                          onClick={handleAddSocialLink}
-                          className="flex items-center gap-2"
+                          onClick={addSocialLink}
                         >
-                          <Plus className="h-4 w-4" />
-                          Adicionar Rede Social
+                          <Plus className="h-4 w-4 mr-1" />
+                          Adicionar
                         </Button>
                       </div>
-
+                      
                       <div className="space-y-3">
-                        {linkTreeData.footer_social_links?.map((link, index) => (
-                          <div key={index} className="flex items-center gap-2 p-3 border rounded-lg">
+                        {(linkTreeData.footer_social_links || []).map((link, index) => (
+                          <div key={index} className="flex gap-2 items-center p-3 border rounded-lg">
                             <Select
                               value={link.platform}
-                              onValueChange={(value) => handleUpdateSocialLink(index, 'platform', value)}
+                              onValueChange={(value) => updateSocialLink(index, 'platform', value)}
                             >
-                              <SelectTrigger className="w-40">
+                              <SelectTrigger className="w-32">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -523,20 +542,17 @@ export function LinkTreeManagement() {
                                 ))}
                               </SelectContent>
                             </Select>
-
+                            
                             <Input
+                              placeholder="URL da rede social"
                               value={link.url}
-                              onChange={(e) => handleUpdateSocialLink(index, 'url', e.target.value)}
-                              placeholder="https://..."
-                              className="flex-1"
+                              onChange={(e) => updateSocialLink(index, 'url', e.target.value)}
                             />
-
+                            
                             <Button
-                              type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => handleRemoveSocialLink(index)}
-                              className="text-destructive hover:text-destructive"
+                              onClick={() => removeSocialLink(index)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
