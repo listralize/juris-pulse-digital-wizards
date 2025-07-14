@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LinkTree, LinkTreeItem } from '@/types/linkTreeTypes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, ExternalLink, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NeuralBackground from '@/components/NeuralBackground';
+import { FormModal } from '@/components/FormModal';
 
 interface LinkTreePreviewProps {
   linkTree: LinkTree;
@@ -12,6 +13,11 @@ interface LinkTreePreviewProps {
 }
 
 export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTreePreviewProps) {
+  const [modalData, setModalData] = useState<{ isOpen: boolean; formType: string; title: string }>({
+    isOpen: false,
+    formType: '',
+    title: ''
+  });
   const handleCardClick = (item: LinkTreeItem) => {
     if (item.url) {
       window.open(item.url, '_blank');
@@ -20,16 +26,12 @@ export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTr
   };
 
   const handleFormClick = (item: LinkTreeItem) => {
-    // Scroll to contact form or open modal based on form_id
-    if (item.form_id === 'contact') {
-      window.location.href = '/#contact';
-    } else if (item.form_id === 'consultation') {
-      // Could open a modal or redirect to specific form
-      console.log('Opening consultation form');
-    } else if (item.form_id === 'quote') {
-      // Could open a modal or redirect to specific form
-      console.log('Opening quote form');
-    }
+    // Abrir modal do formulário ao invés de redirecionar
+    setModalData({
+      isOpen: true,
+      formType: item.form_id || 'contact',
+      title: item.title
+    });
     onItemClick?.(item);
   };
 
@@ -169,26 +171,43 @@ export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTr
                         {item.title}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0">
                       {item.card_image && (
-                        <img 
-                          src={item.card_image} 
-                          alt={item.title}
-                          className="w-full h-32 object-cover rounded-lg mb-3"
-                        />
+                        <div className="relative w-full h-48 overflow-hidden">
+                          <img 
+                            src={item.card_image} 
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        </div>
                       )}
-                      <p className="text-sm opacity-90 mb-3">
-                        {item.card_content}
-                      </p>
-                      {item.card_price && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-green-400">
-                            {item.card_price}
-                          </span>
+                      <div className="p-4">
+                        <p className="text-sm opacity-90 mb-3">
+                          {item.card_content}
+                        </p>
+                        {item.card_price && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-2xl font-bold text-green-400">
+                              {item.card_price}
+                            </span>
+                            <Button 
+                              onClick={() => handleCardClick(item)}
+                              className={customStyles.cardButton}
+                              size="sm"
+                              style={{
+                                backgroundColor: item.text_color,
+                                color: item.background_color
+                              }}
+                            >
+                              {item.card_button_text || 'Saiba Mais'}
+                            </Button>
+                          </div>
+                        )}
+                        {!item.card_price && (
                           <Button 
                             onClick={() => handleCardClick(item)}
-                            className={customStyles.cardButton}
-                            size="sm"
+                            className={`w-full ${customStyles.cardButton}`}
                             style={{
                               backgroundColor: item.text_color,
                               color: item.background_color
@@ -196,20 +215,8 @@ export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTr
                           >
                             {item.card_button_text || 'Saiba Mais'}
                           </Button>
-                        </div>
-                      )}
-                      {!item.card_price && (
-                        <Button 
-                          onClick={() => handleCardClick(item)}
-                          className={`w-full ${customStyles.cardButton}`}
-                          style={{
-                            backgroundColor: item.text_color,
-                            color: item.background_color
-                          }}
-                        >
-                          {item.card_button_text || 'Saiba Mais'}
-                        </Button>
-                      )}
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -259,6 +266,14 @@ export function LinkTreePreview({ linkTree, linkTreeItems, onItemClick }: LinkTr
           </div>
         </div>
       </div>
+
+      {/* Modal do Formulário */}
+      <FormModal
+        isOpen={modalData.isOpen}
+        onClose={() => setModalData({ isOpen: false, formType: '', title: '' })}
+        formType={modalData.formType}
+        title={modalData.title}
+      />
     </div>
   );
 }
