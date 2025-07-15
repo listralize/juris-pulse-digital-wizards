@@ -218,6 +218,8 @@ export type Database = {
       link_tree: {
         Row: {
           animation_style: string | null
+          avatar_format: string | null
+          avatar_size: string | null
           avatar_url: string | null
           background_color: string | null
           background_gradient: string | null
@@ -245,6 +247,8 @@ export type Database = {
         }
         Insert: {
           animation_style?: string | null
+          avatar_format?: string | null
+          avatar_size?: string | null
           avatar_url?: string | null
           background_color?: string | null
           background_gradient?: string | null
@@ -272,6 +276,8 @@ export type Database = {
         }
         Update: {
           animation_style?: string | null
+          avatar_format?: string | null
+          avatar_size?: string | null
           avatar_url?: string | null
           background_color?: string | null
           background_gradient?: string | null
