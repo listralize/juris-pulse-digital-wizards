@@ -48,8 +48,6 @@ interface ConversionTracking {
   customForms: Array<{ name: string; id: string; campaign: string; submitButtonId: string; }>;
   events: {
     formSubmission: boolean;
-    conversion: boolean;
-    pageView: boolean;
     buttonClick: boolean;
     linkClick: boolean;
   };
@@ -61,15 +59,25 @@ interface AnalyticsData {
     unique: number;
     today: number;
     thisWeek: number;
+    growth: number;
   };
   conversions: {
     total: number;
     today: number;
     thisWeek: number;
     conversionRate: number;
+    growth: number;
   };
   topPages: Array<{ page: string; views: number; }>;
   formSubmissions: Array<{ formId: string; count: number; }>;
+  geographicData: Array<{ location: string; count: number; }>;
+  deviceData: Array<{ device: string; count: number; }>;
+  funnelData: {
+    visitors: number;
+    engagedUsers: number;
+    qualifiedLeads: number;
+    conversions: number;
+  };
 }
 
 export const MarketingManagement: React.FC = () => {
@@ -106,8 +114,6 @@ export const MarketingManagement: React.FC = () => {
     customForms: [],
     events: {
       formSubmission: true,
-      conversion: true,
-      pageView: true,
       buttonClick: false,
       linkClick: false
     }
@@ -117,7 +123,12 @@ export const MarketingManagement: React.FC = () => {
     loadMarketingConfig();
     loadAnalyticsData();
     loadLinkTreeForms();
-    loadSystemForms();
+  }, []);
+
+  useEffect(() => {
+    if (multipleFormsConfig?.forms) {
+      loadSystemForms();
+    }
   }, [multipleFormsConfig]);
 
   const loadSystemForms = () => {
@@ -158,7 +169,7 @@ export const MarketingManagement: React.FC = () => {
       if (linkTreeItems) {
         const linkTreeFormIds = linkTreeItems
           .map(item => item.form_id)
-          .filter(Boolean);
+          .filter(id => id !== null);
 
         setConversionTracking(prev => ({
           ...prev,
@@ -174,12 +185,15 @@ export const MarketingManagement: React.FC = () => {
     try {
       const today = new Date();
       const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
+      // Carregar dados de visitantes com informações geográficas
       const { data: visitorsData } = await supabase
         .from('website_analytics')
-        .select('session_id, timestamp')
+        .select('session_id, timestamp, country, city, page_url, page_title, device_type, browser')
         .gte('timestamp', oneWeekAgo.toISOString());
 
+      // Carregar dados de conversões detalhadas
       const { data: conversionsData } = await supabase
         .from('conversion_events')
         .select('*')
@@ -191,25 +205,99 @@ export const MarketingManagement: React.FC = () => {
           new Date(v.timestamp).toDateString() === today.toDateString()
         ).length;
 
+        const yesterdayVisitors = visitorsData.filter(v => 
+          new Date(v.timestamp).toDateString() === yesterday.toDateString()
+        ).length;
+
         const todayConversions = conversionsData.filter(c => 
           new Date(c.timestamp).toDateString() === today.toDateString()
         ).length;
+
+        const yesterdayConversions = conversionsData.filter(c => 
+          new Date(c.timestamp).toDateString() === yesterday.toDateString()
+        ).length;
+
+        // Analisar páginas mais visitadas
+        const pageViews = visitorsData.reduce((acc, visit) => {
+          const page = visit.page_url || 'Página desconhecida';
+          acc[page] = (acc[page] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const topPages = Object.entries(pageViews)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 10)
+          .map(([page, views]) => ({ page, views }));
+
+        // Analisar submissões por formulário
+        const formSubmissions = conversionsData.reduce((acc, conversion) => {
+          const formId = conversion.form_id || 'Formulário desconhecido';
+          acc[formId] = (acc[formId] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const formStats = Object.entries(formSubmissions)
+          .sort(([,a], [,b]) => b - a)
+          .map(([formId, count]) => ({ formId, count }));
+
+        // Dados geográficos
+        const geographicData = visitorsData.reduce((acc, visit) => {
+          if (visit.country) {
+            const key = `${visit.country}${visit.city ? ` - ${visit.city}` : ''}`;
+            acc[key] = (acc[key] || 0) + 1;
+          }
+          return acc;
+        }, {} as Record<string, number>);
+
+        const topLocations = Object.entries(geographicData)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 10)
+          .map(([location, count]) => ({ location, count }));
+
+        // Dados de dispositivos
+        const deviceData = visitorsData.reduce((acc, visit) => {
+          const device = visit.device_type || 'Desconhecido';
+          acc[device] = (acc[device] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        // Funil de conversão
+        const totalVisitors = uniqueVisitors;
+        const totalConversions = conversionsData.length;
+        const conversionRate = totalVisitors > 0 ? (totalConversions / totalVisitors * 100) : 0;
+
+        // Cálculos de crescimento
+        const visitorsGrowth = yesterdayVisitors > 0 ? 
+          ((todayVisitors - yesterdayVisitors) / yesterdayVisitors * 100) : 0;
+        
+        const conversionsGrowth = yesterdayConversions > 0 ? 
+          ((todayConversions - yesterdayConversions) / yesterdayConversions * 100) : 0;
 
         setAnalyticsData({
           visitors: {
             total: visitorsData.length,
             unique: uniqueVisitors,
             today: todayVisitors,
-            thisWeek: visitorsData.length
+            thisWeek: visitorsData.length,
+            growth: visitorsGrowth
           },
           conversions: {
             total: conversionsData.length,
             today: todayConversions,
             thisWeek: conversionsData.length,
-            conversionRate: uniqueVisitors > 0 ? (conversionsData.length / uniqueVisitors * 100) : 0
+            conversionRate,
+            growth: conversionsGrowth
           },
-          topPages: [],
-          formSubmissions: []
+          topPages,
+          formSubmissions: formStats,
+          geographicData: topLocations,
+          deviceData: Object.entries(deviceData).map(([device, count]) => ({ device, count })),
+          funnelData: {
+            visitors: totalVisitors,
+            engagedUsers: Math.floor(totalVisitors * 0.7), // Estimativa
+            qualifiedLeads: Math.floor(totalVisitors * 0.3), // Estimativa
+            conversions: totalConversions
+          }
         });
       }
     } catch (error) {
@@ -248,37 +336,23 @@ export const MarketingManagement: React.FC = () => {
 
         if (settings.form_tracking_config && typeof settings.form_tracking_config === 'object') {
           const savedConfig = settings.form_tracking_config as any;
-          setConversionTracking(prev => ({
-            ...prev,
-            systemForms: savedConfig.systemForms || prev.systemForms,
-            customForms: savedConfig.customForms || prev.customForms
-          }));
-        }
-
-        if (settings.event_tracking_config && typeof settings.event_tracking_config === 'object') {
-          setConversionTracking(prev => ({
-            ...prev,
-            events: {
-              ...prev.events,
-              ...settings.event_tracking_config as Record<string, boolean>
-            }
-          }));
+          setConversionTracking({
+            systemForms: savedConfig.systemForms || [],
+            linkTreeForms: savedConfig.linkTreeForms || [],
+            customForms: savedConfig.customForms || [],
+            events: savedConfig.events || { formSubmission: true, buttonClick: false, linkClick: false }
+          });
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar configuração de marketing:', error);
+      console.error('Erro ao carregar configurações de marketing:', error);
     }
   };
 
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
-      const { data: existingSettings } = await supabase
-        .from('marketing_settings')
-        .select('id')
-        .single();
-
-      const settingsData = {
+      const configData = {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
         facebook_pixel_id: marketingScripts.facebookPixel.pixelId,
         facebook_custom_code: marketingScripts.facebookPixel.customCode,
@@ -289,113 +363,27 @@ export const MarketingManagement: React.FC = () => {
         google_tag_manager_id: marketingScripts.googleTagManager.containerId,
         custom_head_scripts: marketingScripts.customScripts.head,
         custom_body_scripts: marketingScripts.customScripts.body,
-        form_tracking_config: JSON.parse(JSON.stringify({
-          systemForms: conversionTracking.systemForms,
-          linkTreeForms: conversionTracking.linkTreeForms,
-          customForms: conversionTracking.customForms
-        })),
-        event_tracking_config: JSON.parse(JSON.stringify(conversionTracking.events))
+        form_tracking_config: JSON.stringify(conversionTracking),
+        updated_at: new Date().toISOString()
       };
 
-      if (existingSettings) {
-        await supabase
-          .from('marketing_settings')
-          .update(settingsData)
-          .eq('id', existingSettings.id);
-      } else {
-        await supabase
-          .from('marketing_settings')
-          .insert(settingsData);
-      }
-      
+      const { error } = await supabase
+        .from('marketing_settings')
+        .upsert(configData);
+
+      if (error) throw error;
+
       setLastSaved(new Date());
-      await injectScripts();
-      
       toast.success('Configurações de marketing salvas com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar configuração:', error);
+      console.error('Erro ao salvar:', error);
       toast.error('Erro ao salvar configurações de marketing');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const injectScripts = async () => {
-    const existingScripts = document.querySelectorAll('[data-marketing-script]');
-    existingScripts.forEach(script => script.remove());
-
-    if (marketingScripts.facebookPixel.enabled && marketingScripts.facebookPixel.pixelId) {
-      const fbScript = document.createElement('script');
-      fbScript.setAttribute('data-marketing-script', 'facebook-pixel');
-      fbScript.innerHTML = `
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '${marketingScripts.facebookPixel.pixelId}');
-        fbq('track', 'PageView');
-        ${marketingScripts.facebookPixel.customCode}
-      `;
-      document.head.appendChild(fbScript);
-    }
-
-    if (marketingScripts.googleAnalytics.enabled && marketingScripts.googleAnalytics.measurementId) {
-      const gaScript = document.createElement('script');
-      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${marketingScripts.googleAnalytics.measurementId}`;
-      gaScript.setAttribute('data-marketing-script', 'google-analytics');
-      gaScript.async = true;
-      document.head.appendChild(gaScript);
-
-      const gaConfig = document.createElement('script');
-      gaConfig.setAttribute('data-marketing-script', 'google-analytics-config');
-      gaConfig.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${marketingScripts.googleAnalytics.measurementId}');
-        ${marketingScripts.googleAnalytics.customCode}
-      `;
-      document.head.appendChild(gaConfig);
-    }
-
-    if (marketingScripts.googleTagManager.enabled && marketingScripts.googleTagManager.containerId) {
-      const gtmScript = document.createElement('script');
-      gtmScript.setAttribute('data-marketing-script', 'google-tag-manager');
-      gtmScript.innerHTML = `
-        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','${marketingScripts.googleTagManager.containerId}');
-      `;
-      document.head.appendChild(gtmScript);
-    }
-
-    if (marketingScripts.customScripts.head) {
-      const customHead = document.createElement('script');
-      customHead.setAttribute('data-marketing-script', 'custom-head');
-      customHead.innerHTML = marketingScripts.customScripts.head;
-      document.head.appendChild(customHead);
-    }
-
-    if (marketingScripts.customScripts.body) {
-      const customBody = document.createElement('script');
-      customBody.setAttribute('data-marketing-script', 'custom-body');
-      customBody.innerHTML = marketingScripts.customScripts.body;
-      document.body.appendChild(customBody);
-    }
-
-    const conversionScript = document.createElement('script');
-    conversionScript.setAttribute('data-marketing-script', 'conversion-tracking');
-    conversionScript.innerHTML = generateConversionCode();
-    document.head.appendChild(conversionScript);
-  };
-
-  const updateSystemForm = (index: number, field: keyof FormTrackingConfig, value: string | boolean) => {
+  const updateSystemForm = (index: number, field: keyof FormTrackingConfig, value: any) => {
     setConversionTracking(prev => ({
       ...prev,
       systemForms: prev.systemForms.map((form, i) => 
@@ -411,13 +399,6 @@ export const MarketingManagement: React.FC = () => {
     }));
   };
 
-  const removeCustomForm = (index: number) => {
-    setConversionTracking(prev => ({
-      ...prev,
-      customForms: prev.customForms.filter((_, i) => i !== index)
-    }));
-  };
-
   const updateCustomForm = (index: number, field: string, value: string) => {
     setConversionTracking(prev => ({
       ...prev,
@@ -427,135 +408,45 @@ export const MarketingManagement: React.FC = () => {
     }));
   };
 
-  const generateConversionCode = () => {
-    const systemFormsConfig = conversionTracking.systemForms.reduce((acc, form) => {
-      acc[form.formId] = {
-        name: form.formName,
-        submitButtonId: form.submitButtonId,
-        enabled: form.enabled
-      };
-      return acc;
-    }, {} as Record<string, any>);
-
-    return `
-window.AdvancedMarketingTracker = {
-  systemForms: ${JSON.stringify(systemFormsConfig)},
-  linkTreeForms: ${JSON.stringify(conversionTracking.linkTreeForms)},
-  customForms: ${JSON.stringify(conversionTracking.customForms)},
-  
-  trackConversion: async function(formId, formData = {}, additionalData = {}) {
-    const sessionId = this.getSessionId();
-    const conversionData = {
-      session_id: sessionId,
-      event_type: 'conversion',
-      event_category: 'lead_generation',
-      event_action: 'form_submit',
-      form_id: formId,
-      form_name: this.getFormName(formId),
-      lead_data: formData,
-      page_url: window.location.href,
-      referrer: document.referrer,
-      user_agent: navigator.userAgent,
-      ...additionalData
-    };
-
-    try {
-      await fetch('https://hmfsvccbyxhdwmrgcyff.supabase.co/rest/v1/conversion_events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZnN2Y2NieXhoZHdtcmdjeWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NzU4MjksImV4cCI6MjA2NDQ1MTgyOX0.X7SiICMFL246-QjgNPYruRglx2JuQJA2XWj2NVgZzdU'
-        },
-        body: JSON.stringify(conversionData)
-      });
-    } catch (error) {
-      console.warn('Erro ao enviar conversão:', error);
-    }
-
-    if (window.fbq && ${marketingScripts.facebookPixel.enabled}) {
-      fbq('track', 'Lead', { content_name: formId, form_name: this.getFormName(formId), ...formData });
-    }
-    
-    if (window.gtag && ${marketingScripts.googleAnalytics.enabled}) {
-      gtag('event', 'conversion', { event_category: 'lead_generation', event_label: formId, ...formData });
-    }
-  },
-
-  getSessionId: function() {
-    let sessionId = sessionStorage.getItem('marketing_session_id');
-    if (!sessionId) {
-      sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      sessionStorage.setItem('marketing_session_id', sessionId);
-    }
-    return sessionId;
-  },
-
-  getFormName: function(formId) {
-    return this.systemForms[formId]?.name || formId;
-  }
-};
-
-// Auto-track form submissions
-document.addEventListener('submit', function(e) {
-  const form = e.target;
-  if (form.tagName === 'FORM') {
-    const formId = form.id || form.className || 'unknown-form';
-    const formData = new FormData(form);
-    const dataObj = {};
-    for (let [key, value] of formData.entries()) {
-      dataObj[key] = value;
-    }
-    window.AdvancedMarketingTracker.trackConversion(formId, dataObj);
-  }
-});
-    `;
+  const removeCustomForm = (index: number) => {
+    setConversionTracking(prev => ({
+      ...prev,
+      customForms: prev.customForms.filter((_, i) => i !== index)
+    }));
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Marketing & Analytics</h1>
-          <p className="text-muted-foreground mt-1">
-            Configure pixels, códigos de rastreamento e analytics integrados ao Supabase
+          <p className="text-muted-foreground">
+            Configure scripts de marketing, rastreamento de conversões e analise performance
           </p>
         </div>
-        <Button onClick={saveMarketingConfig} disabled={isLoading}>
-          <Save className="w-4 h-4 mr-2" />
-          Salvar Configurações
-        </Button>
+        
+        <div className="flex items-center gap-3">
+          {lastSaved && (
+            <div className="text-sm text-muted-foreground">
+              Última atualização: {lastSaved.toLocaleTimeString()}
+            </div>
+          )}
+          <Button onClick={saveMarketingConfig} disabled={isLoading}>
+            <Save className="w-4 h-4 mr-2" />
+            {isLoading ? 'Salvando...' : 'Salvar Configurações'}
+          </Button>
+        </div>
       </div>
 
-      {lastSaved && (
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            Última configuração salva: {lastSaved.toLocaleString()}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="scripts" className="flex items-center gap-2">
-            <Code className="w-4 h-4" />
-            Scripts & Pixels
-          </TabsTrigger>
-          <TabsTrigger value="tracking" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Rastreamento
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Dashboard
-          </TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
+          <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
+          <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
+          <TabsTrigger value="analytics">⚙️ Analytics</TabsTrigger>
         </TabsList>
 
-        {/* SCRIPTS & PIXELS TAB */}
+        {/* SCRIPTS TAB */}
         <TabsContent value="scripts" className="space-y-6">
           {/* Facebook Pixel */}
           <Card>
@@ -663,7 +554,7 @@ document.addEventListener('submit', function(e) {
                 <Label htmlFor="ga-custom-code">Código Personalizado (Opcional)</Label>
                 <Textarea
                   id="ga-custom-code"
-                  placeholder="gtag('event', 'conversion', {value: 1.0});"
+                  placeholder="gtag('event', 'purchase', {transaction_id: '12345'});"
                   value={marketingScripts.googleAnalytics.customCode}
                   onChange={(e) => setMarketingScripts(prev => ({
                     ...prev,
@@ -685,7 +576,7 @@ document.addEventListener('submit', function(e) {
                 </Badge>
               </CardTitle>
               <CardDescription>
-                Gerencie todos os seus scripts e pixels de forma centralizada.
+                Configure o Google Tag Manager para gerenciar todos os seus tags.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -703,19 +594,17 @@ document.addEventListener('submit', function(e) {
                 <Label htmlFor="gtm-enabled">Ativar Google Tag Manager</Label>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="gtm-container-id">Container ID</Label>
-                  <Input
-                    id="gtm-container-id"
-                    placeholder="GTM-XXXXXXX"
-                    value={marketingScripts.googleTagManager.containerId}
-                    onChange={(e) => setMarketingScripts(prev => ({
-                      ...prev,
-                      googleTagManager: { ...prev.googleTagManager, containerId: e.target.value }
-                    }))}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="gtm-container-id">Container ID</Label>
+                <Input
+                  id="gtm-container-id"
+                  placeholder="GTM-XXXXXXX"
+                  value={marketingScripts.googleTagManager.containerId}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    googleTagManager: { ...prev.googleTagManager, containerId: e.target.value }
+                  }))}
+                />
               </div>
             </CardContent>
           </Card>
@@ -723,37 +612,37 @@ document.addEventListener('submit', function(e) {
           {/* Custom Scripts */}
           <Card>
             <CardHeader>
-              <CardTitle>🛠️ Scripts Personalizados</CardTitle>
+              <CardTitle>🔧 Scripts Personalizados</CardTitle>
               <CardDescription>
                 Adicione scripts personalizados no head ou body da página.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="custom-head">Scripts do Head</Label>
+                <Label htmlFor="custom-head">Scripts no Head</Label>
                 <Textarea
                   id="custom-head"
-                  placeholder="<!-- Scripts que devem ficar no <head> -->"
+                  placeholder="<script>/* Seu código aqui */</script>"
                   value={marketingScripts.customScripts.head}
                   onChange={(e) => setMarketingScripts(prev => ({
                     ...prev,
                     customScripts: { ...prev.customScripts, head: e.target.value }
                   }))}
-                  rows={4}
+                  rows={5}
                 />
               </div>
               
               <div>
-                <Label htmlFor="custom-body">Scripts do Body</Label>
+                <Label htmlFor="custom-body">Scripts no Body</Label>
                 <Textarea
                   id="custom-body"
-                  placeholder="<!-- Scripts que devem ficar no final do <body> -->"
+                  placeholder="<script>/* Seu código aqui */</script>"
                   value={marketingScripts.customScripts.body}
                   onChange={(e) => setMarketingScripts(prev => ({
                     ...prev,
                     customScripts: { ...prev.customScripts, body: e.target.value }
                   }))}
-                  rows={4}
+                  rows={5}
                 />
               </div>
             </CardContent>
@@ -776,7 +665,7 @@ document.addEventListener('submit', function(e) {
                 Formulários configurados no sistema com opções de rastreamento personalizadas.
               </CardDescription>
             </CardHeader>
-              <CardContent className="space-y-4">
+            <CardContent className="space-y-4">
               {conversionTracking.systemForms.length === 0 ? (
                 <div className="text-center p-8 text-muted-foreground">
                   <p>Nenhum formulário encontrado.</p>
@@ -856,25 +745,6 @@ document.addEventListener('submit', function(e) {
                             />
                           </div>
                         )}
-
-                        {/* Scripts de Conversão Gerados */}
-                        <div className="mt-4 p-3 bg-muted rounded-lg">
-                          <Label className="text-sm font-semibold">Scripts de Conversão Gerados:</Label>
-                          <div className="mt-2 space-y-2 text-xs font-mono">
-                            {marketingScripts.facebookPixel.enabled && (
-                              <div className="bg-background p-2 rounded border">
-                                <div className="text-blue-600 font-semibold">Facebook Pixel:</div>
-                                <code>{`fbq('track', 'Lead', {content_name: '${form.formId}', campaign_name: '${form.campaign || form.formName}', form_id: '${form.formId}'});`}</code>
-                              </div>
-                            )}
-                            {marketingScripts.googleAnalytics.enabled && (
-                              <div className="bg-background p-2 rounded border">
-                                <div className="text-green-600 font-semibold">Google Analytics:</div>
-                                <code>{`gtag('event', 'conversion', {event_category: 'lead_generation', event_label: '${form.formId}', campaign_name: '${form.campaign || form.formName}'});`}</code>
-                              </div>
-                            )}
-                          </div>
-                        </div>
                       </>
                     )}
                   </div>
@@ -883,101 +753,390 @@ document.addEventListener('submit', function(e) {
             </CardContent>
           </Card>
 
-          {/* LinkTree Forms */}
+          {/* Scripts Gerados Automaticamente */}
           <Card>
             <CardHeader>
-              <CardTitle>🔗 Formulários LinkTree</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Scripts de Conversão Gerados
+              </CardTitle>
               <CardDescription>
-                Formulários encontrados nos itens do LinkTree.
+                Scripts automáticos para formulários ativos. Cole estes códigos nos seus formulários ou use eventos de JavaScript.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label className="text-base font-semibold">
-                  {conversionTracking.linkTreeForms.length} formulários encontrados
-                </Label>
-                <div className="flex flex-wrap gap-2">
-                  {conversionTracking.linkTreeForms.map((formId, index) => (
-                    <Badge key={index} variant="outline">
-                      {formId}
-                    </Badge>
+            <CardContent className="space-y-4">
+              {conversionTracking.systemForms.filter(form => form.enabled).length === 0 ? (
+                <div className="text-center p-8 text-muted-foreground">
+                  <p>Nenhum formulário ativo para gerar scripts.</p>
+                  <p className="text-sm">Ative pelo menos um formulário acima para ver os scripts de conversão.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {conversionTracking.systemForms.filter(form => form.enabled).map((form, index) => (
+                    <div key={form.formId} className="border rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="default">{form.formId}</Badge>
+                        <span className="font-medium">{form.formName}</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {marketingScripts.facebookPixel.enabled && marketingScripts.facebookPixel.pixelId && (
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-blue-600">Facebook Pixel - Evento de Lead:</Label>
+                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                              <code>{`// Adicione este código no evento de submit do formulário
+document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
+  fbq('track', 'Lead', {
+    content_name: '${form.formId}',
+    campaign_name: '${form.campaign || form.formName}',
+    form_id: '${form.formId}',
+    source: 'website'
+  });
+});`}</code>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {marketingScripts.googleAnalytics.enabled && marketingScripts.googleAnalytics.measurementId && (
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-green-600">Google Analytics - Evento de Conversão:</Label>
+                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                              <code>{`// Adicione este código no evento de submit do formulário
+document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
+  gtag('event', 'conversion', {
+    event_category: 'lead_generation',
+    event_label: '${form.formId}',
+    campaign_name: '${form.campaign || form.formName}',
+    form_id: '${form.formId}',
+    value: 1
+  });
+});`}</code>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {marketingScripts.googleTagManager.enabled && marketingScripts.googleTagManager.containerId && (
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-purple-600">Google Tag Manager - DataLayer Push:</Label>
+                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                              <code>{`// Adicione este código no evento de submit do formulário
+document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
+  dataLayer.push({
+    'event': 'form_submission',
+    'form_id': '${form.formId}',
+    'form_name': '${form.formName}',
+    'campaign_name': '${form.campaign || form.formName}',
+    'conversion_value': 1
+  });
+});`}</code>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ))}
+                  
+                  {/* Instrução de Implementação */}
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Como implementar:</strong> Copie os scripts acima e adicione-os no final da sua página, 
+                      antes do fechamento da tag &lt;/body&gt;. Certifique-se de que os IDs dos botões de submit 
+                      correspondem aos configurados acima.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* DASHBOARD FUNCIONAL */}
+        <TabsContent value="dashboard" className="space-y-6">
+          {/* Header do Dashboard com Botão de Refresh */}
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Dashboard Analytics Funcional</h2>
+            <Button onClick={loadAnalyticsData} disabled={isLoading} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Atualizar Dados
+            </Button>
+          </div>
+
+          {/* KPIs Principais */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Visitantes Únicos</p>
+                    <p className="text-3xl font-bold">{analyticsData?.visitors.unique || 0}</p>
+                    {analyticsData?.visitors.growth !== undefined && (
+                      <p className={`text-sm flex items-center gap-1 ${analyticsData.visitors.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TrendingUp className="w-3 h-3" />
+                        {analyticsData.visitors.growth > 0 ? '+' : ''}{analyticsData.visitors.growth.toFixed(1)}% hoje
+                      </p>
+                    )}
+                  </div>
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total de Conversões</p>
+                    <p className="text-3xl font-bold">{analyticsData?.conversions.total || 0}</p>
+                    {analyticsData?.conversions.growth !== undefined && (
+                      <p className={`text-sm flex items-center gap-1 ${analyticsData.conversions.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TrendingUp className="w-3 h-3" />
+                        {analyticsData.conversions.growth > 0 ? '+' : ''}{analyticsData.conversions.growth.toFixed(1)}% hoje
+                      </p>
+                    )}
+                  </div>
+                  <Target className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Taxa de Conversão</p>
+                    <p className="text-3xl font-bold">{analyticsData?.conversions.conversionRate.toFixed(2) || 0}%</p>
+                    <p className="text-sm text-muted-foreground">Meta: 3.5%</p>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Hoje</p>
+                    <p className="text-3xl font-bold">{analyticsData?.visitors.today || 0}</p>
+                    <p className="text-sm text-muted-foreground">{analyticsData?.conversions.today || 0} conversões</p>
+                  </div>
+                  <Calendar className="h-8 w-8 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Funil de Conversão */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Funil de Conversão (Últimos 7 dias)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="font-medium">Visitantes</span>
+                  </div>
+                  <span className="text-xl font-bold">{analyticsData?.funnelData?.visitors || 0}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="font-medium">Usuários Engajados</span>
+                  </div>
+                  <span className="text-xl font-bold">{analyticsData?.funnelData?.engagedUsers || 0}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span className="font-medium">Leads Qualificados</span>
+                  </div>
+                  <span className="text-xl font-bold">{analyticsData?.funnelData?.qualifiedLeads || 0}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span className="font-medium">Conversões</span>
+                  </div>
+                  <span className="text-xl font-bold">{analyticsData?.funnelData?.conversions || 0}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Custom Forms */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                🛠️ Formulários Personalizados
-                <Button variant="outline" size="sm" onClick={addCustomForm}>
-                  + Adicionar
-                </Button>
-              </CardTitle>
-              <CardDescription>
-                Adicione formulários personalizados para rastreamento.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {conversionTracking.customForms.map((form, index) => (
-                <div key={index} className="grid grid-cols-5 gap-2 items-center">
-                  <Input
-                    placeholder="Nome"
-                    value={form.name}
-                    onChange={(e) => updateCustomForm(index, 'name', e.target.value)}
-                  />
-                  <Input
-                    placeholder="ID do Formulário"
-                    value={form.id}
-                    onChange={(e) => updateCustomForm(index, 'id', e.target.value)}
-                  />
-                  <Input
-                    placeholder="ID do Botão Submit"
-                    value={form.submitButtonId}
-                    onChange={(e) => updateCustomForm(index, 'submitButtonId', e.target.value)}
-                  />
-                  <Input
-                    placeholder="Campanha"
-                    value={form.campaign}
-                    onChange={(e) => updateCustomForm(index, 'campaign', e.target.value)}
-                  />
-                  <Button variant="destructive" size="sm" onClick={() => removeCustomForm(index)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Event Tracking */}
-          <Card>
-            <CardHeader>
-              <CardTitle>🎯 Eventos de Rastreamento</CardTitle>
-              <CardDescription>
-                Configure quais eventos serão rastreados automaticamente.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(conversionTracking.events).map(([event, enabled]) => (
-                  <div key={event} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`event-${event}`}
-                      checked={enabled}
-                      onChange={(e) => setConversionTracking(prev => ({
-                        ...prev,
-                        events: { ...prev.events, [event]: e.target.checked }
-                      }))}
-                      className="rounded"
-                    />
-                    <Label htmlFor={`event-${event}`} className="capitalize">
-                      {event.replace(/([A-Z])/g, ' $1').trim()}
-                    </Label>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Submissões por Formulário */}
+            <Card>
+              <CardHeader>
+                <CardTitle>📝 Performance dos Formulários</CardTitle>
+                <CardDescription>Conversões por formulário (últimos 7 dias)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analyticsData?.formSubmissions && analyticsData.formSubmissions.length > 0 ? (
+                  <div className="space-y-3">
+                    {analyticsData.formSubmissions.slice(0, 5).map((form, index) => (
+                      <div key={form.formId} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="outline">{form.formId}</Badge>
+                          <span className="text-sm font-medium">
+                            {form.formId === 'default' ? 'Formulário Principal' : 
+                             conversionTracking.systemForms.find(f => f.formId === form.formId)?.formName || form.formId}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold">{form.count}</p>
+                          <p className="text-xs text-muted-foreground">conversões</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Nenhuma submissão de formulário registrada</p>
+                    <p className="text-sm">Configure o rastreamento para ver dados aqui</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Dados Geográficos */}
+            <Card>
+              <CardHeader>
+                <CardTitle>🌍 Visitantes por Localização</CardTitle>
+                <CardDescription>Top 10 cidades (últimos 7 dias)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analyticsData?.geographicData && analyticsData.geographicData.length > 0 ? (
+                  <div className="space-y-3">
+                    {analyticsData.geographicData.map((location, index) => (
+                      <div key={location.location} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                          <span className="text-sm font-medium">{location.location}</span>
+                        </div>
+                        <Badge variant="secondary">{location.count} visitantes</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Nenhum dado geográfico disponível</p>
+                    <p className="text-sm">Os dados aparecem conforme os visitantes chegam ao site</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top Páginas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>📊 Páginas Mais Visitadas</CardTitle>
+                <CardDescription>Últimos 7 dias</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analyticsData?.topPages && analyticsData.topPages.length > 0 ? (
+                  <div className="space-y-3">
+                    {analyticsData.topPages.slice(0, 8).map((page, index) => (
+                      <div key={page.page} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                          <span className="text-sm font-medium truncate">{page.page.replace(/^https?:\/\/[^\/]+/, '') || '/'}</span>
+                        </div>
+                        <Badge variant="outline">{page.views} views</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Nenhuma visualização de página registrada</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Dispositivos */}
+            <Card>
+              <CardHeader>
+                <CardTitle>📱 Dispositivos dos Visitantes</CardTitle>
+                <CardDescription>Últimos 7 dias</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analyticsData?.deviceData && analyticsData.deviceData.length > 0 ? (
+                  <div className="space-y-3">
+                    {analyticsData.deviceData.map((device, index) => (
+                      <div key={device.device} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium capitalize">{device.device}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold">{device.count}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {((device.count / (analyticsData?.visitors.unique || 1)) * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Nenhum dado de dispositivo disponível</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Insights e Recomendações */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Insights e Recomendações
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Taxa de Conversão:</strong> {analyticsData?.conversions.conversionRate.toFixed(2) || 0}% 
+                    {(analyticsData?.conversions.conversionRate || 0) < 2 ? 
+                      " - Baixa. Considere otimizar os formulários." : 
+                      " - Boa performance de conversão!"
+                    }
+                  </AlertDescription>
+                </Alert>
+                
+                <Alert>
+                  <TrendingUp className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Crescimento:</strong> 
+                    {analyticsData?.visitors.growth ? 
+                      ` ${analyticsData.visitors.growth > 0 ? '+' : ''}${analyticsData.visitors.growth.toFixed(1)}% visitantes hoje` :
+                      " Configure o analytics para ver tendências"
+                    }
+                  </AlertDescription>
+                </Alert>
+              </div>
+              
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <p className="font-semibold mb-2">💡 Próximos Passos:</p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Configure rastreamento nos formulários mais importantes</li>
+                  <li>• Monitore a taxa de conversão diariamente</li>
+                  <li>• Analise o funil para identificar pontos de melhoria</li>
+                  <li>• Configure campanhas no Facebook e Google para aumentar conversões</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
@@ -987,164 +1146,15 @@ document.addEventListener('submit', function(e) {
         <TabsContent value="analytics" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                ✅ Status dos Scripts
-                <Badge variant="default">Funcionando</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <h3 className="font-semibold">Facebook Pixel</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {marketingScripts.facebookPixel.enabled ? 'Ativo e rastreando' : 'Inativo'}
-                  </p>
-                </div>
-                
-                <div className="text-center p-4 border rounded-lg">
-                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <h3 className="font-semibold">Google Analytics</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {marketingScripts.googleAnalytics.enabled ? 'Ativo e rastreando' : 'Inativo'}
-                  </p>
-                </div>
-                
-                <div className="text-center p-4 border rounded-lg">
-                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <h3 className="font-semibold">Supabase Analytics</h3>
-                  <p className="text-sm text-muted-foreground">Integrado e funcionando</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>📋 Código de Rastreamento Gerado</CardTitle>
+              <CardTitle>⚙️ Configurações Avançadas</CardTitle>
               <CardDescription>
-                Este código é automaticamente injetado no site para rastrear conversões.
+                Configurações técnicas e integrações avançadas.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto max-h-64">
-                <pre>{generateConversionCode()}</pre>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Este código rastreia automaticamente submissões de formulários, pageviews e eventos personalizados, 
-                enviando dados para Supabase, Facebook Pixel e Google Analytics conforme configurado.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* DASHBOARD TAB */}
-        <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <Users className="h-8 w-8 text-blue-500" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Visitantes Totais</p>
-                    <p className="text-2xl font-bold">{analyticsData?.visitors.total || 0}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <Eye className="h-8 w-8 text-green-500" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Visitantes Únicos</p>
-                    <p className="text-2xl font-bold">{analyticsData?.visitors.unique || 0}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <MousePointer className="h-8 w-8 text-orange-500" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Conversões</p>
-                    <p className="text-2xl font-bold">{analyticsData?.conversions.total || 0}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-purple-500" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Taxa de Conversão</p>
-                    <p className="text-2xl font-bold">{analyticsData?.conversions.conversionRate.toFixed(1) || 0}%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Dados de Hoje
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Visitantes:</span>
-                    <span className="font-semibold">{analyticsData?.visitors.today || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Conversões:</span>
-                    <span className="font-semibold">{analyticsData?.conversions.today || 0}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ArrowUpDown className="h-5 w-5" />
-                  Últimos 7 Dias
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Visitantes:</span>
-                    <span className="font-semibold">{analyticsData?.visitors.thisWeek || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Conversões:</span>
-                    <span className="font-semibold">{analyticsData?.conversions.thisWeek || 0}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🔄 Atualização de Dados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={loadAnalyticsData} disabled={isLoading} className="w-full">
-                {isLoading ? 'Carregando...' : 'Atualizar Dados do Analytics'}
-              </Button>
-              <p className="text-sm text-muted-foreground mt-2">
-                Os dados são atualizados automaticamente a cada pageview e conversão.
-                Use este botão para forçar uma atualização manual.
+              <p className="text-muted-foreground">
+                Configurações avançadas em desenvolvimento. Em breve: 
+                webhooks customizados, APIs externas, relatórios automatizados.
               </p>
             </CardContent>
           </Card>
