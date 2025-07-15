@@ -61,9 +61,26 @@ export function LinkTreePreview({
     formConfig: null,
     title: ''
   });
+
+  const [videoModal, setVideoModal] = useState<{
+    isOpen: boolean;
+    videoId: string;
+    title: string;
+  }>({
+    isOpen: false,
+    videoId: '',
+    title: ''
+  });
   const {
     multipleFormsConfig
   } = useFormConfig();
+  // Função para extrair ID do YouTube
+  const extractYouTubeId = (url: string): string | null => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
   const handleItemClick = (item: LinkTreeItem) => {
     if (item.item_type === 'form') {
       const formConfig = multipleFormsConfig.forms.find(f => f.id === item.form_id);
@@ -71,6 +88,19 @@ export function LinkTreePreview({
         setModalData({
           isOpen: true,
           formConfig: formConfig,
+          title: item.title
+        });
+        return;
+      }
+    }
+
+    // Para items de vídeo, verificar se é YouTube e abrir modal
+    if (item.item_type === 'video' && item.url) {
+      const videoId = extractYouTubeId(item.url);
+      if (videoId) {
+        setVideoModal({
+          isOpen: true,
+          videoId: videoId,
           title: item.title
         });
         return;
@@ -747,6 +777,33 @@ export function LinkTreePreview({
         title: ''
       })} formConfig={modalData.formConfig} title={modalData.title} />
 
+        {/* Modal de Vídeo YouTube */}
+        {videoModal.isOpen && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setVideoModal({ isOpen: false, videoId: '', title: '' })}>
+            <div className="bg-white rounded-lg max-w-4xl w-full aspect-video max-h-[80vh] relative" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center p-4 border-b">
+                <h3 className="text-lg font-semibold text-black">{videoModal.title}</h3>
+                <button 
+                  onClick={() => setVideoModal({ isOpen: false, videoId: '', title: '' })}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="aspect-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoModal.videoId}?autoplay=1&modestbranding=1&rel=0`}
+                  className="w-full h-full rounded-b-lg"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={videoModal.title}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {linkTree.custom_css && <style dangerouslySetInnerHTML={{
         __html: linkTree.custom_css
       }} />}
@@ -872,6 +929,33 @@ export function LinkTreePreview({
       formConfig: null,
       title: ''
     })} formConfig={modalData.formConfig} title={modalData.title} />
+
+      {/* Modal de Vídeo YouTube */}
+      {videoModal.isOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setVideoModal({ isOpen: false, videoId: '', title: '' })}>
+          <div className="bg-white rounded-lg max-w-4xl w-full aspect-video max-h-[80vh] relative" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-semibold text-black">{videoModal.title}</h3>
+              <button 
+                onClick={() => setVideoModal({ isOpen: false, videoId: '', title: '' })}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoModal.videoId}?autoplay=1&modestbranding=1&rel=0`}
+                className="w-full h-full rounded-b-lg"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={videoModal.title}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {linkTree.custom_css && <style dangerouslySetInnerHTML={{
       __html: linkTree.custom_css
