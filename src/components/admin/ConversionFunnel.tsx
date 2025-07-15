@@ -26,7 +26,11 @@ interface LocationData {
   visitors: number;
 }
 
-export const ConversionFunnel: React.FC = () => {
+interface ConversionFunnelProps {
+  analyticsData?: any; // Recebe dados do componente pai
+}
+
+export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsData }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
@@ -74,75 +78,108 @@ export const ConversionFunnel: React.FC = () => {
     loadForms();
   }, []);
 
-  // Carregar dados do funil baseado no formulário selecionado
+  // Carregar dados do funil baseado no formulário selecionado e analytics data
   useEffect(() => {
     const loadFunnelData = async () => {
       try {
-        // Buscar dados de analytics
-        const { data: analyticsData } = await supabase
-          .from('website_analytics')
-          .select('*')
-          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+        console.log('🎯 Analytics data recebidos:', analyticsData);
+        
+        // Usar dados do analytics se disponíveis
+        if (analyticsData) {
+          const totalVisitors = analyticsData.visitors?.total || 0;
+          const totalConversions = analyticsData.conversions?.total || 0;
+          
+          // Estimar visualizações do formulário (70% dos visitantes veem o formulário)
+          const estimatedFormViews = Math.round(totalVisitors * 0.7);
+          
+          // Filtrar conversões por formulário se não for "all"
+          let filteredSubmissions = totalConversions;
+          if (selectedForm !== 'all') {
+            const formSubmission = analyticsData.formSubmissions?.find(
+              (fs: any) => fs.formId === selectedForm
+            );
+            filteredSubmissions = formSubmission?.count || 0;
+          }
 
-        // Buscar dados de conversões
-        const { data: conversionData } = await supabase
-          .from('conversion_events')
-          .select('*')
-          .eq('event_type', 'form_submission')
-          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+          const selectedFormData = availableForms.find(f => f.id === selectedForm);
 
-        let filteredAnalytics = analyticsData || [];
-        let filteredConversions = conversionData || [];
+          console.log('🔍 Dados do funil calculados:', {
+            formId: selectedForm,
+            formName: selectedFormData?.name || 'Todos os Formulários',
+            pageViews: totalVisitors,
+            formViews: estimatedFormViews,
+            submissions: filteredSubmissions,
+            contracts: editableValues.contracts,
+            adSpend: editableValues.adSpend,
+            contractValue: editableValues.contractValue
+          });
 
-        if (selectedForm !== 'all') {
-          filteredConversions = conversionData?.filter(conv => conv.form_id === selectedForm) || [];
+          setFunnelData({
+            formId: selectedForm,
+            formName: selectedFormData?.name || 'Todos os Formulários',
+            pageViews: totalVisitors,
+            formViews: estimatedFormViews,
+            submissions: filteredSubmissions,
+            contracts: editableValues.contracts,
+            adSpend: editableValues.adSpend,
+            contractValue: editableValues.contractValue
+          });
+
+          // Processar dados de localização do analytics
+          if (analyticsData.geographicData) {
+            const locations = analyticsData.geographicData
+              .map((item: any) => {
+                const [city, country] = item.location.split(' - ');
+                return { 
+                  city: city || 'Unknown', 
+                  country: country || 'Unknown', 
+                  visitors: item.count 
+                };
+              })
+              .slice(0, 10);
+            
+            setLocationData(locations);
+          }
+        } else {
+          // Fallback para buscar dados diretamente se analyticsData não estiver disponível
+          const { data: analyticsData } = await supabase
+            .from('website_analytics')
+            .select('*')
+            .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
+          const { data: conversionData } = await supabase
+            .from('conversion_events')
+            .select('*')
+            .eq('event_type', 'form_submission')
+            .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
+          let filteredConversions = conversionData || [];
+          if (selectedForm !== 'all') {
+            filteredConversions = conversionData?.filter(conv => conv.form_id === selectedForm) || [];
+          }
+
+          const uniqueVisitors = new Set(analyticsData?.map(a => a.visitor_id)).size;
+          const estimatedFormViews = Math.round(uniqueVisitors * 0.7);
+
+          setFunnelData({
+            formId: selectedForm,
+            formName: availableForms.find(f => f.id === selectedForm)?.name || 'Todos os Formulários',
+            pageViews: uniqueVisitors,
+            formViews: estimatedFormViews,
+            submissions: filteredConversions.length,
+            contracts: editableValues.contracts,
+            adSpend: editableValues.adSpend,
+            contractValue: editableValues.contractValue
+          });
         }
 
-        // Calcular métricas do funil
-        const uniqueVisitors = new Set(filteredAnalytics.map(a => a.visitor_id)).size;
-        const totalPageViews = filteredAnalytics.length;
-        const formSubmissions = filteredConversions.length;
-
-        // Estimar visualizações do formulário (assumindo que 60% dos visitantes veem o formulário)
-        const estimatedFormViews = Math.round(uniqueVisitors * 0.6);
-
-        const selectedFormData = availableForms.find(f => f.id === selectedForm);
-
-        setFunnelData({
-          formId: selectedForm,
-          formName: selectedFormData?.name || 'Todos os Formulários',
-          pageViews: totalPageViews,
-          formViews: estimatedFormViews,
-          submissions: formSubmissions,
-          contracts: editableValues.contracts,
-          adSpend: editableValues.adSpend,
-          contractValue: editableValues.contractValue
-        });
-
-        // Processar dados de localização
-        const locationCounts = filteredAnalytics.reduce((acc, item) => {
-          const location = `${item.city || 'Unknown'} - ${item.country || 'Unknown'}`;
-          acc[location] = (acc[location] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-
-        const locations = Object.entries(locationCounts)
-          .map(([location, count]) => {
-            const [city, country] = location.split(' - ');
-            return { city, country, visitors: count };
-          })
-          .sort((a, b) => b.visitors - a.visitors)
-          .slice(0, 10);
-
-        setLocationData(locations);
-
       } catch (error) {
-        console.error('Erro ao carregar dados do funil:', error);
+        console.error('❌ Erro ao carregar dados do funil:', error);
       }
     };
 
     loadFunnelData();
-  }, [selectedForm, editableValues, availableForms]);
+  }, [selectedForm, editableValues, availableForms, analyticsData]);
 
   const handleValueChange = (field: keyof typeof editableValues, value: string) => {
     const numValue = parseFloat(value) || 0;

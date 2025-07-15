@@ -1218,7 +1218,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
 
         <TabsContent value="funnel">
         <TabsContent value="funnel">
-          <ConversionFunnel />
+          <ConversionFunnel analyticsData={analyticsData} />
         </TabsContent>
         </TabsContent>
       </Tabs>
