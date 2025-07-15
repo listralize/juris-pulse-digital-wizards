@@ -24,63 +24,83 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const [adSpend, setAdSpend] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
 
-  // Carregar formulários disponíveis
+  // Carregar formulários disponíveis dos dados de analytics
   useEffect(() => {
-    const loadForms = async () => {
-      try {
-        const { data: adminData } = await supabase
-          .from('admin_settings')
-          .select('form_config')
-          .maybeSingle();
+    if (analyticsData?.formSubmissions) {
+      console.log('📋 Carregando formulários dos dados de analytics:', analyticsData.formSubmissions);
+      
+      const formsFromAnalytics = analyticsData.formSubmissions.map((form: any) => ({
+        id: form.formId,
+        name: form.formId === 'default' ? 'Formulário Principal' : 
+              form.formId.startsWith('form_') ? `Formulário ${form.formId.slice(-4)}` : 
+              form.formId
+      }));
 
-        console.log('📋 Admin data carregado:', adminData);
+      const formsWithAll = [
+        { id: 'all', name: 'Todos os Formulários' },
+        ...formsFromAnalytics
+      ];
 
-        if (adminData?.form_config) {
-          const formConfig = adminData.form_config as any;
-          const forms = formConfig.forms || [];
-          console.log('📋 Formulários encontrados:', forms);
-          
-          const formsWithAll = [
-            { id: 'all', name: 'Todos os Formulários' },
-            ...forms.map((form: any) => ({ 
-              id: form.id, 
-              name: form.name || `Formulário ${form.id}` 
-            }))
-          ];
-          
-          setAvailableForms(formsWithAll);
-          console.log('📋 Formulários configurados:', formsWithAll);
-        } else {
-          // Se não há configuração, usar formulários padrão
+      setAvailableForms(formsWithAll);
+      console.log('📋 Formulários configurados:', formsWithAll);
+    } else {
+      // Fallback: tentar carregar da configuração admin
+      const loadFromAdmin = async () => {
+        try {
+          const { data: adminData } = await supabase
+            .from('admin_settings')
+            .select('form_config')
+            .maybeSingle();
+
+          if (adminData?.form_config) {
+            const formConfig = adminData.form_config as any;
+            const forms = formConfig.forms || [];
+            
+            const formsWithAll = [
+              { id: 'all', name: 'Todos os Formulários' },
+              ...forms.map((form: any) => ({ 
+                id: form.id, 
+                name: form.name || `Formulário ${form.id}` 
+              }))
+            ];
+            
+            setAvailableForms(formsWithAll);
+          } else {
+            setAvailableForms([
+              { id: 'all', name: 'Todos os Formulários' },
+              { id: 'default', name: 'Formulário Principal' }
+            ]);
+          }
+        } catch (error) {
+          console.error('❌ Erro ao carregar formulários:', error);
           setAvailableForms([
             { id: 'all', name: 'Todos os Formulários' },
             { id: 'default', name: 'Formulário Principal' }
           ]);
         }
-      } catch (error) {
-        console.error('❌ Erro ao carregar formulários:', error);
-        // Fallback para formulários padrão
-        setAvailableForms([
-          { id: 'all', name: 'Todos os Formulários' },
-          { id: 'default', name: 'Formulário Principal' }
-        ]);
-      }
-    };
+      };
 
-    loadForms();
-  }, []);
+      loadFromAdmin();
+    }
+  }, [analyticsData]);
 
   // Atualizar dados do formulário selecionado
   useEffect(() => {
-    if (analyticsData) {
+    if (analyticsData?.formSubmissions) {
+      console.log('🔄 Atualizando dados para formulário:', selectedForm);
+      console.log('📊 Dados disponíveis:', analyticsData.formSubmissions);
+      
       if (selectedForm === 'all') {
         // Somar todas as conversões de todos os formulários
-        const totalSubmissions = analyticsData.formSubmissions?.reduce((sum: number, form: any) => sum + form.count, 0) || 0;
+        const totalSubmissions = analyticsData.formSubmissions.reduce((sum: number, form: any) => sum + form.count, 0);
         setFormSubmissions(totalSubmissions);
+        console.log('📊 Total de envios (todos):', totalSubmissions);
       } else {
         // Filtrar pelo formulário específico selecionado
-        const formData = analyticsData.formSubmissions?.find((fs: any) => fs.formId === selectedForm);
-        setFormSubmissions(formData?.count || 0);
+        const formData = analyticsData.formSubmissions.find((fs: any) => fs.formId === selectedForm);
+        const count = formData?.count || 0;
+        setFormSubmissions(count);
+        console.log('📊 Envios para formulário', selectedForm, ':', count);
       }
     }
   }, [analyticsData, selectedForm]);
