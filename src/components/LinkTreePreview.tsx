@@ -81,6 +81,12 @@ export function LinkTreePreview({
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+  // Função para obter thumbnail do YouTube
+  const getYouTubeThumbnail = (url: string): string | null => {
+    const videoId = extractYouTubeId(url);
+    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+  };
+
   const handleItemClick = (item: LinkTreeItem) => {
     if (item.item_type === 'form') {
       const formConfig = multipleFormsConfig.forms.find(f => f.id === item.form_id);
@@ -411,27 +417,67 @@ export function LinkTreePreview({
     const sizeClass = sizeClasses[item.card_size || 'medium'] || 'min-h-[80px] text-base py-4';
     return `${baseClasses} ${formatClass} ${sizeClass} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
   };
-  const renderListItem = (item: LinkTreeItem) => <Button key={item.id} onClick={() => handleItemClick(item)} className={`${getButtonStyle(item)} border-0`} style={{
-    backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-    color: item.text_color,
-    backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
-      {getItemOverlay(item)}
-      <div className="flex items-center gap-3 relative z-10">
-        {getItemIcon(item)}
-        <div className="text-left">
-          <span className="font-medium block">{item.title}</span>
-          {item.card_content && <span className="text-sm opacity-80 block">{item.card_content}</span>}
+  const renderListItem = (item: LinkTreeItem) => {
+    // Para itens de vídeo do YouTube, renderizar com thumbnail
+    if (item.item_type === 'video' && item.url) {
+      const thumbnail = getYouTubeThumbnail(item.url);
+      if (thumbnail) {
+        return (
+          <div 
+            key={item.id} 
+            onClick={() => handleItemClick(item)} 
+            className={`${getButtonStyle(item)} cursor-pointer relative group`}
+            style={{
+              backgroundImage: `url(${thumbnail})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            {/* Overlay escuro */}
+            <div className="absolute inset-0 bg-black/40 rounded-lg"></div>
+            
+            {/* Botão de play centralizado */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="bg-red-600 hover:bg-red-700 transition-colors rounded-full p-4 group-hover:scale-110 duration-200">
+                <Play className="w-8 h-8 text-white fill-current ml-1" />
+              </div>
+            </div>
+            
+            {/* Título na parte inferior */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+              <span className="font-medium text-white text-sm bg-black/60 px-3 py-1 rounded-full">
+                {item.title}
+              </span>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    // Renderização padrão para outros tipos
+    return <Button key={item.id} onClick={() => handleItemClick(item)} className={`${getButtonStyle(item)} border-0`} style={{
+      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+      color: item.text_color,
+      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
+        {getItemOverlay(item)}
+        <div className="flex items-center gap-3 relative z-10">
+          {getItemIcon(item)}
+          <div className="text-left">
+            <span className="font-medium block">{item.title}</span>
+            {item.card_content && <span className="text-sm opacity-80 block">{item.card_content}</span>}
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2 relative z-10">
-        {item.card_price && <Badge className="bg-green-500 text-white">{item.card_price}</Badge>}
-        {item.is_featured && <Star className="w-5 h-5 fill-current" />}
-      </div>
-    </Button>;
+        <div className="flex items-center gap-2 relative z-10">
+          {item.card_price && <Badge className="bg-green-500 text-white">{item.card_price}</Badge>}
+          {item.is_featured && <Star className="w-5 h-5 fill-current" />}
+        </div>
+      </Button>;
+  };
   const getCardStyle = (item: LinkTreeItem) => {
     const baseClasses = "cursor-pointer transition-all duration-300 relative overflow-hidden border-0";
     const hoverClasses = {
@@ -466,29 +512,108 @@ export function LinkTreePreview({
     const sizeClass = sizeClasses[item.card_size || 'medium'] || 'min-h-[80px] text-base';
     return `${baseClasses} ${formatClass} ${sizeClass} ${hoverClasses[item.hover_effect || 'scale']} ${buttonStyleClasses[item.button_style || 'inherit']}`;
   };
-  const renderGridItem = (item: LinkTreeItem) => <Card key={item.id} className={getCardStyle(item)} onClick={() => handleItemClick(item)} style={{
-    backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-    color: item.text_color,
-    borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-    backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
-      {getItemOverlay(item)}
-      <CardContent className="p-6 text-center relative z-10">
-        <div className="mb-4 flex justify-center">
-          {getItemIcon(item)}
-        </div>
-        <h3 className="font-semibold mb-2">{item.title}</h3>
-        {item.card_content && <p className="text-sm opacity-80 mb-2">{item.card_content}</p>}
-        {item.card_price && <Badge className="mb-2 bg-green-500 text-white">{item.card_price}</Badge>}
-        {item.is_featured && <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>}
-      </CardContent>
-    </Card>;
+  const renderGridItem = (item: LinkTreeItem) => {
+    // Para itens de vídeo do YouTube, renderizar com thumbnail
+    if (item.item_type === 'video' && item.url) {
+      const thumbnail = getYouTubeThumbnail(item.url);
+      if (thumbnail) {
+        return (
+          <Card 
+            key={item.id} 
+            className={`${getCardStyle(item)} aspect-video`} 
+            onClick={() => handleItemClick(item)}
+            style={{
+              backgroundImage: `url(${thumbnail})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            {/* Overlay escuro */}
+            <div className="absolute inset-0 bg-black/40 rounded-lg"></div>
+            
+            {/* Botão de play centralizado */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="bg-red-600 hover:bg-red-700 transition-colors rounded-full p-4 group-hover:scale-110 duration-200">
+                <Play className="w-8 h-8 text-white fill-current ml-1" />
+              </div>
+            </div>
+            
+            {/* Título na parte inferior */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+              <span className="font-medium text-white text-sm bg-black/60 px-3 py-1 rounded-full">
+                {item.title}
+              </span>
+            </div>
+          </Card>
+        );
+      }
+    }
+
+    // Renderização padrão para outros tipos
+    return <Card key={item.id} className={getCardStyle(item)} onClick={() => handleItemClick(item)} style={{
+      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+      color: item.text_color,
+      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
+        {getItemOverlay(item)}
+        <CardContent className="p-6 text-center relative z-10">
+          <div className="mb-4 flex justify-center">
+            {getItemIcon(item)}
+          </div>
+          <h3 className="font-semibold mb-2">{item.title}</h3>
+          {item.card_content && <p className="text-sm opacity-80 mb-2">{item.card_content}</p>}
+          {item.card_price && <Badge className="mb-2 bg-green-500 text-white">{item.card_price}</Badge>}
+          {item.is_featured && <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>}
+        </CardContent>
+      </Card>;
+  };
   const renderBentoItem = (item: LinkTreeItem, index: number) => {
     const sizes = ['col-span-1 row-span-1', 'col-span-2 row-span-1', 'col-span-1 row-span-2', 'col-span-2 row-span-2'];
     const sizeClass = sizes[index % sizes.length];
+    
+    // Para itens de vídeo do YouTube, renderizar com thumbnail
+    if (item.item_type === 'video' && item.url) {
+      const thumbnail = getYouTubeThumbnail(item.url);
+      if (thumbnail) {
+        return (
+          <Card 
+            key={item.id} 
+            className={`${getCardStyle(item)} ${sizeClass}`}
+            onClick={() => handleItemClick(item)}
+            style={{
+              backgroundImage: `url(${thumbnail})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            {/* Overlay escuro */}
+            <div className="absolute inset-0 bg-black/40 rounded-lg"></div>
+            
+            {/* Botão de play centralizado */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="bg-red-600 hover:bg-red-700 transition-colors rounded-full p-4 group-hover:scale-110 duration-200">
+                <Play className="w-6 h-6 text-white fill-current ml-1" />
+              </div>
+            </div>
+            
+            {/* Título na parte inferior */}
+            <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+              <span className="font-medium text-white text-xs bg-black/60 px-2 py-1 rounded-full">
+                {item.title}
+              </span>
+            </div>
+          </Card>
+        );
+      }
+    }
+
+    // Renderização padrão para outros tipos
     return <Card key={item.id} className={`${getCardStyle(item)} ${sizeClass}`} onClick={() => handleItemClick(item)} style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -498,7 +623,7 @@ export function LinkTreePreview({
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-      {getItemOverlay(item)}
+        {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
           <div className="mb-4 flex justify-center">
             {getItemIcon(item)}
