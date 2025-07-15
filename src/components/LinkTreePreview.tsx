@@ -426,7 +426,7 @@ export function LinkTreePreview({
           <div 
             key={item.id} 
             onClick={() => handleItemClick(item)} 
-            className={`${getButtonStyle(item)} cursor-pointer relative group`}
+            className={`${getButtonStyle(item)} cursor-pointer relative group min-h-[200px]`}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
@@ -444,9 +444,9 @@ export function LinkTreePreview({
               </div>
             </div>
             
-            {/* Título na parte inferior */}
+            {/* Título na parte inferior esquerda */}
             <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-              <span className="font-medium text-white text-sm bg-black/60 px-3 py-1 rounded-full">
+              <span className="font-medium text-white text-sm bg-black/60 px-3 py-1 rounded-full inline-block">
                 {item.title}
               </span>
             </div>
@@ -520,7 +520,7 @@ export function LinkTreePreview({
         return (
           <Card 
             key={item.id} 
-            className={`${getCardStyle(item)} aspect-video`} 
+            className={`${getCardStyle(item)} min-h-[250px]`} 
             onClick={() => handleItemClick(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
@@ -539,9 +539,9 @@ export function LinkTreePreview({
               </div>
             </div>
             
-            {/* Título na parte inferior */}
+            {/* Título na parte inferior esquerda */}
             <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-              <span className="font-medium text-white text-sm bg-black/60 px-3 py-1 rounded-full">
+              <span className="font-medium text-white text-sm bg-black/60 px-3 py-1 rounded-full inline-block">
                 {item.title}
               </span>
             </div>
@@ -602,9 +602,9 @@ export function LinkTreePreview({
               </div>
             </div>
             
-            {/* Título na parte inferior */}
+            {/* Título na parte inferior esquerda */}
             <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-              <span className="font-medium text-white text-xs bg-black/60 px-2 py-1 rounded-full">
+              <span className="font-medium text-white text-xs bg-black/60 px-2 py-1 rounded-full inline-block">
                 {item.title}
               </span>
             </div>
