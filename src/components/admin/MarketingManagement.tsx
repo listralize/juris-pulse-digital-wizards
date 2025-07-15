@@ -182,6 +182,8 @@ export const MarketingManagement: React.FC = () => {
   };
 
   const loadAnalyticsData = async () => {
+    console.log('🔄 Iniciando carregamento dos dados de analytics...');
+    setIsLoading(true);
     try {
       const today = new Date();
       const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -300,8 +302,13 @@ export const MarketingManagement: React.FC = () => {
           }
         });
       }
+      console.log('✅ Dados de analytics carregados com sucesso!', analyticsData);
+      toast.success('Dados atualizados com sucesso!');
     } catch (error) {
-      console.error('Erro ao carregar dados de analytics:', error);
+      console.error('❌ Erro ao carregar dados de analytics:', error);
+      toast.error('Erro ao carregar dados de analytics');
+    } finally {
+      setIsLoading(false);
     }
   };
 
