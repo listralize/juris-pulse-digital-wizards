@@ -137,6 +137,72 @@ export type Database = {
         }
         Relationships: []
       }
+      conversion_events: {
+        Row: {
+          campaign_medium: string | null
+          campaign_name: string | null
+          campaign_source: string | null
+          conversion_value: number | null
+          created_at: string
+          event_action: string
+          event_category: string | null
+          event_label: string | null
+          event_type: string
+          form_id: string | null
+          form_name: string | null
+          id: string
+          lead_data: Json | null
+          page_url: string
+          referrer: string | null
+          session_id: string
+          timestamp: string
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          campaign_medium?: string | null
+          campaign_name?: string | null
+          campaign_source?: string | null
+          conversion_value?: number | null
+          created_at?: string
+          event_action: string
+          event_category?: string | null
+          event_label?: string | null
+          event_type: string
+          form_id?: string | null
+          form_name?: string | null
+          id?: string
+          lead_data?: Json | null
+          page_url: string
+          referrer?: string | null
+          session_id: string
+          timestamp?: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          campaign_medium?: string | null
+          campaign_name?: string | null
+          campaign_source?: string | null
+          conversion_value?: number | null
+          created_at?: string
+          event_action?: string
+          event_category?: string | null
+          event_label?: string | null
+          event_type?: string
+          form_id?: string | null
+          form_name?: string | null
+          id?: string
+          lead_data?: Json | null
+          page_url?: string
+          referrer?: string | null
+          session_id?: string
+          timestamp?: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       footer_info: {
         Row: {
           company_name: string
@@ -411,6 +477,135 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      marketing_campaigns: {
+        Row: {
+          budget: number | null
+          campaign_medium: string | null
+          campaign_name: string
+          campaign_source: string | null
+          campaign_type: string | null
+          clicks: number | null
+          conversions: number | null
+          cost: number | null
+          created_at: string
+          end_date: string | null
+          goals: string | null
+          id: string
+          impressions: number | null
+          start_date: string | null
+          status: string | null
+          target_audience: string | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          budget?: number | null
+          campaign_medium?: string | null
+          campaign_name: string
+          campaign_source?: string | null
+          campaign_type?: string | null
+          clicks?: number | null
+          conversions?: number | null
+          cost?: number | null
+          created_at?: string
+          end_date?: string | null
+          goals?: string | null
+          id?: string
+          impressions?: number | null
+          start_date?: string | null
+          status?: string | null
+          target_audience?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          budget?: number | null
+          campaign_medium?: string | null
+          campaign_name?: string
+          campaign_source?: string | null
+          campaign_type?: string | null
+          clicks?: number | null
+          conversions?: number | null
+          cost?: number | null
+          created_at?: string
+          end_date?: string | null
+          goals?: string | null
+          id?: string
+          impressions?: number | null
+          start_date?: string | null
+          status?: string | null
+          target_audience?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
+      marketing_settings: {
+        Row: {
+          created_at: string
+          custom_body_scripts: string | null
+          custom_head_scripts: string | null
+          event_tracking_config: Json | null
+          facebook_custom_code: string | null
+          facebook_pixel_enabled: boolean | null
+          facebook_pixel_id: string | null
+          form_tracking_config: Json | null
+          google_analytics_custom_code: string | null
+          google_analytics_enabled: boolean | null
+          google_analytics_id: string | null
+          google_tag_manager_enabled: boolean | null
+          google_tag_manager_id: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_body_scripts?: string | null
+          custom_head_scripts?: string | null
+          event_tracking_config?: Json | null
+          facebook_custom_code?: string | null
+          facebook_pixel_enabled?: boolean | null
+          facebook_pixel_id?: string | null
+          form_tracking_config?: Json | null
+          google_analytics_custom_code?: string | null
+          google_analytics_enabled?: boolean | null
+          google_analytics_id?: string | null
+          google_tag_manager_enabled?: boolean | null
+          google_tag_manager_id?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_body_scripts?: string | null
+          custom_head_scripts?: string | null
+          event_tracking_config?: Json | null
+          facebook_custom_code?: string | null
+          facebook_pixel_enabled?: boolean | null
+          facebook_pixel_id?: string | null
+          form_tracking_config?: Json | null
+          google_analytics_custom_code?: string | null
+          google_analytics_enabled?: boolean | null
+          google_analytics_id?: string | null
+          google_tag_manager_enabled?: boolean | null
+          google_tag_manager_id?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       service_benefits: {
         Row: {
@@ -747,6 +942,81 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      website_analytics: {
+        Row: {
+          bounce: boolean | null
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_address: string | null
+          os: string | null
+          page_title: string | null
+          page_url: string
+          referrer: string | null
+          screen_resolution: string | null
+          scroll_depth: number | null
+          session_duration: number | null
+          session_id: string
+          session_start: string | null
+          time_on_page: number | null
+          timestamp: string
+          updated_at: string
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          bounce?: boolean | null
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string | null
+          page_title?: string | null
+          page_url: string
+          referrer?: string | null
+          screen_resolution?: string | null
+          scroll_depth?: number | null
+          session_duration?: number | null
+          session_id: string
+          session_start?: string | null
+          time_on_page?: number | null
+          timestamp?: string
+          updated_at?: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          bounce?: boolean | null
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string | null
+          page_title?: string | null
+          page_url?: string
+          referrer?: string | null
+          screen_resolution?: string | null
+          scroll_depth?: number | null
+          session_duration?: number | null
+          session_id?: string
+          session_start?: string | null
+          time_on_page?: number | null
+          timestamp?: string
+          updated_at?: string
+          user_agent?: string | null
+          visitor_id?: string | null
         }
         Relationships: []
       }
