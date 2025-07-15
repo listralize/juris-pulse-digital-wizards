@@ -798,13 +798,25 @@ export function LinkTreePreview({
               })}
                     </div>}
 
-                  {/* Texto do rodapé */}
-                  {linkTree.footer_text && <div className="text-center border-t border-current border-opacity-20 pt-4">
-                      <p className="text-sm opacity-80">{linkTree.footer_text}</p>
-                    </div>}
-                </div>}
-            </div>
-          </footer>}
+                   {/* Texto do rodapé */}
+                   {linkTree.footer_text && <div className="text-center border-t border-current border-opacity-20 pt-4">
+                       <p className="text-sm opacity-80">{linkTree.footer_text}</p>
+                     </div>}
+                 </div>}
+             </div>
+           </footer>}
+
+           {/* Fixed Developer Credit */}
+           <div className="mt-6 pt-4 border-t border-white/10 text-center">
+             <a 
+               href="https://listralize.com.br/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="text-xs text-white/60 hover:text-white/80 transition-colors"
+             >
+               Desenvolvido por Grupo Listralize
+             </a>
+           </div>
       </div>
 
       <FormModal isOpen={modalData.isOpen} onClose={() => setModalData({
