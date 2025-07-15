@@ -11,6 +11,7 @@ import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCir
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useFormConfig } from '@/hooks/useFormConfig';
+import { ConversionFunnel } from './ConversionFunnel';
 
 interface MarketingScripts {
   facebookPixel: {
@@ -808,7 +809,7 @@ export const MarketingManagement: React.FC = () => {
                   <p className="text-sm">Clique em "Atualizar" na aba de Rastreamento para carregar os formulários.</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {conversionTracking.systemForms.map((form, index) => (
                     <div key={form.formId} className="border rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
@@ -1213,6 +1214,12 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="funnel">
+        <TabsContent value="funnel">
+          <ConversionFunnel />
+        </TabsContent>
         </TabsContent>
       </Tabs>
     </div>
