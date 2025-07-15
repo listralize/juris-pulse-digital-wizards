@@ -569,16 +569,21 @@ export function LinkTreePreview({
     </Card>;
   if (isPremiumLayout) {
     const themeGradient = getThemeGradient();
-    const themeClass = isNeuralTheme ? '' : `bg-gradient-to-br ${themeGradient}`;
+    // Só aplicar gradiente de tema se não for imagem, vídeo ou neural
+    const shouldUseThemeGradient = !isNeuralTheme && linkTree.background_type !== 'image' && linkTree.background_type !== 'video' && linkTree.background_type !== 'gradient';
+    const themeClass = shouldUseThemeGradient ? `bg-gradient-to-br ${themeGradient}` : '';
 
     // Aplicar estilo baseado no tipo de fundo
     const backgroundStyle = linkTree.background_type === 'solid' ? {
       backgroundColor: linkTree.background_color || '#3b82f6'
+    } : (linkTree.background_type === 'image' || linkTree.background_type === 'video') ? {
+      backgroundColor: linkTree.background_color || '#000'
     } : isNeuralTheme ? {
       backgroundColor: linkTree.background_color || '#1a1a2e',
       opacity: linkTree.background_opacity || 0.8
     } : {};
-    return <div className={`relative min-h-screen text-white overflow-hidden ${linkTree.background_type === 'solid' ? '' : themeClass}`} style={{
+    
+    return <div className={`relative min-h-screen text-white overflow-hidden ${themeClass}`} style={{
       ...getCustomStyles(),
       ...backgroundStyle
     }}>
