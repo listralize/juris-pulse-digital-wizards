@@ -18,10 +18,12 @@ import {
   Filter,
   CheckSquare,
   Square,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 
 interface FormLead {
   id: string;
@@ -211,6 +213,19 @@ export const ConversionsTab: React.FC = () => {
     link.href = URL.createObjectURL(blob);
     link.download = `conversoes_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
+  };
+
+  const handleWhatsAppContact = (phone: string, name: string) => {
+    if (!phone) {
+      toast.error('Número de telefone não disponível');
+      return;
+    }
+    
+    // Remove caracteres não numéricos
+    const cleanPhone = phone.replace(/\D/g, '');
+    const message = `Olá ${name || 'cliente'}, vi que você entrou em contato através do nosso site. Como posso ajudá-lo?`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=55${cleanPhone}&text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const filteredLeads = leads.filter(lead => {
@@ -406,7 +421,7 @@ export const ConversionsTab: React.FC = () => {
                     <TableHead>Origem</TableHead>
                     <TableHead>Localização</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Valor</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -476,7 +491,28 @@ export const ConversionsTab: React.FC = () => {
                         {getStatusBadge(lead.status)}
                       </TableCell>
                       <TableCell>
-                        {lead.conversion_value ? `R$ ${lead.conversion_value.toFixed(2)}` : '-'}
+                        <div className="flex gap-2">
+                          {lead.lead_data?.phone && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleWhatsAppContact(lead.lead_data.phone, lead.lead_data.name)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {lead.lead_data?.phone && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`tel:${lead.lead_data.phone}`, '_self')}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Phone className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
