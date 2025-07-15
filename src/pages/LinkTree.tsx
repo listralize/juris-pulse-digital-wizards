@@ -13,10 +13,19 @@ export default function LinkTreePage() {
   useEffect(() => {
     loadLinkTree();
     
-    // Configurar intervalo para recarregar dados a cada 5 segundos
-    const interval = setInterval(loadLinkTree, 5000);
+    // Escutar mudanças no localStorage para recarregar quando admin salvar
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'linkTreeUpdated') {
+        loadLinkTree();
+        localStorage.removeItem('linkTreeUpdated');
+      }
+    };
     
-    return () => clearInterval(interval);
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const loadLinkTree = async () => {

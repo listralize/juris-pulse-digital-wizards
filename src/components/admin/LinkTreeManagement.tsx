@@ -394,11 +394,16 @@ export function LinkTreeManagement() {
         setLinkTree(data as any);
       }
       
+      
       toast({
-        title: "✅ Salvo com sucesso!",
-        description: "Suas configurações foram salvas e estão disponíveis no Link Tree.",
-        variant: "default"
+        title: "🎉 Salvo com sucesso!",
+        description: "Suas configurações foram salvas. A página será atualizada automaticamente.",
+        variant: "default",
+        duration: 4000
       });
+      
+      // Sinalizar para outras abas recarregarem
+      localStorage.setItem('linkTreeUpdated', Date.now().toString());
     } catch (error) {
       console.error('Erro ao salvar Link Tree:', error);
       toast({
@@ -1287,8 +1292,20 @@ export function LinkTreeManagement() {
                   </CardContent>
                 </Card>
 
-                <Button onClick={saveLinkTree} className="w-full" size="lg" disabled={isSaving}>
-                  {isSaving ? "Salvando..." : "Salvar Configurações"}
+                <Button 
+                  onClick={saveLinkTree} 
+                  className={`w-full transition-all duration-300 ${isSaving ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90'}`} 
+                  size="lg" 
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Salvando...
+                    </div>
+                  ) : (
+                    "💾 Salvar Configurações"
+                  )}
                 </Button>
             </TabsContent>
 
@@ -1718,8 +1735,20 @@ export function LinkTreeManagement() {
           </Tabs>
 
           <div className="flex gap-4">
-            <Button onClick={saveLinkTree} className="flex-1" size="lg" disabled={isSaving}>
-              {isSaving ? "Salvando..." : "Salvar Configurações"}
+            <Button 
+              onClick={saveLinkTree} 
+              className={`flex-1 transition-all duration-300 ${isSaving ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90'}`} 
+              size="lg" 
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Salvando...
+                </div>
+              ) : (
+                "💾 Salvar Configurações"
+              )}
             </Button>
             <Button variant="outline" size="lg" asChild>
               <a href="/tree" target="_blank" rel="noopener noreferrer">
