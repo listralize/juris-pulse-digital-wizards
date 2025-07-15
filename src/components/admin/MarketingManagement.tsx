@@ -1122,38 +1122,45 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <CardDescription>Conversões por formulário (últimos 7 dias)</CardDescription>
               </CardHeader>
               <CardContent>
-                {analyticsData?.formSubmissions && analyticsData.formSubmissions.length > 0 ? <div className="space-y-3">
-                    {analyticsData.formSubmissions.slice(0, 5).map((form) => {
-                      // Melhorar nome de exibição do formulário
-                      let displayName = form.formId || 'Formulário não identificado';
+                {conversionTracking.systemForms.length > 0 ? (
+                  <div className="space-y-3">
+                    {conversionTracking.systemForms.map((systemForm) => {
+                      // Buscar dados de analytics para este formulário
+                      const analyticsForm = analyticsData?.formSubmissions?.find(
+                        (f) => f.formId === systemForm.formId
+                      );
                       
-                      if (form.formId === 'default') {
-                        displayName = 'Formulário Principal';
-                      } else if (form.formId && form.formId.startsWith('form_')) {
-                        // Buscar nome do formulário no formConfig
-                        const formConfig = conversionTracking.systemForms.find(f => f.formId === form.formId);
-                        displayName = formConfig?.formName || `Formulário ${form.formId.replace('form_', '')}`;
-                      }
+                      const submissionCount = analyticsForm?.count || 0;
                       
                       return (
-                        <div key={form.formId} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div key={systemForm.formId} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center gap-3">
-                            <Badge variant="outline">{form.formId}</Badge>
+                            <Badge variant="outline">{systemForm.formId}</Badge>
                             <span className="text-sm font-medium">
-                              {displayName}
+                              {systemForm.formName}
                             </span>
+                            {systemForm.enabled && (
+                              <Badge variant="secondary" className="text-xs">
+                                ✓ Rastreando
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold">{form.count}</p>
-                            <p className="text-xs text-muted-foreground">conversões</p>
+                            <p className="text-lg font-bold">{submissionCount}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {submissionCount === 1 ? 'conversão' : 'conversões'}
+                            </p>
                           </div>
                         </div>
                       );
                     })}
-                  </div> : <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhuma submissão de formulário registrada</p>
-                    <p className="text-sm">Configure o rastreamento para ver dados aqui</p>
-                  </div>}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Nenhum formulário encontrado.</p>
+                    <p className="text-sm">Configure os formulários na aba de rastreamento para ver dados aqui</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

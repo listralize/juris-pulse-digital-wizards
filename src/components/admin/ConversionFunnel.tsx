@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { format, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '../../lib/utils';
+import { useFormConfig } from '@/hooks/useFormConfig';
 
 interface ConversionFunnelProps {
   analyticsData?: any;
@@ -30,6 +31,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const isDark = theme === 'dark';
   const [selectedForm, setSelectedForm] = useState<string>('all');
   const [availableForms, setAvailableForms] = useState<AvailableForm[]>([]);
+  const { multipleFormsConfig } = useFormConfig();
 
   // Date range state
   const [dateRange, setDateRange] = useState<{
@@ -106,27 +108,14 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   };
 
-  // Load all available forms from database automatically
-  const loadAllAvailableForms = async () => {
+  // Load all available forms from configuration
+  const loadAllAvailableForms = () => {
     try {
-      console.log('🔄 Buscando todos os formulários disponíveis...');
+      console.log('🔄 [ConversionFunnel] Carregando formulários do sistema...');
+      console.log('📋 [ConversionFunnel] Formulários disponíveis:', multipleFormsConfig.forms);
 
-      // Buscar TODOS os form_ids únicos que têm leads, sem filtro de data
-      const { data: formLeads, error, count } = await supabase
-        .from('form_leads')
-        .select('form_id, form_name', { count: 'exact' });
-
-      console.log('📊 Query executada. Count:', count);
-      console.log('❓ Erro na query:', error);
-      console.log('📋 Form leads brutos encontrados:', formLeads);
-
-      if (error) {
-        console.error('❌ Erro ao carregar formulários:', error);
-        throw error;
-      }
-
-      if (!formLeads || formLeads.length === 0) {
-        console.log('⚠️ Nenhum formulário com leads encontrado');
+      if (!multipleFormsConfig.forms || multipleFormsConfig.forms.length === 0) {
+        console.log('⚠️ [ConversionFunnel] Nenhum formulário no sistema');
         const fallbackForms = [
           { id: 'all', name: 'Todos os Formulários' },
           { id: 'default', name: 'Formulário Principal' }
@@ -135,46 +124,24 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         return fallbackForms;
       }
 
-      // Agrupar por form_id e pegar nomes únicos
-      const uniqueForms: Record<string, AvailableForm> = {};
-      
-      formLeads.forEach(lead => {
-        // Verificar se lead existe e tem as propriedades necessárias
-        if (!lead) return;
-        
-        const formId = lead.form_id || 'default';
-        
-        if (!uniqueForms[formId]) {
-          let displayName = lead.form_name || formId;
-          
-          // Melhorar nomes de exibição
-          if (formId === 'default') {
-            displayName = 'Formulário Principal';
-          } else if (!lead.form_name && formId.startsWith('form_')) {
-            displayName = `Formulário ${formId.replace('form_', '')}`;
-          }
-
-          uniqueForms[formId] = {
-            id: formId,
-            name: displayName
-          };
-        }
-      });
-
-      const formsArray = Object.values(uniqueForms);
+      // Mapear formulários do sistema para o formato esperado
+      const systemForms: AvailableForm[] = multipleFormsConfig.forms.map(form => ({
+        id: form.id || 'default',
+        name: form.name || 'Formulário sem nome'
+      }));
       
       // Adicionar opção "Todos os Formulários" no início
       const allForms: AvailableForm[] = [
         { id: 'all', name: 'Todos os Formulários' },
-        ...formsArray
+        ...systemForms
       ];
 
       setAvailableForms(allForms);
-      console.log('✅ Formulários carregados:', allForms);
+      console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
 
       return allForms;
     } catch (error) {
-      console.error('❌ Erro ao carregar formulários:', error);
+      console.error('❌ [ConversionFunnel] Erro ao carregar formulários:', error);
       const fallbackForms = [
         { id: 'all', name: 'Todos os Formulários' },
         { id: 'default', name: 'Formulário Principal' }
@@ -226,7 +193,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       }
 
       // Atualizar lista de formulários disponíveis
-      await loadAllAvailableForms();
+      loadAllAvailableForms();
 
       toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
     } catch (error) {
@@ -253,10 +220,10 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     loadMarketingConfig();
   }, []);
 
-  // Load forms when component mounts
+  // Load forms when component mounts or when multipleFormsConfig changes
   useEffect(() => {
     loadAllAvailableForms();
-  }, []);
+  }, [multipleFormsConfig]);
 
   // Refresh data when date range or selected form changes
   useEffect(() => {
