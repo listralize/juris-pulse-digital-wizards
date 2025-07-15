@@ -1,83 +1,52 @@
-
 import React from 'react';
-import { Toaster } from './components/ui/sonner';
-import { ThemeProvider } from './components/ThemeProvider';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-// Pages
-import Index from './pages/Index';
+import Home from './pages/Home';
+import About from './pages/About';
+import Services from './pages/Services';
+import Areas from './pages/Areas';
+import Blog from './pages/Blog';
+import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
-import Obrigado from './pages/Obrigado';
-import LinkTree from './pages/LinkTree';
 import NotFound from './pages/NotFound';
+import { ThemeProvider } from './components/ThemeProvider';
+import { Toaster } from 'sonner';
+import { QueryClient } from 'react-query';
+import WhatsAppButton from './components/WhatsAppButton';
+import { useAnalytics } from './hooks/useAnalytics';
 
-// Dynamic routes
-import DynamicServiceRoutes from './components/DynamicServiceRoutes';
-import DynamicCategoryRoutes from './components/areas/DynamicCategoryRoutes';
+const App = () => {
 
-// Area pages (static fallbacks)
-import Familia from './pages/areas/Familia';
-import Tributario from './pages/areas/Tributario';
-import Empresarial from './pages/areas/Empresarial';
-import Trabalho from './pages/areas/Trabalho';
-import Civil from './pages/areas/Civil';
-import Previdenciario from './pages/areas/Previdenciario';
-import Consumidor from './pages/areas/Consumidor';
-import Constitucional from './pages/areas/Constitucional';
-import Administrativo from './pages/areas/Administrativo';
+  useAnalytics();
 
-const queryClient = new QueryClient();
-
-function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <QueryClient>
+      <BrowserRouter>
         <AuthProvider>
-          <Router>
-            <div className="App">
-              <Routes>
-                {/* Main pages */}
-                <Route path="/" element={<Index />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/tree" element={<LinkTree />} />
-                <Route path="/obrigado" element={<Obrigado />} />
-                
-                {/* Static area pages (fallbacks for existing URLs) */}
-                <Route path="/areas/familia" element={<Familia />} />
-                <Route path="/areas/tributario" element={<Tributario />} />
-                <Route path="/areas/empresarial" element={<Empresarial />} />
-                <Route path="/areas/trabalho" element={<Trabalho />} />
-                <Route path="/areas/civil" element={<Civil />} />
-                <Route path="/areas/previdenciario" element={<Previdenciario />} />
-                <Route path="/areas/consumidor" element={<Consumidor />} />
-                <Route path="/areas/constitucional" element={<Constitucional />} />
-                <Route path="/areas/administrativo" element={<Administrativo />} />
-                
-                {/* Dynamic area pages - Para todas as categorias do Supabase */}
-                <Route path="/areas/*" element={<DynamicCategoryRoutes />} />
-                
-                {/* Dynamic service pages */}
-                <Route path="/services/*" element={<DynamicServiceRoutes />} />
-                <Route path="/servicos/*" element={<DynamicServiceRoutes />} />
-                
-                {/* 404 fallback */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-          </Router>
-          <Toaster />
+          <ThemeProvider>
+            <Toaster position="top-right" />
+            
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/quem-somos" element={<About />} />
+              <Route path="/servicos" element={<Services />} />
+              <Route path="/areas/:slug" element={<Areas />} />
+              <Route path="/services/:slug" element={<Areas />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/contato" element={<Contact />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            
+            <WhatsAppButton />
+          </ThemeProvider>
         </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+      </BrowserRouter>
+    </QueryClient>
   );
-}
+};
 
 export default App;
