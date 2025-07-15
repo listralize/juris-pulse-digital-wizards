@@ -797,10 +797,11 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
                   className="mx-auto overflow-hidden"
                   style={{ 
                     width: `${linkTree.avatar_size || '128'}px`, 
-                    height: `${linkTree.avatar_size || '128'}px` 
+                    height: `${linkTree.avatar_size || '128'}px`,
+                    borderRadius: 0
                   }}
                 >
-                  <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-contain" />
+                   <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-contain" />
                 </div>
               )}
               
@@ -968,7 +969,8 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
             className="mx-auto overflow-hidden"
             style={{ 
               width: `${linkTree.avatar_size || '128'}px`, 
-              height: `${linkTree.avatar_size || '128'}px` 
+              height: `${linkTree.avatar_size || '128'}px`,
+              borderRadius: 0
             }}
           >
             <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-contain" />

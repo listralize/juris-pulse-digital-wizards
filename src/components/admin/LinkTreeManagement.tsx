@@ -647,7 +647,7 @@ export function LinkTreeManagement() {
           <h1 className="text-3xl font-bold">Link Tree Management</h1>
           <p className="text-muted-foreground">Sistema completo de gerenciamento de Link Tree</p>
         </div>
-        <Badge variant="secondary" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+        <Badge variant="secondary" className="bg-gradient-to-r from-gray-900 to-white text-white border border-white/20 backdrop-blur-sm">
           Premium
         </Badge>
       </div>
@@ -727,7 +727,7 @@ export function LinkTreeManagement() {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-900 via-gray-600 to-white flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
                             <Zap className="w-6 h-6 text-white" />
                           </div>
                           <div>
@@ -1079,7 +1079,7 @@ export function LinkTreeManagement() {
                   <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <div className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                        <div className="p-4 bg-gradient-to-r from-gray-900/10 to-white/10 rounded-lg border border-white/20 backdrop-blur-sm">
                           <Label className="text-sm font-medium mb-3 block">Configurações do Título</Label>
                           <div className="space-y-3">
                             <div>
@@ -1508,7 +1508,7 @@ export function LinkTreeManagement() {
                               </SelectItem>
                               {buttonStyleOptions.map(option => (
                                 <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
-                                  <span className="w-2 h-2 bg-purple-500 rounded-full inline-block mr-2"></span>
+                                   <span className="w-2 h-2 bg-white/80 rounded-full inline-block mr-2"></span>
                                   {option.label}
                                 </SelectItem>
                               ))}
@@ -1571,11 +1571,11 @@ export function LinkTreeManagement() {
                             </SelectTrigger>
                             <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
                               <SelectItem value="rounded" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-purple-500 rounded-full inline-block mr-2"></span>
-                                Arredondado
-                              </SelectItem>
-                              <SelectItem value="square" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-pink-500 rounded-full inline-block mr-2"></span>
+                                 <span className="w-2 h-2 bg-white/80 rounded-full inline-block mr-2"></span>
+                                 Arredondado
+                               </SelectItem>
+                               <SelectItem value="square" className="text-white hover:bg-white/10">
+                                 <span className="w-2 h-2 bg-gray-400 rounded-full inline-block mr-2"></span>
                                 Quadrado
                               </SelectItem>
                               <SelectItem value="circle" className="text-white hover:bg-white/10">
