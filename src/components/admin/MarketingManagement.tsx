@@ -346,17 +346,24 @@ export const MarketingManagement: React.FC = () => {
     loadLinkTreeForms();
   }, []);
   useEffect(() => {
-    if (multipleFormsConfig?.forms) {
+    if (multipleFormsConfig?.forms && multipleFormsConfig.forms.length > 0) {
+      console.log('🔄 [MarketingManagement] Carregando formulários do sistema:', multipleFormsConfig.forms.length);
       loadSystemForms();
+    } else {
+      console.log('⚠️ [MarketingManagement] Aguardando carregamento dos formulários...');
     }
   }, [multipleFormsConfig]);
   const loadSystemForms = () => {
     if (multipleFormsConfig?.forms) {
+      console.log('📝 [loadSystemForms] Carregando', multipleFormsConfig.forms.length, 'formulários');
+      console.log('📋 [loadSystemForms] Formulários:', multipleFormsConfig.forms.map(f => ({ id: f.id, name: f.name })));
+      
       // Preservar configurações existentes ou criar novas
       const existingConfigs = conversionTracking.systemForms.reduce((acc, config) => {
         acc[config.formId] = config;
         return acc;
       }, {} as Record<string, FormTrackingConfig>);
+      
       const systemForms: FormTrackingConfig[] = multipleFormsConfig.forms.map(form => {
         const existing = existingConfigs[form.id || ''];
         return {
@@ -365,10 +372,12 @@ export const MarketingManagement: React.FC = () => {
           submitButtonId: existing?.submitButtonId || `submit-${form.id}`,
           webhookUrl: form.webhookUrl,
           enabled: existing?.enabled ?? false,
-          // Por padrão desabilitado
           campaign: existing?.campaign || ''
         };
       });
+      
+      console.log('✅ [loadSystemForms] Configurados', systemForms.length, 'formulários para tracking');
+      
       setConversionTracking(prev => ({
         ...prev,
         systemForms

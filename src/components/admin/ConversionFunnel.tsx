@@ -115,7 +115,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       console.log('📋 [ConversionFunnel] Formulários disponíveis:', multipleFormsConfig.forms);
 
       if (!multipleFormsConfig.forms || multipleFormsConfig.forms.length === 0) {
-        console.log('⚠️ [ConversionFunnel] Nenhum formulário no sistema');
+        console.log('⚠️ [ConversionFunnel] Nenhum formulário no sistema, usando fallback temporário');
         const fallbackForms = [
           { id: 'all', name: 'Todos os Formulários' },
           { id: 'default', name: 'Formulário Principal' }
@@ -222,7 +222,17 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
 
   // Load forms when component mounts or when multipleFormsConfig changes
   useEffect(() => {
-    loadAllAvailableForms();
+    // Aguardar até que os formulários sejam carregados completamente
+    if (multipleFormsConfig.forms && multipleFormsConfig.forms.length > 0) {
+      loadAllAvailableForms();
+    } else {
+      // Tentar novamente após um pequeno delay se ainda não carregou
+      const timeout = setTimeout(() => {
+        loadAllAvailableForms();
+      }, 500);
+      
+      return () => clearTimeout(timeout);
+    }
   }, [multipleFormsConfig]);
 
   // Refresh data when date range or selected form changes
