@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../../../integrations/supabase/client';
 import { useFormConfig } from '../../../hooks/useFormConfig';
+import { useAnalytics } from '../../../hooks/useAnalytics';
 
 interface ContactFormData {
   name: string;
@@ -16,6 +17,7 @@ interface ContactFormData {
 
 export const useContactForm = () => {
   const { formConfig } = useFormConfig();
+  const { trackConversion } = useAnalytics();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -82,6 +84,18 @@ export const useContactForm = () => {
       }
 
       console.log('✅ Resposta da edge function:', data);
+      
+      // Rastrear conversão no analytics
+      await trackConversion(
+        formConfig.id || 'default',
+        formConfig.name || 'Formulário Principal',
+        submitData,
+        {
+          source: new URLSearchParams(window.location.search).get('utm_source') || 'direct',
+          medium: new URLSearchParams(window.location.search).get('utm_medium') || 'none',
+          campaign: new URLSearchParams(window.location.search).get('utm_campaign') || 'organic'
+        }
+      );
       
       toast.success(formConfig.formTexts.successMessage);
       setIsSubmitted(true);

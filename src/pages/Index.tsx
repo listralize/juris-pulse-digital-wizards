@@ -10,6 +10,7 @@ import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
 import { useTheme } from '../components/ThemeProvider';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -19,6 +20,9 @@ const Index = () => {
   const [showLegalPopup, setShowLegalPopup] = useState(false);
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
+  
+  // Inicializar analytics para rastrear visitantes automaticamente
+  useAnalytics();
 
   useEffect(() => {
     try {
