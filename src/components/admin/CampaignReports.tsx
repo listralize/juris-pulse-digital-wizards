@@ -13,10 +13,8 @@ import {
   Users, 
   ChevronDown, 
   ChevronRight,
-  Eye,
   Trash2,
-  BarChart3,
-  Hash
+  BarChart3
 } from 'lucide-react';
 
 interface CampaignReport {
@@ -36,7 +34,6 @@ interface CampaignReport {
   period_start: string;
   period_end: string;
   created_at: string;
-  facebook_pixel_config?: any;
 }
 
 export const CampaignReports: React.FC = () => {
@@ -96,217 +93,248 @@ export const CampaignReports: React.FC = () => {
   };
 
   const getROIColor = (roi: number) => {
-    if (roi >= 300) return 'text-green-600 bg-green-50';
-    if (roi >= 200) return 'text-blue-600 bg-blue-50';
-    if (roi >= 100) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (roi >= 300) return 'text-green-400';
+    if (roi >= 200) return 'text-blue-400';
+    if (roi >= 100) return 'text-yellow-400';
+    return 'text-red-400';
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando relatórios...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-white/30 border-t-white rounded-full mx-auto mb-4"></div>
+          <p className="text-white/90">Carregando relatórios...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Relatórios de Campanha</h2>
-          <p className="text-muted-foreground">
-            Visualize o desempenho das suas campanhas de marketing
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm">
-            {reports.length} {reports.length === 1 ? 'relatório' : 'relatórios'}
-          </Badge>
-          <Button variant="outline" size="sm" onClick={loadReports}>
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Atualizar
-          </Button>
-        </div>
-      </div>
-
-      {reports.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <BarChart3 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Nenhum relatório encontrado</h3>
-            <p className="text-muted-foreground">
-              Crie seu primeiro relatório na aba "Analytics" usando o funil de conversão.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {reports.map((report) => (
-            <Card key={report.id} className="overflow-hidden">
-              <Collapsible 
-                open={expandedReport === report.id}
-                onOpenChange={(open) => setExpandedReport(open ? report.id : null)}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Glassmorphism */}
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Relatórios de Campanha</h2>
+              <p className="text-white/70">
+                Visualize o desempenho das suas campanhas de marketing
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl px-4 py-2">
+                <Badge variant="outline" className="text-white border-white/30 bg-transparent">
+                  {reports.length} {reports.length === 1 ? 'relatório' : 'relatórios'}
+                </Badge>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={loadReports}
+                className="backdrop-blur-sm bg-white/5 border-white/20 text-white hover:bg-white/10 rounded-xl"
               >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          {expandedReport === report.id ? (
-                            <ChevronDown className="w-4 h-4" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4" />
-                          )}
-                          <CardTitle className="text-lg">{report.campaign_name}</CardTitle>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {report.form_name}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div className="text-sm text-muted-foreground">ROI</div>
-                          <div className={`text-lg font-bold px-2 py-1 rounded ${getROIColor(report.roi)}`}>
-                            {report.roi.toFixed(1)}%
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm text-muted-foreground">Receita</div>
-                          <div className="text-lg font-bold text-green-600">
-                            {formatCurrency(report.revenue)}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm text-muted-foreground">Data</div>
-                          <div className="text-sm font-medium">
-                            {formatDate(report.created_at)}
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteReport(report.id);
-                          }}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <CardContent className="pt-0 space-y-6">
-                    {/* Métricas Principais */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <Users className="w-6 h-6 mx-auto mb-2 text-blue-600" />
-                        <div className="text-2xl font-bold text-blue-600">{report.form_submissions}</div>
-                        <div className="text-sm text-muted-foreground">Leads</div>
-                      </div>
-                      
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <Target className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                        <div className="text-2xl font-bold text-green-600">{report.contracts}</div>
-                        <div className="text-sm text-muted-foreground">Contratos</div>
-                      </div>
-                      
-                      <div className="text-center p-4 bg-orange-50 rounded-lg">
-                        <TrendingUp className="w-6 h-6 mx-auto mb-2 text-orange-600" />
-                        <div className="text-2xl font-bold text-orange-600">{report.conversion_rate.toFixed(1)}%</div>
-                        <div className="text-sm text-muted-foreground">Conversão</div>
-                      </div>
-                      
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <DollarSign className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                        <div className="text-2xl font-bold text-purple-600">{formatCurrency(report.ticket_medio)}</div>
-                        <div className="text-sm text-muted-foreground">Ticket Médio</div>
-                      </div>
-                    </div>
-
-                    {/* Custos e Resultados */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-lg">💰 Investimento</h4>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                            <span className="text-muted-foreground">Gasto em Anúncios</span>
-                            <span className="font-medium text-red-600">{formatCurrency(report.ad_spend)}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                            <span className="text-muted-foreground">Custo por Lead</span>
-                            <span className="font-medium">{formatCurrency(report.cost_per_lead)}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                            <span className="text-muted-foreground">Custo por Aquisição</span>
-                            <span className="font-medium">{formatCurrency(report.cost_per_acquisition)}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-lg">📈 Resultados</h4>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-                            <span className="text-muted-foreground">Receita Total</span>
-                            <span className="font-medium text-green-600">{formatCurrency(report.revenue)}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-                            <span className="text-muted-foreground">Lucro Líquido</span>
-                            <span className={`font-medium ${report.lucro_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {formatCurrency(report.lucro_liquido)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-                            <span className="text-muted-foreground">ROI</span>
-                            <span className={`font-bold ${report.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {report.roi.toFixed(1)}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Configuração do Facebook Pixel */}
-                    {report.facebook_pixel_config && (
-                      <div className="border-t pt-4">
-                        <h4 className="font-semibold text-lg mb-3">🎯 Configuração do Pixel</h4>
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <span className="text-sm text-muted-foreground">Facebook Pixel ID</span>
-                              <div className="font-mono text-sm bg-white p-2 rounded border">
-                                {report.facebook_pixel_config.pixel_id || 'Não configurado'}
-                              </div>
-                            </div>
-                            <div>
-                              <span className="text-sm text-muted-foreground">API de Conversão</span>
-                              <div className="text-sm">
-                                {report.facebook_pixel_config.conversion_api_token ? 
-                                  <Badge variant="secondary" className="text-green-600">✓ Configurado</Badge> : 
-                                  <Badge variant="outline">Não configurado</Badge>
-                                }
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          ))}
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Atualizar
+              </Button>
+            </div>
+          </div>
         </div>
-      )}
+
+        {reports.length === 0 ? (
+          <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl">
+            <div className="text-center py-16">
+              <BarChart3 className="w-16 h-16 mx-auto text-white/50 mb-6" />
+              <h3 className="text-2xl font-bold text-white mb-3">Nenhum relatório encontrado</h3>
+              <p className="text-white/70 max-w-md mx-auto">
+                Crie seu primeiro relatório na aba "Analytics" usando o funil de conversão.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {reports.map((report, index) => (
+              <div 
+                key={report.id}
+                className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <Collapsible 
+                  open={expandedReport === report.id}
+                  onOpenChange={(open) => setExpandedReport(open ? report.id : null)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <div className="cursor-pointer hover:bg-white/5 transition-all duration-300 p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 backdrop-blur-sm bg-white/10 rounded-xl border border-white/20">
+                              {expandedReport === report.id ? (
+                                <ChevronDown className="w-5 h-5 text-white" />
+                              ) : (
+                                <ChevronRight className="w-5 h-5 text-white" />
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-white">{report.campaign_name}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge 
+                                  variant="secondary" 
+                                  className="text-xs bg-white/10 text-white/90 border-white/20"
+                                >
+                                  {report.form_name}
+                                </Badge>
+                                <span className="text-white/60 text-sm">
+                                  {formatDate(report.created_at)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <div className="text-sm text-white/60 mb-1">ROI</div>
+                            <div className={`text-2xl font-bold ${getROIColor(report.roi)}`}>
+                              {report.roi.toFixed(1)}%
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-white/60 mb-1">Receita</div>
+                            <div className="text-xl font-bold text-green-400">
+                              {formatCurrency(report.revenue)}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-white/60 mb-1">Lucro</div>
+                            <div className={`text-lg font-bold ${report.lucro_liquido >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {formatCurrency(report.lucro_liquido)}
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteReport(report.id);
+                            }}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <div className="px-6 pb-6 space-y-6 border-t border-white/10">
+                      {/* Métricas Principais */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
+                        <div className="backdrop-blur-sm bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 text-center">
+                          <Users className="w-8 h-8 mx-auto mb-3 text-blue-400" />
+                          <div className="text-3xl font-bold text-blue-400">{report.form_submissions}</div>
+                          <div className="text-sm text-white/60">Leads Gerados</div>
+                        </div>
+                        
+                        <div className="backdrop-blur-sm bg-green-500/20 border border-green-400/30 rounded-xl p-4 text-center">
+                          <Target className="w-8 h-8 mx-auto mb-3 text-green-400" />
+                          <div className="text-3xl font-bold text-green-400">{report.contracts}</div>
+                          <div className="text-sm text-white/60">Contratos Fechados</div>
+                        </div>
+                        
+                        <div className="backdrop-blur-sm bg-orange-500/20 border border-orange-400/30 rounded-xl p-4 text-center">
+                          <TrendingUp className="w-8 h-8 mx-auto mb-3 text-orange-400" />
+                          <div className="text-3xl font-bold text-orange-400">{report.conversion_rate.toFixed(1)}%</div>
+                          <div className="text-sm text-white/60">Taxa de Conversão</div>
+                        </div>
+                        
+                        <div className="backdrop-blur-sm bg-purple-500/20 border border-purple-400/30 rounded-xl p-4 text-center">
+                          <DollarSign className="w-8 h-8 mx-auto mb-3 text-purple-400" />
+                          <div className="text-3xl font-bold text-purple-400">{formatCurrency(report.ticket_medio)}</div>
+                          <div className="text-sm text-white/60">Ticket Médio</div>
+                        </div>
+                      </div>
+
+                      {/* Investimento vs Resultados */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl p-6">
+                          <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            💰 Investimento
+                          </h4>
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-red-500/10 border border-red-400/20 rounded-lg">
+                              <span className="text-white/80">Gasto em Anúncios</span>
+                              <span className="font-bold text-red-400">{formatCurrency(report.ad_spend)}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/5 border border-white/20 rounded-lg">
+                              <span className="text-white/80">Custo por Lead</span>
+                              <span className="font-medium text-white">{formatCurrency(report.cost_per_lead)}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/5 border border-white/20 rounded-lg">
+                              <span className="text-white/80">Custo por Aquisição</span>
+                              <span className="font-medium text-white">{formatCurrency(report.cost_per_acquisition)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl p-6">
+                          <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            📈 Resultados
+                          </h4>
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-green-500/10 border border-green-400/20 rounded-lg">
+                              <span className="text-white/80">Receita Total</span>
+                              <span className="font-bold text-green-400">{formatCurrency(report.revenue)}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-green-500/10 border border-green-400/20 rounded-lg">
+                              <span className="text-white/80">Lucro Líquido</span>
+                              <span className={`font-bold ${report.lucro_liquido >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {formatCurrency(report.lucro_liquido)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-blue-500/10 border border-blue-400/20 rounded-lg">
+                              <span className="text-white/80">Retorno sobre Investimento</span>
+                              <span className={`font-bold text-xl ${report.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {report.roi.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Performance Summary */}
+                      <div className="backdrop-blur-sm bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/20 rounded-xl p-6">
+                        <h4 className="text-lg font-bold text-white mb-4">📊 Resumo da Performance</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="text-white/60">Taxa de Fechamento</div>
+                            <div className="text-xl font-bold text-white">
+                              {report.form_submissions > 0 ? ((report.contracts / report.form_submissions) * 100).toFixed(1) : 0}%
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-white/60">ROAS (Return on Ad Spend)</div>
+                            <div className="text-xl font-bold text-white">
+                              {report.ad_spend > 0 ? (report.revenue / report.ad_spend).toFixed(1) : 0}x
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-white/60">Margem de Lucro</div>
+                            <div className="text-xl font-bold text-white">
+                              {report.revenue > 0 ? ((report.lucro_liquido / report.revenue) * 100).toFixed(1) : 0}%
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

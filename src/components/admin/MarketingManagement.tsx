@@ -374,6 +374,8 @@ export const MarketingManagement: React.FC = () => {
             savedConfig = settings.form_tracking_config;
           }
           
+          console.log('📋 Configuração carregada do banco:', savedConfig);
+          
           setConversionTracking({
             systemForms: savedConfig.systemForms || [],
             linkTreeForms: savedConfig.linkTreeForms || [],
@@ -416,6 +418,7 @@ export const MarketingManagement: React.FC = () => {
       };
 
       console.log('📝 Dados a serem salvos:', configData);
+      console.log('🔧 ConversionTracking atual:', conversionTracking);
 
       // Primeiro, tentar buscar configuração existente
       const { data: existingConfig } = await supabase
@@ -430,13 +433,15 @@ export const MarketingManagement: React.FC = () => {
         result = await supabase
           .from('marketing_settings')
           .update(configData)
-          .eq('id', existingConfig.id);
+          .eq('id', existingConfig.id)
+          .select();
       } else {
         // Criar nova configuração
         console.log('➕ Criando nova configuração');
         result = await supabase
           .from('marketing_settings')
-          .insert(configData);
+          .insert(configData)
+          .select();
       }
 
       const { error } = result;
