@@ -270,10 +270,10 @@ export function LinkTreeManagement() {
           avatar_size: (linkTreeData as any).avatar_size || '128',
           theme: linkTreeData.theme as LinkTree['theme'] || 'modern',
           background_type: linkTreeData.background_type as LinkTree['background_type'] || 'neural',
-          background_gradient: linkTreeData.background_gradient || '',
+          background_gradient: linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)',
           background_image: linkTreeData.background_image || '',
           background_video: linkTreeData.background_video || '',
-          background_opacity: (linkTreeData as any).background_opacity || 0.5,
+          background_opacity: linkTreeData.background_opacity || 0.8,
           custom_css: linkTreeData.custom_css || '',
           animation_style: linkTreeData.animation_style as LinkTree['animation_style'] || 'glow',
           show_analytics: false,
@@ -359,10 +359,10 @@ export function LinkTreeManagement() {
         avatar_size: linkTreeData.avatar_size || '128',
         theme: linkTreeData.theme || 'modern',
         background_type: linkTreeData.background_type || 'neural',
-        background_gradient: linkTreeData.background_gradient || '',
+        background_gradient: linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)',
         background_image: linkTreeData.background_image || '',
         background_video: linkTreeData.background_video || '',
-        background_opacity: (linkTreeData as any).background_opacity || 0.8,
+        background_opacity: linkTreeData.background_opacity || 0.8,
         custom_css: linkTreeData.custom_css || '',
         animation_style: linkTreeData.animation_style || 'glow',
         show_analytics: linkTreeData.show_analytics || false,
@@ -888,7 +888,11 @@ export function LinkTreeManagement() {
                             <div className="flex gap-2">
                               <Input 
                                 type="color" 
-                                value={linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea'} 
+                                 value={(() => {
+                                   const gradient = linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)';
+                                   const match = gradient.match(/linear-gradient\([^,]+,\s*([^,]+)/);
+                                   return match ? match[1].trim() : '#667eea';
+                                 })()}
                                 onChange={(e) => {
                                   const color1 = e.target.value;
                                   const color2 = linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2';
@@ -933,7 +937,11 @@ export function LinkTreeManagement() {
                             <div className="flex gap-2">
                               <Input 
                                 type="color" 
-                                value={linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2'} 
+                                 value={(() => {
+                                   const gradient = linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)';
+                                   const match = gradient.match(/,\s*([^)]+)\)/);
+                                   return match ? match[1].trim() : '#764ba2';
+                                 })()}
                                 onChange={(e) => {
                                   const color1 = linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea';
                                   const color2 = e.target.value;

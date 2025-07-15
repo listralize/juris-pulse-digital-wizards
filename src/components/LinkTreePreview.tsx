@@ -114,6 +114,7 @@ export function LinkTreePreview({
       baseStyles.backgroundSize = 'cover';
       baseStyles.backgroundPosition = 'center';
       baseStyles.backgroundRepeat = 'no-repeat';
+      baseStyles.backgroundColor = linkTree.background_color || '#000';
       // Aplicar overlay de opacidade se definido
       if (linkTree.background_opacity !== undefined) {
         baseStyles.position = 'relative';
