@@ -631,12 +631,6 @@ export function LinkTreePreview({
     }}>
         {isNeuralTheme && <NeuralBackground />}
         
-        {/* Overlay para aplicar cor de fundo no neural theme */}
-        {isNeuralTheme && <div className="absolute inset-0 z-0" style={{
-        backgroundColor: linkTree.background_color || '#1a1a2e',
-        
-        pointerEvents: 'none'
-      }} />}
         
         {/* Vídeo de fundo */}
         {linkTree.background_type === 'video' && linkTree.background_video && <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover z-0">
