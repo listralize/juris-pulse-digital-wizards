@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -112,17 +111,19 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     try {
       console.log('🔄 Buscando todos os formulários disponíveis...');
 
-      // Buscar todos os form_ids únicos que têm leads
-      const { data: formLeads, error } = await supabase
+      // Buscar TODOS os form_ids únicos que têm leads, sem filtro de data
+      const { data: formLeads, error, count } = await supabase
         .from('form_leads')
-        .select('form_id, form_name');
+        .select('form_id, form_name', { count: 'exact' });
+
+      console.log('📊 Query executada. Count:', count);
+      console.log('❓ Erro na query:', error);
+      console.log('📋 Form leads brutos encontrados:', formLeads);
 
       if (error) {
         console.error('❌ Erro ao carregar formulários:', error);
         throw error;
       }
-
-      console.log('📋 Form leads brutos encontrados:', formLeads);
 
       if (!formLeads || formLeads.length === 0) {
         console.log('⚠️ Nenhum formulário com leads encontrado');
