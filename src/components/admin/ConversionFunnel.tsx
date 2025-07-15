@@ -128,7 +128,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       if (!formLeads || formLeads.length === 0) {
         console.log('⚠️ Nenhum formulário com leads encontrado');
         const fallbackForms = [
-          { id: 'all', name: 'Todos os Formulários' }
+          { id: 'all', name: 'Todos os Formulários' },
+          { id: 'default', name: 'Formulário Principal' }
         ];
         setAvailableForms(fallbackForms);
         return fallbackForms;
@@ -175,7 +176,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     } catch (error) {
       console.error('❌ Erro ao carregar formulários:', error);
       const fallbackForms = [
-        { id: 'all', name: 'Todos os Formulários' }
+        { id: 'all', name: 'Todos os Formulários' },
+        { id: 'default', name: 'Formulário Principal' }
       ];
       setAvailableForms(fallbackForms);
       return fallbackForms;
@@ -323,120 +325,28 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Controles de Entrada - Glassmorphism */}
-      <div className="backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 rounded-2xl shadow-2xl">
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Calculator className="w-5 h-5 text-white" />
-            <h3 className="text-xl font-bold text-white">Configuração do Funil de Conversão</h3>
-          </div>
-          
-          {/* Date Range Selector */}
-          <div className="mb-6 p-4 backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
-            <h4 className="text-lg font-semibold text-white mb-4">📅 Período de Análise</h4>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-white/90 font-medium">Período Pré-definido</Label>
-                <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-                  <SelectTrigger className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl">
-                    <SelectValue placeholder="Selecione um período" />
-                  </SelectTrigger>
-                  <SelectContent className="backdrop-blur-md bg-black/80 border-white/20">
-                    {periods.map(period => (
-                      <SelectItem 
-                        key={period.value} 
-                        value={period.value} 
-                        className="text-white hover:bg-white/10"
-                      >
-                        {period.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedPeriod === 'custom' && (
-                <div className="space-y-2">
-                  <Label className="text-white/90 font-medium">Período Personalizado</Label>
-                  <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl justify-start text-left font-normal hover:bg-white/10",
-                          !dateRange && "text-white/50"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateRange?.from ? (
-                          dateRange.to ? (
-                            <>
-                              {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                              {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
-                            </>
-                          ) : (
-                            format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
-                          )
-                        ) : (
-                          <span>Selecione as datas</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 backdrop-blur-md bg-black/80 border-white/20" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={(range) => {
-                          if (range?.from && range?.to) {
-                            setDateRange({ from: range.from, to: range.to });
-                            setIsDatePickerOpen(false);
-                          } else if (range?.from) {
-                            setDateRange({ from: range.from, to: range.from });
-                          }
-                        }}
-                        numberOfMonths={2}
-                        className={cn("backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl text-white")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-white/70 text-sm">
-                Dados de {format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} até {format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}
-              </div>
-              <Button
-                onClick={refreshAnalyticsData}
-                disabled={isRefreshing}
-                className="backdrop-blur-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 text-white px-4 py-2 rounded-xl transition-all duration-300"
-              >
-                <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
-                {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Controles Compactos */}
+      <Card className="h-fit">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-5 h-5" />
+            Funil de Conversão
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Seletor de Período e Formulário */}
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label className="text-white/90 font-medium">Formulário</Label>
-              <Select value={selectedForm} onValueChange={setSelectedForm}>
-                <SelectTrigger className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl">
-                  <SelectValue placeholder="Selecione um formulário" />
+              <Label className="text-sm font-medium">Período</Label>
+              <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Selecione um período" />
                 </SelectTrigger>
-                <SelectContent className="backdrop-blur-md bg-black/80 border-white/20">
-                  {availableForms.map(form => (
-                    <SelectItem 
-                      key={form.id} 
-                      value={form.id} 
-                      className="text-white hover:bg-white/10"
-                    >
-                      {form.name}
+                <SelectContent>
+                  {periods.map(period => (
+                    <SelectItem key={period.value} value={period.value}>
+                      {period.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -444,250 +354,180 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white/90 font-medium">Contratos Fechados</Label>
+              <Label className="text-sm font-medium">Formulário</Label>
+              <Select value={selectedForm} onValueChange={setSelectedForm}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Selecione um formulário" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableForms.map(form => (
+                    <SelectItem key={form.id} value={form.id}>
+                      {form.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          {/* Inputs Compactos */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Contratos</Label>
               <Input
                 type="number"
                 value={contracts}
                 onChange={(e) => setContracts(Number(e.target.value) || 0)}
-                className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
-                placeholder="Ex: 5"
+                className="h-10"
+                placeholder="0"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white/90 font-medium">Dinheiro Gasto (R$)</Label>
+              <Label className="text-sm font-medium">Gasto (R$)</Label>
               <Input
                 type="number"
                 value={adSpend}
                 onChange={(e) => setAdSpend(Number(e.target.value) || 0)}
-                className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
-                placeholder="Ex: 5000"
+                className="h-10"
+                placeholder="0"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white/90 font-medium">Dinheiro Ganho (R$)</Label>
+              <Label className="text-sm font-medium">Receita (R$)</Label>
               <Input
                 type="number"
                 value={revenue}
                 onChange={(e) => setRevenue(Number(e.target.value) || 0)}
-                className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
-                placeholder="Ex: 25000"
+                className="h-10"
+                placeholder="0"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Campanha</Label>
+              <Input
+                type="text"
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                className="h-10"
+                placeholder="Nome da campanha"
               />
             </div>
           </div>
-
-          {/* Seção de Configuração de Campanha */}
-          <div className="border-t border-white/20 pt-6 mt-6">
-            <h4 className="text-lg font-semibold text-white mb-4">📊 Configuração da Campanha</h4>
-            
-            {!marketingConfig?.facebook_pixel_id && (
-              <div className="mb-6 p-4 backdrop-blur-sm bg-amber-500/20 border border-amber-400/30 rounded-xl">
-                <div className="flex items-center gap-2 text-amber-100">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    Configure o Facebook Pixel ID na aba "Scripts de Marketing e Rastreamento" para ativar o rastreamento de conversões.
-                  </span>
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-2">
-                <Label className="text-white/90 font-medium">Nome da Campanha</Label>
-                <Input
-                  type="text"
-                  value={campaignName}
-                  onChange={(e) => setCampaignName(e.target.value)}
-                  className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
-                  placeholder="Ex: Campanha Black Friday 2024"
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end mt-6">
-              <Button
-                onClick={saveCampaignReport}
-                disabled={isLoading || !campaignName.trim()}
-                className="backdrop-blur-sm bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {isLoading ? 'Salvando...' : 'Salvar Relatório'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Funil Visual - Glassmorphism */}
-      <div className="backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            📊 Funil de Conversão - {availableForms.find(f => f.id === selectedForm)?.name || 'Carregando...'}
-          </h2>
           
-          {/* Visual do Funil */}
-          <div className="relative max-w-4xl mx-auto mb-12">
-            <div className="space-y-4">
-              
-              {/* NÍVEL 1: ENVIOS DE FORMULÁRIO */}
-              <div className="relative animate-fade-in">
-                <div 
-                  className="mx-auto h-20 rounded-2xl relative overflow-hidden shadow-2xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105"
-                  style={{
-                    width: '100%',
-                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.9) 100%)'
-                  }}
-                >
-                  <div className="flex items-center justify-between h-full px-8 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-4 h-4 bg-white/80 rounded-full animate-pulse"></div>
-                      <span className="text-white font-bold text-xl drop-shadow-lg">
-                        {formSubmissions.toLocaleString()} Envios de Formulário
-                      </span>
-                    </div>
-                    <span className="text-white/90 text-lg font-semibold">100%</span>
-                  </div>
-                </div>
-              </div>
+          {/* Botões de Ação */}
+          <div className="flex gap-2">
+            <Button
+              onClick={refreshAnalyticsData}
+              disabled={isRefreshing}
+              variant="outline"
+              className="flex-1"
+            >
+              <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
+              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+            </Button>
+            
+            <Button
+              onClick={saveCampaignReport}
+              disabled={isLoading || !campaignName.trim()}
+              className="flex-1"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isLoading ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-              {/* NÍVEL 2: CONTRATOS FECHADOS */}
-              <div className="relative animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <div 
-                  className="mx-auto h-20 rounded-2xl relative overflow-hidden shadow-2xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105"
-                  style={{
-                    width: '80%',
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%)'
-                  }}
-                >
-                  <div className="flex items-center justify-between h-full px-8 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-4 h-4 bg-white/80 rounded-full animate-pulse"></div>
-                      <span className="text-white font-bold text-xl drop-shadow-lg">
-                        {contracts.toLocaleString()} Contratos Fechados
-                      </span>
-                    </div>
-                    <span className="text-white/90 text-lg font-semibold">{conversionRate.toFixed(1)}%</span>
-                  </div>
-                </div>
+      {/* Funil Visual Compacto */}
+      <Card className="h-fit">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">
+            {availableForms.find(f => f.id === selectedForm)?.name || 'Carregando...'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Funil Visual Compacto */}
+          <div className="space-y-3 mb-4">
+            {/* Nível 1: Envios */}
+            <div className="relative">
+              <div className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-between px-4">
+                <span className="text-white font-medium text-sm">
+                  {formSubmissions.toLocaleString()} Envios
+                </span>
+                <span className="text-white/90 text-sm">100%</span>
               </div>
-
-              {/* NÍVEL 3: RECEITA GERADA */}
-              <div className="relative animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                <div 
-                  className="mx-auto h-20 rounded-2xl relative overflow-hidden shadow-2xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105"
-                  style={{
-                    width: '60%',
-                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.8) 0%, rgba(217, 119, 6, 0.9) 100%)'
-                  }}
-                >
-                  <div className="flex items-center justify-between h-full px-8 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-4 h-4 bg-white/80 rounded-full animate-pulse"></div>
-                      <span className="text-white font-bold text-xl drop-shadow-lg">
-                        R$ {revenue.toLocaleString()} em Receita
-                      </span>
-                    </div>
-                    <span className="text-white/90 text-sm font-medium">
-                      {contracts > 0 ? `R$ ${ticketMedio.toFixed(0)} médio` : '0'}
-                    </span>
-                  </div>
-                </div>
+            </div>
+            
+            {/* Nível 2: Contratos */}
+            <div className="relative">
+              <div className="w-4/5 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-between px-4 mx-auto">
+                <span className="text-white font-medium text-sm">
+                  {contracts.toLocaleString()} Contratos
+                </span>
+                <span className="text-white/90 text-sm">{conversionRate.toFixed(1)}%</span>
               </div>
-
-              {/* NÍVEL 4: LUCRO LÍQUIDO */}
-              <div className="relative animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                <div 
-                  className="mx-auto h-20 rounded-2xl relative overflow-hidden shadow-2xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105"
-                  style={{
-                    width: '40%',
-                    background: lucroLiquido >= 0 
-                      ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(124, 58, 237, 0.9) 100%)'
-                      : 'linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(220, 38, 38, 0.9) 100%)'
-                  }}
-                >
-                  <div className="flex items-center justify-between h-full px-8 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-4 h-4 bg-white/80 rounded-full animate-pulse"></div>
-                      <span className="text-white font-bold text-xl drop-shadow-lg">
-                        R$ {lucroLiquido.toLocaleString()} Lucro
-                      </span>
-                    </div>
-                    <span className="text-white/90 text-sm font-medium">
-                      {roi.toFixed(0)}% ROI
-                    </span>
-                  </div>
-                </div>
+            </div>
+            
+            {/* Nível 3: Receita */}
+            <div className="relative">
+              <div className="w-3/5 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg flex items-center justify-between px-4 mx-auto">
+                <span className="text-white font-medium text-sm">
+                  R$ {revenue.toLocaleString()}
+                </span>
+                <span className="text-white/90 text-xs">
+                  {contracts > 0 ? `R$ ${ticketMedio.toFixed(0)}` : '0'}
+                </span>
               </div>
-
+            </div>
+            
+            {/* Nível 4: Lucro */}
+            <div className="relative">
+              <div className={`w-2/5 h-12 rounded-lg flex items-center justify-between px-4 mx-auto ${
+                lucroLiquido >= 0 
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600' 
+                  : 'bg-gradient-to-r from-red-500 to-red-600'
+              }`}>
+                <span className="text-white font-medium text-sm">
+                  R$ {lucroLiquido.toLocaleString()}
+                </span>
+                <span className="text-white/90 text-xs">
+                  {roi.toFixed(0)}% ROI
+                </span>
+              </div>
             </div>
           </div>
-
-          {/* Métricas Calculadas - Glassmorphism */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 pt-8 border-t border-white/20">
-            <div className="text-center p-4 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className={`text-2xl font-bold drop-shadow-lg ${
-                conversionRate >= 20 ? 'text-green-400' : 
-                conversionRate >= 10 ? 'text-yellow-400' : 'text-red-400'
+          
+          {/* Métricas Compactas */}
+          <div className="grid grid-cols-3 gap-3 pt-4 border-t">
+            <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className={`text-lg font-bold ${
+                conversionRate >= 20 ? 'text-green-500' : 
+                conversionRate >= 10 ? 'text-yellow-500' : 'text-red-500'
               }`}>
                 {conversionRate.toFixed(1)}%
               </div>
-              <div className="text-sm text-white/70 font-medium">
-                Taxa de Conversão
-              </div>
+              <div className="text-xs text-muted-foreground">Taxa Conv.</div>
             </div>
             
-            <div className="text-center p-4 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className={`text-2xl font-bold drop-shadow-lg ${
-                roi >= 200 ? 'text-green-400' : 
-                roi >= 100 ? 'text-yellow-400' : 
-                roi >= 0 ? 'text-blue-400' : 'text-red-400'
-              }`}>
-                {roi.toFixed(0)}%
-              </div>
-              <div className="text-sm text-white/70 font-medium">
-                ROI
-              </div>
-            </div>
-            
-            <div className="text-center p-4 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="text-xl font-bold text-white drop-shadow-lg">
+            <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className="text-lg font-bold text-foreground">
                 R$ {costPerLead.toFixed(0)}
               </div>
-              <div className="text-sm text-white/70 font-medium">
-                Custo por Lead
-              </div>
+              <div className="text-xs text-muted-foreground">CPL</div>
             </div>
             
-            <div className="text-center p-4 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="text-xl font-bold text-white drop-shadow-lg">
+            <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className="text-lg font-bold text-foreground">
                 R$ {costPerAcquisition.toFixed(0)}
               </div>
-              <div className="text-sm text-white/70 font-medium">
-                CAC
-              </div>
-            </div>
-            
-            <div className="text-center p-4 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="text-xl font-bold text-white drop-shadow-lg">
-                R$ {ticketMedio.toFixed(0)}
-              </div>
-              <div className="text-sm text-white/70 font-medium">
-                Ticket Médio
-              </div>
-            </div>
-            
-            <div className="text-center p-4 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className={`text-xl font-bold drop-shadow-lg ${lucroLiquido >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                R$ {lucroLiquido.toLocaleString()}
-              </div>
-              <div className="text-sm text-white/70 font-medium">
-                Lucro Líquido
-              </div>
+              <div className="text-xs text-muted-foreground">CAC</div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

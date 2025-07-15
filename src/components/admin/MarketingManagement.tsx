@@ -1123,18 +1123,33 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               </CardHeader>
               <CardContent>
                 {analyticsData?.formSubmissions && analyticsData.formSubmissions.length > 0 ? <div className="space-y-3">
-                    {analyticsData.formSubmissions.slice(0, 5).map((form, index) => <div key={form.formId} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="outline">{form.formId}</Badge>
-                          <span className="text-sm font-medium">
-                            {form.formId === 'default' ? 'Formulário Principal' : conversionTracking.systemForms.find(f => f.formId === form.formId)?.formName || form.formId}
-                          </span>
+                    {analyticsData.formSubmissions.slice(0, 5).map((form) => {
+                      // Melhorar nome de exibição do formulário
+                      let displayName = form.formId || 'Formulário não identificado';
+                      
+                      if (form.formId === 'default') {
+                        displayName = 'Formulário Principal';
+                      } else if (form.formId && form.formId.startsWith('form_')) {
+                        // Buscar nome do formulário no formConfig
+                        const formConfig = conversionTracking.systemForms.find(f => f.formId === form.formId);
+                        displayName = formConfig?.formName || `Formulário ${form.formId.replace('form_', '')}`;
+                      }
+                      
+                      return (
+                        <div key={form.formId} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Badge variant="outline">{form.formId}</Badge>
+                            <span className="text-sm font-medium">
+                              {displayName}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold">{form.count}</p>
+                            <p className="text-xs text-muted-foreground">conversões</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">{form.count}</p>
-                          <p className="text-xs text-muted-foreground">conversões</p>
-                        </div>
-                      </div>)}
+                      );
+                    })}
                   </div> : <div className="text-center p-8 text-muted-foreground">
                     <p>Nenhuma submissão de formulário registrada</p>
                     <p className="text-sm">Configure o rastreamento para ver dados aqui</p>
