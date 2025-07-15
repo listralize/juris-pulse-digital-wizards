@@ -1,17 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Checkbox } from '../ui/checkbox';
-import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Label } from '../../ui/label';
+import { Input } from '../../ui/input';
+import { Textarea } from '../../ui/textarea';
+import { Checkbox } from '../../ui/checkbox';
+import { Button } from '../../ui/button';
 import { Save, RotateCw } from 'lucide-react';
-import { useTheme } from '../ThemeProvider';
-import { supabase } from '../../integrations/supabase/client';
+import { useTheme } from '../../ThemeProvider';
+import { supabase } from '../../../integrations/supabase/client';
 import { toast } from 'sonner';
-import { ConversionsTab } from './ConversionsTab';
 
 interface MarketingScripts {
   facebookPixel: {
@@ -244,7 +242,6 @@ export const MarketingManagement: React.FC = () => {
             <TabsTrigger value="facebook" onClick={() => setActiveTab('facebook')}>Facebook Pixel</TabsTrigger>
             <TabsTrigger value="google" onClick={() => setActiveTab('google')}>Google Analytics</TabsTrigger>
             <TabsTrigger value="gtm" onClick={() => setActiveTab('gtm')}>Google Tag Manager</TabsTrigger>
-            <TabsTrigger value="conversions" onClick={() => setActiveTab('conversions')}>Conversões</TabsTrigger>
           </TabsList>
           
           <TabsContent value="scripts">
@@ -389,10 +386,6 @@ export const MarketingManagement: React.FC = () => {
                 />
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="conversions">
-            <ConversionsTab />
           </TabsContent>
         </Tabs>
       </CardContent>
