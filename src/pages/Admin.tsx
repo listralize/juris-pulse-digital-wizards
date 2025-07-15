@@ -17,12 +17,15 @@ import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
-
 const Admin = () => {
-  const { logout } = useAuth();
-  const { theme } = useTheme();
+  const {
+    logout
+  } = useAuth();
+  const {
+    theme
+  } = useTheme();
   const isDark = theme === 'dark';
-  
+
   // Usar o hook específico para page texts
   const {
     pageTexts,
@@ -30,7 +33,6 @@ const Admin = () => {
     savePageTexts,
     setPageTexts
   } = useSupabasePageTexts();
-
   const {
     teamMembers,
     servicePages,
@@ -43,16 +45,13 @@ const Admin = () => {
     setTeamMembers,
     refreshData
   } = useSupabaseDataNew();
-
   const {
     blogPosts,
     isLoading: blogLoading,
     saveBlogPosts,
     loadBlogPosts
   } = useSupabaseBlog();
-
   const isLoading = dataLoading || blogLoading || pageTextsLoading;
-
   const handleSaveServicePages = async (pages: ServicePage[]) => {
     try {
       await saveServicePages(pages);
@@ -62,7 +61,6 @@ const Admin = () => {
       toast.error('Erro ao salvar páginas de serviços');
     }
   };
-
   const handleSaveCategories = async (cats: CategoryInfo[]) => {
     try {
       await saveCategories(cats);
@@ -72,12 +70,10 @@ const Admin = () => {
       toast.error('Erro ao salvar categorias');
     }
   };
-
   const handleUpdatePageTexts = (texts: PageTexts) => {
     console.log('🔄 Admin: Atualizando pageTexts:', texts);
     setPageTexts(texts);
   };
-
   const handleSavePageTexts = async () => {
     try {
       console.log('💾 Admin: Salvando pageTexts:', pageTexts);
@@ -88,23 +84,21 @@ const Admin = () => {
       toast.error('Erro ao salvar textos das páginas');
     }
   };
-
   const handleSaveTeamMembers = async () => {
     try {
       console.log('💾 Admin: Salvando teamMembers:', teamMembers);
       await saveTeamMembers(teamMembers);
       toast.success('Equipe salva com sucesso!');
-      
+
       // Disparar evento para atualizar a seção Partners
-      window.dispatchEvent(new CustomEvent('teamMembersUpdated', { 
-        detail: teamMembers 
+      window.dispatchEvent(new CustomEvent('teamMembersUpdated', {
+        detail: teamMembers
       }));
     } catch (error) {
       console.error('Erro ao salvar equipe:', error);
       toast.error('Erro ao salvar equipe');
     }
   };
-
   const handleAddTeamMember = () => {
     const newMember: TeamMember = {
       id: crypto.randomUUID(),
@@ -119,21 +113,19 @@ const Admin = () => {
     setTeamMembers(updatedMembers);
     console.log('➕ Admin: Adicionando novo membro:', newMember);
   };
-
   const handleRemoveTeamMember = (id: string) => {
     const updatedMembers = teamMembers.filter(member => member.id !== id);
     setTeamMembers(updatedMembers);
     console.log('🗑️ Admin: Removendo membro:', id);
   };
-
   const handleUpdateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
-    const updatedMembers = teamMembers.map(member => 
-      member.id === id ? { ...member, [field]: value } : member
-    );
+    const updatedMembers = teamMembers.map(member => member.id === id ? {
+      ...member,
+      [field]: value
+    } : member);
     setTeamMembers(updatedMembers);
     console.log('✏️ Admin: Atualizando membro:', id, field, value);
   };
-
   const handleSaveBlogPosts = async (posts: BlogPost[]) => {
     try {
       await saveBlogPosts(posts);
@@ -143,30 +135,20 @@ const Admin = () => {
       toast.error('Erro ao salvar posts do blog');
     }
   };
-
   const validPageTexts: PageTexts = pageTexts && Object.keys(pageTexts).length > 0 ? pageTexts : defaultPageTexts;
   const validTeamMembers: TeamMember[] = teamMembers || [];
   const validBlogPosts: BlogPost[] = blogPosts || [];
-
-  return (
-    <AdminProtectedRoute>
-      {isLoading ? (
-        <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
+  return <AdminProtectedRoute>
+      {isLoading ? <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
           <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-        </div>
-      ) : (
-        <div className={`min-h-screen p-6 admin-layout ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`} style={{ overflow: 'auto', height: 'auto' }}>
+        </div> : <div className={`min-h-screen p-6 admin-layout ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'}`} style={{
+      overflow: 'auto',
+      height: 'auto'
+    }}>
           <div className="max-w-7xl mx-auto">
             <AdminHeader onLogout={logout} />
 
-            <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-green-500/10 border border-green-500/20' : 'bg-green-50 border border-green-200'}`}>
-              <p className={`text-sm ${isDark ? 'text-green-300' : 'text-green-700'}`}>
-                🔒 Sistema Seguro Ativo: Row Level Security (RLS) implementado em todas as tabelas
-              </p>
-              <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                📊 Status: {servicePages?.length || 0} páginas | 📂 Categorias: {categories?.length || 0} | 👥 Equipe: {validTeamMembers.length} | 📝 Blog: {validBlogPosts.length} posts
-              </p>
-            </div>
+            
 
             <Tabs defaultValue="content" className="space-y-6">
               <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-gray-900 border border-gray-700' : 'bg-gray-900 border border-gray-700'}`}>
@@ -193,35 +175,15 @@ const Admin = () => {
               </TabsList>
 
               <TabsContent value="content">
-                <ContentManagement 
-                  teamMembers={validTeamMembers}
-                  pageTexts={validPageTexts}
-                  onAddTeamMember={handleAddTeamMember}
-                  onRemoveTeamMember={handleRemoveTeamMember}
-                  onUpdateTeamMember={handleUpdateTeamMember}
-                  onSaveTeamMembers={handleSaveTeamMembers}
-                  onUpdatePageTexts={handleUpdatePageTexts}
-                  onSavePageTexts={handleSavePageTexts}
-                />
+                <ContentManagement teamMembers={validTeamMembers} pageTexts={validPageTexts} onAddTeamMember={handleAddTeamMember} onRemoveTeamMember={handleRemoveTeamMember} onUpdateTeamMember={handleUpdateTeamMember} onSaveTeamMembers={handleSaveTeamMembers} onUpdatePageTexts={handleUpdatePageTexts} onSavePageTexts={handleSavePageTexts} />
               </TabsContent>
 
               <TabsContent value="service-pages">
-                <ServicePagesManager 
-                  servicePages={servicePages || []}
-                  categories={categories || []}
-                  pageTexts={validPageTexts}
-                  onSave={handleSaveServicePages}
-                  onSaveCategories={handleSaveCategories}
-                  onSavePageTexts={handleSavePageTexts}
-                  onUpdatePageTexts={handleUpdatePageTexts}
-                />
+                <ServicePagesManager servicePages={servicePages || []} categories={categories || []} pageTexts={validPageTexts} onSave={handleSaveServicePages} onSaveCategories={handleSaveCategories} onSavePageTexts={handleSavePageTexts} onUpdatePageTexts={handleUpdatePageTexts} />
               </TabsContent>
 
               <TabsContent value="blog">
-                <BlogManagement 
-                  blogPosts={validBlogPosts}
-                  onSave={handleSaveBlogPosts}
-                />
+                <BlogManagement blogPosts={validBlogPosts} onSave={handleSaveBlogPosts} />
               </TabsContent>
 
               <TabsContent value="linktree">
@@ -233,10 +195,7 @@ const Admin = () => {
               </TabsContent>
             </Tabs>
           </div>
-        </div>
-      )}
-    </AdminProtectedRoute>
-  );
+        </div>}
+    </AdminProtectedRoute>;
 };
-
 export default Admin;
