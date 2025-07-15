@@ -878,6 +878,110 @@ export function LinkTreeManagement() {
                         </div>
                       </div>}
 
+                    {linkTreeData.background_type === 'gradient' && (
+                      <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
+                        <h4 className="font-semibold text-foreground">Configurações do Gradiente</h4>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Cor Inicial</Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                type="color" 
+                                value={linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea'} 
+                                onChange={(e) => {
+                                  const color1 = e.target.value;
+                                  const color2 = linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2';
+                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  setLinkTreeData(prev => ({
+                                    ...prev,
+                                    background_gradient: newGradient
+                                  }));
+                                  if (linkTree) {
+                                    setLinkTree(prev => ({
+                                      ...prev!,
+                                      background_gradient: newGradient
+                                    }));
+                                  }
+                                }} 
+                                className="w-16 h-10" 
+                              />
+                              <Input 
+                                value={linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea'} 
+                                onChange={(e) => {
+                                  const color1 = e.target.value;
+                                  const color2 = linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2';
+                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  setLinkTreeData(prev => ({
+                                    ...prev,
+                                    background_gradient: newGradient
+                                  }));
+                                  if (linkTree) {
+                                    setLinkTree(prev => ({
+                                      ...prev!,
+                                      background_gradient: newGradient
+                                    }));
+                                  }
+                                }} 
+                                placeholder="#667eea" 
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label>Cor Final</Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                type="color" 
+                                value={linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2'} 
+                                onChange={(e) => {
+                                  const color1 = linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea';
+                                  const color2 = e.target.value;
+                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  setLinkTreeData(prev => ({
+                                    ...prev,
+                                    background_gradient: newGradient
+                                  }));
+                                  if (linkTree) {
+                                    setLinkTree(prev => ({
+                                      ...prev!,
+                                      background_gradient: newGradient
+                                    }));
+                                  }
+                                }} 
+                                className="w-16 h-10" 
+                              />
+                              <Input 
+                                value={linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2'} 
+                                onChange={(e) => {
+                                  const color1 = linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea';
+                                  const color2 = e.target.value;
+                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  setLinkTreeData(prev => ({
+                                    ...prev,
+                                    background_gradient: newGradient
+                                  }));
+                                  if (linkTree) {
+                                    setLinkTree(prev => ({
+                                      ...prev!,
+                                      background_gradient: newGradient
+                                    }));
+                                  }
+                                }} 
+                                placeholder="#764ba2" 
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 p-3 rounded-lg border" style={{
+                          background: linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)'
+                        }}>
+                          <p className="text-white text-sm text-center">Preview do Gradiente</p>
+                        </div>
+                      </div>
+                    )}
+
                     {(linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video') && <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
                         <h4 className="font-semibold text-foreground">Configurações de Mídia</h4>
                         
@@ -936,20 +1040,75 @@ export function LinkTreeManagement() {
                           </div>}
 
                         <div>
-                          <Label>Opacidade do Fundo ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
-                          <input type="range" min="0" max="1" step="0.05" value={(linkTreeData as any).background_opacity || 0.8} onChange={e => {
-                        const opacity = parseFloat(e.target.value);
-                        setLinkTreeData(prev => ({
-                          ...prev,
-                          background_opacity: opacity
-                        }));
-                        if (linkTree) {
-                          setLinkTree(prev => ({
-                            ...prev!,
-                            background_opacity: opacity
-                          }) as any);
-                        }
-                      }} className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer" />
+                          <Label>Cor de Fundo (sob a mídia)</Label>
+                          <div className="flex gap-2">
+                            <Input 
+                              type="color" 
+                              value={linkTreeData.background_color || '#000000'} 
+                              onChange={e => {
+                                const newColor = e.target.value;
+                                setLinkTreeData(prev => ({
+                                  ...prev,
+                                  background_color: newColor
+                                }));
+                                if (linkTree) {
+                                  setLinkTree(prev => ({
+                                    ...prev!,
+                                    background_color: newColor
+                                  }));
+                                }
+                              }} 
+                              className="w-16 h-10" 
+                            />
+                            <Input 
+                              value={linkTreeData.background_color || '#000000'} 
+                              onChange={e => {
+                                const newColor = e.target.value;
+                                setLinkTreeData(prev => ({
+                                  ...prev,
+                                  background_color: newColor
+                                }));
+                                if (linkTree) {
+                                  setLinkTree(prev => ({
+                                    ...prev!,
+                                    background_color: newColor
+                                  }));
+                                }
+                              }} 
+                              placeholder="#000000" 
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Cor que aparece atrás da imagem/vídeo
+                          </p>
+                        </div>
+
+                        <div>
+                          <Label>Opacidade da Mídia ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
+                          <input 
+                            type="range" 
+                            min="0" 
+                            max="1" 
+                            step="0.05" 
+                            value={(linkTreeData as any).background_opacity || 0.8} 
+                            onChange={e => {
+                              const opacity = parseFloat(e.target.value);
+                              setLinkTreeData(prev => ({
+                                ...prev,
+                                background_opacity: opacity
+                              }));
+                              if (linkTree) {
+                                setLinkTree(prev => ({
+                                  ...prev!,
+                                  background_opacity: opacity
+                                }) as any);
+                              }
+                            }} 
+                            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer" 
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Controla a transparência da imagem/vídeo sobre o fundo
+                          </p>
                         </div>
                       </div>}
                   </div>
