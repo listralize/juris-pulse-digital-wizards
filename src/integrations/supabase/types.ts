@@ -628,6 +628,7 @@ export type Database = {
           custom_body_scripts: string | null
           custom_head_scripts: string | null
           event_tracking_config: Json | null
+          facebook_conversion_api_token: string | null
           facebook_custom_code: string | null
           facebook_pixel_enabled: boolean | null
           facebook_pixel_id: string | null
@@ -645,6 +646,7 @@ export type Database = {
           custom_body_scripts?: string | null
           custom_head_scripts?: string | null
           event_tracking_config?: Json | null
+          facebook_conversion_api_token?: string | null
           facebook_custom_code?: string | null
           facebook_pixel_enabled?: boolean | null
           facebook_pixel_id?: string | null
@@ -662,6 +664,7 @@ export type Database = {
           custom_body_scripts?: string | null
           custom_head_scripts?: string | null
           event_tracking_config?: Json | null
+          facebook_conversion_api_token?: string | null
           facebook_custom_code?: string | null
           facebook_pixel_enabled?: boolean | null
           facebook_pixel_id?: string | null

@@ -542,9 +542,9 @@ export const MarketingManagement: React.FC = () => {
                 <Label htmlFor="facebook-enabled">Ativar Facebook Pixel</Label>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <Label htmlFor="facebook-pixel-id">Pixel ID</Label>
+                  <Label htmlFor="facebook-pixel-id">Facebook Pixel ID</Label>
                   <Input
                     id="facebook-pixel-id"
                     placeholder="123456789012345"
@@ -554,6 +554,23 @@ export const MarketingManagement: React.FC = () => {
                       facebookPixel: { ...prev.facebookPixel, pixelId: e.target.value }
                     }))}
                   />
+                </div>
+                
+                <div>
+                  <Label htmlFor="facebook-conversion-api-token">Token API de Conversão</Label>
+                  <Input
+                    id="facebook-conversion-api-token"
+                    type="password"
+                    placeholder="Token da API de Conversão do Facebook"
+                    value={marketingScripts.facebookPixel.conversionApiToken}
+                    onChange={(e) => setMarketingScripts(prev => ({
+                      ...prev,
+                      facebookPixel: { ...prev.facebookPixel, conversionApiToken: e.target.value }
+                    }))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Configure na <a href="https://business.facebook.com/events_manager2/list/pixel" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Central de Eventos do Facebook</a>
+                  </p>
                 </div>
               </div>
               
