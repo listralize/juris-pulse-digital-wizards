@@ -765,14 +765,14 @@ export const MarketingManagement: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {conversionTracking.systemForms.filter(form => form.enabled).length === 0 ? (
+              {conversionTracking.systemForms.length === 0 ? (
                 <div className="text-center p-8 text-muted-foreground">
-                  <p>Nenhum formulário ativo para gerar scripts.</p>
-                  <p className="text-sm">Ative pelo menos um formulário acima para ver os scripts de conversão.</p>
+                  <p>Nenhum formulário encontrado.</p>
+                  <p className="text-sm">Clique em "Atualizar" na aba de Rastreamento para carregar os formulários.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {conversionTracking.systemForms.filter(form => form.enabled).map((form, index) => (
+                  {conversionTracking.systemForms.map((form, index) => (
                     <div key={form.formId} className="border rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="default">{form.formId}</Badge>
