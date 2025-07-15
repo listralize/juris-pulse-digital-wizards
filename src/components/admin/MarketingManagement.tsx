@@ -19,11 +19,9 @@ import {
   Save,
   CheckCircle,
   AlertCircle,
-  Loader2,
-  TrendingUp,
-  Target
+  Loader2
 } from 'lucide-react';
-import { ConversionsTab } from './ConversionsTab';
+import { ConversionFunnel } from './ConversionFunnel';
 
 interface MarketingSettings {
   id: string;
@@ -284,7 +282,7 @@ export const MarketingManagement: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Marketing & Analytics</h2>
-          <p className="text-muted-foreground">Configure scripts de rastreamento e analise conversões</p>
+          <p className="text-muted-foreground">Configure scripts de rastreamento e marketing</p>
         </div>
         <div className="flex items-center gap-2">
           {hasChanges && (
@@ -305,22 +303,14 @@ export const MarketingManagement: React.FC = () => {
       </div>
 
       <Tabs defaultValue="scripts" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="scripts" className="flex items-center gap-2">
             <Code className="w-4 h-4" />
             Scripts & Rastreamento
           </TabsTrigger>
-          <TabsTrigger value="conversions" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Conversões
-          </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="campaigns" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Campanhas
+            Funil de Conversão
           </TabsTrigger>
         </TabsList>
 
@@ -489,48 +479,8 @@ export const MarketingManagement: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="conversions">
-          <ConversionsTab />
-        </TabsContent>
-
         <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Analytics Avançado
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <BarChart3 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Analytics Avançado</h3>
-                <p className="text-muted-foreground">
-                  Relatórios detalhados de tráfego e comportamento dos usuários em breve
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="campaigns">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Gestão de Campanhas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <TrendingUp className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Gestão de Campanhas</h3>
-                <p className="text-muted-foreground">
-                  Crie e gerencie campanhas de marketing integradas em breve
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <ConversionFunnel />
         </TabsContent>
       </Tabs>
     </div>
