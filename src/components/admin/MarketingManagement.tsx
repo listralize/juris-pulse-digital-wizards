@@ -983,50 +983,8 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
             </Card>
           </div>
 
-          {/* Funil de Conversão */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Funil de Conversão (Últimos 7 dias)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="font-medium">Visitantes</span>
-                  </div>
-                  <span className="text-xl font-bold">{analyticsData?.funnelData?.visitors || 0}</span>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="font-medium">Usuários Engajados</span>
-                  </div>
-                  <span className="text-xl font-bold">{analyticsData?.funnelData?.engagedUsers || 0}</span>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                    <span className="font-medium">Leads Qualificados</span>
-                  </div>
-                  <span className="text-xl font-bold">{analyticsData?.funnelData?.qualifiedLeads || 0}</span>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <span className="font-medium">Conversões</span>
-                  </div>
-                  <span className="text-xl font-bold">{analyticsData?.funnelData?.conversions || 0}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Funil de Conversão Completo */}
+          <ConversionFunnel analyticsData={analyticsData} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Submissões por Formulário */}
@@ -1216,11 +1174,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           </Card>
         </TabsContent>
 
-        <TabsContent value="funnel">
-        <TabsContent value="funnel">
-          <ConversionFunnel analyticsData={analyticsData} />
-        </TabsContent>
-        </TabsContent>
       </Tabs>
     </div>
   );
