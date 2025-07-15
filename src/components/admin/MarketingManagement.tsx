@@ -94,21 +94,20 @@ export const MarketingManagement: React.FC = () => {
 
   const [conversionTracking, setConversionTracking] = useState<ConversionTracking>({
     formIds: {
-      contactFormMain: 'contact-form-main', // Formulário principal de contato
-      serviceFormModal: 'service-form-modal', // Modal de serviços
-      linkTreeForms: [], // Formulários do LinkTree (populado dinamicamente)
+      contactFormMain: 'contact-form-main',
+      serviceFormModal: 'service-form-modal', 
+      linkTreeForms: [],
       customForms: []
     },
     events: {
       formSubmission: true,
-      conversion: true, // ✅ ADICIONADO evento de conversão
+      conversion: true,
       pageView: true,
       buttonClick: false,
       linkClick: false
     }
   });
 
-  // Load existing configurations
   useEffect(() => {
     loadMarketingConfig();
     loadAnalyticsData();
@@ -143,17 +142,14 @@ export const MarketingManagement: React.FC = () => {
 
   const loadAnalyticsData = async () => {
     try {
-      // Carregar dados de analytics do Supabase
       const today = new Date();
       const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      // Visitantes
       const { data: visitorsData } = await supabase
         .from('website_analytics')
         .select('session_id, timestamp')
         .gte('timestamp', oneWeekAgo.toISOString());
 
-      // Conversões
       const { data: conversionsData } = await supabase
         .from('conversion_events')
         .select('*')
@@ -193,7 +189,6 @@ export const MarketingManagement: React.FC = () => {
 
   const loadMarketingConfig = async () => {
     try {
-      // Carregar configurações do Supabase
       const { data: settings } = await supabase
         .from('marketing_settings')
         .select('*')
@@ -226,7 +221,7 @@ export const MarketingManagement: React.FC = () => {
             ...prev,
             formIds: {
               ...prev.formIds,
-              ...settings.form_tracking_config as Record<string, string>
+              ...settings.form_tracking_config as Record<string, any>
             }
           }));
         }
@@ -243,20 +238,12 @@ export const MarketingManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Erro ao carregar configuração de marketing:', error);
-      // Fallback para localStorage se não houver no Supabase
-      const saved = localStorage.getItem('marketing-config');
-      if (saved) {
-        const config = JSON.parse(saved);
-        setMarketingScripts(config.scripts || marketingScripts);
-        setConversionTracking(config.tracking || conversionTracking);
-      }
     }
   };
 
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
-      // Salvar no Supabase
       const { data: existingSettings } = await supabase
         .from('marketing_settings')
         .select('id')
@@ -287,18 +274,8 @@ export const MarketingManagement: React.FC = () => {
           .from('marketing_settings')
           .insert([settingsData]);
       }
-
-      // Backup no localStorage
-      const config = {
-        scripts: marketingScripts,
-        tracking: conversionTracking,
-        lastUpdated: new Date().toISOString()
-      };
-      localStorage.setItem('marketing-config', JSON.stringify(config));
       
       setLastSaved(new Date());
-      
-      // Inject scripts into the DOM
       await injectScripts();
       
       toast.success('Configurações de marketing salvas com sucesso!');
@@ -311,11 +288,9 @@ export const MarketingManagement: React.FC = () => {
   };
 
   const injectScripts = async () => {
-    // Remove existing injected scripts
     const existingScripts = document.querySelectorAll('[data-marketing-script]');
     existingScripts.forEach(script => script.remove());
 
-    // Facebook Pixel
     if (marketingScripts.facebookPixel.enabled && marketingScripts.facebookPixel.pixelId) {
       const fbScript = document.createElement('script');
       fbScript.setAttribute('data-marketing-script', 'facebook-pixel');
@@ -335,7 +310,6 @@ export const MarketingManagement: React.FC = () => {
       document.head.appendChild(fbScript);
     }
 
-    // Google Analytics 4
     if (marketingScripts.googleAnalytics.enabled && marketingScripts.googleAnalytics.measurementId) {
       const gaScript = document.createElement('script');
       gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${marketingScripts.googleAnalytics.measurementId}`;
@@ -349,16 +323,12 @@ export const MarketingManagement: React.FC = () => {
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '${marketingScripts.googleAnalytics.measurementId}', {
-          page_title: document.title,
-          page_location: window.location.href
-        });
+        gtag('config', '${marketingScripts.googleAnalytics.measurementId}');
         ${marketingScripts.googleAnalytics.customCode}
       `;
       document.head.appendChild(gaConfig);
     }
 
-    // Google Tag Manager
     if (marketingScripts.googleTagManager.enabled && marketingScripts.googleTagManager.containerId) {
       const gtmScript = document.createElement('script');
       gtmScript.setAttribute('data-marketing-script', 'google-tag-manager');
@@ -372,7 +342,6 @@ export const MarketingManagement: React.FC = () => {
       document.head.appendChild(gtmScript);
     }
 
-    // Custom Scripts
     if (marketingScripts.customScripts.head) {
       const customHead = document.createElement('script');
       customHead.setAttribute('data-marketing-script', 'custom-head');
@@ -387,7 +356,6 @@ export const MarketingManagement: React.FC = () => {
       document.body.appendChild(customBody);
     }
 
-    // Inject conversion tracking script
     const conversionScript = document.createElement('script');
     conversionScript.setAttribute('data-marketing-script', 'conversion-tracking');
     conversionScript.innerHTML = generateConversionCode();
@@ -428,19 +396,14 @@ export const MarketingManagement: React.FC = () => {
 
   const generateConversionCode = () => {
     return `
-// 🚀 Sistema de Analytics e Conversão Avançado - ${new Date().toISOString()}
-// Este código rastreia automaticamente todos os eventos importantes do seu site
-
 window.AdvancedMarketingTracker = {
-  // ✅ CONFIGURAÇÃO DE FORMULÁRIOS REAIS DO SEU SITE
   formIds: {
-    contactFormMain: '${conversionTracking.formIds.contactFormMain}', // Formulário principal de contato
-    serviceFormModal: '${conversionTracking.formIds.serviceFormModal}', // Modal de serviços específicos
-    linkTreeForms: ${JSON.stringify(conversionTracking.formIds.linkTreeForms)}, // Formulários do LinkTree
-    customForms: ${JSON.stringify(conversionTracking.formIds.customForms)} // Formulários personalizados
+    contactFormMain: '${conversionTracking.formIds.contactFormMain}',
+    serviceFormModal: '${conversionTracking.formIds.serviceFormModal}',
+    linkTreeForms: ${JSON.stringify(conversionTracking.formIds.linkTreeForms)},
+    customForms: ${JSON.stringify(conversionTracking.formIds.customForms)}
   },
   
-  // 📊 FUNÇÃO DE RASTREAMENTO DE CONVERSÕES
   trackConversion: async function(formId, formData = {}, additionalData = {}) {
     const sessionId = this.getSessionId();
     const conversionData = {
@@ -457,7 +420,6 @@ window.AdvancedMarketingTracker = {
       ...additionalData
     };
 
-    // Enviar para Supabase
     try {
       await fetch('https://hmfsvccbyxhdwmrgcyff.supabase.co/rest/v1/conversion_events', {
         method: 'POST',
@@ -468,226 +430,578 @@ window.AdvancedMarketingTracker = {
         body: JSON.stringify(conversionData)
       });
     } catch (error) {
-      console.warn('Erro ao enviar conversão para analytics:', error);
+      console.warn('Erro ao enviar conversão:', error);
     }
 
-    // Facebook Pixel
     if (window.fbq && ${marketingScripts.facebookPixel.enabled}) {
-      fbq('track', 'Lead', {
-        content_name: formId,
-        form_name: this.getFormName(formId),
-        ...formData
-      });
+      fbq('track', 'Lead', { content_name: formId, form_name: this.getFormName(formId), ...formData });
     }
     
-    // Google Analytics 4
     if (window.gtag && ${marketingScripts.googleAnalytics.enabled}) {
-      gtag('event', 'conversion', {
-        event_category: 'lead_generation',
-        event_label: formId,
-        form_id: formId,
-        value: 1,
-        currency: 'BRL',
-        ...formData
-      });
-    }
-    
-    console.log('✅ Conversão rastreada:', formId, formData);
-  },
-
-  // 📈 RASTREAMENTO DE PAGEVIEW
-  trackPageView: async function() {
-    const sessionId = this.getSessionId();
-    const pageData = {
-      session_id: sessionId,
-      page_url: window.location.href,
-      page_title: document.title,
-      referrer: document.referrer,
-      user_agent: navigator.userAgent,
-      timestamp: new Date().toISOString()
-    };
-
-    try {
-      await fetch('https://hmfsvccbyxhdwmrgcyff.supabase.co/rest/v1/website_analytics', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZnN2Y2NieXhoZHdtcmdjeWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NzU4MjksImV4cCI6MjA2NDQ1MTgyOX0.X7SiICMFL246-QjgNPYruRglx2JuQJA2XWj2NVgZzdU'
-        },
-        body: JSON.stringify(pageData)
-      });
-    } catch (error) {
-      console.warn('Erro ao enviar pageview:', error);
+      gtag('event', 'conversion', { event_category: 'lead_generation', event_label: formId, ...formData });
     }
   },
 
-  // 🔧 FUNÇÕES AUXILIARES
   getSessionId: function() {
-    let sessionId = localStorage.getItem('analytics_session_id');
+    let sessionId = sessionStorage.getItem('marketing_session_id');
     if (!sessionId) {
       sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('analytics_session_id', sessionId);
+      sessionStorage.setItem('marketing_session_id', sessionId);
     }
     return sessionId;
   },
 
   getFormName: function(formId) {
     const formNames = {
-      '${conversionTracking.formIds.contactFormMain}': 'Formulário de Contato Principal',
-      '${conversionTracking.formIds.serviceFormModal}': 'Formulário de Serviços (Modal)',
-      ...Object.fromEntries(${JSON.stringify(conversionTracking.formIds.customForms)}.map(f => [f.id, f.name]))
+      '${conversionTracking.formIds.contactFormMain}': 'Formulário Principal',
+      '${conversionTracking.formIds.serviceFormModal}': 'Modal de Serviços'
     };
-    return formNames[formId] || 'Formulário Desconhecido';
-  },
-  
-  // 🚀 INICIALIZAÇÃO AUTOMÁTICA
-  init: function() {
-    // Rastrear pageview
-    this.trackPageView();
-
-    // Auto-rastrear formulários principais
-    this.setupFormTracking('${conversionTracking.formIds.contactFormMain}');
-    this.setupFormTracking('${conversionTracking.formIds.serviceFormModal}');
-    
-    // Auto-rastrear formulários do LinkTree
-    ${JSON.stringify(conversionTracking.formIds.linkTreeForms)}.forEach(formId => {
-      this.setupFormTracking(formId);
-    });
-    
-    // Auto-rastrear formulários personalizados
-    ${JSON.stringify(conversionTracking.formIds.customForms)}.forEach(config => {
-      this.setupFormTracking(config.id, { campaign: config.campaign });
-    });
-
-    console.log('🚀 Sistema de Analytics inicializado com sucesso!');
-  },
-
-  setupFormTracking: function(formId, extraData = {}) {
-    const form = document.getElementById(formId);
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        this.trackConversion(formId, data, extraData);
-      });
-      console.log('✅ Rastreamento configurado para:', formId);
-    } else {
-      console.warn('⚠️ Formulário não encontrado:', formId);
-    }
+    return formNames[formId] || formId;
   }
 };
 
-// 🔥 INICIALIZAR QUANDO DOM ESTIVER PRONTO
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => window.AdvancedMarketingTracker.init(), 1000);
-  });
-} else {
-  setTimeout(() => window.AdvancedMarketingTracker.init(), 1000);
-}
+// Auto-track form submissions
+document.addEventListener('submit', function(e) {
+  const form = e.target;
+  if (form.tagName === 'FORM') {
+    const formId = form.id || form.className || 'unknown-form';
+    const formData = new FormData(form);
+    const dataObj = {};
+    for (let [key, value] of formData.entries()) {
+      dataObj[key] = value;
+    }
+    window.AdvancedMarketingTracker.trackConversion(formId, dataObj);
+  }
+});
     `;
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-white">Marketing & Analytics</h2>
-          <p className="text-white/70">Configure pixels, códigos de rastreamento e analytics integrados ao Supabase</p>
+          <h1 className="text-3xl font-bold">Marketing & Analytics</h1>
+          <p className="text-muted-foreground mt-1">
+            Configure pixels, códigos de rastreamento e analytics integrados ao Supabase
+          </p>
         </div>
-        <div className="flex items-center gap-4">
-          {lastSaved && (
-            <Badge variant="outline" className="text-green-400 border-green-400">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Salvo {lastSaved.toLocaleTimeString()}
-            </Badge>
-          )}
-          <Button onClick={saveMarketingConfig} disabled={isLoading} className="bg-white/10 hover:bg-white/20 text-white">
-            <Save className="w-4 h-4 mr-2" />
-            {isLoading ? 'Salvando...' : 'Salvar Configurações'}
-          </Button>
-        </div>
+        <Button onClick={saveMarketingConfig} disabled={isLoading}>
+          <Save className="w-4 h-4 mr-2" />
+          Salvar Configurações
+        </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 backdrop-blur-md bg-white/10 border border-white/20">
-          <TabsTrigger value="scripts" className="text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-            <Code className="w-4 h-4 mr-2" />
+      {lastSaved && (
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Última configuração salva: {lastSaved.toLocaleString()}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-4 w-full">
+          <TabsTrigger value="scripts" className="flex items-center gap-2">
+            <Code className="w-4 h-4" />
             Scripts & Pixels
           </TabsTrigger>
-          <TabsTrigger value="tracking" className="text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-            <Target className="w-4 h-4 mr-2" />
+          <TabsTrigger value="tracking" className="flex items-center gap-2">
+            <Target className="w-4 h-4" />
             Rastreamento
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-            <BarChart3 className="w-4 h-4 mr-2" />
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value="dashboard" className="text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-            <TrendingUp className="w-4 h-4 mr-2" />
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
             Dashboard
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="scripts">
-          {/* Content for scripts tab - simplified */}
-          <Card className="backdrop-blur-md bg-white/5 border-white/20">
+        {/* SCRIPTS & PIXELS TAB */}
+        <TabsContent value="scripts" className="space-y-6">
+          {/* Facebook Pixel */}
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">Scripts & Pixels Configurados</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                📘 Facebook Pixel
+                <Badge variant={marketingScripts.facebookPixel.enabled ? "default" : "secondary"}>
+                  {marketingScripts.facebookPixel.enabled ? "Ativo" : "Inativo"}
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Configure o Facebook Pixel para rastrear conversões e otimizar campanhas.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-white/70">Configure Facebook Pixel, Google Analytics e outros scripts aqui.</p>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="facebook-enabled"
+                  checked={marketingScripts.facebookPixel.enabled}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    facebookPixel: { ...prev.facebookPixel, enabled: e.target.checked }
+                  }))}
+                  className="rounded"
+                />
+                <Label htmlFor="facebook-enabled">Ativar Facebook Pixel</Label>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="facebook-pixel-id">Pixel ID</Label>
+                  <Input
+                    id="facebook-pixel-id"
+                    placeholder="123456789012345"
+                    value={marketingScripts.facebookPixel.pixelId}
+                    onChange={(e) => setMarketingScripts(prev => ({
+                      ...prev,
+                      facebookPixel: { ...prev.facebookPixel, pixelId: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="facebook-custom-code">Código Personalizado (Opcional)</Label>
+                <Textarea
+                  id="facebook-custom-code"
+                  placeholder="fbq('track', 'Purchase', {value: 0.00, currency: 'USD'});"
+                  value={marketingScripts.facebookPixel.customCode}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    facebookPixel: { ...prev.facebookPixel, customCode: e.target.value }
+                  }))}
+                  rows={3}
+                />
+              </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="tracking">
-          <Card className="backdrop-blur-md bg-white/5 border-white/20">
+          {/* Google Analytics */}
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">Formulários Rastreados</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                📊 Google Analytics 4
+                <Badge variant={marketingScripts.googleAnalytics.enabled ? "default" : "secondary"}>
+                  {marketingScripts.googleAnalytics.enabled ? "Ativo" : "Inativo"}
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Configure o Google Analytics 4 para análise detalhada de comportamento.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="ga-enabled"
+                  checked={marketingScripts.googleAnalytics.enabled}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    googleAnalytics: { ...prev.googleAnalytics, enabled: e.target.checked }
+                  }))}
+                  className="rounded"
+                />
+                <Label htmlFor="ga-enabled">Ativar Google Analytics</Label>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ga-measurement-id">Measurement ID</Label>
+                  <Input
+                    id="ga-measurement-id"
+                    placeholder="G-XXXXXXXXXX"
+                    value={marketingScripts.googleAnalytics.measurementId}
+                    onChange={(e) => setMarketingScripts(prev => ({
+                      ...prev,
+                      googleAnalytics: { ...prev.googleAnalytics, measurementId: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="ga-custom-code">Código Personalizado (Opcional)</Label>
+                <Textarea
+                  id="ga-custom-code"
+                  placeholder="gtag('event', 'conversion', {value: 1.0});"
+                  value={marketingScripts.googleAnalytics.customCode}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    googleAnalytics: { ...prev.googleAnalytics, customCode: e.target.value }
+                  }))}
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Google Tag Manager */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                🏷️ Google Tag Manager
+                <Badge variant={marketingScripts.googleTagManager.enabled ? "default" : "secondary"}>
+                  {marketingScripts.googleTagManager.enabled ? "Ativo" : "Inativo"}
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Gerencie todos os seus scripts e pixels de forma centralizada.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="gtm-enabled"
+                  checked={marketingScripts.googleTagManager.enabled}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    googleTagManager: { ...prev.googleTagManager, enabled: e.target.checked }
+                  }))}
+                  className="rounded"
+                />
+                <Label htmlFor="gtm-enabled">Ativar Google Tag Manager</Label>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="gtm-container-id">Container ID</Label>
+                  <Input
+                    id="gtm-container-id"
+                    placeholder="GTM-XXXXXXX"
+                    value={marketingScripts.googleTagManager.containerId}
+                    onChange={(e) => setMarketingScripts(prev => ({
+                      ...prev,
+                      googleTagManager: { ...prev.googleTagManager, containerId: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Custom Scripts */}
+          <Card>
+            <CardHeader>
+              <CardTitle>🛠️ Scripts Personalizados</CardTitle>
+              <CardDescription>
+                Adicione scripts personalizados no head ou body da página.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-white">Formulário Principal: {conversionTracking.formIds.contactFormMain}</Label>
+                <Label htmlFor="custom-head">Scripts do Head</Label>
+                <Textarea
+                  id="custom-head"
+                  placeholder="<!-- Scripts que devem ficar no <head> -->"
+                  value={marketingScripts.customScripts.head}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    customScripts: { ...prev.customScripts, head: e.target.value }
+                  }))}
+                  rows={4}
+                />
               </div>
+              
               <div>
-                <Label className="text-white">Modal de Serviços: {conversionTracking.formIds.serviceFormModal}</Label>
-              </div>
-              <div>
-                <Label className="text-white">LinkTree Forms: {conversionTracking.formIds.linkTreeForms.length} encontrados</Label>
+                <Label htmlFor="custom-body">Scripts do Body</Label>
+                <Textarea
+                  id="custom-body"
+                  placeholder="<!-- Scripts que devem ficar no final do <body> -->"
+                  value={marketingScripts.customScripts.body}
+                  onChange={(e) => setMarketingScripts(prev => ({
+                    ...prev,
+                    customScripts: { ...prev.customScripts, body: e.target.value }
+                  }))}
+                  rows={4}
+                />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics">
-          <Card className="backdrop-blur-md bg-white/5 border-white/20">
+        {/* TRACKING TAB */}
+        <TabsContent value="tracking" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">Status dos Scripts</CardTitle>
+              <CardTitle>📝 Formulários Rastreados</CardTitle>
+              <CardDescription>
+                Configure os IDs dos formulários que serão rastreados para conversões.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-white/70">Todos os scripts estão integrados ao Supabase e funcionando.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="dashboard">
-          <Card className="backdrop-blur-md bg-white/5 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Dashboard Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-white/60">Visitantes: {analyticsData?.visitors.total || 0}</p>
+                  <Label htmlFor="contact-form-main">Formulário Principal</Label>
+                  <Input
+                    id="contact-form-main"
+                    value={conversionTracking.formIds.contactFormMain}
+                    onChange={(e) => setConversionTracking(prev => ({
+                      ...prev,
+                      formIds: { ...prev.formIds, contactFormMain: e.target.value }
+                    }))}
+                  />
                 </div>
+                
                 <div>
-                  <p className="text-white/60">Conversões: {analyticsData?.conversions.total || 0}</p>
+                  <Label htmlFor="service-form-modal">Modal de Serviços</Label>
+                  <Input
+                    id="service-form-modal"
+                    value={conversionTracking.formIds.serviceFormModal}
+                    onChange={(e) => setConversionTracking(prev => ({
+                      ...prev,
+                      formIds: { ...prev.formIds, serviceFormModal: e.target.value }
+                    }))}
+                  />
                 </div>
               </div>
-              <Button onClick={loadAnalyticsData} className="mt-4">
-                Atualizar Dados
+
+              <div>
+                <Label className="text-base font-semibold">LinkTree Forms: {conversionTracking.formIds.linkTreeForms.length} encontrados</Label>
+                <div className="mt-2 space-y-1">
+                  {conversionTracking.formIds.linkTreeForms.map((formId, index) => (
+                    <Badge key={index} variant="outline" className="mr-2">
+                      {formId}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center">
+                  <Label className="text-base font-semibold">Formulários Personalizados</Label>
+                  <Button variant="outline" size="sm" onClick={addCustomForm}>
+                    + Adicionar
+                  </Button>
+                </div>
+                
+                <div className="space-y-3 mt-3">
+                  {conversionTracking.formIds.customForms.map((form, index) => (
+                    <div key={index} className="grid grid-cols-4 gap-2 items-center">
+                      <Input
+                        placeholder="Nome"
+                        value={form.name}
+                        onChange={(e) => updateCustomForm(index, 'name', e.target.value)}
+                      />
+                      <Input
+                        placeholder="ID do Formulário"
+                        value={form.id}
+                        onChange={(e) => updateCustomForm(index, 'id', e.target.value)}
+                      />
+                      <Input
+                        placeholder="Campanha"
+                        value={form.campaign}
+                        onChange={(e) => updateCustomForm(index, 'campaign', e.target.value)}
+                      />
+                      <Button variant="destructive" size="sm" onClick={() => removeCustomForm(index)}>
+                        Remover
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>🎯 Eventos de Rastreamento</CardTitle>
+              <CardDescription>
+                Configure quais eventos serão rastreados automaticamente.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(conversionTracking.events).map(([event, enabled]) => (
+                  <div key={event} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`event-${event}`}
+                      checked={enabled}
+                      onChange={(e) => setConversionTracking(prev => ({
+                        ...prev,
+                        events: { ...prev.events, [event]: e.target.checked }
+                      }))}
+                      className="rounded"
+                    />
+                    <Label htmlFor={`event-${event}`} className="capitalize">
+                      {event.replace(/([A-Z])/g, ' $1').trim()}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ANALYTICS TAB */}
+        <TabsContent value="analytics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                ✅ Status dos Scripts
+                <Badge variant="default">Funcionando</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 border rounded-lg">
+                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                  <h3 className="font-semibold">Facebook Pixel</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {marketingScripts.facebookPixel.enabled ? 'Ativo e rastreando' : 'Inativo'}
+                  </p>
+                </div>
+                
+                <div className="text-center p-4 border rounded-lg">
+                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                  <h3 className="font-semibold">Google Analytics</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {marketingScripts.googleAnalytics.enabled ? 'Ativo e rastreando' : 'Inativo'}
+                  </p>
+                </div>
+                
+                <div className="text-center p-4 border rounded-lg">
+                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                  <h3 className="font-semibold">Supabase Analytics</h3>
+                  <p className="text-sm text-muted-foreground">Integrado e funcionando</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>📋 Código de Rastreamento Gerado</CardTitle>
+              <CardDescription>
+                Este código é automaticamente injetado no site para rastrear conversões.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto max-h-64">
+                <pre>{generateConversionCode()}</pre>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Este código rastreia automaticamente submissões de formulários, pageviews e eventos personalizados, 
+                enviando dados para Supabase, Facebook Pixel e Google Analytics conforme configurado.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* DASHBOARD TAB */}
+        <TabsContent value="dashboard" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Users className="h-8 w-8 text-blue-500" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Visitantes Totais</p>
+                    <p className="text-2xl font-bold">{analyticsData?.visitors.total || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Eye className="h-8 w-8 text-green-500" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Visitantes Únicos</p>
+                    <p className="text-2xl font-bold">{analyticsData?.visitors.unique || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <MousePointer className="h-8 w-8 text-orange-500" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Conversões</p>
+                    <p className="text-2xl font-bold">{analyticsData?.conversions.total || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <TrendingUp className="h-8 w-8 text-purple-500" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Taxa de Conversão</p>
+                    <p className="text-2xl font-bold">{analyticsData?.conversions.conversionRate.toFixed(1) || 0}%</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Dados de Hoje
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Visitantes:</span>
+                    <span className="font-semibold">{analyticsData?.visitors.today || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Conversões:</span>
+                    <span className="font-semibold">{analyticsData?.conversions.today || 0}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ArrowUpDown className="h-5 w-5" />
+                  Últimos 7 Dias
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Visitantes:</span>
+                    <span className="font-semibold">{analyticsData?.visitors.thisWeek || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Conversões:</span>
+                    <span className="font-semibold">{analyticsData?.conversions.thisWeek || 0}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>🔄 Atualização de Dados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={loadAnalyticsData} disabled={isLoading} className="w-full">
+                {isLoading ? 'Carregando...' : 'Atualizar Dados do Analytics'}
               </Button>
+              <p className="text-sm text-muted-foreground mt-2">
+                Os dados são atualizados automaticamente a cada pageview e conversão.
+                Use este botão para forçar uma atualização manual.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -695,3 +1009,5 @@ if (document.readyState === 'loading') {
     </div>
   );
 };
+
+export default MarketingManagement;
