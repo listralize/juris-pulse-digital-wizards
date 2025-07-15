@@ -7,9 +7,10 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown } from 'lucide-react';
+import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useFormConfig } from '@/hooks/useFormConfig';
 
 interface MarketingScripts {
   facebookPixel: {
@@ -32,13 +33,19 @@ interface MarketingScripts {
   };
 }
 
+interface FormTrackingConfig {
+  formId: string;
+  formName: string;
+  submitButtonId: string;
+  webhookUrl?: string;
+  enabled: boolean;
+  campaign?: string;
+}
+
 interface ConversionTracking {
-  formIds: {
-    contactFormMain: string;
-    serviceFormModal: string;
-    linkTreeForms: string[];
-    customForms: Array<{ name: string; id: string; campaign: string; }>;
-  };
+  systemForms: FormTrackingConfig[];
+  linkTreeForms: string[];
+  customForms: Array<{ name: string; id: string; campaign: string; submitButtonId: string; }>;
   events: {
     formSubmission: boolean;
     conversion: boolean;
@@ -70,6 +77,7 @@ export const MarketingManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const { multipleFormsConfig } = useFormConfig();
   
   const [marketingScripts, setMarketingScripts] = useState<MarketingScripts>({
     facebookPixel: {
@@ -93,12 +101,9 @@ export const MarketingManagement: React.FC = () => {
   });
 
   const [conversionTracking, setConversionTracking] = useState<ConversionTracking>({
-    formIds: {
-      contactFormMain: 'contact-form-main',
-      serviceFormModal: 'service-form-modal', 
-      linkTreeForms: [],
-      customForms: []
-    },
+    systemForms: [],
+    linkTreeForms: [],
+    customForms: [],
     events: {
       formSubmission: true,
       conversion: true,
@@ -112,7 +117,26 @@ export const MarketingManagement: React.FC = () => {
     loadMarketingConfig();
     loadAnalyticsData();
     loadLinkTreeForms();
-  }, []);
+    loadSystemForms();
+  }, [multipleFormsConfig]);
+
+  const loadSystemForms = () => {
+    if (multipleFormsConfig?.forms) {
+      const systemForms: FormTrackingConfig[] = multipleFormsConfig.forms.map(form => ({
+        formId: form.id,
+        formName: form.name,
+        submitButtonId: `submit-${form.id}`,
+        webhookUrl: form.webhookUrl,
+        enabled: true,
+        campaign: ''
+      }));
+
+      setConversionTracking(prev => ({
+        ...prev,
+        systemForms
+      }));
+    }
+  };
 
   const loadLinkTreeForms = async () => {
     try {
@@ -129,10 +153,7 @@ export const MarketingManagement: React.FC = () => {
 
         setConversionTracking(prev => ({
           ...prev,
-          formIds: {
-            ...prev.formIds,
-            linkTreeForms: linkTreeFormIds
-          }
+          linkTreeForms: linkTreeFormIds
         }));
       }
     } catch (error) {
@@ -217,12 +238,11 @@ export const MarketingManagement: React.FC = () => {
         });
 
         if (settings.form_tracking_config && typeof settings.form_tracking_config === 'object') {
+          const savedConfig = settings.form_tracking_config as any;
           setConversionTracking(prev => ({
             ...prev,
-            formIds: {
-              ...prev.formIds,
-              ...settings.form_tracking_config as Record<string, any>
-            }
+            systemForms: savedConfig.systemForms || prev.systemForms,
+            customForms: savedConfig.customForms || prev.customForms
           }));
         }
 
@@ -260,8 +280,12 @@ export const MarketingManagement: React.FC = () => {
         google_tag_manager_id: marketingScripts.googleTagManager.containerId,
         custom_head_scripts: marketingScripts.customScripts.head,
         custom_body_scripts: marketingScripts.customScripts.body,
-        form_tracking_config: conversionTracking.formIds,
-        event_tracking_config: conversionTracking.events
+        form_tracking_config: JSON.parse(JSON.stringify({
+          systemForms: conversionTracking.systemForms,
+          linkTreeForms: conversionTracking.linkTreeForms,
+          customForms: conversionTracking.customForms
+        })),
+        event_tracking_config: JSON.parse(JSON.stringify(conversionTracking.events))
       };
 
       if (existingSettings) {
@@ -272,7 +296,7 @@ export const MarketingManagement: React.FC = () => {
       } else {
         await supabase
           .from('marketing_settings')
-          .insert([settingsData]);
+          .insert(settingsData);
       }
       
       setLastSaved(new Date());
@@ -362,47 +386,53 @@ export const MarketingManagement: React.FC = () => {
     document.head.appendChild(conversionScript);
   };
 
+  const updateSystemForm = (index: number, field: keyof FormTrackingConfig, value: string | boolean) => {
+    setConversionTracking(prev => ({
+      ...prev,
+      systemForms: prev.systemForms.map((form, i) => 
+        i === index ? { ...form, [field]: value } : form
+      )
+    }));
+  };
+
   const addCustomForm = () => {
     setConversionTracking(prev => ({
       ...prev,
-      formIds: {
-        ...prev.formIds,
-        customForms: [...prev.formIds.customForms, { name: '', id: '', campaign: '' }]
-      }
+      customForms: [...prev.customForms, { name: '', id: '', campaign: '', submitButtonId: '' }]
     }));
   };
 
   const removeCustomForm = (index: number) => {
     setConversionTracking(prev => ({
       ...prev,
-      formIds: {
-        ...prev.formIds,
-        customForms: prev.formIds.customForms.filter((_, i) => i !== index)
-      }
+      customForms: prev.customForms.filter((_, i) => i !== index)
     }));
   };
 
   const updateCustomForm = (index: number, field: string, value: string) => {
     setConversionTracking(prev => ({
       ...prev,
-      formIds: {
-        ...prev.formIds,
-        customForms: prev.formIds.customForms.map((form, i) => 
-          i === index ? { ...form, [field]: value } : form
-        )
-      }
+      customForms: prev.customForms.map((form, i) => 
+        i === index ? { ...form, [field]: value } : form
+      )
     }));
   };
 
   const generateConversionCode = () => {
+    const systemFormsConfig = conversionTracking.systemForms.reduce((acc, form) => {
+      acc[form.formId] = {
+        name: form.formName,
+        submitButtonId: form.submitButtonId,
+        enabled: form.enabled
+      };
+      return acc;
+    }, {} as Record<string, any>);
+
     return `
 window.AdvancedMarketingTracker = {
-  formIds: {
-    contactFormMain: '${conversionTracking.formIds.contactFormMain}',
-    serviceFormModal: '${conversionTracking.formIds.serviceFormModal}',
-    linkTreeForms: ${JSON.stringify(conversionTracking.formIds.linkTreeForms)},
-    customForms: ${JSON.stringify(conversionTracking.formIds.customForms)}
-  },
+  systemForms: ${JSON.stringify(systemFormsConfig)},
+  linkTreeForms: ${JSON.stringify(conversionTracking.linkTreeForms)},
+  customForms: ${JSON.stringify(conversionTracking.customForms)},
   
   trackConversion: async function(formId, formData = {}, additionalData = {}) {
     const sessionId = this.getSessionId();
@@ -452,11 +482,7 @@ window.AdvancedMarketingTracker = {
   },
 
   getFormName: function(formId) {
-    const formNames = {
-      '${conversionTracking.formIds.contactFormMain}': 'Formulário Principal',
-      '${conversionTracking.formIds.serviceFormModal}': 'Modal de Serviços'
-    };
-    return formNames[formId] || formId;
+    return this.systemForms[formId]?.name || formId;
   }
 };
 
@@ -727,87 +753,137 @@ document.addEventListener('submit', function(e) {
 
         {/* TRACKING TAB */}
         <TabsContent value="tracking" className="space-y-6">
+          {/* System Forms */}
           <Card>
             <CardHeader>
-              <CardTitle>📝 Formulários Rastreados</CardTitle>
+              <CardTitle>📝 Formulários do Sistema</CardTitle>
               <CardDescription>
-                Configure os IDs dos formulários que serão rastreados para conversões.
+                Formulários configurados no sistema com opções de rastreamento personalizadas.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="contact-form-main">Formulário Principal</Label>
-                  <Input
-                    id="contact-form-main"
-                    value={conversionTracking.formIds.contactFormMain}
-                    onChange={(e) => setConversionTracking(prev => ({
-                      ...prev,
-                      formIds: { ...prev.formIds, contactFormMain: e.target.value }
-                    }))}
-                  />
+              {conversionTracking.systemForms.map((form, index) => (
+                <div key={form.formId} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{form.formId}</Badge>
+                      <span className="font-medium">{form.formName}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`form-enabled-${index}`}
+                        checked={form.enabled}
+                        onChange={(e) => updateSystemForm(index, 'enabled', e.target.checked)}
+                        className="rounded"
+                      />
+                      <Label htmlFor={`form-enabled-${index}`}>Rastrear</Label>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>ID do Botão de Submit</Label>
+                      <Input
+                        value={form.submitButtonId}
+                        onChange={(e) => updateSystemForm(index, 'submitButtonId', e.target.value)}
+                        placeholder="submit-button-id"
+                      />
+                    </div>
+                    <div>
+                      <Label>Campanha (Opcional)</Label>
+                      <Input
+                        value={form.campaign || ''}
+                        onChange={(e) => updateSystemForm(index, 'campaign', e.target.value)}
+                        placeholder="nome-da-campanha"
+                      />
+                    </div>
+                  </div>
+                  
+                  {form.webhookUrl && (
+                    <div>
+                      <Label>Webhook URL</Label>
+                      <Input
+                        value={form.webhookUrl}
+                        readOnly
+                        className="bg-muted"
+                      />
+                    </div>
+                  )}
                 </div>
-                
-                <div>
-                  <Label htmlFor="service-form-modal">Modal de Serviços</Label>
-                  <Input
-                    id="service-form-modal"
-                    value={conversionTracking.formIds.serviceFormModal}
-                    onChange={(e) => setConversionTracking(prev => ({
-                      ...prev,
-                      formIds: { ...prev.formIds, serviceFormModal: e.target.value }
-                    }))}
-                  />
-                </div>
-              </div>
+              ))}
+            </CardContent>
+          </Card>
 
-              <div>
-                <Label className="text-base font-semibold">LinkTree Forms: {conversionTracking.formIds.linkTreeForms.length} encontrados</Label>
-                <div className="mt-2 space-y-1">
-                  {conversionTracking.formIds.linkTreeForms.map((formId, index) => (
-                    <Badge key={index} variant="outline" className="mr-2">
+          {/* LinkTree Forms */}
+          <Card>
+            <CardHeader>
+              <CardTitle>🔗 Formulários LinkTree</CardTitle>
+              <CardDescription>
+                Formulários encontrados nos itens do LinkTree.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">
+                  {conversionTracking.linkTreeForms.length} formulários encontrados
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {conversionTracking.linkTreeForms.map((formId, index) => (
+                    <Badge key={index} variant="outline">
                       {formId}
                     </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center">
-                  <Label className="text-base font-semibold">Formulários Personalizados</Label>
-                  <Button variant="outline" size="sm" onClick={addCustomForm}>
-                    + Adicionar
-                  </Button>
-                </div>
-                
-                <div className="space-y-3 mt-3">
-                  {conversionTracking.formIds.customForms.map((form, index) => (
-                    <div key={index} className="grid grid-cols-4 gap-2 items-center">
-                      <Input
-                        placeholder="Nome"
-                        value={form.name}
-                        onChange={(e) => updateCustomForm(index, 'name', e.target.value)}
-                      />
-                      <Input
-                        placeholder="ID do Formulário"
-                        value={form.id}
-                        onChange={(e) => updateCustomForm(index, 'id', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Campanha"
-                        value={form.campaign}
-                        onChange={(e) => updateCustomForm(index, 'campaign', e.target.value)}
-                      />
-                      <Button variant="destructive" size="sm" onClick={() => removeCustomForm(index)}>
-                        Remover
-                      </Button>
-                    </div>
                   ))}
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Custom Forms */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                🛠️ Formulários Personalizados
+                <Button variant="outline" size="sm" onClick={addCustomForm}>
+                  + Adicionar
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Adicione formulários personalizados para rastreamento.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {conversionTracking.customForms.map((form, index) => (
+                <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                  <Input
+                    placeholder="Nome"
+                    value={form.name}
+                    onChange={(e) => updateCustomForm(index, 'name', e.target.value)}
+                  />
+                  <Input
+                    placeholder="ID do Formulário"
+                    value={form.id}
+                    onChange={(e) => updateCustomForm(index, 'id', e.target.value)}
+                  />
+                  <Input
+                    placeholder="ID do Botão Submit"
+                    value={form.submitButtonId}
+                    onChange={(e) => updateCustomForm(index, 'submitButtonId', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Campanha"
+                    value={form.campaign}
+                    onChange={(e) => updateCustomForm(index, 'campaign', e.target.value)}
+                  />
+                  <Button variant="destructive" size="sm" onClick={() => removeCustomForm(index)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Event Tracking */}
           <Card>
             <CardHeader>
               <CardTitle>🎯 Eventos de Rastreamento</CardTitle>
