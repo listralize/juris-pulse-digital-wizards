@@ -323,8 +323,6 @@ export const MarketingManagement: React.FC = () => {
         console.log('📈 Analytics calculados:', newAnalyticsData);
         setAnalyticsData(newAnalyticsData);
       }
-      console.log('✅ Dados de analytics carregados com sucesso!', analyticsData);
-      toast.success('Dados atualizados com sucesso!');
     } catch (error) {
       console.error('❌ Erro ao carregar dados de analytics:', error);
       toast.error('Erro ao carregar dados de analytics');
@@ -363,8 +361,19 @@ export const MarketingManagement: React.FC = () => {
           }
         });
 
-        if (settings.form_tracking_config && typeof settings.form_tracking_config === 'object') {
-          const savedConfig = settings.form_tracking_config as any;
+        if (settings.form_tracking_config) {
+          let savedConfig;
+          if (typeof settings.form_tracking_config === 'string') {
+            try {
+              savedConfig = JSON.parse(settings.form_tracking_config);
+            } catch (e) {
+              console.error('Erro ao parsear form_tracking_config:', e);
+              savedConfig = {};
+            }
+          } else {
+            savedConfig = settings.form_tracking_config;
+          }
+          
           setConversionTracking({
             systemForms: savedConfig.systemForms || [],
             linkTreeForms: savedConfig.linkTreeForms || [],
