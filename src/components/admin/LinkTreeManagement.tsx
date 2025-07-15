@@ -421,6 +421,31 @@ export function LinkTreeManagement() {
       setIsSaving(false);
     }
   };
+
+  // Helper functions para gradiente
+  const parseGradientColors = (gradient: string) => {
+    const defaultColor1 = '#667eea';
+    const defaultColor2 = '#764ba2';
+    
+    if (!gradient || !gradient.includes('linear-gradient')) {
+      return { color1: defaultColor1, color2: defaultColor2 };
+    }
+    
+    // Extrair cores do formato: linear-gradient(135deg, #cor1, #cor2)
+    const match = gradient.match(/linear-gradient\([^,]*,\s*([^,]+),\s*([^)]+)\)/);
+    if (match) {
+      return {
+        color1: match[1].trim(),
+        color2: match[2].trim()
+      };
+    }
+    
+    return { color1: defaultColor1, color2: defaultColor2 };
+  };
+
+  const createGradient = (color1: string, color2: string) => {
+    return `linear-gradient(135deg, ${color1}, ${color2})`;
+  };
   const saveLinkTreeItem = async (itemData: any) => {
     try {
       const {
@@ -888,11 +913,7 @@ export function LinkTreeManagement() {
                             <div className="flex gap-2">
                               <Input 
                                 type="color" 
-                                 value={(() => {
-                                   const gradient = linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)';
-                                   const match = gradient.match(/linear-gradient\([^,]+,\s*([^,]+)/);
-                                   return match ? match[1].trim() : '#667eea';
-                                 })()}
+                                 value={parseGradientColors(linkTreeData.background_gradient || '').color1}
                                 onChange={(e) => {
                                   const color1 = e.target.value;
                                   const color2 = linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2';
@@ -937,11 +958,7 @@ export function LinkTreeManagement() {
                             <div className="flex gap-2">
                               <Input 
                                 type="color" 
-                                 value={(() => {
-                                   const gradient = linkTreeData.background_gradient || 'linear-gradient(135deg, #667eea, #764ba2)';
-                                   const match = gradient.match(/,\s*([^)]+)\)/);
-                                   return match ? match[1].trim() : '#764ba2';
-                                 })()}
+                                 value={parseGradientColors(linkTreeData.background_gradient || '').color2}
                                 onChange={(e) => {
                                   const color1 = linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea';
                                   const color2 = e.target.value;
