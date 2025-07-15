@@ -15,13 +15,17 @@ import { LinkTreePreview } from '@/components/LinkTreePreview';
 import { useToast } from '@/hooks/use-toast';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { IconSelector } from './IconSelector';
-
 export function LinkTreeManagement() {
   const [linkTree, setLinkTree] = useState<LinkTree | null>(null);
   const [items, setItems] = useState<LinkTreeItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  const { formConfig, multipleFormsConfig } = useFormConfig();
+  const {
+    toast
+  } = useToast();
+  const {
+    formConfig,
+    multipleFormsConfig
+  } = useFormConfig();
 
   // Estados para o novo item
   const [newItem, setNewItem] = useState({
@@ -71,7 +75,11 @@ export function LinkTreeManagement() {
     description_color: '#ffffff',
     footer_enabled: true,
     footer_text: '',
-    footer_social_links: [] as Array<{platform: string; url: string; icon?: string}>,
+    footer_social_links: [] as Array<{
+      platform: string;
+      url: string;
+      icon?: string;
+    }>,
     footer_background_color: '#1a1a1a',
     footer_text_color: '#ffffff',
     footer_style: 'minimal' as 'minimal' | 'modern' | 'complete'
@@ -79,89 +87,172 @@ export function LinkTreeManagement() {
 
   // Estado para edição de item
   const [editingItem, setEditingItem] = useState<LinkTreeItem | null>(null);
-
-  const itemTypeOptions = [
-    { value: 'link', label: '🔗 Link', description: 'Link básico para qualquer URL' },
-    { value: 'card', label: '📄 Card Premium', description: 'Card com imagem, texto e botão de ação' },
-    { value: 'form', label: '📝 Formulário', description: 'Formulário de contato integrado' },
-    { value: 'video', label: '🎥 Vídeo/Mídia', description: 'Vídeo institucional ou apresentação' },
-    { value: 'text', label: '📝 Informativo', description: 'Bloco de texto ou aviso importante' },
-    { value: 'service', label: '⚖️ Serviços Jurídicos', description: 'Destaque para áreas de atuação' }
-  ];
-
-  const layoutOptions = [
-    { value: 'list', label: '☰ Lista Elegante', description: 'Lista vertical tradicional' },
-    { value: 'grid', label: '⊞ Grid Premium', description: 'Layout em grade organizada' },
-    { value: 'bento', label: '⊡ Bento Grid', description: 'Grid estilo Bento moderno' },
-    { value: 'carousel', label: '⟵⟶ Carrossel', description: 'Navegação por slides' }
-  ];
-
-  const themeOptions = [
-    { value: 'modern', label: '✨ Moderno', color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-    { value: 'minimal', label: '⚪ Minimalista', color: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' },
-    { value: 'dark', label: '🖤 Dark Elite', color: 'linear-gradient(135deg, #434343 0%, #000000 100%)' },
-    { value: 'corporate', label: '💼 Corporativo', color: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)' },
-    { value: 'premium', label: '👑 Premium', color: 'linear-gradient(135deg, #ffd700 0%, #ffb347 100%)' },
-    { value: 'gold', label: '🥇 Gold', color: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)' },
-    { value: 'platinum', label: '💎 Platinum', color: 'linear-gradient(135deg, #c0c0c0 0%, #e6e6e6 100%)' },
-    { value: 'custom', label: '🎨 Personalizado', color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
-  ];
-
-  const backgroundTypeOptions = [
-    { value: 'solid', label: '⬜ Cor Sólida' },
-    { value: 'gradient', label: '🌈 Gradiente' },
-    { value: 'neural', label: '🧠 Neural' },
-    { value: 'image', label: '🖼️ Imagem' },
-    { value: 'video', label: '🎥 Vídeo' }
-  ];
-
-  const buttonStyleOptions = [
-    { value: 'rounded', label: '⬜ Arredondado' },
-    { value: 'square', label: '⬛ Quadrado' },
-    { value: 'pill', label: '💊 Pílula' },
-    { value: 'glassmorphism', label: '💎 Glassmorphism' },
-    { value: 'neon', label: '⚡ Neon' },
-    { value: 'gradient', label: '🌈 Gradiente' },
-    { value: 'custom', label: '🎨 Personalizado' }
-  ];
-
-  const animationOptions = [
-    { value: 'none', label: '🚫 Sem Animação' },
-    { value: 'fade', label: '🌅 Fade' },
-    { value: 'slide', label: '➡️ Slide' },
-    { value: 'bounce', label: '🏀 Bounce' },
-    { value: 'pulse', label: '💓 Pulse' },
-    { value: 'glow', label: '✨ Glow' }
-  ];
-
-  const hoverEffectOptions = [
-    { value: 'none', label: 'Nenhum' },
-    { value: 'scale', label: 'Escala' },
-    { value: 'glow', label: 'Brilho' },
-    { value: 'lift', label: 'Elevação' },
-    { value: 'bounce', label: 'Salto' },
-    { value: 'rotate', label: 'Rotação' }
-  ];
-
+  const itemTypeOptions = [{
+    value: 'link',
+    label: '🔗 Link',
+    description: 'Link básico para qualquer URL'
+  }, {
+    value: 'card',
+    label: '📄 Card Premium',
+    description: 'Card com imagem, texto e botão de ação'
+  }, {
+    value: 'form',
+    label: '📝 Formulário',
+    description: 'Formulário de contato integrado'
+  }, {
+    value: 'video',
+    label: '🎥 Vídeo/Mídia',
+    description: 'Vídeo institucional ou apresentação'
+  }, {
+    value: 'text',
+    label: '📝 Informativo',
+    description: 'Bloco de texto ou aviso importante'
+  }, {
+    value: 'service',
+    label: '⚖️ Serviços Jurídicos',
+    description: 'Destaque para áreas de atuação'
+  }];
+  const layoutOptions = [{
+    value: 'list',
+    label: '☰ Lista Elegante',
+    description: 'Lista vertical tradicional'
+  }, {
+    value: 'grid',
+    label: '⊞ Grid Premium',
+    description: 'Layout em grade organizada'
+  }, {
+    value: 'bento',
+    label: '⊡ Bento Grid',
+    description: 'Grid estilo Bento moderno'
+  }, {
+    value: 'carousel',
+    label: '⟵⟶ Carrossel',
+    description: 'Navegação por slides'
+  }];
+  const themeOptions = [{
+    value: 'modern',
+    label: '✨ Moderno',
+    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  }, {
+    value: 'minimal',
+    label: '⚪ Minimalista',
+    color: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+  }, {
+    value: 'dark',
+    label: '🖤 Dark Elite',
+    color: 'linear-gradient(135deg, #434343 0%, #000000 100%)'
+  }, {
+    value: 'corporate',
+    label: '💼 Corporativo',
+    color: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)'
+  }, {
+    value: 'premium',
+    label: '👑 Premium',
+    color: 'linear-gradient(135deg, #ffd700 0%, #ffb347 100%)'
+  }, {
+    value: 'gold',
+    label: '🥇 Gold',
+    color: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)'
+  }, {
+    value: 'platinum',
+    label: '💎 Platinum',
+    color: 'linear-gradient(135deg, #c0c0c0 0%, #e6e6e6 100%)'
+  }, {
+    value: 'custom',
+    label: '🎨 Personalizado',
+    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  }];
+  const backgroundTypeOptions = [{
+    value: 'solid',
+    label: '⬜ Cor Sólida'
+  }, {
+    value: 'gradient',
+    label: '🌈 Gradiente'
+  }, {
+    value: 'neural',
+    label: '🧠 Neural'
+  }, {
+    value: 'image',
+    label: '🖼️ Imagem'
+  }, {
+    value: 'video',
+    label: '🎥 Vídeo'
+  }];
+  const buttonStyleOptions = [{
+    value: 'rounded',
+    label: '⬜ Arredondado'
+  }, {
+    value: 'square',
+    label: '⬛ Quadrado'
+  }, {
+    value: 'pill',
+    label: '💊 Pílula'
+  }, {
+    value: 'glassmorphism',
+    label: '💎 Glassmorphism'
+  }, {
+    value: 'neon',
+    label: '⚡ Neon'
+  }, {
+    value: 'gradient',
+    label: '🌈 Gradiente'
+  }, {
+    value: 'custom',
+    label: '🎨 Personalizado'
+  }];
+  const animationOptions = [{
+    value: 'none',
+    label: '🚫 Sem Animação'
+  }, {
+    value: 'fade',
+    label: '🌅 Fade'
+  }, {
+    value: 'slide',
+    label: '➡️ Slide'
+  }, {
+    value: 'bounce',
+    label: '🏀 Bounce'
+  }, {
+    value: 'pulse',
+    label: '💓 Pulse'
+  }, {
+    value: 'glow',
+    label: '✨ Glow'
+  }];
+  const hoverEffectOptions = [{
+    value: 'none',
+    label: 'Nenhum'
+  }, {
+    value: 'scale',
+    label: 'Escala'
+  }, {
+    value: 'glow',
+    label: 'Brilho'
+  }, {
+    value: 'lift',
+    label: 'Elevação'
+  }, {
+    value: 'bounce',
+    label: 'Salto'
+  }, {
+    value: 'rotate',
+    label: 'Rotação'
+  }];
   useEffect(() => {
     loadLinkTree();
   }, []);
-
   const loadLinkTree = async () => {
     try {
       setLoading(true);
-      
-      // Buscar link tree
-      const { data: linkTreeData, error: linkTreeError } = await supabase
-        .from('link_tree')
-        .select('*')
-        .eq('is_active', true)
-        .single();
 
+      // Buscar link tree
+      const {
+        data: linkTreeData,
+        error: linkTreeError
+      } = await supabase.from('link_tree').select('*').eq('is_active', true).single();
       if (linkTreeError && linkTreeError.code !== 'PGRST116') {
         throw linkTreeError;
       }
-
       if (linkTreeData) {
         setLinkTree(linkTreeData as any);
         setLinkTreeData({
@@ -169,18 +260,19 @@ export function LinkTreeManagement() {
           description: linkTreeData.description || '',
           background_color: linkTreeData.background_color || '#000000',
           text_color: linkTreeData.text_color || '#ffffff',
-          button_style: (linkTreeData.button_style as LinkTree['button_style']) || 'list',
+          button_style: linkTreeData.button_style as LinkTree['button_style'] || 'list',
           avatar_url: linkTreeData.avatar_url || '',
           avatar_size: (linkTreeData as any).avatar_size || '128',
-          theme: (linkTreeData.theme as LinkTree['theme']) || 'modern',
-          background_type: (linkTreeData.background_type as LinkTree['background_type']) || 'neural',
+          theme: linkTreeData.theme as LinkTree['theme'] || 'modern',
+          background_type: linkTreeData.background_type as LinkTree['background_type'] || 'neural',
           background_gradient: linkTreeData.background_gradient || '',
           background_image: linkTreeData.background_image || '',
           background_video: linkTreeData.background_video || '',
           background_opacity: (linkTreeData as any).background_opacity || 0.5,
           custom_css: linkTreeData.custom_css || '',
-          animation_style: (linkTreeData.animation_style as LinkTree['animation_style']) || 'glow',
-          show_analytics: false, // Remove analytics
+          animation_style: linkTreeData.animation_style as LinkTree['animation_style'] || 'glow',
+          show_analytics: false,
+          // Remove analytics
           is_active: linkTreeData.is_active || true,
           title_size: 'text-3xl',
           title_font: 'font-bold',
@@ -196,13 +288,10 @@ export function LinkTreeManagement() {
         });
 
         // Buscar itens
-        const { data: itemsData, error: itemsError } = await supabase
-          .from('link_tree_items')
-          .select('*')
-          .eq('link_tree_id', linkTreeData.id)
-          .eq('is_active', true)
-          .order('display_order');
-
+        const {
+          data: itemsData,
+          error: itemsError
+        } = await supabase.from('link_tree_items').select('*').eq('link_tree_id', linkTreeData.id).eq('is_active', true).order('display_order');
         if (itemsError) throw itemsError;
         setItems((itemsData || []) as LinkTreeItem[]);
       } else {
@@ -220,26 +309,23 @@ export function LinkTreeManagement() {
       setLoading(false);
     }
   };
-
   const createDefaultLinkTree = async () => {
     try {
-      const { data, error } = await supabase
-        .from('link_tree')
-        .insert([{
-          title: 'Meu Link Tree',
-          description: '',
-          background_color: '#000000',
-          text_color: '#ffffff',
-          button_style: 'list',
-          theme: 'modern',
-          background_type: 'neural',
-          animation_style: 'glow',
-          show_analytics: false,
-          is_active: true
-        }])
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('link_tree').insert([{
+        title: 'Meu Link Tree',
+        description: '',
+        background_color: '#000000',
+        text_color: '#ffffff',
+        button_style: 'list',
+        theme: 'modern',
+        background_type: 'neural',
+        animation_style: 'glow',
+        show_analytics: false,
+        is_active: true
+      }]).select().single();
       if (error) throw error;
       setLinkTree(data as any);
     } catch (error) {
@@ -251,7 +337,6 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   const saveLinkTree = async () => {
     try {
       // Preparar dados completos para salvar
@@ -280,42 +365,33 @@ export function LinkTreeManagement() {
         footer_text_color: linkTreeData.footer_text_color,
         footer_style: linkTreeData.footer_style
       };
-
       if (linkTree?.id) {
         // Atualizar existente
-        const { data, error } = await supabase
-          .from('link_tree')
-          .update(dataToSave)
-          .eq('id', linkTree.id)
-          .select()
-          .single();
-        
+        const {
+          data,
+          error
+        } = await supabase.from('link_tree').update(dataToSave).eq('id', linkTree.id).select().single();
         if (error) {
           throw error;
         }
-        
+
         // Atualizar estado local
         setLinkTree(data as any);
       } else {
         // Criar novo
-        const { data, error } = await supabase
-          .from('link_tree')
-          .insert([dataToSave])
-          .select()
-          .single();
-        
+        const {
+          data,
+          error
+        } = await supabase.from('link_tree').insert([dataToSave]).select().single();
         if (error) {
           throw error;
         }
-        
         setLinkTree(data as any);
       }
-
       toast({
         title: "Sucesso",
         description: "Configurações salvas com sucesso!"
       });
-
     } catch (error) {
       console.error('Erro ao salvar Link Tree:', error);
       toast({
@@ -325,17 +401,13 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   const saveLinkTreeItem = async (itemData: any) => {
     try {
-      const { data, error } = await supabase
-        .from('link_tree_items')
-        .insert([itemData])
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('link_tree_items').insert([itemData]).select().single();
       if (error) throw error;
-
       setItems(prev => [...prev, data as LinkTreeItem]);
       toast({
         title: "Sucesso",
@@ -350,14 +422,11 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   const moveItem = async (itemId: string, direction: 'up' | 'down') => {
     const currentIndex = items.findIndex(item => item.id === itemId);
     if (currentIndex === -1) return;
-
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (newIndex < 0 || newIndex >= items.length) return;
-
     const newItems = [...items];
     [newItems[currentIndex], newItems[newIndex]] = [newItems[newIndex], newItems[currentIndex]];
 
@@ -367,14 +436,11 @@ export function LinkTreeManagement() {
         id: item.id,
         display_order: index
       }));
-
       for (const update of updates) {
-        await supabase
-          .from('link_tree_items')
-          .update({ display_order: update.display_order })
-          .eq('id', update.id);
+        await supabase.from('link_tree_items').update({
+          display_order: update.display_order
+        }).eq('id', update.id);
       }
-
       setItems(newItems);
       toast({
         title: "Sucesso",
@@ -389,44 +455,37 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   const handleAddItem = async () => {
     if (!linkTree || !newItem.title) return;
-
     try {
       // Mapear 'text' para 'info' para compatibilidade com constraint
       const itemType = newItem.item_type === 'text' ? 'info' : newItem.item_type;
-      
-      const { error } = await supabase
-        .from('link_tree_items')
-        .insert({
-          link_tree_id: linkTree.id,
-          title: newItem.title,
-          url: newItem.url,
-          icon: newItem.icon,
-          icon_size: newItem.icon_size,
-          icon_color: newItem.icon_color,
-          background_color: newItem.background_color,
-          text_color: newItem.text_color,
-          button_style: newItem.button_style,
-          hover_effect: newItem.hover_effect,
-          display_order: items.length,
-          is_featured: newItem.is_featured,
-          item_type: itemType,
-          card_content: newItem.card_content,
-          card_image: newItem.card_image,
-          card_price: newItem.card_price,
-          card_button_text: newItem.card_button_text,
-          card_size: newItem.card_size,
-          card_format: newItem.card_format,
-          form_id: newItem.item_type === 'form' ? newItem.form_id : null,
-          form_fields: newItem.item_type === 'form' && formConfig 
-            ? JSON.stringify(formConfig) 
-            : null
-        });
-
+      const {
+        error
+      } = await supabase.from('link_tree_items').insert({
+        link_tree_id: linkTree.id,
+        title: newItem.title,
+        url: newItem.url,
+        icon: newItem.icon,
+        icon_size: newItem.icon_size,
+        icon_color: newItem.icon_color,
+        background_color: newItem.background_color,
+        text_color: newItem.text_color,
+        button_style: newItem.button_style,
+        hover_effect: newItem.hover_effect,
+        display_order: items.length,
+        is_featured: newItem.is_featured,
+        item_type: itemType,
+        card_content: newItem.card_content,
+        card_image: newItem.card_image,
+        card_price: newItem.card_price,
+        card_button_text: newItem.card_button_text,
+        card_size: newItem.card_size,
+        card_format: newItem.card_format,
+        form_id: newItem.item_type === 'form' ? newItem.form_id : null,
+        form_fields: newItem.item_type === 'form' && formConfig ? JSON.stringify(formConfig) : null
+      });
       if (error) throw error;
-
       toast({
         title: "Item adicionado!",
         description: "O item foi adicionado com sucesso ao Link Tree.",
@@ -454,7 +513,6 @@ export function LinkTreeManagement() {
         card_size: 'medium',
         card_format: 'rounded'
       });
-
       await loadLinkTree();
     } catch (error) {
       console.error('Erro ao adicionar item:', error);
@@ -465,7 +523,6 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   const handleEditItem = (item: LinkTreeItem) => {
     setEditingItem(item);
     setNewItem({
@@ -476,10 +533,10 @@ export function LinkTreeManagement() {
       icon_color: item.icon_color || '#000000',
       background_color: item.background_color || '#ffffff',
       text_color: item.text_color || '#000000',
-      button_style: (item.button_style as any) || 'inherit',
-      hover_effect: (item.hover_effect as any) || 'scale',
+      button_style: item.button_style as any || 'inherit',
+      hover_effect: item.hover_effect as any || 'scale',
       is_featured: item.is_featured || false,
-      item_type: (item.item_type as any) || 'link',
+      item_type: item.item_type as any || 'link',
       card_content: item.card_content || '',
       card_image: item.card_image || '',
       card_price: item.card_price || '',
@@ -489,12 +546,9 @@ export function LinkTreeManagement() {
       card_format: item.card_format || 'rounded'
     });
   };
-
   const handleUpdateItem = async () => {
     if (!editingItem || !newItem.title) return;
-
     console.log('🔄 Atualizando item:', editingItem.id, newItem);
-
     try {
       const updateData = {
         title: newItem.title,
@@ -515,36 +569,24 @@ export function LinkTreeManagement() {
         card_size: newItem.card_size,
         card_format: newItem.card_format,
         form_id: newItem.item_type === 'form' ? newItem.form_id : null,
-        form_fields: newItem.item_type === 'form' && formConfig 
-          ? JSON.stringify(formConfig) 
-          : null,
+        form_fields: newItem.item_type === 'form' && formConfig ? JSON.stringify(formConfig) : null,
         updated_at: new Date().toISOString()
       };
-
       console.log('📝 Dados a serem atualizados:', updateData);
-
-      const { error } = await supabase
-        .from('link_tree_items')
-        .update(updateData)
-        .eq('id', editingItem.id);
-
+      const {
+        error
+      } = await supabase.from('link_tree_items').update(updateData).eq('id', editingItem.id);
       if (error) {
         console.error('❌ Erro do Supabase:', error);
         throw error;
       }
-
       console.log('✅ Item atualizado no banco');
 
       // Atualizar lista local imediatamente
-      setItems(prev => prev.map(item => 
-        item.id === editingItem.id 
-          ? {
-              ...item,
-              ...updateData
-            }
-          : item
-      ));
-
+      setItems(prev => prev.map(item => item.id === editingItem.id ? {
+        ...item,
+        ...updateData
+      } : item));
       toast({
         title: "Item atualizado!",
         description: "O item foi atualizado com sucesso.",
@@ -587,7 +629,6 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   const cancelEdit = () => {
     setEditingItem(null);
     setNewItem({
@@ -611,16 +652,12 @@ export function LinkTreeManagement() {
       card_format: 'rounded'
     });
   };
-
   const deleteItem = async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from('link_tree_items')
-        .delete()
-        .eq('id', itemId);
-
+      const {
+        error
+      } = await supabase.from('link_tree_items').delete().eq('id', itemId);
       if (error) throw error;
-
       setItems(prev => prev.filter(item => item.id !== itemId));
       toast({
         title: "Sucesso",
@@ -635,21 +672,16 @@ export function LinkTreeManagement() {
       });
     }
   };
-
   if (loading) {
     return <div className="flex items-center justify-center p-8">Carregando...</div>;
   }
-
-  return (
-    <div className="container mx-auto p-6 space-y-6">
+  return <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Link Tree Management</h1>
           <p className="text-muted-foreground">Sistema completo de gerenciamento de Link Tree</p>
         </div>
-        <Badge variant="secondary" className="bg-gradient-to-r from-gray-900 to-white text-white border border-white/20 backdrop-blur-sm">
-          Premium
-        </Badge>
+        
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -683,49 +715,17 @@ export function LinkTreeManagement() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                     <div>
-                       <Label htmlFor="text-color">Cor do Texto</Label>
-                       <div className="flex gap-2">
-                         <Input
-                           id="text-color"
-                           type="color"
-                           value={linkTreeData.text_color}
-                           onChange={(e) => {
-                             setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
-                             // Sincronizar com o preview
-                             if (linkTree) {
-                               setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
-                             }
-                           }}
-                           className="w-16 h-10"
-                         />
-                         <Input
-                           value={linkTreeData.text_color}
-                           onChange={(e) => {
-                             setLinkTreeData(prev => ({ ...prev, text_color: e.target.value }));
-                             // Sincronizar com o preview
-                             if (linkTree) {
-                               setLinkTree(prev => ({ ...prev!, text_color: e.target.value }));
-                             }
-                           }}
-                           placeholder="#ffffff"
-                         />
-                       </div>
-                     </div>
+                     
                   </div>
 
                   <div className="space-y-4">
                     <Label>Tipo de Fundo</Label>
                     <div className="grid grid-cols-1 gap-3">
                       {/* Fundo Neural */}
-                      <div 
-                        onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'neural' }))}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                          linkTreeData.background_type === 'neural' 
-                            ? 'border-primary bg-primary/10 shadow-lg' 
-                            : 'border-border hover:border-primary/50 hover:bg-accent/50'
-                        }`}
-                      >
+                      <div onClick={() => setLinkTreeData(prev => ({
+                      ...prev,
+                      background_type: 'neural'
+                    }))} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${linkTreeData.background_type === 'neural' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50 hover:bg-accent/50'}`}>
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-900 via-gray-600 to-white flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
                             <Zap className="w-6 h-6 text-white" />
@@ -738,19 +738,14 @@ export function LinkTreeManagement() {
                       </div>
 
                       {/* Cor Personalizada */}
-                      <div 
-                        onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'solid' }))}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                          linkTreeData.background_type === 'solid' 
-                            ? 'border-primary bg-primary/10 shadow-lg' 
-                            : 'border-border hover:border-primary/50 hover:bg-accent/50'
-                        }`}
-                      >
+                      <div onClick={() => setLinkTreeData(prev => ({
+                      ...prev,
+                      background_type: 'solid'
+                    }))} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${linkTreeData.background_type === 'solid' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50 hover:bg-accent/50'}`}>
                         <div className="flex items-center gap-3">
-                          <div 
-                            className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg border"
-                            style={{ backgroundColor: linkTreeData.background_color || '#3b82f6' }}
-                          >
+                          <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg border" style={{
+                          backgroundColor: linkTreeData.background_color || '#3b82f6'
+                        }}>
                             <Palette className="w-6 h-6 text-white" />
                           </div>
                           <div>
@@ -761,14 +756,10 @@ export function LinkTreeManagement() {
                       </div>
 
                       {/* Imagem ou Vídeo */}
-                      <div 
-                        onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'image' }))}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                          linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video'
-                            ? 'border-primary bg-primary/10 shadow-lg' 
-                            : 'border-border hover:border-primary/50 hover:bg-accent/50'
-                        }`}
-                      >
+                      <div onClick={() => setLinkTreeData(prev => ({
+                      ...prev,
+                      background_type: 'image'
+                    }))} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50 hover:bg-accent/50'}`}>
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg">
                             <ImageIcon className="w-6 h-6 text-white" />
@@ -782,225 +773,207 @@ export function LinkTreeManagement() {
                     </div>
 
                     {/* Configurações específicas por tipo */}
-                    {linkTreeData.background_type === 'neural' && (
-                      <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
+                    {linkTreeData.background_type === 'neural' && <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
                         <h4 className="font-semibold text-foreground">Configurações do Fundo Neural</h4>
                         
                         <div>
                           <Label>Cor do Fundo Neural</Label>
                           <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={linkTreeData.background_color || '#1a1a2e'}
-                              onChange={(e) => {
-                                const newColor = e.target.value;
-                                setLinkTreeData(prev => ({ ...prev, background_color: newColor }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: newColor }));
-                                }
-                              }}
-                              className="w-16 h-10"
-                            />
-                            <Input
-                              value={linkTreeData.background_color || '#1a1a2e'}
-                              onChange={(e) => {
-                                const newColor = e.target.value;
-                                setLinkTreeData(prev => ({ ...prev, background_color: newColor }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: newColor }));
-                                }
-                              }}
-                              placeholder="#1a1a2e"
-                            />
+                            <Input type="color" value={linkTreeData.background_color || '#1a1a2e'} onChange={e => {
+                          const newColor = e.target.value;
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            background_color: newColor
+                          }));
+                          if (linkTree) {
+                            setLinkTree(prev => ({
+                              ...prev!,
+                              background_color: newColor
+                            }));
+                          }
+                        }} className="w-16 h-10" />
+                            <Input value={linkTreeData.background_color || '#1a1a2e'} onChange={e => {
+                          const newColor = e.target.value;
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            background_color: newColor
+                          }));
+                          if (linkTree) {
+                            setLinkTree(prev => ({
+                              ...prev!,
+                              background_color: newColor
+                            }));
+                          }
+                        }} placeholder="#1a1a2e" />
                           </div>
                         </div>
 
                         <div>
                           <Label>Opacidade do Fundo ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.05"
-                            value={(linkTreeData as any).background_opacity || 0.8}
-                            onChange={(e) => {
-                              const opacity = parseFloat(e.target.value);
-                              setLinkTreeData(prev => ({ ...prev, background_opacity: opacity }));
-                              if (linkTree) {
-                                setLinkTree(prev => ({ ...prev!, background_opacity: opacity } as any));
-                              }
-                            }}
-                            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <input type="range" min="0" max="1" step="0.05" value={(linkTreeData as any).background_opacity || 0.8} onChange={e => {
+                        const opacity = parseFloat(e.target.value);
+                        setLinkTreeData(prev => ({
+                          ...prev,
+                          background_opacity: opacity
+                        }));
+                        if (linkTree) {
+                          setLinkTree(prev => ({
+                            ...prev!,
+                            background_opacity: opacity
+                          }) as any);
+                        }
+                      }} className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider" />
                         </div>
-                      </div>
-                    )}
+                      </div>}
 
-                    {linkTreeData.background_type === 'solid' && (
-                      <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
+                    {linkTreeData.background_type === 'solid' && <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
                         <h4 className="font-semibold text-foreground">Configurações da Cor</h4>
                         
                         <div>
                           <Label>Cor de Fundo</Label>
                           <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={linkTreeData.background_color || '#3b82f6'}
-                              onChange={(e) => {
-                                const newColor = e.target.value;
-                                setLinkTreeData(prev => ({ ...prev, background_color: newColor }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: newColor }));
-                                }
-                              }}
-                              className="w-16 h-10"
-                            />
-                            <Input
-                              value={linkTreeData.background_color || '#3b82f6'}
-                              onChange={(e) => {
-                                const newColor = e.target.value;
-                                setLinkTreeData(prev => ({ ...prev, background_color: newColor }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_color: newColor }));
-                                }
-                              }}
-                              placeholder="#3b82f6"
-                            />
+                            <Input type="color" value={linkTreeData.background_color || '#3b82f6'} onChange={e => {
+                          const newColor = e.target.value;
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            background_color: newColor
+                          }));
+                          if (linkTree) {
+                            setLinkTree(prev => ({
+                              ...prev!,
+                              background_color: newColor
+                            }));
+                          }
+                        }} className="w-16 h-10" />
+                            <Input value={linkTreeData.background_color || '#3b82f6'} onChange={e => {
+                          const newColor = e.target.value;
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            background_color: newColor
+                          }));
+                          if (linkTree) {
+                            setLinkTree(prev => ({
+                              ...prev!,
+                              background_color: newColor
+                            }));
+                          }
+                        }} placeholder="#3b82f6" />
                           </div>
                         </div>
-                      </div>
-                    )}
+                      </div>}
 
-                    {(linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video') && (
-                      <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
+                    {(linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video') && <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">
                         <h4 className="font-semibold text-foreground">Configurações de Mídia</h4>
                         
                         <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            type="button"
-                            variant={linkTreeData.background_type === 'image' ? 'default' : 'outline'}
-                            onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'image' }))}
-                            className="w-full"
-                          >
+                          <Button type="button" variant={linkTreeData.background_type === 'image' ? 'default' : 'outline'} onClick={() => setLinkTreeData(prev => ({
+                        ...prev,
+                        background_type: 'image'
+                      }))} className="w-full">
                             <ImageIcon className="w-4 h-4 mr-2" />
                             Imagem
                           </Button>
-                          <Button
-                            type="button"
-                            variant={linkTreeData.background_type === 'video' ? 'default' : 'outline'}
-                            onClick={() => setLinkTreeData(prev => ({ ...prev, background_type: 'video' }))}
-                            className="w-full"
-                          >
+                          <Button type="button" variant={linkTreeData.background_type === 'video' ? 'default' : 'outline'} onClick={() => setLinkTreeData(prev => ({
+                        ...prev,
+                        background_type: 'video'
+                      }))} className="w-full">
                             <Video className="w-4 h-4 mr-2" />
                             Vídeo
                           </Button>
                         </div>
 
-                        {linkTreeData.background_type === 'image' && (
-                          <div>
+                        {linkTreeData.background_type === 'image' && <div>
                             <Label>URL da Imagem de Fundo</Label>
-                            <Input
-                              type="url"
-                              placeholder="https://exemplo.com/imagem.jpg"
-                              value={linkTreeData.background_image || ''}
-                              onChange={(e) => {
-                                const newImage = e.target.value;
-                                setLinkTreeData(prev => ({ ...prev, background_image: newImage }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_image: newImage }));
-                                }
-                              }}
-                            />
-                          </div>
-                        )}
+                            <Input type="url" placeholder="https://exemplo.com/imagem.jpg" value={linkTreeData.background_image || ''} onChange={e => {
+                        const newImage = e.target.value;
+                        setLinkTreeData(prev => ({
+                          ...prev,
+                          background_image: newImage
+                        }));
+                        if (linkTree) {
+                          setLinkTree(prev => ({
+                            ...prev!,
+                            background_image: newImage
+                          }));
+                        }
+                      }} />
+                          </div>}
 
-                        {linkTreeData.background_type === 'video' && (
-                          <div>
+                        {linkTreeData.background_type === 'video' && <div>
                             <Label>URL do Vídeo de Fundo</Label>
-                            <Input
-                              type="url"
-                              placeholder="https://exemplo.com/video.mp4"
-                              value={linkTreeData.background_video || ''}
-                              onChange={(e) => {
-                                const newVideo = e.target.value;
-                                setLinkTreeData(prev => ({ ...prev, background_video: newVideo }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({ ...prev!, background_video: newVideo }));
-                                }
-                              }}
-                            />
+                            <Input type="url" placeholder="https://exemplo.com/video.mp4" value={linkTreeData.background_video || ''} onChange={e => {
+                        const newVideo = e.target.value;
+                        setLinkTreeData(prev => ({
+                          ...prev,
+                          background_video: newVideo
+                        }));
+                        if (linkTree) {
+                          setLinkTree(prev => ({
+                            ...prev!,
+                            background_video: newVideo
+                          }));
+                        }
+                      }} />
                             <p className="text-xs text-muted-foreground mt-1">
                               Vídeo será reproduzido sem áudio e em loop
                             </p>
-                          </div>
-                        )}
+                          </div>}
 
                         <div>
                           <Label>Opacidade do Fundo ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.05"
-                            value={(linkTreeData as any).background_opacity || 0.8}
-                            onChange={(e) => {
-                              const opacity = parseFloat(e.target.value);
-                              setLinkTreeData(prev => ({ ...prev, background_opacity: opacity }));
-                              if (linkTree) {
-                                setLinkTree(prev => ({ ...prev!, background_opacity: opacity } as any));
-                              }
-                            }}
-                            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
-                          />
+                          <input type="range" min="0" max="1" step="0.05" value={(linkTreeData as any).background_opacity || 0.8} onChange={e => {
+                        const opacity = parseFloat(e.target.value);
+                        setLinkTreeData(prev => ({
+                          ...prev,
+                          background_opacity: opacity
+                        }));
+                        if (linkTree) {
+                          setLinkTree(prev => ({
+                            ...prev!,
+                            background_opacity: opacity
+                          }) as any);
+                        }
+                      }} className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer" />
                         </div>
-                      </div>
-                    )}
+                      </div>}
                   </div>
 
                   <div>
                     <Label>Layout</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
-                      {layoutOptions.map(layout => (
-                        <button
-                          key={layout.value}
-                          onClick={() => setLinkTreeData(prev => ({ ...prev, button_style: layout.value as LinkTree['button_style'] }))}
-                          className={`p-4 border rounded-lg text-left transition-all ${
-                            linkTreeData.button_style === layout.value 
-                              ? 'border-primary bg-primary/10' 
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                        >
+                      {layoutOptions.map(layout => <button key={layout.value} onClick={() => setLinkTreeData(prev => ({
+                      ...prev,
+                      button_style: layout.value as LinkTree['button_style']
+                    }))} className={`p-4 border rounded-lg text-left transition-all ${linkTreeData.button_style === layout.value ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}>
                           <div className="font-semibold text-sm">{layout.label}</div>
                           <div className="text-xs text-muted-foreground mt-1">{layout.description}</div>
-                        </button>
-                      ))}
+                        </button>)}
                     </div>
                   </div>
 
                   <div>
                     <Label>Estilo de Animação</Label>
-                    <Select value={linkTreeData.animation_style} onValueChange={(value: LinkTree['animation_style']) => setLinkTreeData(prev => ({ ...prev, animation_style: value }))}>
+                    <Select value={linkTreeData.animation_style} onValueChange={(value: LinkTree['animation_style']) => setLinkTreeData(prev => ({
+                    ...prev,
+                    animation_style: value
+                  }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {animationOptions.map(option => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {animationOptions.map(option => <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
                     <Label>CSS Personalizado</Label>
-                    <Textarea
-                      value={linkTreeData.custom_css}
-                      onChange={(e) => setLinkTreeData(prev => ({ ...prev, custom_css: e.target.value }))}
-                      placeholder=".custom-button { border-radius: 20px; }"
-                      rows={4}
-                    />
+                    <Textarea value={linkTreeData.custom_css} onChange={e => setLinkTreeData(prev => ({
+                    ...prev,
+                    custom_css: e.target.value
+                  }))} placeholder=".custom-button { border-radius: 20px; }" rows={4} />
                   </div>
                 </CardContent>
               </Card>
@@ -1014,48 +987,36 @@ export function LinkTreeManagement() {
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="title">Título</Label>
-                    <Input
-                      id="title"
-                      value={linkTreeData.title}
-                      onChange={(e) => setLinkTreeData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Título do seu Link Tree"
-                    />
+                    <Input id="title" value={linkTreeData.title} onChange={e => setLinkTreeData(prev => ({
+                    ...prev,
+                    title: e.target.value
+                  }))} placeholder="Título do seu Link Tree" />
                   </div>
 
                   <div>
                     <Label htmlFor="description">Descrição</Label>
-                    <Textarea
-                      id="description"
-                      value={linkTreeData.description}
-                      onChange={(e) => setLinkTreeData(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Descrição opcional"
-                      rows={3}
-                    />
+                    <Textarea id="description" value={linkTreeData.description} onChange={e => setLinkTreeData(prev => ({
+                    ...prev,
+                    description: e.target.value
+                  }))} placeholder="Descrição opcional" rows={3} />
                   </div>
 
                   <div>
                     <Label htmlFor="avatar">URL do Avatar</Label>
-                    <Input
-                      id="avatar"
-                      value={linkTreeData.avatar_url}
-                      onChange={(e) => setLinkTreeData(prev => ({ ...prev, avatar_url: e.target.value }))}
-                      placeholder="https://exemplo.com/avatar.jpg"
-                    />
+                    <Input id="avatar" value={linkTreeData.avatar_url} onChange={e => setLinkTreeData(prev => ({
+                    ...prev,
+                    avatar_url: e.target.value
+                  }))} placeholder="https://exemplo.com/avatar.jpg" />
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
                   <div>
                     <Label htmlFor="avatar-size">Tamanho do Avatar ({linkTreeData.avatar_size}px)</Label>
                     <div className="mt-2">
-                      <input
-                        type="range"
-                        min="64"
-                        max="300"
-                        step="4"
-                        value={linkTreeData.avatar_size || '128'}
-                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, avatar_size: e.target.value }))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider accent-primary"
-                      />
+                      <input type="range" min="64" max="300" step="4" value={linkTreeData.avatar_size || '128'} onChange={e => setLinkTreeData(prev => ({
+                        ...prev,
+                        avatar_size: e.target.value
+                      }))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider accent-primary" />
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
                         <span>64px</span>
                         <span>300px</span>
@@ -1084,7 +1045,10 @@ export function LinkTreeManagement() {
                           <div className="space-y-3">
                             <div>
                               <Label className="text-xs text-muted-foreground">Tamanho</Label>
-                              <Select value={linkTreeData.title_size || 'text-3xl'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_size: value }))}>
+                              <Select value={linkTreeData.title_size || 'text-3xl'} onValueChange={value => setLinkTreeData(prev => ({
+                            ...prev,
+                            title_size: value
+                          }))}>
                                 <SelectTrigger className="h-8 bg-background/80 backdrop-blur-sm">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -1099,7 +1063,10 @@ export function LinkTreeManagement() {
                             </div>
                             <div>
                               <Label className="text-xs text-muted-foreground">Peso da Fonte</Label>
-                              <Select value={linkTreeData.title_font || 'font-bold'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, title_font: value }))}>
+                              <Select value={linkTreeData.title_font || 'font-bold'} onValueChange={value => setLinkTreeData(prev => ({
+                            ...prev,
+                            title_font: value
+                          }))}>
                                 <SelectTrigger className="h-8 bg-background/80 backdrop-blur-sm">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -1116,18 +1083,14 @@ export function LinkTreeManagement() {
                             <div>
                               <Label className="text-xs text-muted-foreground">Cor do Título</Label>
                               <div className="flex gap-2">
-                                <Input
-                                  type="color"
-                                  value={linkTreeData.title_color || linkTreeData.text_color}
-                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
-                                  className="w-12 h-8 p-0 border-0 rounded-md"
-                                />
-                                <Input
-                                  value={linkTreeData.title_color || linkTreeData.text_color}
-                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, title_color: e.target.value }))}
-                                  className="h-8 bg-background/80 backdrop-blur-sm"
-                                  placeholder="#ffffff"
-                                />
+                                <Input type="color" value={linkTreeData.title_color || linkTreeData.text_color} onChange={e => setLinkTreeData(prev => ({
+                              ...prev,
+                              title_color: e.target.value
+                            }))} className="w-12 h-8 p-0 border-0 rounded-md" />
+                                <Input value={linkTreeData.title_color || linkTreeData.text_color} onChange={e => setLinkTreeData(prev => ({
+                              ...prev,
+                              title_color: e.target.value
+                            }))} className="h-8 bg-background/80 backdrop-blur-sm" placeholder="#ffffff" />
                               </div>
                             </div>
                           </div>
@@ -1140,7 +1103,10 @@ export function LinkTreeManagement() {
                           <div className="space-y-3">
                             <div>
                               <Label className="text-xs text-muted-foreground">Tamanho</Label>
-                              <Select value={linkTreeData.description_size || 'text-base'} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, description_size: value }))}>
+                              <Select value={linkTreeData.description_size || 'text-base'} onValueChange={value => setLinkTreeData(prev => ({
+                            ...prev,
+                            description_size: value
+                          }))}>
                                 <SelectTrigger className="h-8 bg-background/80 backdrop-blur-sm">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -1155,18 +1121,14 @@ export function LinkTreeManagement() {
                             <div>
                               <Label className="text-xs text-muted-foreground">Cor da Descrição</Label>
                               <div className="flex gap-2">
-                                <Input
-                                  type="color"
-                                  value={linkTreeData.description_color || linkTreeData.text_color}
-                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
-                                  className="w-12 h-8 p-0 border-0 rounded-md"
-                                />
-                                <Input
-                                  value={linkTreeData.description_color || linkTreeData.text_color}
-                                  onChange={(e) => setLinkTreeData(prev => ({ ...prev, description_color: e.target.value }))}
-                                  className="h-8 bg-background/80 backdrop-blur-sm"
-                                  placeholder="#ffffff"
-                                />
+                                <Input type="color" value={linkTreeData.description_color || linkTreeData.text_color} onChange={e => setLinkTreeData(prev => ({
+                              ...prev,
+                              description_color: e.target.value
+                            }))} className="w-12 h-8 p-0 border-0 rounded-md" />
+                                <Input value={linkTreeData.description_color || linkTreeData.text_color} onChange={e => setLinkTreeData(prev => ({
+                              ...prev,
+                              description_color: e.target.value
+                            }))} className="h-8 bg-background/80 backdrop-blur-sm" placeholder="#ffffff" />
                               </div>
                             </div>
                           </div>
@@ -1192,80 +1154,75 @@ export function LinkTreeManagement() {
                         <Label className="text-sm font-medium">Habilitar Rodapé</Label>
                         <p className="text-xs text-muted-foreground">Mostrar rodapé no Link Tree</p>
                       </div>
-                      <Switch
-                        checked={linkTreeData.footer_enabled ?? true}
-                        onCheckedChange={(checked) => setLinkTreeData(prev => ({ ...prev, footer_enabled: checked }))}
-                      />
+                      <Switch checked={linkTreeData.footer_enabled ?? true} onCheckedChange={checked => setLinkTreeData(prev => ({
+                    ...prev,
+                    footer_enabled: checked
+                  }))} />
                     </div>
 
-                    {linkTreeData.footer_enabled && (
-                      <div className="space-y-6">
+                    {linkTreeData.footer_enabled && <div className="space-y-6">
                         <div>
                           <Label>Texto do Rodapé</Label>
-                          <Textarea
-                            value={linkTreeData.footer_text || ''}
-                            onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text: e.target.value }))}
-                            placeholder="© 2024 Meu Nome - Todos os direitos reservados"
-                            rows={3}
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Textarea value={linkTreeData.footer_text || ''} onChange={e => setLinkTreeData(prev => ({
+                      ...prev,
+                      footer_text: e.target.value
+                    }))} placeholder="© 2024 Meu Nome - Todos os direitos reservados" rows={3} className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
 
                         <div>
                           <Label className="text-sm font-medium mb-3 block">Estilo do Rodapé</Label>
                           <div className="grid grid-cols-3 gap-3">
-                            {[
-                              { value: 'minimal', label: 'Minimalista', description: 'Texto simples centralizado' },
-                              { value: 'modern', label: 'Moderno', description: 'Com divisores e espaçamento' },
-                              { value: 'complete', label: 'Completo', description: 'Texto + redes sociais' }
-                            ].map(style => (
-                              <button
-                                key={style.value}
-                                onClick={() => setLinkTreeData(prev => ({ ...prev, footer_style: style.value as 'minimal' | 'modern' | 'complete' }))}
-                                className={`p-3 rounded-lg border text-left transition-all ${
-                                  linkTreeData.footer_style === style.value 
-                                    ? 'border-primary bg-primary/10 text-white' 
-                                    : 'border-white/20 bg-white/5 text-white/70 hover:border-primary/50 hover:bg-white/10'
-                                }`}
-                              >
+                            {[{
+                        value: 'minimal',
+                        label: 'Minimalista',
+                        description: 'Texto simples centralizado'
+                      }, {
+                        value: 'modern',
+                        label: 'Moderno',
+                        description: 'Com divisores e espaçamento'
+                      }, {
+                        value: 'complete',
+                        label: 'Completo',
+                        description: 'Texto + redes sociais'
+                      }].map(style => <button key={style.value} onClick={() => setLinkTreeData(prev => ({
+                        ...prev,
+                        footer_style: style.value as 'minimal' | 'modern' | 'complete'
+                      }))} className={`p-3 rounded-lg border text-left transition-all ${linkTreeData.footer_style === style.value ? 'border-primary bg-primary/10 text-white' : 'border-white/20 bg-white/5 text-white/70 hover:border-primary/50 hover:bg-white/10'}`}>
                                 <div className="font-medium text-sm">{style.label}</div>
                                 <div className="text-xs opacity-70 mt-1">{style.description}</div>
-                              </button>
-                            ))}
+                              </button>)}
                           </div>
                         </div>
 
                         <div>
                           <Label className="text-xs text-muted-foreground">Cor do Texto</Label>
                           <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={linkTreeData.footer_text_color || '#ffffff'}
-                              onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
-                              className="w-12 h-8 p-0 border-0 rounded-md"
-                            />
-                            <Input
-                              value={linkTreeData.footer_text_color || '#ffffff'}
-                              onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
-                              className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white"
-                              placeholder="#ffffff"
-                            />
+                            <Input type="color" value={linkTreeData.footer_text_color || '#ffffff'} onChange={e => setLinkTreeData(prev => ({
+                        ...prev,
+                        footer_text_color: e.target.value
+                      }))} className="w-12 h-8 p-0 border-0 rounded-md" />
+                            <Input value={linkTreeData.footer_text_color || '#ffffff'} onChange={e => setLinkTreeData(prev => ({
+                        ...prev,
+                        footer_text_color: e.target.value
+                      }))} className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white" placeholder="#ffffff" />
                           </div>
                         </div>
 
                         <div>
                           <Label className="text-sm font-medium mb-3 block">Redes Sociais</Label>
                           <div className="space-y-3">
-                            {(linkTreeData.footer_social_links || []).map((social, index) => (
-                              <div key={index} className="flex gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
-                                <Select 
-                                  value={social.platform} 
-                                  onValueChange={(value) => {
-                                    const newSocials = [...(linkTreeData.footer_social_links || [])];
-                                    newSocials[index] = { ...social, platform: value };
-                                    setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
-                                  }}
-                                >
+                            {(linkTreeData.footer_social_links || []).map((social, index) => <div key={index} className="flex gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                                <Select value={social.platform} onValueChange={value => {
+                          const newSocials = [...(linkTreeData.footer_social_links || [])];
+                          newSocials[index] = {
+                            ...social,
+                            platform: value
+                          };
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            footer_social_links: newSocials
+                          }));
+                        }}>
                                   <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white">
                                     <SelectValue />
                                   </SelectTrigger>
@@ -1279,54 +1236,49 @@ export function LinkTreeManagement() {
                                     <SelectItem value="whatsapp" className="text-white hover:bg-white/10">💬 WhatsApp</SelectItem>
                                   </SelectContent>
                                 </Select>
-                                <Input
-                                  value={social.url}
-                                  onChange={(e) => {
-                                    const newSocials = [...(linkTreeData.footer_social_links || [])];
-                                    newSocials[index] = { ...social, url: e.target.value };
-                                    setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
-                                  }}
-                                  placeholder="https://..."
-                                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                                />
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    const newSocials = [...(linkTreeData.footer_social_links || [])];
-                                    newSocials.splice(index, 1);
-                                    setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
-                                  }}
-                                  className="border-red-500/50 text-red-400 hover:bg-red-500/10"
-                                >
+                                <Input value={social.url} onChange={e => {
+                          const newSocials = [...(linkTreeData.footer_social_links || [])];
+                          newSocials[index] = {
+                            ...social,
+                            url: e.target.value
+                          };
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            footer_social_links: newSocials
+                          }));
+                        }} placeholder="https://..." className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400" />
+                                <Button variant="outline" size="sm" onClick={() => {
+                          const newSocials = [...(linkTreeData.footer_social_links || [])];
+                          newSocials.splice(index, 1);
+                          setLinkTreeData(prev => ({
+                            ...prev,
+                            footer_social_links: newSocials
+                          }));
+                        }} className="border-red-500/50 text-red-400 hover:bg-red-500/10">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
-                              </div>
-                            ))}
+                              </div>)}
                             
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                const newSocials = [...(linkTreeData.footer_social_links || []), { platform: 'instagram', url: '' }];
-                                setLinkTreeData(prev => ({ ...prev, footer_social_links: newSocials }));
-                              }}
-                              className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
-                            >
+                            <Button variant="outline" onClick={() => {
+                        const newSocials = [...(linkTreeData.footer_social_links || []), {
+                          platform: 'instagram',
+                          url: ''
+                        }];
+                        setLinkTreeData(prev => ({
+                          ...prev,
+                          footer_social_links: newSocials
+                        }));
+                      }} className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm">
                               <Plus className="w-4 h-4 mr-2" />
                               Adicionar Rede Social
                             </Button>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      </div>}
                   </CardContent>
                 </Card>
 
-                <Button 
-                  onClick={saveLinkTree} 
-                  className="w-full"
-                  size="lg"
-                >
+                <Button onClick={saveLinkTree} className="w-full" size="lg">
                   Salvar Configurações
                 </Button>
             </TabsContent>
@@ -1350,37 +1302,34 @@ export function LinkTreeManagement() {
                         <div className="space-y-3">
                           <div>
                             <Label className="text-xs text-gray-300">Título</Label>
-                            <Input
-                              value={newItem.title}
-                              onChange={(e) => setNewItem(prev => ({ ...prev, title: e.target.value }))}
-                              placeholder="Título do item"
-                              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                            />
+                            <Input value={newItem.title} onChange={e => setNewItem(prev => ({
+                            ...prev,
+                            title: e.target.value
+                          }))} placeholder="Título do item" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                           </div>
                           <div>
                             <Label className="text-xs text-gray-300">URL</Label>
-                            <Input
-                              value={newItem.url}
-                              onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
-                              placeholder="https://exemplo.com"
-                              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                            />
+                            <Input value={newItem.url} onChange={e => setNewItem(prev => ({
+                            ...prev,
+                            url: e.target.value
+                          }))} placeholder="https://exemplo.com" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                           </div>
                           <div>
                             <Label className="text-xs text-gray-300">Tipo de Item</Label>
-                            <Select value={newItem.item_type} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, item_type: value }))}>
+                            <Select value={newItem.item_type} onValueChange={(value: any) => setNewItem(prev => ({
+                            ...prev,
+                            item_type: value
+                          }))}>
                               <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                                {itemTypeOptions.map(option => (
-                                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
+                                {itemTypeOptions.map(option => <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
                                     <div>
                                       <div className="font-medium">{option.label}</div>
                                       <div className="text-xs text-gray-400">{option.description}</div>
                                     </div>
-                                  </SelectItem>
-                                ))}
+                                  </SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>
@@ -1395,35 +1344,27 @@ export function LinkTreeManagement() {
                           <div>
                             <Label className="text-xs text-gray-300">Cor de Fundo</Label>
                             <div className="flex gap-2">
-                              <Input
-                                type="color"
-                                value={newItem.background_color}
-                                onChange={(e) => setNewItem(prev => ({ ...prev, background_color: e.target.value }))}
-                                className="w-12 h-8 p-0 border-0 rounded-md"
-                              />
-                              <Input
-                                value={newItem.background_color}
-                                onChange={(e) => setNewItem(prev => ({ ...prev, background_color: e.target.value }))}
-                                placeholder="#ffffff"
-                                className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                              />
+                              <Input type="color" value={newItem.background_color} onChange={e => setNewItem(prev => ({
+                              ...prev,
+                              background_color: e.target.value
+                            }))} className="w-12 h-8 p-0 border-0 rounded-md" />
+                              <Input value={newItem.background_color} onChange={e => setNewItem(prev => ({
+                              ...prev,
+                              background_color: e.target.value
+                            }))} placeholder="#ffffff" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                             </div>
                           </div>
                           <div>
                             <Label className="text-xs text-gray-300">Cor do Texto</Label>
                             <div className="flex gap-2">
-                              <Input
-                                type="color"
-                                value={newItem.text_color}
-                                onChange={(e) => setNewItem(prev => ({ ...prev, text_color: e.target.value }))}
-                                className="w-12 h-8 p-0 border-0 rounded-md"
-                              />
-                              <Input
-                                value={newItem.text_color}
-                                onChange={(e) => setNewItem(prev => ({ ...prev, text_color: e.target.value }))}
-                                placeholder="#000000"
-                                className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                              />
+                              <Input type="color" value={newItem.text_color} onChange={e => setNewItem(prev => ({
+                              ...prev,
+                              text_color: e.target.value
+                            }))} className="w-12 h-8 p-0 border-0 rounded-md" />
+                              <Input value={newItem.text_color} onChange={e => setNewItem(prev => ({
+                              ...prev,
+                              text_color: e.target.value
+                            }))} placeholder="#000000" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                             </div>
                           </div>
                         </div>
@@ -1436,15 +1377,17 @@ export function LinkTreeManagement() {
                       <Label className="text-sm font-medium mb-3 block text-white">Configurações do Ícone</Label>
                       <div className="space-y-3">
                         <div>
-                          <IconSelector
-                            value={newItem.icon}
-                            onChange={(iconName) => setNewItem(prev => ({ ...prev, icon: iconName }))}
-                            label="Ícone"
-                          />
+                          <IconSelector value={newItem.icon} onChange={iconName => setNewItem(prev => ({
+                          ...prev,
+                          icon: iconName
+                        }))} label="Ícone" />
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Tamanho do Ícone</Label>
-                          <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, icon_size: value }))}>
+                          <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({
+                          ...prev,
+                          icon_size: value
+                        }))}>
                             <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                               <SelectValue />
                             </SelectTrigger>
@@ -1475,18 +1418,14 @@ export function LinkTreeManagement() {
                         <div>
                           <Label className="text-xs text-gray-300">Cor do Ícone</Label>
                           <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={newItem.icon_color}
-                              onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
-                              className="w-12 h-8 p-0 border-0 rounded-md"
-                            />
-                            <Input
-                              value={newItem.icon_color}
-                              onChange={(e) => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))}
-                              placeholder="#000000"
-                              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                            />
+                            <Input type="color" value={newItem.icon_color} onChange={e => setNewItem(prev => ({
+                            ...prev,
+                            icon_color: e.target.value
+                          }))} className="w-12 h-8 p-0 border-0 rounded-md" />
+                            <Input value={newItem.icon_color} onChange={e => setNewItem(prev => ({
+                            ...prev,
+                            icon_color: e.target.value
+                          }))} placeholder="#000000" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                           </div>
                         </div>
                       </div>
@@ -1497,7 +1436,10 @@ export function LinkTreeManagement() {
                       <div className="space-y-3">
                         <div>
                           <Label className="text-xs text-gray-300">Estilo do Botão</Label>
-                          <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, button_style: value }))}>
+                          <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({
+                          ...prev,
+                          button_style: value
+                        }))}>
                             <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                               <SelectValue />
                             </SelectTrigger>
@@ -1506,28 +1448,27 @@ export function LinkTreeManagement() {
                                 <span className="w-2 h-2 bg-gray-500 rounded-full inline-block mr-2"></span>
                                 Herdar do Tema
                               </SelectItem>
-                              {buttonStyleOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
+                              {buttonStyleOptions.map(option => <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
                                    <span className="w-2 h-2 bg-white/80 rounded-full inline-block mr-2"></span>
                                   {option.label}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Efeito de Hover</Label>
-                          <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>
+                          <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({
+                          ...prev,
+                          hover_effect: value
+                        }))}>
                             <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                              {hoverEffectOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
+                              {hoverEffectOptions.map(option => <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
                                   <span className="w-2 h-2 bg-cyan-500 rounded-full inline-block mr-2"></span>
                                   {option.label}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1539,7 +1480,10 @@ export function LinkTreeManagement() {
                       <div className="space-y-3">
                         <div>
                           <Label className="text-xs text-gray-300">Tamanho do Card</Label>
-                          <Select value={newItem.card_size || 'medium'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_size: value }))}>
+                          <Select value={newItem.card_size || 'medium'} onValueChange={value => setNewItem(prev => ({
+                          ...prev,
+                          card_size: value
+                        }))}>
                             <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                               <SelectValue />
                             </SelectTrigger>
@@ -1565,7 +1509,10 @@ export function LinkTreeManagement() {
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Formato do Card</Label>
-                          <Select value={newItem.card_format || 'rounded'} onValueChange={(value) => setNewItem(prev => ({ ...prev, card_format: value }))}>
+                          <Select value={newItem.card_format || 'rounded'} onValueChange={value => setNewItem(prev => ({
+                          ...prev,
+                          card_format: value
+                        }))}>
                             <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                               <SelectValue />
                             </SelectTrigger>
@@ -1590,193 +1537,148 @@ export function LinkTreeManagement() {
                           </Select>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Switch
-                            id="featured"
-                            checked={newItem.is_featured}
-                            onCheckedChange={(checked) => setNewItem(prev => ({ ...prev, is_featured: checked }))}
-                          />
+                          <Switch id="featured" checked={newItem.is_featured} onCheckedChange={checked => setNewItem(prev => ({
+                          ...prev,
+                          is_featured: checked
+                        }))} />
                           <Label htmlFor="featured" className="text-xs text-gray-300">Item em destaque</Label>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {(newItem.item_type as string) === 'form' && formConfig && (
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
+                  {newItem.item_type as string === 'form' && formConfig && <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
                       <Label className="text-sm font-medium mb-3 block text-white">Configurações do Formulário</Label>
                       <div>
                         <Label className="text-xs text-gray-300">Formulário</Label>
-                        <Select value={newItem.form_id} onValueChange={(value) => setNewItem(prev => ({ ...prev, form_id: value }))}>
+                        <Select value={newItem.form_id} onValueChange={value => setNewItem(prev => ({
+                      ...prev,
+                      form_id: value
+                    }))}>
                           <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                             <SelectValue placeholder="Selecione um formulário" />
                           </SelectTrigger>
                            <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                             {multipleFormsConfig.forms.map(form => (
-                               <SelectItem key={form.id} value={form.id} className="text-white hover:bg-white/10">
+                             {multipleFormsConfig.forms.map(form => <SelectItem key={form.id} value={form.id} className="text-white hover:bg-white/10">
                                  {form.name}
-                               </SelectItem>
-                             ))}
+                               </SelectItem>)}
                            </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
-                  {(newItem.item_type as string) === 'card' && (
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
+                  {newItem.item_type as string === 'card' && <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
                       <Label className="text-sm font-medium mb-3 block text-white">Configurações do Card</Label>
                       <div className="space-y-3">
                         <div>
                           <Label className="text-xs text-gray-300">Conteúdo do Card</Label>
-                          <Textarea
-                            value={newItem.card_content}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                            placeholder="Descrição ou conteúdo do card"
-                            rows={3}
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Textarea value={newItem.card_content} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        card_content: e.target.value
+                      }))} placeholder="Descrição ou conteúdo do card" rows={3} className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Imagem de Fundo do Card</Label>
-                          <Input
-                            value={newItem.card_image}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                            placeholder="https://exemplo.com/imagem.jpg"
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Input value={newItem.card_image} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        card_image: e.target.value
+                      }))} placeholder="https://exemplo.com/imagem.jpg" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <Label className="text-xs text-gray-300">Preço (opcional)</Label>
-                            <Input
-                              value={newItem.card_price}
-                              onChange={(e) => setNewItem(prev => ({ ...prev, card_price: e.target.value }))}
-                              placeholder="R$ 99,99"
-                              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                            />
+                            <Input value={newItem.card_price} onChange={e => setNewItem(prev => ({
+                          ...prev,
+                          card_price: e.target.value
+                        }))} placeholder="R$ 99,99" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                           </div>
                           <div>
                             <Label className="text-xs text-gray-300">Texto do Botão</Label>
-                            <Input
-                              value={newItem.card_button_text}
-                              onChange={(e) => setNewItem(prev => ({ ...prev, card_button_text: e.target.value }))}
-                              placeholder="Saiba Mais"
-                              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                            />
+                            <Input value={newItem.card_button_text} onChange={e => setNewItem(prev => ({
+                          ...prev,
+                          card_button_text: e.target.value
+                        }))} placeholder="Saiba Mais" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
-                  {(newItem.item_type as string) === 'video' && (
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
+                  {newItem.item_type as string === 'video' && <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
                       <Label className="text-sm font-medium mb-3 block text-white">Configurações do Vídeo</Label>
                       <div className="space-y-3">
                         <div>
                           <Label className="text-xs text-gray-300">URL do Vídeo</Label>
-                          <Input
-                            value={newItem.url}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, url: e.target.value }))}
-                            placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Input value={newItem.url} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        url: e.target.value
+                      }))} placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..." className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Thumbnail do Vídeo (opcional)</Label>
-                          <Input
-                            value={newItem.card_image}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                            placeholder="https://exemplo.com/thumbnail.jpg"
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Input value={newItem.card_image} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        card_image: e.target.value
+                      }))} placeholder="https://exemplo.com/thumbnail.jpg" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Descrição do Vídeo</Label>
-                          <Textarea
-                            value={newItem.card_content}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                            placeholder="Descrição do vídeo"
-                            rows={2}
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Textarea value={newItem.card_content} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        card_content: e.target.value
+                      }))} placeholder="Descrição do vídeo" rows={2} className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
-                  {(newItem.item_type as string) === 'text' && (
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
+                  {newItem.item_type as string === 'text' && <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
                       <Label className="text-sm font-medium mb-3 block text-white">Configurações do Texto</Label>
                       <div className="space-y-3">
                         <div>
                           <Label className="text-xs text-gray-300">Conteúdo Informativo</Label>
-                          <Textarea
-                            value={newItem.card_content}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_content: e.target.value }))}
-                            placeholder="Texto informativo, horários de funcionamento, etc."
-                            rows={4}
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Textarea value={newItem.card_content} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        card_content: e.target.value
+                      }))} placeholder="Texto informativo, horários de funcionamento, etc." rows={4} className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                         <div>
                           <Label className="text-xs text-gray-300">Imagem de Fundo (opcional)</Label>
-                          <Input
-                            value={newItem.card_image}
-                            onChange={(e) => setNewItem(prev => ({ ...prev, card_image: e.target.value }))}
-                            placeholder="https://exemplo.com/imagem.jpg"
-                            className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400"
-                          />
+                          <Input value={newItem.card_image} onChange={e => setNewItem(prev => ({
+                        ...prev,
+                        card_image: e.target.value
+                      }))} placeholder="https://exemplo.com/imagem.jpg" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
                   <div className="flex gap-2">
-                    {editingItem ? (
-                      <>
+                    {editingItem ? <>
                         <Button onClick={handleUpdateItem} className="flex-1 bg-white/10 border border-white/20 backdrop-blur-md text-white hover:bg-white/20">
                           Atualizar Item
                         </Button>
                         <Button onClick={cancelEdit} variant="outline" className="flex-1 border-white/20 text-white hover:bg-white/10">
                           Cancelar
                         </Button>
-                      </>
-                    ) : (
-                      <Button onClick={handleAddItem} className="w-full bg-white/10 border border-white/20 backdrop-blur-md text-white hover:bg-white/20">
+                      </> : <Button onClick={handleAddItem} className="w-full bg-white/10 border border-white/20 backdrop-blur-md text-white hover:bg-white/20">
                         <Plus className="w-4 h-4 mr-2" />
                         Adicionar Item
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
                 </CardContent>
               </Card>
 
-              {items.length > 0 && (
-                <Card>
+              {items.length > 0 && <Card>
                   <CardHeader>
                     <CardTitle>Items Cadastrados</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {items.map((item, index) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      {items.map((item, index) => <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="flex flex-col gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => moveItem(item.id, 'up')}
-                                disabled={index === 0}
-                              >
+                              <Button variant="ghost" size="sm" onClick={() => moveItem(item.id, 'up')} disabled={index === 0}>
                                 ↑
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => moveItem(item.id, 'down')}
-                                disabled={index === items.length - 1}
-                              >
+                              <Button variant="ghost" size="sm" onClick={() => moveItem(item.id, 'down')} disabled={index === items.length - 1}>
                                 ↓
                               </Button>
                             </div>
@@ -1788,32 +1690,20 @@ export function LinkTreeManagement() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            {item.is_featured && (
-                              <Badge variant="secondary">
+                            {item.is_featured && <Badge variant="secondary">
                                 Destaque
-                              </Badge>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditItem(item)}
-                            >
+                              </Badge>}
+                            <Button variant="ghost" size="sm" onClick={() => handleEditItem(item)}>
                               ✏️
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteItem(item.id)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => deleteItem(item.id)}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
             </TabsContent>
 
           </Tabs>
@@ -1841,41 +1731,38 @@ export function LinkTreeManagement() {
             </CardHeader>
             <CardContent>
               <div className="border rounded-lg overflow-auto max-h-[700px] bg-gray-50">
-                <LinkTreePreview
-                  linkTree={{
-                    id: linkTree?.id || '',
-                    title: linkTreeData.title,
-                    description: linkTreeData.description,
-                    background_color: linkTreeData.background_color,
-                    text_color: linkTreeData.text_color,
-                    button_style: linkTreeData.button_style,
-                    avatar_url: linkTreeData.avatar_url,
-                    theme: linkTreeData.theme,
-                    background_type: linkTreeData.background_type,
-                    background_gradient: linkTreeData.background_gradient,
-                    background_image: linkTreeData.background_image,
-                    background_video: linkTreeData.background_video,
-                    background_opacity: (linkTreeData as any).background_opacity || 0.8,
-                    custom_css: linkTreeData.custom_css,
-                    animation_style: linkTreeData.animation_style,
-                    show_analytics: linkTreeData.show_analytics,
-                    is_active: linkTreeData.is_active,
-                    title_size: linkTreeData.title_size,
-                    title_font: linkTreeData.title_font,
-                    title_color: linkTreeData.title_color,
-                    description_size: linkTreeData.description_size,
-                    description_color: linkTreeData.description_color,
-                    footer_enabled: linkTreeData.footer_enabled,
-                    footer_text: linkTreeData.footer_text,
-                    footer_social_links: linkTreeData.footer_social_links,
-                    footer_background_color: linkTreeData.footer_background_color,
-                    footer_text_color: linkTreeData.footer_text_color,
-                    footer_style: linkTreeData.footer_style,
-                    created_at: linkTree?.created_at || new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  } as LinkTree}
-                  linkTreeItems={items}
-                />
+                <LinkTreePreview linkTree={{
+                id: linkTree?.id || '',
+                title: linkTreeData.title,
+                description: linkTreeData.description,
+                background_color: linkTreeData.background_color,
+                text_color: linkTreeData.text_color,
+                button_style: linkTreeData.button_style,
+                avatar_url: linkTreeData.avatar_url,
+                theme: linkTreeData.theme,
+                background_type: linkTreeData.background_type,
+                background_gradient: linkTreeData.background_gradient,
+                background_image: linkTreeData.background_image,
+                background_video: linkTreeData.background_video,
+                background_opacity: (linkTreeData as any).background_opacity || 0.8,
+                custom_css: linkTreeData.custom_css,
+                animation_style: linkTreeData.animation_style,
+                show_analytics: linkTreeData.show_analytics,
+                is_active: linkTreeData.is_active,
+                title_size: linkTreeData.title_size,
+                title_font: linkTreeData.title_font,
+                title_color: linkTreeData.title_color,
+                description_size: linkTreeData.description_size,
+                description_color: linkTreeData.description_color,
+                footer_enabled: linkTreeData.footer_enabled,
+                footer_text: linkTreeData.footer_text,
+                footer_social_links: linkTreeData.footer_social_links,
+                footer_background_color: linkTreeData.footer_background_color,
+                footer_text_color: linkTreeData.footer_text_color,
+                footer_style: linkTreeData.footer_style,
+                created_at: linkTree?.created_at || new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              } as LinkTree} linkTreeItems={items} />
                 {/* Debug info */}
                 <div className="p-2 bg-gray-100 text-xs text-gray-600">
                   <div>Background Color: {linkTreeData.background_color}</div>
@@ -1887,6 +1774,5 @@ export function LinkTreeManagement() {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
