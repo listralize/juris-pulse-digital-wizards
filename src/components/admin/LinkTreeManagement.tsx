@@ -260,6 +260,11 @@ export function LinkTreeManagement() {
           description: linkTreeData.description || '',
           background_color: linkTreeData.background_color || '#000000',
           text_color: linkTreeData.text_color || '#ffffff',
+          title_color: (linkTreeData as any).title_color || linkTreeData.text_color || '#ffffff',
+          description_color: (linkTreeData as any).description_color || linkTreeData.text_color || '#ffffff',
+          title_size: (linkTreeData as any).title_size || 'text-3xl',
+          title_font: (linkTreeData as any).title_font || 'font-bold',
+          description_size: (linkTreeData as any).description_size || 'text-base',
           button_style: linkTreeData.button_style as LinkTree['button_style'] || 'list',
           avatar_url: linkTreeData.avatar_url || '',
           avatar_size: (linkTreeData as any).avatar_size || '128',
@@ -274,11 +279,6 @@ export function LinkTreeManagement() {
           show_analytics: false,
           // Remove analytics
           is_active: linkTreeData.is_active || true,
-          title_size: 'text-3xl',
-          title_font: 'font-bold',
-          title_color: linkTreeData.text_color || '#ffffff',
-          description_size: 'text-base',
-          description_color: linkTreeData.text_color || '#ffffff',
           footer_enabled: (linkTreeData as any).footer_enabled ?? true,
           footer_text: (linkTreeData as any).footer_text || '',
           footer_social_links: (linkTreeData as any).footer_social_links || [],
@@ -349,6 +349,11 @@ export function LinkTreeManagement() {
         description: linkTreeData.description || '',
         background_color: linkTreeData.background_color || '#000000',
         text_color: linkTreeData.text_color || '#ffffff',
+        title_color: linkTreeData.title_color || linkTreeData.text_color || '#ffffff',
+        description_color: linkTreeData.description_color || linkTreeData.text_color || '#ffffff',
+        title_size: linkTreeData.title_size || 'text-3xl',
+        title_font: linkTreeData.title_font || 'font-bold',
+        description_size: linkTreeData.description_size || 'text-base',
         button_style: linkTreeData.button_style || 'list',
         avatar_url: linkTreeData.avatar_url || '',
         avatar_size: linkTreeData.avatar_size || '128',
@@ -380,6 +385,7 @@ export function LinkTreeManagement() {
           throw error;
         }
 
+        console.log('✅ Link Tree atualizado:', data);
         // Atualizar estado local
         setLinkTree(data as any);
       } else {
