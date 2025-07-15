@@ -740,56 +740,52 @@ export function LinkTreeManagement() {
 
                   <div className="space-y-4">
                     <Label>Tipo de Fundo</Label>
-                    <div className="grid grid-cols-1 gap-3">
-                      {/* Fundo Neural */}
-                      <div onClick={() => setLinkTreeData(prev => ({
-                      ...prev,
-                      background_type: 'neural'
-                    }))} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${linkTreeData.background_type === 'neural' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50 hover:bg-accent/50'}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-900 via-gray-600 to-white flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20">
-                            <Zap className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground">Fundo Neural</h3>
-                            <p className="text-sm text-muted-foreground">Animação neural moderna</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Cor Personalizada */}
-                      <div onClick={() => setLinkTreeData(prev => ({
-                      ...prev,
-                      background_type: 'solid'
-                    }))} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${linkTreeData.background_type === 'solid' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50 hover:bg-accent/50'}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg border" style={{
-                          backgroundColor: linkTreeData.background_color || '#3b82f6'
-                        }}>
-                            <Palette className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground">Cor Personalizada</h3>
-                            <p className="text-sm text-muted-foreground">Escolha sua cor de fundo</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Imagem ou Vídeo */}
-                      <div onClick={() => setLinkTreeData(prev => ({
-                      ...prev,
-                      background_type: 'image'
-                    }))} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${linkTreeData.background_type === 'image' || linkTreeData.background_type === 'video' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50 hover:bg-accent/50'}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg">
-                            <ImageIcon className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground">Imagem ou Vídeo</h3>
-                            <p className="text-sm text-muted-foreground">Use sua própria mídia de fundo</p>
+                    <div className="space-y-3">
+                      {backgroundTypeOptions.map((option) => (
+                        <div 
+                          key={option.value}
+                          onClick={() => setLinkTreeData(prev => ({
+                            ...prev,
+                            background_type: option.value as any
+                          }))} 
+                          className={`relative p-3 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                            linkTreeData.background_type === option.value 
+                              ? 'border-white/40 bg-white/10 shadow-lg ring-2 ring-white/20' 
+                              : 'border-white/10 hover:border-white/30 hover:bg-white/5'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                                linkTreeData.background_type === option.value 
+                                  ? 'bg-white/20 shadow-lg' 
+                                  : 'bg-white/5'
+                              }`}>
+                                {option.value === 'solid' && <div className="w-4 h-4 bg-white rounded"></div>}
+                                {option.value === 'gradient' && <div className="w-4 h-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded"></div>}
+                                {option.value === 'neural' && <Zap className="w-5 h-5 text-white" />}
+                                {option.value === 'image' && <ImageIcon className="w-5 h-5 text-white" />}
+                                {option.value === 'video' && <Video className="w-5 h-5 text-white" />}
+                              </div>
+                              <div>
+                                <span className="text-white font-medium">{option.label}</span>
+                                <div className="text-xs text-white/60 mt-1">
+                                  {option.value === 'solid' && 'Cor única de fundo'}
+                                  {option.value === 'gradient' && 'Gradiente personalizado'}
+                                  {option.value === 'neural' && 'Animação neural moderna'}
+                                  {option.value === 'image' && 'Sua própria imagem'}
+                                  {option.value === 'video' && 'Vídeo de fundo'}
+                                </div>
+                              </div>
+                            </div>
+                            {linkTreeData.background_type === option.value && (
+                              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-black"></div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
 
                     {/* Configurações específicas por tipo */}
@@ -1118,7 +1114,7 @@ export function LinkTreeManagement() {
                       </div>
 
                       <div className="space-y-4">
-                        <div className="p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                        <div className="p-4 bg-gradient-to-r from-gray-900/10 to-white/10 rounded-lg border border-white/20 backdrop-blur-sm">
                           <Label className="text-sm font-medium mb-3 block">Configurações da Descrição</Label>
                           <div className="space-y-3">
                             <div>
