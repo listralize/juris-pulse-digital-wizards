@@ -31,7 +31,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const isDark = theme === 'dark';
   const [selectedForm, setSelectedForm] = useState<string>('all');
   const [availableForms, setAvailableForms] = useState<AvailableForm[]>([]);
-  const { multipleFormsConfig } = useFormConfig();
+  const { multipleFormsConfig, isLoading: formsLoading } = useFormConfig();
 
   // Date range state
   const [dateRange, setDateRange] = useState<{
@@ -108,23 +108,18 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   };
 
-  // Load all available forms from configuration
-  const loadAllAvailableForms = () => {
-    try {
-      console.log('🔄 [ConversionFunnel] Carregando formulários do sistema...');
-      console.log('📋 [ConversionFunnel] Formulários disponíveis:', multipleFormsConfig.forms);
+  // Carregar formulários diretamente do useFormConfig
+  useEffect(() => {
+    console.log('🔄 [ConversionFunnel] useFormConfig alterado:', { 
+      formsLoading, 
+      formsLength: multipleFormsConfig?.forms?.length,
+      forms: multipleFormsConfig?.forms 
+    });
 
-      if (!multipleFormsConfig.forms || multipleFormsConfig.forms.length === 0) {
-        console.log('⚠️ [ConversionFunnel] Nenhum formulário no sistema, usando fallback temporário');
-        const fallbackForms = [
-          { id: 'all', name: 'Todos os Formulários' },
-          { id: 'default', name: 'Formulário Principal' }
-        ];
-        setAvailableForms(fallbackForms);
-        return fallbackForms;
-      }
-
-      // Mapear formulários do sistema para o formato esperado
+    if (!formsLoading && multipleFormsConfig?.forms && multipleFormsConfig.forms.length > 0) {
+      console.log('📋 [ConversionFunnel] Processando formulários do sistema...');
+      
+      // Mapear formulários do sistema
       const systemForms: AvailableForm[] = multipleFormsConfig.forms.map(form => ({
         id: form.id || 'default',
         name: form.name || 'Formulário sem nome'
@@ -136,20 +131,16 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         ...systemForms
       ];
 
-      setAvailableForms(allForms);
       console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
-
-      return allForms;
-    } catch (error) {
-      console.error('❌ [ConversionFunnel] Erro ao carregar formulários:', error);
-      const fallbackForms = [
+      setAvailableForms(allForms);
+    } else if (!formsLoading) {
+      console.log('⚠️ [ConversionFunnel] Nenhum formulário encontrado, usando fallback');
+      setAvailableForms([
         { id: 'all', name: 'Todos os Formulários' },
         { id: 'default', name: 'Formulário Principal' }
-      ];
-      setAvailableForms(fallbackForms);
-      return fallbackForms;
+      ]);
     }
-  };
+  }, [multipleFormsConfig, formsLoading]);
 
   // Refresh data based on date range
   const refreshAnalyticsData = async () => {
@@ -192,9 +183,6 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         console.log('📉 Nenhum envio encontrado para o período');
       }
 
-      // Atualizar lista de formulários disponíveis
-      loadAllAvailableForms();
-
       toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
     } catch (error) {
       console.error('❌ Erro ao atualizar dados:', error);
@@ -219,21 +207,6 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     };
     loadMarketingConfig();
   }, []);
-
-  // Load forms when component mounts or when multipleFormsConfig changes
-  useEffect(() => {
-    // Aguardar até que os formulários sejam carregados completamente
-    if (multipleFormsConfig.forms && multipleFormsConfig.forms.length > 0) {
-      loadAllAvailableForms();
-    } else {
-      // Tentar novamente após um pequeno delay se ainda não carregou
-      const timeout = setTimeout(() => {
-        loadAllAvailableForms();
-      }, 500);
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [multipleFormsConfig]);
 
   // Refresh data when date range or selected form changes
   useEffect(() => {
