@@ -59,7 +59,7 @@ const Login = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form id="admin-login-form" onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div>
                 <Label htmlFor="fullName" className={`${isDark ? 'text-white' : 'text-black'}`}>
@@ -103,6 +103,7 @@ const Login = () => {
               />
             </div>
             <Button 
+              id="submit-admin-login"
               type="submit" 
               className={`w-full ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
               disabled={loading}

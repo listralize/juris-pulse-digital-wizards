@@ -119,7 +119,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="contact-form-main" onSubmit={handleSubmit} className="space-y-4">
         <DynamicFormRenderer
           formFields={formConfig.allFields || []}
           serviceOptions={formConfig.serviceOptions}
@@ -129,6 +129,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
         />
 
         <button
+          id="submit-contact-main"
           type="submit"
           disabled={isSubmitting}
           className={`w-full flex items-center justify-center py-3 px-6 rounded-md font-medium transition-all ${

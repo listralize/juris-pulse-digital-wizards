@@ -185,7 +185,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form id="service-form-modal" onSubmit={handleSubmit} className="space-y-4 mt-4">
           {sortedFields.map(field => renderField(field))}
 
           <div className="flex gap-3 pt-4">
@@ -199,6 +199,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
               Cancelar
             </Button>
             <Button
+              id="submit-service-modal"
               type="submit"
               className="flex-1 backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white"
               disabled={isSubmitting}

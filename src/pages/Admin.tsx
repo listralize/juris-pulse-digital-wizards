@@ -15,6 +15,7 @@ import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
+import { MarketingManagement } from '../components/admin/MarketingManagement';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 const Admin = () => {
@@ -151,24 +152,35 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className={`grid w-full grid-cols-5 ${isDark ? 'bg-gray-900 border border-gray-700' : 'bg-gray-900 border border-gray-700'}`}>
-                <TabsTrigger value="content" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-6 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '12px'
+                }}>
+                <TabsTrigger value="content" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <Edit className="w-4 h-4" />
                   Conteúdo Geral
                 </TabsTrigger>
-                <TabsTrigger value="service-pages" className="flex items-center gap-2">
+                <TabsTrigger value="service-pages" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <Globe className="w-4 h-4" />
                   Páginas de Serviços ({servicePages?.length || 0})
                 </TabsTrigger>
-                <TabsTrigger value="blog" className="flex items-center gap-2">
+                <TabsTrigger value="blog" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <FileText className="w-4 h-4" />
                   Blog ({validBlogPosts.length})
                 </TabsTrigger>
-                <TabsTrigger value="linktree" className="flex items-center gap-2">
+                <TabsTrigger value="linktree" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <Link className="w-4 h-4" />
                   Link Tree
                 </TabsTrigger>
-                <TabsTrigger value="supabase" className="flex items-center gap-2">
+                <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
+                  <Briefcase className="w-4 h-4" />
+                  Marketing & Analytics
+                </TabsTrigger>
+                <TabsTrigger value="supabase" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <Database className="w-4 h-4" />
                   Supabase
                 </TabsTrigger>
@@ -188,6 +200,10 @@ const Admin = () => {
 
               <TabsContent value="linktree">
                 <LinkTreeManagement />
+              </TabsContent>
+
+              <TabsContent value="marketing">
+                <MarketingManagement />
               </TabsContent>
 
               <TabsContent value="supabase">
