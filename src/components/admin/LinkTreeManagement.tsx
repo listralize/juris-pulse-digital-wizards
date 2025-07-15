@@ -913,11 +913,10 @@ export function LinkTreeManagement() {
                             <div className="flex gap-2">
                               <Input 
                                 type="color" 
-                                 value={parseGradientColors(linkTreeData.background_gradient || '').color1}
+                                value={parseGradientColors(linkTreeData.background_gradient || '').color1}
                                 onChange={(e) => {
-                                  const color1 = e.target.value;
-                                  const color2 = linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2';
-                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  const { color2 } = parseGradientColors(linkTreeData.background_gradient || '');
+                                  const newGradient = createGradient(e.target.value, color2);
                                   setLinkTreeData(prev => ({
                                     ...prev,
                                     background_gradient: newGradient
@@ -927,15 +926,15 @@ export function LinkTreeManagement() {
                                       ...prev!,
                                       background_gradient: newGradient
                                     }));
-                                   }
-                                 className="w-16 h-10"
+                                  }
+                                }} 
+                                className="w-16 h-10"
                               />
                               <Input 
-                                value={linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea'} 
+                                value={parseGradientColors(linkTreeData.background_gradient || '').color1}
                                 onChange={(e) => {
-                                  const color1 = e.target.value;
-                                  const color2 = linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2';
-                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  const { color2 } = parseGradientColors(linkTreeData.background_gradient || '');
+                                  const newGradient = createGradient(e.target.value, color2);
                                   setLinkTreeData(prev => ({
                                     ...prev,
                                     background_gradient: newGradient
@@ -945,7 +944,7 @@ export function LinkTreeManagement() {
                                       ...prev!,
                                       background_gradient: newGradient
                                     }));
-                                 }
+                                  }
                                 }} 
                                 placeholder="#667eea" 
                               />
@@ -957,29 +956,28 @@ export function LinkTreeManagement() {
                             <div className="flex gap-2">
                               <Input 
                                 type="color" 
-                                 value={parseGradientColors(linkTreeData.background_gradient || '').color2}
-                                 onChange={(e) => {
-                                   const { color1 } = parseGradientColors(linkTreeData.background_gradient || '');
-                                   const newGradient = createGradient(color1, e.target.value);
-                                   setLinkTreeData(prev => ({
-                                     ...prev,
-                                     background_gradient: newGradient
-                                   }));
-                                   if (linkTree) {
-                                     setLinkTree(prev => ({
-                                       ...prev!,
-                                       background_gradient: newGradient
-                                     }));
-                                   }
-                                 }
+                                value={parseGradientColors(linkTreeData.background_gradient || '').color2}
+                                onChange={(e) => {
+                                  const { color1 } = parseGradientColors(linkTreeData.background_gradient || '');
+                                  const newGradient = createGradient(color1, e.target.value);
+                                  setLinkTreeData(prev => ({
+                                    ...prev,
+                                    background_gradient: newGradient
+                                  }));
+                                  if (linkTree) {
+                                    setLinkTree(prev => ({
+                                      ...prev!,
+                                      background_gradient: newGradient
+                                    }));
+                                  }
+                                }} 
                                 className="w-16 h-10" 
                               />
                               <Input 
-                                value={linkTreeData.background_gradient?.split(',')[1]?.split(')')[0] || '#764ba2'} 
+                                value={parseGradientColors(linkTreeData.background_gradient || '').color2}
                                 onChange={(e) => {
-                                  const color1 = linkTreeData.background_gradient?.split(',')[0]?.split('(')[1] || '#667eea';
-                                  const color2 = e.target.value;
-                                  const newGradient = `linear-gradient(135deg, ${color1}, ${color2})`;
+                                  const { color1 } = parseGradientColors(linkTreeData.background_gradient || '');
+                                  const newGradient = createGradient(color1, e.target.value);
                                   setLinkTreeData(prev => ({
                                     ...prev,
                                     background_gradient: newGradient
@@ -1081,17 +1079,20 @@ export function LinkTreeManagement() {
                                    }));
                                  }
                                }}
-                               className="w-16 h-10"
-                              onChange={e => {
-                                const newColor = e.target.value;
-                                setLinkTreeData(prev => ({
-                                  ...prev,
-                                  background_color: newColor
-                                }));
-                                if (linkTree) {
-                                  setLinkTree(prev => ({
-                                    ...prev!,
+                                className="w-16 h-10" 
+                              />
+                              <Input 
+                                value={linkTreeData.background_color || '#000000'} 
+                                onChange={e => {
+                                  const newColor = e.target.value;
+                                  setLinkTreeData(prev => ({
+                                    ...prev,
                                     background_color: newColor
+                                  }));
+                                  if (linkTree) {
+                                    setLinkTree(prev => ({
+                                      ...prev!,
+                                      background_color: newColor
                                   }));
                                 }
                               }} 
