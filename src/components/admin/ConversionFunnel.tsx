@@ -71,18 +71,18 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
 
   return (
     <div className="space-y-6">
-      {/* Controles */}
+      {/* Controles de Entrada */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
             <Calculator className="w-5 h-5" />
-            Funil de Conversão - Dados Manuais
+            Configuração do Funil de Conversão
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <Label>Formulário</Label>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="space-y-2">
+              <Label className={`${isDark ? 'text-white' : 'text-black'}`}>Formulário</Label>
               <Select value={selectedForm} onValueChange={setSelectedForm}>
                 <SelectTrigger className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'}`}>
                   <SelectValue />
@@ -97,48 +97,37 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
               </Select>
             </div>
             
-            <div>
-              <Label>Contratos Fechados</Label>
+            <div className="space-y-2">
+              <Label className={`${isDark ? 'text-white' : 'text-black'}`}>Contratos Fechados</Label>
               <Input
                 type="number"
                 value={contracts}
                 onChange={(e) => setContracts(Number(e.target.value) || 0)}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'}`}
-                placeholder="0"
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'} text-lg`}
+                placeholder="Ex: 5"
               />
             </div>
             
-            <div>
-              <Label>Dinheiro Gasto (R$)</Label>
+            <div className="space-y-2">
+              <Label className={`${isDark ? 'text-white' : 'text-black'}`}>Dinheiro Gasto (R$)</Label>
               <Input
                 type="number"
                 value={adSpend}
                 onChange={(e) => setAdSpend(Number(e.target.value) || 0)}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'}`}
-                placeholder="0"
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'} text-lg`}
+                placeholder="Ex: 5000"
               />
             </div>
             
-            <div>
-              <Label>Dinheiro Ganho (R$)</Label>
+            <div className="space-y-2">
+              <Label className={`${isDark ? 'text-white' : 'text-black'}`}>Dinheiro Ganho (R$)</Label>
               <Input
                 type="number"
                 value={revenue}
                 onChange={(e) => setRevenue(Number(e.target.value) || 0)}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'}`}
-                placeholder="0"
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200'} text-lg`}
+                placeholder="Ex: 25000"
               />
-            </div>
-
-            <div className="flex items-end">
-              <div className={`text-center w-full p-2 rounded ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Envios do Form
-                </div>
-                <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-black'}`}>
-                  {formSubmissions}
-                </div>
-              </div>
             </div>
           </div>
         </CardContent>
@@ -147,100 +136,124 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
       {/* Funil Visual */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
-          <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            📊 Funil de Conversão - {availableForms.find(f => f.id === selectedForm)?.name}
+          <CardTitle className={`${isDark ? 'text-white' : 'text-black'} text-center text-2xl`}>
+            📊 Funil de Conversão (Últimos 7 dias)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative max-w-3xl mx-auto space-y-6">
-            
-            {/* ETAPA 1: LEADS (Envios de Formulário) */}
-            <div className="relative">
-              <div 
-                className="mx-auto h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-between px-6 shadow-xl transform hover:scale-105 transition-transform"
-                style={{ width: '100%' }}
-              >
-                <div className="flex items-center gap-4">
-                  <FileText className="w-8 h-8 text-white" />
-                  <div>
-                    <div className="text-white font-bold text-xl">Leads Gerados</div>
-                    <div className="text-blue-100 text-sm">Envios do formulário</div>
+          {/* Visual do Funil */}
+          <div className="relative max-w-4xl mx-auto mb-12">
+            <div className="space-y-2">
+              
+              {/* NÍVEL 1: ENVIOS DE FORMULÁRIO */}
+              <div className="relative">
+                <div 
+                  className="mx-auto h-16 rounded-xl relative overflow-hidden shadow-lg"
+                  style={{ 
+                    width: '100%',
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)'
+                  }}
+                >
+                  <div className="flex items-center justify-between h-full px-6 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <span className="text-white font-bold text-lg">
+                        {formSubmissions.toLocaleString()} Envios de Formulário
+                      </span>
+                    </div>
+                    <span className="text-white/80 text-sm">100%</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-4xl font-bold text-white">{formSubmissions.toLocaleString()}</div>
-                  <div className="text-blue-100 text-sm">100%</div>
-                </div>
               </div>
-            </div>
 
-            {/* SETA */}
-            <div className="flex justify-center">
-              <TrendingUp className="w-8 h-8 text-gray-400 transform rotate-90" />
-            </div>
-
-            {/* ETAPA 2: CONTRATOS (Conversões) */}
-            <div className="relative">
-              <div 
-                className="mx-auto h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-between px-6 shadow-xl transform hover:scale-105 transition-transform"
-                style={{ width: '75%' }}
-              >
-                <div className="flex items-center gap-4">
-                  <Handshake className="w-8 h-8 text-white" />
-                  <div>
-                    <div className="text-white font-bold text-xl">Contratos Fechados</div>
-                    <div className="text-green-100 text-sm">Clientes convertidos</div>
+              {/* NÍVEL 2: CONTRATOS FECHADOS */}
+              <div className="relative">
+                <div 
+                  className="mx-auto h-16 rounded-xl relative overflow-hidden shadow-lg"
+                  style={{ 
+                    width: '80%',
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+                  }}
+                >
+                  <div className="flex items-center justify-between h-full px-6 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <span className="text-white font-bold text-lg">
+                        {contracts.toLocaleString()} Contratos Fechados
+                      </span>
+                    </div>
+                    <span className="text-white/80 text-sm">{conversionRate.toFixed(1)}%</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-4xl font-bold text-white">{contracts.toLocaleString()}</div>
-                  <div className="text-green-100 text-sm">{conversionRate.toFixed(1)}%</div>
-                </div>
               </div>
-            </div>
 
-            {/* SETA */}
-            <div className="flex justify-center">
-              <DollarSign className="w-8 h-8 text-gray-400" />
-            </div>
-
-            {/* ETAPA 3: RECEITA */}
-            <div className="relative">
-              <div 
-                className="mx-auto h-20 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-between px-6 shadow-xl transform hover:scale-105 transition-transform"
-                style={{ width: '50%' }}
-              >
-                <div className="flex items-center gap-4">
-                  <Target className="w-8 h-8 text-white" />
-                  <div>
-                    <div className="text-white font-bold text-xl">Receita Total</div>
-                    <div className="text-purple-100 text-sm">Dinheiro ganho</div>
+              {/* NÍVEL 3: RECEITA GERADA */}
+              <div className="relative">
+                <div 
+                  className="mx-auto h-16 rounded-xl relative overflow-hidden shadow-lg"
+                  style={{ 
+                    width: '60%',
+                    background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
+                  }}
+                >
+                  <div className="flex items-center justify-between h-full px-6 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <span className="text-white font-bold text-lg">
+                        R$ {revenue.toLocaleString()} em Receita
+                      </span>
+                    </div>
+                    <span className="text-white/80 text-sm">
+                      {contracts > 0 ? `R$ ${ticketMedio.toFixed(0)} médio` : '0'}
+                    </span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-white">R$ {revenue.toLocaleString()}</div>
-                  <div className="text-purple-100 text-sm">Total</div>
+              </div>
+
+              {/* NÍVEL 4: LUCRO LÍQUIDO */}
+              <div className="relative">
+                <div 
+                  className="mx-auto h-16 rounded-xl relative overflow-hidden shadow-lg"
+                  style={{ 
+                    width: '40%',
+                    background: lucroLiquido >= 0 
+                      ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)'
+                      : 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+                  }}
+                >
+                  <div className="flex items-center justify-between h-full px-6 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <span className="text-white font-bold text-lg">
+                        R$ {lucroLiquido.toLocaleString()} Lucro
+                      </span>
+                    </div>
+                    <span className="text-white/80 text-sm">
+                      {roi.toFixed(0)}% ROI
+                    </span>
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
 
           {/* Métricas Calculadas */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="text-center p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
-              <div className={`text-xl font-bold ${conversionRate >= 20 ? 'text-green-500' : conversionRate >= 10 ? 'text-yellow-500' : 'text-red-500'}`}>
+              <div className={`text-2xl font-bold ${conversionRate >= 20 ? 'text-green-500' : conversionRate >= 10 ? 'text-yellow-500' : 'text-red-500'}`}>
                 {conversionRate.toFixed(1)}%
               </div>
-              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Taxa Conversão
+              <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Taxa de Conversão
               </div>
             </div>
             
             <div className="text-center p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
-              <div className={`text-xl font-bold ${roi >= 200 ? 'text-green-500' : roi >= 100 ? 'text-yellow-500' : roi >= 0 ? 'text-blue-500' : 'text-red-500'}`}>
+              <div className={`text-2xl font-bold ${roi >= 200 ? 'text-green-500' : roi >= 100 ? 'text-yellow-500' : roi >= 0 ? 'text-blue-500' : 'text-red-500'}`}>
                 {roi.toFixed(0)}%
               </div>
-              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 ROI
               </div>
             </div>
@@ -249,8 +262,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
               <div className={`text-xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>
                 R$ {costPerLead.toFixed(0)}
               </div>
-              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Custo/Lead
+              <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Custo por Lead
               </div>
             </div>
             
@@ -258,7 +271,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
               <div className={`text-xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>
                 R$ {costPerAcquisition.toFixed(0)}
               </div>
-              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 CAC
               </div>
             </div>
@@ -267,7 +280,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
               <div className={`text-xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>
                 R$ {ticketMedio.toFixed(0)}
               </div>
-              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Ticket Médio
               </div>
             </div>
@@ -276,7 +289,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
               <div className={`text-xl font-bold ${lucroLiquido >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 R$ {lucroLiquido.toLocaleString()}
               </div>
-              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Lucro Líquido
               </div>
             </div>
