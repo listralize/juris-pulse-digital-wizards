@@ -123,8 +123,229 @@ export const MarketingManagement: React.FC = () => {
     }
   });
 
+  // Forçar reload dos dados do banco
+  const forceReloadFromDatabase = async () => {
+    try {
+      console.log('🔄 Forçando reload dos dados do banco...');
+      
+      const { data: settings, error } = await supabase
+        .from('marketing_settings')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('❌ Erro ao recarregar:', error);
+        return;
+      }
+
+      console.log('📋 Dados recarregados do banco:', settings);
+
+      if (settings) {
+        // Atualizar scripts com dados do banco
+        const newScripts = {
+          facebookPixel: {
+            enabled: settings.facebook_pixel_enabled || false,
+            pixelId: settings.facebook_pixel_id || '',
+            customCode: settings.facebook_custom_code || '',
+            conversionApiToken: settings.facebook_conversion_api_token || ''
+          },
+          googleAnalytics: {
+            enabled: settings.google_analytics_enabled || false,
+            measurementId: settings.google_analytics_id || '',
+            customCode: settings.google_analytics_custom_code || ''
+          },
+          googleTagManager: {
+            enabled: settings.google_tag_manager_enabled || false,
+            containerId: settings.google_tag_manager_id || ''
+          },
+          customScripts: {
+            head: settings.custom_head_scripts || '',
+            body: settings.custom_body_scripts || ''
+          }
+        };
+
+        console.log('📝 Atualizando interface com:', newScripts);
+        setMarketingScripts(newScripts);
+
+        // Atualizar tracking
+        if (settings.form_tracking_config) {
+          try {
+            let trackingConfig;
+            if (typeof settings.form_tracking_config === 'string') {
+              trackingConfig = JSON.parse(settings.form_tracking_config);
+            } else {
+              trackingConfig = settings.form_tracking_config;
+            }
+            
+            setConversionTracking({
+              systemForms: trackingConfig.systemForms || [],
+              linkTreeForms: trackingConfig.linkTreeForms || [],
+              customForms: trackingConfig.customForms || [],
+              events: trackingConfig.events || { 
+                formSubmission: true, 
+                buttonClick: false, 
+                linkClick: false 
+              }
+            });
+          } catch (parseError) {
+            console.error('❌ Erro ao parsear tracking:', parseError);
+          }
+        }
+
+        // Implementar os scripts no site
+        implementMarketingScripts(newScripts);
+        
+        toast.success('Dados sincronizados com o banco!');
+      } else {
+        console.log('ℹ️ Nenhum dado encontrado no banco');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao forçar reload:', error);
+      toast.error('Erro ao sincronizar com banco');
+    }
+  };
+
+  // Implementar scripts de marketing no site
+  const implementMarketingScripts = (scripts: MarketingScripts) => {
+    console.log('🚀 Implementando scripts no site:', scripts);
+
+    // Remover scripts antigos
+    removeExistingScripts();
+
+    // Facebook Pixel
+    if (scripts.facebookPixel.enabled && scripts.facebookPixel.pixelId) {
+      implementFacebookPixel(scripts.facebookPixel);
+    }
+
+    // Google Analytics
+    if (scripts.googleAnalytics.enabled && scripts.googleAnalytics.measurementId) {
+      implementGoogleAnalytics(scripts.googleAnalytics);
+    }
+
+    // Google Tag Manager
+    if (scripts.googleTagManager.enabled && scripts.googleTagManager.containerId) {
+      implementGoogleTagManager(scripts.googleTagManager);
+    }
+
+    // Scripts customizados
+    if (scripts.customScripts.head || scripts.customScripts.body) {
+      implementCustomScripts(scripts.customScripts);
+    }
+
+    console.log('✅ Scripts implementados com sucesso!');
+  };
+
+  const removeExistingScripts = () => {
+    // Remover scripts existentes do Facebook Pixel
+    const existingFbScripts = document.querySelectorAll('script[data-marketing="facebook-pixel"]');
+    existingFbScripts.forEach(script => script.remove());
+
+    // Remover scripts existentes do Google Analytics
+    const existingGaScripts = document.querySelectorAll('script[data-marketing="google-analytics"]');
+    existingGaScripts.forEach(script => script.remove());
+
+    // Remover scripts existentes do GTM
+    const existingGtmScripts = document.querySelectorAll('script[data-marketing="google-tag-manager"]');
+    existingGtmScripts.forEach(script => script.remove());
+
+    // Remover scripts customizados
+    const existingCustomScripts = document.querySelectorAll('script[data-marketing="custom"]');
+    existingCustomScripts.forEach(script => script.remove());
+  };
+
+  const implementFacebookPixel = (config: any) => {
+    console.log('📘 Implementando Facebook Pixel:', config.pixelId);
+
+    const fbPixelScript = document.createElement('script');
+    fbPixelScript.setAttribute('data-marketing', 'facebook-pixel');
+    fbPixelScript.innerHTML = `
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '${config.pixelId}');
+      fbq('track', 'PageView');
+      ${config.customCode || ''}
+    `;
+    document.head.appendChild(fbPixelScript);
+
+    // Adicionar noscript
+    const noscript = document.createElement('noscript');
+    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${config.pixelId}&ev=PageView&noscript=1" />`;
+    document.head.appendChild(noscript);
+  };
+
+  const implementGoogleAnalytics = (config: any) => {
+    console.log('📊 Implementando Google Analytics:', config.measurementId);
+
+    // Script do gtag
+    const gtagScript = document.createElement('script');
+    gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${config.measurementId}`;
+    gtagScript.async = true;
+    gtagScript.setAttribute('data-marketing', 'google-analytics');
+    document.head.appendChild(gtagScript);
+
+    // Script de configuração
+    const configScript = document.createElement('script');
+    configScript.setAttribute('data-marketing', 'google-analytics');
+    configScript.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${config.measurementId}');
+      ${config.customCode || ''}
+    `;
+    document.head.appendChild(configScript);
+  };
+
+  const implementGoogleTagManager = (config: any) => {
+    console.log('🏷️ Implementando Google Tag Manager:', config.containerId);
+
+    // Script principal do GTM
+    const gtmScript = document.createElement('script');
+    gtmScript.setAttribute('data-marketing', 'google-tag-manager');
+    gtmScript.innerHTML = `
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','${config.containerId}');
+    `;
+    document.head.appendChild(gtmScript);
+
+    // Noscript do GTM
+    const noscript = document.createElement('noscript');
+    noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${config.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+    document.body.appendChild(noscript);
+  };
+
+  const implementCustomScripts = (config: any) => {
+    console.log('🔧 Implementando scripts customizados');
+
+    if (config.head) {
+      const headScript = document.createElement('div');
+      headScript.setAttribute('data-marketing', 'custom');
+      headScript.innerHTML = config.head;
+      document.head.appendChild(headScript);
+    }
+
+    if (config.body) {
+      const bodyScript = document.createElement('div');
+      bodyScript.setAttribute('data-marketing', 'custom');
+      bodyScript.innerHTML = config.body;
+      document.body.appendChild(bodyScript);
+    }
+  };
+
   useEffect(() => {
-    loadMarketingConfig();
+    // Carregar dados iniciais e forçar sincronização
+    forceReloadFromDatabase();
     loadAnalyticsData();
     loadLinkTreeForms();
   }, []);
@@ -330,88 +551,10 @@ export const MarketingManagement: React.FC = () => {
     }
   };
 
-  const loadMarketingConfig = async () => {
-    try {
-      console.log('🔄 Carregando configurações de marketing...');
-      
-      const { data: settings, error } = await supabase
-        .from('marketing_settings')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        console.error('❌ Erro ao carregar configurações:', error);
-        return;
-      }
-
-      console.log('📋 Configurações carregadas do banco:', settings);
-
-      if (settings) {
-        // Carregar configurações de scripts
-        setMarketingScripts({
-          facebookPixel: {
-            enabled: settings.facebook_pixel_enabled || false,
-            pixelId: settings.facebook_pixel_id || '',
-            customCode: settings.facebook_custom_code || '',
-            conversionApiToken: settings.facebook_conversion_api_token || ''
-          },
-          googleAnalytics: {
-            enabled: settings.google_analytics_enabled || false,
-            measurementId: settings.google_analytics_id || '',
-            customCode: settings.google_analytics_custom_code || ''
-          },
-          googleTagManager: {
-            enabled: settings.google_tag_manager_enabled || false,
-            containerId: settings.google_tag_manager_id || ''
-          },
-          customScripts: {
-            head: settings.custom_head_scripts || '',
-            body: settings.custom_body_scripts || ''
-          }
-        });
-
-        // Carregar configurações de rastreamento
-        if (settings.form_tracking_config) {
-          try {
-            let trackingConfig;
-            if (typeof settings.form_tracking_config === 'string') {
-              trackingConfig = JSON.parse(settings.form_tracking_config);
-            } else {
-              trackingConfig = settings.form_tracking_config;
-            }
-            
-            console.log('🎯 Configuração de rastreamento carregada:', trackingConfig);
-            
-            setConversionTracking({
-              systemForms: trackingConfig.systemForms || [],
-              linkTreeForms: trackingConfig.linkTreeForms || [],
-              customForms: trackingConfig.customForms || [],
-              events: trackingConfig.events || { 
-                formSubmission: true, 
-                buttonClick: false, 
-                linkClick: false 
-              }
-            });
-          } catch (parseError) {
-            console.error('❌ Erro ao parsear configuração de rastreamento:', parseError);
-          }
-        }
-      } else {
-        console.log('ℹ️ Nenhuma configuração encontrada, usando padrões');
-      }
-    } catch (error) {
-      console.error('❌ Erro geral ao carregar configurações:', error);
-      toast.error('Erro ao carregar configurações de marketing');
-    }
-  };
-
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
-      console.log('💾 Iniciando salvamento das configurações...');
-      console.log('📝 Scripts a serem salvos:', marketingScripts);
-      console.log('🎯 Rastreamento a ser salvo:', conversionTracking);
+      console.log('💾 Salvando configurações de marketing...');
       
       const configData = {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
@@ -436,19 +579,15 @@ export const MarketingManagement: React.FC = () => {
         updated_at: new Date().toISOString()
       };
 
-      console.log('📤 Dados preparados para salvamento:', configData);
+      console.log('📤 Dados a serem salvos:', configData);
 
-      // Verificar se já existe configuração
-      const { data: existingConfig, error: selectError } = await supabase
+      // Verificar configuração existente
+      const { data: existingConfig } = await supabase
         .from('marketing_settings')
         .select('id')
+        .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-
-      if (selectError) {
-        console.error('❌ Erro ao verificar configuração existente:', selectError);
-        throw selectError;
-      }
 
       let result;
       if (existingConfig) {
@@ -469,22 +608,26 @@ export const MarketingManagement: React.FC = () => {
       const { data: savedData, error } = result;
 
       if (error) {
-        console.error('❌ Erro ao salvar no banco:', error);
+        console.error('❌ Erro ao salvar:', error);
         throw error;
       }
 
-      console.log('✅ Dados salvos com sucesso:', savedData);
+      console.log('✅ Configurações salvas:', savedData);
       setLastSaved(new Date());
-      toast.success('Configurações salvas com sucesso!');
+
+      // Implementar scripts imediatamente após salvar
+      implementMarketingScripts(marketingScripts);
       
-      // Recarregar configurações para confirmar persistência
+      toast.success('Configurações salvas e implementadas no site!');
+      
+      // Aguardar e recarregar para confirmar persistência
       setTimeout(() => {
-        loadMarketingConfig();
-      }, 500);
+        forceReloadFromDatabase();
+      }, 1000);
       
     } catch (error) {
-      console.error('❌ Erro completo ao salvar:', error);
-      toast.error(`Erro ao salvar configurações: ${error.message}`);
+      console.error('❌ Erro ao salvar:', error);
+      toast.error(`Erro ao salvar: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -534,6 +677,10 @@ export const MarketingManagement: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-3">
+          <Button onClick={forceReloadFromDatabase} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Sincronizar
+          </Button>
           {lastSaved && (
             <div className="text-sm text-muted-foreground">
               Última atualização: {lastSaved.toLocaleTimeString()}
@@ -541,10 +688,29 @@ export const MarketingManagement: React.FC = () => {
           )}
           <Button onClick={saveMarketingConfig} disabled={isLoading}>
             <Save className="w-4 h-4 mr-2" />
-            {isLoading ? 'Salvando...' : 'Salvar Configurações'}
+            {isLoading ? 'Salvando...' : 'Salvar e Implementar'}
           </Button>
         </div>
       </div>
+
+      {/* Indicador de status dos scripts */}
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Status dos Scripts:</strong>
+          <div className="flex gap-2 mt-2">
+            <Badge variant={marketingScripts.facebookPixel.enabled ? "default" : "secondary"}>
+              Facebook Pixel: {marketingScripts.facebookPixel.enabled ? "Ativo" : "Inativo"}
+            </Badge>
+            <Badge variant={marketingScripts.googleAnalytics.enabled ? "default" : "secondary"}>
+              Google Analytics: {marketingScripts.googleAnalytics.enabled ? "Ativo" : "Inativo"}
+            </Badge>
+            <Badge variant={marketingScripts.googleTagManager.enabled ? "default" : "secondary"}>
+              GTM: {marketingScripts.googleTagManager.enabled ? "Ativo" : "Inativo"}
+            </Badge>
+          </div>
+        </AlertDescription>
+      </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
