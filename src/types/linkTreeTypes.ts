@@ -6,6 +6,8 @@ export interface LinkTree {
   text_color: string;
   button_style: 'rounded' | 'square' | 'pill' | 'glassmorphism' | 'neon' | 'gradient' | 'grid' | 'list' | 'masonry' | 'carousel' | 'magazine' | 'portfolio' | 'bento';
   avatar_url?: string;
+  avatar_size?: string;
+  avatar_format?: string;
   theme: 'modern' | 'minimal' | 'colorful' | 'dark' | 'corporate' | 'premium' | 'gold' | 'platinum' | 'custom';
   background_type: 'solid' | 'gradient' | 'image' | 'video' | 'neural';
   background_gradient?: string;
