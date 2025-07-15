@@ -114,25 +114,35 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   // Load all available forms from database automatically
   const loadAllAvailableForms = async () => {
     try {
-      console.log('🔄 Carregando todos os formulários disponíveis...');
+      console.log('🔄 Buscando todos os formulários disponíveis...');
 
-      // Buscar todos os form_ids únicos que têm conversões
+      // Buscar todos os form_ids únicos que têm leads
       const { data: formLeads, error } = await supabase
         .from('form_leads')
-        .select('form_id, form_name')
-        .not('form_id', 'is', null);
+        .select('form_id, form_name');
 
       if (error) {
         console.error('❌ Erro ao carregar formulários:', error);
         throw error;
       }
 
-      console.log('📋 Form leads encontrados:', formLeads);
+      console.log('📋 Form leads brutos encontrados:', formLeads);
+
+      if (!formLeads || formLeads.length === 0) {
+        console.log('⚠️ Nenhum formulário com leads encontrado');
+        const fallbackForms = [
+          { id: 'all', name: 'Todos os Formulários' }
+        ];
+        setAvailableForms(fallbackForms);
+        return fallbackForms;
+      }
 
       // Agrupar por form_id e pegar nomes únicos
-      const uniqueForms = formLeads?.reduce((acc: Record<string, AvailableForm>, lead) => {
+      const uniqueForms: Record<string, AvailableForm> = {};
+      
+      formLeads.forEach(lead => {
         const formId = lead.form_id || 'default';
-        if (!acc[formId]) {
+        if (!uniqueForms[formId]) {
           let displayName = lead.form_name || formId;
           
           // Melhorar nomes de exibição
@@ -142,13 +152,12 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
             displayName = `Formulário ${formId.replace('form_', '')}`;
           }
 
-          acc[formId] = {
+          uniqueForms[formId] = {
             id: formId,
             name: displayName
           };
         }
-        return acc;
-      }, {}) || {};
+      });
 
       const formsArray = Object.values(uniqueForms);
       
@@ -159,15 +168,13 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       ];
 
       setAvailableForms(allForms);
-      console.log('✅ Formulários carregados automaticamente:', allForms);
+      console.log('✅ Formulários carregados:', allForms);
 
       return allForms;
     } catch (error) {
       console.error('❌ Erro ao carregar formulários:', error);
-      // Fallback básico
       const fallbackForms = [
-        { id: 'all', name: 'Todos os Formulários' },
-        { id: 'default', name: 'Formulário Principal' }
+        { id: 'all', name: 'Todos os Formulários' }
       ];
       setAvailableForms(fallbackForms);
       return fallbackForms;
@@ -178,50 +185,44 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
     try {
-      console.log('🔄 Atualizando dados para período:', dateRange);
+      console.log('🔄 Buscando dados para período:', {
+        from: dateRange.from.toISOString(),
+        to: dateRange.to.toISOString(),
+        selectedForm
+      });
 
       // Query form leads for the selected period
-      const { data: formLeads, error: leadsError } = await supabase
+      let query = supabase
         .from('form_leads')
         .select('*')
         .gte('created_at', dateRange.from.toISOString())
         .lte('created_at', dateRange.to.toISOString());
+
+      // Se não for "all", filtrar pelo formulário específico
+      if (selectedForm !== 'all') {
+        query = query.eq('form_id', selectedForm);
+      }
+
+      const { data: formLeads, error: leadsError } = await query;
 
       if (leadsError) {
         console.error('❌ Erro ao carregar leads:', leadsError);
         throw leadsError;
       }
 
-      console.log('📊 Leads carregados:', formLeads);
+      console.log('📊 Leads encontrados:', formLeads);
 
-      if (formLeads) {
-        // Group by form ID with proper typing
-        const formSubmissionsData: Record<string, FormSubmissionData> = formLeads.reduce((acc, lead) => {
-          const formId = lead.form_id || 'default';
-          if (!acc[formId]) {
-            acc[formId] = { formId, count: 0 };
-          }
-          acc[formId].count++;
-          return acc;
-        }, {} as Record<string, FormSubmissionData>);
-
-        const formSubmissionsArray: FormSubmissionData[] = Object.values(formSubmissionsData);
-        console.log('📋 Dados de envios agrupados:', formSubmissionsArray);
-
-        // Update form submissions count based on selected form
-        if (selectedForm === 'all') {
-          const totalSubmissions = formSubmissionsArray.reduce((sum: number, form: FormSubmissionData) => sum + form.count, 0);
-          setFormSubmissions(totalSubmissions);
-        } else {
-          const formData = formSubmissionsArray.find((fs: FormSubmissionData) => fs.formId === selectedForm);
-          setFormSubmissions(formData?.count || 0);
-        }
-
-        // Atualizar lista de formulários disponíveis com base nos dados atuais
-        await loadAllAvailableForms();
+      if (formLeads && formLeads.length > 0) {
+        // Contar total de envios
+        setFormSubmissions(formLeads.length);
+        console.log('📈 Total de envios encontrados:', formLeads.length);
       } else {
         setFormSubmissions(0);
+        console.log('📉 Nenhum envio encontrado para o período');
       }
+
+      // Atualizar lista de formulários disponíveis
+      await loadAllAvailableForms();
 
       toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
     } catch (error) {
@@ -500,8 +501,6 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
                   placeholder="Ex: Campanha Black Friday 2024"
                 />
               </div>
-              
-              {marketingConfig?.facebook_pixel_id}
             </div>
             
             <div className="flex justify-end mt-6">
