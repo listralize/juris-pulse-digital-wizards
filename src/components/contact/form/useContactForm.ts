@@ -40,6 +40,10 @@ export const useContactForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('📤 Iniciando envio do formulário...');
+    console.log('📋 Dados do formulário:', formData);
+    console.log('⚙️ Configuração do formulário:', formConfig);
+    
     // Validar apenas campos obrigatórios que não estão desabilitados
     const requiredFields = formConfig.allFields?.filter(field => 
       field.required && !field.disabled
@@ -66,14 +70,25 @@ export const useContactForm = () => {
         }
       });
 
+      // Preparar dados para envio
       const submitData = {
         ...formData,
         customFields: customFieldsData,
         formConfig: {
-          redirectUrl: formConfig.redirectUrl
-        }
+          redirectUrl: formConfig.redirectUrl,
+          formId: formConfig.id,
+          formName: formConfig.name
+        },
+        timestamp: new Date().toISOString(),
+        pageUrl: window.location.href,
+        referrer: document.referrer || null,
+        userAgent: navigator.userAgent,
+        sessionId: Math.random().toString(36).substring(2, 15)
       };
 
+      console.log('📦 Dados preparados para envio:', submitData);
+
+      // Enviar via edge function
       const { data, error } = await supabase.functions.invoke('contact-form', {
         body: submitData
       });
@@ -84,6 +99,47 @@ export const useContactForm = () => {
       }
 
       console.log('✅ Resposta da edge function:', data);
+
+      // Salvar também diretamente na tabela form_leads como backup
+      try {
+        const leadData = {
+          lead_data: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            message: formData.message,
+            service: formData.service,
+            isUrgent: formData.isUrgent,
+            ...customFieldsData
+          },
+          form_id: formConfig.id || 'default',
+          form_name: formConfig.name || 'Formulário Principal',
+          source_page: window.location.pathname,
+          utm_source: new URLSearchParams(window.location.search).get('utm_source'),
+          utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
+          utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign'),
+          session_id: submitData.sessionId,
+          user_agent: navigator.userAgent,
+          status: 'new',
+          conversion_value: null
+        };
+
+        console.log('💾 Salvando lead diretamente na tabela:', leadData);
+        
+        const { data: leadResult, error: leadError } = await supabase
+          .from('form_leads')
+          .insert([leadData])
+          .select();
+
+        if (leadError) {
+          console.error('❌ Erro ao salvar lead:', leadError);
+        } else {
+          console.log('✅ Lead salvo com sucesso:', leadResult);
+        }
+      } catch (backupError) {
+        console.error('❌ Erro no backup do lead:', backupError);
+        // Não interromper o fluxo principal por erro no backup
+      }
       
       // Rastrear conversão no analytics
       await trackConversion(
@@ -126,15 +182,18 @@ export const useContactForm = () => {
 
       setFormData(resetData);
 
+      console.log('🎉 Formulário enviado com sucesso!');
+
     } catch (error) {
       console.error('❌ Erro ao enviar formulário:', error);
-      toast.error(formConfig.formTexts.errorMessage);
+      toast.error(formConfig.formTexts.errorMessage || 'Erro ao enviar formulário. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const resetForm = () => {
+    console.log('🔄 Resetando formulário...');
     setIsSubmitted(false);
     const resetData: ContactFormData = {
       name: '',
