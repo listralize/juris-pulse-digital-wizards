@@ -690,6 +690,18 @@ export function LinkTreePreview({
                     </div>}
                 </div>
               </footer>}
+
+            {/* Fixed Developer Credit */}
+            <div className="mt-6 pt-4 border-t border-white/10 text-center">
+              <a 
+                href="https://listralize.com.br/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-xs text-white/60 hover:text-white/80 transition-colors"
+              >
+                Desenvolvido por Grupo Listralize
+              </a>
+            </div>
           </div>
         </div>
 
@@ -806,18 +818,18 @@ export function LinkTreePreview({
              </div>
            </footer>}
 
-           {/* Fixed Developer Credit */}
-           <div className="mt-6 pt-4 border-t border-white/10 text-center">
-             <a 
-               href="https://listralize.com.br/" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               className="text-xs text-white/60 hover:text-white/80 transition-colors"
-             >
-               Desenvolvido por Grupo Listralize
-             </a>
-           </div>
-      </div>
+            {/* Fixed Developer Credit */}
+            <div className="mt-6 pt-4 border-t border-white/10 text-center">
+              <a 
+                href="https://listralize.com.br/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-xs text-white/60 hover:text-white/80 transition-colors"
+              >
+                Desenvolvido por Grupo Listralize
+              </a>
+            </div>
+       </div>
 
       <FormModal isOpen={modalData.isOpen} onClose={() => setModalData({
       isOpen: false,
