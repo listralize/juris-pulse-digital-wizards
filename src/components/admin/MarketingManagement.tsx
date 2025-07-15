@@ -236,7 +236,7 @@ export const MarketingManagement: React.FC = () => {
           return convDate === yesterday.toDateString();
         }).length;
 
-        const thisWeekConversions = conversionsData.length; // Todas as conversões da última semana
+        const thisWeekConversions = conversionsData.length;
 
         // Páginas mais visitadas
         const pageViewsMap = visitorsData.reduce((acc, visit) => {
@@ -261,7 +261,6 @@ export const MarketingManagement: React.FC = () => {
           .sort(([,a], [,b]) => b - a)
           .map(([formId, count]) => ({ formId, count }));
 
-        // Remoção dos dados geográficos conforme solicitado
         const topLocations: Array<{ location: string; count: number; }> = [];
 
         // Dados de dispositivos
@@ -289,8 +288,8 @@ export const MarketingManagement: React.FC = () => {
 
         // Funil de conversão realista
         const totalUniqueVisitors = uniqueVisitors;
-        const engagedUsers = Math.floor(totalUniqueVisitors * 0.6); // 60% se engajam
-        const qualifiedLeads = Math.floor(totalUniqueVisitors * 0.25); // 25% são leads qualificados
+        const engagedUsers = Math.floor(totalUniqueVisitors * 0.6);
+        const qualifiedLeads = Math.floor(totalUniqueVisitors * 0.25);
         const actualConversions = thisWeekConversions;
 
         const newAnalyticsData = {
@@ -310,7 +309,7 @@ export const MarketingManagement: React.FC = () => {
           },
           topPages,
           formSubmissions: formStats,
-          geographicData: [], // Removido conforme solicitado
+          geographicData: [],
           deviceData: deviceStats,
           funnelData: {
             visitors: totalUniqueVisitors,
@@ -333,12 +332,23 @@ export const MarketingManagement: React.FC = () => {
 
   const loadMarketingConfig = async () => {
     try {
-      const { data: settings } = await supabase
+      console.log('🔄 Carregando configurações de marketing...');
+      
+      const { data: settings, error } = await supabase
         .from('marketing_settings')
         .select('*')
+        .limit(1)
         .maybeSingle();
 
+      if (error) {
+        console.error('❌ Erro ao carregar configurações:', error);
+        return;
+      }
+
+      console.log('📋 Configurações carregadas do banco:', settings);
+
       if (settings) {
+        // Carregar configurações de scripts
         setMarketingScripts({
           facebookPixel: {
             enabled: settings.facebook_pixel_enabled || false,
@@ -361,38 +371,47 @@ export const MarketingManagement: React.FC = () => {
           }
         });
 
+        // Carregar configurações de rastreamento
         if (settings.form_tracking_config) {
-          let savedConfig;
-          if (typeof settings.form_tracking_config === 'string') {
-            try {
-              savedConfig = JSON.parse(settings.form_tracking_config);
-            } catch (e) {
-              console.error('Erro ao parsear form_tracking_config:', e);
-              savedConfig = {};
+          try {
+            let trackingConfig;
+            if (typeof settings.form_tracking_config === 'string') {
+              trackingConfig = JSON.parse(settings.form_tracking_config);
+            } else {
+              trackingConfig = settings.form_tracking_config;
             }
-          } else {
-            savedConfig = settings.form_tracking_config;
+            
+            console.log('🎯 Configuração de rastreamento carregada:', trackingConfig);
+            
+            setConversionTracking({
+              systemForms: trackingConfig.systemForms || [],
+              linkTreeForms: trackingConfig.linkTreeForms || [],
+              customForms: trackingConfig.customForms || [],
+              events: trackingConfig.events || { 
+                formSubmission: true, 
+                buttonClick: false, 
+                linkClick: false 
+              }
+            });
+          } catch (parseError) {
+            console.error('❌ Erro ao parsear configuração de rastreamento:', parseError);
           }
-          
-          console.log('📋 Configuração carregada do banco:', savedConfig);
-          
-          setConversionTracking({
-            systemForms: savedConfig.systemForms || [],
-            linkTreeForms: savedConfig.linkTreeForms || [],
-            customForms: savedConfig.customForms || [],
-            events: savedConfig.events || { formSubmission: true, buttonClick: false, linkClick: false }
-          });
         }
+      } else {
+        console.log('ℹ️ Nenhuma configuração encontrada, usando padrões');
       }
     } catch (error) {
-      console.error('Erro ao carregar configurações de marketing:', error);
+      console.error('❌ Erro geral ao carregar configurações:', error);
+      toast.error('Erro ao carregar configurações de marketing');
     }
   };
 
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
-      console.log('🔄 Iniciando salvamento das configurações de marketing...');
+      console.log('💾 Iniciando salvamento das configurações...');
+      console.log('📝 Scripts a serem salvos:', marketingScripts);
+      console.log('🎯 Rastreamento a ser salvo:', conversionTracking);
       
       const configData = {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
@@ -417,52 +436,62 @@ export const MarketingManagement: React.FC = () => {
         updated_at: new Date().toISOString()
       };
 
-      console.log('📝 Dados a serem salvos:', configData);
-      console.log('🔧 ConversionTracking atual:', conversionTracking);
+      console.log('📤 Dados preparados para salvamento:', configData);
 
-      // Primeiro, tentar buscar configuração existente
-      const { data: existingConfig } = await supabase
+      // Verificar se já existe configuração
+      const { data: existingConfig, error: selectError } = await supabase
         .from('marketing_settings')
         .select('id')
+        .limit(1)
         .maybeSingle();
+
+      if (selectError) {
+        console.error('❌ Erro ao verificar configuração existente:', selectError);
+        throw selectError;
+      }
 
       let result;
       if (existingConfig) {
-        // Atualizar configuração existente
-        console.log('🔄 Atualizando configuração existente com ID:', existingConfig.id);
+        console.log('🔄 Atualizando configuração existente...');
         result = await supabase
           .from('marketing_settings')
           .update(configData)
           .eq('id', existingConfig.id)
           .select();
       } else {
-        // Criar nova configuração
-        console.log('➕ Criando nova configuração');
+        console.log('➕ Criando nova configuração...');
         result = await supabase
           .from('marketing_settings')
-          .insert(configData)
+          .insert([configData])
           .select();
       }
 
-      const { error } = result;
+      const { data: savedData, error } = result;
 
       if (error) {
-        console.error('❌ Erro no Supabase:', error);
+        console.error('❌ Erro ao salvar no banco:', error);
         throw error;
       }
 
-      console.log('✅ Configurações salvas com sucesso!');
+      console.log('✅ Dados salvos com sucesso:', savedData);
       setLastSaved(new Date());
-      toast.success('Configurações de marketing salvas com sucesso!');
+      toast.success('Configurações salvas com sucesso!');
+      
+      // Recarregar configurações para confirmar persistência
+      setTimeout(() => {
+        loadMarketingConfig();
+      }, 500);
+      
     } catch (error) {
-      console.error('❌ Erro ao salvar configurações:', error);
-      toast.error('Erro ao salvar configurações de marketing');
+      console.error('❌ Erro completo ao salvar:', error);
+      toast.error(`Erro ao salvar configurações: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   const updateSystemForm = (index: number, field: keyof FormTrackingConfig, value: any) => {
+    console.log('✏️ Atualizando formulário:', index, field, value);
     setConversionTracking(prev => ({
       ...prev,
       systemForms: prev.systemForms.map((form, i) => 
@@ -966,9 +995,8 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           </Card>
         </TabsContent>
 
-        {/* DASHBOARD FUNCIONAL */}
+        {/* DASHBOARD TAB */}
         <TabsContent value="dashboard" className="space-y-6">
-          {/* Header do Dashboard com Botão de Refresh */}
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Dashboard Analytics Funcional</h2>
             <Button onClick={loadAnalyticsData} disabled={isLoading} variant="outline">
@@ -977,7 +1005,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
             </Button>
           </div>
 
-          {/* KPIs Principais */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-6">
@@ -1042,11 +1069,9 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
             </Card>
           </div>
 
-          {/* Funil de Conversão Completo */}
           <ConversionFunnel analyticsData={analyticsData} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Submissões por Formulário */}
             <Card>
               <CardHeader>
                 <CardTitle>📝 Performance dos Formulários</CardTitle>
@@ -1080,7 +1105,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               </CardContent>
             </Card>
 
-            {/* Dados Geográficos */}
             <Card>
               <CardHeader>
                 <CardTitle>🌍 Visitantes por Localização</CardTitle>
@@ -1110,7 +1134,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Top Páginas */}
             <Card>
               <CardHeader>
                 <CardTitle>📊 Páginas Mais Visitadas</CardTitle>
@@ -1137,7 +1160,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               </CardContent>
             </Card>
 
-            {/* Dispositivos */}
             <Card>
               <CardHeader>
                 <CardTitle>📱 Dispositivos dos Visitantes</CardTitle>
@@ -1169,7 +1191,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
             </Card>
           </div>
 
-          {/* Insights e Recomendações */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
