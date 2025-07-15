@@ -53,6 +53,8 @@ export function LinkTreeManagement() {
     text_color: '#ffffff',
     button_style: 'list' as LinkTree['button_style'],
     avatar_url: '',
+    avatar_size: 'w-20 h-20',
+    avatar_format: 'rounded-full',
     theme: 'modern' as LinkTree['theme'],
     background_type: 'neural' as LinkTree['background_type'],
     background_gradient: '',
@@ -170,6 +172,8 @@ export function LinkTreeManagement() {
           text_color: linkTreeData.text_color || '#ffffff',
           button_style: (linkTreeData.button_style as LinkTree['button_style']) || 'list',
           avatar_url: linkTreeData.avatar_url || '',
+          avatar_size: (linkTreeData as any).avatar_size || 'w-20 h-20',
+          avatar_format: (linkTreeData as any).avatar_format || 'rounded-full',
           theme: (linkTreeData.theme as LinkTree['theme']) || 'modern',
           background_type: (linkTreeData.background_type as LinkTree['background_type']) || 'neural',
           background_gradient: linkTreeData.background_gradient || '',
@@ -260,6 +264,8 @@ export function LinkTreeManagement() {
         text_color: linkTreeData.text_color || '#ffffff',
         button_style: linkTreeData.button_style || 'list',
         avatar_url: linkTreeData.avatar_url || '',
+        avatar_size: linkTreeData.avatar_size || 'w-20 h-20',
+        avatar_format: linkTreeData.avatar_format || 'rounded-full',
         theme: linkTreeData.theme || 'modern',
         background_type: linkTreeData.background_type || 'neural',
         background_gradient: linkTreeData.background_gradient || '',
@@ -1039,6 +1045,36 @@ export function LinkTreeManagement() {
                       placeholder="https://exemplo.com/avatar.jpg"
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="avatar-size">Tamanho do Avatar</Label>
+                      <Select value={linkTreeData.avatar_size} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, avatar_size: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="w-16 h-16">Pequeno</SelectItem>
+                          <SelectItem value="w-20 h-20">Médio</SelectItem>
+                          <SelectItem value="w-24 h-24">Grande</SelectItem>
+                          <SelectItem value="w-32 h-32">Extra Grande</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="avatar-format">Formato do Avatar</Label>
+                      <Select value={linkTreeData.avatar_format} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, avatar_format: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="rounded-full">Circular</SelectItem>
+                          <SelectItem value="rounded-lg">Arredondado</SelectItem>
+                          <SelectItem value="rounded-none">Quadrado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -1316,6 +1352,14 @@ export function LinkTreeManagement() {
                     )}
                   </CardContent>
                 </Card>
+
+                <Button 
+                  onClick={saveLinkTree} 
+                  className="w-full"
+                  size="lg"
+                >
+                  Salvar Configurações
+                </Button>
             </TabsContent>
 
             <TabsContent value="items" className="space-y-6">
