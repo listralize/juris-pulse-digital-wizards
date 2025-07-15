@@ -230,6 +230,8 @@ export type Database = {
           created_at: string | null
           custom_css: string | null
           description: string | null
+          description_color: string | null
+          description_size: string | null
           footer_background_color: string | null
           footer_enabled: boolean | null
           footer_social_links: Json | null
@@ -242,6 +244,9 @@ export type Database = {
           text_color: string | null
           theme: string | null
           title: string
+          title_color: string | null
+          title_font: string | null
+          title_size: string | null
           updated_at: string | null
         }
         Insert: {
@@ -258,6 +263,8 @@ export type Database = {
           created_at?: string | null
           custom_css?: string | null
           description?: string | null
+          description_color?: string | null
+          description_size?: string | null
           footer_background_color?: string | null
           footer_enabled?: boolean | null
           footer_social_links?: Json | null
@@ -270,6 +277,9 @@ export type Database = {
           text_color?: string | null
           theme?: string | null
           title?: string
+          title_color?: string | null
+          title_font?: string | null
+          title_size?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -286,6 +296,8 @@ export type Database = {
           created_at?: string | null
           custom_css?: string | null
           description?: string | null
+          description_color?: string | null
+          description_size?: string | null
           footer_background_color?: string | null
           footer_enabled?: boolean | null
           footer_social_links?: Json | null
@@ -298,6 +310,9 @@ export type Database = {
           text_color?: string | null
           theme?: string | null
           title?: string
+          title_color?: string | null
+          title_font?: string | null
+          title_size?: string | null
           updated_at?: string | null
         }
         Relationships: []

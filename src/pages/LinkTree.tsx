@@ -12,6 +12,11 @@ export default function LinkTreePage() {
 
   useEffect(() => {
     loadLinkTree();
+    
+    // Configurar intervalo para recarregar dados a cada 5 segundos
+    const interval = setInterval(loadLinkTree, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadLinkTree = async () => {
