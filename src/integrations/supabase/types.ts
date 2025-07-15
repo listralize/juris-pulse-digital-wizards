@@ -50,6 +50,57 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_monthly_summary: {
+        Row: {
+          avg_session_duration: number | null
+          bounce_rate: number | null
+          browser_breakdown: Json | null
+          created_at: string
+          device_breakdown: Json | null
+          id: string
+          location_breakdown: Json | null
+          month_year: string
+          top_pages: Json | null
+          top_sources: Json | null
+          total_page_views: number | null
+          total_visitors: number | null
+          unique_visitors: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_session_duration?: number | null
+          bounce_rate?: number | null
+          browser_breakdown?: Json | null
+          created_at?: string
+          device_breakdown?: Json | null
+          id?: string
+          location_breakdown?: Json | null
+          month_year: string
+          top_pages?: Json | null
+          top_sources?: Json | null
+          total_page_views?: number | null
+          total_visitors?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_session_duration?: number | null
+          bounce_rate?: number | null
+          browser_breakdown?: Json | null
+          created_at?: string
+          device_breakdown?: Json | null
+          id?: string
+          location_breakdown?: Json | null
+          month_year?: string
+          top_pages?: Json | null
+          top_sources?: Json | null
+          total_page_views?: number | null
+          total_visitors?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author: string
@@ -293,6 +344,78 @@ export type Database = {
           description?: string
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      form_leads: {
+        Row: {
+          browser: string | null
+          city: string | null
+          conversion_value: number | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          form_id: string | null
+          form_name: string | null
+          id: string
+          ip_address: string | null
+          is_whatsapp_conversion: boolean | null
+          lead_data: Json
+          session_id: string
+          source_page: string | null
+          status: string | null
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          conversion_value?: number | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          form_id?: string | null
+          form_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_whatsapp_conversion?: boolean | null
+          lead_data: Json
+          session_id: string
+          source_page?: string | null
+          status?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          conversion_value?: number | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          form_id?: string | null
+          form_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_whatsapp_conversion?: boolean | null
+          lead_data?: Json
+          session_id?: string
+          source_page?: string | null
+          status?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_id?: string | null
         }
         Relationships: []
       }
@@ -1097,6 +1220,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _user_id: string
