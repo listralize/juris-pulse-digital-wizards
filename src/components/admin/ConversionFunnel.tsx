@@ -111,6 +111,69 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   };
 
+  // Load all available forms from database automatically
+  const loadAllAvailableForms = async () => {
+    try {
+      console.log('🔄 Carregando todos os formulários disponíveis...');
+
+      // Buscar todos os form_ids únicos que têm conversões
+      const { data: formLeads, error } = await supabase
+        .from('form_leads')
+        .select('form_id, form_name')
+        .not('form_id', 'is', null);
+
+      if (error) {
+        console.error('❌ Erro ao carregar formulários:', error);
+        throw error;
+      }
+
+      console.log('📋 Form leads encontrados:', formLeads);
+
+      // Agrupar por form_id e pegar nomes únicos
+      const uniqueForms = formLeads?.reduce((acc: Record<string, AvailableForm>, lead) => {
+        const formId = lead.form_id || 'default';
+        if (!acc[formId]) {
+          let displayName = lead.form_name || formId;
+          
+          // Melhorar nomes de exibição
+          if (formId === 'default') {
+            displayName = 'Formulário Principal';
+          } else if (!lead.form_name && formId.startsWith('form_')) {
+            displayName = `Formulário ${formId.replace('form_', '')}`;
+          }
+
+          acc[formId] = {
+            id: formId,
+            name: displayName
+          };
+        }
+        return acc;
+      }, {}) || {};
+
+      const formsArray = Object.values(uniqueForms);
+      
+      // Adicionar opção "Todos os Formulários" no início
+      const allForms: AvailableForm[] = [
+        { id: 'all', name: 'Todos os Formulários' },
+        ...formsArray
+      ];
+
+      setAvailableForms(allForms);
+      console.log('✅ Formulários carregados automaticamente:', allForms);
+
+      return allForms;
+    } catch (error) {
+      console.error('❌ Erro ao carregar formulários:', error);
+      // Fallback básico
+      const fallbackForms = [
+        { id: 'all', name: 'Todos os Formulários' },
+        { id: 'default', name: 'Formulário Principal' }
+      ];
+      setAvailableForms(fallbackForms);
+      return fallbackForms;
+    }
+  };
+
   // Refresh data based on date range
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
@@ -153,6 +216,9 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
           const formData = formSubmissionsArray.find((fs: FormSubmissionData) => fs.formId === selectedForm);
           setFormSubmissions(formData?.count || 0);
         }
+
+        // Atualizar lista de formulários disponíveis com base nos dados atuais
+        await loadAllAvailableForms();
       } else {
         setFormSubmissions(0);
       }
@@ -182,87 +248,12 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     loadMarketingConfig();
   }, []);
 
-  // Carregar formulários disponíveis com nomes corretos
+  // Load forms when component mounts
   useEffect(() => {
-    const loadFormsWithCorrectNames = async () => {
-      try {
-        // Primeiro, carregar a configuração admin para pegar os nomes corretos
-        const { data: adminData } = await supabase
-          .from('admin_settings')
-          .select('form_config')
-          .maybeSingle();
+    loadAllAvailableForms();
+  }, []);
 
-        console.log('📋 Carregando configuração admin:', adminData);
-
-        let formsConfig: any[] = [];
-        if (adminData?.form_config) {
-          const formConfig = adminData.form_config as any;
-          formsConfig = formConfig.forms || [];
-        }
-
-        // Agora criar a lista de formulários baseada nos dados de analytics mas com nomes da config
-        if (analyticsData?.formSubmissions) {
-          console.log('📊 Dados de analytics:', analyticsData.formSubmissions);
-
-          const formsWithCorrectNames = analyticsData.formSubmissions.map((analyticsForm: any) => {
-            // Procurar o nome correto na configuração admin
-            const configForm = formsConfig.find((config: any) => config.id === analyticsForm.formId);
-            
-            let displayName = analyticsForm.formId;
-            if (configForm?.name) {
-              displayName = configForm.name;
-            } else if (analyticsForm.formId === 'default') {
-              displayName = 'Formulário Principal';
-            } else if (analyticsForm.formId.startsWith('form_')) {
-              displayName = `Formulário ${analyticsForm.formId.replace('form_', '')}`;
-            }
-
-            console.log(`📋 Formulário ${analyticsForm.formId} -> Nome: ${displayName}`);
-
-            return {
-              id: analyticsForm.formId,
-              name: displayName,
-              count: analyticsForm.count
-            };
-          });
-
-          const formsWithAll: AvailableForm[] = [
-            { id: 'all', name: 'Todos os Formulários' },
-            ...formsWithCorrectNames
-          ];
-
-          setAvailableForms(formsWithAll);
-          console.log('✅ Formulários configurados com nomes corretos:', formsWithAll);
-        } else {
-          // Se não há dados de analytics, usar apenas a configuração admin
-          const formsFromConfig = formsConfig.map((form: any) => ({
-            id: form.id,
-            name: form.name || `Formulário ${form.id}`
-          }));
-
-          const formsWithAll: AvailableForm[] = [
-            { id: 'all', name: 'Todos os Formulários' },
-            { id: 'default', name: 'Formulário Principal' },
-            ...formsFromConfig
-          ];
-
-          setAvailableForms(formsWithAll);
-          console.log('📋 Usando formulários da configuração:', formsWithAll);
-        }
-      } catch (error) {
-        console.error('❌ Erro ao carregar formulários:', error);
-        // Fallback básico
-        setAvailableForms([
-          { id: 'all', name: 'Todos os Formulários' },
-          { id: 'default', name: 'Formulário Principal' }
-        ]);
-      }
-    };
-
-    loadFormsWithCorrectNames();
-  }, [analyticsData]);
-
-  // Refresh data when date range changes
+  // Refresh data when date range or selected form changes
   useEffect(() => {
     refreshAnalyticsData();
   }, [dateRange, selectedForm]);
