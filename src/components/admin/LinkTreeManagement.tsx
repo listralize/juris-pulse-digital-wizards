@@ -1493,263 +1493,353 @@ export function LinkTreeManagement() {
 
             <TabsContent value="items" className="space-y-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="w-5 h-5" />
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+                      <Plus className="w-5 h-5 text-white" />
+                    </div>
                     {editingItem ? 'Editar Item' : 'Adicionar Novo Item'}
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                     Interface futurística com controle total sobre a aparência dos itens
                   </p>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
-                        <Label className="text-sm font-medium mb-3 block text-white">Informações Básicas</Label>
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-gray-300">Título</Label>
-                            <Input value={newItem.title} onChange={e => setNewItem(prev => ({
-                            ...prev,
-                            title: e.target.value
-                          }))} placeholder="Título do item" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
-                          </div>
-                          <div>
-                            <Label className="text-xs text-gray-300">URL</Label>
-                            <Input value={newItem.url} onChange={e => setNewItem(prev => ({
-                            ...prev,
-                            url: e.target.value
-                          }))} placeholder="https://exemplo.com" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
-                          </div>
-                          <div>
-                            <Label className="text-xs text-gray-300">Tipo de Item</Label>
-                            <Select value={newItem.item_type} onValueChange={(value: any) => setNewItem(prev => ({
-                            ...prev,
-                            item_type: value
-                          }))}>
-                              <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                                {itemTypeOptions.map(option => <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
-                                    <div>
-                                      <div className="font-medium">{option.label}</div>
-                                      <div className="text-xs text-gray-400">{option.description}</div>
-                                    </div>
-                                  </SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
+                <CardContent className="space-y-8">
+                  {/* Seção Principal - Informações Básicas */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">1</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-white">Informações Básicas</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="group">
+                        <Label className="text-sm font-medium text-emerald-400 mb-2 block">Título</Label>
+                        <Input 
+                          value={newItem.title} 
+                          onChange={e => setNewItem(prev => ({ ...prev, title: e.target.value }))} 
+                          placeholder="Título do item" 
+                          className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-emerald-400 transition-all duration-300" 
+                        />
+                      </div>
+                      <div className="group">
+                        <Label className="text-sm font-medium text-emerald-400 mb-2 block">URL</Label>
+                        <Input 
+                          value={newItem.url} 
+                          onChange={e => setNewItem(prev => ({ ...prev, url: e.target.value }))} 
+                          placeholder="https://exemplo.com" 
+                          className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-emerald-400 transition-all duration-300" 
+                        />
                       </div>
                     </div>
+                    <div className="max-w-md">
+                      <Label className="text-sm font-medium text-emerald-400 mb-2 block">Tipo de Item</Label>
+                      <Select value={newItem.item_type} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, item_type: value }))}>
+                        <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white focus:border-emerald-400">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                          {itemTypeOptions.map(option => 
+                            <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
+                              <div className="flex items-center gap-3">
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                <div>
+                                  <div className="font-medium">{option.label}</div>
+                                  <div className="text-xs text-gray-400">{option.description}</div>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-                    <div className="space-y-4">
-                      <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
-                        <Label className="text-sm font-medium mb-3 block text-white">Configurações de Cores</Label>
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-gray-300">Cor de Fundo</Label>
-                            <div className="flex gap-2">
-                              <Input type="color" value={newItem.background_color} onChange={e => setNewItem(prev => ({
-                              ...prev,
-                              background_color: e.target.value
-                            }))} className="w-12 h-8 p-0 border-0 rounded-md" />
-                              <Input value={newItem.background_color} onChange={e => setNewItem(prev => ({
-                              ...prev,
-                              background_color: e.target.value
-                            }))} placeholder="#ffffff" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
+                  {/* Seção de Cores */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-rose-600 flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">2</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-white">Configurações de Cores</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-pink-400 mb-2 block">Cor de Fundo</Label>
+                        <div className="flex gap-3">
+                          <div className="relative">
+                            <Input 
+                              type="color" 
+                              value={newItem.background_color} 
+                              onChange={e => setNewItem(prev => ({ ...prev, background_color: e.target.value }))} 
+                              className="w-14 h-10 p-1 border border-white/20 rounded-lg cursor-pointer hover:scale-110 transition-transform" 
+                            />
+                            <div className="absolute -top-2 -right-2 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center">
+                              <span className="text-xs text-white">🎨</span>
                             </div>
                           </div>
-                          <div>
-                            <Label className="text-xs text-gray-300">Cor do Texto</Label>
-                            <div className="flex gap-2">
-                              <Input type="color" value={newItem.text_color} onChange={e => setNewItem(prev => ({
-                              ...prev,
-                              text_color: e.target.value
-                            }))} className="w-12 h-8 p-0 border-0 rounded-md" />
-                              <Input value={newItem.text_color} onChange={e => setNewItem(prev => ({
-                              ...prev,
-                              text_color: e.target.value
-                            }))} placeholder="#000000" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
+                          <Input 
+                            value={newItem.background_color} 
+                            onChange={e => setNewItem(prev => ({ ...prev, background_color: e.target.value }))} 
+                            placeholder="#ffffff" 
+                            className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-pink-400" 
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-pink-400 mb-2 block">Cor do Texto</Label>
+                        <div className="flex gap-3">
+                          <div className="relative">
+                            <Input 
+                              type="color" 
+                              value={newItem.text_color} 
+                              onChange={e => setNewItem(prev => ({ ...prev, text_color: e.target.value }))} 
+                              className="w-14 h-10 p-1 border border-white/20 rounded-lg cursor-pointer hover:scale-110 transition-transform" 
+                            />
+                            <div className="absolute -top-2 -right-2 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center">
+                              <span className="text-xs text-white">Aa</span>
                             </div>
                           </div>
+                          <Input 
+                            value={newItem.text_color} 
+                            onChange={e => setNewItem(prev => ({ ...prev, text_color: e.target.value }))} 
+                            placeholder="#000000" 
+                            className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-pink-400" 
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
-                      <Label className="text-sm font-medium mb-3 block text-white">Configurações do Ícone</Label>
-                      <div className="space-y-3">
-                        <div>
-                          <IconSelector value={newItem.icon} onChange={iconName => setNewItem(prev => ({
-                          ...prev,
-                          icon: iconName
-                        }))} label="Ícone" />
+                  {/* Seção de Configurações Avançadas */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">3</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-white">Configurações Avançadas</h3>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {/* Configurações do Ícone */}
+                      <div className="p-6 backdrop-blur-md bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-xl border border-white/10 hover:border-blue-400/50 transition-all duration-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-6 h-6 rounded bg-blue-500 flex items-center justify-center">
+                            <span className="text-white text-xs">🎯</span>
+                          </div>
+                          <Label className="text-sm font-semibold text-blue-400">Configurações do Ícone</Label>
                         </div>
-                        <div>
-                          <Label className="text-xs text-gray-300">Tamanho do Ícone</Label>
-                          <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({
-                          ...prev,
-                          icon_size: value
-                        }))}>
-                            <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                              <SelectItem value="w-4 h-4" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
-                                Pequeno
-                              </SelectItem>
-                              <SelectItem value="w-5 h-5" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-green-500 rounded-full inline-block mr-2"></span>
-                                Médio
-                              </SelectItem>
-                              <SelectItem value="w-6 h-6" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-2"></span>
-                                Grande
-                              </SelectItem>
-                              <SelectItem value="w-8 h-8" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-orange-500 rounded-full inline-block mr-2"></span>
-                                Extra Grande
-                              </SelectItem>
-                              <SelectItem value="w-10 h-10" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-red-500 rounded-full inline-block mr-2"></span>
-                                Gigante
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label className="text-xs text-gray-300">Cor do Ícone</Label>
-                          <div className="flex gap-2">
-                            <Input type="color" value={newItem.icon_color} onChange={e => setNewItem(prev => ({
-                            ...prev,
-                            icon_color: e.target.value
-                          }))} className="w-12 h-8 p-0 border-0 rounded-md" />
-                            <Input value={newItem.icon_color} onChange={e => setNewItem(prev => ({
-                            ...prev,
-                            icon_color: e.target.value
-                          }))} placeholder="#000000" className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400" />
+                        <div className="space-y-4">
+                          <div>
+                            <IconSelector 
+                              value={newItem.icon} 
+                              onChange={iconName => setNewItem(prev => ({ ...prev, icon: iconName }))} 
+                              label="Ícone" 
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-blue-300 mb-2 block">Tamanho do Ícone</Label>
+                            <Select value={newItem.icon_size} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, icon_size: value }))}>
+                              <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white focus:border-blue-400">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                                <SelectItem value="w-4 h-4" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    Pequeno
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="w-5 h-5" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                                    Médio
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="w-6 h-6" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
+                                    Grande
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="w-8 h-8" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 bg-orange-500 rounded-full"></span>
+                                    Extra Grande
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="w-10 h-10" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-6 h-6 bg-red-500 rounded-full"></span>
+                                    Gigante
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-blue-300 mb-2 block">Cor do Ícone</Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                type="color" 
+                                value={newItem.icon_color} 
+                                onChange={e => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))} 
+                                className="w-12 h-8 p-0 border border-white/20 rounded-md cursor-pointer" 
+                              />
+                              <Input 
+                                value={newItem.icon_color} 
+                                onChange={e => setNewItem(prev => ({ ...prev, icon_color: e.target.value }))} 
+                                placeholder="#000000" 
+                                className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400" 
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
-                      <Label className="text-sm font-medium mb-3 block text-white">Estilo do Botão</Label>
-                      <div className="space-y-3">
-                        <div>
-                          <Label className="text-xs text-gray-300">Estilo do Botão</Label>
-                          <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({
-                          ...prev,
-                          button_style: value
-                        }))}>
-                            <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                              <SelectItem value="inherit" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-gray-500 rounded-full inline-block mr-2"></span>
-                                Herdar do Tema
-                              </SelectItem>
-                              {buttonStyleOptions.map(option => <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
-                                   <span className="w-2 h-2 bg-white/80 rounded-full inline-block mr-2"></span>
-                                  {option.label}
-                                </SelectItem>)}
-                            </SelectContent>
-                          </Select>
+                      {/* Estilo do Botão */}
+                      <div className="p-6 backdrop-blur-md bg-gradient-to-br from-emerald-500/10 to-teal-600/10 rounded-xl border border-white/10 hover:border-emerald-400/50 transition-all duration-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center">
+                            <span className="text-white text-xs">🎨</span>
+                          </div>
+                          <Label className="text-sm font-semibold text-emerald-400">Estilo do Botão</Label>
                         </div>
-                        <div>
-                          <Label className="text-xs text-gray-300">Efeito de Hover</Label>
-                          <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({
-                          ...prev,
-                          hover_effect: value
-                        }))}>
-                            <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                              {hoverEffectOptions.map(option => <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
-                                  <span className="w-2 h-2 bg-cyan-500 rounded-full inline-block mr-2"></span>
-                                  {option.label}
-                                </SelectItem>)}
-                            </SelectContent>
-                          </Select>
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-xs text-emerald-300 mb-2 block">Estilo do Botão</Label>
+                            <Select value={newItem.button_style} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, button_style: value }))}>
+                              <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white focus:border-emerald-400">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                                <SelectItem value="inherit" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
+                                    Herdar do Tema
+                                  </div>
+                                </SelectItem>
+                                {buttonStyleOptions.map(option => 
+                                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                      {option.label}
+                                    </div>
+                                  </SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-emerald-300 mb-2 block">Efeito de Hover</Label>
+                            <Select value={newItem.hover_effect} onValueChange={(value: any) => setNewItem(prev => ({ ...prev, hover_effect: value }))}>
+                              <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white focus:border-emerald-400">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                                {hoverEffectOptions.map(option => 
+                                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-white/10">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
+                                      {option.label}
+                                    </div>
+                                  </SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="p-4 backdrop-blur-md bg-white/5 rounded-lg border border-white/10">
-                      <Label className="text-sm font-medium mb-3 block text-white">Configurações do Card</Label>
-                      <div className="space-y-3">
-                        <div>
-                          <Label className="text-xs text-gray-300">Tamanho do Card</Label>
-                          <Select value={newItem.card_size || 'medium'} onValueChange={value => setNewItem(prev => ({
-                          ...prev,
-                          card_size: value
-                        }))}>
-                            <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                              <SelectItem value="small" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
-                                Pequeno
-                              </SelectItem>
-                              <SelectItem value="medium" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-green-500 rounded-full inline-block mr-2"></span>
-                                Médio
-                              </SelectItem>
-                              <SelectItem value="large" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-2"></span>
-                                Grande
-                              </SelectItem>
-                              <SelectItem value="full" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-red-500 rounded-full inline-block mr-2"></span>
-                                Largura Total
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                      {/* Configurações do Card */}
+                      <div className="p-6 backdrop-blur-md bg-gradient-to-br from-purple-500/10 to-pink-600/10 rounded-xl border border-white/10 hover:border-purple-400/50 transition-all duration-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-6 h-6 rounded bg-purple-500 flex items-center justify-center">
+                            <span className="text-white text-xs">📱</span>
+                          </div>
+                          <Label className="text-sm font-semibold text-purple-400">Configurações do Card</Label>
                         </div>
-                        <div>
-                          <Label className="text-xs text-gray-300">Formato do Card</Label>
-                          <Select value={newItem.card_format || 'rounded'} onValueChange={value => setNewItem(prev => ({
-                          ...prev,
-                          card_format: value
-                        }))}>
-                            <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
-                              <SelectItem value="rounded" className="text-white hover:bg-white/10">
-                                 <span className="w-2 h-2 bg-white/80 rounded-full inline-block mr-2"></span>
-                                 Arredondado
-                               </SelectItem>
-                               <SelectItem value="square" className="text-white hover:bg-white/10">
-                                 <span className="w-2 h-2 bg-gray-400 rounded-full inline-block mr-2"></span>
-                                Quadrado
-                              </SelectItem>
-                              <SelectItem value="circle" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-indigo-500 rounded-full inline-block mr-2"></span>
-                                Circular
-                              </SelectItem>
-                              <SelectItem value="pill" className="text-white hover:bg-white/10">
-                                <span className="w-2 h-2 bg-teal-500 rounded-full inline-block mr-2"></span>
-                                Pílula
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch id="featured" checked={newItem.is_featured} onCheckedChange={checked => setNewItem(prev => ({
-                          ...prev,
-                          is_featured: checked
-                        }))} />
-                          <Label htmlFor="featured" className="text-xs text-gray-300">Item em destaque</Label>
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-xs text-purple-300 mb-2 block">Tamanho do Card</Label>
+                            <Select value={newItem.card_size || 'medium'} onValueChange={value => setNewItem(prev => ({ ...prev, card_size: value }))}>
+                              <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white focus:border-purple-400">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                                <SelectItem value="small" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    Pequeno
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="medium" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                                    Médio
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="large" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
+                                    Grande
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="full" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 bg-red-500 rounded-full"></span>
+                                    Largura Total
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-purple-300 mb-2 block">Formato do Card</Label>
+                            <Select value={newItem.card_format || 'rounded'} onValueChange={value => setNewItem(prev => ({ ...prev, card_format: value }))}>
+                              <SelectTrigger className="bg-white/10 backdrop-blur-sm border-white/20 text-white focus:border-purple-400">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-900/95 backdrop-blur-md border-white/20">
+                                <SelectItem value="rounded" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                                    Arredondado
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="square" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-gray-400 rounded-sm"></span>
+                                    Quadrado
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="circle" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                                    Circular
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="pill" className="text-white hover:bg-white/10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-4 h-2 bg-teal-500 rounded-full"></span>
+                                    Pílula
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                            <Switch 
+                              id="featured" 
+                              checked={newItem.is_featured} 
+                              onCheckedChange={checked => setNewItem(prev => ({ ...prev, is_featured: checked }))} 
+                            />
+                            <div>
+                              <Label htmlFor="featured" className="text-sm font-medium text-purple-300">Item em destaque</Label>
+                              <p className="text-xs text-gray-400">Destacar este item na visualização</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
