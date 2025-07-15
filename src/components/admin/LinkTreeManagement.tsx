@@ -849,22 +849,6 @@ export function LinkTreeManagement() {
                           </div>
                         </div>
 
-                        <div>
-                          <Label>Opacidade do Fundo ({Math.round(((linkTreeData as any).background_opacity || 0.8) * 100)}%)</Label>
-                          <input type="range" min="0" max="1" step="0.05" value={(linkTreeData as any).background_opacity || 0.8} onChange={e => {
-                        const opacity = parseFloat(e.target.value);
-                        setLinkTreeData(prev => ({
-                          ...prev,
-                          background_opacity: opacity
-                        }));
-                        if (linkTree) {
-                          setLinkTree(prev => ({
-                            ...prev!,
-                            background_opacity: opacity
-                          }) as any);
-                        }
-                      }} className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider" />
-                        </div>
                       </div>}
 
                     {linkTreeData.background_type === 'solid' && <div className="space-y-4 mt-6 p-4 bg-card rounded-lg border">

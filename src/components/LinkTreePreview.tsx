@@ -598,8 +598,7 @@ export function LinkTreePreview({
     } : (linkTree.background_type === 'image' || linkTree.background_type === 'video') ? {
       backgroundColor: linkTree.background_color || '#000'
     } : isNeuralTheme ? {
-      backgroundColor: linkTree.background_color || '#1a1a2e',
-      opacity: linkTree.background_opacity || 0.8
+      backgroundColor: linkTree.background_color || '#1a1a2e'
     } : {};
     
     return <div className={`relative min-h-screen text-white overflow-hidden ${themeClass}`} style={{
@@ -611,7 +610,7 @@ export function LinkTreePreview({
         {/* Overlay para aplicar cor de fundo no neural theme */}
         {isNeuralTheme && <div className="absolute inset-0 z-0" style={{
         backgroundColor: linkTree.background_color || '#1a1a2e',
-        opacity: linkTree.background_opacity || 0.8,
+        
         pointerEvents: 'none'
       }} />}
         
