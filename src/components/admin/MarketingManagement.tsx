@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { ConversionFunnel } from './ConversionFunnel';
 import { CampaignReports } from './CampaignReports';
+import { ConversionsTab } from './ConversionsTab';
 
 interface MarketingScripts {
   facebookPixel: {
@@ -713,9 +714,10 @@ export const MarketingManagement: React.FC = () => {
       </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
+          <TabsTrigger value="conversions">📈 Conversões</TabsTrigger>
           <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
           <TabsTrigger value="analytics">⚙️ Analytics</TabsTrigger>
           <TabsTrigger value="reports">📋 Relatórios</TabsTrigger>
@@ -1159,6 +1161,11 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* NEW CONVERSIONS TAB */}
+        <TabsContent value="conversions">
+          <ConversionsTab />
         </TabsContent>
 
         {/* DASHBOARD TAB */}
