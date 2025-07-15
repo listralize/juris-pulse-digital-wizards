@@ -320,6 +320,30 @@ export function LinkTreePreview({
         return renderFallbackIcon(ExternalLink);
     }
   };
+
+  // Função para obter overlay com 50% da cor de fundo do item
+  const getItemOverlay = (item: LinkTreeItem) => {
+    if (!item.card_image) return null;
+    
+    const backgroundColor = item.background_color || '#000000';
+    // Converter hex para RGB e aplicar 50% de opacidade
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 0, g: 0, b: 0 };
+    };
+    
+    const rgb = hexToRgb(backgroundColor);
+    const overlayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`;
+    
+    return <div 
+      className="absolute inset-0 backdrop-blur-[2px] rounded-lg" 
+      style={{ backgroundColor: overlayColor }}
+    ></div>;
+  };
   const getButtonStyle = (item: LinkTreeItem) => {
     const baseClasses = "w-full justify-between p-6 h-auto relative overflow-hidden transition-all duration-300 border-0";
     const hoverClasses = {
@@ -365,7 +389,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] rounded-lg"></div>}
+      {getItemOverlay(item)}
       <div className="flex items-center gap-3 relative z-10">
         {getItemIcon(item)}
         <div className="text-left">
@@ -421,7 +445,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] rounded-lg"></div>}
+      {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center">
           {getItemIcon(item)}
@@ -444,7 +468,7 @@ export function LinkTreePreview({
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-        {item.card_image && <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] rounded-lg"></div>}
+      {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
           <div className="mb-4 flex justify-center">
             {getItemIcon(item)}
@@ -465,7 +489,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>}
+      {getItemOverlay(item)}
       <CardContent className="p-6 relative z-10">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-full bg-blue-500/20">
@@ -489,7 +513,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
+      {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -512,7 +536,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
+      {getItemOverlay(item)}
       <CardContent className="p-4 relative z-10">
         <div className="flex items-center gap-3 mb-3">
           {getItemIcon(item)}
@@ -532,7 +556,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
+      {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center">
           {getItemIcon(item)}
@@ -554,7 +578,7 @@ export function LinkTreePreview({
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-        {item.card_image && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
+      {getItemOverlay(item)}
         <CardContent className="p-6 relative z-10">
           <div className="flex items-center gap-3 mb-3">
             {getItemIcon(item)}
