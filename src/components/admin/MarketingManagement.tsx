@@ -1,396 +1,488 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Label } from '../../ui/label';
-import { Input } from '../../ui/input';
-import { Textarea } from '../../ui/textarea';
-import { Checkbox } from '../../ui/checkbox';
-import { Button } from '../../ui/button';
-import { Save, RotateCw } from 'lucide-react';
-import { useTheme } from '../../ThemeProvider';
-import { supabase } from '../../../integrations/supabase/client';
-import { toast } from 'sonner';
 
-interface MarketingScripts {
-  facebookPixel: {
-    enabled: boolean;
-    pixelId: string;
-    accessToken: string;
-    conversionApiEnabled: boolean;
-  };
-  googleAnalytics: {
-    enabled: boolean;
-    trackingId: string;
-    gtag: string;
-  };
-  googleTagManager: {
-    enabled: boolean;
-    containerId: string;
-  };
-  customScripts: {
-    headerScripts: string;
-    bodyScripts: string;
-    footerScripts: string;
-  };
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Switch } from '../ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Badge } from '../ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { 
+  Settings, 
+  Code, 
+  Facebook, 
+  BarChart3, 
+  Tag,
+  Save,
+  CheckCircle,
+  AlertCircle,
+  Loader2
+} from 'lucide-react';
+import { ConversionFunnel } from './ConversionFunnel';
+
+interface MarketingSettings {
+  id: string;
+  facebook_pixel_enabled: boolean;
+  facebook_pixel_id: string;
+  facebook_custom_code: string;
+  facebook_conversion_api_token: string;
+  google_analytics_enabled: boolean;
+  google_analytics_id: string;
+  google_analytics_custom_code: string;
+  google_tag_manager_enabled: boolean;
+  google_tag_manager_id: string;
+  custom_head_scripts: string;
+  custom_body_scripts: string;
+  form_tracking_config: any;
+  event_tracking_config: any;
 }
 
-export const MarketingManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('scripts');
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [marketingScripts, setMarketingScripts] = useState({
-    facebookPixel: {
-      enabled: false,
-      pixelId: '',
-      accessToken: '',
-      conversionApiEnabled: false
-    },
-    googleAnalytics: {
-      enabled: false,
-      trackingId: '',
-      gtag: ''
-    },
-    googleTagManager: {
-      enabled: false,
-      containerId: ''
-    },
-    customScripts: {
-      headerScripts: '',
-      bodyScripts: '',
-      footerScripts: ''
-    }
-  });
+const defaultSettings: Omit<MarketingSettings, 'id'> = {
+  facebook_pixel_enabled: false,
+  facebook_pixel_id: '',
+  facebook_custom_code: '',
+  facebook_conversion_api_token: '',
+  google_analytics_enabled: false,
+  google_analytics_id: '',
+  google_analytics_custom_code: '',
+  google_tag_manager_enabled: false,
+  google_tag_manager_id: '',
+  custom_head_scripts: '',
+  custom_body_scripts: '',
+  form_tracking_config: {},
+  event_tracking_config: {}
+};
 
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+export const MarketingManagement: React.FC = () => {
+  const [settings, setSettings] = useState<MarketingSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    loadMarketingConfig();
+    loadSettings();
   }, []);
 
-  const loadMarketingConfig = async () => {
-    console.log('🔄 Carregando configuração de marketing...');
+  const loadSettings = async () => {
     try {
+      setIsLoading(true);
+      console.log('🔄 Carregando configurações de marketing...');
+
       const { data, error } = await supabase
-        .from('admin_settings')
+        .from('marketing_settings')
         .select('*')
-        .eq('id', 'marketing-config')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('❌ Erro ao carregar configuração:', error);
-        return;
+        throw error;
       }
 
-      if (data && data.form_config) {
-        console.log('✅ Configuração carregada:', data.form_config);
-        setMarketingScripts(data.form_config);
+      if (data) {
+        console.log('✅ Configurações carregadas:', data);
+        setSettings(data);
       } else {
-        console.log('ℹ️ Nenhuma configuração encontrada, usando padrões');
+        console.log('📝 Nenhuma configuração encontrada, usando padrões');
+        const newSettings = { 
+          id: crypto.randomUUID(), 
+          ...defaultSettings 
+        };
+        setSettings(newSettings);
       }
+      
+      setHasChanges(false);
     } catch (error) {
-      console.error('❌ Erro crítico ao carregar configuração:', error);
-    }
-  };
-
-  const saveMarketingConfig = async () => {
-    console.log('💾 Salvando configuração de marketing...');
-    console.log('📦 Dados a serem salvos:', marketingScripts);
-    
-    setIsLoading(true);
-    
-    try {
-      // Primeiro, tentar atualizar se já existe
-      const { data: existingData } = await supabase
-        .from('admin_settings')
-        .select('id')
-        .eq('id', 'marketing-config')
-        .single();
-
-      let result;
-      
-      if (existingData) {
-        // Atualizar registro existente
-        console.log('🔄 Atualizando configuração existente...');
-        result = await supabase
-          .from('admin_settings')
-          .update({
-            form_config: marketingScripts,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', 'marketing-config')
-          .select();
-      } else {
-        // Criar novo registro
-        console.log('➕ Criando nova configuração...');
-        result = await supabase
-          .from('admin_settings')
-          .insert([{
-            id: 'marketing-config',
-            form_config: marketingScripts,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }])
-          .select();
-      }
-
-      if (result.error) {
-        console.error('❌ Erro ao salvar no banco:', result.error);
-        throw result.error;
-      }
-
-      console.log('✅ Configuração salva com sucesso:', result.data);
-      setLastSaved(new Date());
-      toast.success('🎉 Configuração de marketing salva com sucesso!');
-      
-      // Disparar evento para recarregar scripts
-      window.dispatchEvent(new CustomEvent('marketingConfigUpdated', {
-        detail: marketingScripts
-      }));
-      
-    } catch (error) {
-      console.error('❌ Erro ao salvar configuração:', error);
-      toast.error('❌ Erro ao salvar configuração de marketing');
+      console.error('❌ Erro ao carregar configurações:', error);
+      toast.error('Erro ao carregar configurações de marketing');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const forceReloadFromDatabase = async () => {
-    console.log('🔄 Forçando recarga do banco de dados...');
-    await loadMarketingConfig();
-    toast.success('✅ Dados sincronizados com o banco de dados');
+  const updateSettings = (field: keyof MarketingSettings, value: any) => {
+    if (!settings) return;
+    
+    setSettings(prev => prev ? { ...prev, [field]: value } : null);
+    setHasChanges(true);
   };
 
-  const updateFacebookPixel = (field: string, value: string | boolean) => {
-    console.log('🔧 Atualizando Facebook Pixel:', field, value);
-    setMarketingScripts(prev => ({
-      ...prev,
-      facebookPixel: {
-        ...prev.facebookPixel,
-        [field]: value
+  const saveSettings = async () => {
+    if (!settings || !hasChanges) return;
+
+    try {
+      setIsSaving(true);
+      console.log('💾 Salvando configurações:', settings);
+
+      // Verificar se já existe uma configuração
+      const { data: existingData } = await supabase
+        .from('marketing_settings')
+        .select('id')
+        .maybeSingle();
+
+      let result;
+      if (existingData) {
+        // Atualizar configuração existente
+        result = await supabase
+          .from('marketing_settings')
+          .update({
+            facebook_pixel_enabled: settings.facebook_pixel_enabled,
+            facebook_pixel_id: settings.facebook_pixel_id || null,
+            facebook_custom_code: settings.facebook_custom_code || null,
+            facebook_conversion_api_token: settings.facebook_conversion_api_token || null,
+            google_analytics_enabled: settings.google_analytics_enabled,
+            google_analytics_id: settings.google_analytics_id || null,
+            google_analytics_custom_code: settings.google_analytics_custom_code || null,
+            google_tag_manager_enabled: settings.google_tag_manager_enabled,
+            google_tag_manager_id: settings.google_tag_manager_id || null,
+            custom_head_scripts: settings.custom_head_scripts || null,
+            custom_body_scripts: settings.custom_body_scripts || null,
+            form_tracking_config: settings.form_tracking_config || {},
+            event_tracking_config: settings.event_tracking_config || {},
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+      } else {
+        // Criar nova configuração
+        result = await supabase
+          .from('marketing_settings')
+          .insert([{
+            facebook_pixel_enabled: settings.facebook_pixel_enabled,
+            facebook_pixel_id: settings.facebook_pixel_id || null,
+            facebook_custom_code: settings.facebook_custom_code || null,
+            facebook_conversion_api_token: settings.facebook_conversion_api_token || null,
+            google_analytics_enabled: settings.google_analytics_enabled,
+            google_analytics_id: settings.google_analytics_id || null,
+            google_analytics_custom_code: settings.google_analytics_custom_code || null,
+            google_tag_manager_enabled: settings.google_tag_manager_enabled,
+            google_tag_manager_id: settings.google_tag_manager_id || null,
+            custom_head_scripts: settings.custom_head_scripts || null,
+            custom_body_scripts: settings.custom_body_scripts || null,
+            form_tracking_config: settings.form_tracking_config || {},
+            event_tracking_config: settings.event_tracking_config || {}
+          }]);
       }
-    }));
+
+      if (result.error) throw result.error;
+
+      console.log('✅ Configurações salvas com sucesso');
+      toast.success('Configurações de marketing salvas com sucesso!');
+      setHasChanges(false);
+      
+      // Implementar scripts no site
+      implementScripts();
+      
+    } catch (error) {
+      console.error('❌ Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações de marketing');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const updateGoogleAnalytics = (field: string, value: string | boolean) => {
-    console.log('🔧 Atualizando Google Analytics:', field, value);
-    setMarketingScripts(prev => ({
-      ...prev,
-      googleAnalytics: {
-        ...prev.googleAnalytics,
-        [field]: value
-      }
-    }));
+  const implementScripts = () => {
+    if (!settings) return;
+
+    // Remover scripts existentes
+    const existingScripts = document.querySelectorAll('script[data-marketing="true"]');
+    existingScripts.forEach(script => script.remove());
+
+    // Facebook Pixel
+    if (settings.facebook_pixel_enabled && settings.facebook_pixel_id) {
+      const fbScript = document.createElement('script');
+      fbScript.setAttribute('data-marketing', 'true');
+      fbScript.innerHTML = `
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${settings.facebook_pixel_id}');
+        fbq('track', 'PageView');
+      `;
+      document.head.appendChild(fbScript);
+    }
+
+    // Google Analytics
+    if (settings.google_analytics_enabled && settings.google_analytics_id) {
+      const gaScript = document.createElement('script');
+      gaScript.setAttribute('data-marketing', 'true');
+      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${settings.google_analytics_id}`;
+      gaScript.async = true;
+      document.head.appendChild(gaScript);
+
+      const gaConfigScript = document.createElement('script');
+      gaConfigScript.setAttribute('data-marketing', 'true');
+      gaConfigScript.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${settings.google_analytics_id}');
+      `;
+      document.head.appendChild(gaConfigScript);
+    }
+
+    // Google Tag Manager
+    if (settings.google_tag_manager_enabled && settings.google_tag_manager_id) {
+      const gtmScript = document.createElement('script');
+      gtmScript.setAttribute('data-marketing', 'true');
+      gtmScript.innerHTML = `
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','${settings.google_tag_manager_id}');
+      `;
+      document.head.appendChild(gtmScript);
+    }
+
+    // Scripts personalizados no head
+    if (settings.custom_head_scripts) {
+      const customHeadScript = document.createElement('script');
+      customHeadScript.setAttribute('data-marketing', 'true');
+      customHeadScript.innerHTML = settings.custom_head_scripts;
+      document.head.appendChild(customHeadScript);
+    }
+
+    // Scripts personalizados no body
+    if (settings.custom_body_scripts) {
+      const customBodyScript = document.createElement('script');
+      customBodyScript.setAttribute('data-marketing', 'true');
+      customBodyScript.innerHTML = settings.custom_body_scripts;
+      document.body.appendChild(customBodyScript);
+    }
+
+    console.log('🚀 Scripts de marketing implementados no site');
   };
 
-  const updateGoogleTagManager = (field: string, value: string | boolean) => {
-    console.log('🔧 Atualizando Google Tag Manager:', field, value);
-    setMarketingScripts(prev => ({
-      ...prev,
-      googleTagManager: {
-        ...prev.googleTagManager,
-        [field]: value
-      }
-    }));
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <span className="ml-2">Carregando configurações...</span>
+      </div>
+    );
+  }
 
-  const updateCustomScripts = (field: string, value: string) => {
-    console.log('🔧 Atualizando Scripts Customizados:', field, value.length, 'caracteres');
-    setMarketingScripts(prev => ({
-      ...prev,
-      customScripts: {
-        ...prev.customScripts,
-        [field]: value
-      }
-    }));
-  };
+  if (!settings) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <AlertCircle className="w-8 h-8 mr-2" />
+        <span>Erro ao carregar configurações</span>
+      </div>
+    );
+  }
 
   return (
-    <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            Marketing & Analytics
-          </CardTitle>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={forceReloadFromDatabase}
-              disabled={isLoading}
-            >
-              <RotateCw className="w-4 h-4 mr-2" />
-              Sincronizar
-            </Button>
-            <Button onClick={saveMarketingConfig} disabled={isLoading} size="sm">
-              <Save className="w-4 h-4 mr-2" />
-              {isLoading ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Marketing & Analytics</h2>
+          <p className="text-muted-foreground">Configure scripts de rastreamento e marketing</p>
         </div>
-        {lastSaved && (
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Última atualização: {lastSaved.toLocaleTimeString()}
-          </p>
-        )}
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="scripts" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="scripts" onClick={() => setActiveTab('scripts')}>Scripts</TabsTrigger>
-            <TabsTrigger value="facebook" onClick={() => setActiveTab('facebook')}>Facebook Pixel</TabsTrigger>
-            <TabsTrigger value="google" onClick={() => setActiveTab('google')}>Google Analytics</TabsTrigger>
-            <TabsTrigger value="gtm" onClick={() => setActiveTab('gtm')}>Google Tag Manager</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="scripts">
-            <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          {hasChanges && (
+            <Badge variant="outline" className="text-orange-600">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              Alterações não salvas
+            </Badge>
+          )}
+          <Button onClick={saveSettings} disabled={!hasChanges || isSaving}>
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            Salvar Configurações
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="scripts" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="scripts" className="flex items-center gap-2">
+            <Code className="w-4 h-4" />
+            Scripts & Rastreamento
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Funil de Conversão
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="scripts" className="space-y-6">
+          {/* Facebook Pixel */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Facebook className="w-5 h-5" />
+                Facebook Pixel
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={settings.facebook_pixel_enabled}
+                  onCheckedChange={(checked) => updateSettings('facebook_pixel_enabled', checked)}
+                />
+                <Label>Habilitar Facebook Pixel</Label>
+              </div>
+
+              {settings.facebook_pixel_enabled && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="facebook_pixel_id">Pixel ID</Label>
+                    <Input
+                      id="facebook_pixel_id"
+                      value={settings.facebook_pixel_id}
+                      onChange={(e) => updateSettings('facebook_pixel_id', e.target.value)}
+                      placeholder="123456789012345"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="facebook_conversion_api_token">Conversion API Token (Opcional)</Label>
+                    <Input
+                      id="facebook_conversion_api_token"
+                      value={settings.facebook_conversion_api_token}
+                      onChange={(e) => updateSettings('facebook_conversion_api_token', e.target.value)}
+                      placeholder="Access Token para Conversion API"
+                      type="password"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="facebook_custom_code">Código Personalizado (Opcional)</Label>
+                    <Textarea
+                      id="facebook_custom_code"
+                      value={settings.facebook_custom_code}
+                      onChange={(e) => updateSettings('facebook_custom_code', e.target.value)}
+                      placeholder="Código JavaScript personalizado para Facebook"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Google Analytics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Google Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={settings.google_analytics_enabled}
+                  onCheckedChange={(checked) => updateSettings('google_analytics_enabled', checked)}
+                />
+                <Label>Habilitar Google Analytics</Label>
+              </div>
+
+              {settings.google_analytics_enabled && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="google_analytics_id">Measurement ID</Label>
+                    <Input
+                      id="google_analytics_id"
+                      value={settings.google_analytics_id}
+                      onChange={(e) => updateSettings('google_analytics_id', e.target.value)}
+                      placeholder="G-XXXXXXXXXX"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="google_analytics_custom_code">Código Personalizado (Opcional)</Label>
+                    <Textarea
+                      id="google_analytics_custom_code"
+                      value={settings.google_analytics_custom_code}
+                      onChange={(e) => updateSettings('google_analytics_custom_code', e.target.value)}
+                      placeholder="Código JavaScript personalizado para Google Analytics"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Google Tag Manager */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5" />
+                Google Tag Manager
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={settings.google_tag_manager_enabled}
+                  onCheckedChange={(checked) => updateSettings('google_tag_manager_enabled', checked)}
+                />
+                <Label>Habilitar Google Tag Manager</Label>
+              </div>
+
+              {settings.google_tag_manager_enabled && (
+                <div>
+                  <Label htmlFor="google_tag_manager_id">Container ID</Label>
+                  <Input
+                    id="google_tag_manager_id"
+                    value={settings.google_tag_manager_id}
+                    onChange={(e) => updateSettings('google_tag_manager_id', e.target.value)}
+                    placeholder="GTM-XXXXXXX"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Scripts Personalizados */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Scripts Personalizados
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="headerScripts">Scripts de Cabeçalho</Label>
+                <Label htmlFor="custom_head_scripts">Scripts do Head</Label>
                 <Textarea
-                  id="headerScripts"
-                  value={marketingScripts.customScripts.headerScripts}
-                  onChange={(e) => updateCustomScripts('headerScripts', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Cole aqui seus scripts que devem ser inseridos no &lt;head&gt;."
+                  id="custom_head_scripts"
+                  value={settings.custom_head_scripts}
+                  onChange={(e) => updateSettings('custom_head_scripts', e.target.value)}
+                  placeholder="Scripts que serão inseridos no <head>"
                   rows={4}
                 />
               </div>
+
               <div>
-                <Label htmlFor="bodyScripts">Scripts de Corpo (Início)</Label>
+                <Label htmlFor="custom_body_scripts">Scripts do Body</Label>
                 <Textarea
-                  id="bodyScripts"
-                  value={marketingScripts.customScripts.bodyScripts}
-                  onChange={(e) => updateCustomScripts('bodyScripts', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Cole aqui seus scripts que devem ser inseridos logo após a abertura da tag &lt;body&gt;."
+                  id="custom_body_scripts"
+                  value={settings.custom_body_scripts}
+                  onChange={(e) => updateSettings('custom_body_scripts', e.target.value)}
+                  placeholder="Scripts que serão inseridos no final do <body>"
                   rows={4}
                 />
               </div>
-              <div>
-                <Label htmlFor="footerScripts">Scripts de Rodapé</Label>
-                <Textarea
-                  id="footerScripts"
-                  value={marketingScripts.customScripts.footerScripts}
-                  onChange={(e) => updateCustomScripts('footerScripts', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Cole aqui seus scripts que devem ser inseridos antes do fechamento da tag &lt;body&gt;."
-                  rows={4}
-                />
-              </div>
-            </div>
-          </TabsContent>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="facebook">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="facebookPixelEnabled"
-                  checked={marketingScripts.facebookPixel.enabled}
-                  onCheckedChange={(checked) => updateFacebookPixel('enabled', checked!)}
-                  className={isDark ? 'border-neutral-500 data-[state=checked]:bg-white data-[state=checked]:text-black' : 'border-gray-400'}
-                />
-                <Label htmlFor="facebookPixelEnabled">Ativar Facebook Pixel</Label>
-              </div>
-              <div>
-                <Label htmlFor="facebookPixelId">Pixel ID</Label>
-                <Input
-                  type="text"
-                  id="facebookPixelId"
-                  value={marketingScripts.facebookPixel.pixelId}
-                  onChange={(e) => updateFacebookPixel('pixelId', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Insira o ID do seu Pixel do Facebook"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="conversionApiEnabled"
-                  checked={marketingScripts.facebookPixel.conversionApiEnabled}
-                  onCheckedChange={(checked) => updateFacebookPixel('conversionApiEnabled', checked!)}
-                  className={isDark ? 'border-neutral-500 data-[state=checked]:bg-white data-[state=checked]:text-black' : 'border-gray-400'}
-                />
-                <Label htmlFor="conversionApiEnabled">Ativar Conversion API</Label>
-              </div>
-              <div>
-                <Label htmlFor="facebookAccessToken">Access Token</Label>
-                <Input
-                  type="text"
-                  id="facebookAccessToken"
-                  value={marketingScripts.facebookPixel.accessToken}
-                  onChange={(e) => updateFacebookPixel('accessToken', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Insira seu Access Token do Facebook"
-                />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="google">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="googleAnalyticsEnabled"
-                  checked={marketingScripts.googleAnalytics.enabled}
-                  onCheckedChange={(checked) => updateGoogleAnalytics('enabled', checked!)}
-                  className={isDark ? 'border-neutral-500 data-[state=checked]:bg-white data-[state=checked]:text-black' : 'border-gray-400'}
-                />
-                <Label htmlFor="googleAnalyticsEnabled">Ativar Google Analytics</Label>
-              </div>
-              <div>
-                <Label htmlFor="googleTrackingId">Tracking ID</Label>
-                <Input
-                  type="text"
-                  id="googleTrackingId"
-                  value={marketingScripts.googleAnalytics.trackingId}
-                  onChange={(e) => updateGoogleAnalytics('trackingId', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Insira o ID de rastreamento do Google Analytics (UA-XXXXX-Y)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="googleGtag">Gtag (GA4)</Label>
-                <Input
-                  type="text"
-                  id="googleGtag"
-                  value={marketingScripts.googleAnalytics.gtag}
-                  onChange={(e) => updateGoogleAnalytics('gtag', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Insira o Gtag do Google Analytics (G-XXXXXXX)"
-                />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="gtm">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="googleTagManagerEnabled"
-                  checked={marketingScripts.googleTagManager.enabled}
-                  onCheckedChange={(checked) => updateGoogleTagManager('enabled', checked!)}
-                  className={isDark ? 'border-neutral-500 data-[state=checked]:bg-white data-[state=checked]:text-black' : 'border-gray-400'}
-                />
-                <Label htmlFor="googleTagManagerEnabled">Ativar Google Tag Manager</Label>
-              </div>
-              <div>
-                <Label htmlFor="googleTagManagerContainerId">Container ID</Label>
-                <Input
-                  type="text"
-                  id="googleTagManagerContainerId"
-                  value={marketingScripts.googleTagManager.containerId}
-                  onChange={(e) => updateGoogleTagManager('containerId', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="Insira o ID do seu Container do Google Tag Manager (GTM-XXXXXXX)"
-                />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        <TabsContent value="analytics">
+          <ConversionFunnel />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
-
-export default MarketingManagement;

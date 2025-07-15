@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -14,7 +15,8 @@ import {
   ChevronDown, 
   ChevronRight,
   Trash2,
-  BarChart3
+  BarChart3,
+  RefreshCw
 } from 'lucide-react';
 
 interface CampaignReport {
@@ -101,40 +103,38 @@ export const CampaignReports: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-white/30 border-t-white rounded-full mx-auto mb-4"></div>
-          <p className="text-white/90">Carregando relatórios...</p>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-gray-600 border-t-white rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-300">Carregando relatórios...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Glassmorphism */}
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
+        {/* Header */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">Relatórios de Campanha</h2>
-              <p className="text-white/70">
+              <p className="text-gray-400">
                 Visualize o desempenho das suas campanhas de marketing
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl px-4 py-2">
-                <Badge variant="outline" className="text-white border-white/30 bg-transparent">
-                  {reports.length} {reports.length === 1 ? 'relatório' : 'relatórios'}
-                </Badge>
-              </div>
+              <Badge variant="outline" className="text-gray-300 border-gray-600">
+                {reports.length} {reports.length === 1 ? 'relatório' : 'relatórios'}
+              </Badge>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={loadReports}
-                className="backdrop-blur-sm bg-white/5 border-white/20 text-white hover:bg-white/10 rounded-xl"
+                className="bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
               >
-                <BarChart3 className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 mr-2" />
                 Atualizar
               </Button>
             </div>
@@ -142,11 +142,11 @@ export const CampaignReports: React.FC = () => {
         </div>
 
         {reports.length === 0 ? (
-          <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg">
             <div className="text-center py-16">
-              <BarChart3 className="w-16 h-16 mx-auto text-white/50 mb-6" />
+              <BarChart3 className="w-16 h-16 mx-auto text-gray-600 mb-6" />
               <h3 className="text-2xl font-bold text-white mb-3">Nenhum relatório encontrado</h3>
-              <p className="text-white/70 max-w-md mx-auto">
+              <p className="text-gray-400 max-w-md mx-auto">
                 Crie seu primeiro relatório na aba "Analytics" usando o funil de conversão.
               </p>
             </div>
@@ -156,23 +156,22 @@ export const CampaignReports: React.FC = () => {
             {reports.map((report, index) => (
               <div 
                 key={report.id}
-                className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="bg-gray-900 border border-gray-800 rounded-lg shadow-lg overflow-hidden"
               >
                 <Collapsible 
                   open={expandedReport === report.id}
                   onOpenChange={(open) => setExpandedReport(open ? report.id : null)}
                 >
                   <CollapsibleTrigger asChild>
-                    <div className="cursor-pointer hover:bg-white/5 transition-all duration-300 p-6">
+                    <div className="cursor-pointer hover:bg-gray-800 transition-colors p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 backdrop-blur-sm bg-white/10 rounded-xl border border-white/20">
+                            <div className="p-2 bg-gray-800 rounded-lg border border-gray-700">
                               {expandedReport === report.id ? (
-                                <ChevronDown className="w-5 h-5 text-white" />
+                                <ChevronDown className="w-5 h-5 text-gray-300" />
                               ) : (
-                                <ChevronRight className="w-5 h-5 text-white" />
+                                <ChevronRight className="w-5 h-5 text-gray-300" />
                               )}
                             </div>
                             <div>
@@ -180,11 +179,11 @@ export const CampaignReports: React.FC = () => {
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge 
                                   variant="secondary" 
-                                  className="text-xs bg-white/10 text-white/90 border-white/20"
+                                  className="text-xs bg-gray-800 text-gray-300 border-gray-600"
                                 >
                                   {report.form_name}
                                 </Badge>
-                                <span className="text-white/60 text-sm">
+                                <span className="text-gray-500 text-sm">
                                   {formatDate(report.created_at)}
                                 </span>
                               </div>
@@ -194,20 +193,20 @@ export const CampaignReports: React.FC = () => {
                         
                         <div className="flex items-center gap-6">
                           <div className="text-right">
-                            <div className="text-sm text-white/60 mb-1">ROI</div>
+                            <div className="text-sm text-gray-500 mb-1">ROI</div>
                             <div className={`text-2xl font-bold ${getROIColor(report.roi)}`}>
                               {report.roi.toFixed(1)}%
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm text-white/60 mb-1">Receita</div>
+                            <div className="text-sm text-gray-500 mb-1">Receita</div>
                             <div className="text-xl font-bold text-white">
                               {formatCurrency(report.revenue)}
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm text-white/60 mb-1">Lucro</div>
-                            <div className={`text-lg font-bold ${report.lucro_liquido >= 0 ? 'text-white' : 'text-gray-400'}`}>
+                            <div className="text-sm text-gray-500 mb-1">Lucro</div>
+                            <div className={`text-lg font-bold ${report.lucro_liquido >= 0 ? 'text-white' : 'text-gray-500'}`}>
                               {formatCurrency(report.lucro_liquido)}
                             </div>
                           </div>
@@ -218,7 +217,7 @@ export const CampaignReports: React.FC = () => {
                               e.stopPropagation();
                               deleteReport(report.id);
                             }}
-                            className="text-gray-400 hover:text-gray-200 hover:bg-gray-700/20 rounded-xl"
+                            className="text-gray-500 hover:text-gray-300 hover:bg-gray-800"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -228,74 +227,74 @@ export const CampaignReports: React.FC = () => {
                   </CollapsibleTrigger>
 
                   <CollapsibleContent>
-                    <div className="px-6 pb-6 space-y-6 border-t border-white/10">
+                    <div className="px-6 pb-6 space-y-6 border-t border-gray-800">
                       {/* Métricas Principais */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
-                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
-                          <Users className="w-8 h-8 mx-auto mb-3 text-white" />
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-center">
+                          <Users className="w-8 h-8 mx-auto mb-3 text-gray-300" />
                           <div className="text-3xl font-bold text-white">{report.form_submissions}</div>
-                          <div className="text-sm text-white/60">Leads Gerados</div>
+                          <div className="text-sm text-gray-500">Leads Gerados</div>
                         </div>
                         
-                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
-                          <Target className="w-8 h-8 mx-auto mb-3 text-white" />
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-center">
+                          <Target className="w-8 h-8 mx-auto mb-3 text-gray-300" />
                           <div className="text-3xl font-bold text-white">{report.contracts}</div>
-                          <div className="text-sm text-white/60">Contratos Fechados</div>
+                          <div className="text-sm text-gray-500">Contratos Fechados</div>
                         </div>
                         
-                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
-                          <TrendingUp className="w-8 h-8 mx-auto mb-3 text-white" />
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-center">
+                          <TrendingUp className="w-8 h-8 mx-auto mb-3 text-gray-300" />
                           <div className="text-3xl font-bold text-white">{report.conversion_rate.toFixed(1)}%</div>
-                          <div className="text-sm text-white/60">Taxa de Conversão</div>
+                          <div className="text-sm text-gray-500">Taxa de Conversão</div>
                         </div>
                         
-                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
-                          <DollarSign className="w-8 h-8 mx-auto mb-3 text-white" />
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-center">
+                          <DollarSign className="w-8 h-8 mx-auto mb-3 text-gray-300" />
                           <div className="text-3xl font-bold text-white">{formatCurrency(report.ticket_medio)}</div>
-                          <div className="text-sm text-white/60">Ticket Médio</div>
+                          <div className="text-sm text-gray-500">Ticket Médio</div>
                         </div>
                       </div>
 
                       {/* Investimento vs Resultados */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl p-6">
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                           <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             💰 Investimento
                           </h4>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-gray-700/20 border border-gray-500/20 rounded-lg">
-                              <span className="text-white/80">Gasto em Anúncios</span>
+                            <div className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg">
+                              <span className="text-gray-300">Gasto em Anúncios</span>
                               <span className="font-bold text-white">{formatCurrency(report.ad_spend)}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/5 border border-white/20 rounded-lg">
-                              <span className="text-white/80">Custo por Lead</span>
+                            <div className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg">
+                              <span className="text-gray-300">Custo por Lead</span>
                               <span className="font-medium text-white">{formatCurrency(report.cost_per_lead)}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/5 border border-white/20 rounded-lg">
-                              <span className="text-white/80">Custo por Aquisição</span>
+                            <div className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg">
+                              <span className="text-gray-300">Custo por Aquisição</span>
                               <span className="font-medium text-white">{formatCurrency(report.cost_per_acquisition)}</span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl p-6">
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                           <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             📈 Resultados
                           </h4>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
-                              <span className="text-white/80">Receita Total</span>
+                            <div className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg">
+                              <span className="text-gray-300">Receita Total</span>
                               <span className="font-bold text-white">{formatCurrency(report.revenue)}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
-                              <span className="text-white/80">Lucro Líquido</span>
-                              <span className={`font-bold ${report.lucro_liquido >= 0 ? 'text-white' : 'text-gray-400'}`}>
+                            <div className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg">
+                              <span className="text-gray-300">Lucro Líquido</span>
+                              <span className={`font-bold ${report.lucro_liquido >= 0 ? 'text-white' : 'text-gray-500'}`}>
                                 {formatCurrency(report.lucro_liquido)}
                               </span>
                             </div>
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-gray-600/20 border border-gray-400/20 rounded-lg">
-                              <span className="text-white/80">Retorno sobre Investimento</span>
-                              <span className={`font-bold text-xl ${report.roi >= 0 ? 'text-white' : 'text-gray-400'}`}>
+                            <div className="flex justify-between items-center p-3 bg-gray-600 border border-gray-500 rounded-lg">
+                              <span className="text-gray-300">ROI</span>
+                              <span className={`font-bold text-xl ${report.roi >= 0 ? 'text-white' : 'text-gray-500'}`}>
                                 {report.roi.toFixed(1)}%
                               </span>
                             </div>
@@ -304,23 +303,23 @@ export const CampaignReports: React.FC = () => {
                       </div>
 
                       {/* Performance Summary */}
-                      <div className="backdrop-blur-sm bg-gradient-to-r from-gray-700/10 to-gray-600/10 border border-gray-400/20 rounded-xl p-6">
+                      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                         <h4 className="text-lg font-bold text-white mb-4">📊 Resumo da Performance</h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div className="text-center">
-                            <div className="text-white/60">Taxa de Fechamento</div>
+                            <div className="text-gray-500">Taxa de Fechamento</div>
                             <div className="text-xl font-bold text-white">
                               {report.form_submissions > 0 ? ((report.contracts / report.form_submissions) * 100).toFixed(1) : 0}%
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-white/60">ROAS (Return on Ad Spend)</div>
+                            <div className="text-gray-500">ROAS</div>
                             <div className="text-xl font-bold text-white">
                               {report.ad_spend > 0 ? (report.revenue / report.ad_spend).toFixed(1) : 0}x
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-white/60">Margem de Lucro</div>
+                            <div className="text-gray-500">Margem de Lucro</div>
                             <div className="text-xl font-bold text-white">
                               {report.revenue > 0 ? ((report.lucro_liquido / report.revenue) * 100).toFixed(1) : 0}%
                             </div>
