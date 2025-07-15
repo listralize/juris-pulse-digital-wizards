@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,7 +19,7 @@ const getDeviceInfo = () => {
   return { deviceType, browser };
 };
 
-// Função para obter localização aproximada via IP
+// Função para obter localização aproximada via IP (usando um serviço gratuito)
 const getLocationInfo = async () => {
   try {
     const response = await fetch('https://ipapi.co/json/');
@@ -137,23 +136,6 @@ export const useAnalytics = () => {
         console.error('Erro ao salvar conversão:', error);
       } else {
         console.log('✅ Conversão salva com sucesso');
-        
-        // Enviar evento para scripts de marketing externos
-        if (typeof (window as any).fbq !== 'undefined') {
-          (window as any).fbq('track', 'Lead', {
-            content_name: formName,
-            value: 100,
-            currency: 'BRL'
-          });
-        }
-        
-        if (typeof (window as any).gtag !== 'undefined') {
-          (window as any).gtag('event', 'generate_lead', {
-            event_category: 'engagement',
-            event_label: formName,
-            value: 100
-          });
-        }
       }
     } catch (error) {
       console.error('Erro no tracking de conversão:', error);
@@ -172,7 +154,7 @@ export const useAnalytics = () => {
       const timeOnPage = Math.floor((Date.now() - pageLoadTime.current.getTime()) / 1000);
       const scrollDepth = Math.floor((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
       
-      // Tentar enviar dados de sessão finalizada
+      // Enviar dados de sessão finalizada (usando navigator.sendBeacon para ser mais confiável)
       const sessionData = {
         session_id: sessionId.current,
         time_on_page: timeOnPage,
@@ -180,10 +162,7 @@ export const useAnalytics = () => {
         session_duration: timeOnPage
       };
 
-      // Usar sendBeacon para maior confiabilidade
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/analytics/session-end', JSON.stringify(sessionData));
-      }
+      navigator.sendBeacon('/api/analytics/session-end', JSON.stringify(sessionData));
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);

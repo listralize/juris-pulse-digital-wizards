@@ -21,10 +21,10 @@ export const useMarketingScripts = () => {
       facebookPixel: typeof (window as any).fbq !== 'undefined',
       googleAnalytics: typeof (window as any).gtag !== 'undefined',
       googleTagManager: typeof (window as any).dataLayer !== 'undefined',
-      customScripts: document.querySelectorAll('script[data-marketing="true"]').length > 0
+      customScripts: document.querySelectorAll('script[data-marketing="custom"]').length > 0
     };
 
-    console.log('📊 Status dos scripts de marketing:', status);
+    console.log('📊 Status dos scripts:', status);
     setScriptStatus(status);
   };
 
@@ -32,11 +32,16 @@ export const useMarketingScripts = () => {
     // Verificar status inicial
     checkScriptStatus();
 
-    // Verificar periodicamente se os scripts foram carregados
-    const interval = setInterval(checkScriptStatus, 2000);
+    // Observar mudanças no DOM
+    const observer = new MutationObserver(() => {
+      checkScriptStatus();
+    });
+
+    observer.observe(document.head, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      clearInterval(interval);
+      observer.disconnect();
     };
   }, []);
 
@@ -45,35 +50,23 @@ export const useMarketingScripts = () => {
 
     // Facebook Pixel
     if (scriptStatus.facebookPixel && (window as any).fbq) {
-      try {
-        (window as any).fbq('track', eventName, parameters);
-        console.log('📘 Evento enviado para Facebook Pixel');
-      } catch (error) {
-        console.error('Erro ao enviar evento para Facebook Pixel:', error);
-      }
+      (window as any).fbq('track', eventName, parameters);
+      console.log('📘 Evento enviado para Facebook Pixel');
     }
 
     // Google Analytics
     if (scriptStatus.googleAnalytics && (window as any).gtag) {
-      try {
-        (window as any).gtag('event', eventName, parameters);
-        console.log('📊 Evento enviado para Google Analytics');
-      } catch (error) {
-        console.error('Erro ao enviar evento para Google Analytics:', error);
-      }
+      (window as any).gtag('event', eventName, parameters);
+      console.log('📊 Evento enviado para Google Analytics');
     }
 
     // Google Tag Manager
     if (scriptStatus.googleTagManager && (window as any).dataLayer) {
-      try {
-        (window as any).dataLayer.push({
-          event: eventName,
-          ...parameters
-        });
-        console.log('🏷️ Evento enviado para Google Tag Manager');
-      } catch (error) {
-        console.error('Erro ao enviar evento para Google Tag Manager:', error);
-      }
+      (window as any).dataLayer.push({
+        event: eventName,
+        ...parameters
+      });
+      console.log('🏷️ Evento enviado para Google Tag Manager');
     }
   };
 
