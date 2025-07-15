@@ -221,22 +221,22 @@ export const MarketingManagement: React.FC = () => {
           }
         });
 
-        if (settings.form_tracking_config) {
+        if (settings.form_tracking_config && typeof settings.form_tracking_config === 'object') {
           setConversionTracking(prev => ({
             ...prev,
             formIds: {
               ...prev.formIds,
-              ...settings.form_tracking_config
+              ...settings.form_tracking_config as Record<string, string>
             }
           }));
         }
 
-        if (settings.event_tracking_config) {
+        if (settings.event_tracking_config && typeof settings.event_tracking_config === 'object') {
           setConversionTracking(prev => ({
             ...prev,
             events: {
               ...prev.events,
-              ...settings.event_tracking_config
+              ...settings.event_tracking_config as Record<string, boolean>
             }
           }));
         }
