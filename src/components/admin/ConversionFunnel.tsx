@@ -4,10 +4,15 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Calendar } from '../ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
-import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator, Save, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator, Save, AlertTriangle, CheckCircle, CalendarIcon, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { format, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '../../lib/utils';
 
 interface ConversionFunnelProps {
   analyticsData?: any;
@@ -20,6 +25,14 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const [selectedForm, setSelectedForm] = useState<string>('all');
   const [availableForms, setAvailableForms] = useState<Array<{id: string, name: string}>>([]);
   
+  // Date range state
+  const [dateRange, setDateRange] = useState<{from: Date, to: Date}>({
+    from: subDays(new Date(), 7),
+    to: new Date()
+  });
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('7days');
+  
   // Dados que o usuário controla
   const [formSubmissions, setFormSubmissions] = useState<number>(0);
   const [contracts, setContracts] = useState<number>(0);
@@ -28,6 +41,110 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const [campaignName, setCampaignName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [marketingConfig, setMarketingConfig] = useState<any>(null);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  // Predefined periods
+  const periods = [
+    { value: '7days', label: 'Últimos 7 dias' },
+    { value: '30days', label: 'Últimos 30 dias' },
+    { value: 'thisWeek', label: 'Esta semana' },
+    { value: 'lastWeek', label: 'Semana passada' },
+    { value: 'thisMonth', label: 'Este mês' },
+    { value: 'lastMonth', label: 'Mês passado' },
+    { value: 'thisYear', label: 'Este ano' },
+    { value: 'custom', label: 'Período personalizado' }
+  ];
+
+  // Handle period selection
+  const handlePeriodChange = (period: string) => {
+    setSelectedPeriod(period);
+    const now = new Date();
+    
+    switch (period) {
+      case '7days':
+        setDateRange({ from: subDays(now, 7), to: now });
+        break;
+      case '30days':
+        setDateRange({ from: subDays(now, 30), to: now });
+        break;
+      case 'thisWeek':
+        setDateRange({ from: startOfWeek(now, { weekStartsOn: 1 }), to: endOfWeek(now, { weekStartsOn: 1 }) });
+        break;
+      case 'lastWeek':
+        const lastWeekStart = startOfWeek(subDays(now, 7), { weekStartsOn: 1 });
+        const lastWeekEnd = endOfWeek(subDays(now, 7), { weekStartsOn: 1 });
+        setDateRange({ from: lastWeekStart, to: lastWeekEnd });
+        break;
+      case 'thisMonth':
+        setDateRange({ from: startOfMonth(now), to: endOfMonth(now) });
+        break;
+      case 'lastMonth':
+        const lastMonth = subDays(startOfMonth(now), 1);
+        setDateRange({ from: startOfMonth(lastMonth), to: endOfMonth(lastMonth) });
+        break;
+      case 'thisYear':
+        setDateRange({ from: startOfYear(now), to: endOfYear(now) });
+        break;
+      case 'custom':
+        // Keep current dates for custom selection
+        break;
+    }
+  };
+
+  // Refresh data based on date range
+  const refreshAnalyticsData = async () => {
+    setIsRefreshing(true);
+    try {
+      console.log('🔄 Atualizando dados para período:', dateRange);
+      
+      // Query form leads for the selected period
+      const { data: formLeads, error: leadsError } = await supabase
+        .from('form_leads')
+        .select('*')
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString());
+
+      if (leadsError) {
+        console.error('❌ Erro ao carregar leads:', leadsError);
+        throw leadsError;
+      }
+
+      console.log('📊 Leads carregados:', formLeads);
+
+      if (formLeads) {
+        // Group by form ID
+        const formSubmissionsData = formLeads.reduce((acc: any, lead: any) => {
+          const formId = lead.form_id || 'default';
+          if (!acc[formId]) {
+            acc[formId] = { formId, count: 0 };
+          }
+          acc[formId].count++;
+          return acc;
+        }, {});
+
+        const formSubmissionsArray = Object.values(formSubmissionsData);
+        console.log('📋 Dados de envios agrupados:', formSubmissionsArray);
+        
+        // Update form submissions count based on selected form
+        if (selectedForm === 'all') {
+          const totalSubmissions = formSubmissionsArray.reduce((sum: number, form: any) => sum + form.count, 0);
+          setFormSubmissions(totalSubmissions);
+        } else {
+          const formData = formSubmissionsArray.find((fs: any) => fs.formId === selectedForm);
+          setFormSubmissions(formData?.count || 0);
+        }
+      } else {
+        setFormSubmissions(0);
+      }
+
+      toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
+    } catch (error) {
+      console.error('❌ Erro ao atualizar dados:', error);
+      toast.error('Erro ao atualizar dados do período selecionado');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Carregar configurações de marketing
   useEffect(() => {
@@ -127,26 +244,10 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
     loadFormsWithCorrectNames();
   }, [analyticsData]);
 
-  // Atualizar dados do formulário selecionado
+  // Refresh data when date range changes
   useEffect(() => {
-    if (analyticsData?.formSubmissions) {
-      console.log('🔄 Atualizando dados para formulário:', selectedForm);
-      console.log('📊 Dados disponíveis:', analyticsData.formSubmissions);
-      
-      if (selectedForm === 'all') {
-        // Somar todas as conversões de todos os formulários
-        const totalSubmissions = analyticsData.formSubmissions.reduce((sum: number, form: any) => sum + form.count, 0);
-        setFormSubmissions(totalSubmissions);
-        console.log('📊 Total de envios (todos):', totalSubmissions);
-      } else {
-        // Filtrar pelo formulário específico selecionado
-        const formData = analyticsData.formSubmissions.find((fs: any) => fs.formId === selectedForm);
-        const count = formData?.count || 0;
-        setFormSubmissions(count);
-        console.log('📊 Envios para formulário', selectedForm, ':', count);
-      }
-    }
-  }, [analyticsData, selectedForm]);
+    refreshAnalyticsData();
+  }, [dateRange, selectedForm]);
 
   // Cálculos automáticos
   const conversionRate = formSubmissions > 0 ? (contracts / formSubmissions) * 100 : 0;
@@ -190,8 +291,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
           pixel_id: marketingConfig?.facebook_pixel_id || '',
           conversion_api_token: marketingConfig?.facebook_conversion_api_token || ''
         },
-        period_start: new Date().toISOString().split('T')[0],
-        period_end: new Date().toISOString().split('T')[0]
+        period_start: format(dateRange.from, 'yyyy-MM-dd'),
+        period_end: format(dateRange.to, 'yyyy-MM-dd')
       };
 
       const { error } = await supabase
@@ -218,6 +319,92 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
           <div className="flex items-center gap-2 mb-6">
             <Calculator className="w-5 h-5 text-white" />
             <h3 className="text-xl font-bold text-white">Configuração do Funil de Conversão</h3>
+          </div>
+          
+          {/* Date Range Selector */}
+          <div className="mb-6 p-4 backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <h4 className="text-lg font-semibold text-white mb-4">📅 Período de Análise</h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white/90 font-medium">Período Pré-definido</Label>
+                <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+                  <SelectTrigger className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl">
+                    <SelectValue placeholder="Selecione um período" />
+                  </SelectTrigger>
+                  <SelectContent className="backdrop-blur-md bg-black/80 border-white/20">
+                    {periods.map(period => (
+                      <SelectItem key={period.value} value={period.value} className="text-white hover:bg-white/10">
+                        {period.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {selectedPeriod === 'custom' && (
+                <div className="space-y-2">
+                  <Label className="text-white/90 font-medium">Período Personalizado</Label>
+                  <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl justify-start text-left font-normal hover:bg-white/10",
+                          !dateRange && "text-white/50"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <>
+                              {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                              {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                            </>
+                          ) : (
+                            format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                          )
+                        ) : (
+                          <span>Selecione as datas</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 backdrop-blur-md bg-black/80 border-white/20" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={(range) => {
+                          if (range?.from && range?.to) {
+                            setDateRange({ from: range.from, to: range.to });
+                            setIsDatePickerOpen(false);
+                          } else if (range?.from) {
+                            setDateRange({ from: range.from, to: range.from });
+                          }
+                        }}
+                        numberOfMonths={2}
+                        className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl text-white"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-white/70 text-sm">
+                Dados de {format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} até {format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}
+              </div>
+              <Button
+                onClick={refreshAnalyticsData}
+                disabled={isRefreshing}
+                className="backdrop-blur-sm bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 text-white px-4 py-2 rounded-xl transition-all duration-300"
+              >
+                <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
+                {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
+              </Button>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
