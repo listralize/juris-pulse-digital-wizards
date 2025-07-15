@@ -793,7 +793,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
             {/* Header Premium */}
             <div className="space-y-6">
               {linkTree.avatar_url && (
-                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white/20 shadow-2xl">
+                <div className={`${linkTree.avatar_size || 'w-32 h-32'} mx-auto ${linkTree.avatar_format || 'rounded-full'} overflow-hidden border-4 border-white/20 shadow-2xl`}>
                   <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -860,18 +860,63 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
               {renderItemsByLayout()}
             </div>
 
-            {/* Footer Premium */}
-            <div className="text-center mt-16 pt-8 border-t border-white/10">
-              <p className="text-gray-400 text-sm">
-                ⚖️ Excelência Jurídica • Tradição • Inovação
-              </p>
-              {linkTree.show_analytics && (
-                <div className="mt-4 flex justify-center gap-6 text-xs text-gray-500">
-                  <span>{linkTreeItems.reduce((total, item) => total + (item.click_count || 0), 0)} cliques totais</span>
-                  <span>{linkTreeItems.length} links ativos</span>
+            {/* Footer Premium Personalizado */}
+            {linkTree.footer_enabled && (
+              <footer 
+                className="w-full mt-16 pt-8 border-t border-white/10"
+                style={{
+                  backgroundColor: linkTree.footer_background_color || 'transparent',
+                  color: linkTree.footer_text_color || '#ffffff'
+                }}
+              >
+                <div className="max-w-4xl mx-auto text-center">
+                  {linkTree.footer_style === 'minimal' && (
+                    <p className="text-sm opacity-80">
+                      {linkTree.footer_text || '© 2024 - Todos os direitos reservados'}
+                    </p>
+                  )}
+                  
+                  {linkTree.footer_style === 'modern' && (
+                    <div className="space-y-4">
+                      <p className="text-sm opacity-80">
+                        {linkTree.footer_text || '© 2024 - Todos os direitos reservados'}
+                      </p>
+                      <div className="w-16 h-px bg-current opacity-30 mx-auto"></div>
+                    </div>
+                  )}
+                  
+                  {linkTree.footer_style === 'complete' && (
+                    <div className="space-y-4">
+                      <p className="text-sm opacity-80">
+                        {linkTree.footer_text || '© 2024 - Todos os direitos reservados'}
+                      </p>
+                      {linkTree.footer_social_links && linkTree.footer_social_links.length > 0 && (
+                        <div className="flex justify-center gap-4">
+                          {linkTree.footer_social_links.map((social, index) => (
+                            <a 
+                              key={index}
+                              href={social.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs opacity-70 hover:opacity-100 transition-opacity"
+                            >
+                              {social.platform}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {linkTree.show_analytics && (
+                    <div className="mt-4 flex justify-center gap-6 text-xs opacity-50">
+                      <span>{linkTreeItems.reduce((total, item) => total + (item.click_count || 0), 0)} cliques totais</span>
+                      <span>{linkTreeItems.length} links ativos</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </footer>
+            )}
           </div>
         </div>
 
@@ -913,7 +958,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
         {/* Header */}
         {linkTree.avatar_url && (
-          <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-white/20">
+          <div className={`${linkTree.avatar_size || 'w-24 h-24'} mx-auto ${linkTree.avatar_format || 'rounded-full'} overflow-hidden border-4 border-white/20`}>
             <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
           </div>
         )}
