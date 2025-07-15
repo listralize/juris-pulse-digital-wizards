@@ -147,13 +147,32 @@ export function LinkTreePreview({
             {sortedItems.map(item => renderMasonryItem(item))}
           </div>;
       case 'carousel':
-        return <div className="w-full px-4">
-            <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
+        return <div className="w-full px-4 relative">
+            <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide scroll-smooth" id="carousel-container">
               {sortedItems.map(item => renderCarouselItem(item))}
             </div>
             <div className="flex justify-center gap-2 mt-4">
               {sortedItems.map((_, index) => <div key={index} className="w-2 h-2 bg-white/30 rounded-full"></div>)}
             </div>
+            {/* Navigation arrows */}
+            <button 
+              onClick={() => {
+                const container = document.getElementById('carousel-container');
+                if (container) container.scrollLeft -= 300;
+              }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            >
+              ←
+            </button>
+            <button 
+              onClick={() => {
+                const container = document.getElementById('carousel-container');
+                if (container) container.scrollLeft += 300;
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            >
+              →
+            </button>
           </div>;
       case 'magazine':
         return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
@@ -164,7 +183,7 @@ export function LinkTreePreview({
             {sortedItems.map(item => renderPortfolioItem(item))}
           </div>;
       case 'bento':
-        return <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 auto-rows-min p-4">
+        return <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[minmax(120px,auto)] p-4 max-w-4xl mx-auto">
             {sortedItems.map((item, index) => renderBentoItem(item, index))}
           </div>;
       case 'list':
@@ -346,7 +365,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>}
+      {item.card_image && <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] rounded-lg"></div>}
       <div className="flex items-center gap-3 relative z-10">
         {getItemIcon(item)}
         <div className="text-left">
@@ -402,7 +421,7 @@ export function LinkTreePreview({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'
   }}>
-      {item.card_image && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
+      {item.card_image && <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] rounded-lg"></div>}
       <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center">
           {getItemIcon(item)}
@@ -414,7 +433,7 @@ export function LinkTreePreview({
       </CardContent>
     </Card>;
   const renderBentoItem = (item: LinkTreeItem, index: number) => {
-    const sizes = ['col-span-2 row-span-2', 'col-span-1 row-span-1', 'col-span-2 row-span-1', 'col-span-1 row-span-2'];
+    const sizes = ['col-span-1 row-span-1', 'col-span-2 row-span-1', 'col-span-1 row-span-2', 'col-span-2 row-span-2'];
     const sizeClass = sizes[index % sizes.length];
     return <Card key={item.id} className={`${getCardStyle(item)} ${sizeClass}`} onClick={() => handleItemClick(item)} style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
@@ -425,7 +444,7 @@ export function LinkTreePreview({
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-        {item.card_image && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
+        {item.card_image && <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] rounded-lg"></div>}
         <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
           <div className="mb-4 flex justify-center">
             {getItemIcon(item)}
