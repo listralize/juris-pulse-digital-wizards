@@ -1725,15 +1725,6 @@ export function LinkTreeManagement() {
                           />
                         </div>
                         <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs font-medium">Imagem (URL)</Label>
-                            <Input 
-                              value={newItem.card_image} 
-                              onChange={e => setNewItem(prev => ({ ...prev, card_image: e.target.value }))} 
-                              placeholder="https://exemplo.com/imagem.jpg" 
-                              className="h-8 text-sm" 
-                            />
-                          </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <Label className="text-xs font-medium">Preço</Label>
