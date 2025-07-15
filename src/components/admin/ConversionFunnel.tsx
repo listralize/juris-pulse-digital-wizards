@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
-import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator } from 'lucide-react';
+import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ConversionFunnelProps {
   analyticsData?: any;
@@ -23,6 +25,10 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const [contracts, setContracts] = useState<number>(0);
   const [adSpend, setAdSpend] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
+  const [campaignName, setCampaignName] = useState<string>('');
+  const [facebookPixelId, setFacebookPixelId] = useState<string>('');
+  const [conversionApiToken, setConversionApiToken] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Carregar formulários disponíveis com nomes corretos
   useEffect(() => {
@@ -55,6 +61,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
               displayName = configForm.name;
             } else if (analyticsForm.formId === 'default') {
               displayName = 'Formulário Principal';
+            } else if (analyticsForm.formId.startsWith('form_')) {
+              displayName = `Formulário ${analyticsForm.formId.replace('form_', '')}`;
             }
 
             console.log(`📋 Formulário ${analyticsForm.formId} -> Nome: ${displayName}`);
@@ -131,6 +139,62 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const ticketMedio = contracts > 0 ? revenue / contracts : 0;
   const lucroLiquido = revenue - adSpend;
 
+  // Função para salvar relatório de campanha
+  const saveCampaignReport = async () => {
+    if (!campaignName.trim()) {
+      toast.error('Por favor, insira um nome para a campanha');
+      return;
+    }
+
+    if (formSubmissions === 0) {
+      toast.error('Não há dados de envios de formulário para salvar');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const selectedFormData = availableForms.find(f => f.id === selectedForm);
+      
+      const reportData = {
+        campaign_name: campaignName,
+        form_id: selectedForm,
+        form_name: selectedFormData?.name || 'Formulário desconhecido',
+        form_submissions: formSubmissions,
+        contracts,
+        ad_spend: adSpend,
+        revenue,
+        conversion_rate: Number(conversionRate.toFixed(2)),
+        roi: Number(roi.toFixed(2)),
+        cost_per_lead: Number(costPerLead.toFixed(2)),
+        cost_per_acquisition: Number(costPerAcquisition.toFixed(2)),
+        ticket_medio: Number(ticketMedio.toFixed(2)),
+        lucro_liquido: Number(lucroLiquido.toFixed(2)),
+        facebook_pixel_config: {
+          pixel_id: facebookPixelId,
+          conversion_api_token: conversionApiToken
+        },
+        period_start: new Date().toISOString().split('T')[0],
+        period_end: new Date().toISOString().split('T')[0]
+      };
+
+      const { error } = await supabase
+        .from('campaign_reports')
+        .insert(reportData);
+
+      if (error) throw error;
+
+      toast.success('Relatório de campanha salvo com sucesso!');
+      setCampaignName('');
+      setFacebookPixelId('');
+      setConversionApiToken('');
+    } catch (error) {
+      console.error('Erro ao salvar relatório:', error);
+      toast.error('Erro ao salvar relatório de campanha');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Controles de Entrada - Glassmorphism */}
@@ -141,7 +205,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
             <h3 className="text-xl font-bold text-white">Configuração do Funil de Conversão</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-2">
               <Label className="text-white/90 font-medium">Formulário</Label>
               <Select value={selectedForm} onValueChange={setSelectedForm}>
@@ -189,6 +253,56 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
                 className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
                 placeholder="Ex: 25000"
               />
+            </div>
+          </div>
+
+          {/* Seção de Configuração de Campanha */}
+          <div className="border-t border-white/20 pt-6 mt-6">
+            <h4 className="text-lg font-semibold text-white mb-4">📊 Configuração da Campanha</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label className="text-white/90 font-medium">Nome da Campanha</Label>
+                <Input
+                  type="text"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
+                  placeholder="Ex: Campanha Black Friday 2024"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-white/90 font-medium">Facebook Pixel ID</Label>
+                <Input
+                  type="text"
+                  value={facebookPixelId}
+                  onChange={(e) => setFacebookPixelId(e.target.value)}
+                  className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
+                  placeholder="Ex: 123456789012345"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-white/90 font-medium">Token API de Conversão</Label>
+                <Input
+                  type="text"
+                  value={conversionApiToken}
+                  onChange={(e) => setConversionApiToken(e.target.value)}
+                  className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
+                  placeholder="Token da API de Conversão do Facebook"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <Button 
+                onClick={saveCampaignReport}
+                disabled={isLoading}
+                className="backdrop-blur-sm bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isLoading ? 'Salvando...' : 'Salvar Relatório'}
+              </Button>
             </div>
           </div>
         </div>

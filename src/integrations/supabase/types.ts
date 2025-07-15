@@ -104,6 +104,75 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_reports: {
+        Row: {
+          ad_spend: number
+          campaign_name: string
+          contracts: number
+          conversion_api_config: Json | null
+          conversion_rate: number
+          cost_per_acquisition: number
+          cost_per_lead: number
+          created_at: string
+          facebook_pixel_config: Json | null
+          form_id: string
+          form_name: string
+          form_submissions: number
+          id: string
+          lucro_liquido: number
+          period_end: string
+          period_start: string
+          revenue: number
+          roi: number
+          ticket_medio: number
+          updated_at: string
+        }
+        Insert: {
+          ad_spend?: number
+          campaign_name: string
+          contracts?: number
+          conversion_api_config?: Json | null
+          conversion_rate?: number
+          cost_per_acquisition?: number
+          cost_per_lead?: number
+          created_at?: string
+          facebook_pixel_config?: Json | null
+          form_id: string
+          form_name: string
+          form_submissions?: number
+          id?: string
+          lucro_liquido?: number
+          period_end: string
+          period_start: string
+          revenue?: number
+          roi?: number
+          ticket_medio?: number
+          updated_at?: string
+        }
+        Update: {
+          ad_spend?: number
+          campaign_name?: string
+          contracts?: number
+          conversion_api_config?: Json | null
+          conversion_rate?: number
+          cost_per_acquisition?: number
+          cost_per_lead?: number
+          created_at?: string
+          facebook_pixel_config?: Json | null
+          form_id?: string
+          form_name?: string
+          form_submissions?: number
+          id?: string
+          lucro_liquido?: number
+          period_end?: string
+          period_start?: string
+          revenue?: number
+          roi?: number
+          ticket_medio?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_info: {
         Row: {
           address: string

@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { ConversionFunnel } from './ConversionFunnel';
+import { CampaignReports } from './CampaignReports';
 
 interface MarketingScripts {
   facebookPixel: {
@@ -190,10 +191,10 @@ export const MarketingManagement: React.FC = () => {
       const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
       const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
-      // Carregar dados de visitantes com informações geográficas
+      // Carregar dados de visitantes
       const { data: visitorsData } = await supabase
         .from('website_analytics')
-        .select('session_id, timestamp, country, city, page_url, page_title, device_type, browser')
+        .select('session_id, timestamp, page_url, page_title, device_type, browser')
         .gte('timestamp', oneWeekAgo.toISOString());
 
       // Carregar dados de conversões detalhadas
@@ -258,21 +259,8 @@ export const MarketingManagement: React.FC = () => {
           .sort(([,a], [,b]) => b - a)
           .map(([formId, count]) => ({ formId, count }));
 
-        // Dados geográficos (cidade + país)
-        const geoMap = visitorsData.reduce((acc, visit) => {
-          if (visit.city && visit.country) {
-            const location = `${visit.country} - ${visit.city}`;
-            acc[location] = (acc[location] || 0) + 1;
-          } else if (visit.country) {
-            acc[visit.country] = (acc[visit.country] || 0) + 1;
-          }
-          return acc;
-        }, {} as Record<string, number>);
-
-        const topLocations = Object.entries(geoMap)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 10)
-          .map(([location, count]) => ({ location, count }));
+        // Remoção dos dados geográficos conforme solicitado
+        const topLocations: Array<{ location: string; count: number; }> = [];
 
         // Dados de dispositivos
         const deviceMap = visitorsData.reduce((acc, visit) => {
@@ -320,7 +308,7 @@ export const MarketingManagement: React.FC = () => {
           },
           topPages,
           formSubmissions: formStats,
-          geographicData: topLocations,
+          geographicData: [], // Removido conforme solicitado
           deviceData: deviceStats,
           funnelData: {
             visitors: totalUniqueVisitors,
@@ -477,11 +465,12 @@ export const MarketingManagement: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
           <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
           <TabsTrigger value="analytics">⚙️ Analytics</TabsTrigger>
+          <TabsTrigger value="reports">📋 Relatórios</TabsTrigger>
         </TabsList>
 
         {/* SCRIPTS TAB */}
@@ -1172,6 +1161,11 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* REPORTS TAB */}
+        <TabsContent value="reports" className="space-y-6">
+          <CampaignReports />
         </TabsContent>
 
       </Tabs>
