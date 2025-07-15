@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAnalyticsCleanup } from './useAnalyticsCleanup';
 
 // Função para obter informações do dispositivo e navegador
 const getDeviceInfo = () => {
@@ -61,9 +60,6 @@ export const useAnalytics = () => {
   const pageLoadTime = useRef<Date>(new Date());
   const hasTrackedPageView = useRef<boolean>(false);
 
-  // Ativar sistema de limpeza automática
-  useAnalyticsCleanup();
-
   // Função para rastrear visualização de página
   const trackPageView = async (pageUrl?: string, pageTitle?: string) => {
     try {
@@ -122,7 +118,7 @@ export const useAnalytics = () => {
         page_url: window.location.href,
         timestamp: new Date().toISOString(),
         lead_data: JSON.stringify(formData),
-        conversion_value: formId === 'whatsapp_button' ? 50 : 100, // Valor baseado no tipo
+        conversion_value: 100, // Valor estimado do lead
         referrer: document.referrer || null,
         user_agent: navigator.userAgent,
         campaign_source: campaignData?.source || 'direct',

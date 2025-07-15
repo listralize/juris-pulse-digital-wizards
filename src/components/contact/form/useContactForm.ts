@@ -17,7 +17,7 @@ interface ContactFormData {
 
 export const useContactForm = () => {
   const { formConfig } = useFormConfig();
-  const { trackConversion, sessionId, visitorId } = useAnalytics();
+  const { trackConversion } = useAnalytics();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -74,76 +74,6 @@ export const useContactForm = () => {
         }
       };
 
-      // Primeiro, salvar na tabela form_leads
-      const getDeviceInfo = () => {
-        const userAgent = navigator.userAgent;
-        let deviceType = 'desktop';
-        
-        if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
-          deviceType = /iPad|tablet/.test(userAgent) ? 'tablet' : 'mobile';
-        }
-        
-        let browser = 'Unknown';
-        if (userAgent.includes('Chrome')) browser = 'Chrome';
-        else if (userAgent.includes('Firefox')) browser = 'Firefox';
-        else if (userAgent.includes('Safari')) browser = 'Safari';
-        else if (userAgent.includes('Edge')) browser = 'Edge';
-        
-        return { deviceType, browser };
-      };
-
-      const getLocationInfo = async () => {
-        try {
-          const response = await fetch('https://ipapi.co/json/');
-          const data = await response.json();
-          return {
-            country: data.country_name || 'Unknown',
-            city: data.city || 'Unknown',
-            ip: data.ip || 'Unknown'
-          };
-        } catch (error) {
-          return {
-            country: 'Unknown',
-            city: 'Unknown',
-            ip: 'Unknown'
-          };
-        }
-      };
-
-      const { deviceType, browser } = getDeviceInfo();
-      const locationInfo = await getLocationInfo();
-
-      // Salvar lead na nova tabela
-      const { error: leadError } = await supabase
-        .from('form_leads')
-        .insert({
-          session_id: sessionId,
-          visitor_id: visitorId,
-          form_id: formConfig.id || 'default',
-          form_name: formConfig.name || 'Formulário Principal',
-          lead_data: submitData,
-          source_page: window.location.href,
-          utm_source: new URLSearchParams(window.location.search).get('utm_source'),
-          utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
-          utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign'),
-          ip_address: locationInfo.ip,
-          user_agent: navigator.userAgent,
-          device_type: deviceType,
-          browser: browser,
-          country: locationInfo.country,
-          city: locationInfo.city,
-          is_whatsapp_conversion: false,
-          conversion_value: 100,
-          status: 'new'
-        });
-
-      if (leadError) {
-        console.error('❌ Erro ao salvar lead:', leadError);
-      } else {
-        console.log('✅ Lead salvo na tabela form_leads');
-      }
-
-      // Enviar via edge function
       const { data, error } = await supabase.functions.invoke('contact-form', {
         body: submitData
       });
