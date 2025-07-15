@@ -337,8 +337,12 @@ export function LinkTreeManagement() {
       });
     }
   };
+  const [isSaving, setIsSaving] = useState(false);
+
   const saveLinkTree = async () => {
     try {
+      setIsSaving(true);
+      
       // Preparar dados completos para salvar
       const dataToSave = {
         title: linkTreeData.title || 'Meu Link Tree',
@@ -365,6 +369,7 @@ export function LinkTreeManagement() {
         footer_text_color: linkTreeData.footer_text_color,
         footer_style: linkTreeData.footer_style
       };
+      
       if (linkTree?.id) {
         // Atualizar existente
         const {
@@ -388,17 +393,21 @@ export function LinkTreeManagement() {
         }
         setLinkTree(data as any);
       }
+      
       toast({
-        title: "Sucesso",
-        description: "Configurações salvas com sucesso!"
+        title: "✅ Salvo com sucesso!",
+        description: "Suas configurações foram salvas e estão disponíveis no Link Tree.",
+        variant: "default"
       });
     } catch (error) {
       console.error('Erro ao salvar Link Tree:', error);
       toast({
-        title: "Erro",
-        description: "Falha ao salvar configurações",
+        title: "❌ Erro ao salvar",
+        description: "Falha ao salvar configurações. Tente novamente.",
         variant: "destructive"
       });
+    } finally {
+      setIsSaving(false);
     }
   };
   const saveLinkTreeItem = async (itemData: any) => {
@@ -1278,8 +1287,8 @@ export function LinkTreeManagement() {
                   </CardContent>
                 </Card>
 
-                <Button onClick={saveLinkTree} className="w-full" size="lg">
-                  Salvar Configurações
+                <Button onClick={saveLinkTree} className="w-full" size="lg" disabled={isSaving}>
+                  {isSaving ? "Salvando..." : "Salvar Configurações"}
                 </Button>
             </TabsContent>
 
@@ -1709,8 +1718,8 @@ export function LinkTreeManagement() {
           </Tabs>
 
           <div className="flex gap-4">
-            <Button onClick={saveLinkTree} className="flex-1" size="lg">
-              Salvar Configurações
+            <Button onClick={saveLinkTree} className="flex-1" size="lg" disabled={isSaving}>
+              {isSaving ? "Salvando..." : "Salvar Configurações"}
             </Button>
             <Button variant="outline" size="lg" asChild>
               <a href="/tree" target="_blank" rel="noopener noreferrer">
