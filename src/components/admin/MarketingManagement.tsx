@@ -779,59 +779,77 @@ export const MarketingManagement: React.FC = () => {
                         <span className="font-medium">{form.formName}</span>
                       </div>
                       
-                      <div className="space-y-3">
-                        {marketingScripts.facebookPixel.enabled && marketingScripts.facebookPixel.pixelId && (
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-blue-600">Facebook Pixel - Evento de Lead:</Label>
-                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
-                              <code>{`// Adicione este código no evento de submit do formulário
+                       <div className="space-y-3">
+                         {/* Facebook Pixel Script - sempre mostra */}
+                         <div className="space-y-2">
+                           <Label className="text-sm font-semibold text-blue-600">
+                             Facebook Pixel - Evento de Lead:
+                             {!marketingScripts.facebookPixel.enabled && (
+                               <Badge variant="outline" className="ml-2 text-xs">Pixel desabilitado</Badge>
+                             )}
+                           </Label>
+                           <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                             <code>{`// Adicione este código no evento de submit do formulário
 document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
-  fbq('track', 'Lead', {
-    content_name: '${form.formId}',
-    campaign_name: '${form.campaign || form.formName}',
-    form_id: '${form.formId}',
-    source: 'website'
-  });
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'Lead', {
+      content_name: '${form.formId}',
+      campaign_name: '${form.campaign || form.formName}',
+      form_id: '${form.formId}',
+      source: 'website'
+    });
+  }
 });`}</code>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {marketingScripts.googleAnalytics.enabled && marketingScripts.googleAnalytics.measurementId && (
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-green-600">Google Analytics - Evento de Conversão:</Label>
-                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
-                              <code>{`// Adicione este código no evento de submit do formulário
+                           </div>
+                         </div>
+                         
+                         {/* Google Analytics Script - sempre mostra */}
+                         <div className="space-y-2">
+                           <Label className="text-sm font-semibold text-green-600">
+                             Google Analytics - Evento de Conversão:
+                             {!marketingScripts.googleAnalytics.enabled && (
+                               <Badge variant="outline" className="ml-2 text-xs">GA desabilitado</Badge>
+                             )}
+                           </Label>
+                           <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                             <code>{`// Adicione este código no evento de submit do formulário
 document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
-  gtag('event', 'conversion', {
-    event_category: 'lead_generation',
-    event_label: '${form.formId}',
-    campaign_name: '${form.campaign || form.formName}',
-    form_id: '${form.formId}',
-    value: 1
-  });
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'conversion', {
+      event_category: 'lead_generation',
+      event_label: '${form.formId}',
+      campaign_name: '${form.campaign || form.formName}',
+      form_id: '${form.formId}',
+      value: 1
+    });
+  }
 });`}</code>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {marketingScripts.googleTagManager.enabled && marketingScripts.googleTagManager.containerId && (
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-purple-600">Google Tag Manager - DataLayer Push:</Label>
-                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
-                              <code>{`// Adicione este código no evento de submit do formulário
+                           </div>
+                         </div>
+                         
+                         {/* Google Tag Manager Script - sempre mostra */}
+                         <div className="space-y-2">
+                           <Label className="text-sm font-semibold text-purple-600">
+                             Google Tag Manager - DataLayer Push:
+                             {!marketingScripts.googleTagManager.enabled && (
+                               <Badge variant="outline" className="ml-2 text-xs">GTM desabilitado</Badge>
+                             )}
+                           </Label>
+                           <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                             <code>{`// Adicione este código no evento de submit do formulário
 document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
-  dataLayer.push({
-    'event': 'form_submission',
-    'form_id': '${form.formId}',
-    'form_name': '${form.formName}',
-    'campaign_name': '${form.campaign || form.formName}',
-    'conversion_value': 1
-  });
+  if (typeof dataLayer !== 'undefined') {
+    dataLayer.push({
+      'event': 'form_submission',
+      'form_id': '${form.formId}',
+      'form_name': '${form.formName}',
+      'campaign_name': '${form.campaign || form.formName}',
+      'conversion_value': 1
+    });
+  }
 });`}</code>
-                            </div>
-                          </div>
-                        )}
+                           </div>
+                         </div>
                       </div>
                     </div>
                   ))}
