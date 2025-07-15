@@ -202,8 +202,20 @@ export function LinkTreeManagement() {
       };
 
       await saveLinkTree(dataToSave);
+      await loadLinkTree(); // Recarregar dados após salvar
+      
+      toast({
+        title: "Configurações salvas!",
+        description: "Todas as configurações do Link Tree foram salvas com sucesso.",
+        variant: "default"
+      });
     } catch (error) {
       console.error('Erro ao salvar Link Tree:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -635,6 +647,12 @@ export function LinkTreeManagement() {
                       rows={4}
                     />
                   </div>
+
+                  <div className="pt-4 border-t">
+                    <Button onClick={handleSaveLinkTree} className="w-full">
+                      Salvar Configurações de Design
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -839,6 +857,12 @@ export function LinkTreeManagement() {
                       </div>
                     </div>
                   )}
+
+                  <div className="pt-4 border-t">
+                    <Button onClick={handleSaveLinkTree} className="w-full">
+                      Salvar Configurações do Rodapé
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
