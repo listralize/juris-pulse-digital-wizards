@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import Home from './pages/Home';
+import Index from './pages/Index';
 import About from './pages/About';
 import Services from './pages/Services';
 import Areas from './pages/Areas';
@@ -12,24 +13,25 @@ import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from 'sonner';
-import { QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useAnalytics } from './hooks/useAnalytics';
 
-const App = () => {
+const queryClient = new QueryClient();
 
+const App = () => {
   useAnalytics();
 
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
           <ThemeProvider>
             <Toaster position="top-right" />
             
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/quem-somos" element={<About />} />
               <Route path="/servicos" element={<Services />} />
               <Route path="/areas/:slug" element={<Areas />} />
@@ -45,7 +47,7 @@ const App = () => {
           </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
-    </QueryClient>
+    </QueryClientProvider>
   );
 };
 
