@@ -53,8 +53,11 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   useEffect(() => {
     if (analyticsData) {
       if (selectedForm === 'all') {
-        setFormSubmissions(analyticsData.conversions?.total || 0);
+        // Somar todas as conversões de todos os formulários
+        const totalSubmissions = analyticsData.formSubmissions?.reduce((sum: number, form: any) => sum + form.count, 0) || 0;
+        setFormSubmissions(totalSubmissions);
       } else {
+        // Filtrar pelo formulário específico selecionado
         const formData = analyticsData.formSubmissions?.find((fs: any) => fs.formId === selectedForm);
         setFormSubmissions(formData?.count || 0);
       }
@@ -137,7 +140,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'} text-center text-2xl`}>
-            📊 Funil de Conversão (Últimos 7 dias)
+            📊 Funil de Conversão - {availableForms.find(f => f.id === selectedForm)?.name || 'Carregando...'}
           </CardTitle>
         </CardHeader>
         <CardContent>
