@@ -56,29 +56,21 @@ export const useLinkTree = () => {
 
   const saveLinkTree = async (data: Omit<LinkTree, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      if (linkTree?.id) {
+      if (linkTree) {
         // Atualizar existente
-        const { error, data: updatedData } = await supabase
+        const { error } = await supabase
           .from('link_tree')
           .update(data)
-          .eq('id', linkTree.id)
-          .select()
-          .single();
+          .eq('id', linkTree.id);
 
         if (error) throw error;
         
-        setLinkTree(updatedData as LinkTree);
+        setLinkTree({ ...linkTree, ...data });
       } else {
-        // Primeiro, desativar qualquer link tree ativo existente
-        await supabase
-          .from('link_tree')
-          .update({ is_active: false })
-          .eq('is_active', true);
-
-        // Criar novo como ativo
+        // Criar novo
         const { data: newLinkTree, error } = await supabase
           .from('link_tree')
-          .insert([{ ...data, is_active: true }])
+          .insert([data])
           .select()
           .single();
 
