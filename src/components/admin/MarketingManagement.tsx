@@ -378,6 +378,8 @@ export const MarketingManagement: React.FC = () => {
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
+      console.log('🔄 Iniciando salvamento das configurações de marketing...');
+      
       const configData = {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
         facebook_pixel_id: marketingScripts.facebookPixel.pixelId,
@@ -390,19 +392,52 @@ export const MarketingManagement: React.FC = () => {
         custom_head_scripts: marketingScripts.customScripts.head,
         custom_body_scripts: marketingScripts.customScripts.body,
         form_tracking_config: JSON.stringify(conversionTracking),
+        event_tracking_config: {
+          formSubmission: conversionTracking.events.formSubmission,
+          buttonClick: conversionTracking.events.buttonClick,
+          linkClick: conversionTracking.events.linkClick,
+          pageView: true,
+          conversion: true
+        },
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      console.log('📝 Dados a serem salvos:', configData);
+
+      // Primeiro, tentar buscar configuração existente
+      const { data: existingConfig } = await supabase
         .from('marketing_settings')
-        .upsert(configData);
+        .select('id')
+        .maybeSingle();
 
-      if (error) throw error;
+      let result;
+      if (existingConfig) {
+        // Atualizar configuração existente
+        console.log('🔄 Atualizando configuração existente com ID:', existingConfig.id);
+        result = await supabase
+          .from('marketing_settings')
+          .update(configData)
+          .eq('id', existingConfig.id);
+      } else {
+        // Criar nova configuração
+        console.log('➕ Criando nova configuração');
+        result = await supabase
+          .from('marketing_settings')
+          .insert(configData);
+      }
 
+      const { error } = result;
+
+      if (error) {
+        console.error('❌ Erro no Supabase:', error);
+        throw error;
+      }
+
+      console.log('✅ Configurações salvas com sucesso!');
       setLastSaved(new Date());
       toast.success('Configurações de marketing salvas com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('❌ Erro ao salvar configurações:', error);
       toast.error('Erro ao salvar configurações de marketing');
     } finally {
       setIsLoading(false);
