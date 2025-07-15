@@ -19,6 +19,7 @@ interface MarketingScripts {
     enabled: boolean;
     pixelId: string;
     customCode: string;
+    conversionApiToken: string;
   };
   googleAnalytics: {
     enabled: boolean;
@@ -93,7 +94,8 @@ export const MarketingManagement: React.FC = () => {
     facebookPixel: {
       enabled: false,
       pixelId: '',
-      customCode: ''
+      customCode: '',
+      conversionApiToken: ''
     },
     googleAnalytics: {
       enabled: false,
@@ -343,7 +345,8 @@ export const MarketingManagement: React.FC = () => {
           facebookPixel: {
             enabled: settings.facebook_pixel_enabled || false,
             pixelId: settings.facebook_pixel_id || '',
-            customCode: settings.facebook_custom_code || ''
+            customCode: settings.facebook_custom_code || '',
+            conversionApiToken: settings.facebook_conversion_api_token || ''
           },
           googleAnalytics: {
             enabled: settings.google_analytics_enabled || false,
@@ -384,6 +387,7 @@ export const MarketingManagement: React.FC = () => {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
         facebook_pixel_id: marketingScripts.facebookPixel.pixelId,
         facebook_custom_code: marketingScripts.facebookPixel.customCode,
+        facebook_conversion_api_token: marketingScripts.facebookPixel.conversionApiToken,
         google_analytics_enabled: marketingScripts.googleAnalytics.enabled,
         google_analytics_id: marketingScripts.googleAnalytics.measurementId,
         google_analytics_custom_code: marketingScripts.googleAnalytics.customCode,

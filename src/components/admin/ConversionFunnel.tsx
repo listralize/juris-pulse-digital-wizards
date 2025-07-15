@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
-import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator, Save } from 'lucide-react';
+import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator, Save, AlertTriangle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ConversionFunnelProps {
@@ -26,9 +26,26 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const [adSpend, setAdSpend] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
   const [campaignName, setCampaignName] = useState<string>('');
-  const [facebookPixelId, setFacebookPixelId] = useState<string>('');
-  const [conversionApiToken, setConversionApiToken] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [marketingConfig, setMarketingConfig] = useState<any>(null);
+
+  // Carregar configurações de marketing
+  useEffect(() => {
+    const loadMarketingConfig = async () => {
+      try {
+        const { data: settings } = await supabase
+          .from('marketing_settings')
+          .select('*')
+          .maybeSingle();
+        
+        setMarketingConfig(settings);
+      } catch (error) {
+        console.error('❌ Erro ao carregar configurações de marketing:', error);
+      }
+    };
+
+    loadMarketingConfig();
+  }, []);
 
   // Carregar formulários disponíveis com nomes corretos
   useEffect(() => {
@@ -170,8 +187,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
         ticket_medio: Number(ticketMedio.toFixed(2)),
         lucro_liquido: Number(lucroLiquido.toFixed(2)),
         facebook_pixel_config: {
-          pixel_id: facebookPixelId,
-          conversion_api_token: conversionApiToken
+          pixel_id: marketingConfig?.facebook_pixel_id || '',
+          conversion_api_token: marketingConfig?.facebook_conversion_api_token || ''
         },
         period_start: new Date().toISOString().split('T')[0],
         period_end: new Date().toISOString().split('T')[0]
@@ -185,8 +202,6 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
 
       toast.success('Relatório de campanha salvo com sucesso!');
       setCampaignName('');
-      setFacebookPixelId('');
-      setConversionApiToken('');
     } catch (error) {
       console.error('Erro ao salvar relatório:', error);
       toast.error('Erro ao salvar relatório de campanha');
@@ -259,7 +274,19 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
           {/* Seção de Configuração de Campanha */}
           <div className="border-t border-white/20 pt-6 mt-6">
             <h4 className="text-lg font-semibold text-white mb-4">📊 Configuração da Campanha</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {!marketingConfig?.facebook_pixel_id && (
+              <div className="mb-6 p-4 backdrop-blur-sm bg-amber-500/20 border border-amber-400/30 rounded-xl">
+                <div className="flex items-center gap-2 text-amber-100">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    Configure o Facebook Pixel ID na aba "Scripts de Marketing e Rastreamento" para ativar o rastreamento de conversões.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-6">
               <div className="space-y-2">
                 <Label className="text-white/90 font-medium">Nome da Campanha</Label>
                 <Input
@@ -271,34 +298,34 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label className="text-white/90 font-medium">Facebook Pixel ID</Label>
-                <Input
-                  type="text"
-                  value={facebookPixelId}
-                  onChange={(e) => setFacebookPixelId(e.target.value)}
-                  className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
-                  placeholder="Ex: 123456789012345"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-white/90 font-medium">Token API de Conversão</Label>
-                <Input
-                  type="text"
-                  value={conversionApiToken}
-                  onChange={(e) => setConversionApiToken(e.target.value)}
-                  className="backdrop-blur-sm bg-white/5 border-white/20 text-white h-12 rounded-xl placeholder:text-white/50"
-                  placeholder="Token da API de Conversão do Facebook"
-                />
-              </div>
+              {marketingConfig?.facebook_pixel_id && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 backdrop-blur-sm bg-green-500/10 border border-green-400/20 rounded-xl">
+                  <div className="space-y-1">
+                    <Label className="text-green-100 text-sm">Facebook Pixel ID Configurado</Label>
+                    <div className="text-green-100 font-mono text-sm bg-green-500/20 p-2 rounded">
+                      {marketingConfig.facebook_pixel_id}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-green-100 text-sm">API de Conversão</Label>
+                    <div className="text-green-100 text-sm">
+                      {marketingConfig.facebook_conversion_api_token ? 
+                        <span className="flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" /> Configurado
+                        </span> : 
+                        <span className="text-amber-200">Não configurado</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="flex justify-end mt-6">
               <Button 
                 onClick={saveCampaignReport}
-                disabled={isLoading}
-                className="backdrop-blur-sm bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300"
+                disabled={isLoading || !campaignName.trim()}
+                className="backdrop-blur-sm bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {isLoading ? 'Salvando...' : 'Salvar Relatório'}
