@@ -13,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { ConversionFunnel } from './ConversionFunnel';
 import { CampaignReports } from './CampaignReports';
-
 interface MarketingScripts {
   facebookPixel: {
     enabled: boolean;
@@ -35,7 +34,6 @@ interface MarketingScripts {
     body: string;
   };
 }
-
 interface FormTrackingConfig {
   formId: string;
   formName: string;
@@ -44,18 +42,21 @@ interface FormTrackingConfig {
   enabled: boolean;
   campaign?: string;
 }
-
 interface ConversionTracking {
   systemForms: FormTrackingConfig[];
   linkTreeForms: string[];
-  customForms: Array<{ name: string; id: string; campaign: string; submitButtonId: string; }>;
+  customForms: Array<{
+    name: string;
+    id: string;
+    campaign: string;
+    submitButtonId: string;
+  }>;
   events: {
     formSubmission: boolean;
     buttonClick: boolean;
     linkClick: boolean;
   };
 }
-
 interface AnalyticsData {
   visitors: {
     total: number;
@@ -71,10 +72,22 @@ interface AnalyticsData {
     conversionRate: number;
     growth: number;
   };
-  topPages: Array<{ page: string; views: number; }>;
-  formSubmissions: Array<{ formId: string; count: number; }>;
-  geographicData: Array<{ location: string; count: number; }>;
-  deviceData: Array<{ device: string; count: number; }>;
+  topPages: Array<{
+    page: string;
+    views: number;
+  }>;
+  formSubmissions: Array<{
+    formId: string;
+    count: number;
+  }>;
+  geographicData: Array<{
+    location: string;
+    count: number;
+  }>;
+  deviceData: Array<{
+    device: string;
+    count: number;
+  }>;
   funnelData: {
     visitors: number;
     engagedUsers: number;
@@ -82,14 +95,15 @@ interface AnalyticsData {
     conversions: number;
   };
 }
-
 export const MarketingManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('scripts');
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const { multipleFormsConfig, refreshConfig } = useFormConfig();
-  
+  const {
+    multipleFormsConfig,
+    refreshConfig
+  } = useFormConfig();
   const [marketingScripts, setMarketingScripts] = useState<MarketingScripts>({
     facebookPixel: {
       enabled: false,
@@ -111,7 +125,6 @@ export const MarketingManagement: React.FC = () => {
       body: ''
     }
   });
-
   const [conversionTracking, setConversionTracking] = useState<ConversionTracking>({
     systemForms: [],
     linkTreeForms: [],
@@ -127,21 +140,17 @@ export const MarketingManagement: React.FC = () => {
   const forceReloadFromDatabase = async () => {
     try {
       console.log('🔄 Forçando reload dos dados do banco...');
-      
-      const { data: settings, error } = await supabase
-        .from('marketing_settings')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      const {
+        data: settings,
+        error
+      } = await supabase.from('marketing_settings').select('*').order('created_at', {
+        ascending: false
+      }).limit(1).maybeSingle();
       if (error) {
         console.error('❌ Erro ao recarregar:', error);
         return;
       }
-
       console.log('📋 Dados recarregados do banco:', settings);
-
       if (settings) {
         // Atualizar scripts com dados do banco
         const newScripts = {
@@ -165,7 +174,6 @@ export const MarketingManagement: React.FC = () => {
             body: settings.custom_body_scripts || ''
           }
         };
-
         console.log('📝 Atualizando interface com:', newScripts);
         setMarketingScripts(newScripts);
 
@@ -178,15 +186,14 @@ export const MarketingManagement: React.FC = () => {
             } else {
               trackingConfig = settings.form_tracking_config;
             }
-            
             setConversionTracking({
               systemForms: trackingConfig.systemForms || [],
               linkTreeForms: trackingConfig.linkTreeForms || [],
               customForms: trackingConfig.customForms || [],
-              events: trackingConfig.events || { 
-                formSubmission: true, 
-                buttonClick: false, 
-                linkClick: false 
+              events: trackingConfig.events || {
+                formSubmission: true,
+                buttonClick: false,
+                linkClick: false
               }
             });
           } catch (parseError) {
@@ -196,7 +203,6 @@ export const MarketingManagement: React.FC = () => {
 
         // Implementar os scripts no site
         implementMarketingScripts(newScripts);
-        
         toast.success('Dados sincronizados com o banco!');
       } else {
         console.log('ℹ️ Nenhum dado encontrado no banco');
@@ -233,10 +239,8 @@ export const MarketingManagement: React.FC = () => {
     if (scripts.customScripts.head || scripts.customScripts.body) {
       implementCustomScripts(scripts.customScripts);
     }
-
     console.log('✅ Scripts implementados com sucesso!');
   };
-
   const removeExistingScripts = () => {
     // Remover scripts existentes do Facebook Pixel
     const existingFbScripts = document.querySelectorAll('script[data-marketing="facebook-pixel"]');
@@ -254,10 +258,8 @@ export const MarketingManagement: React.FC = () => {
     const existingCustomScripts = document.querySelectorAll('script[data-marketing="custom"]');
     existingCustomScripts.forEach(script => script.remove());
   };
-
   const implementFacebookPixel = (config: any) => {
     console.log('📘 Implementando Facebook Pixel:', config.pixelId);
-
     const fbPixelScript = document.createElement('script');
     fbPixelScript.setAttribute('data-marketing', 'facebook-pixel');
     fbPixelScript.innerHTML = `
@@ -280,7 +282,6 @@ export const MarketingManagement: React.FC = () => {
     noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${config.pixelId}&ev=PageView&noscript=1" />`;
     document.head.appendChild(noscript);
   };
-
   const implementGoogleAnalytics = (config: any) => {
     console.log('📊 Implementando Google Analytics:', config.measurementId);
 
@@ -303,7 +304,6 @@ export const MarketingManagement: React.FC = () => {
     `;
     document.head.appendChild(configScript);
   };
-
   const implementGoogleTagManager = (config: any) => {
     console.log('🏷️ Implementando Google Tag Manager:', config.containerId);
 
@@ -324,17 +324,14 @@ export const MarketingManagement: React.FC = () => {
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${config.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
     document.body.appendChild(noscript);
   };
-
   const implementCustomScripts = (config: any) => {
     console.log('🔧 Implementando scripts customizados');
-
     if (config.head) {
       const headScript = document.createElement('div');
       headScript.setAttribute('data-marketing', 'custom');
       headScript.innerHTML = config.head;
       document.head.appendChild(headScript);
     }
-
     if (config.body) {
       const bodyScript = document.createElement('div');
       bodyScript.setAttribute('data-marketing', 'custom');
@@ -342,20 +339,17 @@ export const MarketingManagement: React.FC = () => {
       document.body.appendChild(bodyScript);
     }
   };
-
   useEffect(() => {
     // Carregar dados iniciais e forçar sincronização
     forceReloadFromDatabase();
     loadAnalyticsData();
     loadLinkTreeForms();
   }, []);
-
   useEffect(() => {
     if (multipleFormsConfig?.forms) {
       loadSystemForms();
     }
   }, [multipleFormsConfig]);
-
   const loadSystemForms = () => {
     if (multipleFormsConfig?.forms) {
       // Preservar configurações existentes ou criar novas
@@ -363,7 +357,6 @@ export const MarketingManagement: React.FC = () => {
         acc[config.formId] = config;
         return acc;
       }, {} as Record<string, FormTrackingConfig>);
-
       const systemForms: FormTrackingConfig[] = multipleFormsConfig.forms.map(form => {
         const existing = existingConfigs[form.id || ''];
         return {
@@ -371,31 +364,24 @@ export const MarketingManagement: React.FC = () => {
           formName: form.name || 'Formulário sem nome',
           submitButtonId: existing?.submitButtonId || `submit-${form.id}`,
           webhookUrl: form.webhookUrl,
-          enabled: existing?.enabled ?? false, // Por padrão desabilitado
+          enabled: existing?.enabled ?? false,
+          // Por padrão desabilitado
           campaign: existing?.campaign || ''
         };
       });
-
       setConversionTracking(prev => ({
         ...prev,
         systemForms
       }));
     }
   };
-
   const loadLinkTreeForms = async () => {
     try {
-      const { data: linkTreeItems } = await supabase
-        .from('link_tree_items')
-        .select('form_id, title')
-        .eq('item_type', 'form')
-        .not('form_id', 'is', null);
-
+      const {
+        data: linkTreeItems
+      } = await supabase.from('link_tree_items').select('form_id, title').eq('item_type', 'form').not('form_id', 'is', null);
       if (linkTreeItems) {
-        const linkTreeFormIds = linkTreeItems
-          .map(item => item.form_id)
-          .filter(id => id !== null);
-
+        const linkTreeFormIds = linkTreeItems.map(item => item.form_id).filter(id => id !== null);
         setConversionTracking(prev => ({
           ...prev,
           linkTreeForms: linkTreeFormIds
@@ -405,7 +391,6 @@ export const MarketingManagement: React.FC = () => {
       console.error('Erro ao carregar formulários do LinkTree:', error);
     }
   };
-
   const loadAnalyticsData = async () => {
     console.log('🔄 Iniciando carregamento dos dados de analytics...');
     setIsLoading(true);
@@ -415,35 +400,33 @@ export const MarketingManagement: React.FC = () => {
       const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
       // Carregar dados de visitantes
-      const { data: visitorsData } = await supabase
-        .from('website_analytics')
-        .select('session_id, timestamp, page_url, page_title, device_type, browser')
-        .gte('timestamp', oneWeekAgo.toISOString());
+      const {
+        data: visitorsData
+      } = await supabase.from('website_analytics').select('session_id, timestamp, page_url, page_title, device_type, browser').gte('timestamp', oneWeekAgo.toISOString());
 
       // Carregar dados de conversões detalhadas
-      const { data: conversionsData } = await supabase
-        .from('conversion_events')
-        .select('*')
-        .gte('timestamp', oneWeekAgo.toISOString());
-
+      const {
+        data: conversionsData
+      } = await supabase.from('conversion_events').select('*').gte('timestamp', oneWeekAgo.toISOString());
       if (visitorsData && conversionsData) {
-        console.log('📊 Dados brutos carregados:', { visitorsCount: visitorsData.length, conversionsCount: conversionsData.length });
-        
+        console.log('📊 Dados brutos carregados:', {
+          visitorsCount: visitorsData.length,
+          conversionsCount: conversionsData.length
+        });
+
         // Calcular visitantes únicos
         const uniqueSessionIds = new Set(visitorsData.map(v => v.session_id));
         const uniqueVisitors = uniqueSessionIds.size;
-        
+
         // Calcular visitantes de hoje, ontem e esta semana
         const todayVisitors = visitorsData.filter(v => {
           const visitDate = new Date(v.timestamp).toDateString();
           return visitDate === today.toDateString();
         }).length;
-
         const yesterdayVisitors = visitorsData.filter(v => {
           const visitDate = new Date(v.timestamp).toDateString();
           return visitDate === yesterday.toDateString();
         }).length;
-
         const thisWeekVisitors = visitorsData.length; // Todos os visitantes da última semana
 
         // Calcular conversões de hoje, ontem e esta semana
@@ -451,12 +434,10 @@ export const MarketingManagement: React.FC = () => {
           const convDate = new Date(c.timestamp).toDateString();
           return convDate === today.toDateString();
         }).length;
-
         const yesterdayConversions = conversionsData.filter(c => {
           const convDate = new Date(c.timestamp).toDateString();
           return convDate === yesterday.toDateString();
         }).length;
-
         const thisWeekConversions = conversionsData.length;
 
         // Páginas mais visitadas
@@ -465,11 +446,10 @@ export const MarketingManagement: React.FC = () => {
           acc[page] = (acc[page] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
-
-        const topPages = Object.entries(pageViewsMap)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 10)
-          .map(([page, views]) => ({ page, views }));
+        const topPages = Object.entries(pageViewsMap).sort(([, a], [, b]) => b - a).slice(0, 10).map(([page, views]) => ({
+          page,
+          views
+        }));
 
         // Submissões por formulário
         const formSubmissionsMap = conversionsData.reduce((acc, conversion) => {
@@ -477,12 +457,14 @@ export const MarketingManagement: React.FC = () => {
           acc[formId] = (acc[formId] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
-
-        const formStats = Object.entries(formSubmissionsMap)
-          .sort(([,a], [,b]) => b - a)
-          .map(([formId, count]) => ({ formId, count }));
-
-        const topLocations: Array<{ location: string; count: number; }> = [];
+        const formStats = Object.entries(formSubmissionsMap).sort(([, a], [, b]) => b - a).map(([formId, count]) => ({
+          formId,
+          count
+        }));
+        const topLocations: Array<{
+          location: string;
+          count: number;
+        }> = [];
 
         // Dados de dispositivos
         const deviceMap = visitorsData.reduce((acc, visit) => {
@@ -490,29 +472,23 @@ export const MarketingManagement: React.FC = () => {
           acc[device] = (acc[device] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
-
-        const deviceStats = Object.entries(deviceMap)
-          .sort(([,a], [,b]) => b - a)
-          .map(([device, count]) => ({ device, count }));
+        const deviceStats = Object.entries(deviceMap).sort(([, a], [, b]) => b - a).map(([device, count]) => ({
+          device,
+          count
+        }));
 
         // Taxa de conversão
-        const conversionRate = uniqueVisitors > 0 ? (thisWeekConversions / uniqueVisitors * 100) : 0;
+        const conversionRate = uniqueVisitors > 0 ? thisWeekConversions / uniqueVisitors * 100 : 0;
 
         // Cálculo de crescimento (hoje vs ontem)
-        const visitorsGrowth = yesterdayVisitors > 0 ? 
-          ((todayVisitors - yesterdayVisitors) / yesterdayVisitors * 100) : 
-          (todayVisitors > 0 ? 100 : 0);
-        
-        const conversionsGrowth = yesterdayConversions > 0 ? 
-          ((todayConversions - yesterdayConversions) / yesterdayConversions * 100) : 
-          (todayConversions > 0 ? 100 : 0);
+        const visitorsGrowth = yesterdayVisitors > 0 ? (todayVisitors - yesterdayVisitors) / yesterdayVisitors * 100 : todayVisitors > 0 ? 100 : 0;
+        const conversionsGrowth = yesterdayConversions > 0 ? (todayConversions - yesterdayConversions) / yesterdayConversions * 100 : todayConversions > 0 ? 100 : 0;
 
         // Funil de conversão realista
         const totalUniqueVisitors = uniqueVisitors;
         const engagedUsers = Math.floor(totalUniqueVisitors * 0.6);
         const qualifiedLeads = Math.floor(totalUniqueVisitors * 0.25);
         const actualConversions = thisWeekConversions;
-
         const newAnalyticsData = {
           visitors: {
             total: thisWeekVisitors,
@@ -539,7 +515,6 @@ export const MarketingManagement: React.FC = () => {
             conversions: actualConversions
           }
         };
-
         console.log('📈 Analytics calculados:', newAnalyticsData);
         setAnalyticsData(newAnalyticsData);
       }
@@ -550,12 +525,10 @@ export const MarketingManagement: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
       console.log('💾 Salvando configurações de marketing...');
-      
       const configData = {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
         facebook_pixel_id: marketingScripts.facebookPixel.pixelId,
@@ -578,53 +551,41 @@ export const MarketingManagement: React.FC = () => {
         },
         updated_at: new Date().toISOString()
       };
-
       console.log('📤 Dados a serem salvos:', configData);
 
       // Verificar configuração existente
-      const { data: existingConfig } = await supabase
-        .from('marketing_settings')
-        .select('id')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      const {
+        data: existingConfig
+      } = await supabase.from('marketing_settings').select('id').order('created_at', {
+        ascending: false
+      }).limit(1).maybeSingle();
       let result;
       if (existingConfig) {
         console.log('🔄 Atualizando configuração existente...');
-        result = await supabase
-          .from('marketing_settings')
-          .update(configData)
-          .eq('id', existingConfig.id)
-          .select();
+        result = await supabase.from('marketing_settings').update(configData).eq('id', existingConfig.id).select();
       } else {
         console.log('➕ Criando nova configuração...');
-        result = await supabase
-          .from('marketing_settings')
-          .insert([configData])
-          .select();
+        result = await supabase.from('marketing_settings').insert([configData]).select();
       }
-
-      const { data: savedData, error } = result;
-
+      const {
+        data: savedData,
+        error
+      } = result;
       if (error) {
         console.error('❌ Erro ao salvar:', error);
         throw error;
       }
-
       console.log('✅ Configurações salvas:', savedData);
       setLastSaved(new Date());
 
       // Implementar scripts imediatamente após salvar
       implementMarketingScripts(marketingScripts);
-      
       toast.success('Configurações salvas e implementadas no site!');
-      
+
       // Aguardar e recarregar para confirmar persistência
       setTimeout(() => {
         forceReloadFromDatabase();
       }, 1000);
-      
     } catch (error) {
       console.error('❌ Erro ao salvar:', error);
       toast.error(`Erro ao salvar: ${error.message}`);
@@ -632,42 +593,43 @@ export const MarketingManagement: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   const updateSystemForm = (index: number, field: keyof FormTrackingConfig, value: any) => {
     console.log('✏️ Atualizando formulário:', index, field, value);
     setConversionTracking(prev => ({
       ...prev,
-      systemForms: prev.systemForms.map((form, i) => 
-        i === index ? { ...form, [field]: value } : form
-      )
+      systemForms: prev.systemForms.map((form, i) => i === index ? {
+        ...form,
+        [field]: value
+      } : form)
     }));
   };
-
   const addCustomForm = () => {
     setConversionTracking(prev => ({
       ...prev,
-      customForms: [...prev.customForms, { name: '', id: '', campaign: '', submitButtonId: '' }]
+      customForms: [...prev.customForms, {
+        name: '',
+        id: '',
+        campaign: '',
+        submitButtonId: ''
+      }]
     }));
   };
-
   const updateCustomForm = (index: number, field: string, value: string) => {
     setConversionTracking(prev => ({
       ...prev,
-      customForms: prev.customForms.map((form, i) => 
-        i === index ? { ...form, [field]: value } : form
-      )
+      customForms: prev.customForms.map((form, i) => i === index ? {
+        ...form,
+        [field]: value
+      } : form)
     }));
   };
-
   const removeCustomForm = (index: number) => {
     setConversionTracking(prev => ({
       ...prev,
       customForms: prev.customForms.filter((_, i) => i !== index)
     }));
   };
-
-  return (
-    <div className="container mx-auto p-6 space-y-6">
+  return <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Marketing & Analytics</h1>
@@ -681,11 +643,9 @@ export const MarketingManagement: React.FC = () => {
             <RefreshCw className="w-4 h-4 mr-2" />
             Sincronizar
           </Button>
-          {lastSaved && (
-            <div className="text-sm text-muted-foreground">
+          {lastSaved && <div className="text-sm text-muted-foreground">
               Última atualização: {lastSaved.toLocaleTimeString()}
-            </div>
-          )}
+            </div>}
           <Button onClick={saveMarketingConfig} disabled={isLoading}>
             <Save className="w-4 h-4 mr-2" />
             {isLoading ? 'Salvando...' : 'Salvar e Implementar'}
@@ -738,45 +698,37 @@ export const MarketingManagement: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="facebook-enabled"
-                  checked={marketingScripts.facebookPixel.enabled}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    facebookPixel: { ...prev.facebookPixel, enabled: e.target.checked }
-                  }))}
-                  className="rounded"
-                />
+                <input type="checkbox" id="facebook-enabled" checked={marketingScripts.facebookPixel.enabled} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                facebookPixel: {
+                  ...prev.facebookPixel,
+                  enabled: e.target.checked
+                }
+              }))} className="rounded" />
                 <Label htmlFor="facebook-enabled">Ativar Facebook Pixel</Label>
               </div>
               
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="facebook-pixel-id">Facebook Pixel ID</Label>
-                  <Input
-                    id="facebook-pixel-id"
-                    placeholder="123456789012345"
-                    value={marketingScripts.facebookPixel.pixelId}
-                    onChange={(e) => setMarketingScripts(prev => ({
-                      ...prev,
-                      facebookPixel: { ...prev.facebookPixel, pixelId: e.target.value }
-                    }))}
-                  />
+                  <Input id="facebook-pixel-id" placeholder="123456789012345" value={marketingScripts.facebookPixel.pixelId} onChange={e => setMarketingScripts(prev => ({
+                  ...prev,
+                  facebookPixel: {
+                    ...prev.facebookPixel,
+                    pixelId: e.target.value
+                  }
+                }))} />
                 </div>
                 
                 <div>
                   <Label htmlFor="facebook-conversion-api-token">Token API de Conversão</Label>
-                  <Input
-                    id="facebook-conversion-api-token"
-                    type="password"
-                    placeholder="Token da API de Conversão do Facebook"
-                    value={marketingScripts.facebookPixel.conversionApiToken}
-                    onChange={(e) => setMarketingScripts(prev => ({
-                      ...prev,
-                      facebookPixel: { ...prev.facebookPixel, conversionApiToken: e.target.value }
-                    }))}
-                  />
+                  <Input id="facebook-conversion-api-token" type="password" placeholder="Token da API de Conversão do Facebook" value={marketingScripts.facebookPixel.conversionApiToken} onChange={e => setMarketingScripts(prev => ({
+                  ...prev,
+                  facebookPixel: {
+                    ...prev.facebookPixel,
+                    conversionApiToken: e.target.value
+                  }
+                }))} />
                   <p className="text-xs text-muted-foreground mt-1">
                     Configure na <a href="https://business.facebook.com/events_manager2/list/pixel" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Central de Eventos do Facebook</a>
                   </p>
@@ -785,16 +737,13 @@ export const MarketingManagement: React.FC = () => {
               
               <div>
                 <Label htmlFor="facebook-custom-code">Código Personalizado (Opcional)</Label>
-                <Textarea
-                  id="facebook-custom-code"
-                  placeholder="fbq('track', 'Purchase', {value: 0.00, currency: 'USD'});"
-                  value={marketingScripts.facebookPixel.customCode}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    facebookPixel: { ...prev.facebookPixel, customCode: e.target.value }
-                  }))}
-                  rows={3}
-                />
+                <Textarea id="facebook-custom-code" placeholder="fbq('track', 'Purchase', {value: 0.00, currency: 'USD'});" value={marketingScripts.facebookPixel.customCode} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                facebookPixel: {
+                  ...prev.facebookPixel,
+                  customCode: e.target.value
+                }
+              }))} rows={3} />
               </div>
             </CardContent>
           </Card>
@@ -814,46 +763,38 @@ export const MarketingManagement: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="ga-enabled"
-                  checked={marketingScripts.googleAnalytics.enabled}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    googleAnalytics: { ...prev.googleAnalytics, enabled: e.target.checked }
-                  }))}
-                  className="rounded"
-                />
+                <input type="checkbox" id="ga-enabled" checked={marketingScripts.googleAnalytics.enabled} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                googleAnalytics: {
+                  ...prev.googleAnalytics,
+                  enabled: e.target.checked
+                }
+              }))} className="rounded" />
                 <Label htmlFor="ga-enabled">Ativar Google Analytics</Label>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="ga-measurement-id">Measurement ID</Label>
-                  <Input
-                    id="ga-measurement-id"
-                    placeholder="G-XXXXXXXXXX"
-                    value={marketingScripts.googleAnalytics.measurementId}
-                    onChange={(e) => setMarketingScripts(prev => ({
-                      ...prev,
-                      googleAnalytics: { ...prev.googleAnalytics, measurementId: e.target.value }
-                    }))}
-                  />
+                  <Input id="ga-measurement-id" placeholder="G-XXXXXXXXXX" value={marketingScripts.googleAnalytics.measurementId} onChange={e => setMarketingScripts(prev => ({
+                  ...prev,
+                  googleAnalytics: {
+                    ...prev.googleAnalytics,
+                    measurementId: e.target.value
+                  }
+                }))} />
                 </div>
               </div>
               
               <div>
                 <Label htmlFor="ga-custom-code">Código Personalizado (Opcional)</Label>
-                <Textarea
-                  id="ga-custom-code"
-                  placeholder="gtag('event', 'purchase', {transaction_id: '12345'});"
-                  value={marketingScripts.googleAnalytics.customCode}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    googleAnalytics: { ...prev.googleAnalytics, customCode: e.target.value }
-                  }))}
-                  rows={3}
-                />
+                <Textarea id="ga-custom-code" placeholder="gtag('event', 'purchase', {transaction_id: '12345'});" value={marketingScripts.googleAnalytics.customCode} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                googleAnalytics: {
+                  ...prev.googleAnalytics,
+                  customCode: e.target.value
+                }
+              }))} rows={3} />
               </div>
             </CardContent>
           </Card>
@@ -873,30 +814,25 @@ export const MarketingManagement: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="gtm-enabled"
-                  checked={marketingScripts.googleTagManager.enabled}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    googleTagManager: { ...prev.googleTagManager, enabled: e.target.checked }
-                  }))}
-                  className="rounded"
-                />
+                <input type="checkbox" id="gtm-enabled" checked={marketingScripts.googleTagManager.enabled} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                googleTagManager: {
+                  ...prev.googleTagManager,
+                  enabled: e.target.checked
+                }
+              }))} className="rounded" />
                 <Label htmlFor="gtm-enabled">Ativar Google Tag Manager</Label>
               </div>
               
               <div>
                 <Label htmlFor="gtm-container-id">Container ID</Label>
-                <Input
-                  id="gtm-container-id"
-                  placeholder="GTM-XXXXXXX"
-                  value={marketingScripts.googleTagManager.containerId}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    googleTagManager: { ...prev.googleTagManager, containerId: e.target.value }
-                  }))}
-                />
+                <Input id="gtm-container-id" placeholder="GTM-XXXXXXX" value={marketingScripts.googleTagManager.containerId} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                googleTagManager: {
+                  ...prev.googleTagManager,
+                  containerId: e.target.value
+                }
+              }))} />
               </div>
             </CardContent>
           </Card>
@@ -912,30 +848,24 @@ export const MarketingManagement: React.FC = () => {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="custom-head">Scripts no Head</Label>
-                <Textarea
-                  id="custom-head"
-                  placeholder="<script>/* Seu código aqui */</script>"
-                  value={marketingScripts.customScripts.head}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    customScripts: { ...prev.customScripts, head: e.target.value }
-                  }))}
-                  rows={5}
-                />
+                <Textarea id="custom-head" placeholder="<script>/* Seu código aqui */</script>" value={marketingScripts.customScripts.head} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                customScripts: {
+                  ...prev.customScripts,
+                  head: e.target.value
+                }
+              }))} rows={5} />
               </div>
               
               <div>
                 <Label htmlFor="custom-body">Scripts no Body</Label>
-                <Textarea
-                  id="custom-body"
-                  placeholder="<script>/* Seu código aqui */</script>"
-                  value={marketingScripts.customScripts.body}
-                  onChange={(e) => setMarketingScripts(prev => ({
-                    ...prev,
-                    customScripts: { ...prev.customScripts, body: e.target.value }
-                  }))}
-                  rows={5}
-                />
+                <Textarea id="custom-body" placeholder="<script>/* Seu código aqui */</script>" value={marketingScripts.customScripts.body} onChange={e => setMarketingScripts(prev => ({
+                ...prev,
+                customScripts: {
+                  ...prev.customScripts,
+                  body: e.target.value
+                }
+              }))} rows={5} />
               </div>
             </CardContent>
           </Card>
@@ -948,7 +878,10 @@ export const MarketingManagement: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 📝 Formulários do Sistema
-                <Button variant="outline" size="sm" onClick={() => { loadSystemForms(); refreshConfig(); }}>
+                <Button variant="outline" size="sm" onClick={() => {
+                loadSystemForms();
+                refreshConfig();
+              }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Atualizar
                 </Button>
@@ -958,90 +891,51 @@ export const MarketingManagement: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {conversionTracking.systemForms.length === 0 ? (
-                <div className="text-center p-8 text-muted-foreground">
+              {conversionTracking.systemForms.length === 0 ? <div className="text-center p-8 text-muted-foreground">
                   <p>Nenhum formulário encontrado.</p>
                   <p className="text-sm">Clique em "Atualizar" para recarregar os formulários do sistema.</p>
-                </div>
-              ) : (
-                conversionTracking.systemForms.map((form, index) => (
-                  <div 
-                    key={form.formId} 
-                    className={`border rounded-lg p-4 space-y-3 cursor-pointer transition-all ${
-                      form.enabled ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'
-                    }`}
-                    onClick={() => updateSystemForm(index, 'enabled', !form.enabled)}
-                  >
+                </div> : conversionTracking.systemForms.map((form, index) => <div key={form.formId} className={`border rounded-lg p-4 space-y-3 cursor-pointer transition-all ${form.enabled ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'}`} onClick={() => updateSystemForm(index, 'enabled', !form.enabled)}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Badge variant={form.enabled ? "default" : "outline"}>{form.formId}</Badge>
                         <span className="font-medium">{form.formName}</span>
-                        {form.enabled && (
-                          <Badge variant="secondary" className="text-xs">
+                        {form.enabled && <Badge variant="secondary" className="text-xs">
                             ✓ Rastreando
-                          </Badge>
-                        )}
+                          </Badge>}
                       </div>
                       <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id={`form-enabled-${index}`}
-                          checked={form.enabled}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            updateSystemForm(index, 'enabled', e.target.checked);
-                          }}
-                          className="rounded"
-                        />
+                        <input type="checkbox" id={`form-enabled-${index}`} checked={form.enabled} onChange={e => {
+                    e.stopPropagation();
+                    updateSystemForm(index, 'enabled', e.target.checked);
+                  }} className="rounded" />
                         <Label htmlFor={`form-enabled-${index}`}>Ativar</Label>
                       </div>
                     </div>
                     
-                    {form.enabled && (
-                      <>
+                    {form.enabled && <>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label>ID do Botão de Submit</Label>
-                            <Input
-                              value={form.submitButtonId}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                updateSystemForm(index, 'submitButtonId', e.target.value);
-                              }}
-                              placeholder="submit-button-id"
-                              onClick={(e) => e.stopPropagation()}
-                            />
+                            <Input value={form.submitButtonId} onChange={e => {
+                      e.stopPropagation();
+                      updateSystemForm(index, 'submitButtonId', e.target.value);
+                    }} placeholder="submit-button-id" onClick={e => e.stopPropagation()} />
                           </div>
                           <div>
                             <Label>Nome da Campanha</Label>
-                            <Input
-                              value={form.campaign || ''}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                updateSystemForm(index, 'campaign', e.target.value);
-                              }}
-                              placeholder="nome-da-campanha"
-                              onClick={(e) => e.stopPropagation()}
-                            />
+                            <Input value={form.campaign || ''} onChange={e => {
+                      e.stopPropagation();
+                      updateSystemForm(index, 'campaign', e.target.value);
+                    }} placeholder="nome-da-campanha" onClick={e => e.stopPropagation()} />
                           </div>
                         </div>
                         
-                        {form.webhookUrl && (
-                          <div>
+                        {form.webhookUrl && <div>
                             <Label>Webhook URL</Label>
-                            <Input
-                              value={form.webhookUrl}
-                              readOnly
-                              className="bg-muted"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))
-              )}
+                            <Input value={form.webhookUrl} readOnly className="bg-muted" onClick={e => e.stopPropagation()} />
+                          </div>}
+                      </>}
+                  </div>)}
             </CardContent>
           </Card>
 
@@ -1057,15 +951,11 @@ export const MarketingManagement: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {conversionTracking.systemForms.length === 0 ? (
-                <div className="text-center p-8 text-muted-foreground">
+              {conversionTracking.systemForms.length === 0 ? <div className="text-center p-8 text-muted-foreground">
                   <p>Nenhum formulário encontrado.</p>
                   <p className="text-sm">Clique em "Atualizar" na aba de Rastreamento para carregar os formulários.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {conversionTracking.systemForms.map((form, index) => (
-                    <div key={form.formId} className="border rounded-lg p-4">
+                </div> : <div className="space-y-4">
+                  {conversionTracking.systemForms.map((form, index) => <div key={form.formId} className="border rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="default">{form.formId}</Badge>
                         <span className="font-medium">{form.formName}</span>
@@ -1076,9 +966,7 @@ export const MarketingManagement: React.FC = () => {
                          <div className="space-y-2">
                            <Label className="text-sm font-semibold text-blue-600">
                              Facebook Pixel - Evento de Lead:
-                             {!marketingScripts.facebookPixel.enabled && (
-                               <Badge variant="outline" className="ml-2 text-xs">Pixel desabilitado</Badge>
-                             )}
+                             {!marketingScripts.facebookPixel.enabled && <Badge variant="outline" className="ml-2 text-xs">Pixel desabilitado</Badge>}
                            </Label>
                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
                              <code>{`// Adicione este código no evento de submit do formulário
@@ -1099,9 +987,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                          <div className="space-y-2">
                            <Label className="text-sm font-semibold text-green-600">
                              Google Analytics - Evento de Conversão:
-                             {!marketingScripts.googleAnalytics.enabled && (
-                               <Badge variant="outline" className="ml-2 text-xs">GA desabilitado</Badge>
-                             )}
+                             {!marketingScripts.googleAnalytics.enabled && <Badge variant="outline" className="ml-2 text-xs">GA desabilitado</Badge>}
                            </Label>
                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
                              <code>{`// Adicione este código no evento de submit do formulário
@@ -1123,9 +1009,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                          <div className="space-y-2">
                            <Label className="text-sm font-semibold text-purple-600">
                              Google Tag Manager - DataLayer Push:
-                             {!marketingScripts.googleTagManager.enabled && (
-                               <Badge variant="outline" className="ml-2 text-xs">GTM desabilitado</Badge>
-                             )}
+                             {!marketingScripts.googleTagManager.enabled && <Badge variant="outline" className="ml-2 text-xs">GTM desabilitado</Badge>}
                            </Label>
                            <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
                              <code>{`// Adicione este código no evento de submit do formulário
@@ -1143,8 +1027,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                            </div>
                          </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                   
                   {/* Instrução de Implementação */}
                   <Alert>
@@ -1155,8 +1038,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                       correspondem aos configurados acima.
                     </AlertDescription>
                   </Alert>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -1178,12 +1060,10 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Visitantes Únicos</p>
                     <p className="text-3xl font-bold">{analyticsData?.visitors.unique || 0}</p>
-                    {analyticsData?.visitors.growth !== undefined && (
-                      <p className={`text-sm flex items-center gap-1 ${analyticsData.visitors.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {analyticsData?.visitors.growth !== undefined && <p className={`text-sm flex items-center gap-1 ${analyticsData.visitors.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         <TrendingUp className="w-3 h-3" />
                         {analyticsData.visitors.growth > 0 ? '+' : ''}{analyticsData.visitors.growth.toFixed(1)}% hoje
-                      </p>
-                    )}
+                      </p>}
                   </div>
                   <Users className="h-8 w-8 text-blue-500" />
                 </div>
@@ -1196,12 +1076,10 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total de Conversões</p>
                     <p className="text-3xl font-bold">{analyticsData?.conversions.total || 0}</p>
-                    {analyticsData?.conversions.growth !== undefined && (
-                      <p className={`text-sm flex items-center gap-1 ${analyticsData.conversions.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {analyticsData?.conversions.growth !== undefined && <p className={`text-sm flex items-center gap-1 ${analyticsData.conversions.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         <TrendingUp className="w-3 h-3" />
                         {analyticsData.conversions.growth > 0 ? '+' : ''}{analyticsData.conversions.growth.toFixed(1)}% hoje
-                      </p>
-                    )}
+                      </p>}
                   </div>
                   <Target className="h-8 w-8 text-green-500" />
                 </div>
@@ -1244,59 +1122,27 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <CardDescription>Conversões por formulário (últimos 7 dias)</CardDescription>
               </CardHeader>
               <CardContent>
-                {analyticsData?.formSubmissions && analyticsData.formSubmissions.length > 0 ? (
-                  <div className="space-y-3">
-                    {analyticsData.formSubmissions.slice(0, 5).map((form, index) => (
-                      <div key={form.formId} className="flex items-center justify-between p-3 border rounded-lg">
+                {analyticsData?.formSubmissions && analyticsData.formSubmissions.length > 0 ? <div className="space-y-3">
+                    {analyticsData.formSubmissions.slice(0, 5).map((form, index) => <div key={form.formId} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
                           <Badge variant="outline">{form.formId}</Badge>
                           <span className="text-sm font-medium">
-                            {form.formId === 'default' ? 'Formulário Principal' : 
-                             conversionTracking.systemForms.find(f => f.formId === form.formId)?.formName || form.formId}
+                            {form.formId === 'default' ? 'Formulário Principal' : conversionTracking.systemForms.find(f => f.formId === form.formId)?.formName || form.formId}
                           </span>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold">{form.count}</p>
                           <p className="text-xs text-muted-foreground">conversões</p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
+                      </div>)}
+                  </div> : <div className="text-center p-8 text-muted-foreground">
                     <p>Nenhuma submissão de formulário registrada</p>
                     <p className="text-sm">Configure o rastreamento para ver dados aqui</p>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>🌍 Visitantes por Localização</CardTitle>
-                <CardDescription>Top 10 cidades (últimos 7 dias)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {analyticsData?.geographicData && analyticsData.geographicData.length > 0 ? (
-                  <div className="space-y-3">
-                    {analyticsData.geographicData.map((location, index) => (
-                      <div key={location.location} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
-                          <span className="text-sm font-medium">{location.location}</span>
-                        </div>
-                        <Badge variant="secondary">{location.count} visitantes</Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhum dado geográfico disponível</p>
-                    <p className="text-sm">Os dados aparecem conforme os visitantes chegam ao site</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1306,23 +1152,17 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <CardDescription>Últimos 7 dias</CardDescription>
               </CardHeader>
               <CardContent>
-                {analyticsData?.topPages && analyticsData.topPages.length > 0 ? (
-                  <div className="space-y-3">
-                    {analyticsData.topPages.slice(0, 8).map((page, index) => (
-                      <div key={page.page} className="flex items-center justify-between">
+                {analyticsData?.topPages && analyticsData.topPages.length > 0 ? <div className="space-y-3">
+                    {analyticsData.topPages.slice(0, 8).map((page, index) => <div key={page.page} className="flex items-center justify-between">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
                           <span className="text-sm font-medium truncate">{page.page.replace(/^https?:\/\/[^\/]+/, '') || '/'}</span>
                         </div>
                         <Badge variant="outline">{page.views} views</Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
+                      </div>)}
+                  </div> : <div className="text-center p-8 text-muted-foreground">
                     <p>Nenhuma visualização de página registrada</p>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
 
@@ -1332,73 +1172,28 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <CardDescription>Últimos 7 dias</CardDescription>
               </CardHeader>
               <CardContent>
-                {analyticsData?.deviceData && analyticsData.deviceData.length > 0 ? (
-                  <div className="space-y-3">
-                    {analyticsData.deviceData.map((device, index) => (
-                      <div key={device.device} className="flex items-center justify-between p-3 border rounded-lg">
+                {analyticsData?.deviceData && analyticsData.deviceData.length > 0 ? <div className="space-y-3">
+                    {analyticsData.deviceData.map((device, index) => <div key={device.device} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
                           <span className="font-medium capitalize">{device.device}</span>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold">{device.count}</p>
                           <p className="text-xs text-muted-foreground">
-                            {((device.count / (analyticsData?.visitors.unique || 1)) * 100).toFixed(1)}%
+                            {(device.count / (analyticsData?.visitors.unique || 1) * 100).toFixed(1)}%
                           </p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
+                      </div>)}
+                  </div> : <div className="text-center p-8 text-muted-foreground">
                     <p>Nenhum dado de dispositivo disponível</p>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
           </div>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Insights e Recomendações
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Taxa de Conversão:</strong> {analyticsData?.conversions.conversionRate.toFixed(2) || 0}% 
-                    {(analyticsData?.conversions.conversionRate || 0) < 2 ? 
-                      " - Baixa. Considere otimizar os formulários." : 
-                      " - Boa performance de conversão!"
-                    }
-                  </AlertDescription>
-                </Alert>
-                
-                <Alert>
-                  <TrendingUp className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Crescimento:</strong> 
-                    {analyticsData?.visitors.growth ? 
-                      ` ${analyticsData.visitors.growth > 0 ? '+' : ''}${analyticsData.visitors.growth.toFixed(1)}% visitantes hoje` :
-                      " Configure o analytics para ver tendências"
-                    }
-                  </AlertDescription>
-                </Alert>
-              </div>
-              
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <p className="font-semibold mb-2">💡 Próximos Passos:</p>
-                <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>• Configure rastreamento nos formulários mais importantes</li>
-                  <li>• Monitore a taxa de conversão diariamente</li>
-                  <li>• Analise o funil para identificar pontos de melhoria</li>
-                  <li>• Configure campanhas no Facebook e Google para aumentar conversões</li>
-                </ul>
-              </div>
-            </CardContent>
+            
+            
           </Card>
         </TabsContent>
 
@@ -1426,8 +1221,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
         </TabsContent>
 
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default MarketingManagement;
