@@ -24,64 +24,82 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ analyticsDat
   const [adSpend, setAdSpend] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
 
-  // Carregar formulários disponíveis dos dados de analytics
+  // Carregar formulários disponíveis com nomes corretos
   useEffect(() => {
-    if (analyticsData?.formSubmissions) {
-      console.log('📋 Carregando formulários dos dados de analytics:', analyticsData.formSubmissions);
-      
-      const formsFromAnalytics = analyticsData.formSubmissions.map((form: any) => ({
-        id: form.formId,
-        name: form.formId === 'default' ? 'Formulário Principal' : 
-              form.formId.startsWith('form_') ? `Formulário ${form.formId.slice(-4)}` : 
-              form.formId
-      }));
+    const loadFormsWithCorrectNames = async () => {
+      try {
+        // Primeiro, carregar a configuração admin para pegar os nomes corretos
+        const { data: adminData } = await supabase
+          .from('admin_settings')
+          .select('form_config')
+          .maybeSingle();
 
-      const formsWithAll = [
-        { id: 'all', name: 'Todos os Formulários' },
-        ...formsFromAnalytics
-      ];
+        console.log('📋 Carregando configuração admin:', adminData);
 
-      setAvailableForms(formsWithAll);
-      console.log('📋 Formulários configurados:', formsWithAll);
-    } else {
-      // Fallback: tentar carregar da configuração admin
-      const loadFromAdmin = async () => {
-        try {
-          const { data: adminData } = await supabase
-            .from('admin_settings')
-            .select('form_config')
-            .maybeSingle();
-
-          if (adminData?.form_config) {
-            const formConfig = adminData.form_config as any;
-            const forms = formConfig.forms || [];
-            
-            const formsWithAll = [
-              { id: 'all', name: 'Todos os Formulários' },
-              ...forms.map((form: any) => ({ 
-                id: form.id, 
-                name: form.name || `Formulário ${form.id}` 
-              }))
-            ];
-            
-            setAvailableForms(formsWithAll);
-          } else {
-            setAvailableForms([
-              { id: 'all', name: 'Todos os Formulários' },
-              { id: 'default', name: 'Formulário Principal' }
-            ]);
-          }
-        } catch (error) {
-          console.error('❌ Erro ao carregar formulários:', error);
-          setAvailableForms([
-            { id: 'all', name: 'Todos os Formulários' },
-            { id: 'default', name: 'Formulário Principal' }
-          ]);
+        let formsConfig: any[] = [];
+        if (adminData?.form_config) {
+          const formConfig = adminData.form_config as any;
+          formsConfig = formConfig.forms || [];
         }
-      };
 
-      loadFromAdmin();
-    }
+        // Agora criar a lista de formulários baseada nos dados de analytics mas com nomes da config
+        if (analyticsData?.formSubmissions) {
+          console.log('📊 Dados de analytics:', analyticsData.formSubmissions);
+          
+          const formsWithCorrectNames = analyticsData.formSubmissions.map((analyticsForm: any) => {
+            // Procurar o nome correto na configuração admin
+            const configForm = formsConfig.find((config: any) => config.id === analyticsForm.formId);
+            
+            let displayName = analyticsForm.formId;
+            if (configForm?.name) {
+              displayName = configForm.name;
+            } else if (analyticsForm.formId === 'default') {
+              displayName = 'Formulário Principal';
+            }
+
+            console.log(`📋 Formulário ${analyticsForm.formId} -> Nome: ${displayName}`);
+            
+            return {
+              id: analyticsForm.formId,
+              name: displayName,
+              count: analyticsForm.count
+            };
+          });
+
+          const formsWithAll = [
+            { id: 'all', name: 'Todos os Formulários' },
+            ...formsWithCorrectNames
+          ];
+
+          setAvailableForms(formsWithAll);
+          console.log('✅ Formulários configurados com nomes corretos:', formsWithAll);
+        } else {
+          // Se não há dados de analytics, usar apenas a configuração admin
+          const formsFromConfig = formsConfig.map((form: any) => ({
+            id: form.id,
+            name: form.name || `Formulário ${form.id}`
+          }));
+
+          const formsWithAll = [
+            { id: 'all', name: 'Todos os Formulários' },
+            { id: 'default', name: 'Formulário Principal' },
+            ...formsFromConfig
+          ];
+
+          setAvailableForms(formsWithAll);
+          console.log('📋 Usando formulários da configuração:', formsWithAll);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar formulários:', error);
+        // Fallback básico
+        setAvailableForms([
+          { id: 'all', name: 'Todos os Formulários' },
+          { id: 'default', name: 'Formulário Principal' }
+        ]);
+      }
+    };
+
+    loadFormsWithCorrectNames();
   }, [analyticsData]);
 
   // Atualizar dados do formulário selecionado
