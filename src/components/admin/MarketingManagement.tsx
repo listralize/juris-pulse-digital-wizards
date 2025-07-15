@@ -310,7 +310,7 @@ export const MarketingManagement: React.FC = () => {
       const { data: settings } = await supabase
         .from('marketing_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (settings) {
         setMarketingScripts({
