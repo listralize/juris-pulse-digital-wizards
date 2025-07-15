@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -16,11 +17,6 @@ import { cn } from '../../lib/utils';
 
 interface ConversionFunnelProps {
   analyticsData?: any;
-}
-
-interface FormSubmissionData {
-  formId: string;
-  count: number;
 }
 
 interface AvailableForm {
@@ -141,7 +137,11 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       const uniqueForms: Record<string, AvailableForm> = {};
       
       formLeads.forEach(lead => {
+        // Verificar se lead existe e tem as propriedades necessárias
+        if (!lead) return;
+        
         const formId = lead.form_id || 'default';
+        
         if (!uniqueForms[formId]) {
           let displayName = lead.form_name || formId;
           
@@ -212,10 +212,11 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
 
       console.log('📊 Leads encontrados:', formLeads);
 
-      if (formLeads && formLeads.length > 0) {
-        // Contar total de envios
-        setFormSubmissions(formLeads.length);
-        console.log('📈 Total de envios encontrados:', formLeads.length);
+      if (formLeads && Array.isArray(formLeads) && formLeads.length > 0) {
+        // Contar total de envios - verificação de segurança adicional
+        const validLeads = formLeads.filter(lead => lead && typeof lead === 'object');
+        setFormSubmissions(validLeads.length);
+        console.log('📈 Total de envios encontrados:', validLeads.length);
       } else {
         setFormSubmissions(0);
         console.log('📉 Nenhum envio encontrado para o período');
