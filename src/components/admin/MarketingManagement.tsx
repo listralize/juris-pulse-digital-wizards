@@ -7,7 +7,7 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2 } from 'lucide-react';
+import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useFormConfig } from '@/hooks/useFormConfig';
@@ -77,7 +77,7 @@ export const MarketingManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const { multipleFormsConfig } = useFormConfig();
+  const { multipleFormsConfig, refreshConfig } = useFormConfig();
   
   const [marketingScripts, setMarketingScripts] = useState<MarketingScripts>({
     facebookPixel: {
@@ -756,7 +756,13 @@ document.addEventListener('submit', function(e) {
           {/* System Forms */}
           <Card>
             <CardHeader>
-              <CardTitle>📝 Formulários do Sistema</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                📝 Formulários do Sistema
+                <Button variant="outline" size="sm" onClick={() => { loadSystemForms(); refreshConfig(); }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Atualizar
+                </Button>
+              </CardTitle>
               <CardDescription>
                 Formulários configurados no sistema com opções de rastreamento personalizadas.
               </CardDescription>
