@@ -101,7 +101,7 @@ export const CampaignReports: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 text-center">
           <div className="animate-spin w-8 h-8 border-4 border-white/30 border-t-white rounded-full mx-auto mb-4"></div>
           <p className="text-white/90">Carregando relatórios...</p>
@@ -111,7 +111,7 @@ export const CampaignReports: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header Glassmorphism */}
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
@@ -201,13 +201,13 @@ export const CampaignReports: React.FC = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-sm text-white/60 mb-1">Receita</div>
-                            <div className="text-xl font-bold text-green-400">
+                            <div className="text-xl font-bold text-white">
                               {formatCurrency(report.revenue)}
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="text-sm text-white/60 mb-1">Lucro</div>
-                            <div className={`text-lg font-bold ${report.lucro_liquido >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            <div className={`text-lg font-bold ${report.lucro_liquido >= 0 ? 'text-white' : 'text-gray-400'}`}>
                               {formatCurrency(report.lucro_liquido)}
                             </div>
                           </div>
@@ -218,7 +218,7 @@ export const CampaignReports: React.FC = () => {
                               e.stopPropagation();
                               deleteReport(report.id);
                             }}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl"
+                            className="text-gray-400 hover:text-gray-200 hover:bg-gray-700/20 rounded-xl"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -231,27 +231,27 @@ export const CampaignReports: React.FC = () => {
                     <div className="px-6 pb-6 space-y-6 border-t border-white/10">
                       {/* Métricas Principais */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
-                        <div className="backdrop-blur-sm bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 text-center">
-                          <Users className="w-8 h-8 mx-auto mb-3 text-blue-400" />
-                          <div className="text-3xl font-bold text-blue-400">{report.form_submissions}</div>
+                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+                          <Users className="w-8 h-8 mx-auto mb-3 text-white" />
+                          <div className="text-3xl font-bold text-white">{report.form_submissions}</div>
                           <div className="text-sm text-white/60">Leads Gerados</div>
                         </div>
                         
-                        <div className="backdrop-blur-sm bg-green-500/20 border border-green-400/30 rounded-xl p-4 text-center">
-                          <Target className="w-8 h-8 mx-auto mb-3 text-green-400" />
-                          <div className="text-3xl font-bold text-green-400">{report.contracts}</div>
+                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+                          <Target className="w-8 h-8 mx-auto mb-3 text-white" />
+                          <div className="text-3xl font-bold text-white">{report.contracts}</div>
                           <div className="text-sm text-white/60">Contratos Fechados</div>
                         </div>
                         
-                        <div className="backdrop-blur-sm bg-orange-500/20 border border-orange-400/30 rounded-xl p-4 text-center">
-                          <TrendingUp className="w-8 h-8 mx-auto mb-3 text-orange-400" />
-                          <div className="text-3xl font-bold text-orange-400">{report.conversion_rate.toFixed(1)}%</div>
+                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+                          <TrendingUp className="w-8 h-8 mx-auto mb-3 text-white" />
+                          <div className="text-3xl font-bold text-white">{report.conversion_rate.toFixed(1)}%</div>
                           <div className="text-sm text-white/60">Taxa de Conversão</div>
                         </div>
                         
-                        <div className="backdrop-blur-sm bg-purple-500/20 border border-purple-400/30 rounded-xl p-4 text-center">
-                          <DollarSign className="w-8 h-8 mx-auto mb-3 text-purple-400" />
-                          <div className="text-3xl font-bold text-purple-400">{formatCurrency(report.ticket_medio)}</div>
+                        <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+                          <DollarSign className="w-8 h-8 mx-auto mb-3 text-white" />
+                          <div className="text-3xl font-bold text-white">{formatCurrency(report.ticket_medio)}</div>
                           <div className="text-sm text-white/60">Ticket Médio</div>
                         </div>
                       </div>
@@ -263,9 +263,9 @@ export const CampaignReports: React.FC = () => {
                             💰 Investimento
                           </h4>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-red-500/10 border border-red-400/20 rounded-lg">
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-gray-700/20 border border-gray-500/20 rounded-lg">
                               <span className="text-white/80">Gasto em Anúncios</span>
-                              <span className="font-bold text-red-400">{formatCurrency(report.ad_spend)}</span>
+                              <span className="font-bold text-white">{formatCurrency(report.ad_spend)}</span>
                             </div>
                             <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/5 border border-white/20 rounded-lg">
                               <span className="text-white/80">Custo por Lead</span>
@@ -283,19 +283,19 @@ export const CampaignReports: React.FC = () => {
                             📈 Resultados
                           </h4>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-green-500/10 border border-green-400/20 rounded-lg">
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
                               <span className="text-white/80">Receita Total</span>
-                              <span className="font-bold text-green-400">{formatCurrency(report.revenue)}</span>
+                              <span className="font-bold text-white">{formatCurrency(report.revenue)}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-green-500/10 border border-green-400/20 rounded-lg">
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
                               <span className="text-white/80">Lucro Líquido</span>
-                              <span className={`font-bold ${report.lucro_liquido >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              <span className={`font-bold ${report.lucro_liquido >= 0 ? 'text-white' : 'text-gray-400'}`}>
                                 {formatCurrency(report.lucro_liquido)}
                               </span>
                             </div>
-                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-blue-500/10 border border-blue-400/20 rounded-lg">
+                            <div className="flex justify-between items-center p-3 backdrop-blur-sm bg-gray-600/20 border border-gray-400/20 rounded-lg">
                               <span className="text-white/80">Retorno sobre Investimento</span>
-                              <span className={`font-bold text-xl ${report.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              <span className={`font-bold text-xl ${report.roi >= 0 ? 'text-white' : 'text-gray-400'}`}>
                                 {report.roi.toFixed(1)}%
                               </span>
                             </div>
@@ -304,7 +304,7 @@ export const CampaignReports: React.FC = () => {
                       </div>
 
                       {/* Performance Summary */}
-                      <div className="backdrop-blur-sm bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/20 rounded-xl p-6">
+                      <div className="backdrop-blur-sm bg-gradient-to-r from-gray-700/10 to-gray-600/10 border border-gray-400/20 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-white mb-4">📊 Resumo da Performance</h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div className="text-center">
