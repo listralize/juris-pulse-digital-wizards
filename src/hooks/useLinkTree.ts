@@ -27,7 +27,7 @@ export const useLinkTree = () => {
       }
 
       if (linkTreeData) {
-        setLinkTree(linkTreeData as LinkTree);
+        setLinkTree(linkTreeData as any);
 
         // Carregar itens do link tree
         const { data: itemsData, error: itemsError } = await supabase
@@ -76,7 +76,7 @@ export const useLinkTree = () => {
 
         if (error) throw error;
         
-        setLinkTree(newLinkTree as LinkTree);
+        setLinkTree(newLinkTree as any);
       }
       
       toast.success('Link Tree salvo com sucesso!');

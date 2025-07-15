@@ -54,7 +54,6 @@ export function LinkTreeManagement() {
     button_style: 'list' as LinkTree['button_style'],
     avatar_url: '',
     avatar_size: 'w-20 h-20',
-    avatar_format: 'rounded-full',
     theme: 'modern' as LinkTree['theme'],
     background_type: 'neural' as LinkTree['background_type'],
     background_gradient: '',
@@ -164,7 +163,7 @@ export function LinkTreeManagement() {
       }
 
       if (linkTreeData) {
-        setLinkTree(linkTreeData as LinkTree);
+        setLinkTree(linkTreeData as any);
         setLinkTreeData({
           title: linkTreeData.title || 'Meu Link Tree',
           description: linkTreeData.description || '',
@@ -173,7 +172,6 @@ export function LinkTreeManagement() {
           button_style: (linkTreeData.button_style as LinkTree['button_style']) || 'list',
           avatar_url: linkTreeData.avatar_url || '',
           avatar_size: (linkTreeData as any).avatar_size || 'w-20 h-20',
-          avatar_format: (linkTreeData as any).avatar_format || 'rounded-full',
           theme: (linkTreeData.theme as LinkTree['theme']) || 'modern',
           background_type: (linkTreeData.background_type as LinkTree['background_type']) || 'neural',
           background_gradient: linkTreeData.background_gradient || '',
@@ -243,7 +241,7 @@ export function LinkTreeManagement() {
         .single();
 
       if (error) throw error;
-      setLinkTree(data as LinkTree);
+      setLinkTree(data as any);
     } catch (error) {
       console.error('Erro ao criar Link Tree:', error);
       toast({
@@ -265,7 +263,6 @@ export function LinkTreeManagement() {
         button_style: linkTreeData.button_style || 'list',
         avatar_url: linkTreeData.avatar_url || '',
         avatar_size: linkTreeData.avatar_size || 'w-20 h-20',
-        avatar_format: linkTreeData.avatar_format || 'rounded-full',
         theme: linkTreeData.theme || 'modern',
         background_type: linkTreeData.background_type || 'neural',
         background_gradient: linkTreeData.background_gradient || '',
@@ -298,7 +295,7 @@ export function LinkTreeManagement() {
         }
         
         // Atualizar estado local
-        setLinkTree(data as LinkTree);
+        setLinkTree(data as any);
       } else {
         // Criar novo
         const { data, error } = await supabase
@@ -311,7 +308,7 @@ export function LinkTreeManagement() {
           throw error;
         }
         
-        setLinkTree(data as LinkTree);
+        setLinkTree(data as any);
       }
 
       toast({
@@ -1046,7 +1043,7 @@ export function LinkTreeManagement() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <Label htmlFor="avatar-size">Tamanho do Avatar</Label>
                       <Select value={linkTreeData.avatar_size} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, avatar_size: value }))}>
@@ -1058,19 +1055,6 @@ export function LinkTreeManagement() {
                           <SelectItem value="w-20 h-20">Médio</SelectItem>
                           <SelectItem value="w-24 h-24">Grande</SelectItem>
                           <SelectItem value="w-32 h-32">Extra Grande</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="avatar-format">Formato do Avatar</Label>
-                      <Select value={linkTreeData.avatar_format} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, avatar_format: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="rounded-full">Circular</SelectItem>
-                          <SelectItem value="rounded-lg">Arredondado</SelectItem>
-                          <SelectItem value="rounded-none">Quadrado</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1247,40 +1231,21 @@ export function LinkTreeManagement() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Cor de Fundo</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                type="color"
-                                value={linkTreeData.footer_background_color || '#1a1a1a'}
-                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_background_color: e.target.value }))}
-                                className="w-12 h-8 p-0 border-0 rounded-md"
-                              />
-                              <Input
-                                value={linkTreeData.footer_background_color || '#1a1a1a'}
-                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_background_color: e.target.value }))}
-                                className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white"
-                                placeholder="#1a1a1a"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Cor do Texto</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                type="color"
-                                value={linkTreeData.footer_text_color || '#ffffff'}
-                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
-                                className="w-12 h-8 p-0 border-0 rounded-md"
-                              />
-                              <Input
-                                value={linkTreeData.footer_text_color || '#ffffff'}
-                                onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
-                                className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white"
-                                placeholder="#ffffff"
-                              />
-                            </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Cor do Texto</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={linkTreeData.footer_text_color || '#ffffff'}
+                              onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
+                              className="w-12 h-8 p-0 border-0 rounded-md"
+                            />
+                            <Input
+                              value={linkTreeData.footer_text_color || '#ffffff'}
+                              onChange={(e) => setLinkTreeData(prev => ({ ...prev, footer_text_color: e.target.value }))}
+                              className="h-8 bg-white/10 backdrop-blur-sm border-white/20 text-white"
+                              placeholder="#ffffff"
+                            />
                           </div>
                         </div>
 
@@ -1871,8 +1836,8 @@ export function LinkTreeManagement() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg overflow-hidden max-h-[600px]">
-                <LinkTreePreview 
+              <div className="border rounded-lg overflow-auto max-h-[700px] bg-gray-50">
+                <LinkTreePreview
                   linkTree={{
                     id: linkTree?.id || '',
                     title: linkTreeData.title,

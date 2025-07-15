@@ -33,7 +33,7 @@ export default function LinkTreePage() {
       }
 
       if (linkTreeData) {
-        setLinkTree(linkTreeData as LinkTree);
+        setLinkTree(linkTreeData as any);
 
         // Carregar itens do link tree
         const { data: itemsData, error: itemsError } = await supabase

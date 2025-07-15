@@ -793,8 +793,8 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
             {/* Header Premium */}
             <div className="space-y-6">
               {linkTree.avatar_url && (
-                <div className={`${linkTree.avatar_size || 'w-32 h-32'} mx-auto ${linkTree.avatar_format || 'rounded-full'} overflow-hidden shadow-2xl`}>
-                  <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                <div className={`${linkTree.avatar_size || 'w-32 h-32'} mx-auto overflow-hidden shadow-2xl`}>
+                  <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-contain" />
                 </div>
               )}
               
@@ -829,7 +829,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
                   ESCRITÓRIO PREMIUM
                 </Badge>
               )}
-              {isCorporateTheme && !isNeuralTheme && (
+              {isCorporateTheme && !isNeuralTheme && linkTree.theme !== 'custom' && (
                 <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold px-6 py-3 text-lg">
                   <Shield className="w-5 h-5 mr-2" />
                   CORPORATIVO
@@ -958,8 +958,8 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
       <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
         {/* Header */}
         {linkTree.avatar_url && (
-          <div className={`${linkTree.avatar_size || 'w-24 h-24'} mx-auto ${linkTree.avatar_format || 'rounded-full'} overflow-hidden shadow-lg`}>
-            <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+          <div className={`${linkTree.avatar_size || 'w-24 h-24'} mx-auto overflow-hidden shadow-lg`}>
+            <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-contain" />
           </div>
         )}
         
