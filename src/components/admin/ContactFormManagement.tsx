@@ -6,8 +6,9 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
-import { Save, Star, StarOff, Send, Loader2 } from 'lucide-react';
+import { Save, Star, StarOff, Send, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
 import { FormFieldsManager } from './contact-form/FormFieldsManager';
@@ -96,6 +97,7 @@ export const ContactFormManagement: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isTestingWebhook, setIsTestingWebhook] = useState(false);
   const [availablePages, setAvailablePages] = useState<Array<{ value: string; label: string; category?: string }>>([]);
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
   const currentForm = multipleFormsConfig.forms[currentFormIndex] || defaultFormConfig;
 
@@ -344,6 +346,13 @@ export const ContactFormManagement: React.FC = () => {
     return acc;
   }, {} as Record<string, typeof availablePages>);
 
+  const toggleCategory = (category: string) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Form Selector */}
@@ -473,20 +482,37 @@ export const ContactFormManagement: React.FC = () => {
             </p>
             
             {Object.entries(pagesByCategory).map(([category, pages]) => (
-              <div key={category} className="mb-4">
-                <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                  {category}
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 ml-4">
-                  {pages.map((page) => (
-                    <div key={page.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`page-${page.value}`}
-                        checked={currentForm.linkedPages?.includes(page.value) || false}
-                        onCheckedChange={(checked) => {
-                          const currentPages = currentForm.linkedPages || [];
-                          const updatedPages = checked
-                            ? [...currentPages, page.value]
+              <Collapsible 
+                key={category} 
+                open={openCategories[category]} 
+                onOpenChange={() => toggleCategory(category)}
+                className="mb-4"
+              >
+                <CollapsibleTrigger asChild>
+                  <div className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-opacity-50 ${
+                    isDark ? 'border-white/20 hover:bg-white/10' : 'border-gray-200 hover:bg-gray-50'
+                  }`}>
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                      {category} ({pages.length} páginas)
+                    </h4>
+                    {openCategories[category] ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 ml-4">
+                    {pages.map((page) => (
+                      <div key={page.value} className="flex items-center space-x-2 p-2">
+                        <Checkbox
+                          id={`page-${page.value}`}
+                          checked={currentForm.linkedPages?.includes(page.value) || false}
+                          onCheckedChange={(checked) => {
+                            const currentPages = currentForm.linkedPages || [];
+                            const updatedPages = checked
+                              ? [...currentPages, page.value]
                             : currentPages.filter(p => p !== page.value);
                           updateLinkedPages(updatedPages);
                         }}
@@ -496,8 +522,9 @@ export const ContactFormManagement: React.FC = () => {
                       </Label>
                     </div>
                   ))}
-                </div>
-              </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             ))}
           </div>
         </CardContent>
