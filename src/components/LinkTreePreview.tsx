@@ -865,7 +865,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
               <footer 
                 className="w-full mt-16 pt-8 border-t border-white/10"
                 style={{
-                  backgroundColor: linkTree.footer_background_color || 'transparent',
+                  backgroundColor: 'transparent',
                   color: linkTree.footer_text_color || '#ffffff'
                 }}
               >
@@ -998,7 +998,7 @@ export function LinkTreePreview({ linkTree, linkTreeItems = [], onItemClick }: L
           <footer 
             className="w-full mt-12 py-6 px-4"
             style={{
-              backgroundColor: linkTree.footer_background_color || '#1a1a1a',
+              backgroundColor: 'transparent',
               color: linkTree.footer_text_color || '#ffffff'
             }}
           >
