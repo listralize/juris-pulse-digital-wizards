@@ -53,7 +53,7 @@ export function LinkTreeManagement() {
     text_color: '#ffffff',
     button_style: 'list' as LinkTree['button_style'],
     avatar_url: '',
-    avatar_size: 'w-20 h-20',
+    avatar_size: '128',
     theme: 'modern' as LinkTree['theme'],
     background_type: 'neural' as LinkTree['background_type'],
     background_gradient: '',
@@ -171,7 +171,7 @@ export function LinkTreeManagement() {
           text_color: linkTreeData.text_color || '#ffffff',
           button_style: (linkTreeData.button_style as LinkTree['button_style']) || 'list',
           avatar_url: linkTreeData.avatar_url || '',
-          avatar_size: (linkTreeData as any).avatar_size || 'w-20 h-20',
+          avatar_size: (linkTreeData as any).avatar_size || '128',
           theme: (linkTreeData.theme as LinkTree['theme']) || 'modern',
           background_type: (linkTreeData.background_type as LinkTree['background_type']) || 'neural',
           background_gradient: linkTreeData.background_gradient || '',
@@ -262,7 +262,7 @@ export function LinkTreeManagement() {
         text_color: linkTreeData.text_color || '#ffffff',
         button_style: linkTreeData.button_style || 'list',
         avatar_url: linkTreeData.avatar_url || '',
-        avatar_size: linkTreeData.avatar_size || 'w-20 h-20',
+        avatar_size: linkTreeData.avatar_size || '128',
         theme: linkTreeData.theme || 'modern',
         background_type: linkTreeData.background_type || 'neural',
         background_gradient: linkTreeData.background_gradient || '',
@@ -1044,20 +1044,24 @@ export function LinkTreeManagement() {
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor="avatar-size">Tamanho do Avatar</Label>
-                      <Select value={linkTreeData.avatar_size} onValueChange={(value) => setLinkTreeData(prev => ({ ...prev, avatar_size: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="w-16 h-16">Pequeno</SelectItem>
-                          <SelectItem value="w-20 h-20">Médio</SelectItem>
-                          <SelectItem value="w-24 h-24">Grande</SelectItem>
-                          <SelectItem value="w-32 h-32">Extra Grande</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div>
+                    <Label htmlFor="avatar-size">Tamanho do Avatar ({linkTreeData.avatar_size}px)</Label>
+                    <div className="mt-2">
+                      <input
+                        type="range"
+                        min="64"
+                        max="300"
+                        step="4"
+                        value={linkTreeData.avatar_size || '128'}
+                        onChange={(e) => setLinkTreeData(prev => ({ ...prev, avatar_size: e.target.value }))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider accent-primary"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>64px</span>
+                        <span>300px</span>
+                      </div>
                     </div>
+                  </div>
                   </div>
                 </CardContent>
               </Card>
