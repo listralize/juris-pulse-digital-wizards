@@ -122,14 +122,23 @@ export const MarketingManagement: React.FC = () => {
 
   const loadSystemForms = () => {
     if (multipleFormsConfig?.forms) {
-      const systemForms: FormTrackingConfig[] = multipleFormsConfig.forms.map(form => ({
-        formId: form.id,
-        formName: form.name,
-        submitButtonId: `submit-${form.id}`,
-        webhookUrl: form.webhookUrl,
-        enabled: true,
-        campaign: ''
-      }));
+      // Preservar configurações existentes ou criar novas
+      const existingConfigs = conversionTracking.systemForms.reduce((acc, config) => {
+        acc[config.formId] = config;
+        return acc;
+      }, {} as Record<string, FormTrackingConfig>);
+
+      const systemForms: FormTrackingConfig[] = multipleFormsConfig.forms.map(form => {
+        const existing = existingConfigs[form.id || ''];
+        return {
+          formId: form.id || '',
+          formName: form.name || 'Formulário sem nome',
+          submitButtonId: existing?.submitButtonId || `submit-${form.id}`,
+          webhookUrl: form.webhookUrl,
+          enabled: existing?.enabled ?? false, // Por padrão desabilitado
+          campaign: existing?.campaign || ''
+        };
+      });
 
       setConversionTracking(prev => ({
         ...prev,
@@ -767,57 +776,110 @@ document.addEventListener('submit', function(e) {
                 Formulários configurados no sistema com opções de rastreamento personalizadas.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {conversionTracking.systemForms.map((form, index) => (
-                <div key={form.formId} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">{form.formId}</Badge>
-                      <span className="font-medium">{form.formName}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`form-enabled-${index}`}
-                        checked={form.enabled}
-                        onChange={(e) => updateSystemForm(index, 'enabled', e.target.checked)}
-                        className="rounded"
-                      />
-                      <Label htmlFor={`form-enabled-${index}`}>Rastrear</Label>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>ID do Botão de Submit</Label>
-                      <Input
-                        value={form.submitButtonId}
-                        onChange={(e) => updateSystemForm(index, 'submitButtonId', e.target.value)}
-                        placeholder="submit-button-id"
-                      />
-                    </div>
-                    <div>
-                      <Label>Campanha (Opcional)</Label>
-                      <Input
-                        value={form.campaign || ''}
-                        onChange={(e) => updateSystemForm(index, 'campaign', e.target.value)}
-                        placeholder="nome-da-campanha"
-                      />
-                    </div>
-                  </div>
-                  
-                  {form.webhookUrl && (
-                    <div>
-                      <Label>Webhook URL</Label>
-                      <Input
-                        value={form.webhookUrl}
-                        readOnly
-                        className="bg-muted"
-                      />
-                    </div>
-                  )}
+              <CardContent className="space-y-4">
+              {conversionTracking.systemForms.length === 0 ? (
+                <div className="text-center p-8 text-muted-foreground">
+                  <p>Nenhum formulário encontrado.</p>
+                  <p className="text-sm">Clique em "Atualizar" para recarregar os formulários do sistema.</p>
                 </div>
-              ))}
+              ) : (
+                conversionTracking.systemForms.map((form, index) => (
+                  <div 
+                    key={form.formId} 
+                    className={`border rounded-lg p-4 space-y-3 cursor-pointer transition-all ${
+                      form.enabled ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'
+                    }`}
+                    onClick={() => updateSystemForm(index, 'enabled', !form.enabled)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={form.enabled ? "default" : "outline"}>{form.formId}</Badge>
+                        <span className="font-medium">{form.formName}</span>
+                        {form.enabled && (
+                          <Badge variant="secondary" className="text-xs">
+                            ✓ Rastreando
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`form-enabled-${index}`}
+                          checked={form.enabled}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            updateSystemForm(index, 'enabled', e.target.checked);
+                          }}
+                          className="rounded"
+                        />
+                        <Label htmlFor={`form-enabled-${index}`}>Ativar</Label>
+                      </div>
+                    </div>
+                    
+                    {form.enabled && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>ID do Botão de Submit</Label>
+                            <Input
+                              value={form.submitButtonId}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'submitButtonId', e.target.value);
+                              }}
+                              placeholder="submit-button-id"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div>
+                            <Label>Nome da Campanha</Label>
+                            <Input
+                              value={form.campaign || ''}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'campaign', e.target.value);
+                              }}
+                              placeholder="nome-da-campanha"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+                        
+                        {form.webhookUrl && (
+                          <div>
+                            <Label>Webhook URL</Label>
+                            <Input
+                              value={form.webhookUrl}
+                              readOnly
+                              className="bg-muted"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        )}
+
+                        {/* Scripts de Conversão Gerados */}
+                        <div className="mt-4 p-3 bg-muted rounded-lg">
+                          <Label className="text-sm font-semibold">Scripts de Conversão Gerados:</Label>
+                          <div className="mt-2 space-y-2 text-xs font-mono">
+                            {marketingScripts.facebookPixel.enabled && (
+                              <div className="bg-background p-2 rounded border">
+                                <div className="text-blue-600 font-semibold">Facebook Pixel:</div>
+                                <code>{`fbq('track', 'Lead', {content_name: '${form.formId}', campaign_name: '${form.campaign || form.formName}', form_id: '${form.formId}'});`}</code>
+                              </div>
+                            )}
+                            {marketingScripts.googleAnalytics.enabled && (
+                              <div className="bg-background p-2 rounded border">
+                                <div className="text-green-600 font-semibold">Google Analytics:</div>
+                                <code>{`gtag('event', 'conversion', {event_category: 'lead_generation', event_label: '${form.formId}', campaign_name: '${form.campaign || form.formName}'});`}</code>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
