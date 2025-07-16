@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -240,20 +241,22 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     setIsLoading(true);
     try {
       const selectedFormData = availableForms.find(f => f.id === selectedForm);
+      
+      // Validar e garantir que todos os números sejam válidos
       const reportData = {
-        campaign_name: campaignName,
-        form_id: selectedForm,
+        campaign_name: campaignName.trim(),
+        form_id: selectedForm || 'all',
         form_name: selectedFormData?.name || 'Formulário desconhecido',
-        form_submissions: formSubmissions,
-        contracts,
-        ad_spend: adSpend,
-        revenue,
-        conversion_rate: Number(conversionRate.toFixed(2)),
-        roi: Number(roi.toFixed(2)),
-        cost_per_lead: Number(costPerLead.toFixed(2)),
-        cost_per_acquisition: Number(costPerAcquisition.toFixed(2)),
-        ticket_medio: Number(ticketMedio.toFixed(2)),
-        lucro_liquido: Number(lucroLiquido.toFixed(2)),
+        form_submissions: Math.max(0, formSubmissions || 0),
+        contracts: Math.max(0, contracts || 0),
+        ad_spend: Math.max(0, Number(adSpend) || 0),
+        revenue: Math.max(0, Number(revenue) || 0),
+        conversion_rate: Number((conversionRate || 0).toFixed(2)),
+        roi: Number((roi || 0).toFixed(2)),
+        cost_per_lead: Number((costPerLead || 0).toFixed(2)),
+        cost_per_acquisition: Number((costPerAcquisition || 0).toFixed(2)),
+        ticket_medio: Number((ticketMedio || 0).toFixed(2)),
+        lucro_liquido: Number((lucroLiquido || 0).toFixed(2)),
         facebook_pixel_config: {
           pixel_id: marketingConfig?.facebook_pixel_id || '',
           conversion_api_token: marketingConfig?.facebook_conversion_api_token || ''
@@ -262,17 +265,33 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         period_end: format(dateRange.to, 'yyyy-MM-dd')
       };
 
-      const { error } = await supabase
+      console.log('💾 [ConversionFunnel] Salvando relatório:', reportData);
+
+      const { data, error } = await supabase
         .from('campaign_reports')
-        .insert(reportData);
+        .insert(reportData)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [ConversionFunnel] Erro detalhado ao salvar:', error);
+        throw error;
+      }
 
+      console.log('✅ [ConversionFunnel] Relatório salvo com sucesso:', data);
       toast.success('Relatório de campanha salvo com sucesso!');
       setCampaignName('');
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error('❌ [ConversionFunnel] Erro ao salvar relatório:', error);
-      toast.error('Erro ao salvar relatório de campanha');
+      
+      // Mensagem de erro mais específica
+      if (error?.message) {
+        toast.error(`Erro ao salvar: ${error.message}`);
+      } else if (error?.code) {
+        toast.error(`Erro no banco de dados (${error.code}): Verifique os dados inseridos`);
+      } else {
+        toast.error('Erro desconhecido ao salvar relatório de campanha');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -336,6 +355,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
                 onChange={(e) => setContracts(Number(e.target.value) || 0)}
                 className="h-10"
                 placeholder="0"
+                min="0"
               />
             </div>
             
@@ -347,6 +367,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
                 onChange={(e) => setAdSpend(Number(e.target.value) || 0)}
                 className="h-10"
                 placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
             
@@ -358,6 +380,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
                 onChange={(e) => setRevenue(Number(e.target.value) || 0)}
                 className="h-10"
                 placeholder="0"
+                min="0"
+                step="0.01"
               />
             </div>
             
@@ -369,6 +393,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
                 onChange={(e) => setCampaignName(e.target.value)}
                 className="h-10"
                 placeholder="Nome da campanha"
+                maxLength={100}
               />
             </div>
           </div>
