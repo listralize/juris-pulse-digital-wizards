@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -22,6 +23,12 @@ interface AvailableForm {
   name: string;
 }
 
+interface FormPerformance {
+  formId: string;
+  formName: string;
+  count: number;
+}
+
 export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   analyticsData
 }) => {
@@ -40,6 +47,9 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     to: new Date()
   });
   const [selectedPeriod, setSelectedPeriod] = useState<string>('7days');
+
+  // Performance tracking
+  const [formPerformanceData, setFormPerformanceData] = useState<FormPerformance[]>([]);
 
   // Dados que o usuário controla
   const [formSubmissions, setFormSubmissions] = useState<number>(0);
@@ -136,48 +146,85 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
   };
 
+  // Buscar performance de todos os formulários
+  const loadFormPerformanceData = async () => {
+    try {
+      console.log('📊 [ConversionFunnel] === CARREGANDO PERFORMANCE DOS FORMULÁRIOS ===');
+      
+      // Buscar dados de todos os formulários para o período
+      const { data: allLeads, error } = await supabase
+        .from('form_leads')
+        .select('form_id, form_name, created_at')
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString());
+
+      if (error) {
+        console.error('❌ [ConversionFunnel] Erro ao carregar performance:', error);
+        return;
+      }
+
+      console.log('📈 [ConversionFunnel] Todos os leads do período:', allLeads);
+
+      // Agrupar por formulário
+      const performanceMap = new Map<string, { formName: string; count: number }>();
+      
+      allLeads?.forEach(lead => {
+        const formId = lead.form_id || 'unknown';
+        const formName = lead.form_name || 'Formulário desconhecido';
+        
+        if (performanceMap.has(formId)) {
+          performanceMap.get(formId)!.count += 1;
+        } else {
+          performanceMap.set(formId, { formName, count: 1 });
+        }
+      });
+
+      // Converter para array e garantir que todos os formulários apareçam
+      const performanceData: FormPerformance[] = [];
+      
+      // Adicionar formulários configurados, mesmo que não tenham dados
+      availableForms.forEach(form => {
+        if (form.id !== 'all') {
+          const data = performanceMap.get(form.id);
+          performanceData.push({
+            formId: form.id,
+            formName: form.name,
+            count: data?.count || 0
+          });
+        }
+      });
+
+      // Adicionar formulários que têm dados mas não estão configurados
+      performanceMap.forEach((data, formId) => {
+        if (!performanceData.find(p => p.formId === formId)) {
+          performanceData.push({
+            formId,
+            formName: data.formName,
+            count: data.count
+          });
+        }
+      });
+
+      console.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
+      setFormPerformanceData(performanceData);
+
+    } catch (error) {
+      console.error('❌ [ConversionFunnel] Erro crítico ao carregar performance:', error);
+    }
+  };
+
   // Buscar dados de conversão baseado no período selecionado
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
     try {
-      console.log('🔄 [ConversionFunnel] Buscando dados para período:', {
+      console.log('🔄 [ConversionFunnel] === BUSCANDO DADOS DO FUNIL ===');
+      console.log('🎯 [ConversionFunnel] Período:', {
         from: dateRange.from.toISOString(),
         to: dateRange.to.toISOString(),
         selectedForm
       });
 
-      // VERIFICAR SE EXISTE DADOS EM TODAS AS TABELAS RELACIONADAS
-      console.log('🔍 [ConversionFunnel] === VERIFICAÇÃO COMPLETA DE DADOS ===');
-      
-      // 1. Verificar tabela form_leads
-      const { data: allFormLeads, error: formLeadsError } = await supabase
-        .from('form_leads')
-        .select('*');
-
-      console.log('📊 [form_leads] Total de registros:', allFormLeads?.length || 0);
-      console.log('📊 [form_leads] Erro:', formLeadsError);
-      console.log('📊 [form_leads] Primeiros 3 registros:', allFormLeads?.slice(0, 3));
-
-      // 2. Verificar tabela conversion_events
-      const { data: allConversions, error: conversionError } = await supabase
-        .from('conversion_events')
-        .select('*');
-
-      console.log('📊 [conversion_events] Total de registros:', allConversions?.length || 0);
-      console.log('📊 [conversion_events] Erro:', conversionError);
-      console.log('📊 [conversion_events] Primeiros 3 registros:', allConversions?.slice(0, 3));
-
-      // 3. Verificar se há dados de contato sendo salvos
-      const { data: recentContacts, error: contactError } = await supabase
-        .from('form_leads')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      console.log('📊 [form_leads] Últimos 10 contatos:', recentContacts);
-      console.log('📊 [form_leads] Erro ao buscar contatos:', contactError);
-
-      // Query para o período selecionado
+      // Query principal para o formulário selecionado
       let query = supabase
         .from('form_leads')
         .select('*')
@@ -199,65 +246,23 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         throw leadsError;
       }
 
-      console.log('📊 [ConversionFunnel] Query executada:', {
-        query: `form_leads WHERE created_at >= '${dateRange.from.toISOString()}' AND created_at <= '${dateRange.to.toISOString()}'${selectedForm !== 'all' ? ` AND form_id = '${selectedForm}'` : ''}`,
-        resultCount: formLeads?.length || 0
+      console.log('📊 [ConversionFunnel] Resultado da query principal:', {
+        selectedForm,
+        totalLeads: formLeads?.length || 0,
+        leads: formLeads?.slice(0, 3) // Primeiros 3 para debug
       });
 
-      // Se não há dados na tabela, vamos verificar se o problema é na inserção
-      if (!allFormLeads || allFormLeads.length === 0) {
-        console.log('⚠️ [ConversionFunnel] DIAGNÓSTICO: Tabela form_leads está vazia!');
-        console.log('💡 [ConversionFunnel] Possíveis causas:');
-        console.log('   - Formulários não estão salvando dados na tabela correta');
-        console.log('   - Hook de envio de formulário não está funcionando');
-        console.log('   - Edge function não está inserindo dados');
-        console.log('   - RLS policies podem estar bloqueando inserções');
-        
-        // Criar um registro de teste para verificar se a inserção funciona
-        console.log('🧪 [ConversionFunnel] Tentando inserir um registro de teste...');
-        
-        const testLead = {
-          session_id: 'test-session-' + Date.now(),
-          lead_data: {
-            name: 'Teste ConversionFunnel',
-            email: 'teste@conversion.com',
-            message: 'Teste de inserção do funil'
-          },
-          form_id: selectedForm === 'all' ? 'default' : selectedForm,
-          form_name: 'Teste Funil',
-          source_page: '/admin',
-          created_at: new Date().toISOString()
-        };
+      // Atualizar contagem de envios
+      const submissionsCount = formLeads?.length || 0;
+      setFormSubmissions(submissionsCount);
 
-        const { data: testResult, error: testError } = await supabase
-          .from('form_leads')
-          .insert(testLead)
-          .select();
+      console.log('✅ [ConversionFunnel] Envios atualizados:', submissionsCount);
 
-        if (testError) {
-          console.error('❌ [ConversionFunnel] Erro ao inserir teste:', testError);
-          toast.error('Erro: Não foi possível inserir dados na tabela form_leads. Verifique as permissões RLS.');
-        } else {
-          console.log('✅ [ConversionFunnel] Teste inserido com sucesso:', testResult);
-          toast.success('Teste inserido na tabela! Recarregando dados...');
-          
-          // Tentar buscar novamente após inserção de teste
-          const { data: retryLeads } = await query;
-          setFormSubmissions(retryLeads?.length || 0);
-          console.log('📈 [ConversionFunnel] Após teste - Total de envios:', retryLeads?.length || 0);
-        }
-      } else {
-        // Tabela tem dados, mas query não retornou nada para o período
-        setFormSubmissions(formLeads?.length || 0);
-        console.log('📈 [ConversionFunnel] Total de envios para o período:', formLeads?.length || 0);
-        
-        if ((formLeads?.length || 0) === 0) {
-          console.log('📅 [ConversionFunnel] Nenhum lead encontrado para o período selecionado');
-          console.log('💡 [ConversionFunnel] Sugestão: Tente selecionar um período maior ou "Todos os Formulários"');
-        }
-      }
+      // Carregar performance de todos os formulários
+      await loadFormPerformanceData();
 
-      toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
+      toast.success(`Dados atualizados: ${submissionsCount} envios para o período selecionado`);
+      
     } catch (error) {
       console.error('❌ [ConversionFunnel] Erro ao atualizar dados:', error);
       toast.error('Erro ao atualizar dados do período selecionado');
@@ -380,212 +385,260 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const selectedFormData = availableForms.find(f => f.id === selectedForm);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Controles Compactos */}
-      <Card className="h-fit">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="w-5 h-5" />
-            Funil de Conversão
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Seletor de Período e Formulário */}
-          <div className="grid grid-cols-1 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Período</Label>
-              <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Selecione um período" />
-                </SelectTrigger>
-                <SelectContent>
-                  {periods.map(period => (
-                    <SelectItem key={period.value} value={period.value}>
-                      {period.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <div className="space-y-6">
+      {/* Funil Principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Controles Compactos */}
+        <Card className="h-fit">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="w-5 h-5" />
+              Funil de Conversão
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Seletor de Período e Formulário */}
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Período</Label>
+                <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione um período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periods.map(period => (
+                      <SelectItem key={period.value} value={period.value}>
+                        {period.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Formulário</Label>
+                <Select value={selectedForm} onValueChange={setSelectedForm}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione um formulário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableForms.map(form => (
+                      <SelectItem key={form.id} value={form.id}>
+                        {form.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Formulário</Label>
-              <Select value={selectedForm} onValueChange={setSelectedForm}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Selecione um formulário" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableForms.map(form => (
-                    <SelectItem key={form.id} value={form.id}>
-                      {form.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          {/* Inputs Compactos */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Contratos</Label>
-              <Input
-                type="number"
-                value={contracts}
-                onChange={(e) => setContracts(Number(e.target.value) || 0)}
-                className="h-10"
-                placeholder="0"
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Gasto (R$)</Label>
-              <Input
-                type="number"
-                value={adSpend}
-                onChange={(e) => setAdSpend(Number(e.target.value) || 0)}
-                className="h-10"
-                placeholder="0"
-                min="0"
-                step="0.01"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Receita (R$)</Label>
-              <Input
-                type="number"
-                value={revenue}
-                onChange={(e) => setRevenue(Number(e.target.value) || 0)}
-                className="h-10"
-                placeholder="0"
-                min="0"
-                step="0.01"
-              />
+            {/* Inputs Compactos */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Contratos</Label>
+                <Input
+                  type="number"
+                  value={contracts}
+                  onChange={(e) => setContracts(Number(e.target.value) || 0)}
+                  className="h-10"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Gasto (R$)</Label>
+                <Input
+                  type="number"
+                  value={adSpend}
+                  onChange={(e) => setAdSpend(Number(e.target.value) || 0)}
+                  className="h-10"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Receita (R$)</Label>
+                <Input
+                  type="number"
+                  value={revenue}
+                  onChange={(e) => setRevenue(Number(e.target.value) || 0)}
+                  className="h-10"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Campanha</Label>
+                <Input
+                  type="text"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  className="h-10"
+                  placeholder="Nome da campanha"
+                  maxLength={100}
+                />
+              </div>
             </div>
             
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Campanha</Label>
-              <Input
-                type="text"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-                className="h-10"
-                placeholder="Nome da campanha"
-                maxLength={100}
-              />
+            {/* Botões de Ação */}
+            <div className="flex gap-2">
+              <Button
+                onClick={refreshAnalyticsData}
+                disabled={isRefreshing}
+                variant="outline"
+                className="flex-1"
+              >
+                <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
+                {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+              </Button>
+              
+              <Button
+                onClick={saveCampaignReport}
+                disabled={isLoading || !campaignName.trim()}
+                className="flex-1"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isLoading ? 'Salvando...' : 'Salvar'}
+              </Button>
             </div>
-          </div>
-          
-          {/* Botões de Ação */}
-          <div className="flex gap-2">
-            <Button
-              onClick={refreshAnalyticsData}
-              disabled={isRefreshing}
-              variant="outline"
-              className="flex-1"
-            >
-              <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
-              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-            </Button>
-            
-            <Button
-              onClick={saveCampaignReport}
-              disabled={isLoading || !campaignName.trim()}
-              className="flex-1"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isLoading ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Funil Visual Compacto */}
-      <Card className="h-fit">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">
-            {selectedFormData?.name || 'Todos os Formulários'}
+        {/* Funil Visual Compacto */}
+        <Card className="h-fit">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">
+              {selectedFormData?.name || 'Todos os Formulários'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Funil Visual Compacto */}
+            <div className="space-y-3 mb-4">
+              {/* Nível 1: Envios */}
+              <div className="relative">
+                <div className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-between px-4">
+                  <span className="text-white font-medium text-sm">
+                    {formSubmissions.toLocaleString()} Envios
+                  </span>
+                  <span className="text-white/90 text-sm">100%</span>
+                </div>
+              </div>
+              
+              {/* Nível 2: Contratos */}
+              <div className="relative">
+                <div className="w-4/5 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-between px-4 mx-auto">
+                  <span className="text-white font-medium text-sm">
+                    {contracts.toLocaleString()} Contratos
+                  </span>
+                  <span className="text-white/90 text-sm">{conversionRate.toFixed(1)}%</span>
+                </div>
+              </div>
+              
+              {/* Nível 3: Receita */}
+              <div className="relative">
+                <div className="w-3/5 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg flex items-center justify-between px-4 mx-auto">
+                  <span className="text-white font-medium text-sm">
+                    R$ {revenue.toLocaleString()}
+                  </span>
+                  <span className="text-white/90 text-xs">
+                    {contracts > 0 ? `R$ ${ticketMedio.toFixed(0)}` : '0'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Nível 4: Lucro */}
+              <div className="relative">
+                <div className={`w-2/5 h-12 rounded-lg flex items-center justify-between px-4 mx-auto ${
+                  lucroLiquido >= 0 
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600' 
+                    : 'bg-gradient-to-r from-red-500 to-red-600'
+                }`}>
+                  <span className="text-white font-medium text-sm">
+                    R$ {lucroLiquido.toLocaleString()}
+                  </span>
+                  <span className="text-white/90 text-xs">
+                    {roi.toFixed(0)}% ROI
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Métricas Compactas */}
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t">
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <div className={`text-lg font-bold ${
+                  conversionRate >= 20 ? 'text-green-500' : 
+                  conversionRate >= 10 ? 'text-yellow-500' : 'text-red-500'
+                }`}>
+                  {conversionRate.toFixed(1)}%
+                </div>
+                <div className="text-xs text-muted-foreground">Taxa Conv.</div>
+              </div>
+              
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <div className="text-lg font-bold text-foreground">
+                  R$ {costPerLead.toFixed(0)}
+                </div>
+                <div className="text-xs text-muted-foreground">CPL</div>
+              </div>
+              
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <div className="text-lg font-bold text-foreground">
+                  R$ {costPerAcquisition.toFixed(0)}
+                </div>
+                <div className="text-xs text-muted-foreground">CAC</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Performance dos Formulários */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Performance dos Formulários
+            <span className="text-sm text-muted-foreground font-normal">
+              (conversões por formulário - {periods.find(p => p.value === selectedPeriod)?.label.toLowerCase()})
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Funil Visual Compacto */}
-          <div className="space-y-3 mb-4">
-            {/* Nível 1: Envios */}
-            <div className="relative">
-              <div className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-between px-4">
-                <span className="text-white font-medium text-sm">
-                  {formSubmissions.toLocaleString()} Envios
-                </span>
-                <span className="text-white/90 text-sm">100%</span>
+          <div className="space-y-3">
+            {formPerformanceData.length > 0 ? (
+              formPerformanceData.map((performance) => (
+                <div key={performance.formId} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div>
+                      <span className="font-medium">{performance.formId}</span>
+                      <span className="text-sm text-muted-foreground ml-2">{performance.formName}</span>
+                      {performance.formId === selectedForm && (
+                        <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                          ✓ Rastreando
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{performance.count}</div>
+                    <div className="text-sm text-muted-foreground">conversões</div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Nenhuma conversão encontrada para este período</p>
+                <p className="text-sm">Tente selecionar um período maior ou verificar se há dados de formulários</p>
               </div>
-            </div>
-            
-            {/* Nível 2: Contratos */}
-            <div className="relative">
-              <div className="w-4/5 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-between px-4 mx-auto">
-                <span className="text-white font-medium text-sm">
-                  {contracts.toLocaleString()} Contratos
-                </span>
-                <span className="text-white/90 text-sm">{conversionRate.toFixed(1)}%</span>
-              </div>
-            </div>
-            
-            {/* Nível 3: Receita */}
-            <div className="relative">
-              <div className="w-3/5 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg flex items-center justify-between px-4 mx-auto">
-                <span className="text-white font-medium text-sm">
-                  R$ {revenue.toLocaleString()}
-                </span>
-                <span className="text-white/90 text-xs">
-                  {contracts > 0 ? `R$ ${ticketMedio.toFixed(0)}` : '0'}
-                </span>
-              </div>
-            </div>
-            
-            {/* Nível 4: Lucro */}
-            <div className="relative">
-              <div className={`w-2/5 h-12 rounded-lg flex items-center justify-between px-4 mx-auto ${
-                lucroLiquido >= 0 
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-600' 
-                  : 'bg-gradient-to-r from-red-500 to-red-600'
-              }`}>
-                <span className="text-white font-medium text-sm">
-                  R$ {lucroLiquido.toLocaleString()}
-                </span>
-                <span className="text-white/90 text-xs">
-                  {roi.toFixed(0)}% ROI
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Métricas Compactas */}
-          <div className="grid grid-cols-3 gap-3 pt-4 border-t">
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <div className={`text-lg font-bold ${
-                conversionRate >= 20 ? 'text-green-500' : 
-                conversionRate >= 10 ? 'text-yellow-500' : 'text-red-500'
-              }`}>
-                {conversionRate.toFixed(1)}%
-              </div>
-              <div className="text-xs text-muted-foreground">Taxa Conv.</div>
-            </div>
-            
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <div className="text-lg font-bold text-foreground">
-                R$ {costPerLead.toFixed(0)}
-              </div>
-              <div className="text-xs text-muted-foreground">CPL</div>
-            </div>
-            
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <div className="text-lg font-bold text-foreground">
-                R$ {costPerAcquisition.toFixed(0)}
-              </div>
-              <div className="text-xs text-muted-foreground">CAC</div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
