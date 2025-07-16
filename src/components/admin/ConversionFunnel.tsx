@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -147,7 +146,22 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         selectedForm
       });
 
-      // Query form leads for the selected period
+      // Primeiro, vamos buscar TODOS os leads para debug
+      console.log('🔍 [ConversionFunnel] Verificando estrutura da tabela form_leads...');
+      
+      const { data: allLeads, error: allLeadsError } = await supabase
+        .from('form_leads')
+        .select('*')
+        .limit(5);
+
+      if (allLeadsError) {
+        console.error('❌ [ConversionFunnel] Erro ao buscar todos os leads:', allLeadsError);
+      } else {
+        console.log('📋 [ConversionFunnel] Estrutura dos dados na tabela form_leads:', allLeads);
+        console.log('📊 [ConversionFunnel] Total de leads na tabela:', allLeads?.length || 0);
+      }
+
+      // Query principal para buscar leads do período
       let query = supabase
         .from('form_leads')
         .select('*')
@@ -156,7 +170,10 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
 
       // Se não for "all", filtrar pelo formulário específico
       if (selectedForm !== 'all') {
+        console.log('🎯 [ConversionFunnel] Filtrando por form_id:', selectedForm);
         query = query.eq('form_id', selectedForm);
+      } else {
+        console.log('📋 [ConversionFunnel] Buscando todos os formulários');
       }
 
       const { data: formLeads, error: leadsError } = await query;
@@ -166,15 +183,46 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         throw leadsError;
       }
 
-      console.log('📊 [ConversionFunnel] Leads encontrados:', formLeads);
+      console.log('📊 [ConversionFunnel] Query executada com sucesso');
+      console.log('📊 [ConversionFunnel] Leads encontrados para o período:', formLeads);
+      console.log('📊 [ConversionFunnel] Quantidade de leads encontrados:', formLeads?.length || 0);
 
+      // Verificar se há dados na resposta
       if (formLeads && Array.isArray(formLeads)) {
-        const validLeads = formLeads.filter(lead => lead && typeof lead === 'object');
-        setFormSubmissions(validLeads.length);
-        console.log('📈 [ConversionFunnel] Total de envios encontrados:', validLeads.length);
+        console.log('✅ [ConversionFunnel] Dados válidos recebidos');
+        
+        // Log detalhado de cada lead encontrado
+        formLeads.forEach((lead, index) => {
+          console.log(`📄 [ConversionFunnel] Lead ${index + 1}:`, {
+            id: lead.id,
+            form_id: lead.form_id,
+            form_name: lead.form_name,
+            created_at: lead.created_at,
+            lead_data: lead.lead_data
+          });
+        });
+
+        setFormSubmissions(formLeads.length);
+        console.log('📈 [ConversionFunnel] Total de envios atualizado para:', formLeads.length);
       } else {
+        console.log('📉 [ConversionFunnel] Nenhum lead encontrado ou dados inválidos');
         setFormSubmissions(0);
-        console.log('📉 [ConversionFunnel] Nenhum envio encontrado para o período');
+      }
+
+      // Buscar também estatísticas gerais para comparação
+      const { data: totalStats, error: statsError } = await supabase
+        .from('form_leads')
+        .select('form_id, created_at')
+        .gte('created_at', subDays(new Date(), 30).toISOString());
+
+      if (!statsError && totalStats) {
+        console.log('📊 [ConversionFunnel] Estatísticas dos últimos 30 dias:', {
+          total: totalStats.length,
+          formsDistribution: totalStats.reduce((acc, lead) => {
+            acc[lead.form_id || 'undefined'] = (acc[lead.form_id || 'undefined'] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>)
+        });
       }
 
       toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
