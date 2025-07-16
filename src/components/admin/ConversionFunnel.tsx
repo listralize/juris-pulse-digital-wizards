@@ -4,8 +4,6 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Calendar } from '../ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
 import { Target, DollarSign, TrendingUp, FileText, Handshake, Calculator, Save, AlertTriangle, CheckCircle, CalendarIcon, RefreshCw } from 'lucide-react';
@@ -31,7 +29,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const isDark = theme === 'dark';
   const [selectedForm, setSelectedForm] = useState<string>('all');
   const [availableForms, setAvailableForms] = useState<AvailableForm[]>([]);
-  const { multipleFormsConfig } = useFormConfig();
+  const { multipleFormsConfig, isLoading: configLoading } = useFormConfig();
 
   // Date range state
   const [dateRange, setDateRange] = useState<{
@@ -41,7 +39,6 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     from: subDays(new Date(), 7),
     to: new Date()
   });
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<string>('7days');
 
   // Dados que o usuário controla
@@ -108,54 +105,42 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   };
 
-  // Load all available forms from configuration
+  // Carregar todos os formulários configurados no sistema
   const loadAllAvailableForms = () => {
-    try {
-      console.log('🔄 [ConversionFunnel] Carregando formulários do sistema...');
-      console.log('📋 [ConversionFunnel] Formulários disponíveis:', multipleFormsConfig.forms);
+    console.log('🔄 [ConversionFunnel] Carregando formulários do sistema...');
+    console.log('📋 [ConversionFunnel] multipleFormsConfig:', multipleFormsConfig);
 
-      if (!multipleFormsConfig.forms || multipleFormsConfig.forms.length === 0) {
-        console.log('⚠️ [ConversionFunnel] Nenhum formulário no sistema');
-        const fallbackForms = [
-          { id: 'all', name: 'Todos os Formulários' },
-          { id: 'default', name: 'Formulário Principal' }
-        ];
-        setAvailableForms(fallbackForms);
-        return fallbackForms;
-      }
-
-      // Mapear formulários do sistema para o formato esperado
-      const systemForms: AvailableForm[] = multipleFormsConfig.forms.map(form => ({
-        id: form.id || 'default',
-        name: form.name || 'Formulário sem nome'
-      }));
-      
-      // Adicionar opção "Todos os Formulários" no início
-      const allForms: AvailableForm[] = [
-        { id: 'all', name: 'Todos os Formulários' },
-        ...systemForms
-      ];
-
-      setAvailableForms(allForms);
-      console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
-
-      return allForms;
-    } catch (error) {
-      console.error('❌ [ConversionFunnel] Erro ao carregar formulários:', error);
+    if (!multipleFormsConfig || !multipleFormsConfig.forms || multipleFormsConfig.forms.length === 0) {
+      console.log('⚠️ [ConversionFunnel] Nenhum formulário configurado no sistema');
       const fallbackForms = [
         { id: 'all', name: 'Todos os Formulários' },
         { id: 'default', name: 'Formulário Principal' }
       ];
       setAvailableForms(fallbackForms);
-      return fallbackForms;
+      return;
     }
+
+    // Mapear formulários do sistema para o formato esperado
+    const systemForms: AvailableForm[] = multipleFormsConfig.forms.map(form => ({
+      id: form.id || 'default',
+      name: form.name || 'Formulário sem nome'
+    }));
+    
+    // Adicionar opção "Todos os Formulários" no início
+    const allForms: AvailableForm[] = [
+      { id: 'all', name: 'Todos os Formulários' },
+      ...systemForms
+    ];
+
+    setAvailableForms(allForms);
+    console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
   };
 
-  // Refresh data based on date range
+  // Buscar dados de conversão baseado no período selecionado
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
     try {
-      console.log('🔄 Buscando dados para período:', {
+      console.log('🔄 [ConversionFunnel] Buscando dados para período:', {
         from: dateRange.from.toISOString(),
         to: dateRange.to.toISOString(),
         selectedForm
@@ -176,28 +161,24 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       const { data: formLeads, error: leadsError } = await query;
 
       if (leadsError) {
-        console.error('❌ Erro ao carregar leads:', leadsError);
+        console.error('❌ [ConversionFunnel] Erro ao carregar leads:', leadsError);
         throw leadsError;
       }
 
-      console.log('📊 Leads encontrados:', formLeads);
+      console.log('📊 [ConversionFunnel] Leads encontrados:', formLeads);
 
-      if (formLeads && Array.isArray(formLeads) && formLeads.length > 0) {
-        // Contar total de envios - verificação de segurança adicional
+      if (formLeads && Array.isArray(formLeads)) {
         const validLeads = formLeads.filter(lead => lead && typeof lead === 'object');
         setFormSubmissions(validLeads.length);
-        console.log('📈 Total de envios encontrados:', validLeads.length);
+        console.log('📈 [ConversionFunnel] Total de envios encontrados:', validLeads.length);
       } else {
         setFormSubmissions(0);
-        console.log('📉 Nenhum envio encontrado para o período');
+        console.log('📉 [ConversionFunnel] Nenhum envio encontrado para o período');
       }
-
-      // Atualizar lista de formulários disponíveis
-      loadAllAvailableForms();
 
       toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
     } catch (error) {
-      console.error('❌ Erro ao atualizar dados:', error);
+      console.error('❌ [ConversionFunnel] Erro ao atualizar dados:', error);
       toast.error('Erro ao atualizar dados do período selecionado');
     } finally {
       setIsRefreshing(false);
@@ -214,21 +195,27 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
           .maybeSingle();
         setMarketingConfig(settings);
       } catch (error) {
-        console.error('❌ Erro ao carregar configurações de marketing:', error);
+        console.error('❌ [ConversionFunnel] Erro ao carregar configurações de marketing:', error);
       }
     };
     loadMarketingConfig();
   }, []);
 
-  // Load forms when component mounts or when multipleFormsConfig changes
+  // Carregar formulários quando multipleFormsConfig estiver disponível
   useEffect(() => {
-    loadAllAvailableForms();
-  }, [multipleFormsConfig]);
+    if (!configLoading && multipleFormsConfig) {
+      console.log('🔄 [ConversionFunnel] useEffect: Carregando formulários');
+      loadAllAvailableForms();
+    }
+  }, [configLoading, multipleFormsConfig]);
 
-  // Refresh data when date range or selected form changes
+  // Atualizar dados quando período ou formulário mudar
   useEffect(() => {
-    refreshAnalyticsData();
-  }, [dateRange, selectedForm]);
+    if (availableForms.length > 0) {
+      console.log('🔄 [ConversionFunnel] useEffect: Atualizando dados analytics');
+      refreshAnalyticsData();
+    }
+  }, [dateRange, selectedForm, availableForms]);
 
   // Cálculos automáticos
   const conversionRate = formSubmissions > 0 ? contracts / formSubmissions * 100 : 0;
@@ -245,8 +232,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       return;
     }
 
-    if (formSubmissions === 0) {
-      toast.error('Não há dados de envios de formulário para salvar');
+    if (formSubmissions === 0 && contracts === 0 && adSpend === 0 && revenue === 0) {
+      toast.error('Não há dados suficientes para salvar o relatório');
       return;
     }
 
@@ -284,12 +271,14 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       toast.success('Relatório de campanha salvo com sucesso!');
       setCampaignName('');
     } catch (error) {
-      console.error('Erro ao salvar relatório:', error);
+      console.error('❌ [ConversionFunnel] Erro ao salvar relatório:', error);
       toast.error('Erro ao salvar relatório de campanha');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const selectedFormData = availableForms.find(f => f.id === selectedForm);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -412,7 +401,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       <Card className="h-fit">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">
-            {availableForms.find(f => f.id === selectedForm)?.name || 'Carregando...'}
+            {selectedFormData?.name || 'Todos os Formulários'}
           </CardTitle>
         </CardHeader>
         <CardContent>
