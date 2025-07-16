@@ -146,22 +146,38 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         selectedForm
       });
 
-      // Primeiro, vamos buscar TODOS os leads para debug
-      console.log('🔍 [ConversionFunnel] Verificando estrutura da tabela form_leads...');
+      // VERIFICAR SE EXISTE DADOS EM TODAS AS TABELAS RELACIONADAS
+      console.log('🔍 [ConversionFunnel] === VERIFICAÇÃO COMPLETA DE DADOS ===');
       
-      const { data: allLeads, error: allLeadsError } = await supabase
+      // 1. Verificar tabela form_leads
+      const { data: allFormLeads, error: formLeadsError } = await supabase
+        .from('form_leads')
+        .select('*');
+
+      console.log('📊 [form_leads] Total de registros:', allFormLeads?.length || 0);
+      console.log('📊 [form_leads] Erro:', formLeadsError);
+      console.log('📊 [form_leads] Primeiros 3 registros:', allFormLeads?.slice(0, 3));
+
+      // 2. Verificar tabela conversion_events
+      const { data: allConversions, error: conversionError } = await supabase
+        .from('conversion_events')
+        .select('*');
+
+      console.log('📊 [conversion_events] Total de registros:', allConversions?.length || 0);
+      console.log('📊 [conversion_events] Erro:', conversionError);
+      console.log('📊 [conversion_events] Primeiros 3 registros:', allConversions?.slice(0, 3));
+
+      // 3. Verificar se há dados de contato sendo salvos
+      const { data: recentContacts, error: contactError } = await supabase
         .from('form_leads')
         .select('*')
-        .limit(5);
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-      if (allLeadsError) {
-        console.error('❌ [ConversionFunnel] Erro ao buscar todos os leads:', allLeadsError);
-      } else {
-        console.log('📋 [ConversionFunnel] Estrutura dos dados na tabela form_leads:', allLeads);
-        console.log('📊 [ConversionFunnel] Total de leads na tabela:', allLeads?.length || 0);
-      }
+      console.log('📊 [form_leads] Últimos 10 contatos:', recentContacts);
+      console.log('📊 [form_leads] Erro ao buscar contatos:', contactError);
 
-      // Query principal para buscar leads do período
+      // Query para o período selecionado
       let query = supabase
         .from('form_leads')
         .select('*')
@@ -183,46 +199,62 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         throw leadsError;
       }
 
-      console.log('📊 [ConversionFunnel] Query executada com sucesso');
-      console.log('📊 [ConversionFunnel] Leads encontrados para o período:', formLeads);
-      console.log('📊 [ConversionFunnel] Quantidade de leads encontrados:', formLeads?.length || 0);
+      console.log('📊 [ConversionFunnel] Query executada:', {
+        query: `form_leads WHERE created_at >= '${dateRange.from.toISOString()}' AND created_at <= '${dateRange.to.toISOString()}'${selectedForm !== 'all' ? ` AND form_id = '${selectedForm}'` : ''}`,
+        resultCount: formLeads?.length || 0
+      });
 
-      // Verificar se há dados na resposta
-      if (formLeads && Array.isArray(formLeads)) {
-        console.log('✅ [ConversionFunnel] Dados válidos recebidos');
+      // Se não há dados na tabela, vamos verificar se o problema é na inserção
+      if (!allFormLeads || allFormLeads.length === 0) {
+        console.log('⚠️ [ConversionFunnel] DIAGNÓSTICO: Tabela form_leads está vazia!');
+        console.log('💡 [ConversionFunnel] Possíveis causas:');
+        console.log('   - Formulários não estão salvando dados na tabela correta');
+        console.log('   - Hook de envio de formulário não está funcionando');
+        console.log('   - Edge function não está inserindo dados');
+        console.log('   - RLS policies podem estar bloqueando inserções');
         
-        // Log detalhado de cada lead encontrado
-        formLeads.forEach((lead, index) => {
-          console.log(`📄 [ConversionFunnel] Lead ${index + 1}:`, {
-            id: lead.id,
-            form_id: lead.form_id,
-            form_name: lead.form_name,
-            created_at: lead.created_at,
-            lead_data: lead.lead_data
-          });
-        });
+        // Criar um registro de teste para verificar se a inserção funciona
+        console.log('🧪 [ConversionFunnel] Tentando inserir um registro de teste...');
+        
+        const testLead = {
+          session_id: 'test-session-' + Date.now(),
+          lead_data: {
+            name: 'Teste ConversionFunnel',
+            email: 'teste@conversion.com',
+            message: 'Teste de inserção do funil'
+          },
+          form_id: selectedForm === 'all' ? 'default' : selectedForm,
+          form_name: 'Teste Funil',
+          source_page: '/admin',
+          created_at: new Date().toISOString()
+        };
 
-        setFormSubmissions(formLeads.length);
-        console.log('📈 [ConversionFunnel] Total de envios atualizado para:', formLeads.length);
+        const { data: testResult, error: testError } = await supabase
+          .from('form_leads')
+          .insert(testLead)
+          .select();
+
+        if (testError) {
+          console.error('❌ [ConversionFunnel] Erro ao inserir teste:', testError);
+          toast.error('Erro: Não foi possível inserir dados na tabela form_leads. Verifique as permissões RLS.');
+        } else {
+          console.log('✅ [ConversionFunnel] Teste inserido com sucesso:', testResult);
+          toast.success('Teste inserido na tabela! Recarregando dados...');
+          
+          // Tentar buscar novamente após inserção de teste
+          const { data: retryLeads } = await query;
+          setFormSubmissions(retryLeads?.length || 0);
+          console.log('📈 [ConversionFunnel] Após teste - Total de envios:', retryLeads?.length || 0);
+        }
       } else {
-        console.log('📉 [ConversionFunnel] Nenhum lead encontrado ou dados inválidos');
-        setFormSubmissions(0);
-      }
-
-      // Buscar também estatísticas gerais para comparação
-      const { data: totalStats, error: statsError } = await supabase
-        .from('form_leads')
-        .select('form_id, created_at')
-        .gte('created_at', subDays(new Date(), 30).toISOString());
-
-      if (!statsError && totalStats) {
-        console.log('📊 [ConversionFunnel] Estatísticas dos últimos 30 dias:', {
-          total: totalStats.length,
-          formsDistribution: totalStats.reduce((acc, lead) => {
-            acc[lead.form_id || 'undefined'] = (acc[lead.form_id || 'undefined'] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>)
-        });
+        // Tabela tem dados, mas query não retornou nada para o período
+        setFormSubmissions(formLeads?.length || 0);
+        console.log('📈 [ConversionFunnel] Total de envios para o período:', formLeads?.length || 0);
+        
+        if ((formLeads?.length || 0) === 0) {
+          console.log('📅 [ConversionFunnel] Nenhum lead encontrado para o período selecionado');
+          console.log('💡 [ConversionFunnel] Sugestão: Tente selecionar um período maior ou "Todos os Formulários"');
+        }
       }
 
       toast.success(`Dados atualizados para o período de ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
