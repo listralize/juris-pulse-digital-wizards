@@ -213,26 +213,21 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       console.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
       setFormPerformanceData(performanceData);
 
-      // ===== CORREÇÃO DO BUG: USAR A MESMA LÓGICA DA PERFORMANCE =====
+      // ===== USAR DADOS CALCULADOS DIRETAMENTE (NÃO O ESTADO) =====
       let submissionsForSelectedForm = 0;
       
       if (selectedForm === 'all') {
         submissionsForSelectedForm = leadsData?.length || 0;
         console.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
       } else {
-        // USAR A MESMA CONTAGEM QUE ESTÁ NA PERFORMANCE
-        const performanceForSelected = performanceData.find(p => p.formId === selectedForm);
-        submissionsForSelectedForm = performanceForSelected?.count || 0;
+        // Usar os dados recém-calculados (performanceData) ao invés do estado (formPerformanceData)
+        const performanceItem = performanceData.find(p => p.formId === selectedForm);
+        submissionsForSelectedForm = performanceItem?.count || 0;
         
-        console.log('📊 [ConversionFunnel] ===== CORREÇÃO APLICADA =====');
+        console.log('📊 [ConversionFunnel] ===== CORREÇÃO FINAL =====');
         console.log('📊 [ConversionFunnel] Formulário selecionado:', selectedForm);
-        console.log('📊 [ConversionFunnel] Performance encontrada:', performanceForSelected);
-        console.log('📊 [ConversionFunnel] Contagem a ser usada no funil:', submissionsForSelectedForm);
-        
-        // Log adicional para debug
-        const directFilteredLeads = (leadsData || []).filter(lead => lead.form_id === selectedForm);
-        console.log('📊 [ConversionFunnel] Leads filtrados diretamente:', directFilteredLeads);
-        console.log('📊 [ConversionFunnel] Contagem direta:', directFilteredLeads.length);
+        console.log('📊 [ConversionFunnel] Performance calculada:', performanceItem);
+        console.log('📊 [ConversionFunnel] Contagem final para funil:', submissionsForSelectedForm);
       }
 
       setFormSubmissions(submissionsForSelectedForm);
