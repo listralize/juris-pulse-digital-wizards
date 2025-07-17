@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -146,36 +145,35 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
   };
 
-  // Buscar performance de todos os formulários usando conversion_events
-  const loadFormPerformanceData = async () => {
+  // Função unificada para buscar dados de formulários usando form_leads (mesma fonte que funciona)
+  const loadFormData = async () => {
     try {
-      console.log('📊 [ConversionFunnel] === CARREGANDO PERFORMANCE DOS FORMULÁRIOS ===');
+      console.log('📊 [ConversionFunnel] === CARREGANDO DADOS DOS FORMULÁRIOS (FORM_LEADS) ===');
       console.log('📅 [ConversionFunnel] Período:', {
         from: dateRange.from.toISOString(),
         to: dateRange.to.toISOString()
       });
       
-      // Buscar dados de conversion_events para o período
-      const { data: allConversions, error } = await supabase
-        .from('conversion_events')
-        .select('form_id, form_name, timestamp')
-        .gte('timestamp', dateRange.from.toISOString())
-        .lte('timestamp', dateRange.to.toISOString())
-        .eq('event_type', 'form_submission');
+      // Buscar dados de form_leads para o período (mesma query que funciona na seção existente)
+      const { data: allLeads, error } = await supabase
+        .from('form_leads')
+        .select('form_id, form_name, created_at')
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString());
 
       if (error) {
-        console.error('❌ [ConversionFunnel] Erro ao carregar conversion_events:', error);
+        console.error('❌ [ConversionFunnel] Erro ao carregar form_leads:', error);
         return;
       }
 
-      console.log('📈 [ConversionFunnel] Conversões encontradas:', allConversions);
+      console.log('📈 [ConversionFunnel] Leads encontrados no período:', allLeads);
 
-      // Agrupar por formulário
+      // Processar dados para performance de todos os formulários
       const performanceMap = new Map<string, { formName: string; count: number }>();
       
-      allConversions?.forEach(conversion => {
-        const formId = conversion.form_id || 'unknown';
-        const formName = conversion.form_name || 'Formulário desconhecido';
+      allLeads?.forEach(lead => {
+        const formId = lead.form_id || 'unknown';
+        const formName = lead.form_name || 'Formulário desconhecido';
         
         if (performanceMap.has(formId)) {
           performanceMap.get(formId)!.count += 1;
@@ -213,62 +211,33 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       console.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
       setFormPerformanceData(performanceData);
 
+      // Calcular envios para o formulário selecionado no funil principal
+      let submissionsForSelectedForm = 0;
+      
+      if (selectedForm === 'all') {
+        submissionsForSelectedForm = allLeads?.length || 0;
+        console.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
+      } else {
+        const filteredLeads = allLeads?.filter(lead => lead.form_id === selectedForm) || [];
+        submissionsForSelectedForm = filteredLeads.length;
+        console.log('📊 [ConversionFunnel] Formulário específico:', selectedForm, 'total:', submissionsForSelectedForm);
+      }
+
+      setFormSubmissions(submissionsForSelectedForm);
+      console.log('✅ [ConversionFunnel] Envios do funil atualizados:', submissionsForSelectedForm);
+
     } catch (error) {
-      console.error('❌ [ConversionFunnel] Erro crítico ao carregar performance:', error);
+      console.error('❌ [ConversionFunnel] Erro crítico ao carregar dados:', error);
     }
   };
 
-  // Buscar dados de conversão baseado no período selecionado usando conversion_events
+  // Função de refresh que usa a mesma lógica
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
     try {
-      console.log('🔄 [ConversionFunnel] === BUSCANDO DADOS DO FUNIL (CONVERSION_EVENTS) ===');
-      console.log('🎯 [ConversionFunnel] Período:', {
-        from: dateRange.from.toISOString(),
-        to: dateRange.to.toISOString(),
-        selectedForm
-      });
-
-      // Query principal para conversion_events no período selecionado
-      let query = supabase
-        .from('conversion_events')
-        .select('*')
-        .gte('timestamp', dateRange.from.toISOString())
-        .lte('timestamp', dateRange.to.toISOString())
-        .eq('event_type', 'form_submission');
-
-      // Se não for "all", filtrar pelo formulário específico
-      if (selectedForm !== 'all') {
-        console.log('🎯 [ConversionFunnel] Filtrando por form_id:', selectedForm);
-        query = query.eq('form_id', selectedForm);
-      } else {
-        console.log('📋 [ConversionFunnel] Buscando todos os formulários');
-      }
-
-      const { data: conversions, error: conversionsError } = await query;
-
-      if (conversionsError) {
-        console.error('❌ [ConversionFunnel] Erro ao carregar conversion_events:', conversionsError);
-        throw conversionsError;
-      }
-
-      console.log('📊 [ConversionFunnel] Resultado da query conversion_events:', {
-        selectedForm,
-        totalConversions: conversions?.length || 0,
-        conversions: conversions?.slice(0, 3) // Primeiros 3 para debug
-      });
-
-      // Atualizar contagem de envios usando conversion_events
-      const submissionsCount = conversions?.length || 0;
-      setFormSubmissions(submissionsCount);
-
-      console.log('✅ [ConversionFunnel] Envios atualizados:', submissionsCount);
-
-      // Carregar performance de todos os formulários
-      await loadFormPerformanceData();
-
-      toast.success(`Dados atualizados: ${submissionsCount} envios para o período selecionado`);
-      
+      console.log('🔄 [ConversionFunnel] === ATUALIZANDO DADOS ===');
+      await loadFormData();
+      toast.success(`Dados atualizados: ${formSubmissions} envios para o período selecionado`);
     } catch (error) {
       console.error('❌ [ConversionFunnel] Erro ao atualizar dados:', error);
       toast.error('Erro ao atualizar dados do período selecionado');
@@ -276,6 +245,33 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       setIsRefreshing(false);
     }
   };
+
+  // Setup realtime listening para form_leads
+  useEffect(() => {
+    console.log('🔄 [ConversionFunnel] Configurando realtime para form_leads...');
+    
+    const channel = supabase
+      .channel('form_leads_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'form_leads'
+        },
+        (payload) => {
+          console.log('📡 [ConversionFunnel] Mudança detectada em form_leads:', payload);
+          // Recarregar dados quando houver mudanças
+          loadFormData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔄 [ConversionFunnel] Removendo listener realtime...');
+      supabase.removeChannel(channel);
+    };
+  }, [dateRange, selectedForm, availableForms]);
 
   // Carregar configurações de marketing
   useEffect(() => {
@@ -305,7 +301,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   useEffect(() => {
     if (availableForms.length > 0) {
       console.log('🔄 [ConversionFunnel] useEffect: Atualizando dados analytics');
-      refreshAnalyticsData();
+      loadFormData();
     }
   }, [dateRange, selectedForm, availableForms]);
 
@@ -604,12 +600,12 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         </Card>
       </div>
 
-      {/* Performance dos Formulários */}
+      {/* Performance dos Formulários - Nova Seção */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Performance dos Formulários (Dados Reais)
+            <TrendingUp className="w-5 h-5" />
+            Performance dos Formulários - Tempo Real
             <span className="text-sm text-muted-foreground font-normal">
               (conversões por formulário - {periods.find(p => p.value === selectedPeriod)?.label.toLowerCase()})
             </span>
@@ -627,7 +623,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
                       <span className="text-sm text-muted-foreground ml-2">{performance.formName}</span>
                       {performance.formId === selectedForm && (
                         <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                          ✓ Rastreando
+                          ✓ Rastreando no Funil
                         </span>
                       )}
                     </div>
