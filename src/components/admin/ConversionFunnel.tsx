@@ -146,31 +146,36 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
   };
 
-  // Buscar performance de todos os formulários
+  // Buscar performance de todos os formulários usando conversion_events
   const loadFormPerformanceData = async () => {
     try {
       console.log('📊 [ConversionFunnel] === CARREGANDO PERFORMANCE DOS FORMULÁRIOS ===');
+      console.log('📅 [ConversionFunnel] Período:', {
+        from: dateRange.from.toISOString(),
+        to: dateRange.to.toISOString()
+      });
       
-      // Buscar dados de todos os formulários para o período
-      const { data: allLeads, error } = await supabase
-        .from('form_leads')
-        .select('form_id, form_name, created_at')
-        .gte('created_at', dateRange.from.toISOString())
-        .lte('created_at', dateRange.to.toISOString());
+      // Buscar dados de conversion_events para o período
+      const { data: allConversions, error } = await supabase
+        .from('conversion_events')
+        .select('form_id, form_name, timestamp')
+        .gte('timestamp', dateRange.from.toISOString())
+        .lte('timestamp', dateRange.to.toISOString())
+        .eq('event_type', 'form_submission');
 
       if (error) {
-        console.error('❌ [ConversionFunnel] Erro ao carregar performance:', error);
+        console.error('❌ [ConversionFunnel] Erro ao carregar conversion_events:', error);
         return;
       }
 
-      console.log('📈 [ConversionFunnel] Todos os leads do período:', allLeads);
+      console.log('📈 [ConversionFunnel] Conversões encontradas:', allConversions);
 
       // Agrupar por formulário
       const performanceMap = new Map<string, { formName: string; count: number }>();
       
-      allLeads?.forEach(lead => {
-        const formId = lead.form_id || 'unknown';
-        const formName = lead.form_name || 'Formulário desconhecido';
+      allConversions?.forEach(conversion => {
+        const formId = conversion.form_id || 'unknown';
+        const formName = conversion.form_name || 'Formulário desconhecido';
         
         if (performanceMap.has(formId)) {
           performanceMap.get(formId)!.count += 1;
@@ -213,23 +218,24 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   };
 
-  // Buscar dados de conversão baseado no período selecionado
+  // Buscar dados de conversão baseado no período selecionado usando conversion_events
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
     try {
-      console.log('🔄 [ConversionFunnel] === BUSCANDO DADOS DO FUNIL ===');
+      console.log('🔄 [ConversionFunnel] === BUSCANDO DADOS DO FUNIL (CONVERSION_EVENTS) ===');
       console.log('🎯 [ConversionFunnel] Período:', {
         from: dateRange.from.toISOString(),
         to: dateRange.to.toISOString(),
         selectedForm
       });
 
-      // Query principal para o formulário selecionado
+      // Query principal para conversion_events no período selecionado
       let query = supabase
-        .from('form_leads')
+        .from('conversion_events')
         .select('*')
-        .gte('created_at', dateRange.from.toISOString())
-        .lte('created_at', dateRange.to.toISOString());
+        .gte('timestamp', dateRange.from.toISOString())
+        .lte('timestamp', dateRange.to.toISOString())
+        .eq('event_type', 'form_submission');
 
       // Se não for "all", filtrar pelo formulário específico
       if (selectedForm !== 'all') {
@@ -239,21 +245,21 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         console.log('📋 [ConversionFunnel] Buscando todos os formulários');
       }
 
-      const { data: formLeads, error: leadsError } = await query;
+      const { data: conversions, error: conversionsError } = await query;
 
-      if (leadsError) {
-        console.error('❌ [ConversionFunnel] Erro ao carregar leads:', leadsError);
-        throw leadsError;
+      if (conversionsError) {
+        console.error('❌ [ConversionFunnel] Erro ao carregar conversion_events:', conversionsError);
+        throw conversionsError;
       }
 
-      console.log('📊 [ConversionFunnel] Resultado da query principal:', {
+      console.log('📊 [ConversionFunnel] Resultado da query conversion_events:', {
         selectedForm,
-        totalLeads: formLeads?.length || 0,
-        leads: formLeads?.slice(0, 3) // Primeiros 3 para debug
+        totalConversions: conversions?.length || 0,
+        conversions: conversions?.slice(0, 3) // Primeiros 3 para debug
       });
 
-      // Atualizar contagem de envios
-      const submissionsCount = formLeads?.length || 0;
+      // Atualizar contagem de envios usando conversion_events
+      const submissionsCount = conversions?.length || 0;
       setFormSubmissions(submissionsCount);
 
       console.log('✅ [ConversionFunnel] Envios atualizados:', submissionsCount);
@@ -603,7 +609,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Performance dos Formulários
+            Performance dos Formulários (Dados Reais)
             <span className="text-sm text-muted-foreground font-normal">
               (conversões por formulário - {periods.find(p => p.value === selectedPeriod)?.label.toLowerCase()})
             </span>
