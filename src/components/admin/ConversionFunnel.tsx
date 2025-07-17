@@ -60,6 +60,9 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const [marketingConfig, setMarketingConfig] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
+  // Estado para todos os leads (para usar como fonte única de verdade)
+  const [allLeads, setAllLeads] = useState<any[]>([]);
+
   // Predefined periods
   const periods = [
     { value: '7days', label: 'Últimos 7 dias' },
@@ -145,7 +148,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
   };
 
-  // Função unificada para buscar dados de formulários usando form_leads (mesma fonte que funciona)
+  // Função unificada para buscar dados de form_leads
   const loadFormData = async () => {
     try {
       console.log('📊 [ConversionFunnel] === CARREGANDO DADOS DOS FORMULÁRIOS (FORM_LEADS) ===');
@@ -154,24 +157,28 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         to: dateRange.to.toISOString()
       });
       
-      // Buscar dados de form_leads para o período (mesma query que funciona na seção existente)
-      const { data: allLeads, error } = await supabase
+      // Buscar TODOS os dados de form_leads para o período
+      const { data: leadsData, error } = await supabase
         .from('form_leads')
         .select('form_id, form_name, created_at')
         .gte('created_at', dateRange.from.toISOString())
-        .lte('created_at', dateRange.to.toISOString());
+        .lte('created_at', dateRange.to.toISOString())
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('❌ [ConversionFunnel] Erro ao carregar form_leads:', error);
         return;
       }
 
-      console.log('📈 [ConversionFunnel] Leads encontrados no período:', allLeads);
+      console.log('📈 [ConversionFunnel] TODOS os leads encontrados no período:', leadsData);
+      
+      // Atualizar estado com todos os leads
+      setAllLeads(leadsData || []);
 
-      // Processar dados para performance de todos os formulários
+      // Calcular performance de todos os formulários usando os dados carregados
       const performanceMap = new Map<string, { formName: string; count: number }>();
       
-      allLeads?.forEach(lead => {
+      (leadsData || []).forEach(lead => {
         const formId = lead.form_id || 'unknown';
         const formName = lead.form_name || 'Formulário desconhecido';
         
@@ -211,24 +218,33 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       console.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
       setFormPerformanceData(performanceData);
 
-      // Calcular envios para o formulário selecionado no funil principal
-      let submissionsForSelectedForm = 0;
-      
-      if (selectedForm === 'all') {
-        submissionsForSelectedForm = allLeads?.length || 0;
-        console.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
-      } else {
-        const filteredLeads = allLeads?.filter(lead => lead.form_id === selectedForm) || [];
-        submissionsForSelectedForm = filteredLeads.length;
-        console.log('📊 [ConversionFunnel] Formulário específico:', selectedForm, 'total:', submissionsForSelectedForm);
-      }
-
-      setFormSubmissions(submissionsForSelectedForm);
-      console.log('✅ [ConversionFunnel] Envios do funil atualizados:', submissionsForSelectedForm);
-
     } catch (error) {
       console.error('❌ [ConversionFunnel] Erro crítico ao carregar dados:', error);
     }
+  };
+
+  // Calcular envios para o formulário selecionado usando allLeads como fonte única
+  const calculateFormSubmissions = () => {
+    if (!allLeads || allLeads.length === 0) {
+      console.log('📊 [ConversionFunnel] Nenhum lead disponível para calcular');
+      setFormSubmissions(0);
+      return;
+    }
+
+    let submissionsForSelectedForm = 0;
+    
+    if (selectedForm === 'all') {
+      submissionsForSelectedForm = allLeads.length;
+      console.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
+    } else {
+      const filteredLeads = allLeads.filter(lead => lead.form_id === selectedForm);
+      submissionsForSelectedForm = filteredLeads.length;
+      console.log('📊 [ConversionFunnel] Formulário específico:', selectedForm, 'total:', submissionsForSelectedForm);
+      console.log('📊 [ConversionFunnel] Leads filtrados:', filteredLeads);
+    }
+
+    setFormSubmissions(submissionsForSelectedForm);
+    console.log('✅ [ConversionFunnel] Envios do funil atualizados:', submissionsForSelectedForm);
   };
 
   // Função de refresh que usa a mesma lógica
@@ -237,7 +253,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     try {
       console.log('🔄 [ConversionFunnel] === ATUALIZANDO DADOS ===');
       await loadFormData();
-      toast.success(`Dados atualizados: ${formSubmissions} envios para o período selecionado`);
+      toast.success(`Dados atualizados para o período selecionado`);
     } catch (error) {
       console.error('❌ [ConversionFunnel] Erro ao atualizar dados:', error);
       toast.error('Erro ao atualizar dados do período selecionado');
@@ -271,7 +287,12 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       console.log('🔄 [ConversionFunnel] Removendo listener realtime...');
       supabase.removeChannel(channel);
     };
-  }, [dateRange, selectedForm, availableForms]);
+  }, [dateRange, availableForms]);
+
+  // Recalcular envios quando selectedForm ou allLeads mudam
+  useEffect(() => {
+    calculateFormSubmissions();
+  }, [selectedForm, allLeads]);
 
   // Carregar configurações de marketing
   useEffect(() => {
@@ -297,13 +318,13 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   }, [configLoading, multipleFormsConfig]);
 
-  // Atualizar dados quando período ou formulário mudar
+  // Atualizar dados quando período mudar
   useEffect(() => {
     if (availableForms.length > 0) {
       console.log('🔄 [ConversionFunnel] useEffect: Atualizando dados analytics');
       loadFormData();
     }
-  }, [dateRange, selectedForm, availableForms]);
+  }, [dateRange, availableForms]);
 
   // Cálculos automáticos
   const conversionRate = formSubmissions > 0 ? contracts / formSubmissions * 100 : 0;
