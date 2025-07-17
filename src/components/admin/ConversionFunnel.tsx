@@ -153,6 +153,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         from: dateRange.from.toISOString(),
         to: dateRange.to.toISOString()
       });
+      console.log('🎯 [ConversionFunnel] Formulário selecionado:', selectedForm);
       
       // Buscar TODOS os dados de form_leads para o período
       const { data: leadsData, error } = await supabase
@@ -212,21 +213,30 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       console.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
       setFormPerformanceData(performanceData);
 
-      // Calcular submissions para o formulário selecionado USANDO A MESMA FONTE
+      // ===== CORREÇÃO DO BUG: USAR A MESMA LÓGICA DA PERFORMANCE =====
       let submissionsForSelectedForm = 0;
       
       if (selectedForm === 'all') {
         submissionsForSelectedForm = leadsData?.length || 0;
         console.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
       } else {
-        const filteredLeads = (leadsData || []).filter(lead => lead.form_id === selectedForm);
-        submissionsForSelectedForm = filteredLeads.length;
-        console.log('📊 [ConversionFunnel] Formulário específico:', selectedForm, 'total:', submissionsForSelectedForm);
-        console.log('📊 [ConversionFunnel] Leads filtrados:', filteredLeads);
+        // USAR A MESMA CONTAGEM QUE ESTÁ NA PERFORMANCE
+        const performanceForSelected = performanceData.find(p => p.formId === selectedForm);
+        submissionsForSelectedForm = performanceForSelected?.count || 0;
+        
+        console.log('📊 [ConversionFunnel] ===== CORREÇÃO APLICADA =====');
+        console.log('📊 [ConversionFunnel] Formulário selecionado:', selectedForm);
+        console.log('📊 [ConversionFunnel] Performance encontrada:', performanceForSelected);
+        console.log('📊 [ConversionFunnel] Contagem a ser usada no funil:', submissionsForSelectedForm);
+        
+        // Log adicional para debug
+        const directFilteredLeads = (leadsData || []).filter(lead => lead.form_id === selectedForm);
+        console.log('📊 [ConversionFunnel] Leads filtrados diretamente:', directFilteredLeads);
+        console.log('📊 [ConversionFunnel] Contagem direta:', directFilteredLeads.length);
       }
 
       setFormSubmissions(submissionsForSelectedForm);
-      console.log('✅ [ConversionFunnel] Envios do funil atualizados:', submissionsForSelectedForm);
+      console.log('✅ [ConversionFunnel] FUNIL ATUALIZADO - Envios:', submissionsForSelectedForm);
 
     } catch (error) {
       console.error('❌ [ConversionFunnel] Erro crítico ao carregar dados:', error);
