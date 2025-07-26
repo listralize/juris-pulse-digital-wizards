@@ -60,10 +60,18 @@ export const LeadsManagement: React.FC = () => {
   // Aplicar filtros
   useEffect(() => {
     let filtered = [...leads];
+    
+    console.log('🔍 Total de leads antes do filtro:', leads.length);
+    console.log('📋 Formulários disponíveis:', formConfigs);
 
     // Filtro por formulário
     if (selectedFormId !== 'all') {
-      filtered = filtered.filter(lead => (lead.form_id || 'default') === selectedFormId);
+      filtered = filtered.filter(lead => {
+        const formId = lead.form_id || 'default';
+        const match = formId === selectedFormId;
+        return match;
+      });
+      console.log(`📋 Filtrado por formulário ${selectedFormId}:`, filtered.length);
     }
 
     // Filtro por busca
@@ -71,18 +79,20 @@ export const LeadsManagement: React.FC = () => {
       filtered = filtered.filter(lead => {
         const searchText = searchQuery.toLowerCase();
         const data = lead.lead_data || {};
-        return (
-          data.name?.toLowerCase().includes(searchText) ||
-          data.email?.toLowerCase().includes(searchText) ||
-          data.phone?.toLowerCase().includes(searchText) ||
-          data.message?.toLowerCase().includes(searchText)
+        const match = (
+          (data.name || data.nome || '').toLowerCase().includes(searchText) ||
+          (data.email || '').toLowerCase().includes(searchText) ||
+          (data.phone || data.telefone || '').toLowerCase().includes(searchText) ||
+          (data.message || data.mensagem || '').toLowerCase().includes(searchText)
         );
+        return match;
       });
+      console.log(`🔍 Filtrado por busca "${searchQuery}":`, filtered.length);
     }
 
     // Filtro por status
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(lead => lead.status === statusFilter);
+      filtered = filtered.filter(lead => (lead.status || 'new') === statusFilter);
     }
 
     // Filtro por data

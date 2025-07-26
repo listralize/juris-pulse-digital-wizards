@@ -79,9 +79,14 @@ const Partners = () => {
       const { team_video_enabled, team_background_video } = event.detail;
       const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
       
-      if (videoElement && team_background_video) {
-        videoElement.src = team_background_video;
-        videoElement.style.display = team_video_enabled ? 'block' : 'none';
+      if (videoElement) {
+        if (team_background_video && team_video_enabled) {
+          videoElement.src = team_background_video;
+          videoElement.style.display = 'block';
+          videoElement.play().catch(console.error);
+        } else {
+          videoElement.style.display = 'none';
+        }
       }
     };
 
@@ -104,13 +109,19 @@ const Partners = () => {
           .limit(1)
           .maybeSingle();
 
-        if (settings && settings.team_background_video) {
+        if (settings) {
           const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
           
           if (videoElement) {
-            videoElement.src = settings.team_background_video;
-            videoElement.style.display = settings.team_video_enabled ? 'block' : 'none';
-            console.log('🎥 Team video carregado:', settings);
+            if (settings.team_background_video && settings.team_video_enabled) {
+              videoElement.src = settings.team_background_video;
+              videoElement.style.display = 'block';
+              videoElement.play().catch(console.error);
+              console.log('🎥 Team video carregado e reproduzindo:', settings.team_background_video);
+            } else {
+              videoElement.style.display = 'none';
+              console.log('🎥 Team video desabilitado ou sem URL');
+            }
           }
         }
       } catch (error) {
