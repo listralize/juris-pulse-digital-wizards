@@ -128,13 +128,13 @@ const LocationMap = () => {
   };
 
   return (
-    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} h-full border cursor-pointer`} onClick={handleMapClick}>
-      <div className="h-full min-h-[200px]">
+    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} h-full border relative`}>
+      <div className="h-full min-h-[200px] relative">
         <iframe
           src={mapConfig.embedUrl}
           width="100%"
           height="100%"
-          style={{ border: 0, minHeight: '200px', pointerEvents: 'none' }}
+          style={{ border: 0, minHeight: '200px', pointerEvents: 'auto' }}
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
@@ -147,12 +147,16 @@ const LocationMap = () => {
             (e.target as HTMLIFrameElement).src = fallbackUrl;
           }}
         />
-        {/* Overlay clicável */}
-        <div className="absolute inset-0 bg-transparent hover:bg-black/5 transition-colors duration-200 flex items-center justify-center">
-          <div className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-black/70 text-white' : 'bg-white/70 text-black'} opacity-0 hover:opacity-100 transition-opacity`}>
-            Clique para abrir no Google Maps
-          </div>
-        </div>
+        {/* Botão para abrir no Google Maps */}
+        <button
+          onClick={handleMapClick}
+          className={`absolute top-2 right-2 px-2 py-1 text-xs rounded shadow-lg transition-all hover:scale-105 ${
+            isDark ? 'bg-black/80 text-white hover:bg-black' : 'bg-white/90 text-black hover:bg-white'
+          }`}
+          style={{ zIndex: 10 }}
+        >
+          📍 Ver no Google Maps
+        </button>
       </div>
     </div>
   );

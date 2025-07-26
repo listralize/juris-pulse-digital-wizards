@@ -156,7 +156,7 @@ const Contact = () => {
             
             <div className={`order-1 lg:order-2 ${
               isMobile ? '' : isTablet ? 'lg:col-span-2' : 'lg:col-span-3'
-            }`}>
+            }`} style={{ zIndex: 20, position: 'relative' }}>
               <div className={`rounded-lg border shadow-md ${
                 isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'
               } ${isTablet ? 'p-4' : 'p-3'}`}>
