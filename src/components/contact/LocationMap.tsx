@@ -6,6 +6,34 @@ const LocationMap = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  // Função para converter URL do Google Maps para embed
+  const convertToEmbedUrl = (url: string): string => {
+    try {
+      // Se já é uma URL de embed, retorna como está
+      if (url.includes('/maps/embed')) {
+        return url;
+      }
+      
+      // Se é um link do Google Maps (https://maps.app.goo.gl/...)
+      if (url.includes('maps.app.goo.gl') || url.includes('goo.gl')) {
+        // Para links encurtados, usamos a URL diretamente mas convertemos para embed
+        const embedUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3001.0!2d-49.2666729!3d-16.6868916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTbCsDQxJzEyLjgiUyA0OcKwMTUnNjAuMCJX!5e0!3m2!1spt!2sbr!4v1635789456123!5m2!1spt!2sbr&q=${encodeURIComponent(url)}`;
+        return embedUrl;
+      }
+      
+      // Se é uma URL comum do Google Maps, tentamos extrair coordenadas ou local
+      if (url.includes('google.com/maps')) {
+        return url.replace(/\/maps\//, '/maps/embed/');
+      }
+      
+      // Como fallback, cria um embed genérico
+      return `https://www.google.com/maps/embed/v1/place?key=&q=${encodeURIComponent(url)}`;
+    } catch (error) {
+      console.error('Erro ao converter URL do mapa:', error);
+      return url;
+    }
+  };
+
   const [mapConfig, setMapConfig] = useState({
     embedUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15287.357738754663!2d-49.2666729!3d-16.6868916!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935ef205c3fd8e61%3A0x5c8b4e2c7a6b1234!2sWorld%20Trade%20Center%20-%20Torre%20Office%20Corporate!5e0!3m2!1spt!2sbr!4v1635789456123!5m2!1spt!2sbr',
     location: 'World Trade Center, Goiânia - GO'
@@ -28,10 +56,12 @@ const LocationMap = () => {
 
         if (contact) {
           if (contact.map_embed_url) {
+            const processedUrl = convertToEmbedUrl(contact.map_embed_url);
             setMapConfig(prev => ({
               ...prev,
-              embedUrl: contact.map_embed_url
+              embedUrl: processedUrl
             }));
+            console.log('🗺️ LocationMap: URL processada:', processedUrl);
           }
           if (contact.address) {
             setMapConfig(prev => ({
@@ -66,10 +96,13 @@ const LocationMap = () => {
           }));
         }
         if (mapEmbedUrl || map_embed_url) {
+          const rawUrl = mapEmbedUrl || map_embed_url;
+          const processedUrl = convertToEmbedUrl(rawUrl);
           setMapConfig(prev => ({
             ...prev,
-            embedUrl: mapEmbedUrl || map_embed_url
+            embedUrl: processedUrl
           }));
+          console.log('🗺️ LocationMap: URL atualizada em tempo real:', processedUrl);
         }
       }
     };
@@ -95,6 +128,12 @@ const LocationMap = () => {
           referrerPolicy="no-referrer-when-downgrade"
           title={`Localização: ${mapConfig.location}`}
           className="w-full h-full"
+          onError={(e) => {
+            console.error('❌ LocationMap: Erro ao carregar iframe do mapa:', e);
+            // Tentar uma URL alternativa em caso de erro
+            const fallbackUrl = `https://www.google.com/maps/embed/v1/search?key=&q=${encodeURIComponent(mapConfig.location)}`;
+            (e.target as HTMLIFrameElement).src = fallbackUrl;
+          }}
         />
       </div>
     </div>
