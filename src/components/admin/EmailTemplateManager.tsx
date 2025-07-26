@@ -73,12 +73,26 @@ export const EmailTemplateManager: React.FC = () => {
     if (!selectedTemplate) return;
 
     try {
+      // Filtrar apenas os campos que existem na tabela
+      const templateData = {
+        id: selectedTemplate.id,
+        name: selectedTemplate.name,
+        title: selectedTemplate.title,
+        subject: selectedTemplate.subject,
+        content: selectedTemplate.content,
+        is_default: selectedTemplate.is_default,
+        is_active: selectedTemplate.is_active,
+        button_text: selectedTemplate.button_text || 'Falar no WhatsApp',
+        button_url: selectedTemplate.button_url || 'https://api.whatsapp.com/send?phone=5562994594496',
+        secondary_button_text: selectedTemplate.secondary_button_text || 'Seguir no Instagram',
+        secondary_button_url: selectedTemplate.secondary_button_url || 'https://instagram.com/seu_perfil',
+        show_secondary_button: selectedTemplate.show_secondary_button ?? true,
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('email_templates')
-        .upsert({
-          ...selectedTemplate,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(templateData);
 
       if (error) throw error;
 
@@ -87,7 +101,7 @@ export const EmailTemplateManager: React.FC = () => {
       loadTemplates();
     } catch (error) {
       console.error('Erro ao salvar template:', error);
-      toast.error('Erro ao salvar template');
+      toast.error(`Erro ao salvar template: ${error.message}`);
     }
   };
 

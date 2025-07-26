@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -492,29 +491,34 @@ export const ContactFormManagement: React.FC = () => {
                   <div className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-opacity-50 ${
                     isDark ? 'border-white/20 hover:bg-white/10' : 'border-gray-200 hover:bg-gray-50'
                   }`}>
-                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
-                      {category} ({pages.length} páginas)
-                    </h4>
-                    {openCategories[category] ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
+                    <div className="flex items-center gap-2">
+                      {openCategories[category] ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                      <span className="font-medium">{category}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        isDark ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {pages.length}
+                      </span>
+                    </div>
                   </div>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="mt-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 ml-4">
-                    {pages.map((page) => (
-                      <div key={page.value} className="flex items-center space-x-2 p-2">
-                        <Checkbox
-                          id={`page-${page.value}`}
-                          checked={currentForm.linkedPages?.includes(page.value) || false}
-                          onCheckedChange={(checked) => {
-                            const currentPages = currentForm.linkedPages || [];
-                            const updatedPages = checked
-                              ? [...currentPages, page.value]
-                            : currentPages.filter(p => p !== page.value);
-                          updateLinkedPages(updatedPages);
+                <CollapsibleContent className="space-y-2 mt-2 ml-6">
+                  {pages.map((page) => (
+                    <div key={page.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`page-${page.value}`}
+                        checked={currentForm.linkedPages?.includes(page.value) || false}
+                        onCheckedChange={(checked) => {
+                          const currentPages = currentForm.linkedPages || [];
+                          if (checked) {
+                            updateLinkedPages([...currentPages, page.value]);
+                          } else {
+                            updateLinkedPages(currentPages.filter(p => p !== page.value));
+                          }
                         }}
                       />
                       <Label htmlFor={`page-${page.value}`} className="text-sm">
@@ -522,7 +526,6 @@ export const ContactFormManagement: React.FC = () => {
                       </Label>
                     </div>
                   ))}
-                  </div>
                 </CollapsibleContent>
               </Collapsible>
             ))}
@@ -530,72 +533,119 @@ export const ContactFormManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Form Header Texts */}
+      {/* Embed Generator */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
           <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-            📝 Textos do Cabeçalho
+            🔗 Gerador de Embed
           </CardTitle>
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Gere um código HTML para incorporar este formulário em qualquer site
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Título do Cabeçalho</Label>
-              <Input
-                value={currentForm.formTexts.headerTitle}
-                onChange={(e) => updateCurrentForm({
-                  formTexts: { ...currentForm.formTexts, headerTitle: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Subtítulo do Cabeçalho</Label>
-              <Input
-                value={currentForm.formTexts.headerSubtitle}
-                onChange={(e) => updateCurrentForm({
-                  formTexts: { ...currentForm.formTexts, headerSubtitle: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Texto do Botão</Label>
-              <Input
-                value={currentForm.formTexts.submitButton}
-                onChange={(e) => updateCurrentForm({
-                  formTexts: { ...currentForm.formTexts, submitButton: e.target.value }
-                })}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Mensagem de Sucesso</Label>
-              <Textarea
-                value={currentForm.formTexts.successMessage}
-                onChange={(e) => updateCurrentForm({
-                  formTexts: { ...currentForm.formTexts, successMessage: e.target.value }
-                })}
-                rows={2}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-            </div>
-            <div>
-              <Label>Mensagem de Erro</Label>
-              <Textarea
-                value={currentForm.formTexts.errorMessage}
-                onChange={(e) => updateCurrentForm({
-                  formTexts: { ...currentForm.formTexts, errorMessage: e.target.value }
-                })}
-                rows={2}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+          <div>
+            <Label>Código HTML do Formulário</Label>
+            <Textarea
+              readOnly
+              value={`<iframe 
+  src="${window.location.origin}/embed/form/${currentForm.id || 'default'}" 
+  width="100%" 
+  height="600" 
+  frameborder="0" 
+  style="border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+</iframe>
+
+<!-- Adicione este script para tracking e redimensionamento automático -->
+<script>
+window.addEventListener('message', function(event) {
+  if (event.origin !== '${window.location.origin}') return;
+  if (event.data.type === 'resize') {
+    const iframe = document.querySelector('iframe[src*="embed/form"]');
+    if (iframe) iframe.height = event.data.height;
+  }
+  if (event.data.type === 'form_submitted') {
+    console.log('Formulário enviado:', event.data.data);
+    // Adicione aqui seu código de tracking (Google Analytics, Facebook Pixel, etc.)
+  }
+});
+</script>`}
+              rows={15}
+              className={`font-mono text-xs ${isDark ? 'bg-black border-white/20 text-white' : 'bg-gray-50 border-gray-200 text-black'}`}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={() => {
+                const embedCode = `<iframe src="${window.location.origin}/embed/form/${currentForm.id || 'default'}" width="100%" height="600" frameborder="0" style="border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></iframe>`;
+                navigator.clipboard.writeText(embedCode);
+                toast.success('Código do iframe copiado!');
+              }}
+              variant="outline"
+            >
+              📋 Copiar Apenas iframe
+            </Button>
+            
+            <Button
+              onClick={() => {
+                const fullCode = `<iframe 
+  src="${window.location.origin}/embed/form/${currentForm.id || 'default'}" 
+  width="100%" 
+  height="600" 
+  frameborder="0" 
+  style="border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+</iframe>
+
+<script>
+window.addEventListener('message', function(event) {
+  if (event.origin !== '${window.location.origin}') return;
+  if (event.data.type === 'resize') {
+    const iframe = document.querySelector('iframe[src*="embed/form"]');
+    if (iframe) iframe.height = event.data.height;
+  }
+  if (event.data.type === 'form_submitted') {
+    console.log('Formulário enviado:', event.data.data);
+  }
+});
+</script>`;
+                navigator.clipboard.writeText(fullCode);
+                toast.success('Código completo copiado!');
+              }}
+            >
+              📋 Copiar Código Completo
+            </Button>
+          </div>
+
+          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-blue-50'}`}>
+            <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+              💡 Como usar:
+            </h4>
+            <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <li>• Cole o código HTML em qualquer página web</li>
+              <li>• O formulário será exibido com seus estilos personalizados</li>
+              <li>• Os dados serão enviados para o webhook configurado</li>
+              <li>• O script de tracking permite monitorar envios</li>
+              <li>• O iframe se redimensiona automaticamente</li>
+            </ul>
+          </div>
+
+          <div>
+            <Label>Preview do Embed</Label>
+            <div className={`p-4 border rounded-lg ${isDark ? 'border-white/20' : 'border-gray-200'}`}>
+              <iframe 
+                src={`${window.location.origin}/embed/form/${currentForm.id || 'default'}`}
+                width="100%" 
+                height="400" 
+                style={{ border: 'none', borderRadius: '8px' }}
+                title="Preview do formulário embed"
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Unified Fields Manager */}
+      {/* Form Fields Management */}
       <FormFieldsManager
         formFields={currentForm.allFields || []}
         onUpdateFormFields={updateFormFields}
@@ -603,9 +653,17 @@ export const ContactFormManagement: React.FC = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={saveFormConfig} disabled={isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Salvando...' : 'Salvar Todas as Configurações'}
+        <Button 
+          onClick={saveFormConfig} 
+          disabled={isSaving}
+          className="flex items-center gap-2"
+        >
+          {isSaving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          {isSaving ? 'Salvando...' : 'Salvar Configurações'}
         </Button>
       </div>
     </div>

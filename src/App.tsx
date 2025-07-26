@@ -17,6 +17,7 @@ import LinkTree from './pages/LinkTree';
 import NotFound from './pages/NotFound';
 import PoliticaPrivacidade from './pages/PoliticaPrivacidade';
 import TermosUso from './pages/TermosUso';
+import EmbedForm from './pages/EmbedForm';
 
 // Dynamic routes
 import DynamicServiceRoutes from './components/DynamicServiceRoutes';
@@ -53,6 +54,9 @@ function App() {
                 <Route path="/obrigado" element={<Obrigado />} />
                 <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
                 <Route path="/termos-uso" element={<TermosUso />} />
+                
+                {/* Embed form route */}
+                <Route path="/embed/form/:formId" element={<EmbedForm />} />
                 
                 {/* Static area pages (fallbacks for existing URLs) */}
                 <Route path="/areas/familia" element={<Familia />} />
