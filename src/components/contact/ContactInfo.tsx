@@ -12,7 +12,8 @@ const ContactInfo = () => {
     phone: '(62) 99459-4496',
     email: 'contato@stadv.com',
     address: 'World Trade Center, Torre Office e Corporate, Av. D, Av. 85 - St. Marista, Goiânia - GO, 74150-040',
-    whatsapp: '5562994594496'
+    whatsapp: '5562994594496',
+    mapUrl: ''
   });
 
   // Carregar dados iniciais do Supabase
@@ -25,7 +26,7 @@ const ContactInfo = () => {
         // Buscar dados da contact_info
         const { data: contact } = await supabase
           .from('contact_info')
-          .select('phone, email, address, whatsapp')
+          .select('phone, email, address, whatsapp, map_embed_url')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -36,7 +37,8 @@ const ContactInfo = () => {
             phone: contact.phone || contactData.phone,
             email: contact.email || contactData.email,
             address: contact.address || contactData.address,
-            whatsapp: contact.whatsapp || contactData.whatsapp
+            whatsapp: contact.whatsapp || contactData.whatsapp,
+            mapUrl: contact.map_embed_url || ''
           });
         }
       } catch (error) {
@@ -55,7 +57,7 @@ const ContactInfo = () => {
       const data = event.detail;
       
       if (data.contactTexts) {
-        const { phone, email, address, whatsapp } = data.contactTexts;
+        const { phone, email, address, whatsapp, mapEmbedUrl, map_embed_url } = data.contactTexts;
         console.log('📞 ContactInfo: Atualizando dados de contato:', data.contactTexts);
         
         setContactData(prev => ({
@@ -63,7 +65,9 @@ const ContactInfo = () => {
           ...(phone !== undefined && { phone }),
           ...(email !== undefined && { email }),
           ...(address !== undefined && { address }),
-          ...(whatsapp !== undefined && { whatsapp })
+          ...(whatsapp !== undefined && { whatsapp }),
+          ...(mapEmbedUrl !== undefined && { mapUrl: mapEmbedUrl }),
+          ...(map_embed_url !== undefined && { mapUrl: map_embed_url })
         }));
       }
     };
@@ -74,6 +78,16 @@ const ContactInfo = () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     };
   }, []);
+
+  const handleAddressClick = () => {
+    if (contactData.mapUrl) {
+      window.open(contactData.mapUrl, '_blank');
+    } else {
+      // Fallback para busca no Google Maps
+      const encodedAddress = encodeURIComponent(contactData.address);
+      window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+    }
+  };
 
   return (
     <div className={`p-4 rounded-lg ${isDark ? 'bg-black text-white' : 'bg-white text-black'} h-full`}>
@@ -86,9 +100,12 @@ const ContactInfo = () => {
           <MapPin className={`w-5 h-5 mt-1 ${isDark ? 'text-white' : 'text-black'}`} />
           <div>
             <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>Endereço</p>
-            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            <button
+              onClick={handleAddressClick}
+              className={`text-sm ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline text-left cursor-pointer transition-colors`}
+            >
               {contactData.address}
-            </p>
+            </button>
           </div>
         </div>
         

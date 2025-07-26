@@ -40,6 +40,8 @@ const LocationMap = () => {
   });
 
   // Carregar configurações do mapa do Supabase
+  const [mapUrl, setMapUrl] = useState('');
+  
   useEffect(() => {
     const loadMapConfig = async () => {
       try {
@@ -61,6 +63,8 @@ const LocationMap = () => {
               ...prev,
               embedUrl: processedUrl
             }));
+            // Guardar URL original para clique
+            setMapUrl(contact.map_embed_url);
             console.log('🗺️ LocationMap: URL processada:', processedUrl);
           }
           if (contact.address) {
@@ -102,6 +106,8 @@ const LocationMap = () => {
             ...prev,
             embedUrl: processedUrl
           }));
+          // Guardar URL original para clique
+          setMapUrl(rawUrl);
           console.log('🗺️ LocationMap: URL atualizada em tempo real:', processedUrl);
         }
       }
@@ -115,14 +121,20 @@ const LocationMap = () => {
     };
   }, []);
 
+  const handleMapClick = () => {
+    if (mapUrl) {
+      window.open(mapUrl, '_blank');
+    }
+  };
+
   return (
-    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} h-full border`}>
+    <div className={`rounded-lg overflow-hidden ${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} h-full border cursor-pointer`} onClick={handleMapClick}>
       <div className="h-full min-h-[200px]">
         <iframe
           src={mapConfig.embedUrl}
           width="100%"
           height="100%"
-          style={{ border: 0, minHeight: '200px' }}
+          style={{ border: 0, minHeight: '200px', pointerEvents: 'none' }}
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
@@ -135,6 +147,12 @@ const LocationMap = () => {
             (e.target as HTMLIFrameElement).src = fallbackUrl;
           }}
         />
+        {/* Overlay clicável */}
+        <div className="absolute inset-0 bg-transparent hover:bg-black/5 transition-colors duration-200 flex items-center justify-center">
+          <div className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-black/70 text-white' : 'bg-white/70 text-black'} opacity-0 hover:opacity-100 transition-opacity`}>
+            Clique para abrir no Google Maps
+          </div>
+        </div>
       </div>
     </div>
   );

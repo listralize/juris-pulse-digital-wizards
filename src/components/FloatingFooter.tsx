@@ -111,7 +111,21 @@ const FloatingFooter: React.FC = () => {
   };
 
   const handleEmailClick = () => {
-    window.location.href = `mailto:${footerData.email}`;
+    navigator.clipboard.writeText(footerData.email).then(() => {
+      // Mostrar notificação de que o email foi copiado
+      const notification = document.createElement('div');
+      notification.textContent = 'Email copiado para a área de transferência!';
+      notification.className = `fixed top-4 right-4 z-[100] px-4 py-2 rounded-lg text-sm font-medium ${
+        theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'
+      } shadow-lg transition-all duration-300`;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }).catch(() => {
+      // Fallback para abrir o cliente de email
+      window.location.href = `mailto:${footerData.email}`;
+    });
   };
 
   const handleLocationClick = () => {

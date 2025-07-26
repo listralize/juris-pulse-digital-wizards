@@ -248,7 +248,7 @@ const PracticeAreas = () => {
                           transition-all duration-300 group-hover:scale-110
                           ${isDark 
                             ? 'bg-white/[0.25] text-white group-hover:bg-white/[0.35]' 
-                            : 'bg-black/[0.25] text-black group-hover:bg-black/[0.35]'
+                            : 'bg-white/[0.90] text-black group-hover:bg-white'
                           }
                         `}>
                           <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />
