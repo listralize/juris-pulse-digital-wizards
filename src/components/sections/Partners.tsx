@@ -6,14 +6,14 @@ import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import NeuralBackground from '../NeuralBackground';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+
 gsap.registerPlugin(ScrollTrigger);
+
 const Partners = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const {
-    theme
-  } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === 'dark';
   const {
     teamMembers,
@@ -53,13 +53,19 @@ const Partners = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Sincronizar textos da página
   useEffect(() => {
     setLocalPageTexts(pageTexts);
   }, [pageTexts]);
+
+  // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📱 Partners: Recebendo atualização de textos:', event.detail);
-      setLocalPageTexts(event.detail);
+      const { teamTitle } = event.detail;
+      if (teamTitle !== undefined) {
+        setLocalPageTexts(prev => ({ ...prev, teamTitle }));
+      }
     };
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
     return () => {
@@ -121,45 +127,11 @@ const Partners = () => {
   const nextSlide = () => {
     setCurrentSlide(prev => (prev + 1) % totalSlides);
   };
+  
   const prevSlide = () => {
     setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
   };
-  useEffect(() => {
-    if (isLoading) return;
-    const tl = gsap.timeline({
-      defaults: {
-        ease: 'power3.out'
-      }
-    });
-    tl.fromTo(titleRef.current, {
-      opacity: 0,
-      y: 20
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8
-    }).fromTo(carouselRef.current, {
-      opacity: 0,
-      y: 15
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.6
-    }, "-=0.4");
-    return () => {
-      tl.kill();
-    };
-  }, [isLoading]);
-  useEffect(() => {
-    const interval = setInterval(nextSlide, 8000); // Mudou de 5000 para 8000ms (8 segundos)
-    return () => clearInterval(interval);
-  }, [totalSlides]);
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-full">
-        <div className={`animate-spin rounded-full h-6 w-6 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
-      </div>;
-  }
-  
+
   // Abrir perfil do membro
   const openMemberProfile = (member: any) => {
     setSelectedMember(member);
@@ -173,16 +145,48 @@ const Partners = () => {
   };
 
   const teamTitle = localPageTexts?.teamTitle || 'Nossa Equipe';
-  return <div ref={sectionRef} className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`} style={{
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    // Mudando de center para flex-start
-    marginTop: '0px',
-    paddingTop: isMobile ? '20px' : '50px', // Reduzindo ainda mais no mobile
-    paddingBottom: isMobile ? '30px' : '50px' // Diminuindo espaçamento inferior no mobile
-  }}>
+
+  // Animação com GSAP
+  useEffect(() => {
+    if (!sectionRef.current || !titleRef.current || !carouselRef.current) return;
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    
+    tl.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
+    ).fromTo(
+      carouselRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      "-=0.3"
+    );
+
+    return () => {
+      tl.kill();
+    };
+  }, [teamMembers, isLoading]);
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <p className="mt-4">Carregando equipe...</p>
+      </div>
+    </div>;
+  }
+
+  return (
+    <div 
+      ref={sectionRef}
+      className={`w-full min-h-screen relative overflow-hidden ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}
+    >
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
@@ -222,7 +226,8 @@ const Partners = () => {
             }}>
                 {Array.from({
                 length: totalSlides
-              }).map((_, slideIndex) => <div key={slideIndex} className={`w-full flex-shrink-0 px-2 sm:px-4 ${isMobile ? 'flex justify-center' : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'}`} style={{
+              }).map((_, slideIndex) => (
+                <div key={slideIndex} className={`w-full flex-shrink-0 px-2 sm:px-4 ${isMobile ? 'flex justify-center' : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'}`} style={{
                 width: `${100 / totalSlides}%`
               }}>
                     {teamMembers.slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide).map((member, index) => (
@@ -266,12 +271,14 @@ const Partners = () => {
                         </div>
                       </div>
                     ))}
-                  </div>)}
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Navigation Buttons - Responsivos */}
-            {totalSlides > 1 && <>
+            {totalSlides > 1 && (
+              <>
                 <button onClick={prevSlide} className={`absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 transition-all duration-300 team-nav-button rounded-full flex items-center justify-center ${isDark ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'} hover:scale-110 z-10`}>
                   <ChevronLeft className="team-nav-icon" />
                 </button>
@@ -279,10 +286,25 @@ const Partners = () => {
                 <button onClick={nextSlide} className={`absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 transition-all duration-300 team-nav-button rounded-full flex items-center justify-center ${isDark ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-black/5 hover:bg-black/10 text-black border border-black/10'} hover:scale-110 z-10`}>
                   <ChevronRight className="team-nav-icon" />
                 </button>
-              </>}
+              </>
+            )}
 
             {/* Dots Indicator - Responsivo */}
-            {totalSlides > 1}
+            {totalSlides > 1 && (
+              <div className="flex justify-center mt-6 space-x-2">
+                {Array.from({ length: totalSlides }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      currentSlide === index
+                        ? isDark ? 'bg-white' : 'bg-black'
+                        : isDark ? 'bg-white/30' : 'bg-black/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
