@@ -154,7 +154,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-8 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
+              <TabsList className="grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -197,11 +197,6 @@ const Admin = () => {
                   <span className="hidden sm:inline">Marketing & Analytics</span>
                   <span className="sm:hidden">Marketing</span>
                 </TabsTrigger>
-                <TabsTrigger value="supabase" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
-                  <Database className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Supabase</span>
-                  <span className="sm:hidden">DB</span>
-                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="content">
@@ -230,10 +225,6 @@ const Admin = () => {
 
               <TabsContent value="marketing">
                 <MarketingManagement />
-              </TabsContent>
-
-              <TabsContent value="supabase">
-                <SupabaseDataManager />
               </TabsContent>
             </Tabs>
           </div>

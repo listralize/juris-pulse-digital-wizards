@@ -15,13 +15,20 @@ interface EmailRequest {
   customTitle?: string;
   customContent?: string;
   logoUrl?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  buttonColor?: string;
+  customHtml?: string;
 }
 
-const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string) => {
+const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string, backgroundColor?: string, textColor?: string, buttonColor?: string, customHtml?: string) => {
   const title = customTitle || "Obrigado pelo seu contato!";
   const content = customContent || `Agradecemos seu interesse em nossos serviços de ${service}. Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.`;
   const defaultLogo = "https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png";
   const emailLogo = logoUrl || defaultLogo;
+  const bgColor = backgroundColor || '#000000';
+  const txtColor = textColor || '#ffffff';
+  const btnColor = buttonColor || '#4CAF50';
   
   return `
     <!DOCTYPE html>
@@ -31,29 +38,29 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${title}</title>
     </head>
-    <body style="margin: 0; padding: 0; background-color: #000000; font-family: Arial, sans-serif;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #000000; color: #ffffff;">
+    <body style="margin: 0; padding: 0; background-color: ${bgColor}; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: ${bgColor}; color: ${txtColor};">${customHtml ? `<div>${customHtml}</div>` : ''}
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #1a1a1a, #333333); padding: 40px 20px; text-align: center;">
                 <!-- Logo -->
                 <div style="margin-bottom: 20px;">
                     <img src="${emailLogo}" alt="Logo" style="max-width: 200px; height: auto; display: block; margin: 0 auto;" />
                 </div>
-                <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #ffffff;">
+                <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: ${txtColor};">
                     ${title}
                 </h1>
-                <p style="margin: 10px 0 0 0; font-size: 16px; color: #cccccc;">
+                <p style="margin: 10px 0 0 0; font-size: 16px; color: ${txtColor};">
                     Recebemos sua mensagem e entraremos em contato em breve
                 </p>
             </div>
 
             <!-- Content -->
             <div style="padding: 30px 20px; background-color: #111111;">
-                <p style="font-size: 18px; margin: 0 0 20px 0; color: #ffffff;">
-                    Olá <strong style="color: #4CAF50;">${name}</strong>,
+                <p style="font-size: 18px; margin: 0 0 20px 0; color: ${txtColor};">
+                    Olá <strong style="color: ${btnColor};">${name}</strong>,
                 </p>
                 
-                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #cccccc;">
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: ${txtColor};">
                     ${content}
                 </p>
 
@@ -73,7 +80,7 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
                 <!-- Action Buttons -->
                 <div style="text-align: center; margin: 30px 0;">
                     <a href="https://api.whatsapp.com/send?phone=5562994594496&text=Olá,%20vi%20que%20vocês%20entraram%20em%20contato%20comigo%20por%20email.%20Gostaria%20de%20conversar%20sobre%20meu%20caso." 
-                       style="display: inline-block; background-color: #25D366; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 0 10px 10px 0;">
+                       style="display: inline-block; background-color: ${btnColor}; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 0 10px 10px 0;">
                         💬 Falar no WhatsApp
                     </a>
                     
@@ -166,13 +173,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl }: EmailRequest = await req.json();
+    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml }: EmailRequest = await req.json();
 
     if (!to || !name) {
       throw new Error("Email e nome são obrigatórios");
     }
 
-    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl);
+    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml);
     const emailSubject = subject || `Obrigado pelo contato, ${name}! 📧`;
 
     const result = await sendEmail(to, emailSubject, emailHTML);

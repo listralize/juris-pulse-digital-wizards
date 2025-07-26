@@ -18,6 +18,11 @@ interface EmailTemplate {
   title: string;
   subject: string;
   content: string;
+  logo_url?: string;
+  background_color?: string;
+  text_color?: string;
+  button_color?: string;
+  custom_html?: string;
   is_default: boolean;
   is_active: boolean;
   created_at: string;
@@ -89,6 +94,11 @@ export const EmailTemplateManager: React.FC = () => {
       title: 'Obrigado pelo seu contato!',
       subject: 'Obrigado pelo contato, {name}! 📧',
       content: 'Agradecemos seu interesse em nossos serviços de {service}. Nossa equipe entrará em contato em breve.',
+      logo_url: '',
+      background_color: '#000000',
+      text_color: '#ffffff',
+      button_color: '#4CAF50',
+      custom_html: '',
       is_default: false,
       is_active: true,
       created_at: new Date().toISOString(),
@@ -138,7 +148,12 @@ export const EmailTemplateManager: React.FC = () => {
           service: 'Teste de Template',
           message: 'Este é um email de teste do sistema.',
           customTitle: selectedTemplate.title,
-          customContent: selectedTemplate.content.replace('{service}', 'teste').replace('{name}', 'Teste')
+          customContent: selectedTemplate.content.replace('{service}', 'teste').replace('{name}', 'Teste'),
+          logoUrl: selectedTemplate.logo_url,
+          backgroundColor: selectedTemplate.background_color,
+          textColor: selectedTemplate.text_color,
+          buttonColor: selectedTemplate.button_color,
+          customHtml: selectedTemplate.custom_html
         }
       });
 
@@ -337,6 +352,74 @@ export const EmailTemplateManager: React.FC = () => {
                         })}
                         rows={6}
                         placeholder="Use {service} para o serviço e {name} para o nome do cliente"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="logo_url">URL da Logo</Label>
+                        <Input
+                          id="logo_url"
+                          value={selectedTemplate.logo_url || ''}
+                          onChange={(e) => setSelectedTemplate({
+                            ...selectedTemplate,
+                            logo_url: e.target.value
+                          })}
+                          placeholder="https://exemplo.com/logo.png"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="background_color">Cor de Fundo</Label>
+                        <Input
+                          id="background_color"
+                          type="color"
+                          value={selectedTemplate.background_color || '#000000'}
+                          onChange={(e) => setSelectedTemplate({
+                            ...selectedTemplate,
+                            background_color: e.target.value
+                          })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="text_color">Cor do Texto</Label>
+                        <Input
+                          id="text_color"
+                          type="color"
+                          value={selectedTemplate.text_color || '#ffffff'}
+                          onChange={(e) => setSelectedTemplate({
+                            ...selectedTemplate,
+                            text_color: e.target.value
+                          })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="button_color">Cor dos Botões</Label>
+                        <Input
+                          id="button_color"
+                          type="color"
+                          value={selectedTemplate.button_color || '#4CAF50'}
+                          onChange={(e) => setSelectedTemplate({
+                            ...selectedTemplate,
+                            button_color: e.target.value
+                          })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="custom_html">HTML Personalizado (Opcional)</Label>
+                      <Textarea
+                        id="custom_html"
+                        value={selectedTemplate.custom_html || ''}
+                        onChange={(e) => setSelectedTemplate({
+                          ...selectedTemplate,
+                          custom_html: e.target.value
+                        })}
+                        rows={8}
+                        placeholder="HTML personalizado adicional para o template"
                       />
                     </div>
                   </>

@@ -199,29 +199,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     );
   }
 
-  if (showPageBuilder) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => setShowPageBuilder(false)}
-            variant="outline"
-            size="sm"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-            Construtor de Landing Pages
-          </h2>
-        </div>
-        <PageBuilder 
-          page={null}
-          onUpdatePage={() => {}}
-        />
-      </div>
-    );
-  }
 
   if (categoriesLoading) {
     return (
@@ -240,10 +217,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               Gerenciar Páginas por Área do Direito
             </CardTitle>
             <div className="flex gap-2">
-              <Button onClick={() => setShowPageBuilder(true)} size="sm" variant="default">
-                <Plus className="w-4 h-4 mr-2" />
-                Construtor de Landing Page
-              </Button>
               <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Categoria
