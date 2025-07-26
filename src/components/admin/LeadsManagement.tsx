@@ -35,24 +35,37 @@ interface Lead {
 
 // Função para interpretar dados do formulário JSON
 const parseLeadData = (leadData: any) => {
-  if (!leadData || typeof leadData !== 'object') return {};
+  if (!leadData) return {};
   
   console.log('🔍 Dados brutos do lead:', leadData);
   
+  let parsedLeadData = leadData;
+  
+  // Se leadData é uma string JSON, fazer parse
+  if (typeof leadData === 'string') {
+    try {
+      parsedLeadData = JSON.parse(leadData);
+      console.log('📦 JSON parseado:', parsedLeadData);
+    } catch (error) {
+      console.error('❌ Erro ao fazer parse do JSON:', error);
+      return {};
+    }
+  }
+  
   // Os dados já vêm com as chaves corretas, apenas adicionar aliases para compatibilidade
-  const parsedData = {
-    ...leadData,
+  const result = {
+    ...parsedLeadData,
     // Aliases para compatibilidade
-    nome: leadData.name || leadData.nome,
-    telefone: leadData.phone || leadData.telefone,
-    servico: leadData.service || leadData.servico,
-    mensagem: leadData.message || leadData.mensagem,
-    urgente: leadData.isUrgent || leadData.urgente
+    nome: parsedLeadData.name || parsedLeadData.nome,
+    telefone: parsedLeadData.phone || parsedLeadData.telefone,
+    servico: parsedLeadData.service || parsedLeadData.servico,
+    mensagem: parsedLeadData.message || parsedLeadData.mensagem,
+    urgente: parsedLeadData.isUrgent || parsedLeadData.urgente
   };
   
-  console.log('✅ Dados parseados:', parsedData);
+  console.log('✅ Dados parseados:', result);
   
-  return parsedData;
+  return result;
 };
 
 
@@ -217,7 +230,8 @@ export const LeadsManagement: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('all');
   const [formFilter, setFormFilter] = useState('all');
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
-  const [currentView, setCurrentView] = useState<'cards' | 'table'>('table');
+  const [currentView, setCurrentView] = useState<'cards' | 'table' | 'kanban'>('table');
+  const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
 
   // Carregar leads diretamente da tabela conversion_events
   const loadLeads = async () => {
@@ -417,13 +431,212 @@ export const LeadsManagement: React.FC = () => {
           </SelectContent>
         </Select>
 
-        <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as 'cards' | 'table')}>
+        <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as 'cards' | 'table' | 'kanban')}>
           <TabsList>
             <TabsTrigger value="table">Tabela</TabsTrigger>
             <TabsTrigger value="cards">Cards</TabsTrigger>
+            <TabsTrigger value="kanban">Kanban</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
+
+      {/* Visualização Kanban */}
+      {currentView === 'kanban' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Coluna Novo */}
+          <div className="bg-muted/30 rounded-lg p-4">
+            <h3 className="font-semibold mb-3 text-center">Novo</h3>
+            <div className="space-y-3">
+              {filteredLeads
+                .filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo')
+                .map((lead) => {
+                  const rawLeadData = lead.lead_data || {};
+                  const leadData = parseLeadData(rawLeadData);
+                  const phone = leadData.phone || leadData.telefone;
+                  const name = leadData.name || leadData.nome;
+                  
+                  return (
+                    <Card key={lead.id} className="border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20 cursor-pointer hover:shadow-md transition-all">
+                      <CardContent className="p-3">
+                        <div className="space-y-2">
+                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                          {leadData.email && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Mail className="w-3 h-3" />
+                              <span className="truncate">{leadData.email}</span>
+                            </div>
+                          )}
+                          {phone && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Phone className="w-3 h-3 text-green-600" />
+                              <span className="truncate">{phone}</span>
+                            </div>
+                          )}
+                          <div className="flex gap-1 mt-2">
+                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
+                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'contato'})}>
+                              Contatar
+                            </Button>
+                            <LeadDetailSheet lead={lead}>
+                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            </LeadDetailSheet>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* Coluna Em Contato */}
+          <div className="bg-muted/30 rounded-lg p-4">
+            <h3 className="font-semibold mb-3 text-center">Em Contato</h3>
+            <div className="space-y-3">
+              {filteredLeads
+                .filter(lead => leadStatuses[lead.id] === 'contato')
+                .map((lead) => {
+                  const rawLeadData = lead.lead_data || {};
+                  const leadData = parseLeadData(rawLeadData);
+                  const phone = leadData.phone || leadData.telefone;
+                  const name = leadData.name || leadData.nome;
+                  
+                  return (
+                    <Card key={lead.id} className="border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20 cursor-pointer hover:shadow-md transition-all">
+                      <CardContent className="p-3">
+                        <div className="space-y-2">
+                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                          {leadData.email && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Mail className="w-3 h-3" />
+                              <span className="truncate">{leadData.email}</span>
+                            </div>
+                          )}
+                          {phone && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Phone className="w-3 h-3 text-green-600" />
+                              <span className="truncate">{phone}</span>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-4 w-4 p-0 ml-auto"
+                                onClick={() => window.open(`https://wa.me/55${phone.replace(/\D/g, '')}`, '_blank')}
+                              >
+                                <ExternalLink className="w-3 h-3 text-green-600" />
+                              </Button>
+                            </div>
+                          )}
+                          <div className="flex gap-1 mt-2">
+                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
+                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'qualificado'})}>
+                              Qualificar
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
+                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'perdido'})}>
+                              Perder
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* Coluna Qualificado */}
+          <div className="bg-muted/30 rounded-lg p-4">
+            <h3 className="font-semibold mb-3 text-center">Qualificado</h3>
+            <div className="space-y-3">
+              {filteredLeads
+                .filter(lead => leadStatuses[lead.id] === 'qualificado')
+                .map((lead) => {
+                  const rawLeadData = lead.lead_data || {};
+                  const leadData = parseLeadData(rawLeadData);
+                  const phone = leadData.phone || leadData.telefone;
+                  const name = leadData.name || leadData.nome;
+                  
+                  return (
+                    <Card key={lead.id} className="border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 cursor-pointer hover:shadow-md transition-all">
+                      <CardContent className="p-3">
+                        <div className="space-y-2">
+                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                          {leadData.email && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Mail className="w-3 h-3" />
+                              <span className="truncate">{leadData.email}</span>
+                            </div>
+                          )}
+                          {phone && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Phone className="w-3 h-3 text-green-600" />
+                              <span className="truncate">{phone}</span>
+                            </div>
+                          )}
+                          <div className="flex gap-1 mt-2">
+                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
+                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'cliente'})}>
+                              Converter
+                            </Button>
+                            <LeadDetailSheet lead={lead}>
+                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            </LeadDetailSheet>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* Coluna Cliente */}
+          <div className="bg-muted/30 rounded-lg p-4">
+            <h3 className="font-semibold mb-3 text-center">Cliente</h3>
+            <div className="space-y-3">
+              {filteredLeads
+                .filter(lead => leadStatuses[lead.id] === 'cliente')
+                .map((lead) => {
+                  const rawLeadData = lead.lead_data || {};
+                  const leadData = parseLeadData(rawLeadData);
+                  const phone = leadData.phone || leadData.telefone;
+                  const name = leadData.name || leadData.nome;
+                  
+                  return (
+                    <Card key={lead.id} className="border-l-4 border-l-purple-500 bg-purple-50/50 dark:bg-purple-950/20 cursor-pointer hover:shadow-md transition-all">
+                      <CardContent className="p-3">
+                        <div className="space-y-2">
+                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                          {leadData.email && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Mail className="w-3 h-3" />
+                              <span className="truncate">{leadData.email}</span>
+                            </div>
+                          )}
+                          {phone && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Phone className="w-3 h-3 text-green-600" />
+                              <span className="truncate">{phone}</span>
+                            </div>
+                          )}
+                          <div className="text-center mt-2">
+                            <Badge variant="default" className="text-xs bg-purple-600">
+                              Cliente Ativo
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Visualização em Tabela */}
       {currentView === 'table' && (
