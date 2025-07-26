@@ -64,12 +64,9 @@ const BlogPage = () => {
         {/* Header */}
         <div className="text-center mb-12 opacity-0 animate-fade-in-up" style={{ opacity: 1 }}>
           <h1 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            📝 Blog Jurídico
+            Nosso Blog
           </h1>
-          <div className={`w-16 h-0.5 mx-auto mb-4 ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-          <p className={`text-base md:text-lg max-w-3xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Artigos especializados sobre as mais diversas áreas do Direito
-          </p>
+          <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
         </div>
 
         {/* Filtros compactos */}

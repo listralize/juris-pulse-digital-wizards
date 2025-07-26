@@ -218,7 +218,7 @@ const ClientArea = () => {
           <h2 
             ref={titleRef}
             className={`mb-4 font-canela ${isDark ? 'text-white' : 'text-black'} ${
-              isMobile ? 'text-3xl' : isTablet ? 'text-4xl lg:text-5xl' : 'text-3xl md:text-4xl lg:text-5xl'
+              isMobile ? 'text-2xl' : isTablet ? 'text-3xl lg:text-4xl' : 'text-2xl md:text-3xl lg:text-4xl'
             }`}
           >
             {clientAreaTitle}
