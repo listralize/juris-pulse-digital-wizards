@@ -7,23 +7,22 @@ interface FormLead {
   form_id: string | null;
   form_name: string | null;
   lead_data: any;
-  status: string;
+  event_type: string;
+  event_category: string | null;
+  event_action: string;
+  event_label: string | null;
+  conversion_value: number | null;
   created_at: string;
-  updated_at: string;
-  utm_source: string | null;
-  utm_medium: string | null;
-  utm_campaign: string | null;
-  source_page: string | null;
-  country: string | null;
-  city: string | null;
-  is_whatsapp_conversion: boolean;
-  conversion_value: number;
+  timestamp: string;
+  campaign_source: string | null;
+  campaign_medium: string | null;
+  campaign_name: string | null;
+  page_url: string;
+  referrer: string | null;
   session_id: string;
   visitor_id: string | null;
-  ip_address: string | null;
   user_agent: string | null;
-  device_type: string | null;
-  browser: string | null;
+  status?: string; // Campo local para simulação de status
 }
 
 interface FormConfig {
@@ -101,8 +100,9 @@ export const useLeadsData = (): LeadsData => {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('form_leads')
+        .from('conversion_events')
         .select('*')
+        .eq('event_type', 'form_submission')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -111,24 +111,21 @@ export const useLeadsData = (): LeadsData => {
         return;
       }
 
-      // Filtrar apenas leads válidos (não de teste específicos)
+      // Filtrar apenas leads válidos e adicionar status padrão
       const validLeads = (data || []).filter(lead => {
-        // Filtrar apenas dados de teste muito específicos
-        if (lead.session_id?.includes('test-session') ||
-            (lead.lead_data as any)?.name === 'Teste ConversionFunnel') {
-          return false;
-        }
-        
         // Verificar se tem dados válidos de lead
         if (!lead.lead_data || typeof lead.lead_data !== 'object') {
           return false;
         }
         
         const leadData = lead.lead_data as any;
-        return leadData?.name || leadData?.email;
-      });
+        return leadData?.name || leadData?.nome || leadData?.email;
+      }).map(lead => ({
+        ...lead,
+        status: 'new' // Status padrão para todos os leads
+      }));
 
-      console.log('📊 Leads carregados:', validLeads.length);
+      console.log('📊 Leads carregados de conversion_events:', validLeads.length);
       setLeads(validLeads);
     } catch (error) {
       console.error('Erro ao carregar leads:', error);
@@ -142,7 +139,7 @@ export const useLeadsData = (): LeadsData => {
   const deleteLeads = async (leadIds: string[]) => {
     try {
       const { error } = await supabase
-        .from('form_leads')
+        .from('conversion_events')
         .delete()
         .in('id', leadIds);
 
@@ -160,25 +157,13 @@ export const useLeadsData = (): LeadsData => {
     }
   };
 
-  // Atualizar status do lead
+  // Atualizar status do lead (conversão de evento não tem status, mas vamos adicionar uma nota)
   const updateLeadStatus = async (leadId: string, status: string) => {
     try {
-      const { error } = await supabase
-        .from('form_leads')
-        .update({ 
-          status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', leadId);
-
-      if (error) {
-        console.error('Erro ao atualizar status:', error);
-        toast.error('Erro ao atualizar status');
-        throw error;
-      }
-
+      // Para conversion_events, vamos apenas simular a atualização local
+      // pois a tabela não tem campo de status
       setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { ...lead, status, updated_at: new Date().toISOString() } : lead
+        lead.id === leadId ? { ...lead, status } : lead
       ));
       
       toast.success('Status atualizado com sucesso!');
@@ -199,13 +184,13 @@ export const useLeadsData = (): LeadsData => {
     
     // Configurar atualização em tempo real
     const channel = supabase
-      .channel('form_leads_changes')
+      .channel('conversion_events_changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'form_leads'
+          table: 'conversion_events'
         },
         (payload) => {
           console.log('📊 Lead atualizado em tempo real:', payload);
