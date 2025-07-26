@@ -86,7 +86,7 @@ const Partners = () => {
   }, [isLoading]);
 
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000);
+    const interval = setInterval(nextSlide, 8000); // Mudou de 5000 para 8000ms (8 segundos)
     return () => clearInterval(interval);
   }, [totalSlides]);
 

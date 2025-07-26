@@ -30,8 +30,6 @@ const DesktopNavigation = ({
           }} 
         />
         
-        <PracticeAreasDropdown isActive={activeSection === 'areas'} />
-        
         <NavigationItem 
           to="/#about" 
           label="Sobre Nós" 
@@ -42,6 +40,8 @@ const DesktopNavigation = ({
             handleNavigation('about', '/#about');
           }} 
         />
+        
+        <PracticeAreasDropdown isActive={activeSection === 'areas'} />
         
         <NavigationItem 
           to="/#socios" 
@@ -55,6 +55,17 @@ const DesktopNavigation = ({
         />
         
         <NavigationItem 
+          to="/blog" 
+          label="Blog" 
+          isActive={activeSection === 'blog'} 
+          onClick={e => {
+            e.preventDefault();
+            console.log('DesktopNavigation: Blog clicked');
+            navigate('/blog');
+          }} 
+        />
+        
+        <NavigationItem 
           to="/#cliente" 
           label="Área do Cliente" 
           isActive={activeSection === 'cliente'} 
@@ -62,17 +73,6 @@ const DesktopNavigation = ({
             e.preventDefault();
             console.log('DesktopNavigation: Client Area clicked');
             handleNavigation('cliente', '/#cliente');
-          }} 
-        />
-        
-        <NavigationItem 
-          to="/blog" 
-          label="Blog" 
-          isActive={window.location.pathname === '/blog'} 
-          onClick={e => {
-            e.preventDefault();
-            console.log('DesktopNavigation: Blog clicked');
-            navigate('/blog');
           }} 
         />
         

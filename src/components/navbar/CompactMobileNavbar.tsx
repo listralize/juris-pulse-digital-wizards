@@ -158,6 +158,17 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
               </button>
 
               <button
+                onClick={() => handleNavigation('/blog')}
+                className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                  location.pathname === '/blog' 
+                    ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black')
+                    : (isDark ? 'text-white/80 hover:bg-white/5' : 'text-black/80 hover:bg-black/5')
+                }`}
+              >
+                Blog
+              </button>
+
+              <button
                 onClick={() => handleNavigation('/#cliente')}
                 className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
                   isDark ? 'text-white/80 hover:bg-white/5' : 'text-black/80 hover:bg-black/5'
