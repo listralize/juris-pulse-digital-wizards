@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Mail, User } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import NeuralBackground from '../NeuralBackground';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 gsap.registerPlugin(ScrollTrigger);
 const Partners = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -22,6 +23,8 @@ const Partners = () => {
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Force carousel to always start at first slide
   useEffect(() => {
@@ -156,6 +159,19 @@ const Partners = () => {
         <div className={`animate-spin rounded-full h-6 w-6 border-b-2 ${isDark ? 'border-white' : 'border-black'}`}></div>
       </div>;
   }
+  
+  // Abrir perfil do membro
+  const openMemberProfile = (member: any) => {
+    setSelectedMember(member);
+    setIsProfileOpen(true);
+  };
+
+  // Fechar perfil
+  const closeMemberProfile = () => {
+    setIsProfileOpen(false);
+    setSelectedMember(null);
+  };
+
   const teamTitle = localPageTexts?.teamTitle || 'Nossa Equipe';
   return <div ref={sectionRef} className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`} style={{
     minHeight: '100vh',
@@ -209,34 +225,47 @@ const Partners = () => {
               }).map((_, slideIndex) => <div key={slideIndex} className={`w-full flex-shrink-0 px-2 sm:px-4 ${isMobile ? 'flex justify-center' : 'grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8'}`} style={{
                 width: `${100 / totalSlides}%`
               }}>
-                    {teamMembers.slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide).map((member, index) => <div key={index} className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'w-full max-w-sm mx-auto' : ''}`}>
-                          <div className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'} shadow-md hover:shadow-xl`} style={{
-                    height: '420px'
-                  }} // Altura fixa para todos os cards
-                  >
-                            {/* Foto com altura fixa */}
-                            <div className="h-48 relative overflow-hidden">
-                              {member.image ? <img src={member.image} alt={member.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" /> : <div className={`w-full h-full flex items-center justify-center text-2xl sm:text-3xl ${isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'}`}>
-                                  👤
-                                </div>}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            </div>
-                            
-                            
-                            {/* Conteúdo com altura fixa */}
-                            <div className="p-3 sm:p-4 lg:p-5 flex-1">
-                              <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-                                {member.name}
-                              </h3>
-                              <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-                                {member.title || 'Advogado'}
-                              </p>
-                              <p className={`text-xs sm:text-sm leading-relaxed line-clamp-4 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
-                                {member.description}
-                              </p>
+                    {teamMembers.slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide).map((member, index) => (
+                      <div key={index} className={`group p-2 sm:p-3 lg:p-4 ${isMobile ? 'w-full max-w-sm mx-auto' : ''}`}>
+                        <div 
+                          onClick={() => openMemberProfile(member)}
+                          className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 cursor-pointer ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-white hover:bg-gray-50'} shadow-md hover:shadow-xl`} 
+                          style={{ height: '420px' }}
+                        >
+                          {/* Foto com altura fixa */}
+                          <div className="h-48 relative overflow-hidden">
+                            {member.image ? (
+                              <img 
+                                src={member.image} 
+                                alt={member.name} 
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                              />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center text-2xl sm:text-3xl ${isDark ? 'bg-white/10 text-white/50' : 'bg-gray-200 text-gray-400'}`}>
+                                <User size={48} />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              Ver perfil
                             </div>
                           </div>
-                        </div>)}
+                          
+                          {/* Conteúdo com altura fixa */}
+                          <div className="p-3 sm:p-4 lg:p-5 flex-1">
+                            <h3 className={`text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                              {member.name}
+                            </h3>
+                            <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                              {member.title || 'Advogado'}
+                            </p>
+                            <p className={`text-xs sm:text-sm leading-relaxed line-clamp-4 ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
+                              {member.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>)}
               </div>
             </div>
@@ -257,6 +286,85 @@ const Partners = () => {
           </div>
         </div>
       </div>
-    </div>;
+
+      {/* Modal de Perfil do Membro */}
+      <Dialog open={isProfileOpen} onOpenChange={closeMemberProfile}>
+        <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${isDark ? 'bg-black text-white border-white/20' : 'bg-white text-black'}`}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {selectedMember?.image ? (
+                <img 
+                  src={selectedMember.image} 
+                  alt={selectedMember?.name} 
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                  <User size={24} />
+                </div>
+              )}
+              <div>
+                <h3 className="text-xl font-semibold">{selectedMember?.name}</h3>
+                <p className={`text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                  {selectedMember?.title || 'Advogado'}
+                </p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 mt-6">
+            {/* Foto em destaque */}
+            {selectedMember?.image && (
+              <div className="flex justify-center">
+                <img 
+                  src={selectedMember.image} 
+                  alt={selectedMember.name} 
+                  className="w-48 h-48 rounded-lg object-cover shadow-lg"
+                />
+              </div>
+            )}
+            
+            {/* Informações básicas */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <User size={18} className={isDark ? 'text-white/70' : 'text-gray-600'} />
+                <span className="font-medium">Nome:</span>
+                <span>{selectedMember?.name}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Mail size={18} className={isDark ? 'text-white/70' : 'text-gray-600'} />
+                <span className="font-medium">E-mail:</span>
+                <a 
+                  href={`mailto:${selectedMember?.email}`}
+                  className={`hover:underline ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+                >
+                  {selectedMember?.email}
+                </a>
+              </div>
+              
+              {selectedMember?.oab && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">OAB:</span>
+                  <span>{selectedMember.oab}</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Descrição completa */}
+            {selectedMember?.description && (
+              <div className="space-y-2">
+                <h4 className="font-semibold text-lg">Sobre</h4>
+                <p className={`leading-relaxed ${isDark ? 'text-white/80' : 'text-gray-700'}`}>
+                  {selectedMember.description}
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 };
+
 export default Partners;
