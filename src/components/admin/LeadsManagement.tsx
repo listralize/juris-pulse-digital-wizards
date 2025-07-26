@@ -37,44 +37,71 @@ interface Lead {
 const parseLeadData = (leadData: any) => {
   if (!leadData || typeof leadData !== 'object') return {};
   
-  // Se já tem os campos nomeados, retorna como está
-  if (leadData.name || leadData.nome || leadData.email) {
-    return leadData;
-  }
+  console.log('🔍 Dados brutos do lead:', leadData);
   
-  // Se tem dados numerados, interpreta baseado na posição comum dos formulários
   const parsedData: any = {};
   
-  // Mapeamento comum dos campos de formulário
-  const fieldMapping: { [key: string]: string } = {
-    '0': 'nome',        // Primeiro campo geralmente é nome
-    '1': 'telefone',    // Segundo campo geralmente é telefone  
-    '2': 'email',       // Terceiro campo geralmente é email
-    '3': 'servico',     // Quarto campo pode ser serviço
-    '4': 'mensagem',    // Quinto campo pode ser mensagem
-    '5': 'urgente',     // Sexto campo pode ser urgente
-    // Adicionar mais mapeamentos conforme necessário
-  };
+  // Primeiro, copiar todos os dados existentes
+  Object.assign(parsedData, leadData);
   
-  // Processar campos numerados
-  Object.entries(leadData).forEach(([key, value]) => {
-    if (fieldMapping[key] && value) {
-      const fieldName = fieldMapping[key];
-      parsedData[fieldName] = value;
-    } else if (key && value) {
-      // Manter outros campos como estão
-      parsedData[key] = value;
+  // Se já tem campos nomeados diretamente, usar eles
+  if (leadData.name) parsedData.nome = leadData.name;
+  if (leadData.phone) parsedData.telefone = leadData.phone;
+  if (leadData.email) parsedData.email = leadData.email;
+  if (leadData.service) parsedData.servico = leadData.service;
+  if (leadData.message) parsedData.mensagem = leadData.message;
+  
+  // Se os dados estão em formato de array ou objeto com chaves numéricas
+  const entries = Object.entries(leadData);
+  
+  entries.forEach(([key, value]) => {
+    if (!value || value === '') return;
+    
+    // Verificar se é um campo de nome (primeira entrada não vazia que parece nome)
+    if (typeof value === 'string' && value.length > 2 && !parsedData.nome && !parsedData.name) {
+      // Se contém caracteres típicos de nome e não parece email/telefone
+      if (!/[@\d\+\(\)\-\s]{3,}/.test(value) && /^[a-zA-ZÀ-ÿ\s]{2,}/.test(value)) {
+        parsedData.nome = value;
+        parsedData.name = value;
+      }
+    }
+    
+    // Verificar se é email
+    if (typeof value === 'string' && value.includes('@') && !parsedData.email) {
+      parsedData.email = value;
+    }
+    
+    // Verificar se é telefone
+    if (typeof value === 'string' && /[\d\+\(\)\-\s]{8,}/.test(value) && !parsedData.telefone && !parsedData.phone) {
+      parsedData.telefone = value;
+      parsedData.phone = value;
+    }
+    
+    // Verificar se é mensagem (texto longo)
+    if (typeof value === 'string' && value.length > 20 && !parsedData.mensagem && !parsedData.message) {
+      parsedData.mensagem = value;
+      parsedData.message = value;
     }
   });
   
-  // Fallbacks para compatibilidade
-  parsedData.name = parsedData.nome || parsedData.name;
-  parsedData.phone = parsedData.telefone || parsedData.phone;
-  parsedData.service = parsedData.servico || parsedData.service;
-  parsedData.message = parsedData.mensagem || parsedData.message;
+  // Mapeamento específico por posição se não encontrou pelos padrões
+  if (!parsedData.nome && !parsedData.name) {
+    // Tentar pegar o primeiro valor que parece nome
+    for (let i = 0; i < 10; i++) {
+      const value = leadData[i.toString()];
+      if (value && typeof value === 'string' && value.length > 1 && !/[@\d\+\(\)\-]{3,}/.test(value)) {
+        parsedData.nome = value;
+        parsedData.name = value;
+        break;
+      }
+    }
+  }
+  
+  console.log('✅ Dados parseados:', parsedData);
   
   return parsedData;
 };
+
 
 // Componente para exibir detalhes do lead
 const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ lead, children }) => {
