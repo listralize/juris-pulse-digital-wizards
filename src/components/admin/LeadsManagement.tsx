@@ -33,9 +33,54 @@ interface Lead {
   conversion_value?: number | null;
 }
 
+// Função para interpretar dados do formulário JSON
+const parseLeadData = (leadData: any) => {
+  if (!leadData || typeof leadData !== 'object') return {};
+  
+  // Se já tem os campos nomeados, retorna como está
+  if (leadData.name || leadData.nome || leadData.email) {
+    return leadData;
+  }
+  
+  // Se tem dados numerados, interpreta baseado na posição comum dos formulários
+  const parsedData: any = {};
+  
+  // Mapeamento comum dos campos de formulário
+  const fieldMapping: { [key: string]: string } = {
+    '0': 'nome',        // Primeiro campo geralmente é nome
+    '1': 'telefone',    // Segundo campo geralmente é telefone  
+    '2': 'email',       // Terceiro campo geralmente é email
+    '3': 'servico',     // Quarto campo pode ser serviço
+    '4': 'mensagem',    // Quinto campo pode ser mensagem
+    '5': 'urgente',     // Sexto campo pode ser urgente
+    // Adicionar mais mapeamentos conforme necessário
+  };
+  
+  // Processar campos numerados
+  Object.entries(leadData).forEach(([key, value]) => {
+    if (fieldMapping[key] && value) {
+      const fieldName = fieldMapping[key];
+      parsedData[fieldName] = value;
+    } else if (key && value) {
+      // Manter outros campos como estão
+      parsedData[key] = value;
+    }
+  });
+  
+  // Fallbacks para compatibilidade
+  parsedData.name = parsedData.nome || parsedData.name;
+  parsedData.phone = parsedData.telefone || parsedData.phone;
+  parsedData.service = parsedData.servico || parsedData.service;
+  parsedData.message = parsedData.mensagem || parsedData.message;
+  
+  return parsedData;
+};
+
 // Componente para exibir detalhes do lead
 const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ lead, children }) => {
-  const leadData = lead.lead_data || {};
+  const rawLeadData = lead.lead_data || {};
+  const leadData = parseLeadData(rawLeadData);
+  
   const phone = leadData.phone || leadData.telefone;
   const name = leadData.name || leadData.nome;
   const email = leadData.email;
@@ -428,7 +473,8 @@ export const LeadsManagement: React.FC = () => {
             </TableHeader>
             <TableBody>
               {filteredLeads.map((lead) => {
-                const leadData = lead.lead_data || {};
+                const rawLeadData = lead.lead_data || {};
+                const leadData = parseLeadData(rawLeadData);
                 const isSelected = selectedLeads.has(lead.id);
                 const phone = leadData.phone || leadData.telefone;
                 const name = leadData.name || leadData.nome;
@@ -506,7 +552,8 @@ export const LeadsManagement: React.FC = () => {
       {currentView === 'cards' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {filteredLeads.map((lead, index) => {
-            const leadData = lead.lead_data || {};
+            const rawLeadData = lead.lead_data || {};
+            const leadData = parseLeadData(rawLeadData);
             const isSelected = selectedLeads.has(lead.id);
             const phone = leadData.phone || leadData.telefone;
             const name = leadData.name || leadData.nome;
