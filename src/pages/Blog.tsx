@@ -50,10 +50,6 @@ const BlogPage = () => {
   return (
     <div className={`min-h-screen relative ${isDark ? 'bg-black' : 'bg-white'}`}>
       
-      {/* Background gradients escuros como na home */}
-      <div className="fixed inset-0 bg-gradient-to-br from-black via-black to-neutral-900 -z-20"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/10 via-transparent to-purple-950/10 -z-20"></div>
-      
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-20 relative z-10">
