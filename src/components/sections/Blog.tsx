@@ -72,12 +72,9 @@ const Blog = () => {
         {/* Header padronizado - mesma altura que outras páginas */}
         <div className="text-center mb-8 md:mb-12">
           <h2 className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            📝 Blog Jurídico
+            Nosso Blog
           </h2>
           <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
-          <p className={`text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mt-4 px-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            Artigos especializados sobre as mais diversas áreas do Direito
-          </p>
         </div>
 
         {displayPosts.length > 0 ? (
