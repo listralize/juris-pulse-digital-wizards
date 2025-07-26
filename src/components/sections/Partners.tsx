@@ -130,8 +130,8 @@ const Partners = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        marginTop: isMobile ? '0px' : '0px', // Removeu margem negativa
-        paddingTop: '100px' // Mantém espaçamento do topo
+        marginTop: isMobile ? '-200px' : '-200px', // Sobe o conteúdo 200px
+        paddingTop: '300px' // Aumenta o padding para compensar
       }}
     >
       {/* Neural Background only in dark theme */}
