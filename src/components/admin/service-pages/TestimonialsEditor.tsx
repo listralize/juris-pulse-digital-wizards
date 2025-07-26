@@ -66,7 +66,7 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div>
                 <Label className="text-xs">Nome</Label>
                 <Input
@@ -81,15 +81,6 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
                   value={testimonial.role || ''}
                   onChange={(e) => updateTestimonial(index, 'role', e.target.value)}
                   placeholder="Ex: Cliente"
-                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
-              </div>
-              <div>
-                <Label className="text-xs">Foto (URL)</Label>
-                <Input
-                  value={testimonial.image || ''}
-                  onChange={(e) => updateTestimonial(index, 'image', e.target.value)}
-                  placeholder="/lovable-uploads/cliente.jpg"
                   className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                 />
               </div>
