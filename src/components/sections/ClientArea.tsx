@@ -191,8 +191,8 @@ const ClientArea = () => {
                       flex items-center gap-2 whitespace-nowrap shadow-lg
                       ${isMobile ? 'text-xs' : 'text-sm'}
                       ${isDark 
-                        ? 'bg-gray-600 text-white' 
-                        : 'bg-gray-500 text-white'
+                        ? 'bg-gray-100 text-gray-800' 
+                        : 'bg-gray-50 text-gray-700'
                       }
                     `}>
                     <Crown className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
@@ -203,8 +203,8 @@ const ClientArea = () => {
                    <div className={`
                      absolute inset-0 rounded-full blur-sm opacity-30
                      ${isDark 
-                       ? 'bg-gray-600' 
-                       : 'bg-gray-500'
+                       ? 'bg-gray-100' 
+                       : 'bg-gray-50'
                      }
                    `}></div>
                 </div>
@@ -251,8 +251,8 @@ const ClientArea = () => {
                        px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase 
                        flex items-center gap-2 whitespace-nowrap shadow-lg
                        ${isDark 
-                         ? 'bg-gray-600 text-white' 
-                         : 'bg-gray-500 text-white'
+                         ? 'bg-gray-100 text-gray-800' 
+                         : 'bg-gray-50 text-gray-700'
                        }
                      `}>
                       <Crown className="w-3 h-3" />
@@ -263,8 +263,8 @@ const ClientArea = () => {
                      <div className={`
                        absolute inset-0 rounded-full blur-sm opacity-30
                        ${isDark 
-                         ? 'bg-gray-600' 
-                         : 'bg-gray-500'
+                         ? 'bg-gray-100' 
+                         : 'bg-gray-50'
                        }
                      `}></div>
                   </div>
