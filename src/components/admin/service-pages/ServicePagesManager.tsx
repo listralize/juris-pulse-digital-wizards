@@ -10,6 +10,7 @@ import { PagesList } from './PagesList';
 import { PageEditor } from './PageEditor';
 import { CategoriesManager } from './CategoriesManager';
 import { CategoryManagerNew } from './CategoryManagerNew';
+import { PageBuilder } from './PageBuilder';
 import { useSupabaseLawCategories } from '../../../hooks/supabase/useSupabaseLawCategories';
 import { toast } from 'sonner';
 
@@ -40,6 +41,7 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [showCategoryEditor, setShowCategoryEditor] = useState(false);
+  const [showPageBuilder, setShowPageBuilder] = useState(false);
   const [localPages, setLocalPages] = useState<ServicePage[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -197,6 +199,30 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
     );
   }
 
+  if (showPageBuilder) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowPageBuilder(false)}
+            variant="outline"
+            size="sm"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
+            Construtor de Landing Pages
+          </h2>
+        </div>
+        <PageBuilder 
+          page={null}
+          onUpdatePage={() => {}}
+        />
+      </div>
+    );
+  }
+
   if (categoriesLoading) {
     return (
       <div className="flex justify-center p-8">
@@ -214,6 +240,10 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
               Gerenciar Páginas por Área do Direito
             </CardTitle>
             <div className="flex gap-2">
+              <Button onClick={() => setShowPageBuilder(true)} size="sm" variant="default">
+                <Plus className="w-4 h-4 mr-2" />
+                Construtor de Landing Page
+              </Button>
               <Button onClick={() => setShowCategoryEditor(true)} size="sm" variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Categoria

@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BulkEmailSender } from './BulkEmailSender';
 
 // Interface do lead
 interface Lead {
@@ -120,6 +121,22 @@ const LeadDetailSheet: React.FC<{
               </div>
               
               <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-blue-600" />
+                <button
+                  onClick={() => {
+                    if (leadData.email) {
+                      navigator.clipboard.writeText(leadData.email);
+                      toast.success('Email copiado!');
+                    }
+                  }}
+                  className="text-blue-600 hover:underline text-left"
+                >
+                  {leadData.email || 'Email não informado'}
+                </button>
+              </div>
+              
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium">Template:</span>
@@ -154,6 +171,7 @@ const LeadDetailSheet: React.FC<{
                   <Mail className="h-4 w-4 mr-2" />
                   Enviar Email
                 </Button>
+              </div>
               </div>
             </div>
           </div>
@@ -499,11 +517,10 @@ export const LeadsManagement: React.FC = () => {
       });
     }
 
-    // Filtro de formulário
+    // Filtro por fonte/evento
     if (formFilter !== 'all') {
       filtered = filtered.filter(lead => {
-        const leadData = parseLeadData(lead.lead_data);
-        return lead.event_type === formFilter || leadData.service?.includes(formFilter);
+        return lead.event_type === formFilter;
       });
     }
 
@@ -564,17 +581,17 @@ export const LeadsManagement: React.FC = () => {
             Exportar CSV
           </Button>
           
+          <BulkEmailSender
+            selectedLeads={selectedLeads}
+            leads={leads}
+            emailTemplates={emailTemplates}
+            onEmailsSent={() => setSelectedLeads(new Set())}
+          />
+          
           {selectedLeads.size > 0 && (
-            <>
-              <Button onClick={sendBulkEmails} variant="default" size="sm">
-                <Send className="h-4 w-4 mr-2" />
-                Enviar Email ({selectedLeads.size})
-              </Button>
-              
-              <Button onClick={deleteSelected} variant="destructive" size="sm">
-                Excluir ({selectedLeads.size})
-              </Button>
-            </>
+            <Button onClick={deleteSelected} variant="destructive" size="sm">
+              Excluir ({selectedLeads.size})
+            </Button>
           )}
         </div>
       </div>
@@ -605,12 +622,13 @@ export const LeadsManagement: React.FC = () => {
 
         <Select value={formFilter} onValueChange={setFormFilter}>
           <SelectTrigger>
-            <SelectValue placeholder="Filtrar por formulário" />
+            <SelectValue placeholder="Filtrar por fonte" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os formulários</SelectItem>
-            <SelectItem value="contact">Contato</SelectItem>
-            <SelectItem value="service">Serviços</SelectItem>
+            <SelectItem value="all">Todas as fontes</SelectItem>
+            <SelectItem value="form_submission">Formulário de Contato</SelectItem>
+            <SelectItem value="whatsapp_click">WhatsApp</SelectItem>
+            <SelectItem value="email_click">Email</SelectItem>
           </SelectContent>
         </Select>
 
@@ -762,6 +780,8 @@ export const LeadsManagement: React.FC = () => {
                               <SelectContent>
                                 <SelectItem value="novo">Novo</SelectItem>
                                 <SelectItem value="contato">Contato</SelectItem>
+                                <SelectItem value="qualificado">Qualificado</SelectItem>
+                                <SelectItem value="cliente">Cliente</SelectItem>
                                 <SelectItem value="convertido">Convertido</SelectItem>
                                 <SelectItem value="descartado">Descartado</SelectItem>
                               </SelectContent>
@@ -789,10 +809,12 @@ export const LeadsManagement: React.FC = () => {
 
       {/* Kanban Board */}
       {currentView === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           {[
             { key: 'novo', title: 'Novos', variant: 'secondary' as const },
             { key: 'contato', title: 'Em Contato', variant: 'default' as const },
+            { key: 'qualificado', title: 'Qualificados', variant: 'default' as const },
+            { key: 'cliente', title: 'Clientes', variant: 'outline' as const },
             { key: 'convertido', title: 'Convertidos', variant: 'outline' as const },
             { key: 'descartado', title: 'Descartados', variant: 'destructive' as const }
           ].map((column) => (
@@ -805,15 +827,30 @@ export const LeadsManagement: React.FC = () => {
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent 
+                className="space-y-2 min-h-[200px]"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const leadId = e.dataTransfer.getData('text/plain');
+                  updateLeadStatus(leadId, column.key);
+                }}
+              >
                 {filteredLeads
                   .filter(lead => (leadStatuses[lead.id] || 'novo') === column.key)
                   .map((lead) => {
                     const leadData = parseLeadData(lead.lead_data);
                     
                     return (
-                      <Card key={lead.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                            onClick={() => openLeadDetails(lead)}>
+                      <Card 
+                        key={lead.id} 
+                        className="cursor-pointer hover:shadow-md transition-shadow"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', lead.id);
+                        }}
+                        onClick={() => openLeadDetails(lead)}
+                      >
                         <CardContent className="p-3">
                           <div className="space-y-1">
                             <p className="font-medium text-sm">{leadData.name || 'Nome não informado'}</p>
