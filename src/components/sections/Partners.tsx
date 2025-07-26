@@ -82,6 +82,36 @@ const Partners = () => {
     };
   }, []);
 
+  // Carregar vídeo de fundo na inicialização
+  useEffect(() => {
+    const loadTeamVideo = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('team_video_enabled, team_background_video')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (settings && settings.team_background_video) {
+          const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
+          
+          if (videoElement) {
+            videoElement.src = settings.team_background_video;
+            videoElement.style.display = settings.team_video_enabled ? 'block' : 'none';
+            console.log('🎥 Team video carregado:', settings);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar vídeo da equipe:', error);
+      }
+    };
+
+    loadTeamVideo();
+  }, []);
+
   // Cálculos de slides baseados no dispositivo
   const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
   const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
