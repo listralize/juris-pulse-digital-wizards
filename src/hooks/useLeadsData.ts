@@ -48,6 +48,7 @@ export const useLeadsData = (): LeadsData => {
   // Carregar configurações de formulários
   const loadFormConfigs = async () => {
     try {
+      console.log('🔄 Carregando configurações de formulários...');
       const { data: adminSettings, error } = await supabase
         .from('admin_settings')
         .select('form_config')
@@ -55,13 +56,16 @@ export const useLeadsData = (): LeadsData => {
         .limit(1)
         .maybeSingle();
 
+      console.log('📋 Admin settings response:', { adminSettings, error });
+
       if (error) {
-        console.error('Erro ao carregar configs de formulário:', error);
+        console.error('❌ Erro ao carregar configs de formulário:', error);
         return;
       }
 
       if (adminSettings?.form_config) {
         const formConfig = adminSettings.form_config as any;
+        console.log('📋 Form config encontrado:', formConfig);
         
         // Verificar se há formulários configurados
         if (formConfig.forms && Array.isArray(formConfig.forms)) {
@@ -71,26 +75,30 @@ export const useLeadsData = (): LeadsData => {
             form_id: form.id || 'default'
           }));
           
-          setFormConfigs(configs);
           console.log('📋 Formulários configurados:', configs);
+          setFormConfigs(configs);
         } else {
           // Formato antigo - formulário único
-          setFormConfigs([{
+          const defaultConfig = [{
             id: 'default',
             name: 'Formulário Principal',
             form_id: 'default'
-          }]);
+          }];
+          console.log('📋 Usando configuração padrão:', defaultConfig);
+          setFormConfigs(defaultConfig);
         }
       } else {
         // Sem configuração - usar padrão
-        setFormConfigs([{
+        const defaultConfig = [{
           id: 'default',
           name: 'Formulário Principal',
           form_id: 'default'
-        }]);
+        }];
+        console.log('📋 Sem config encontrada, usando padrão:', defaultConfig);
+        setFormConfigs(defaultConfig);
       }
     } catch (error) {
-      console.error('Erro ao carregar configurações:', error);
+      console.error('❌ Erro geral ao carregar configurações:', error);
     }
   };
 
@@ -98,6 +106,7 @@ export const useLeadsData = (): LeadsData => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
+      console.log('🔄 Iniciando carregamento de leads...');
       
       const { data, error } = await supabase
         .from('conversion_events')
@@ -105,30 +114,42 @@ export const useLeadsData = (): LeadsData => {
         .eq('event_type', 'form_submission')
         .order('created_at', { ascending: false });
 
+      console.log('📊 Resposta da query conversion_events:', { data, error });
+
       if (error) {
-        console.error('Erro ao carregar leads:', error);
+        console.error('❌ Erro ao carregar leads:', error);
         toast.error('Erro ao carregar leads');
         return;
       }
+
+      console.log('📈 Total de conversion_events encontrados:', data?.length || 0);
 
       // Filtrar apenas leads válidos e adicionar status padrão
       const validLeads = (data || []).filter(lead => {
         // Verificar se tem dados válidos de lead
         if (!lead.lead_data || typeof lead.lead_data !== 'object') {
+          console.log('❌ Lead inválido - sem lead_data:', lead.id);
           return false;
         }
         
         const leadData = lead.lead_data as any;
-        return leadData?.name || leadData?.nome || leadData?.email;
+        const isValid = leadData?.name || leadData?.nome || leadData?.email;
+        
+        if (!isValid) {
+          console.log('❌ Lead inválido - sem nome/email:', lead.id, leadData);
+        }
+        
+        return isValid;
       }).map(lead => ({
         ...lead,
         status: 'new' // Status padrão para todos os leads
       }));
 
-      console.log('📊 Leads carregados de conversion_events:', validLeads.length);
+      console.log('✅ Leads válidos após filtro:', validLeads.length);
+      console.log('📋 Amostra dos leads:', validLeads.slice(0, 2));
       setLeads(validLeads);
     } catch (error) {
-      console.error('Erro ao carregar leads:', error);
+      console.error('❌ Erro geral ao carregar leads:', error);
       toast.error('Erro ao carregar leads');
     } finally {
       setIsLoading(false);

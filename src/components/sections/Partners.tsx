@@ -210,7 +210,7 @@ const Partners = () => {
           muted
           loop
           playsInline
-          style={{ display: 'none' }}
+          preload="auto"
         />
       </div>
       
