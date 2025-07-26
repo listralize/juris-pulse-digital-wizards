@@ -5,99 +5,57 @@ import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { MessageSquare, Phone, Mail, Clock, User, Eye, ExternalLink, Search, Filter, Trash2, Download, RefreshCw } from 'lucide-react';
+import { MessageSquare, Phone, Mail, Clock, User, Eye, ExternalLink, Search, Filter, Trash2, Download, RefreshCw, Calendar, Globe } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
-import { supabase } from '../../integrations/supabase/client';
-import { toast } from 'sonner';
-
-interface FormLead {
-  id: string;
-  form_id: string | null;
-  form_name: string | null;
-  lead_data: any;
-  status: string;
-  created_at: string;
-  utm_source: string | null;
-  utm_medium: string | null;
-  utm_campaign: string | null;
-  source_page: string | null;
-  country: string | null;
-  city: string | null;
-}
+import { useLeadsData } from '../../hooks/useLeadsData';
 
 interface FormGroup {
   formId: string;
   formName: string;
-  leads: FormLead[];
+  leads: any[];
   count: number;
 }
 
 export const LeadsManagement: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [leads, setLeads] = useState<FormLead[]>([]);
-  const [filteredLeads, setFilteredLeads] = useState<FormLead[]>([]);
+  const { leads, formConfigs, isLoading, refreshLeads, deleteLeads, updateLeadStatus } = useLeadsData();
+  
+  const [filteredLeads, setFilteredLeads] = useState<any[]>([]);
   const [formGroups, setFormGroups] = useState<FormGroup[]>([]);
   const [selectedFormId, setSelectedFormId] = useState<string>('all');
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedLead, setSelectedLead] = useState<FormLead | null>(null);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
 
-  // Carregar leads do Supabase
-  const loadLeads = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('form_leads')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Erro ao carregar leads:', error);
-        toast.error('Erro ao carregar leads');
-        return;
+  // Agrupar leads por formulário
+  useEffect(() => {
+    const groups: Record<string, FormGroup> = {};
+    
+    leads.forEach(lead => {
+      const formId = lead.form_id || 'default';
+      
+      // Encontrar nome do formulário nas configurações
+      const formConfig = formConfigs.find(config => config.form_id === formId);
+      const formName = formConfig?.name || lead.form_name || 'Formulário Padrão';
+      
+      if (!groups[formId]) {
+        groups[formId] = {
+          formId,
+          formName,
+          leads: [],
+          count: 0
+        };
       }
-
-      const validLeads = (data || []).filter(lead => {
-        if (!lead.lead_data || typeof lead.lead_data !== 'object') return false;
-        const leadData = lead.lead_data as any;
-        return leadData.name || leadData.email;
-      });
-
-      setLeads(validLeads);
-      setFilteredLeads(validLeads);
       
-      // Agrupar leads por formulário
-      const groups: Record<string, FormGroup> = {};
-      
-      validLeads.forEach(lead => {
-        const formId = lead.form_id || 'unknown';
-        const formName = lead.form_name || 'Formulário Padrão';
-        
-        if (!groups[formId]) {
-          groups[formId] = {
-            formId,
-            formName,
-            leads: [],
-            count: 0
-          };
-        }
-        
-        groups[formId].leads.push(lead);
-        groups[formId].count++;
-      });
+      groups[formId].leads.push(lead);
+      groups[formId].count++;
+    });
 
-      setFormGroups(Object.values(groups));
-    } catch (error) {
-      console.error('Erro ao carregar leads:', error);
-      toast.error('Erro ao carregar leads');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setFormGroups(Object.values(groups));
+  }, [leads, formConfigs]);
 
   // Aplicar filtros
   useEffect(() => {
@@ -105,7 +63,7 @@ export const LeadsManagement: React.FC = () => {
 
     // Filtro por formulário
     if (selectedFormId !== 'all') {
-      filtered = filtered.filter(lead => lead.form_id === selectedFormId);
+      filtered = filtered.filter(lead => (lead.form_id || 'default') === selectedFormId);
     }
 
     // Filtro por busca
@@ -152,10 +110,6 @@ export const LeadsManagement: React.FC = () => {
     setFilteredLeads(filtered);
   }, [leads, selectedFormId, searchQuery, statusFilter, dateFilter]);
 
-  useEffect(() => {
-    loadLeads();
-  }, []);
-
   // Selecionar/deselecionar lead
   const toggleLeadSelection = (leadId: string) => {
     const newSelection = new Set(selectedLeads);
@@ -184,23 +138,10 @@ export const LeadsManagement: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const { error } = await supabase
-        .from('form_leads')
-        .delete()
-        .in('id', Array.from(selectedLeads));
-
-      if (error) {
-        console.error('Erro ao deletar leads:', error);
-        toast.error('Erro ao deletar leads');
-        return;
-      }
-
-      setLeads(prev => prev.filter(lead => !selectedLeads.has(lead.id)));
+      await deleteLeads(Array.from(selectedLeads));
       setSelectedLeads(new Set());
-      toast.success(`${selectedLeads.size} lead(s) deletado(s) com sucesso!`);
     } catch (error) {
-      console.error('Erro ao deletar leads:', error);
-      toast.error('Erro ao deletar leads');
+      // Erro já tratado no hook
     }
   };
 
@@ -219,28 +160,12 @@ export const LeadsManagement: React.FC = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Atualizar status do lead
-  const updateLeadStatus = async (leadId: string, newStatus: string) => {
+  // Atualizar status (usa hook)
+  const handleUpdateStatus = async (leadId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('form_leads')
-        .update({ status: newStatus })
-        .eq('id', leadId);
-
-      if (error) {
-        console.error('Erro ao atualizar status:', error);
-        toast.error('Erro ao atualizar status');
-        return;
-      }
-
-      setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { ...lead, status: newStatus } : lead
-      ));
-      
-      toast.success('Status atualizado com sucesso!');
+      await updateLeadStatus(leadId, newStatus);
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
-      toast.error('Erro ao atualizar status');
+      // Erro já tratado no hook
     }
   };
 
@@ -271,7 +196,7 @@ export const LeadsManagement: React.FC = () => {
         lead.lead_data?.phone || '',
         lead.status,
         formatDate(lead.created_at),
-        lead.form_name || '',
+        formGroups.find(g => g.formId === lead.form_id)?.formName || '',
         lead.lead_data?.service || '',
         lead.lead_data?.message || ''
       ])
@@ -306,11 +231,11 @@ export const LeadsManagement: React.FC = () => {
                 Gerenciar Leads ({leads.length} total)
               </CardTitle>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Gerencie todos os leads recebidos através dos formulários do site.
+                Gerencie leads dos formulários: {formConfigs.map(f => f.name).join(', ') || 'Nenhum formulário configurado'}
               </p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={loadLeads} variant="outline" size="sm">
+              <Button onClick={refreshLeads} variant="outline" size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Atualizar
               </Button>
@@ -451,7 +376,10 @@ export const LeadsManagement: React.FC = () => {
                 Nenhum lead encontrado
               </p>
               <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                Ajuste os filtros ou aguarde novos leads chegarem
+                {leads.length === 0 
+                  ? 'Aguarde leads chegarem dos formulários ou teste enviando um formulário'
+                  : 'Ajuste os filtros para encontrar leads específicos'
+                }
               </p>
             </div>
           ) : (
@@ -470,7 +398,7 @@ export const LeadsManagement: React.FC = () => {
 
                   <div className={`w-3 h-3 rounded-full ${getStatusColor(lead.status)} flex-shrink-0`}></div>
 
-                  <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-5 gap-2">
                     <div className="truncate">
                       <p className={`font-medium ${isDark ? 'text-white' : 'text-black'}`}>
                         {lead.lead_data?.name || 'Nome não informado'}
@@ -484,54 +412,60 @@ export const LeadsManagement: React.FC = () => {
                       <p className={`text-sm ${isDark ? 'text-white' : 'text-black'}`}>
                         {lead.lead_data?.email || 'Email não informado'}
                       </p>
-                    </div>
-
-                    <div className="truncate">
-                      <p className={`text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         {lead.lead_data?.phone || 'Telefone não informado'}
                       </p>
                     </div>
 
                     <div className="truncate">
-                      <Badge variant="outline" className="text-xs">
-                        {lead.form_name || 'Formulário Padrão'}
-                      </Badge>
+                      <p className={`text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+                        {formGroups.find(g => g.formId === lead.form_id)?.formName || 'Formulário'}
+                      </p>
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {lead.lead_data?.service || 'Serviço não especificado'}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Select value={lead.status} onValueChange={(value) => updateLeadStatus(lead.id, value)}>
-                      <SelectTrigger className="w-32 h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">Novo</SelectItem>
-                        <SelectItem value="contacted">Contatado</SelectItem>
-                        <SelectItem value="qualified">Qualificado</SelectItem>
-                        <SelectItem value="converted">Convertido</SelectItem>
-                        <SelectItem value="lost">Perdido</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Select 
+                        value={lead.status} 
+                        onValueChange={(value) => handleUpdateStatus(lead.id, value)}
+                      >
+                        <SelectTrigger className="w-28 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new">Novo</SelectItem>
+                          <SelectItem value="contacted">Contatado</SelectItem>
+                          <SelectItem value="qualified">Qualificado</SelectItem>
+                          <SelectItem value="converted">Convertido</SelectItem>
+                          <SelectItem value="lost">Perdido</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                    {lead.lead_data?.phone && (
+                    <div className="flex items-center gap-1">
+                      {lead.lead_data?.phone && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2 text-xs"
+                          onClick={() => openWhatsApp(lead.lead_data.phone)}
+                        >
+                          <MessageSquare className="w-3 h-3 mr-1" />
+                          WhatsApp
+                        </Button>
+                      )}
+                      
                       <Button
-                        onClick={() => openWhatsApp(lead.lead_data.phone)}
                         size="sm"
                         variant="outline"
-                        className="h-8 w-8 p-0 bg-green-500 hover:bg-green-600 text-white border-green-500"
+                        className="h-8 px-2 text-xs"
+                        onClick={() => setSelectedLead(selectedLead?.id === lead.id ? null : lead)}
                       >
-                        <MessageSquare className="w-3 h-3" />
+                        <Eye className="w-3 h-3" />
                       </Button>
-                    )}
-
-                    <Button
-                      onClick={() => setSelectedLead(selectedLead?.id === lead.id ? null : lead)}
-                      size="sm"
-                      variant="outline"
-                      className="h-8 w-8 p-0"
-                    >
-                      <Eye className="w-3 h-3" />
-                    </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -545,33 +479,37 @@ export const LeadsManagement: React.FC = () => {
         <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
           <CardHeader>
             <CardTitle className={`${isDark ? 'text-white' : 'text-black'}`}>
-              Detalhes do Lead: {selectedLead.lead_data?.name || 'Nome não informado'}
+              Detalhes do Lead: {selectedLead.lead_data?.name}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+              <div>
                 <h4 className="font-semibold mb-3">Informações Pessoais</h4>
-                <div className="space-y-2 text-sm">
-                  <div><strong>Nome:</strong> {selectedLead.lead_data?.name || 'Não informado'}</div>
-                  <div><strong>Email:</strong> {selectedLead.lead_data?.email || 'Não informado'}</div>
-                  <div><strong>Telefone:</strong> {selectedLead.lead_data?.phone || 'Não informado'}</div>
-                  <div><strong>Serviço:</strong> {selectedLead.lead_data?.service || 'Não especificado'}</div>
+                <div className="space-y-2">
+                  <p><strong>Nome:</strong> {selectedLead.lead_data?.name}</p>
+                  <p><strong>Email:</strong> {selectedLead.lead_data?.email}</p>
+                  <p><strong>Telefone:</strong> {selectedLead.lead_data?.phone}</p>
+                  <p><strong>Formulário:</strong> {formGroups.find(g => g.formId === selectedLead.form_id)?.formName}</p>
+                  <p><strong>Serviço:</strong> {selectedLead.lead_data?.service}</p>
+                  <p><strong>Status:</strong> <Badge className={getStatusColor(selectedLead.status)}>{selectedLead.status}</Badge></p>
                 </div>
               </div>
-
-              <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-                <h4 className="font-semibold mb-3">Informações do Contato</h4>
-                <div className="space-y-2 text-sm">
-                  <div><strong>Data:</strong> {formatDate(selectedLead.created_at)}</div>
-                  <div><strong>Formulário:</strong> {selectedLead.form_name || 'Padrão'}</div>
-                  <div><strong>Página:</strong> {selectedLead.source_page || 'Não informada'}</div>
-                  <div><strong>Localização:</strong> {selectedLead.city && selectedLead.country ? `${selectedLead.city}, ${selectedLead.country}` : 'Não informada'}</div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Dados Técnicos</h4>
+                <div className="space-y-2">
+                  <p><strong>Data:</strong> {formatDate(selectedLead.created_at)}</p>
+                  <p><strong>Página:</strong> {selectedLead.source_page}</p>
+                  <p><strong>UTM Source:</strong> {selectedLead.utm_source || 'N/A'}</p>
+                  <p><strong>UTM Medium:</strong> {selectedLead.utm_medium || 'N/A'}</p>
+                  <p><strong>País:</strong> {selectedLead.country || 'N/A'}</p>
+                  <p><strong>Cidade:</strong> {selectedLead.city || 'N/A'}</p>
                 </div>
               </div>
-
+              
               {selectedLead.lead_data?.message && (
-                <div className={`p-4 rounded-lg md:col-span-2 ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+                <div className="md:col-span-2">
                   <h4 className="font-semibold mb-3">Mensagem</h4>
                   <p className="text-sm whitespace-pre-wrap">{selectedLead.lead_data.message}</p>
                 </div>
@@ -583,3 +521,5 @@ export const LeadsManagement: React.FC = () => {
     </div>
   );
 };
+
+export default LeadsManagement;
