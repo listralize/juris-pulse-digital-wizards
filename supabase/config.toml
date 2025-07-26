@@ -2,3 +2,6 @@ project_id = "hmfsvccbyxhdwmrgcyff"
 
 [functions.send-welcome-email]
 verify_jwt = false
+
+[functions.send-smtp-email]
+verify_jwt = false
