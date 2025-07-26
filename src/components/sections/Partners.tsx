@@ -134,7 +134,8 @@ const Partners = () => {
     justifyContent: 'flex-start',
     // Mudando de center para flex-start
     marginTop: '0px',
-    paddingTop: isMobile ? '20px' : '50px' // Reduzindo ainda mais no mobile
+    paddingTop: isMobile ? '20px' : '50px', // Reduzindo ainda mais no mobile
+    paddingBottom: isMobile ? '30px' : '50px' // Diminuindo espaçamento inferior no mobile
   }}>
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
