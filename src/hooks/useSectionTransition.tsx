@@ -148,6 +148,9 @@ export const useSectionTransition = (sections: Section[]) => {
     setActiveSection(sectionId);
     setActiveSectionIndex(sectionIndex);
     
+    // Notificar outros componentes sobre a mudança de seção
+    window.dispatchEvent(new CustomEvent('activeSectionChanged', { detail: sectionId }));
+    
     // Animar transição - NO MOBILE/TABLET, SEM ANIMAÇÃO DE TRANSFORM
     if (containerRef.current) {
       // Parar qualquer animação anterior

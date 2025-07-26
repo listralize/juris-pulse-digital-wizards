@@ -51,6 +51,18 @@ const Navbar = () => {
       setActiveSection('');
     }
   }, [location]);
+
+  // Listen for section changes from the transition hook
+  useEffect(() => {
+    const handleSectionChange = (event: CustomEvent) => {
+      const section = event.detail;
+      console.log('Navbar: Received section change event:', section);
+      setActiveSection(section);
+    };
+
+    window.addEventListener('activeSectionChanged', handleSectionChange as EventListener);
+    return () => window.removeEventListener('activeSectionChanged', handleSectionChange as EventListener);
+  }, []);
   
   // Improved navigation handling
   const handleNavigation = (sectionId: string, path: string) => {

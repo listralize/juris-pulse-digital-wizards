@@ -21,6 +21,11 @@ const Partners = () => {
   
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Force carousel to always start at first slide
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [teamMembers.length]);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar mobile

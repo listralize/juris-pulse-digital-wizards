@@ -55,13 +55,13 @@ const DesktopNavigation = ({
         />
         
         <NavigationItem 
-          to="/blog" 
+          to="/#blog" 
           label="Blog" 
           isActive={activeSection === 'blog'} 
           onClick={e => {
             e.preventDefault();
             console.log('DesktopNavigation: Blog clicked');
-            navigate('/blog');
+            handleNavigation('blog', '/#blog');
           }} 
         />
         
