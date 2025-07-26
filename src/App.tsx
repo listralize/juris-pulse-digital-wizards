@@ -15,6 +15,8 @@ import BlogPost from './pages/BlogPost';
 import Obrigado from './pages/Obrigado';
 import LinkTree from './pages/LinkTree';
 import NotFound from './pages/NotFound';
+import PoliticaPrivacidade from './pages/PoliticaPrivacidade';
+import TermosUso from './pages/TermosUso';
 
 // Dynamic routes
 import DynamicServiceRoutes from './components/DynamicServiceRoutes';
@@ -49,6 +51,8 @@ function App() {
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/tree" element={<LinkTree />} />
                 <Route path="/obrigado" element={<Obrigado />} />
+                <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
+                <Route path="/termos-uso" element={<TermosUso />} />
                 
                 {/* Static area pages (fallbacks for existing URLs) */}
                 <Route path="/areas/familia" element={<Familia />} />

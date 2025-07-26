@@ -46,7 +46,7 @@ const Blog = () => {
         </div>
       </section>;
   }
-  return <section className={`h-screen flex items-center justify-center overflow-hidden ${isDark ? 'bg-black' : 'bg-white'} relative`}>
+  return <section className={`h-screen flex items-center justify-center overflow-hidden ${isDark ? 'bg-black' : 'bg-white'} relative ${isMobile ? 'pb-4' : ''}`}>
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
 

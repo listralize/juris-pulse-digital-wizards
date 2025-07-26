@@ -116,7 +116,7 @@ const Partners = () => {
     justifyContent: 'flex-start',
     // Mudando de center para flex-start
     marginTop: '0px',
-    paddingTop: '50px' // Reduzindo significativamente o padding do topo
+    paddingTop: isMobile ? '20px' : '50px' // Reduzindo ainda mais no mobile
   }}>
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
@@ -125,7 +125,7 @@ const Partners = () => {
       marginTop: '-100px'
     }}>
         <div className="flex flex-col items-center justify-start flex-1" style={{
-        paddingTop: '155px'
+        paddingTop: isMobile ? '100px' : '155px' // Reduzindo no mobile
       }}>
           {/* Header responsivo */}
           <div className="text-center mb-8 md:mb-12">

@@ -108,7 +108,7 @@ const Footer: React.FC<FooterProps> = ({
       className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}
       style={{
         margin: '0',
-        padding: '2rem 1.5rem 2rem 1.5rem', // Padding controlado, sem margin
+        padding: '3rem 1.5rem 2rem 1.5rem', // Aumentando o padding superior para mais espaço
         marginBottom: '0' // ZERO margin-bottom
       }}
     >
@@ -195,7 +195,7 @@ const Footer: React.FC<FooterProps> = ({
                 href="https://listralize.com.br/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} hover:underline`}
+                className={`${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} hover:underline`}
               >
                 Listralize
               </a>
@@ -204,19 +204,19 @@ const Footer: React.FC<FooterProps> = ({
           
           {/* Copyright e links */}
           <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} font-satoshi`}>
+            <p className={`text-sm ${isDark ? 'text-white' : 'text-black'} font-satoshi`}>
               © {currentYear} {footerData.companyName}. Todos os direitos reservados.
             </p>
             <div className="flex space-x-6">
               <a 
-                href="#" 
-                className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi hover:underline`}
+                href="/politica-privacidade" 
+                className={`text-sm ${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} font-satoshi hover:underline`}
               >
                 Política de Privacidade
               </a>
               <a 
-                href="#" 
-                className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} font-satoshi hover:underline`}
+                href="/termos-uso" 
+                className={`text-sm ${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} font-satoshi hover:underline`}
               >
                 Termos de Uso
               </a>
