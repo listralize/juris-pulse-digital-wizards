@@ -95,13 +95,14 @@ const Hero = () => {
     });
     tl.fromTo(logoRef.current, {
       opacity: 0,
-      y: 30,
-      scale: 0.9
+      y: 40,
+      scale: 0.8
     }, {
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 1
+      duration: 2.5,
+      ease: 'power2.out'
     }).fromTo(headlineRef.current, {
       opacity: 0,
       y: 20
