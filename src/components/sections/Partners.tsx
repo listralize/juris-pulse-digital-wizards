@@ -96,9 +96,9 @@ const Partners = () => {
     };
   }, []);
 
-  // Carregar vídeo de fundo na inicialização
+  // Carregar vídeo de fundo FORÇADAMENTE
   useEffect(() => {
-    const loadTeamVideo = async () => {
+    const forceLoadVideo = async () => {
       try {
         const { supabase } = await import('../../integrations/supabase/client');
         
@@ -109,27 +109,40 @@ const Partners = () => {
           .limit(1)
           .maybeSingle();
 
-        if (settings) {
-          const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
-          
-          if (videoElement) {
-            if (settings.team_background_video && settings.team_video_enabled) {
+        console.log('🎥 FORÇANDO carregamento do vídeo:', settings);
+
+        if (settings?.team_background_video) {
+          // Usar timeout para garantir que o elemento existe
+          setTimeout(() => {
+            const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
+            
+            if (videoElement) {
               videoElement.src = settings.team_background_video;
-              videoElement.style.display = 'block';
-              videoElement.play().catch(console.error);
-              console.log('🎥 Team video carregado e reproduzindo:', settings.team_background_video);
+              if (settings.team_video_enabled) {
+                videoElement.style.display = 'block';
+                videoElement.style.opacity = '0.3';
+                videoElement.play().then(() => {
+                  console.log('✅ VÍDEO REPRODUZINDO:', settings.team_background_video);
+                }).catch(err => {
+                  console.error('❌ Erro ao reproduzir:', err);
+                });
+              } else {
+                videoElement.style.display = 'none';
+                console.log('🚫 Vídeo desabilitado');
+              }
             } else {
-              videoElement.style.display = 'none';
-              console.log('🎥 Team video desabilitado ou sem URL');
+              console.error('❌ Elemento video não encontrado!');
             }
-          }
+          }, 500);
+        } else {
+          console.log('🚫 Sem URL de vídeo configurada');
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar vídeo da equipe:', error);
+        console.error('❌ ERRO CRÍTICO ao carregar vídeo:', error);
       }
     };
 
-    loadTeamVideo();
+    forceLoadVideo();
   }, []);
 
   // Cálculos de slides baseados no dispositivo
