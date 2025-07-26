@@ -666,25 +666,6 @@ export const LeadsManagement: React.FC = () => {
           </SelectContent>
         </Select>
 
-        <Select
-          value={selectedTemplate?.id || ''}
-          onValueChange={(value) => {
-            const template = emailTemplates.find(t => t.id === value);
-            setSelectedTemplate(template);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Template de Email" />
-          </SelectTrigger>
-          <SelectContent>
-            {emailTemplates.map((template) => (
-              <SelectItem key={template.id} value={template.id}>
-                {template.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Button variant="outline" onClick={() => {
           setSearchQuery('');
           setDateFilter('all');
@@ -770,12 +751,12 @@ export const LeadsManagement: React.FC = () => {
                           }}
                         />
                       </th>
-                      <th className="text-left p-2">Nome</th>
-                      <th className="text-left p-2">Email</th>
-                      <th className="text-left p-2">Serviço</th>
-                      <th className="text-left p-2">Data</th>
-                      <th className="text-left p-2">Status</th>
-                      <th className="text-left p-2">Ações</th>
+                       <th className="text-left p-2">Nome</th>
+                       <th className="text-left p-2">Contato</th>
+                       <th className="text-left p-2">Serviço</th>
+                       <th className="text-left p-2">Data</th>
+                       <th className="text-left p-2">Status</th>
+                       <th className="text-left p-2">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -799,8 +780,21 @@ export const LeadsManagement: React.FC = () => {
                               }}
                             />
                           </td>
-                          <td className="p-2 font-medium">{leadData.name || 'N/A'}</td>
-                          <td className="p-2">{leadData.email || 'N/A'}</td>
+                           <td className="p-2 font-medium">{leadData.name || 'N/A'}</td>
+                           <td className="p-2">
+                             <div className="space-y-1">
+                               <div className="flex items-center gap-2">
+                                 <Mail className="h-3 w-3" />
+                                 <span className="text-xs">{leadData.email || 'N/A'}</span>
+                               </div>
+                               {leadData.phone && (
+                                 <div className="flex items-center gap-2">
+                                   <MessageSquare className="h-3 w-3 text-green-600" />
+                                   <span className="text-xs">{leadData.phone}</span>
+                                 </div>
+                               )}
+                             </div>
+                           </td>
                           <td className="p-2">{leadData.service || 'N/A'}</td>
                           <td className="p-2">{new Date(lead.created_at).toLocaleDateString('pt-BR')}</td>
                           <td className="p-2">
@@ -811,14 +805,13 @@ export const LeadsManagement: React.FC = () => {
                               <SelectTrigger className="w-24">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="novo">Novo</SelectItem>
-                                <SelectItem value="contato">Contato</SelectItem>
-                                <SelectItem value="qualificado">Qualificado</SelectItem>
-                                <SelectItem value="cliente">Cliente</SelectItem>
-                                <SelectItem value="convertido">Convertido</SelectItem>
-                                <SelectItem value="descartado">Descartado</SelectItem>
-                              </SelectContent>
+                               <SelectContent>
+                                 <SelectItem value="novo">Novo</SelectItem>
+                                 <SelectItem value="contato">Em Contato</SelectItem>
+                                 <SelectItem value="qualificado">Qualificado</SelectItem>
+                                 <SelectItem value="convertido">Convertido</SelectItem>
+                                 <SelectItem value="descartado">Descartado</SelectItem>
+                               </SelectContent>
                             </Select>
                           </td>
                           <td className="p-2">
@@ -843,12 +836,11 @@ export const LeadsManagement: React.FC = () => {
 
       {/* Kanban Board */}
       {currentView === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {[
             { key: 'novo', title: 'Novos', variant: 'secondary' as const },
             { key: 'contato', title: 'Em Contato', variant: 'default' as const },
             { key: 'qualificado', title: 'Qualificados', variant: 'default' as const },
-            { key: 'cliente', title: 'Clientes', variant: 'outline' as const },
             { key: 'convertido', title: 'Convertidos', variant: 'outline' as const },
             { key: 'descartado', title: 'Descartados', variant: 'destructive' as const }
           ].map((column) => (

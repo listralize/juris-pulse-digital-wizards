@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -105,143 +106,50 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
   `;
 };
 
-// Função para enviar email via GoDaddy SMTP
-async function sendSMTPEmail(to: string, subject: string, html: string) {
-  const smtpEmail = Deno.env.get("SMTP_EMAIL") || "contato@stadv.com.br";
-  const smtpPassword = Deno.env.get("SMTP_PASSWORD") || "";
-  const webhookUrl = Deno.env.get("EMAIL_WEBHOOK_URL");
+// Função para enviar email via Resend
+async function sendEmail(to: string, subject: string, html: string) {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  const fromEmail = "contato@stadv.com.br";
   
-  console.log("=== CONFIGURAÇÃO SMTP ===");
-  console.log("Host: smtpout.secureserver.net");
-  console.log("Port: 465");
-  console.log("Email:", smtpEmail);
+  console.log("=== CONFIGURAÇÃO EMAIL ===");
+  console.log("Provedor: Resend");
+  console.log("De:", fromEmail);
   console.log("Para:", to);
   console.log("Assunto:", subject);
+  console.log("API Key configurada:", resendApiKey ? "Sim" : "Não");
   
   try {
-    // Se temos webhook configurado, usar webhook
-    if (webhookUrl) {
-      console.log("📤 Enviando via webhook para envio SMTP...");
-      
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: smtpEmail,
-          to: to,
-          subject: subject,
-          html: html,
-          smtp_host: "smtpout.secureserver.net",
-          smtp_port: 465,
-          smtp_user: smtpEmail,
-          smtp_password: smtpPassword
-        })
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log("✅ Email enviado via webhook:", result);
-        
-        return {
-          success: true,
-          messageId: `webhook-${Date.now()}`,
-          message: "Email enviado com sucesso via webhook SMTP",
-          details: {
-            from: smtpEmail,
-            to: to,
-            subject: subject,
-            timestamp: new Date().toISOString(),
-            webhook_response: result
-          }
-        };
-      } else {
-        throw new Error(`Webhook falhou: ${response.status} ${response.statusText}`);
-      }
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY não configurada. Configure no painel de secrets do Supabase.");
     }
 
-    // Se temos credenciais SMTP, tentar envio direto via SMTP
-    if (smtpEmail && smtpPassword) {
-      console.log("📧 Tentando envio via SMTP direto...");
-      
-      try {
-        // Usar SMTPClient do Deno
-        const { SMTPClient } = await import('https://deno.land/x/denomailer@1.6.0/mod.ts');
-        
-        const client = new SMTPClient({
-          connection: {
-            hostname: 'smtpout.secureserver.net',
-            port: 465,
-            tls: true,
-            auth: {
-              username: smtpEmail,
-              password: smtpPassword,
-            },
-          },
-        });
+    const resend = new Resend(resendApiKey);
 
-        await client.send({
-          from: smtpEmail,
-          to: to,
-          subject: subject,
-          content: html,
-          html: html,
-        });
-
-        await client.close();
-        console.log("✅ Email enviado via SMTP direto com sucesso");
-
-        return {
-          success: true,
-          messageId: `smtp-${Date.now()}`,
-          message: "Email enviado via SMTP com sucesso",
-          details: {
-            from: smtpEmail,
-            to: to,
-            subject: subject,
-            timestamp: new Date().toISOString()
-          }
-        };
-
-      } catch (smtpError) {
-        console.error("❌ Erro no envio SMTP direto:", smtpError);
-        // Continua para fallback
-      }
-    }
-
-    // Fallback: preparar dados para configuração manual
-    const emailData = {
-      from: {
-        email: smtpEmail,
-        name: "Escritório de Advocacia"
-      },
-      to: [{
-        email: to,
-        name: to.split('@')[0]
-      }],
+    const emailResponse = await resend.emails.send({
+      from: `Escritório de Advocacia <${fromEmail}>`,
+      to: [to],
       subject: subject,
-      html: html
-    };
+      html: html,
+    });
 
-    console.log("📧 Email preparado (configure SMTP ou webhook):", emailData);
-    
+    console.log("✅ Email enviado com sucesso via Resend:", emailResponse);
+
     return {
       success: true,
-      messageId: `prepared-${Date.now()}`,
-      message: "Email preparado - configure SMTP_EMAIL, SMTP_PASSWORD e EMAIL_WEBHOOK_URL para envio real",
+      messageId: emailResponse.data?.id || `resend-${Date.now()}`,
+      message: "Email enviado com sucesso via Resend",
       details: {
-        from: smtpEmail,
+        from: fromEmail,
         to: to,
         subject: subject,
         timestamp: new Date().toISOString(),
-        note: "Configure as credenciais SMTP e webhook para envio real"
+        resend_id: emailResponse.data?.id
       }
     };
 
   } catch (error) {
-    console.error("❌ Erro no envio SMTP:", error);
-    throw error;
+    console.error("❌ Erro no envio via Resend:", error);
+    throw new Error(`Falha no envio: ${error.message}`);
   }
 }
 
@@ -260,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent);
     const emailSubject = subject || `Obrigado pelo contato, ${name}! 📧`;
 
-    const result = await sendSMTPEmail(to, emailSubject, emailHTML);
+    const result = await sendEmail(to, emailSubject, emailHTML);
 
     console.log("✅ Email processado com sucesso:", result);
 
