@@ -38,114 +38,142 @@ const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ 
   const leadData = lead.lead_data || {};
   const phone = leadData.phone || leadData.telefone;
   const name = leadData.name || leadData.nome;
+  const email = leadData.email;
+  const service = leadData.service || leadData.servico;
+  const message = leadData.message || leadData.mensagem;
+
+  const formatWhatsAppNumber = (phoneNumber: string) => {
+    // Remove todos os caracteres não numéricos
+    const clean = phoneNumber.replace(/\D/g, '');
+    // Se não começar com 55, adiciona
+    return clean.startsWith('55') ? clean : `55${clean}`;
+  };
+
+  const openWhatsApp = () => {
+    if (phone) {
+      const formattedNumber = formatWhatsAppNumber(phone);
+      const whatsappMessage = `Olá ${name || 'cliente'}, vi que você entrou em contato através do nosso site. Em que posso ajudá-lo?`;
+      const url = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+      window.open(url, '_blank');
+    }
+  };
 
   return (
     <Sheet>
       <SheetTrigger asChild>
         {children}
       </SheetTrigger>
-      <SheetContent className="w-[600px] sm:max-w-[600px]">
+      <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{name || 'Lead sem nome'}</SheetTitle>
+          <SheetTitle className="text-xl">{name || 'Lead sem nome'}</SheetTitle>
           <SheetDescription>
-            Detalhes completos do lead - {new Date(lead.created_at).toLocaleString('pt-BR')}
+            {new Date(lead.created_at).toLocaleString('pt-BR')}
           </SheetDescription>
         </SheetHeader>
         
-        <div className="mt-6 space-y-6">
-          {/* Informações principais */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Informações de Contato</h3>
-            
-            <div className="grid gap-3">
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  <span className="font-medium">Email:</span>
-                </div>
-                {leadData.email ? (
-                  <a href={`mailto:${leadData.email}`} className="text-blue-600 hover:underline">
-                    {leadData.email}
-                  </a>
-                ) : (
-                  <span className="text-muted-foreground">Não informado</span>
-                )}
+        <div className="mt-6 space-y-4">
+          {/* Ações principais */}
+          <div className="flex gap-2">
+            {email && (
+              <Button variant="outline" size="sm" asChild className="flex-1">
+                <a href={`mailto:${email}`}>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email
+                </a>
+              </Button>
+            )}
+            {phone && (
+              <Button variant="default" size="sm" onClick={openWhatsApp} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Phone className="w-4 h-4 mr-2" />
+                WhatsApp
+              </Button>
+            )}
+          </div>
+
+          {/* Informações principais - Grid compacto */}
+          <div className="grid grid-cols-1 gap-3">
+            {/* Nome */}
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="text-xs font-medium text-muted-foreground mb-1">NOME</div>
+              <div className="text-sm font-medium">{name || 'Não informado'}</div>
+            </div>
+
+            {/* Email */}
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="text-xs font-medium text-muted-foreground mb-1">EMAIL</div>
+              <div className="text-sm">{email || 'Não informado'}</div>
+            </div>
+
+            {/* Telefone */}
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="text-xs font-medium text-muted-foreground mb-1">TELEFONE</div>
+              <div className="text-sm">{phone || 'Não informado'}</div>
+            </div>
+
+            {/* Serviço */}
+            {service && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-xs font-medium text-muted-foreground mb-1">SERVIÇO</div>
+                <div className="text-sm">{service}</div>
               </div>
+            )}
 
-              {phone && (
-                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    <span className="font-medium">Telefone:</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{phone}</span>
-                    <Button size="sm" variant="outline" asChild>
-                      <a 
-                        href={`https://wa.me/55${phone.replace(/\D/g, '')}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-green-600"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        WhatsApp
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Mensagem */}
+            {message && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-xs font-medium text-muted-foreground mb-1">MENSAGEM</div>
+                <div className="text-sm leading-relaxed">{message}</div>
+              </div>
+            )}
           </div>
 
-          {/* Dados do formulário */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados do Formulário</h3>
+          {/* Outros dados do formulário */}
+          {Object.keys(leadData).length > 0 && (
             <div className="space-y-3">
-              {Object.entries(leadData).map(([key, value]) => {
-                if (!value || key === 'phone' || key === 'telefone' || key === 'email') return null;
-                
-                const displayKey = key === 'nome' ? 'Nome' : 
-                                 key === 'servico' ? 'Serviço' : 
-                                 key === 'message' ? 'Mensagem' : 
-                                 key === 'isUrgent' ? 'Urgente' : key;
-                
-                return (
-                  <div key={key} className="p-3 bg-muted rounded-lg">
-                    <div className="font-medium text-sm mb-1">{displayKey}:</div>
-                    <div className="text-sm">
-                      {key === 'isUrgent' ? (value ? 'Sim' : 'Não') : String(value)}
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Outros Dados</h3>
+              <div className="grid grid-cols-1 gap-2">
+                {Object.entries(leadData).map(([key, value]) => {
+                  // Pular campos já exibidos
+                  if (['name', 'nome', 'email', 'phone', 'telefone', 'service', 'servico', 'message', 'mensagem'].includes(key) || !value) {
+                    return null;
+                  }
+                  
+                  return (
+                    <div key={key} className="p-2 bg-muted/30 rounded text-xs">
+                      <span className="font-medium text-muted-foreground">{key.toUpperCase()}:</span>
+                      <span className="ml-2">{typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : String(value)}</span>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Dados técnicos */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados Técnicos</h3>
-            <div className="grid gap-3">
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="font-medium text-sm mb-1">Formulário:</div>
-                <div className="text-sm">{lead.form_name || lead.form_id || 'N/A'}</div>
+          <div className="space-y-3 pt-4 border-t">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Dados Técnicos</h3>
+            <div className="space-y-2">
+              <div className="p-2 bg-muted/30 rounded text-xs">
+                <span className="font-medium text-muted-foreground">FORMULÁRIO:</span>
+                <span className="ml-2">{lead.form_name || lead.form_id || 'N/A'}</span>
               </div>
               
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="font-medium text-sm mb-1">Página de Origem:</div>
-                <div className="text-sm break-all">{lead.page_url}</div>
+              <div className="p-2 bg-muted/30 rounded text-xs">
+                <span className="font-medium text-muted-foreground">PÁGINA:</span>
+                <span className="ml-2 break-all">{lead.page_url}</span>
               </div>
               
               {lead.campaign_name && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <div className="font-medium text-sm mb-1">Campanha:</div>
-                  <div className="text-sm">{lead.campaign_name}</div>
+                <div className="p-2 bg-muted/30 rounded text-xs">
+                  <span className="font-medium text-muted-foreground">CAMPANHA:</span>
+                  <span className="ml-2">{lead.campaign_name}</span>
                 </div>
               )}
               
               {lead.referrer && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <div className="font-medium text-sm mb-1">Referrer:</div>
-                  <div className="text-sm break-all">{lead.referrer}</div>
+                <div className="p-2 bg-muted/30 rounded text-xs">
+                  <span className="font-medium text-muted-foreground">ORIGEM:</span>
+                  <span className="ml-2 break-all">{lead.referrer}</span>
                 </div>
               )}
             </div>
