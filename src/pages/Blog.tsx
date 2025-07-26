@@ -48,17 +48,17 @@ const BlogPage = () => {
   }
 
   return (
-    <div className={`min-h-screen relative ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
-      {/* Neural Background - garantindo que apareça no tema escuro */}
+    <div className={`min-h-screen relative ${isDark ? 'bg-black' : 'bg-white'}`}>
+      {/* Neural Background - garantindo que apareça no tema escuro igual na home */}
       {isDark && (
         <div className="fixed inset-0 w-full h-full -z-10">
           <NeuralBackground />
         </div>
       )}
       
-      {/* Background gradients */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-20"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-20"></div>
+      {/* Background gradients escuros como na home */}
+      <div className="fixed inset-0 bg-gradient-to-br from-black via-black to-neutral-900 -z-20"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/10 via-transparent to-purple-950/10 -z-20"></div>
       
       <Navbar />
       

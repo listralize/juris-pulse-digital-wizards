@@ -145,7 +145,7 @@ const Footer: React.FC<FooterProps> = ({
                   href={`mailto:${footerData.email}`} 
                   className={`${isDark ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700'} hover:underline font-satoshi text-sm block`}
                 >
-                  {footerData.email}
+                  📧 {footerData.email}
                 </a>
               </div>
               <div>
@@ -153,7 +153,7 @@ const Footer: React.FC<FooterProps> = ({
                   href={`tel:${footerData.phone.replace(/\D/g, '')}`}
                   className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} hover:underline font-satoshi text-sm block`}
                 >
-                  {footerData.phone}
+                  📞 {footerData.phone}
                 </a>
               </div>
             </div>
