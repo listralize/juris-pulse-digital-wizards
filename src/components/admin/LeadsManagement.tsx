@@ -70,7 +70,7 @@ const parseLeadData = (leadData: any) => {
 
 
 // Componente para exibir detalhes do lead
-const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ lead, children }) => {
+const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode; selectedTemplate?: any }> = ({ lead, children, selectedTemplate }) => {
   const rawLeadData = lead.lead_data || {};
   const leadData = parseLeadData(rawLeadData);
   
@@ -102,18 +102,26 @@ const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ 
       return;
     }
 
+    if (!selectedTemplate) {
+      toast.error('Template de email não encontrado');
+      return;
+    }
+
     try {
-      const { data, error } = await supabase.functions.invoke('send-welcome-email', {
+      const { data, error } = await supabase.functions.invoke('send-smtp-email', {
         body: {
+          to: email,
+          subject: selectedTemplate.subject.replace('{name}', name || 'Cliente'),
           name: name || 'Cliente',
-          email: email,
           service: service || 'Consultoria Jurídica',
-          message: message || ''
+          message: message || '',
+          customTitle: selectedTemplate.title,
+          customContent: selectedTemplate.content.replace('{service}', service || 'nossos serviços').replace('{name}', name || 'cliente')
         }
       });
 
       if (error) throw error;
-      toast.success('Email de boas-vindas enviado!');
+      toast.success('Email enviado com sucesso!');
     } catch (error) {
       console.error('Erro ao enviar email:', error);
       toast.error('Erro ao enviar email');
@@ -152,11 +160,11 @@ const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ 
             )}
           </div>
 
-          {/* Ação para enviar email de boas-vindas */}
-          {email && (
+          {/* Ação para enviar email personalizado */}
+          {email && selectedTemplate && (
             <Button onClick={sendWelcomeEmail} variant="secondary" size="sm" className="w-full">
               <Mail className="w-4 h-4 mr-2" />
-              Enviar Email de Boas-vindas
+              Enviar Email Personalizado
             </Button>
           )}
 
@@ -264,27 +272,45 @@ export const LeadsManagement: React.FC = () => {
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
   const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
+  const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
 
-  // Carregar leads diretamente da tabela conversion_events
+  // Carregar leads e status do kanban
   const loadLeads = async () => {
     try {
       setIsLoading(true);
       console.log('🔄 Carregando leads da tabela conversion_events...');
       
-      const { data, error } = await supabase
+      const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ Erro:', error);
+      if (leadsError) {
+        console.error('❌ Erro ao carregar leads:', leadsError);
         toast.error('Erro ao carregar leads');
         return;
       }
 
-      console.log(`✅ ${data?.length || 0} registros carregados da conversion_events`);
-      setLeads(data || []);
-      setFilteredLeads(data || []);
+      // Carregar status dos leads
+      const { data: statusData, error: statusError } = await supabase
+        .from('lead_status')
+        .select('*');
+
+      if (statusError) {
+        console.error('❌ Erro ao carregar status:', statusError);
+      }
+
+      // Mapear status
+      const statusMap: { [key: string]: string } = {};
+      statusData?.forEach(status => {
+        statusMap[status.lead_id] = status.status;
+      });
+
+      console.log(`✅ ${leadsData?.length || 0} leads carregados`);
+      setLeads(leadsData || []);
+      setFilteredLeads(leadsData || []);
+      setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
       toast.error('Erro ao carregar leads');
@@ -293,9 +319,62 @@ export const LeadsManagement: React.FC = () => {
     }
   };
 
+  // Carregar templates de email
+  const loadEmailTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_templates')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Erro ao carregar templates:', error);
+        return;
+      }
+
+      setEmailTemplates(data || []);
+      
+      // Selecionar template padrão
+      const defaultTemplate = data?.find(t => t.is_default) || data?.[0];
+      setSelectedTemplate(defaultTemplate);
+    } catch (error) {
+      console.error('❌ Erro ao carregar templates:', error);
+    }
+  };
+
+  // Salvar status do lead no banco
+  const updateLeadStatus = async (leadId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('lead_status')
+        .upsert({
+          lead_id: leadId,
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('❌ Erro ao salvar status:', error);
+        toast.error('Erro ao salvar status');
+        return false;
+      }
+
+      // Atualizar estado local
+      setLeadStatuses(prev => ({ ...prev, [leadId]: newStatus }));
+      toast.success(`Status atualizado para: ${newStatus}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao salvar status:', error);
+      toast.error('Erro ao salvar status');
+      return false;
+    }
+  };
+
   // Carregar na inicialização
   useEffect(() => {
     loadLeads();
+    loadEmailTemplates();
   }, []);
 
   // Aplicar filtros
@@ -492,7 +571,7 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <LeadDetailSheet key={lead.id} lead={lead}>
+                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
                       <Card className="border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20 cursor-pointer hover:shadow-md transition-all">
                         <CardContent className="p-3">
                           <div className="space-y-2">
@@ -516,8 +595,7 @@ export const LeadsManagement: React.FC = () => {
                               <Select 
                                 value={leadStatuses[lead.id] || 'novo'} 
                                 onValueChange={async (value) => {
-                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
-                                  toast.success(`Status atualizado para: ${value}`);
+                                  await updateLeadStatus(lead.id, value);
                                 }}
                               >
                                 <SelectTrigger className="h-6 text-xs">
@@ -558,7 +636,7 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <LeadDetailSheet key={lead.id} lead={lead}>
+                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
                       <Card className="border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20 cursor-pointer hover:shadow-md transition-all">
                         <CardContent className="p-3">
                           <div className="space-y-2">
@@ -582,8 +660,7 @@ export const LeadsManagement: React.FC = () => {
                               <Select 
                                 value={leadStatuses[lead.id] || 'novo'} 
                                 onValueChange={async (value) => {
-                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
-                                  toast.success(`Status atualizado para: ${value}`);
+                                  await updateLeadStatus(lead.id, value);
                                 }}
                               >
                                 <SelectTrigger className="h-6 text-xs">
@@ -624,7 +701,7 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <LeadDetailSheet key={lead.id} lead={lead}>
+                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
                       <Card className="border-l-4 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 cursor-pointer hover:shadow-md transition-all">
                         <CardContent className="p-3">
                           <div className="space-y-2">
@@ -648,8 +725,7 @@ export const LeadsManagement: React.FC = () => {
                               <Select 
                                 value={leadStatuses[lead.id] || 'novo'} 
                                 onValueChange={async (value) => {
-                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
-                                  toast.success(`Status atualizado para: ${value}`);
+                                  await updateLeadStatus(lead.id, value);
                                 }}
                               >
                                 <SelectTrigger className="h-6 text-xs">
@@ -690,7 +766,7 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <LeadDetailSheet key={lead.id} lead={lead}>
+                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
                       <Card className="border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 cursor-pointer hover:shadow-md transition-all">
                         <CardContent className="p-3">
                           <div className="space-y-2">
@@ -714,8 +790,7 @@ export const LeadsManagement: React.FC = () => {
                               <Select 
                                 value={leadStatuses[lead.id] || 'novo'} 
                                 onValueChange={async (value) => {
-                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
-                                  toast.success(`Status atualizado para: ${value}`);
+                                  await updateLeadStatus(lead.id, value);
                                 }}
                               >
                                 <SelectTrigger className="h-6 text-xs">
@@ -828,7 +903,7 @@ export const LeadsManagement: React.FC = () => {
                       {new Date(lead.created_at).toLocaleString('pt-BR')}
                     </TableCell>
                     <TableCell>
-                      <LeadDetailSheet lead={lead}>
+                      <LeadDetailSheet lead={lead} selectedTemplate={selectedTemplate}>
                         <Button variant="outline" size="sm">
                           <Eye className="w-3 h-3 mr-1" />
                           Ver Detalhes
