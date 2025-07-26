@@ -51,7 +51,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const [formPerformanceData, setFormPerformanceData] = useState<FormPerformance[]>([]);
 
   // Dados que o usuário controla
-  const [formSubmissions, setFormSubmissions] = useState<number>(0);
+  const [manualLeads, setManualLeads] = useState<number>(0); // Campo manual para leads
   const [contracts, setContracts] = useState<number>(0);
   const [adSpend, setAdSpend] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
@@ -230,7 +230,8 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         console.log('📊 [ConversionFunnel] Contagem final para funil:', submissionsForSelectedForm);
       }
 
-      setFormSubmissions(submissionsForSelectedForm);
+      // Não atualizar automaticamente os leads, apenas armazenar para referência
+      console.log('✅ [ConversionFunnel] Performance calculada - dados disponíveis para referência');
       console.log('✅ [ConversionFunnel] FUNIL ATUALIZADO - Envios:', submissionsForSelectedForm);
 
     } catch (error) {
@@ -312,10 +313,10 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     }
   }, [dateRange, availableForms, selectedForm]);
 
-  // Cálculos automáticos
-  const conversionRate = formSubmissions > 0 ? contracts / formSubmissions * 100 : 0;
+  // Cálculos automáticos usando leads manuais
+  const conversionRate = manualLeads > 0 ? contracts / manualLeads * 100 : 0;
   const roi = adSpend > 0 ? (revenue - adSpend) / adSpend * 100 : 0;
-  const costPerLead = formSubmissions > 0 ? adSpend / formSubmissions : 0;
+  const costPerLead = manualLeads > 0 ? adSpend / manualLeads : 0;
   const costPerAcquisition = contracts > 0 ? adSpend / contracts : 0;
   const ticketMedio = contracts > 0 ? revenue / contracts : 0;
   const lucroLiquido = revenue - adSpend;
@@ -327,7 +328,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       return;
     }
 
-    if (formSubmissions === 0 && contracts === 0 && adSpend === 0 && revenue === 0) {
+    if (manualLeads === 0 && contracts === 0 && adSpend === 0 && revenue === 0) {
       toast.error('Não há dados suficientes para salvar o relatório');
       return;
     }
@@ -341,7 +342,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         campaign_name: campaignName.trim(),
         form_id: selectedForm || 'all',
         form_name: selectedFormData?.name || 'Formulário desconhecido',
-        form_submissions: Math.max(0, formSubmissions || 0),
+        form_submissions: Math.max(0, manualLeads || 0),
         contracts: Math.max(0, contracts || 0),
         ad_spend: Math.max(0, Number(adSpend) || 0),
         revenue: Math.max(0, Number(revenue) || 0),
@@ -444,6 +445,18 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
             {/* Inputs Compactos */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
+                <Label className="text-sm font-medium">Leads</Label>
+                <Input
+                  type="number"
+                  value={manualLeads}
+                  onChange={(e) => setManualLeads(Number(e.target.value) || 0)}
+                  className="h-10"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <Label className="text-sm font-medium">Contratos</Label>
                 <Input
                   type="number"
@@ -532,7 +545,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
               <div className="relative">
                 <div className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-between px-4">
                   <span className="text-white font-medium text-sm">
-                    {formSubmissions.toLocaleString()} Envios
+                    {manualLeads.toLocaleString()} Leads
                   </span>
                   <span className="text-white/90 text-sm">100%</span>
                 </div>
@@ -610,13 +623,32 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       {/* Performance dos Formulários - USANDO A MESMA FONTE DOS CÁLCULOS DO FUNIL */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Performance dos Formulários - Tempo Real
-            <span className="text-sm text-muted-foreground font-normal">
-              (conversões por formulário - {periods.find(p => p.value === selectedPeriod)?.label.toLowerCase()})
-            </span>
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              Performance dos Formulários - Tempo Real
+              <span className="text-sm text-muted-foreground font-normal">
+                (conversões por formulário - {periods.find(p => p.value === selectedPeriod)?.label.toLowerCase()})
+              </span>
+            </CardTitle>
+            
+            {/* Seletor de período para performance */}
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium">Período:</Label>
+              <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+                <SelectTrigger className="w-[200px] h-8">
+                  <SelectValue placeholder="Selecione um período" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periods.map(period => (
+                    <SelectItem key={period.value} value={period.value}>
+                      {period.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

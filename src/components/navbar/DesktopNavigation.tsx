@@ -55,17 +55,6 @@ const DesktopNavigation = ({
         />
         
         <NavigationItem 
-          to="/#blog" 
-          label="Blog" 
-          isActive={activeSection === 'blog'} 
-          onClick={e => {
-            e.preventDefault();
-            console.log('DesktopNavigation: Blog clicked');
-            handleNavigation('blog', '/#blog');
-          }} 
-        />
-        
-        <NavigationItem 
           to="/#cliente" 
           label="Área do Cliente" 
           isActive={activeSection === 'cliente'} 
@@ -73,6 +62,17 @@ const DesktopNavigation = ({
             e.preventDefault();
             console.log('DesktopNavigation: Client Area clicked');
             handleNavigation('cliente', '/#cliente');
+          }} 
+        />
+        
+        <NavigationItem 
+          to="/#blog" 
+          label="Blog" 
+          isActive={activeSection === 'blog'} 
+          onClick={e => {
+            e.preventDefault();
+            console.log('DesktopNavigation: Blog clicked');
+            handleNavigation('blog', '/#blog');
           }} 
         />
         
