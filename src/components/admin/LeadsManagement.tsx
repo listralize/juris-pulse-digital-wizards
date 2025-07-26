@@ -39,63 +39,16 @@ const parseLeadData = (leadData: any) => {
   
   console.log('🔍 Dados brutos do lead:', leadData);
   
-  const parsedData: any = {};
-  
-  // Primeiro, copiar todos os dados existentes
-  Object.assign(parsedData, leadData);
-  
-  // Se já tem campos nomeados diretamente, usar eles
-  if (leadData.name) parsedData.nome = leadData.name;
-  if (leadData.phone) parsedData.telefone = leadData.phone;
-  if (leadData.email) parsedData.email = leadData.email;
-  if (leadData.service) parsedData.servico = leadData.service;
-  if (leadData.message) parsedData.mensagem = leadData.message;
-  
-  // Se os dados estão em formato de array ou objeto com chaves numéricas
-  const entries = Object.entries(leadData);
-  
-  entries.forEach(([key, value]) => {
-    if (!value || value === '') return;
-    
-    // Verificar se é um campo de nome (primeira entrada não vazia que parece nome)
-    if (typeof value === 'string' && value.length > 2 && !parsedData.nome && !parsedData.name) {
-      // Se contém caracteres típicos de nome e não parece email/telefone
-      if (!/[@\d\+\(\)\-\s]{3,}/.test(value) && /^[a-zA-ZÀ-ÿ\s]{2,}/.test(value)) {
-        parsedData.nome = value;
-        parsedData.name = value;
-      }
-    }
-    
-    // Verificar se é email
-    if (typeof value === 'string' && value.includes('@') && !parsedData.email) {
-      parsedData.email = value;
-    }
-    
-    // Verificar se é telefone
-    if (typeof value === 'string' && /[\d\+\(\)\-\s]{8,}/.test(value) && !parsedData.telefone && !parsedData.phone) {
-      parsedData.telefone = value;
-      parsedData.phone = value;
-    }
-    
-    // Verificar se é mensagem (texto longo)
-    if (typeof value === 'string' && value.length > 20 && !parsedData.mensagem && !parsedData.message) {
-      parsedData.mensagem = value;
-      parsedData.message = value;
-    }
-  });
-  
-  // Mapeamento específico por posição se não encontrou pelos padrões
-  if (!parsedData.nome && !parsedData.name) {
-    // Tentar pegar o primeiro valor que parece nome
-    for (let i = 0; i < 10; i++) {
-      const value = leadData[i.toString()];
-      if (value && typeof value === 'string' && value.length > 1 && !/[@\d\+\(\)\-]{3,}/.test(value)) {
-        parsedData.nome = value;
-        parsedData.name = value;
-        break;
-      }
-    }
-  }
+  // Os dados já vêm com as chaves corretas, apenas adicionar aliases para compatibilidade
+  const parsedData = {
+    ...leadData,
+    // Aliases para compatibilidade
+    nome: leadData.name || leadData.nome,
+    telefone: leadData.phone || leadData.telefone,
+    servico: leadData.service || leadData.servico,
+    mensagem: leadData.message || leadData.mensagem,
+    urgente: leadData.isUrgent || leadData.urgente
+  };
   
   console.log('✅ Dados parseados:', parsedData);
   
