@@ -1,250 +1,177 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { RefreshCw, Download, Search, Trash2, Phone, Mail, MessageSquare, Calendar, Filter, Eye, ExternalLink } from 'lucide-react';
-import { supabase } from '../../integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Interface do lead
 interface Lead {
   id: string;
   lead_data: any;
-  session_id: string;
-  visitor_id: string | null;
   event_type: string;
-  event_category: string | null;
-  event_action: string;
-  event_label: string | null;
-  form_id: string | null;
-  form_name: string | null;
-  page_url: string;
-  referrer: string | null;
-  campaign_name: string | null;
-  campaign_source: string | null;
-  campaign_medium: string | null;
-  user_agent: string | null;
-  timestamp: string;
+  page_url?: string;
+  referrer?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
   created_at: string;
-  conversion_value?: number | null;
 }
 
-// Função para interpretar dados do formulário JSON
+// Helper para parsear dados do lead
 const parseLeadData = (leadData: any) => {
-  if (!leadData) return {};
-  
-  console.log('🔍 Dados brutos do lead:', leadData);
-  
-  let parsedLeadData = leadData;
-  
-  // Se leadData é uma string JSON, fazer parse
-  if (typeof leadData === 'string') {
-    try {
-      parsedLeadData = JSON.parse(leadData);
-      console.log('📦 JSON parseado:', parsedLeadData);
-    } catch (error) {
-      console.error('❌ Erro ao fazer parse do JSON:', error);
-      return {};
+  try {
+    if (typeof leadData === 'string') {
+      leadData = JSON.parse(leadData);
     }
+    
+    return {
+      name: leadData?.name || leadData?.nome || '',
+      email: leadData?.email || '',
+      phone: leadData?.phone || leadData?.telefone || '',
+      service: leadData?.service || leadData?.servico || '',
+      message: leadData?.message || leadData?.mensagem || '',
+      urgent: leadData?.urgent || leadData?.urgente || false,
+      ...leadData
+    };
+  } catch (error) {
+    console.error('Erro ao parsear lead_data:', error);
+    return {};
   }
-  
-  // Os dados já vêm com as chaves corretas, apenas adicionar aliases para compatibilidade
-  const result = {
-    ...parsedLeadData,
-    // Aliases para compatibilidade
-    nome: parsedLeadData.name || parsedLeadData.nome,
-    telefone: parsedLeadData.phone || parsedLeadData.telefone,
-    servico: parsedLeadData.service || parsedLeadData.servico,
-    mensagem: parsedLeadData.message || parsedLeadData.mensagem,
-    urgente: parsedLeadData.isUrgent || parsedLeadData.urgente
-  };
-  
-  console.log('✅ Dados parseados:', result);
-  
-  return result;
 };
 
+// Componente para detalhes do lead
+const LeadDetailSheet: React.FC<{
+  lead: Lead | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSendEmail: (lead: Lead, templateId?: string) => void;
+  emailTemplates: any[];
+  selectedTemplate: any;
+  setSelectedTemplate: (template: any) => void;
+}> = ({ lead, isOpen, onClose, onSendEmail, emailTemplates, selectedTemplate, setSelectedTemplate }) => {
+  if (!lead) return null;
 
-// Componente para exibir detalhes do lead
-const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode; selectedTemplate?: any }> = ({ lead, children, selectedTemplate }) => {
-  const rawLeadData = lead.lead_data || {};
-  const leadData = parseLeadData(rawLeadData);
-  
-  const phone = leadData.phone || leadData.telefone;
-  const name = leadData.name || leadData.nome;
-  const email = leadData.email;
-  const service = leadData.service || leadData.servico;
-  const message = leadData.message || leadData.mensagem;
-
-  const formatWhatsAppNumber = (phoneNumber: string) => {
-    // Remove todos os caracteres não numéricos
-    const clean = phoneNumber.replace(/\D/g, '');
-    // Se não começar com 55, adiciona
-    return clean.startsWith('55') ? clean : `55${clean}`;
-  };
-
-  const openWhatsApp = () => {
-    if (phone) {
-      const formattedNumber = formatWhatsAppNumber(phone);
-      const whatsappMessage = `Olá ${name || 'cliente'}, vi que você entrou em contato através do nosso site. Em que posso ajudá-lo?`;
-      const url = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-      window.open(url, '_blank');
-    }
-  };
-
-  const sendWelcomeEmail = async () => {
-    if (!email) {
-      toast.error('Email não disponível');
-      return;
-    }
-
-    if (!selectedTemplate) {
-      toast.error('Template de email não encontrado');
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.functions.invoke('send-smtp-email', {
-        body: {
-          to: email,
-          subject: selectedTemplate.subject.replace('{name}', name || 'Cliente'),
-          name: name || 'Cliente',
-          service: service || 'Consultoria Jurídica',
-          message: message || '',
-          customTitle: selectedTemplate.title,
-          customContent: selectedTemplate.content.replace('{service}', service || 'nossos serviços').replace('{name}', name || 'cliente')
-        }
-      });
-
-      if (error) throw error;
-      toast.success('Email enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar email:', error);
-      toast.error('Erro ao enviar email');
-    }
-  };
+  const leadData = parseLeadData(lead.lead_data);
+  const whatsappMessage = encodeURIComponent(
+    `Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`
+  );
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=5562994594496&text=${whatsappMessage}`;
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        {children}
-      </SheetTrigger>
-      <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle className="text-xl">{name || 'Lead sem nome'}</SheetTitle>
-          <SheetDescription>
-            {new Date(lead.created_at).toLocaleString('pt-BR')}
-          </SheetDescription>
+          <SheetTitle>Detalhes do Lead</SheetTitle>
         </SheetHeader>
         
-        <div className="mt-6 space-y-4">
-          {/* Ações principais */}
-          <div className="flex gap-2">
-            {email && (
-              <Button variant="outline" size="sm" asChild className="flex-1">
-                <a href={`mailto:${email}`}>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Email
+        <div className="mt-6 space-y-6">
+          {/* Informações principais */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
+              <p className="text-muted-foreground">{leadData.email || 'Email não informado'}</p>
+              {leadData.phone && (
+                <p className="text-muted-foreground">{leadData.phone}</p>
+              )}
+            </div>
+
+            {leadData.service && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">SERVIÇO:</span>
+                <p className="mt-1">{leadData.service}</p>
+              </div>
+            )}
+
+            {leadData.message && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">MENSAGEM:</span>
+                <p className="mt-1 p-3 bg-muted/30 rounded-md">{leadData.message}</p>
+              </div>
+            )}
+
+            {leadData.urgent && (
+              <Badge variant="destructive">Urgente</Badge>
+            )}
+          </div>
+
+          {/* Ações de contato */}
+          <div className="space-y-4">
+            <h4 className="font-medium">Ações</h4>
+            
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-green-600" />
+                <a 
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-green-600 hover:underline"
+                >
+                  WhatsApp
                 </a>
-              </Button>
-            )}
-            {phone && (
-              <Button variant="default" size="sm" onClick={openWhatsApp} className="flex-1 bg-green-600 hover:bg-green-700">
-                <Phone className="w-4 h-4 mr-2" />
-                WhatsApp
-              </Button>
-            )}
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium">Template:</span>
+                </div>
+                
+                <Select
+                  value={selectedTemplate?.id || ''}
+                  onValueChange={(value) => {
+                    const template = emailTemplates.find(t => t.id === value);
+                    setSelectedTemplate(template);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione um template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {emailTemplates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onSendEmail(lead)}
+                  className="text-blue-600 hover:bg-blue-50"
+                  disabled={!selectedTemplate}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Enviar Email
+                </Button>
+              </div>
+            </div>
           </div>
-
-          {/* Ação para enviar email personalizado */}
-          {email && selectedTemplate && (
-            <Button onClick={sendWelcomeEmail} variant="secondary" size="sm" className="w-full">
-              <Mail className="w-4 h-4 mr-2" />
-              Enviar Email Personalizado
-            </Button>
-          )}
-
-          {/* Informações principais - Grid compacto */}
-          <div className="grid grid-cols-1 gap-3">
-            {/* Nome */}
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <div className="text-xs font-medium text-muted-foreground mb-1">NOME</div>
-              <div className="text-sm font-medium">{name || 'Não informado'}</div>
-            </div>
-
-            {/* Email */}
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <div className="text-xs font-medium text-muted-foreground mb-1">EMAIL</div>
-              <div className="text-sm">{email || 'Não informado'}</div>
-            </div>
-
-            {/* Telefone */}
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <div className="text-xs font-medium text-muted-foreground mb-1">TELEFONE</div>
-              <div className="text-sm">{phone || 'Não informado'}</div>
-            </div>
-
-            {/* Serviço */}
-            {service && (
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="text-xs font-medium text-muted-foreground mb-1">SERVIÇO</div>
-                <div className="text-sm">{service}</div>
-              </div>
-            )}
-
-            {/* Mensagem */}
-            {message && (
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="text-xs font-medium text-muted-foreground mb-1">MENSAGEM</div>
-                <div className="text-sm leading-relaxed">{message}</div>
-              </div>
-            )}
-          </div>
-
-          {/* Outros dados do formulário */}
-          {Object.keys(leadData).length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Outros Dados</h3>
-              <div className="grid grid-cols-1 gap-2">
-                {Object.entries(leadData).map(([key, value]) => {
-                  // Pular campos já exibidos
-                  if (['name', 'nome', 'email', 'phone', 'telefone', 'service', 'servico', 'message', 'mensagem'].includes(key) || !value) {
-                    return null;
-                  }
-                  
-                  return (
-                    <div key={key} className="p-2 bg-muted/30 rounded text-xs">
-                      <span className="font-medium text-muted-foreground">{key.toUpperCase()}:</span>
-                      <span className="ml-2">{typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : String(value)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Dados técnicos */}
-          <div className="space-y-3 pt-4 border-t">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Dados Técnicos</h3>
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm">Dados Técnicos</h4>
+            
+            <div className="text-xs space-y-1">
               <div className="p-2 bg-muted/30 rounded text-xs">
-                <span className="font-medium text-muted-foreground">FORMULÁRIO:</span>
-                <span className="ml-2">{lead.form_name || lead.form_id || 'N/A'}</span>
+                <span className="font-medium text-muted-foreground">DATA:</span>
+                <span className="ml-2">{new Date(lead.created_at).toLocaleString('pt-BR')}</span>
               </div>
               
-              <div className="p-2 bg-muted/30 rounded text-xs">
-                <span className="font-medium text-muted-foreground">PÁGINA:</span>
-                <span className="ml-2 break-all">{lead.page_url}</span>
-              </div>
-              
-              {lead.campaign_name && (
+              {lead.page_url && (
                 <div className="p-2 bg-muted/30 rounded text-xs">
-                  <span className="font-medium text-muted-foreground">CAMPANHA:</span>
-                  <span className="ml-2">{lead.campaign_name}</span>
+                  <span className="font-medium text-muted-foreground">PÁGINA:</span>
+                  <span className="ml-2 break-all">{lead.page_url}</span>
                 </div>
               )}
               
@@ -274,6 +201,8 @@ export const LeadsManagement: React.FC = () => {
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
   const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -355,70 +284,120 @@ export const LeadsManagement: React.FC = () => {
         });
 
       if (error) {
-        console.error('❌ Erro ao salvar status:', error);
-        toast.error('Erro ao salvar status');
-        return false;
+        console.error('❌ Erro ao atualizar status:', error);
+        toast.error('Erro ao atualizar status');
+        return;
       }
 
       // Atualizar estado local
-      setLeadStatuses(prev => ({ ...prev, [leadId]: newStatus }));
-      toast.success(`Status atualizado para: ${newStatus}`);
-      return true;
+      setLeadStatuses(prev => ({
+        ...prev,
+        [leadId]: newStatus
+      }));
+
+      toast.success('Status atualizado!');
     } catch (error) {
-      console.error('❌ Erro ao salvar status:', error);
-      toast.error('Erro ao salvar status');
-      return false;
+      console.error('❌ Erro ao atualizar status:', error);
+      toast.error('Erro ao atualizar status');
     }
   };
 
-  // Carregar na inicialização
-  useEffect(() => {
-    loadLeads();
-    loadEmailTemplates();
-  }, []);
+  // Enviar email personalizado
+  const sendCustomEmail = async (lead: Lead, templateId?: string) => {
+    const template = templateId ? emailTemplates.find(t => t.id === templateId) : selectedTemplate;
+    
+    if (!template) {
+      toast.error('Selecione um template de email');
+      return;
+    }
 
-  // Aplicar filtros
-  useEffect(() => {
-    let filtered = [...leads];
-
-    // Filtro por data
-    if (dateFilter !== 'all') {
-      const today = new Date().toDateString();
-      const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toDateString();
+    try {
+      const leadData = parseLeadData(lead.lead_data);
       
-      filtered = filtered.filter(lead => {
-        const leadDate = new Date(lead.created_at).toDateString();
-        if (dateFilter === 'today') return leadDate === today;
-        if (dateFilter === 'week') return new Date(lead.created_at) >= new Date(thisWeek);
-        return true;
+      if (!leadData.email) {
+        toast.error('Email do lead não encontrado');
+        return;
+      }
+
+      console.log('📧 Enviando email personalizado:', {
+        to: leadData.email,
+        template: template.name,
+        lead: leadData.name
       });
-    }
 
-    // Filtro por formulário
-    if (formFilter !== 'all') {
-      filtered = filtered.filter(lead => lead.form_id === formFilter);
-    }
-
-    // Filtro por busca
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(lead => {
-        const leadData = lead.lead_data || {};
-        return (
-          JSON.stringify(leadData).toLowerCase().includes(query) ||
-          (lead.form_name || '').toLowerCase().includes(query) ||
-          (lead.page_url || '').toLowerCase().includes(query) ||
-          (lead.campaign_name || '').toLowerCase().includes(query)
-        );
+      const { data, error } = await supabase.functions.invoke('send-smtp-email', {
+        body: {
+          to: leadData.email,
+          subject: template.subject.replace('{name}', leadData.name || ''),
+          name: leadData.name || 'Cliente',
+          service: leadData.service || 'Consultoria Jurídica',
+          message: leadData.message || '',
+          customTitle: template.subject.replace('{name}', leadData.name || ''),
+          customContent: template.content.replace('{name}', leadData.name || '').replace('{service}', leadData.service || 'Consultoria Jurídica')
+        }
       });
+
+      if (error) {
+        console.error('❌ Erro ao enviar email:', error);
+        toast.error(`Erro ao enviar email: ${error.message}`);
+        return;
+      }
+
+      console.log('✅ Email enviado:', data);
+      toast.success('Email enviado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao enviar email:', error);
+      toast.error('Erro ao enviar email');
+    }
+  };
+
+  // Enviar emails em massa
+  const sendBulkEmails = async () => {
+    if (selectedLeads.size === 0) {
+      toast.error('Selecione pelo menos um lead');
+      return;
     }
 
-    setFilteredLeads(filtered);
-  }, [leads, formFilter, searchQuery, dateFilter]);
+    if (!selectedTemplate) {
+      toast.error('Selecione um template de email');
+      return;
+    }
 
-  // Deletar leads selecionados
+    const confirmation = window.confirm(`Deseja enviar emails para ${selectedLeads.size} leads selecionados?`);
+    if (!confirmation) return;
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const leadId of selectedLeads) {
+        const lead = leads.find(l => l.id === leadId);
+        if (!lead) continue;
+
+        try {
+          await sendCustomEmail(lead);
+          successCount++;
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Delay entre emails
+        } catch (error) {
+          console.error(`❌ Erro ao enviar email para lead ${leadId}:`, error);
+          errorCount++;
+        }
+      }
+
+      toast.success(`Emails enviados: ${successCount} sucessos, ${errorCount} erros`);
+      setSelectedLeads(new Set());
+    } catch (error) {
+      console.error('❌ Erro no envio em massa:', error);
+      toast.error('Erro no envio em massa');
+    }
+  };
+
+  // Excluir leads selecionados
   const deleteSelected = async () => {
     if (selectedLeads.size === 0) return;
+
+    const confirmation = window.confirm(`Deseja excluir ${selectedLeads.size} leads selecionados?`);
+    if (!confirmation) return;
 
     try {
       const { error } = await supabase
@@ -426,503 +405,444 @@ export const LeadsManagement: React.FC = () => {
         .delete()
         .in('id', Array.from(selectedLeads));
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao excluir leads:', error);
+        toast.error('Erro ao excluir leads');
+        return;
+      }
 
-      toast.success(`${selectedLeads.size} lead(s) deletado(s)`);
+      toast.success(`${selectedLeads.size} leads excluídos com sucesso!`);
       setSelectedLeads(new Set());
       loadLeads();
     } catch (error) {
-      console.error('❌ Erro ao deletar:', error);
-      toast.error('Erro ao deletar leads');
+      console.error('❌ Erro ao excluir leads:', error);
+      toast.error('Erro ao excluir leads');
     }
   };
 
   // Exportar leads
   const exportLeads = () => {
-    const csv = [
-      ['ID', 'Data', 'Formulário', 'Nome', 'Email', 'Telefone', 'Página', 'Campanha'],
-      ...filteredLeads.map(lead => {
-        const data = lead.lead_data || {};
-        return [
-          lead.id,
-          new Date(lead.created_at).toLocaleString('pt-BR'),
-          lead.form_name || lead.form_id || '',
-          data.name || data.nome || '',
-          data.email || '',
-          data.phone || data.telefone || '',
-          lead.page_url || '',
-          lead.campaign_name || ''
-        ];
-      })
-    ];
+    if (filteredLeads.length === 0) {
+      toast.error('Não há leads para exportar');
+      return;
+    }
 
-    const csvContent = csv.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const csvData = filteredLeads.map(lead => {
+      const leadData = parseLeadData(lead.lead_data);
+      return {
+        'Nome': leadData.name || '',
+        'Email': leadData.email || '',
+        'Telefone': leadData.phone || '',
+        'Serviço': leadData.service || '',
+        'Mensagem': leadData.message || '',
+        'Data': new Date(lead.created_at).toLocaleString('pt-BR'),
+        'Página': lead.page_url || '',
+        'Origem': lead.referrer || '',
+        'Status': leadStatuses[lead.id] || 'novo'
+      };
+    });
+
+    const headers = Object.keys(csvData[0]).join(',');
+    const rows = csvData.map(row => Object.values(row).map(value => `"${value}"`).join(','));
+    const csv = [headers, ...rows].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `leads-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
+    link.setAttribute('href', url);
+    link.setAttribute('download', `leads_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success('Leads exportados com sucesso!');
   };
 
-  // Obter formulários únicos
-  const uniqueForms = Array.from(new Set(leads.map(lead => lead.form_id))).filter(Boolean);
+  // Filtrar leads
+  useEffect(() => {
+    let filtered = [...leads];
+
+    // Filtro de busca
+    if (searchQuery) {
+      filtered = filtered.filter(lead => {
+        const leadData = parseLeadData(lead.lead_data);
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          leadData.name?.toLowerCase().includes(searchLower) ||
+          leadData.email?.toLowerCase().includes(searchLower) ||
+          leadData.phone?.includes(searchQuery) ||
+          leadData.service?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    // Filtro de data
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      filtered = filtered.filter(lead => {
+        const leadDate = new Date(lead.created_at);
+        switch (dateFilter) {
+          case 'today':
+            return leadDate >= startOfDay;
+          case 'week':
+            return leadDate >= startOfWeek;
+          case 'month':
+            return leadDate >= startOfMonth;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filtro de formulário
+    if (formFilter !== 'all') {
+      filtered = filtered.filter(lead => {
+        const leadData = parseLeadData(lead.lead_data);
+        return lead.event_type === formFilter || leadData.service?.includes(formFilter);
+      });
+    }
+
+    setFilteredLeads(filtered);
+  }, [leads, searchQuery, dateFilter, formFilter]);
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    loadLeads();
+    loadEmailTemplates();
+  }, []);
+
+  // Função para abrir detalhes do lead
+  const openLeadDetails = (lead: Lead) => {
+    setSelectedLead(lead);
+    setIsDetailSheetOpen(true);
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="ml-2">Carregando leads...</span>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Carregando leads...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Leads ({filteredLeads.length})</h2>
-          <p className="text-muted-foreground">Dados da tabela conversion_events</p>
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Gestão de Leads</h2>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={loadLeads} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Atualizar
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant={currentView === 'table' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setCurrentView('table')}
+          >
+            <Table className="h-4 w-4 mr-2" />
+            Tabela
           </Button>
+          <Button
+            variant={currentView === 'kanban' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setCurrentView('kanban')}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Kanban
+          </Button>
+          
           <Button onClick={exportLeads} variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
+            <Download className="h-4 w-4 mr-2" />
+            Exportar CSV
           </Button>
+          
           {selectedLeads.size > 0 && (
-            <Button onClick={deleteSelected} variant="destructive" size="sm">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Deletar ({selectedLeads.size})
-            </Button>
+            <>
+              <Button onClick={sendBulkEmails} variant="default" size="sm">
+                <Send className="h-4 w-4 mr-2" />
+                Enviar Email ({selectedLeads.size})
+              </Button>
+              
+              <Button onClick={deleteSelected} variant="destructive" size="sm">
+                Excluir ({selectedLeads.size})
+              </Button>
+            </>
           )}
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="relative flex-1 min-w-[300px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nome, email, telefone..."
+            placeholder="Buscar por nome ou email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
-        
+
         <Select value={dateFilter} onValueChange={setDateFilter}>
-          <SelectTrigger className="w-48">
-            <Calendar className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Período" />
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por data" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os períodos</SelectItem>
+            <SelectItem value="all">Todas as datas</SelectItem>
             <SelectItem value="today">Hoje</SelectItem>
-            <SelectItem value="week">Última semana</SelectItem>
+            <SelectItem value="week">Esta semana</SelectItem>
+            <SelectItem value="month">Este mês</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={formFilter} onValueChange={setFormFilter}>
-          <SelectTrigger className="w-48">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Formulário" />
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por formulário" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os formulários</SelectItem>
-            {uniqueForms.map(formId => (
-              <SelectItem key={formId} value={formId || 'sem-form'}>
-                {formId || 'Sem formulário'}
+            <SelectItem value="contact">Contato</SelectItem>
+            <SelectItem value="service">Serviços</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={selectedTemplate?.id || ''}
+          onValueChange={(value) => {
+            const template = emailTemplates.find(t => t.id === value);
+            setSelectedTemplate(template);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Template de Email" />
+          </SelectTrigger>
+          <SelectContent>
+            {emailTemplates.map((template) => (
+              <SelectItem key={template.id} value={template.id}>
+                {template.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as 'table' | 'kanban')}>
-          <TabsList>
-            <TabsTrigger value="table">Tabela</TabsTrigger>
-            <TabsTrigger value="kanban">Kanban</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <Button variant="outline" onClick={() => {
+          setSearchQuery('');
+          setDateFilter('all');
+          setFormFilter('all');
+        }}>
+          <Filter className="h-4 w-4 mr-2" />
+          Limpar Filtros
+        </Button>
       </div>
 
-      {/* Visualização Kanban */}
-      {currentView === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Coluna Novo */}
-          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-center">Novo</h3>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {filteredLeads.filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo').length}
-              </Badge>
-            </div>
-            <div className="space-y-3">
-              {filteredLeads
-                .filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo')
-                .map((lead) => {
-                  const rawLeadData = lead.lead_data || {};
-                  const leadData = parseLeadData(rawLeadData);
-                  const phone = leadData.phone || leadData.telefone;
-                  const name = leadData.name || leadData.nome;
-                  
-                  return (
-                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
-                      <Card className="border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20 cursor-pointer hover:shadow-md transition-all">
-                        <CardContent className="p-3">
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                            {leadData.email && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Mail className="w-3 h-3" />
-                                <span className="text-muted-foreground truncate">{leadData.email}</span>
-                              </div>
-                            )}
-                            {phone && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Phone className="w-3 h-3" />
-                                <span className="text-muted-foreground">{phone}</span>
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                            </div>
-                            <div className="flex gap-1 pt-1">
-                              <Select 
-                                value={leadStatuses[lead.id] || 'novo'} 
-                                onValueChange={async (value) => {
-                                  await updateLeadStatus(lead.id, value);
-                                }}
-                              >
-                                <SelectTrigger className="h-6 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="novo">Novo</SelectItem>
-                                  <SelectItem value="contato">Em Contato</SelectItem>
-                                  <SelectItem value="qualificado">Qualificado</SelectItem>
-                                  <SelectItem value="cliente">Cliente</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </LeadDetailSheet>
-                  );
-                })}
-            </div>
-          </div>
+      {/* Estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Leads</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{leads.length}</div>
+          </CardContent>
+        </Card>
 
-          {/* Coluna Em Contato */}
-          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-center">Em Contato</h3>
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                {filteredLeads.filter(lead => leadStatuses[lead.id] === 'contato').length}
-              </Badge>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Novos</CardTitle>
+            <Badge variant="secondary">Novo</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {leads.filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo').length}
             </div>
-            <div className="space-y-3">
-              {filteredLeads
-                .filter(lead => leadStatuses[lead.id] === 'contato')
-                .map((lead) => {
-                  const rawLeadData = lead.lead_data || {};
-                  const leadData = parseLeadData(rawLeadData);
-                  const phone = leadData.phone || leadData.telefone;
-                  const name = leadData.name || leadData.nome;
-                  
-                  return (
-                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
-                      <Card className="border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20 cursor-pointer hover:shadow-md transition-all">
-                        <CardContent className="p-3">
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                            {leadData.email && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Mail className="w-3 h-3" />
-                                <span className="text-muted-foreground truncate">{leadData.email}</span>
-                              </div>
-                            )}
-                            {phone && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Phone className="w-3 h-3" />
-                                <span className="text-muted-foreground">{phone}</span>
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                            </div>
-                            <div className="flex gap-1 pt-1">
-                              <Select 
-                                value={leadStatuses[lead.id] || 'novo'} 
-                                onValueChange={async (value) => {
-                                  await updateLeadStatus(lead.id, value);
-                                }}
-                              >
-                                <SelectTrigger className="h-6 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="novo">Novo</SelectItem>
-                                  <SelectItem value="contato">Em Contato</SelectItem>
-                                  <SelectItem value="qualificado">Qualificado</SelectItem>
-                                  <SelectItem value="cliente">Cliente</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </LeadDetailSheet>
-                  );
-                })}
-            </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Coluna Qualificado */}
-          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-center">Qualificado</h3>
-              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                {filteredLeads.filter(lead => leadStatuses[lead.id] === 'qualificado').length}
-              </Badge>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Em Contato</CardTitle>
+            <Badge variant="default">Contato</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {leads.filter(lead => leadStatuses[lead.id] === 'contato').length}
             </div>
-            <div className="space-y-3">
-              {filteredLeads
-                .filter(lead => leadStatuses[lead.id] === 'qualificado')
-                .map((lead) => {
-                  const rawLeadData = lead.lead_data || {};
-                  const leadData = parseLeadData(rawLeadData);
-                  const phone = leadData.phone || leadData.telefone;
-                  const name = leadData.name || leadData.nome;
-                  
-                  return (
-                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
-                      <Card className="border-l-4 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 cursor-pointer hover:shadow-md transition-all">
-                        <CardContent className="p-3">
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                            {leadData.email && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Mail className="w-3 h-3" />
-                                <span className="text-muted-foreground truncate">{leadData.email}</span>
-                              </div>
-                            )}
-                            {phone && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Phone className="w-3 h-3" />
-                                <span className="text-muted-foreground">{phone}</span>
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                            </div>
-                            <div className="flex gap-1 pt-1">
-                              <Select 
-                                value={leadStatuses[lead.id] || 'novo'} 
-                                onValueChange={async (value) => {
-                                  await updateLeadStatus(lead.id, value);
-                                }}
-                              >
-                                <SelectTrigger className="h-6 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="novo">Novo</SelectItem>
-                                  <SelectItem value="contato">Em Contato</SelectItem>
-                                  <SelectItem value="qualificado">Qualificado</SelectItem>
-                                  <SelectItem value="cliente">Cliente</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </LeadDetailSheet>
-                  );
-                })}
-            </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Coluna Cliente */}
-          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-center">Cliente</h3>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                {filteredLeads.filter(lead => leadStatuses[lead.id] === 'cliente').length}
-              </Badge>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Convertidos</CardTitle>
+            <Badge variant="outline">Convertido</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {leads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
             </div>
-            <div className="space-y-3">
-              {filteredLeads
-                .filter(lead => leadStatuses[lead.id] === 'cliente')
-                .map((lead) => {
-                  const rawLeadData = lead.lead_data || {};
-                  const leadData = parseLeadData(rawLeadData);
-                  const phone = leadData.phone || leadData.telefone;
-                  const name = leadData.name || leadData.nome;
-                  
-                  return (
-                    <LeadDetailSheet key={lead.id} lead={lead} selectedTemplate={selectedTemplate}>
-                      <Card className="border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 cursor-pointer hover:shadow-md transition-all">
-                        <CardContent className="p-3">
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                            {leadData.email && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Mail className="w-3 h-3" />
-                                <span className="text-muted-foreground truncate">{leadData.email}</span>
-                              </div>
-                            )}
-                            {phone && (
-                              <div className="flex items-center gap-1 text-xs">
-                                <Phone className="w-3 h-3" />
-                                <span className="text-muted-foreground">{phone}</span>
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                            </div>
-                            <div className="flex gap-1 pt-1">
-                              <Select 
-                                value={leadStatuses[lead.id] || 'novo'} 
-                                onValueChange={async (value) => {
-                                  await updateLeadStatus(lead.id, value);
-                                }}
-                              >
-                                <SelectTrigger className="h-6 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="novo">Novo</SelectItem>
-                                  <SelectItem value="contato">Em Contato</SelectItem>
-                                  <SelectItem value="qualificado">Qualificado</SelectItem>
-                                  <SelectItem value="cliente">Cliente</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </LeadDetailSheet>
-                  );
-                })}
-            </div>
-          </div>
-        </div>
-      )}
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Visualização em Tabela */}
+      {/* Tabela de leads */}
       {currentView === 'table' && (
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <input
-                    type="checkbox"
-                    checked={selectedLeads.size === filteredLeads.length && filteredLeads.length > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedLeads(new Set(filteredLeads.map(lead => lead.id)));
-                      } else {
-                        setSelectedLeads(new Set());
-                      }
-                    }}
-                  />
-                </TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Formulário</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredLeads.map((lead) => {
-                const rawLeadData = lead.lead_data || {};
-                const leadData = parseLeadData(rawLeadData);
-                const isSelected = selectedLeads.has(lead.id);
-                const phone = leadData.phone || leadData.telefone;
-                const name = leadData.name || leadData.nome;
-                
-                return (
-                  <TableRow key={lead.id} className={isSelected ? 'bg-muted/50' : ''}>
-                    <TableCell>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={(e) => {
-                          const newSelected = new Set(selectedLeads);
-                          if (e.target.checked) {
-                            newSelected.add(lead.id);
-                          } else {
-                            newSelected.delete(lead.id);
-                          }
-                          setSelectedLeads(newSelected);
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {name || 'Nome não informado'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {leadData.email && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Mail className="w-3 h-3" />
-                            <a href={`mailto:${leadData.email}`} className="text-blue-600 hover:underline">
-                              {leadData.email}
-                            </a>
-                          </div>
-                        )}
-                        {phone && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Phone className="w-3 h-3" />
-                            <a 
-                              href={`https://wa.me/55${phone.replace(/\D/g, '')}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-green-600 hover:underline"
+        <Card>
+          <CardContent className="p-6">
+            {filteredLeads.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Nenhum lead encontrado</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2 w-12">
+                        <Checkbox
+                          checked={selectedLeads.size === filteredLeads.length}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedLeads(new Set(filteredLeads.map(lead => lead.id)));
+                            } else {
+                              setSelectedLeads(new Set());
+                            }
+                          }}
+                        />
+                      </th>
+                      <th className="text-left p-2">Nome</th>
+                      <th className="text-left p-2">Email</th>
+                      <th className="text-left p-2">Serviço</th>
+                      <th className="text-left p-2">Data</th>
+                      <th className="text-left p-2">Status</th>
+                      <th className="text-left p-2">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredLeads.map((lead) => {
+                      const leadData = parseLeadData(lead.lead_data);
+                      const status = leadStatuses[lead.id] || 'novo';
+                      
+                      return (
+                        <tr key={lead.id} className="border-b hover:bg-muted/50">
+                          <td className="p-2">
+                            <Checkbox
+                              checked={selectedLeads.has(lead.id)}
+                              onCheckedChange={(checked) => {
+                                const newSelected = new Set(selectedLeads);
+                                if (checked) {
+                                  newSelected.add(lead.id);
+                                } else {
+                                  newSelected.delete(lead.id);
+                                }
+                                setSelectedLeads(newSelected);
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 font-medium">{leadData.name || 'N/A'}</td>
+                          <td className="p-2">{leadData.email || 'N/A'}</td>
+                          <td className="p-2">{leadData.service || 'N/A'}</td>
+                          <td className="p-2">{new Date(lead.created_at).toLocaleDateString('pt-BR')}</td>
+                          <td className="p-2">
+                            <Select
+                              value={status}
+                              onValueChange={(value) => updateLeadStatus(lead.id, value)}
                             >
-                              {phone}
-                            </a>
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="novo">Novo</SelectItem>
+                                <SelectItem value="contato">Contato</SelectItem>
+                                <SelectItem value="convertido">Convertido</SelectItem>
+                                <SelectItem value="descartado">Descartado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="p-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openLeadDetails(lead)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Kanban Board */}
+      {currentView === 'kanban' && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[
+            { key: 'novo', title: 'Novos', variant: 'secondary' as const },
+            { key: 'contato', title: 'Em Contato', variant: 'default' as const },
+            { key: 'convertido', title: 'Convertidos', variant: 'outline' as const },
+            { key: 'descartado', title: 'Descartados', variant: 'destructive' as const }
+          ].map((column) => (
+            <Card key={column.key}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Badge variant={column.variant}>{column.title}</Badge>
+                  <span className="text-sm">
+                    ({filteredLeads.filter(lead => (leadStatuses[lead.id] || 'novo') === column.key).length})
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {filteredLeads
+                  .filter(lead => (leadStatuses[lead.id] || 'novo') === column.key)
+                  .map((lead) => {
+                    const leadData = parseLeadData(lead.lead_data);
+                    
+                    return (
+                      <Card key={lead.id} className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => openLeadDetails(lead)}>
+                        <CardContent className="p-3">
+                          <div className="space-y-1">
+                            <p className="font-medium text-sm">{leadData.name || 'Nome não informado'}</p>
+                            <p className="text-xs text-muted-foreground">{leadData.email}</p>
+                            <p className="text-xs">{leadData.service}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                            </p>
                           </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {lead.form_name || lead.form_id || 'N/A'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {new Date(lead.created_at).toLocaleString('pt-BR')}
-                    </TableCell>
-                    <TableCell>
-                      <LeadDetailSheet lead={lead} selectedTemplate={selectedTemplate}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-3 h-3 mr-1" />
-                          Ver Detalhes
-                        </Button>
-                      </LeadDetailSheet>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
-      {filteredLeads.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Nenhum lead encontrado</p>
-        </div>
-      )}
+      {/* Sheet de detalhes do lead */}
+      <LeadDetailSheet
+        lead={selectedLead}
+        isOpen={isDetailSheetOpen}
+        onClose={() => setIsDetailSheetOpen(false)}
+        onSendEmail={sendCustomEmail}
+        emailTemplates={emailTemplates}
+        selectedTemplate={selectedTemplate}
+        setSelectedTemplate={setSelectedTemplate}
+      />
     </div>
   );
 };

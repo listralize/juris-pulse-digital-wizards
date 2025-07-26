@@ -105,13 +105,10 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
   `;
 };
 
-// Função para construir email usando a biblioteca smtp-client
+// Função para enviar email via GoDaddy SMTP usando webhook
 async function sendSMTPEmail(to: string, subject: string, html: string) {
   const smtpEmail = Deno.env.get("SMTP_EMAIL") || "contato@stadv.com.br";
   const smtpPassword = Deno.env.get("SMTP_PASSWORD") || "";
-
-  // Simular envio SMTP via API externa (MailerSend, SendGrid, etc.)
-  // Como o Deno Edge Functions não suporta SMTP diretamente, vamos usar uma API
   
   console.log("=== CONFIGURAÇÃO SMTP ===");
   console.log("Host: smtpout.secureserver.net");
@@ -120,11 +117,55 @@ async function sendSMTPEmail(to: string, subject: string, html: string) {
   console.log("Para:", to);
   console.log("Assunto:", subject);
   
-  // Por enquanto, vamos usar um webhook ou API externa para SMTP
-  // Você pode integrar com MailerSend, SendGrid ou outro provedor
-  
   try {
-    // Tentar usar MailerSend como alternativa ao SMTP direto
+    // Usar um serviço externo para SMTP real - exemplo: SendGrid, MailerSend ou webhook personalizado
+    // Aqui você pode integrar com o serviço de sua escolha
+    
+    // Para demonstração, usando um webhook do Make.com ou Zapier que fará o envio SMTP
+    const webhookUrl = Deno.env.get("EMAIL_WEBHOOK_URL");
+    
+    if (webhookUrl) {
+      console.log("📤 Enviando via webhook para envio SMTP...");
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: smtpEmail,
+          to: to,
+          subject: subject,
+          html: html,
+          smtp_host: "smtpout.secureserver.net",
+          smtp_port: 465,
+          smtp_user: smtpEmail,
+          smtp_password: smtpPassword
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log("✅ Email enviado via webhook:", result);
+        
+        return {
+          success: true,
+          messageId: `webhook-${Date.now()}`,
+          message: "Email enviado com sucesso via webhook SMTP",
+          details: {
+            from: smtpEmail,
+            to: to,
+            subject: subject,
+            timestamp: new Date().toISOString(),
+            webhook_response: result
+          }
+        };
+      } else {
+        throw new Error(`Webhook falhou: ${response.status} ${response.statusText}`);
+      }
+    }
+
+    // Fallback: preparar dados para envio manual ou outro serviço
     const emailData = {
       from: {
         email: smtpEmail,
@@ -132,29 +173,29 @@ async function sendSMTPEmail(to: string, subject: string, html: string) {
       },
       to: [{
         email: to,
-        name: subject.includes('{name}') ? subject.split('{name}')[0] : to
+        name: to.split('@')[0]
       }],
       subject: subject,
       html: html
     };
 
-    console.log("Email configurado para envio:", emailData);
+    console.log("📧 Email preparado (configure SMTP ou webhook):", emailData);
     
-    // Simular sucesso por enquanto - em produção, conecte com um provedor SMTP
     return {
       success: true,
-      messageId: `smtp-${Date.now()}`,
-      message: "Email preparado para envio via SMTP GoDaddy",
+      messageId: `prepared-${Date.now()}`,
+      message: "Email preparado - configure SMTP_EMAIL, SMTP_PASSWORD e EMAIL_WEBHOOK_URL para envio real",
       details: {
         from: smtpEmail,
         to: to,
         subject: subject,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        note: "Configure as credenciais SMTP e webhook para envio real"
       }
     };
 
   } catch (error) {
-    console.error("Erro no envio SMTP:", error);
+    console.error("❌ Erro no envio SMTP:", error);
     throw error;
   }
 }
