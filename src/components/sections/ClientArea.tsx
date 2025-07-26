@@ -186,27 +186,27 @@ const ClientArea = () => {
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
                 <div className="relative">
                   {/* Badge principal */}
-                  <div className={`
-                    px-4 py-2 rounded-full font-bold tracking-wider uppercase 
-                    flex items-center gap-2 whitespace-nowrap shadow-lg
-                    ${isMobile ? 'text-xs' : 'text-sm'}
-                    ${isDark 
-                      ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 text-black' 
-                      : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-black'
-                    }
-                  `}>
+                    <div className={`
+                      px-4 py-2 rounded-full font-bold tracking-wider uppercase 
+                      flex items-center gap-2 whitespace-nowrap shadow-lg
+                      ${isMobile ? 'text-xs' : 'text-sm'}
+                      ${isDark 
+                        ? 'bg-gray-600 text-white' 
+                        : 'bg-gray-500 text-white'
+                      }
+                    `}>
                     <Crown className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} />
                     <span>EXCLUSIVO PARA CLIENTES ST PRIME</span>
                   </div>
                   
                   {/* Glow effect */}
-                  <div className={`
-                    absolute inset-0 rounded-full blur-sm opacity-30
-                    ${isDark 
-                      ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400' 
-                      : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500'
-                    }
-                  `}></div>
+                   <div className={`
+                     absolute inset-0 rounded-full blur-sm opacity-30
+                     ${isDark 
+                       ? 'bg-gray-600' 
+                       : 'bg-gray-500'
+                     }
+                   `}></div>
                 </div>
               </div>
             </div>
@@ -247,26 +247,26 @@ const ClientArea = () => {
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
                   <div className="relative">
                     {/* Badge principal */}
-                    <div className={`
-                      px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase 
-                      flex items-center gap-2 whitespace-nowrap shadow-lg
-                      ${isDark 
-                        ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 text-black' 
-                        : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-black'
-                      }
-                    `}>
+                     <div className={`
+                       px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase 
+                       flex items-center gap-2 whitespace-nowrap shadow-lg
+                       ${isDark 
+                         ? 'bg-gray-600 text-white' 
+                         : 'bg-gray-500 text-white'
+                       }
+                     `}>
                       <Crown className="w-3 h-3" />
                       <span>EXCLUSIVO PARA CLIENTES ST PRIME</span>
                     </div>
                     
                     {/* Glow effect */}
-                    <div className={`
-                      absolute inset-0 rounded-full blur-sm opacity-30
-                      ${isDark 
-                        ? 'bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400' 
-                        : 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500'
-                      }
-                    `}></div>
+                     <div className={`
+                       absolute inset-0 rounded-full blur-sm opacity-30
+                       ${isDark 
+                         ? 'bg-gray-600' 
+                         : 'bg-gray-500'
+                       }
+                     `}></div>
                   </div>
                 </div>
               </div>

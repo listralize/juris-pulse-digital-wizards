@@ -49,12 +49,10 @@ const BlogPage = () => {
 
   return (
     <div className={`min-h-screen relative ${isDark ? 'bg-black' : 'bg-white'}`}>
-      {/* Neural Background - garantindo que apareça no tema escuro igual na home */}
-      {isDark && (
-        <div className="fixed inset-0 w-full h-full -z-10">
-          <NeuralBackground />
-        </div>
-      )}
+      {/* Neural Background - Sempre escuro igual na home */}
+      <div className="fixed inset-0 w-full h-full -z-10">
+        <NeuralBackground />
+      </div>
       
       {/* Background gradients escuros como na home */}
       <div className="fixed inset-0 bg-gradient-to-br from-black via-black to-neutral-900 -z-20"></div>

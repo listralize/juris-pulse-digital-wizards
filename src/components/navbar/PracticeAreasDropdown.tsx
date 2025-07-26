@@ -14,6 +14,14 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
   const navigate = useNavigate();
   const { categories, isLoading } = useSupabaseLawCategories();
 
+  const handleAreaClick = (areaPath: string) => {
+    // Dispara evento para atualizar seção ativa
+    window.dispatchEvent(new CustomEvent('activeSectionChanged', { 
+      detail: { section: 'areas' } 
+    }));
+    navigate(areaPath);
+  };
+
   // Se estiver carregando, mostrar um dropdown básico
   if (isLoading) {
     return (
@@ -59,7 +67,7 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
                 key={category.id || category.value} 
                 to={`/areas/${category.value}`} 
                 className={`block px-4 py-2 ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-black/5 text-black'} transition-colors`}
-                onClick={() => navigate(`/areas/${category.value}`)}
+                onClick={() => handleAreaClick(`/areas/${category.value}`)}
               >
                 <div className="flex items-center gap-2">
                   {category.icon && (

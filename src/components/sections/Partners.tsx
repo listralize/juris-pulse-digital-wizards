@@ -29,6 +29,21 @@ const Partners = () => {
     setCurrentSlide(0);
   }, [teamMembers]);
 
+  // Force reset to first slide whenever component is accessed
+  useEffect(() => {
+    const handleSectionChange = (event: CustomEvent) => {
+      if (event.detail?.section === 'socios') {
+        setCurrentSlide(0);
+      }
+    };
+
+    window.addEventListener('activeSectionChanged', handleSectionChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('activeSectionChanged', handleSectionChange as EventListener);
+    };
+  }, []);
+
   // Detectar mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -109,7 +124,7 @@ const Partners = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f5] text-black'} relative`}
+      className={`h-full w-full py-4 px-4 md:px-8 lg:px-16 ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}
       style={{ 
         minHeight: '100vh',
         display: 'flex',

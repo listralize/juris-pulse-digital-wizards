@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
-import { Phone, Mail, MapPin, Clock, X } from 'lucide-react';
+import { MessageSquare, Mail, MapPin, X } from 'lucide-react';
 
 const FloatingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [showTimePopup, setShowTimePopup] = useState(false);
+  
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar mobile
@@ -106,12 +106,12 @@ const FloatingFooter: React.FC = () => {
   }, []);
 
   // Funções para ações dos ícones
-  const handlePhoneClick = () => {
-    window.open(`tel:${footerData.phone.replace(/\D/g, '')}`, '_self');
+  const handleWhatsAppClick = () => {
+    window.open(`https://api.whatsapp.com/send?phone=${footerData.whatsapp}`, '_blank');
   };
 
   const handleEmailClick = () => {
-    window.open(`mailto:${footerData.email}`, '_self');
+    window.location.href = `mailto:${footerData.email}`;
   };
 
   const handleLocationClick = () => {
@@ -120,9 +120,6 @@ const FloatingFooter: React.FC = () => {
     window.open(mapsUrl, '_blank');
   };
 
-  const handleTimeClick = () => {
-    setShowTimePopup(true);
-  };
 
   // Se for mobile, não renderizar nada
   if (isMobile) {
@@ -134,10 +131,10 @@ const FloatingFooter: React.FC = () => {
       {/* Desktop Only Footer */}
       <footer 
         className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
-          w-[95%] max-w-4xl mx-auto rounded-xl shadow-xl backdrop-blur-md
+          w-[95%] max-w-4xl mx-auto rounded-xl backdrop-blur-md
           ${isDark 
-            ? 'bg-neutral-950/60 border border-neutral-800/60 text-white' 
-            : 'bg-white/60 border border-neutral-200/60 text-black'
+            ? 'bg-neutral-950/60 border border-neutral-800/60 text-white shadow-xl' 
+            : 'bg-white/60 border border-neutral-200/60 text-black shadow-2xl'
           }
           transition-all duration-300 hover:shadow-2xl`}
         style={{
@@ -154,17 +151,17 @@ const FloatingFooter: React.FC = () => {
                 className="h-10 object-contain"
               />
               <div className="flex items-center space-x-4">
-                {/* Ícone do Telefone */}
+                {/* Ícone do WhatsApp */}
                 <button
-                  onClick={handlePhoneClick}
+                  onClick={handleWhatsAppClick}
                   className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
                     ${isDark 
                       ? 'bg-white/10 hover:bg-white/20 text-white' 
                       : 'bg-black/10 hover:bg-black/20 text-black'
                     }`}
-                  title={`Ligar para ${footerData.phone}`}
+                  title="Falar no WhatsApp"
                 >
-                  <Phone className="h-4 w-4" />
+                  <MessageSquare className="h-4 w-4" />
                 </button>
 
                 {/* Ícone do Email */}
@@ -193,18 +190,6 @@ const FloatingFooter: React.FC = () => {
                   <MapPin className="h-4 w-4" />
                 </button>
 
-                {/* Ícone do Horário */}
-                <button
-                  onClick={handleTimeClick}
-                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:scale-110
-                    ${isDark 
-                      ? 'bg-white/10 hover:bg-white/20 text-white' 
-                      : 'bg-black/10 hover:bg-black/20 text-black'
-                    }`}
-                  title="Ver horário de funcionamento"
-                >
-                  <Clock className="h-4 w-4" />
-                </button>
               </div>
             </div>
             
@@ -227,42 +212,6 @@ const FloatingFooter: React.FC = () => {
         </div>
       </footer>
 
-      {/* Popup de Horário */}
-      {showTimePopup && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className={`relative p-5 rounded-xl shadow-2xl max-w-xs mx-4 ${
-            isDark ? 'bg-neutral-950 border border-neutral-800 text-white' : 'bg-white border border-neutral-200 text-black'
-          }`}>
-            <button
-              onClick={() => setShowTimePopup(false)}
-              className={`absolute top-3 right-3 p-1 rounded-full transition-colors ${
-                isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'
-              }`}
-            >
-              <X className="h-4 w-4" />
-            </button>
-            
-            <div className="text-center">
-              <Clock className="h-10 w-10 mx-auto mb-3 opacity-70" />
-              <h3 className="text-lg font-semibold mb-3 font-space-grotesk">Horário de Funcionamento</h3>
-              <div className="space-y-2 text-sm font-inter">
-                <div className="flex justify-between">
-                  <span>Segunda a Sexta:</span>
-                  <span className="font-medium">09:00 - 18:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sábado:</span>
-                  <span className="font-medium">09:00 - 12:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Domingo:</span>
-                  <span className="font-medium">Fechado</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
