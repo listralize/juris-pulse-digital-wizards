@@ -34,6 +34,7 @@ export interface ContactTexts {
   address: string;
   whatsapp: string;
   mapEmbedUrl?: string;
+  instagram?: string;
 }
 
 export interface FooterTexts {

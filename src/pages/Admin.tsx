@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { FileText, Briefcase, Globe, Edit, Database, Link } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit, Database, Link, Users } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { useSupabasePageTexts } from '../hooks/useSupabasePageTexts';
@@ -16,6 +16,7 @@ import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
 import { MarketingManagement } from '../components/admin/MarketingManagement';
+import { LeadsManagement } from '../components/admin/LeadsManagement';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 const Admin = () => {
@@ -152,7 +153,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg"
+              <TabsList className="grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -175,6 +176,10 @@ const Admin = () => {
                 <TabsTrigger value="linktree" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <Link className="w-4 h-4" />
                   Link Tree
+                </TabsTrigger>
+                <TabsTrigger value="leads" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
+                  <Users className="w-4 h-4" />
+                  Leads
                 </TabsTrigger>
                 <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
                   <Briefcase className="w-4 h-4" />
@@ -200,6 +205,10 @@ const Admin = () => {
 
               <TabsContent value="linktree">
                 <LinkTreeManagement />
+              </TabsContent>
+
+              <TabsContent value="leads">
+                <LeadsManagement />
               </TabsContent>
 
               <TabsContent value="marketing">

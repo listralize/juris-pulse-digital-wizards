@@ -64,6 +64,24 @@ const Partners = () => {
     };
   }, []);
 
+  // Escutar configurações de vídeo de fundo
+  useEffect(() => {
+    const handleVideoSettings = (event: CustomEvent) => {
+      const { team_video_enabled, team_background_video } = event.detail;
+      const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
+      
+      if (videoElement && team_background_video) {
+        videoElement.src = team_background_video;
+        videoElement.style.display = team_video_enabled ? 'block' : 'none';
+      }
+    };
+
+    window.addEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
+    return () => {
+      window.removeEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
+    };
+  }, []);
+
   // Cálculos de slides baseados no dispositivo
   const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
   const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
@@ -120,6 +138,19 @@ const Partners = () => {
   }}>
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
+      
+      {/* Video de fundo opcional */}
+      <div className="absolute inset-0 overflow-hidden">
+        <video
+          id="team-background-video"
+          className="w-full h-full object-cover opacity-30"
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ display: 'none' }}
+        />
+      </div>
       
       <div className="team-responsive-container w-full relative z-10" style={{
       marginTop: '-100px'

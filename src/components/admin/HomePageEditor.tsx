@@ -190,6 +190,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           address: pageTexts.contactTexts.address || '',
           whatsapp: pageTexts.contactTexts.whatsapp || '',
           map_embed_url: pageTexts.contactTexts.mapEmbedUrl || null,
+          instagram_url: pageTexts.contactTexts.instagram || '',
           updated_at: new Date().toISOString()
         };
         
@@ -752,6 +753,15 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     onChange={(e) => handleNestedChange('contactTexts', 'whatsapp', e.target.value)}
                     className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                     placeholder="5562994594496"
+                  />
+                </div>
+                <div>
+                  <Label>Instagram</Label>
+                  <Input
+                    value={pageTexts.contactTexts?.instagram || ''}
+                    onChange={(e) => handleNestedChange('contactTexts', 'instagram', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                    placeholder="https://instagram.com/seuusuario"
                   />
                 </div>
                 <div>

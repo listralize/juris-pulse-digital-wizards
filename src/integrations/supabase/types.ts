@@ -231,6 +231,7 @@ export type Database = {
           email: string
           id: string
           instagram: string | null
+          instagram_url: string | null
           map_embed_url: string | null
           phone: string
           updated_at: string | null
@@ -242,6 +243,7 @@ export type Database = {
           email?: string
           id?: string
           instagram?: string | null
+          instagram_url?: string | null
           map_embed_url?: string | null
           phone?: string
           updated_at?: string | null
@@ -253,6 +255,7 @@ export type Database = {
           email?: string
           id?: string
           instagram?: string | null
+          instagram_url?: string | null
           map_embed_url?: string | null
           phone?: string
           updated_at?: string | null
@@ -1027,7 +1030,9 @@ export type Database = {
           hero_subtitle: string
           hero_title: string
           id: string
+          team_background_video: string | null
           team_title: string
+          team_video_enabled: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -1051,7 +1056,9 @@ export type Database = {
           hero_subtitle?: string
           hero_title?: string
           id?: string
+          team_background_video?: string | null
           team_title?: string
+          team_video_enabled?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -1075,7 +1082,9 @@ export type Database = {
           hero_subtitle?: string
           hero_title?: string
           id?: string
+          team_background_video?: string | null
           team_title?: string
+          team_video_enabled?: boolean | null
           updated_at?: string | null
         }
         Relationships: []
