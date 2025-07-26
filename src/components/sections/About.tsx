@@ -22,6 +22,7 @@ const About = () => {
   const [aboutTitle, setAboutTitle] = useState('Quem Somos');
   const [aboutDescription, setAboutDescription] = useState('Uma equipe dedicada à excelência jurídica');
   const [aboutImage, setAboutImage] = useState('/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
+  const [aboutVideoStorageUrl, setAboutVideoStorageUrl] = useState('');
   const [mediaType, setMediaType] = useState('image');
 
   // Carregar dados do Supabase
@@ -32,7 +33,7 @@ const About = () => {
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('about_title, about_description, about_image, about_media_type')
+          .select('about_title, about_description, about_image, about_media_type, about_video_storage_url')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -42,6 +43,7 @@ const About = () => {
           setAboutTitle(settings.about_title || 'Quem Somos');
           setAboutDescription(settings.about_description || 'Uma equipe dedicada à excelência jurídica');
           setAboutImage(settings.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
+          setAboutVideoStorageUrl(settings.about_video_storage_url || '');
           setMediaType(settings.about_media_type || 'image');
         }
       } catch (error) {
@@ -118,23 +120,45 @@ const About = () => {
   }, []);
 
   const renderMedia = () => {
-    if (mediaType === 'video' && aboutImage) {
-      const embedUrl = getYouTubeEmbedUrl(aboutImage);
-      console.log('🎥 About: Renderizando vídeo:', { originalUrl: aboutImage, embedUrl });
+    if (mediaType === 'video') {
+      // Priorizar vídeo do storage se disponível
+      if (aboutVideoStorageUrl) {
+        console.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
+        return (
+          <div className={`w-full rounded-lg overflow-hidden ${
+            isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
+          }`}>
+            <video
+              src={aboutVideoStorageUrl}
+              title="About Us Video"
+              className="w-full h-full rounded-lg object-cover"
+              controls
+              preload="metadata"
+              playsInline={isMobile}
+            />
+          </div>
+        );
+      }
       
-      return (
-        <div className={`w-full rounded-lg overflow-hidden ${
-          isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
-        }`}>
-          <iframe
-            src={`${embedUrl}${isMobile ? '&playsinline=1' : ''}`}
-            title="About Us Video"
-            className="w-full h-full rounded-lg"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      );
+      // Fallback para YouTube se storage não disponível
+      if (aboutImage) {
+        const embedUrl = getYouTubeEmbedUrl(aboutImage);
+        console.log('🎥 About: Renderizando vídeo do YouTube:', { originalUrl: aboutImage, embedUrl });
+        
+        return (
+          <div className={`w-full rounded-lg overflow-hidden ${
+            isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
+          }`}>
+            <iframe
+              src={`${embedUrl}${isMobile ? '&playsinline=1' : ''}`}
+              title="About Us Video"
+              className="w-full h-full rounded-lg"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
     }
     
     return (

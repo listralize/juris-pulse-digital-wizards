@@ -1008,6 +1008,7 @@ export type Database = {
           about_image: string | null
           about_media_type: string | null
           about_title: string
+          about_video_storage_url: string | null
           areas_title: string
           client_area_description: string
           client_area_title: string
@@ -1031,6 +1032,7 @@ export type Database = {
           about_image?: string | null
           about_media_type?: string | null
           about_title?: string
+          about_video_storage_url?: string | null
           areas_title?: string
           client_area_description?: string
           client_area_title?: string
@@ -1054,6 +1056,7 @@ export type Database = {
           about_image?: string | null
           about_media_type?: string | null
           about_title?: string
+          about_video_storage_url?: string | null
           areas_title?: string
           client_area_description?: string
           client_area_title?: string

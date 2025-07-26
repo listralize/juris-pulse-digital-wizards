@@ -54,6 +54,7 @@ export interface PageTexts {
   aboutDescription: string;
   aboutImage?: string;
   aboutMediaType?: 'image' | 'video';
+  aboutVideoStorageUrl?: string;
   areasTitle: string;
   familiaTitle: string;
   familiaDescription: string;

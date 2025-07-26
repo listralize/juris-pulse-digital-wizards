@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Save, Plus, Trash2, Image, Link, FileText, Users, Phone, MapPin } from 'lucide-react';
 import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
+import { useIsMobile } from '../../hooks/use-mobile';
+import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface HomePageEditorProps {
@@ -32,6 +34,8 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const isMobile = useIsMobile();
 
   const safeTeamMembers = Array.isArray(teamMembers) ? teamMembers : [];
 
@@ -101,6 +105,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             ...(settings?.about_description && { aboutDescription: settings.about_description }),
             ...(settings?.about_image && { aboutImage: settings.about_image }),
             ...(settings?.about_media_type && settings.about_media_type === 'video' ? { aboutMediaType: 'video' as const } : { aboutMediaType: 'image' as const }),
+            ...(settings?.about_video_storage_url && { aboutVideoStorageUrl: settings.about_video_storage_url }),
             ...(settings?.areas_title && { areasTitle: settings.areas_title }),
             ...(settings?.team_title && { teamTitle: settings.team_title }),
             ...(settings?.client_area_title && { clientAreaTitle: settings.client_area_title }),
@@ -253,6 +258,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         about_description: pageTexts.aboutDescription || '',
         about_image: pageTexts.aboutImage || null,
         about_media_type: pageTexts.aboutMediaType || 'image',
+        about_video_storage_url: pageTexts.aboutVideoStorageUrl || null,
         areas_title: pageTexts.areasTitle || '',
         team_title: pageTexts.teamTitle || '',
         client_area_title: pageTexts.clientAreaTitle || '',
@@ -284,6 +290,57 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     } catch (error) {
       console.error('❌ Erro ao salvar nas tabelas do Supabase:', error);
       throw error;
+    }
+  };
+
+  const handleVideoUpload = async (file: File) => {
+    if (!file) return;
+    
+    setUploadingVideo(true);
+    
+    try {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('video/')) {
+        toast.error('Por favor, selecione apenas arquivos de vídeo');
+        return;
+      }
+      
+      // Validar tamanho (máximo 50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error('O arquivo deve ter no máximo 50MB');
+        return;
+      }
+
+      const fileName = `about-video-${Date.now()}.${file.name.split('.').pop()}`;
+      
+      // Upload para o Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('videos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) throw error;
+
+      // Obter URL pública do vídeo
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
+      // Atualizar o estado
+      onUpdatePageTexts({
+        ...pageTexts,
+        aboutVideoStorageUrl: publicUrl
+      });
+
+      toast.success('Vídeo enviado com sucesso!');
+      
+    } catch (error) {
+      console.error('Erro ao enviar vídeo:', error);
+      toast.error('Erro ao enviar vídeo');
+    } finally {
+      setUploadingVideo(false);
     }
   };
 
@@ -447,9 +504,38 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   placeholder={pageTexts.aboutMediaType === 'video' ? 'https://www.youtube.com/watch?v=...' : 'URL da imagem'}
                 />
                 {pageTexts.aboutMediaType === 'video' && (
-                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Cole a URL completa do YouTube (ex: https://www.youtube.com/watch?v=...)
-                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Upload de Vídeo (Supabase Storage)</Label>
+                      <div className="mt-2">
+                        <Input
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleVideoUpload(file);
+                          }}
+                          disabled={uploadingVideo}
+                          className="mb-2"
+                        />
+                        {uploadingVideo && (
+                          <div className="text-sm text-muted-foreground">
+                            Enviando vídeo... Aguarde.
+                          </div>
+                        )}
+                        {pageTexts.aboutVideoStorageUrl && (
+                          <div className="text-sm text-green-600">
+                            ✅ Vídeo carregado com sucesso
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-muted-foreground border-l-4 border-blue-500 pl-4">
+                      <p><strong>Fallback YouTube:</strong></p>
+                      <p>Se não houver vídeo no storage, o sistema usará o URL do YouTube abaixo como alternativa.</p>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
