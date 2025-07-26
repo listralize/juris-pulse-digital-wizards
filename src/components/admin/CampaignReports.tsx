@@ -111,7 +111,7 @@ export const CampaignReports: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">

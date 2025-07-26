@@ -153,7 +153,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg"
+              <TabsList className="grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -161,33 +161,40 @@ const Admin = () => {
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '12px'
                 }}>
-                <TabsTrigger value="content" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <Edit className="w-4 h-4" />
-                  Conteúdo Geral
+                <TabsTrigger value="content" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Edit className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Conteúdo Geral</span>
+                  <span className="sm:hidden">Conteúdo</span>
                 </TabsTrigger>
-                <TabsTrigger value="service-pages" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <Globe className="w-4 h-4" />
-                  Páginas de Serviços ({servicePages?.length || 0})
+                <TabsTrigger value="service-pages" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Globe className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Páginas de Serviços ({servicePages?.length || 0})</span>
+                  <span className="sm:hidden">Serviços ({servicePages?.length || 0})</span>
                 </TabsTrigger>
-                <TabsTrigger value="blog" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <FileText className="w-4 h-4" />
-                  Blog ({validBlogPosts.length})
+                <TabsTrigger value="blog" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <FileText className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Blog ({validBlogPosts.length})</span>
+                  <span className="sm:hidden">Blog ({validBlogPosts.length})</span>
                 </TabsTrigger>
-                <TabsTrigger value="linktree" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <Link className="w-4 h-4" />
-                  Link Tree
+                <TabsTrigger value="linktree" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Link className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Link Tree</span>
+                  <span className="sm:hidden">Links</span>
                 </TabsTrigger>
-                <TabsTrigger value="leads" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <Users className="w-4 h-4" />
-                  Leads
+                <TabsTrigger value="leads" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Users className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Leads</span>
+                  <span className="sm:hidden">Leads</span>
                 </TabsTrigger>
-                <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <Briefcase className="w-4 h-4" />
-                  Marketing & Analytics
+                <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Briefcase className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Marketing & Analytics</span>
+                  <span className="sm:hidden">Marketing</span>
                 </TabsTrigger>
-                <TabsTrigger value="supabase" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20">
-                  <Database className="w-4 h-4" />
-                  Supabase
+                <TabsTrigger value="supabase" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Database className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Supabase</span>
+                  <span className="sm:hidden">DB</span>
                 </TabsTrigger>
               </TabsList>
 

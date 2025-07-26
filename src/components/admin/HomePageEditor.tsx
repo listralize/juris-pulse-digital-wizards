@@ -11,6 +11,7 @@ import { PageTexts, TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { supabase } from '../../integrations/supabase/client';
+import { TeamVideoManagement } from './TeamVideoManagement';
 import { toast } from 'sonner';
 
 interface HomePageEditorProps {
@@ -574,6 +575,12 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                 onChange={(e) => handleInputChange('teamTitle', e.target.value)}
                 className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
               />
+            </div>
+
+            {/* Configurações de Vídeo de Fundo da Equipe */}
+            <div className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
+              <h4 className={`font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Vídeo de Fundo da Seção</h4>
+              <TeamVideoManagement />
             </div>
 
             <div className="space-y-4">

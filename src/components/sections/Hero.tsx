@@ -105,7 +105,7 @@ const Hero = () => {
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 4.5,
+      duration: 3.5,
       ease: 'power2.out'
     }).fromTo(headlineRef.current, {
       opacity: 0,
