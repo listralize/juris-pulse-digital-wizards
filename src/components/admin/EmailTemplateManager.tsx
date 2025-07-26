@@ -75,8 +75,14 @@ export const EmailTemplateManager: React.FC = () => {
     try {
       console.log('Salvando template:', selectedTemplate);
       
+      // Verificar primeiro se logo_url existe na tabela
+      const { data: tableInfo, error: tableError } = await supabase
+        .from('email_templates')
+        .select('*')
+        .limit(1);
+
       // Usar apenas os campos que existem no schema da tabela
-      const templateData = {
+      const templateData: any = {
         name: selectedTemplate.name,
         title: selectedTemplate.title,
         subject: selectedTemplate.subject,
@@ -89,6 +95,11 @@ export const EmailTemplateManager: React.FC = () => {
         secondary_button_url: selectedTemplate.secondary_button_url || 'https://instagram.com/seu_perfil',
         show_secondary_button: selectedTemplate.show_secondary_button ?? true
       };
+
+      // Adicionar logo_url se estiver disponível
+      if (selectedTemplate.logo_url) {
+        templateData.logo_url = selectedTemplate.logo_url;
+      }
 
       // Se é um novo template, fazer insert
       if (!selectedTemplate.id || !templates.find(t => t.id === selectedTemplate.id)) {
@@ -473,18 +484,18 @@ export const EmailTemplateManager: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="logo_url">URL da Logo</Label>
-                        <Input
-                          id="logo_url"
-                          value={selectedTemplate.logo_url || ''}
-                          onChange={(e) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            logo_url: e.target.value
-                          })}
-                          placeholder="https://exemplo.com/logo.png"
-                        />
-                      </div>
+                    <div>
+                      <Label htmlFor="logo_url">URL da Logo</Label>
+                      <Input
+                        id="logo_url"
+                        value={selectedTemplate.logo_url || ''}
+                        onChange={(e) => setSelectedTemplate({
+                          ...selectedTemplate,
+                          logo_url: e.target.value
+                        })}
+                        placeholder="https://exemplo.com/logo.png"
+                      />
+                    </div>
                       <div>
                         <Label htmlFor="background_color">Cor de Fundo</Label>
                         <Input
