@@ -93,40 +93,47 @@ const Hero = () => {
         ease: 'power3.out'
       }
     });
+    
+    // Configurar logo com opacidade 0 inicialmente
+    gsap.set(logoRef.current, { opacity: 0 });
+    
     tl.fromTo(logoRef.current, {
       opacity: 0,
-      y: 40,
-      scale: 0.8
+      y: 60,
+      scale: 0.7
     }, {
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 2.5,
+      duration: 4.5,
       ease: 'power2.out'
     }).fromTo(headlineRef.current, {
       opacity: 0,
-      y: 20
+      y: 30
     }, {
       opacity: 1,
       y: 0,
-      duration: 0.8
-    }, "-=0.6").fromTo(subheadlineRef.current, {
+      duration: 1.5,
+      ease: 'power2.out'
+    }, "-=0.8").fromTo(subheadlineRef.current, {
       opacity: 0,
-      y: 15
+      y: 25
     }, {
       opacity: 1,
       y: 0,
-      duration: 0.6
-    }, "-=0.4").fromTo(ctaRef.current, {
+      duration: 1.2,
+      ease: 'power2.out'
+    }, "-=0.6").fromTo(ctaRef.current, {
       opacity: 0,
-      y: 15,
-      scale: 0.95
+      y: 25,
+      scale: 0.9
     }, {
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 0.6
-    }, "-=0.3");
+      duration: 1.0,
+      ease: 'power2.out'
+    }, "-=0.4");
     return () => {
       tl.kill();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());

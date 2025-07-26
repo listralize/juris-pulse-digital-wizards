@@ -1117,58 +1117,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>📝 Performance dos Formulários</CardTitle>
-                <CardDescription>Conversões por formulário (últimos 7 dias)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {conversionTracking.systemForms.length > 0 ? (
-                  <div className="space-y-3">
-                    {conversionTracking.systemForms.map((systemForm) => {
-                      // Buscar dados de analytics para este formulário
-                      const analyticsForm = analyticsData?.formSubmissions?.find(
-                        (f) => f.formId === systemForm.formId
-                      );
-                      
-                      const submissionCount = analyticsForm?.count || 0;
-                      
-                      return (
-                        <div key={systemForm.formId} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="outline">{systemForm.formId}</Badge>
-                            <span className="text-sm font-medium">
-                              {systemForm.formName}
-                            </span>
-                            {systemForm.enabled && (
-                              <Badge variant="secondary" className="text-xs">
-                                ✓ Rastreando
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-bold">{submissionCount}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {submissionCount === 1 ? 'conversão' : 'conversões'}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhum formulário encontrado.</p>
-                    <p className="text-sm">Configure os formulários na aba de rastreamento para ver dados aqui</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
                 <CardTitle>📊 Páginas Mais Visitadas</CardTitle>
                 <CardDescription>Últimos 7 dias</CardDescription>
               </CardHeader>
