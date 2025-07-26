@@ -131,44 +131,17 @@ const Hero = () => {
     };
   }, []);
 
-  // Função para scroll suave para as áreas de atuação
+  // Função para navegar para a seção de áreas
   const handleAreasClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🎯 Hero: Botão áreas clicado - iniciando scroll suave');
+    console.log('🎯 Hero: Navegando para seção areas');
     
-    // Garantir que estamos na página inicial
-    if (window.location.pathname !== '/') {
-      console.log('🎯 Hero: Redirecionando para home primeiro');
-      window.history.pushState({}, '', '/');
-    }
-    
-    // Disparar evento para atualizar seção ativa
-    window.dispatchEvent(new CustomEvent('activeSectionChanged', { 
-      detail: { section: 'areas' } 
+    // Disparar evento correto para o sistema de transição
+    window.dispatchEvent(new CustomEvent('sectionChange', { 
+      detail: 'areas'
     }));
-    
-    // Pequeno delay para garantir que a página carregou
-    setTimeout(() => {
-      const areasSection = document.getElementById('areas');
-      console.log('🎯 Hero: Procurando seção areas:', areasSection);
-      
-      if (areasSection) {
-        console.log('🎯 Hero: Seção encontrada, fazendo scroll');
-        areasSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      } else {
-        console.warn('🎯 Hero: Seção #areas não encontrada');
-        // Fallback - scroll para uma posição estimada
-        window.scrollTo({
-          top: window.innerHeight * 2, // Aproximadamente 2 telas para baixo
-          behavior: 'smooth'
-        });
-      }
-    }, 100);
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
       {/* Neural Background */}
