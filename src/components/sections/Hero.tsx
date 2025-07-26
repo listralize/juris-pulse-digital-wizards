@@ -15,6 +15,8 @@ const Hero = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   // Estados para os textos editáveis
   const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
   const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
@@ -130,14 +132,30 @@ const Hero = () => {
     };
   }, []);
 
-  // Alternância entre indicadores de scroll
+  // Detectar mobile/tablet
   useEffect(() => {
+    const checkDeviceType = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+    
+    checkDeviceType();
+    window.addEventListener('resize', checkDeviceType);
+    return () => window.removeEventListener('resize', checkDeviceType);
+  }, []);
+
+  // Alternância entre indicadores de scroll - APENAS DESKTOP
+  useEffect(() => {
+    // Só mostrar indicadores no desktop
+    if (isMobile || isTablet) return;
+    
     const interval = setInterval(() => {
       setShowScrollIndicator(prev => !prev);
     }, 3000); // Alterna a cada 3 segundos
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isMobile, isTablet]);
 
   // Função para navegar para a seção de áreas
   const handleAreasClick = (e: React.MouseEvent) => {
@@ -202,37 +220,39 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Indicador de scroll dinâmico alternado */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-        <div className="flex flex-col items-center gap-3">
-          {showScrollIndicator ? (
-            <div className="flex flex-col items-center gap-2 animate-bounce">
-              <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
-                <span>Role para baixo</span>
-                <ChevronDown className="w-4 h-4 animate-pulse" />
+      {/* Indicador de scroll dinâmico alternado - APENAS DESKTOP */}
+      {!isMobile && !isTablet && (
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="flex flex-col items-center gap-3">
+            {showScrollIndicator ? (
+              <div className="flex flex-col items-center gap-2 animate-bounce">
+                <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
+                  <span>Role para baixo</span>
+                  <ChevronDown className="w-4 h-4 animate-pulse" />
+                </div>
+                <div className="flex gap-1">
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+                </div>
               </div>
-              <div className="flex gap-1">
-                <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
-                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-3 text-white/80 text-sm font-medium">
+                  <ArrowLeft className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate' }} />
+                  <span>Use as setas</span>
+                  <ArrowRight className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate-reverse' }} />
+                </div>
+                <div className="flex gap-1">
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-3 text-white/80 text-sm font-medium">
-                <ArrowLeft className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate' }} />
-                <span>Use as setas</span>
-                <ArrowRight className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate-reverse' }} />
-              </div>
-              <div className="flex gap-1">
-                <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
-                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </section>;
 };
 export default Hero;

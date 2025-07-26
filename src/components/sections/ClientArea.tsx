@@ -280,7 +280,7 @@ const ClientArea = () => {
             <p 
               ref={textRef}
               className={`leading-relaxed mb-8 font-satoshi ${isDark ? 'text-white/90' : 'text-black/90'} ${
-                isMobile ? 'text-lg' : isTablet ? 'text-xl' : 'text-lg md:text-xl'
+                isMobile ? 'text-lg text-center' : isTablet ? 'text-xl text-center' : 'text-lg md:text-xl'
               }`}
             >
               {clientAreaDescription}

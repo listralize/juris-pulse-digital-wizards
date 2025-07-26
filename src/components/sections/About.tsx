@@ -123,9 +123,11 @@ const About = () => {
       console.log('🎥 About: Renderizando vídeo:', { originalUrl: aboutImage, embedUrl });
       
       return (
-        <div className="w-full h-48 md:h-56 lg:h-64">
+        <div className={`w-full rounded-lg overflow-hidden ${
+          isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
+        }`}>
           <iframe
-            src={embedUrl}
+            src={`${embedUrl}${isMobile ? '&playsinline=1' : ''}`}
             title="About Us Video"
             className="w-full h-full rounded-lg"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
