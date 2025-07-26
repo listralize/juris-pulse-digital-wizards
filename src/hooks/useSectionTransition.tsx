@@ -57,9 +57,9 @@ export const useSectionTransition = (sections: Section[]) => {
 
   // Função para verificar se a seção permite scroll interno
   const sectionAllowsScroll = (sectionId: string) => {
-    // APENAS a seção 'contact' deve bloquear as setas (tem formulário com scroll)
-    // Todas as outras seções da página inicial devem permitir navegação livre
-    return sectionId === 'contact';
+    // Permitir navegação por setas em todas as seções, incluindo contact
+    // O usuário deve conseguir sair de qualquer seção usando as setas
+    return false;
   };
 
   // Inicialização única
