@@ -61,7 +61,8 @@ export const useSectionTransition = (sections: Section[]) => {
     if (window.innerWidth < 768 && sectionId === 'areas') {
       return true;
     }
-    return ['areas', 'contact', 'blog', 'socios'].includes(sectionId);
+    // Removido 'areas' da lista para permitir navegação por teclado no desktop
+    return ['contact', 'blog', 'socios'].includes(sectionId);
   };
 
   // Inicialização única
