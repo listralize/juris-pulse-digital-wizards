@@ -17,8 +17,8 @@ const DesktopNavigation = ({
   const navigate = useNavigate();
 
   return (
-    <div className="flex w-full justify-center items-center">
-      <div className="flex items-center space-x-6">
+    <nav className="flex w-full justify-center items-center" role="navigation" aria-label="Menu principal">
+      <div className="flex items-center space-x-6" role="menubar">
         <NavigationItem 
           to="/" 
           label="Home" 
@@ -91,7 +91,7 @@ const DesktopNavigation = ({
           <ThemeToggle />
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 

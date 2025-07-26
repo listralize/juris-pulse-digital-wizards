@@ -222,7 +222,15 @@ const PracticeAreas = () => {
                 <Link 
                   key={area.id}
                   to={area.href}
-                  className="group block"
+                  className="group block focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current rounded-xl"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      window.location.href = area.href;
+                    }
+                  }}
+                  aria-label={`${area.title} - ${area.services} serviço${area.services !== 1 ? 's' : ''}`}
                 >
                   <div className={`
                     relative h-32 lg:h-36 rounded-xl border transition-all duration-300 ease-out
