@@ -47,12 +47,15 @@ export const WebhookManager: React.FC = () => {
   const loadWebhooks = async () => {
     try {
       const { data, error } = await supabase
-        .from('webhook_configs')
+        .from('admin_settings')
         .select('*')
-        .order('created_at', { ascending: false });
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
-      setWebhooks(data || []);
+      
+      const webhookData = data?.webhook_configs ? JSON.parse(data.webhook_configs) : [];
+      setWebhooks(Array.isArray(webhookData) ? webhookData : []);
     } catch (error) {
       console.error('Erro ao carregar webhooks:', error);
       toast.error('Erro ao carregar configurações de webhook');
@@ -83,30 +86,44 @@ export const WebhookManager: React.FC = () => {
     if (!selectedWebhook) return;
 
     try {
-      const webhookData = {
-        name: selectedWebhook.name,
-        endpoint_url: selectedWebhook.endpoint_url,
-        mappings: selectedWebhook.mappings,
-        is_active: selectedWebhook.is_active,
-        test_data: selectedWebhook.test_data
-      };
-
+      // Atualizar array de webhooks
+      let updatedWebhooks = [...webhooks];
+      
       if (selectedWebhook.id) {
-        const { error } = await supabase
-          .from('webhook_configs')
-          .update(webhookData)
-          .eq('id', selectedWebhook.id);
-
-        if (error) throw error;
+        // Atualizar webhook existente
+        const index = updatedWebhooks.findIndex(w => w.id === selectedWebhook.id);
+        if (index !== -1) {
+          updatedWebhooks[index] = selectedWebhook;
+        }
       } else {
-        const { data, error } = await supabase
-          .from('webhook_configs')
-          .insert(webhookData)
-          .select()
-          .single();
+        // Novo webhook
+        const newWebhook = { ...selectedWebhook, id: crypto.randomUUID() };
+        updatedWebhooks.push(newWebhook);
+        setSelectedWebhook(newWebhook);
+      }
 
-        if (error) throw error;
-        setSelectedWebhook({ ...selectedWebhook, id: data.id });
+      // Salvar no admin_settings
+      const { data, error } = await supabase
+        .from('admin_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      const webhookConfigsJson = JSON.stringify(updatedWebhooks);
+
+      if (data) {
+        const { error: updateError } = await supabase
+          .from('admin_settings')
+          .update({ webhook_configs: webhookConfigsJson })
+          .eq('id', data.id);
+        
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('admin_settings')
+          .insert({ webhook_configs: webhookConfigsJson });
+        
+        if (insertError) throw insertError;
       }
 
       toast.success('Webhook salvo com sucesso!');
@@ -122,12 +139,24 @@ export const WebhookManager: React.FC = () => {
     if (!confirm('Tem certeza que deseja deletar este webhook?')) return;
 
     try {
-      const { error } = await supabase
-        .from('webhook_configs')
-        .delete()
-        .eq('id', id);
+      const updatedWebhooks = webhooks.filter(w => w.id !== id);
+      
+      const { data, error } = await supabase
+        .from('admin_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
+
+      if (data) {
+        const { error: updateError } = await supabase
+          .from('admin_settings')
+          .update({ webhook_configs: JSON.stringify(updatedWebhooks) })
+          .eq('id', data.id);
+        
+        if (updateError) throw updateError;
+      }
 
       toast.success('Webhook deletado com sucesso!');
       loadWebhooks();
