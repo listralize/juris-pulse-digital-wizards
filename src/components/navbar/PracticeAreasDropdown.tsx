@@ -58,8 +58,21 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
         aria-haspopup="true"
         aria-expanded="false"
         onKeyDown={(e) => {
+          // Permitir navegação Tab normal - não interceptar
+          if (e.key === 'Tab') {
+            return; // Deixa o comportamento padrão do Tab
+          }
           if (e.key === 'Enter' || e.key === ' ') {
-            e.currentTarget.focus();
+            e.preventDefault();
+            // Toggle do dropdown
+            const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
+            if (dropdown) {
+              if (dropdown.classList.contains('opacity-0')) {
+                dropdown.classList.remove('opacity-0', 'invisible');
+              } else {
+                dropdown.classList.add('opacity-0', 'invisible');
+              }
+            }
           }
           if (e.key === 'ArrowDown') {
             e.preventDefault();
@@ -71,7 +84,7 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
       >
         Áreas de Atuação
       </button>
-      <div className={`absolute left-0 mt-2 w-60 ${isDark ? 'bg-black/95 border-white/10' : 'bg-white border-black/10'} border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-300 z-50`}
+      <div className={`absolute left-0 mt-2 w-60 ${isDark ? 'bg-black/95 border-white/10' : 'bg-white border-black/10'} border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50`}
         role="menu"
         aria-label="Áreas de Atuação"
       >
@@ -84,7 +97,7 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
                 className={`block px-4 py-2 ${isDark ? 'hover:bg-white/10 focus:bg-white/10 text-white' : 'hover:bg-black/5 focus:bg-black/5 text-black'} transition-colors focus:outline-none`}
                 onClick={() => handleAreaClick(`/areas/${category.value}`)}
                 role="menuitem"
-                tabIndex={0}
+                tabIndex={-1}
                 onKeyDown={(e) => {
                   if (e.key === 'ArrowUp' && index > 0) {
                     e.preventDefault();
@@ -96,10 +109,15 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
                     const nextLink = e.currentTarget.nextElementSibling as HTMLAnchorElement;
                     nextLink?.focus();
                   }
-                  if (e.key === 'Escape') {
+                  if (e.key === 'Escape' || e.key === 'Tab') {
                     e.preventDefault();
                     const button = e.currentTarget.closest('.group')?.querySelector('button') as HTMLButtonElement;
                     button?.focus();
+                    // Fechar dropdown
+                    const dropdown = e.currentTarget.closest('[role="menu"]') as HTMLElement;
+                    if (dropdown) {
+                      dropdown.classList.add('opacity-0', 'invisible');
+                    }
                   }
                 }}
               >
