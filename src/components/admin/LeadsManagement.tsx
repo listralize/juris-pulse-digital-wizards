@@ -627,10 +627,22 @@ export const LeadsManagement: React.FC = () => {
             Kanban
           </Button>
           
-          <Button onClick={() => setIsContactImporterOpen(true)} variant="outline" size="sm">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Gerenciar Contatos
-          </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsContactImporterOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                Gerenciar Contatos
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsWebhookManagerOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Webhook className="w-4 h-4" />
+                Configurar Webhooks
+              </Button>
           
           <Button onClick={exportLeads} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
@@ -959,6 +971,21 @@ export const LeadsManagement: React.FC = () => {
         onClose={() => setIsContactImporterOpen(false)}
         onContactsAdded={loadLeads}
       />
+
+      {/* Webhook Manager Dialog */}
+      {isWebhookManagerOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Configuração de Webhooks</h2>
+              <Button variant="outline" onClick={() => setIsWebhookManagerOpen(false)}>
+                ✕
+              </Button>
+            </div>
+            <WebhookManager />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

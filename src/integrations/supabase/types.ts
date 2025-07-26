@@ -25,6 +25,7 @@ export type Database = {
           specialized_services: Json | null
           team_members: Json | null
           updated_at: string | null
+          webhook_configs: string | null
         }
         Insert: {
           categories?: Json | null
@@ -36,6 +37,7 @@ export type Database = {
           specialized_services?: Json | null
           team_members?: Json | null
           updated_at?: string | null
+          webhook_configs?: string | null
         }
         Update: {
           categories?: Json | null
@@ -47,6 +49,7 @@ export type Database = {
           specialized_services?: Json | null
           team_members?: Json | null
           updated_at?: string | null
+          webhook_configs?: string | null
         }
         Relationships: []
       }

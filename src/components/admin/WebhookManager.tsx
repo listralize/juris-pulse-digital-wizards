@@ -54,7 +54,7 @@ export const WebhookManager: React.FC = () => {
 
       if (error) throw error;
       
-      const webhookData = data?.webhook_configs ? JSON.parse(data.webhook_configs) : [];
+      const webhookData = (data as any)?.webhook_configs ? JSON.parse((data as any).webhook_configs) : [];
       setWebhooks(Array.isArray(webhookData) ? webhookData : []);
     } catch (error) {
       console.error('Erro ao carregar webhooks:', error);
@@ -114,14 +114,14 @@ export const WebhookManager: React.FC = () => {
       if (data) {
         const { error: updateError } = await supabase
           .from('admin_settings')
-          .update({ webhook_configs: webhookConfigsJson })
+          .update({ webhook_configs: webhookConfigsJson } as any)
           .eq('id', data.id);
         
         if (updateError) throw updateError;
       } else {
         const { error: insertError } = await supabase
           .from('admin_settings')
-          .insert({ webhook_configs: webhookConfigsJson });
+          .insert({ webhook_configs: webhookConfigsJson } as any);
         
         if (insertError) throw insertError;
       }
@@ -152,7 +152,7 @@ export const WebhookManager: React.FC = () => {
       if (data) {
         const { error: updateError } = await supabase
           .from('admin_settings')
-          .update({ webhook_configs: JSON.stringify(updatedWebhooks) })
+          .update({ webhook_configs: JSON.stringify(updatedWebhooks) } as any)
           .eq('id', data.id);
         
         if (updateError) throw updateError;
