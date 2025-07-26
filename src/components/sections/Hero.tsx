@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
 
@@ -194,16 +194,18 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Indicador de scroll intuitivo */}
+      {/* Indicador de scroll dinâmico */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-        <div className="flex flex-col items-center gap-2 animate-bounce">
-          <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
-            <span>Role para baixo</span>
+        <div className="flex flex-col items-center gap-3 animate-bounce">
+          <div className="flex items-center gap-2 text-white/80 text-sm font-medium animate-pulse">
+            <span className="animate-fade-in-out">Role para baixo</span>
+            <ChevronDown className="w-4 h-4" />
           </div>
-          <div className="flex gap-1">
-            <div className="w-1 h-1 bg-white rounded-full animate-pulse"></div>
-            <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+          <div className="text-white/60 text-xs">ou</div>
+          <div className="flex items-center gap-2 text-white/80 text-sm font-medium animate-pulse" style={{ animationDelay: '2s' }}>
+            <ArrowLeft className="w-4 h-4" />
+            <span className="animate-fade-in-out" style={{ animationDelay: '2s' }}>Use as setas</span>
+            <ArrowRight className="w-4 h-4" />
           </div>
         </div>
       </div>
