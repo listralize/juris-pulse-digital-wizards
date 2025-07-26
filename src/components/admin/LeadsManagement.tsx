@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send } from 'lucide-react';
+import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -886,9 +886,18 @@ export const LeadsManagement: React.FC = () => {
                         onClick={() => openLeadDetails(lead)}
                       >
                         <CardContent className="p-3">
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             <p className="font-medium text-sm">{leadData.name || 'Nome não informado'}</p>
-                            <p className="text-xs text-muted-foreground">{leadData.email}</p>
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-3 w-3" />
+                              <p className="text-xs text-muted-foreground truncate">{leadData.email}</p>
+                            </div>
+                            {leadData.phone && (
+                              <div className="flex items-center gap-2">
+                                <MessageSquare className="h-3 w-3 text-green-600" />
+                                <p className="text-xs text-muted-foreground">{leadData.phone}</p>
+                              </div>
+                            )}
                             <p className="text-xs">{leadData.service}</p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(lead.created_at).toLocaleDateString('pt-BR')}
