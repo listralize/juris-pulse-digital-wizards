@@ -224,6 +224,7 @@ export const LeadsManagement: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
   const [isContactImporterOpen, setIsContactImporterOpen] = useState(false);
+  const [availableServices, setAvailableServices] = useState<string[]>([]);
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -256,6 +257,16 @@ export const LeadsManagement: React.FC = () => {
       statusData?.forEach(status => {
         statusMap[status.lead_id] = status.status;
       });
+
+      // Extrair serviços únicos dos leads
+      const servicesSet = new Set<string>();
+      leadsData?.forEach(lead => {
+        const leadData = parseLeadData(lead.lead_data);
+        if (leadData.service && leadData.service !== 'N/A') {
+          servicesSet.add(leadData.service);
+        }
+      });
+      setAvailableServices(Array.from(servicesSet).sort());
 
       console.log(`✅ ${leadsData?.length || 0} leads carregados`);
       setLeads(leadsData || []);
@@ -554,23 +565,16 @@ export const LeadsManagement: React.FC = () => {
       });
     }
 
-    // Filtro por fonte/evento
-    if (formFilter !== 'all') {
-      filtered = filtered.filter(lead => {
-        return lead.event_type === formFilter;
-      });
-    }
-
     // Filtro por serviço
     if (serviceFilter !== 'all') {
       filtered = filtered.filter(lead => {
         const leadData = parseLeadData(lead.lead_data);
-        return leadData.service?.toLowerCase().includes(serviceFilter.toLowerCase());
+        return leadData.service === serviceFilter;
       });
     }
 
     setFilteredLeads(filtered);
-  }, [leads, searchQuery, dateFilter, formFilter, serviceFilter]);
+  }, [leads, searchQuery, dateFilter, serviceFilter]);
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -647,7 +651,7 @@ export const LeadsManagement: React.FC = () => {
       </div>
 
       {/* Filtros */}
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -670,38 +674,23 @@ export const LeadsManagement: React.FC = () => {
           </SelectContent>
         </Select>
 
-        <Select value={formFilter} onValueChange={setFormFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Filtrar por fonte" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as fontes</SelectItem>
-            <SelectItem value="form_submission">Formulário de Contato</SelectItem>
-            <SelectItem value="whatsapp_click">WhatsApp</SelectItem>
-            <SelectItem value="email_click">Email</SelectItem>
-          </SelectContent>
-        </Select>
-
         <Select value={serviceFilter} onValueChange={setServiceFilter}>
           <SelectTrigger>
             <SelectValue placeholder="Filtrar por serviço" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os serviços</SelectItem>
-            <SelectItem value="Direito Civil">Direito Civil</SelectItem>
-            <SelectItem value="Direito Trabalhista">Direito Trabalhista</SelectItem>
-            <SelectItem value="Direito Previdenciário">Direito Previdenciário</SelectItem>
-            <SelectItem value="Direito Empresarial">Direito Empresarial</SelectItem>
-            <SelectItem value="Direito Tributário">Direito Tributário</SelectItem>
-            <SelectItem value="Direito Família">Direito de Família</SelectItem>
-            <SelectItem value="Direito Consumidor">Direito do Consumidor</SelectItem>
+            {availableServices.map(service => (
+              <SelectItem key={service} value={service}>
+                {service}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Button variant="outline" onClick={() => {
           setSearchQuery('');
           setDateFilter('all');
-          setFormFilter('all');
           setServiceFilter('all');
         }}>
           <Filter className="h-4 w-4 mr-2" />

@@ -73,9 +73,10 @@ export const EmailTemplateManager: React.FC = () => {
     if (!selectedTemplate) return;
 
     try {
-      // Filtrar apenas os campos que existem na tabela
+      console.log('Salvando template:', selectedTemplate);
+      
+      // Usar apenas os campos que existem no schema da tabela
       const templateData = {
-        id: selectedTemplate.id,
         name: selectedTemplate.name,
         title: selectedTemplate.title,
         subject: selectedTemplate.subject,
@@ -86,15 +87,29 @@ export const EmailTemplateManager: React.FC = () => {
         button_url: selectedTemplate.button_url || 'https://api.whatsapp.com/send?phone=5562994594496',
         secondary_button_text: selectedTemplate.secondary_button_text || 'Seguir no Instagram',
         secondary_button_url: selectedTemplate.secondary_button_url || 'https://instagram.com/seu_perfil',
-        show_secondary_button: selectedTemplate.show_secondary_button ?? true,
-        updated_at: new Date().toISOString()
+        show_secondary_button: selectedTemplate.show_secondary_button ?? true
       };
 
-      const { error } = await supabase
-        .from('email_templates')
-        .upsert(templateData);
+      // Se é um novo template, fazer insert
+      if (!selectedTemplate.id || !templates.find(t => t.id === selectedTemplate.id)) {
+        const { data, error } = await supabase
+          .from('email_templates')
+          .insert(templateData)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
+        
+        setSelectedTemplate({ ...selectedTemplate, id: data.id });
+      } else {
+        // Senão, fazer update
+        const { error } = await supabase
+          .from('email_templates')
+          .update(templateData)
+          .eq('id', selectedTemplate.id);
+
+        if (error) throw error;
+      }
 
       toast.success('Template salvo com sucesso!');
       setIsEditing(false);
@@ -321,6 +336,52 @@ export const EmailTemplateManager: React.FC = () => {
               <CardContent className="space-y-4">
                 {isEditing ? (
                   <>
+                    {/* Campos Disponíveis */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg mb-4">
+                      <h4 className="font-semibold mb-2">📝 Campos Disponíveis</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Clique nos campos abaixo para inserir automaticamente no conteúdo:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { field: '{name}', label: 'Nome do Cliente' },
+                          { field: '{service}', label: 'Serviço Solicitado' },
+                          { field: '{email}', label: 'Email do Cliente' },
+                          { field: '{phone}', label: 'Telefone' },
+                          { field: '{message}', label: 'Mensagem' },
+                          { field: '{date}', label: 'Data Atual' },
+                          { field: '{time}', label: 'Hora Atual' }
+                        ].map(({ field, label }) => (
+                          <Button
+                            key={field}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const textarea = document.getElementById('content') as HTMLTextAreaElement;
+                              if (textarea) {
+                                const start = textarea.selectionStart;
+                                const end = textarea.selectionEnd;
+                                const value = selectedTemplate.content;
+                                const newValue = value.substring(0, start) + field + value.substring(end);
+                                setSelectedTemplate({
+                                  ...selectedTemplate,
+                                  content: newValue
+                                });
+                                // Restaurar foco e posição do cursor
+                                setTimeout(() => {
+                                  textarea.focus();
+                                  textarea.setSelectionRange(start + field.length, start + field.length);
+                                }, 0);
+                              }
+                            }}
+                            className="text-xs"
+                          >
+                            {field} - {label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="name">Nome do Template</Label>
@@ -359,15 +420,42 @@ export const EmailTemplateManager: React.FC = () => {
 
                     <div>
                       <Label htmlFor="subject">Assunto do Email</Label>
-                      <Input
-                        id="subject"
-                        value={selectedTemplate.subject}
-                        onChange={(e) => setSelectedTemplate({
-                          ...selectedTemplate,
-                          subject: e.target.value
-                        })}
-                        placeholder="Use {name} para o nome do cliente"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="subject"
+                          value={selectedTemplate.subject}
+                          onChange={(e) => setSelectedTemplate({
+                            ...selectedTemplate,
+                            subject: e.target.value
+                          })}
+                          placeholder="Use {name} para o nome do cliente"
+                        />
+                        <div className="flex gap-1">
+                          {['{name}', '{service}'].map(field => (
+                            <Button
+                              key={field}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const input = document.getElementById('subject') as HTMLInputElement;
+                                if (input) {
+                                  const start = input.selectionStart || 0;
+                                  const end = input.selectionEnd || 0;
+                                  const value = selectedTemplate.subject;
+                                  const newValue = value.substring(0, start) + field + value.substring(end);
+                                  setSelectedTemplate({
+                                    ...selectedTemplate,
+                                    subject: newValue
+                                  });
+                                }
+                              }}
+                              className="text-xs"
+                            >
+                              {field}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     <div>

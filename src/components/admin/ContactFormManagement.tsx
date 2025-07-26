@@ -13,6 +13,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { FormFieldsManager } from './contact-form/FormFieldsManager';
 import { FormConfig, FormField } from '../../types/contactFormTypes';
 import { useFormConfig } from '../../hooks/useFormConfig';
+import { WebhookManager } from './WebhookManager';
 
 const defaultFormConfig: FormConfig = {
   webhookUrl: '',
@@ -354,6 +355,9 @@ export const ContactFormManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Webhook Manager */}
+      <WebhookManager />
+      
       {/* Form Selector */}
       <Card className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader>
