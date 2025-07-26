@@ -331,34 +331,49 @@ export type Database = {
       }
       email_templates: {
         Row: {
+          button_text: string | null
+          button_url: string | null
           content: string
           created_at: string
           id: string
           is_active: boolean | null
           is_default: boolean | null
           name: string
+          secondary_button_text: string | null
+          secondary_button_url: string | null
+          show_secondary_button: boolean | null
           subject: string
           title: string
           updated_at: string
         }
         Insert: {
+          button_text?: string | null
+          button_url?: string | null
           content?: string
           created_at?: string
           id?: string
           is_active?: boolean | null
           is_default?: boolean | null
           name: string
+          secondary_button_text?: string | null
+          secondary_button_url?: string | null
+          show_secondary_button?: boolean | null
           subject?: string
           title?: string
           updated_at?: string
         }
         Update: {
+          button_text?: string | null
+          button_url?: string | null
           content?: string
           created_at?: string
           id?: string
           is_active?: boolean | null
           is_default?: boolean | null
           name?: string
+          secondary_button_text?: string | null
+          secondary_button_url?: string | null
+          show_secondary_button?: boolean | null
           subject?: string
           title?: string
           updated_at?: string

@@ -19,9 +19,14 @@ interface EmailRequest {
   textColor?: string;
   buttonColor?: string;
   customHtml?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  secondaryButtonText?: string;
+  secondaryButtonUrl?: string;
+  showSecondaryButton?: boolean;
 }
 
-const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string, backgroundColor?: string, textColor?: string, buttonColor?: string, customHtml?: string) => {
+const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string, backgroundColor?: string, textColor?: string, buttonColor?: string, customHtml?: string, buttonText?: string, buttonUrl?: string, secondaryButtonText?: string, secondaryButtonUrl?: string, showSecondaryButton?: boolean) => {
   const title = customTitle || "Obrigado pelo seu contato!";
   const content = customContent || `Agradecemos seu interesse em nossos serviços de ${service}. Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.`;
   const defaultLogo = "https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png";
@@ -29,6 +34,11 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
   const bgColor = backgroundColor || '#000000';
   const txtColor = textColor || '#ffffff';
   const btnColor = buttonColor || '#4CAF50';
+  const primaryBtnText = buttonText || 'Falar no WhatsApp';
+  const primaryBtnUrl = buttonUrl || 'https://api.whatsapp.com/send?phone=5562994594496';
+  const secondaryBtnText = secondaryButtonText || 'Seguir no Instagram';
+  const secondaryBtnUrl = secondaryButtonUrl || 'https://instagram.com/seu_perfil';
+  const showSecondary = showSecondaryButton !== false;
   
   return `
     <!DOCTYPE html>
@@ -79,15 +89,17 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
 
                 <!-- Action Buttons -->
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://api.whatsapp.com/send?phone=5562994594496&text=Olá,%20vi%20que%20vocês%20entraram%20em%20contato%20comigo%20por%20email.%20Gostaria%20de%20conversar%20sobre%20meu%20caso." 
+                    <a href="${primaryBtnUrl}" 
                        style="display: inline-block; background-color: ${btnColor}; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 0 10px 10px 0;">
-                        💬 Falar no WhatsApp
+                        ${primaryBtnText}
                     </a>
                     
-                    <a href="https://instagram.com/seu_perfil" 
+                    ${showSecondary ? `
+                    <a href="${secondaryBtnUrl}" 
                        style="display: inline-block; background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 0 10px 10px 0;">
-                        📸 Seguir no Instagram
+                        ${secondaryBtnText}
                     </a>
+                    ` : ''}
                 </div>
 
                 <!-- Contact Info -->
@@ -173,13 +185,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml }: EmailRequest = await req.json();
+    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton }: EmailRequest = await req.json();
 
     if (!to || !name) {
       throw new Error("Email e nome são obrigatórios");
     }
 
-    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml);
+    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton);
     const emailSubject = subject || `Obrigado pelo contato, ${name}! 📧`;
 
     const result = await sendEmail(to, emailSubject, emailHTML);

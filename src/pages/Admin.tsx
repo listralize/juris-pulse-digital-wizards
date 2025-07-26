@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
@@ -154,7 +155,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
+              <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -198,6 +199,59 @@ const Admin = () => {
                   <span className="sm:hidden">Marketing</span>
                 </TabsTrigger>
               </TabsList>
+
+              {/* Mobile/Tablet Dropdown Menu */}
+              <div className="md:hidden">
+                <Select defaultValue="content">
+                  <SelectTrigger className="w-full backdrop-blur-md bg-white/10 border border-white/20 text-white">
+                    <SelectValue placeholder="Selecionar seção" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-black/90 backdrop-blur-md border-white/20">
+                    <SelectItem value="content">
+                      <div className="flex items-center gap-2">
+                        <Edit className="w-4 h-4" />
+                        Conteúdo
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="service-pages">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4" />
+                        Serviços ({servicePages?.length || 0})
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="blog">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        Blog ({validBlogPosts.length})
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="linktree">
+                      <div className="flex items-center gap-2">
+                        <Link className="w-4 h-4" />
+                        Links
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="leads">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Leads
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="email-templates">
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        Email
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="marketing">
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="w-4 h-4" />
+                        Marketing
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               <TabsContent value="content">
                 <ContentManagement teamMembers={validTeamMembers} pageTexts={validPageTexts} onAddTeamMember={handleAddTeamMember} onRemoveTeamMember={handleRemoveTeamMember} onUpdateTeamMember={handleUpdateTeamMember} onSaveTeamMembers={handleSaveTeamMembers} onUpdatePageTexts={handleUpdatePageTexts} onSavePageTexts={handleSavePageTexts} />

@@ -23,6 +23,11 @@ interface EmailTemplate {
   text_color?: string;
   button_color?: string;
   custom_html?: string;
+  button_text?: string;
+  button_url?: string;
+  secondary_button_text?: string;
+  secondary_button_url?: string;
+  show_secondary_button?: boolean;
   is_default: boolean;
   is_active: boolean;
   created_at: string;
@@ -94,11 +99,16 @@ export const EmailTemplateManager: React.FC = () => {
       title: 'Obrigado pelo seu contato!',
       subject: 'Obrigado pelo contato, {name}! 📧',
       content: 'Agradecemos seu interesse em nossos serviços de {service}. Nossa equipe entrará em contato em breve.',
-      logo_url: '',
+      logo_url: 'https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png',
       background_color: '#000000',
       text_color: '#ffffff',
       button_color: '#4CAF50',
       custom_html: '',
+      button_text: 'Falar no WhatsApp',
+      button_url: 'https://api.whatsapp.com/send?phone=5562994594496',
+      secondary_button_text: 'Seguir no Instagram',
+      secondary_button_url: 'https://instagram.com/seu_perfil',
+      show_secondary_button: true,
       is_default: false,
       is_active: true,
       created_at: new Date().toISOString(),
@@ -153,7 +163,12 @@ export const EmailTemplateManager: React.FC = () => {
           backgroundColor: selectedTemplate.background_color,
           textColor: selectedTemplate.text_color,
           buttonColor: selectedTemplate.button_color,
-          customHtml: selectedTemplate.custom_html
+          customHtml: selectedTemplate.custom_html,
+          buttonText: selectedTemplate.button_text,
+          buttonUrl: selectedTemplate.button_url,
+          secondaryButtonText: selectedTemplate.secondary_button_text,
+          secondaryButtonUrl: selectedTemplate.secondary_button_url,
+          showSecondaryButton: selectedTemplate.show_secondary_button
         }
       });
 
@@ -406,6 +421,74 @@ export const EmailTemplateManager: React.FC = () => {
                             button_color: e.target.value
                           })}
                         />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Botões de Call-to-Action</Label>
+                      <div className="space-y-4 p-4 border rounded-lg">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="button_text">Texto do Botão Principal</Label>
+                            <Input
+                              id="button_text"
+                              value={selectedTemplate.button_text || 'Falar no WhatsApp'}
+                              onChange={(e) => setSelectedTemplate({
+                                ...selectedTemplate,
+                                button_text: e.target.value
+                              })}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="button_url">URL do Botão Principal</Label>
+                            <Input
+                              id="button_url"
+                              value={selectedTemplate.button_url || 'https://api.whatsapp.com/send?phone=5562994594496'}
+                              onChange={(e) => setSelectedTemplate({
+                                ...selectedTemplate,
+                                button_url: e.target.value
+                              })}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={selectedTemplate.show_secondary_button ?? true}
+                            onCheckedChange={(checked) => setSelectedTemplate({
+                              ...selectedTemplate,
+                              show_secondary_button: checked
+                            })}
+                          />
+                          <Label>Mostrar Botão Secundário</Label>
+                        </div>
+
+                        {selectedTemplate.show_secondary_button && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="secondary_button_text">Texto do Botão Secundário</Label>
+                              <Input
+                                id="secondary_button_text"
+                                value={selectedTemplate.secondary_button_text || 'Seguir no Instagram'}
+                                onChange={(e) => setSelectedTemplate({
+                                  ...selectedTemplate,
+                                  secondary_button_text: e.target.value
+                                })}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="secondary_button_url">URL do Botão Secundário</Label>
+                              <Input
+                                id="secondary_button_url"
+                                value={selectedTemplate.secondary_button_url || 'https://instagram.com/seu_perfil'}
+                                onChange={(e) => setSelectedTemplate({
+                                  ...selectedTemplate,
+                                  secondary_button_url: e.target.value
+                                })}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
