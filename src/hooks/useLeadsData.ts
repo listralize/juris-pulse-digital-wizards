@@ -73,6 +73,7 @@ export const useLeadsData = (): LeadsData => {
           }));
           
           setFormConfigs(configs);
+          console.log('📋 Formulários configurados:', configs);
         } else {
           // Formato antigo - formulário único
           setFormConfigs([{
@@ -110,11 +111,10 @@ export const useLeadsData = (): LeadsData => {
         return;
       }
 
-      // Filtrar apenas leads válidos (não de teste)
+      // Filtrar apenas leads válidos (não de teste específicos)
       const validLeads = (data || []).filter(lead => {
-        // Filtrar dados de teste
-        if (lead.form_name === 'Teste Funil' || 
-            lead.session_id?.includes('test-session') ||
+        // Filtrar apenas dados de teste muito específicos
+        if (lead.session_id?.includes('test-session') ||
             (lead.lead_data as any)?.name === 'Teste ConversionFunnel') {
           return false;
         }
