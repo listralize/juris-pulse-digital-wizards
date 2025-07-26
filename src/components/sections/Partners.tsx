@@ -214,8 +214,12 @@ const Partners = () => {
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      {/* Video de fundo opcional */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Video de fundo ocupando toda a tela */}
+      <div className="absolute inset-0 overflow-hidden" style={{
+        left: '50%',
+        width: '100vw',
+        transform: 'translateX(-50%)'
+      }}>
         <video
           id="team-background-video"
           className="w-full h-full object-cover opacity-30"

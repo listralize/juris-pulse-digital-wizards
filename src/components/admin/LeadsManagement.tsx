@@ -6,7 +6,8 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { RefreshCw, Download, Search, Trash2, Phone, Mail, MessageSquare, Calendar, Filter } from 'lucide-react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { RefreshCw, Download, Search, Trash2, Phone, Mail, MessageSquare, Calendar, Filter, Eye, ExternalLink } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -31,6 +32,129 @@ interface Lead {
   created_at: string;
   conversion_value?: number | null;
 }
+
+// Componente para exibir detalhes do lead
+const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ lead, children }) => {
+  const leadData = lead.lead_data || {};
+  const phone = leadData.phone || leadData.telefone;
+  const name = leadData.name || leadData.nome;
+
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        {children}
+      </SheetTrigger>
+      <SheetContent className="w-[600px] sm:max-w-[600px]">
+        <SheetHeader>
+          <SheetTitle>{name || 'Lead sem nome'}</SheetTitle>
+          <SheetDescription>
+            Detalhes completos do lead - {new Date(lead.created_at).toLocaleString('pt-BR')}
+          </SheetDescription>
+        </SheetHeader>
+        
+        <div className="mt-6 space-y-6">
+          {/* Informações principais */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Informações de Contato</h3>
+            
+            <div className="grid gap-3">
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  <span className="font-medium">Email:</span>
+                </div>
+                {leadData.email ? (
+                  <a href={`mailto:${leadData.email}`} className="text-blue-600 hover:underline">
+                    {leadData.email}
+                  </a>
+                ) : (
+                  <span className="text-muted-foreground">Não informado</span>
+                )}
+              </div>
+
+              {phone && (
+                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    <span className="font-medium">Telefone:</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>{phone}</span>
+                    <Button size="sm" variant="outline" asChild>
+                      <a 
+                        href={`https://wa.me/55${phone.replace(/\D/g, '')}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-green-600"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        WhatsApp
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Dados do formulário */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Dados do Formulário</h3>
+            <div className="space-y-3">
+              {Object.entries(leadData).map(([key, value]) => {
+                if (!value || key === 'phone' || key === 'telefone' || key === 'email') return null;
+                
+                const displayKey = key === 'nome' ? 'Nome' : 
+                                 key === 'servico' ? 'Serviço' : 
+                                 key === 'message' ? 'Mensagem' : 
+                                 key === 'isUrgent' ? 'Urgente' : key;
+                
+                return (
+                  <div key={key} className="p-3 bg-muted rounded-lg">
+                    <div className="font-medium text-sm mb-1">{displayKey}:</div>
+                    <div className="text-sm">
+                      {key === 'isUrgent' ? (value ? 'Sim' : 'Não') : String(value)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Dados técnicos */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Dados Técnicos</h3>
+            <div className="grid gap-3">
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="font-medium text-sm mb-1">Formulário:</div>
+                <div className="text-sm">{lead.form_name || lead.form_id || 'N/A'}</div>
+              </div>
+              
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="font-medium text-sm mb-1">Página de Origem:</div>
+                <div className="text-sm break-all">{lead.page_url}</div>
+              </div>
+              
+              {lead.campaign_name && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="font-medium text-sm mb-1">Campanha:</div>
+                  <div className="text-sm">{lead.campaign_name}</div>
+                </div>
+              )}
+              
+              {lead.referrer && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="font-medium text-sm mb-1">Referrer:</div>
+                  <div className="text-sm break-all">{lead.referrer}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
 export const LeadsManagement: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -270,10 +394,8 @@ export const LeadsManagement: React.FC = () => {
                 <TableHead>Nome</TableHead>
                 <TableHead>Contato</TableHead>
                 <TableHead>Formulário</TableHead>
-                <TableHead>Mensagem</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead>Página</TableHead>
-                <TableHead>Campanha</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -333,28 +455,16 @@ export const LeadsManagement: React.FC = () => {
                         {lead.form_name || lead.form_id || 'N/A'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-xs">
-                      {leadData.message ? (
-                        <div className="text-sm text-muted-foreground truncate" title={leadData.message}>
-                          <MessageSquare className="w-3 h-3 inline mr-1" />
-                          {leadData.message}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">Sem mensagem</span>
-                      )}
-                    </TableCell>
                     <TableCell className="text-sm">
                       {new Date(lead.created_at).toLocaleString('pt-BR')}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                      {lead.page_url}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {lead.campaign_name && (
-                        <Badge variant="secondary" className="text-xs">
-                          {lead.campaign_name}
-                        </Badge>
-                      )}
+                    <TableCell>
+                      <LeadDetailSheet lead={lead}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-3 h-3 mr-1" />
+                          Ver Detalhes
+                        </Button>
+                      </LeadDetailSheet>
                     </TableCell>
                   </TableRow>
                 );
@@ -366,119 +476,121 @@ export const LeadsManagement: React.FC = () => {
 
       {/* Visualização em Cards */}
       {currentView === 'cards' && (
-        <div className="grid gap-4">
-          {filteredLeads.map((lead) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {filteredLeads.map((lead, index) => {
             const leadData = lead.lead_data || {};
             const isSelected = selectedLeads.has(lead.id);
             const phone = leadData.phone || leadData.telefone;
             const name = leadData.name || leadData.nome;
+            
+            // Cores alternadas para os cards
+            const cardColors = [
+              'border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20',
+              'border-l-green-500 bg-green-50/50 dark:bg-green-950/20',
+              'border-l-purple-500 bg-purple-50/50 dark:bg-purple-950/20',
+              'border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20',
+              'border-l-red-500 bg-red-50/50 dark:bg-red-950/20',
+              'border-l-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20',
+              'border-l-pink-500 bg-pink-50/50 dark:bg-pink-950/20',
+              'border-l-teal-500 bg-teal-50/50 dark:bg-teal-950/20'
+            ];
+            const colorClass = cardColors[index % cardColors.length];
 
             return (
-              <Card key={lead.id} className={`${isSelected ? 'ring-2 ring-primary' : ''} transition-all hover:shadow-md`}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={(e) => {
-                          const newSelected = new Set(selectedLeads);
-                          if (e.target.checked) {
-                            newSelected.add(lead.id);
-                          } else {
-                            newSelected.delete(lead.id);
-                          }
-                          setSelectedLeads(newSelected);
-                        }}
-                        className="rounded"
-                      />
-                      <div>
-                        <CardTitle className="text-lg">
-                          {name || 'Nome não informado'}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            {lead.form_name || lead.form_id || 'N/A'}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(lead.created_at).toLocaleString('pt-BR')}
+              <LeadDetailSheet key={lead.id} lead={lead}>
+                <Card className={`${colorClass} border-l-4 cursor-pointer hover:shadow-md transition-all ${isSelected ? 'ring-2 ring-primary' : ''} h-fit`}>
+                  <CardContent className="p-3">
+                    <div className="space-y-2">
+                      {/* Checkbox e Nome */}
+                      <div className="flex items-start justify-between">
+                        <div 
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const newSelected = new Set(selectedLeads);
+                              if (e.target.checked) {
+                                newSelected.add(lead.id);
+                              } else {
+                                newSelected.delete(lead.id);
+                              }
+                              setSelectedLeads(newSelected);
+                            }}
+                            className="rounded mr-2"
+                          />
+                          <span className="font-medium text-sm">
+                            {name || 'Nome não informado'}
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {/* Informações de contato */}
-                    <div className="flex flex-wrap gap-4">
-                      {leadData.email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                          <a href={`mailto:${leadData.email}`} className="text-blue-600 hover:underline text-sm">
-                            {leadData.email}
-                          </a>
-                        </div>
-                      )}
-                      {phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <a 
-                            href={`https://wa.me/55${phone.replace(/\D/g, '')}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-green-600 hover:underline text-sm"
-                          >
-                            {phone} (WhatsApp)
-                          </a>
-                        </div>
-                      )}
-                    </div>
 
-                    {/* Serviço solicitado */}
-                    {(leadData.service || leadData.servico) && (
-                      <div>
-                        <strong className="text-sm">Serviço:</strong>
-                        <span className="text-sm ml-2">{leadData.service || leadData.servico}</span>
-                      </div>
-                    )}
-
-                    {/* Mensagem */}
-                    {leadData.message && (
-                      <div className="bg-muted p-3 rounded">
-                        <div className="flex items-start gap-2">
-                          <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5" />
-                          <div>
-                            <strong className="text-sm">Mensagem:</strong>
-                            <p className="text-sm mt-1">{leadData.message}</p>
+                      {/* Contato rápido */}
+                      <div className="space-y-1">
+                        {leadData.email && (
+                          <div className="flex items-center gap-1 text-xs">
+                            <Mail className="w-3 h-3 text-muted-foreground" />
+                            <span className="truncate">{leadData.email}</span>
                           </div>
+                        )}
+                        {phone && (
+                          <div className="flex items-center gap-1 text-xs">
+                            <Phone className="w-3 h-3 text-green-600" />
+                            <span className="truncate">{phone}</span>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-5 w-5 p-0 ml-auto"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`https://wa.me/55${phone.replace(/\D/g, '')}`, '_blank');
+                              }}
+                            >
+                              <ExternalLink className="w-3 h-3 text-green-600" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Formulário e Data */}
+                      <div className="space-y-1">
+                        <Badge variant="outline" className="text-xs h-5">
+                          {lead.form_name || lead.form_id || 'N/A'}
+                        </Badge>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                         </div>
                       </div>
-                    )}
 
-                    {/* Dados técnicos */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground pt-2 border-t">
-                      <div><strong>Página:</strong> {lead.page_url}</div>
-                      {lead.campaign_name && <div><strong>Campanha:</strong> {lead.campaign_name}</div>}
-                      {lead.referrer && <div><strong>Origem:</strong> {lead.referrer}</div>}
+                      {/* Indicadores */}
+                      <div className="flex flex-wrap gap-1">
+                        {leadData.isUrgent && (
+                          <Badge variant="destructive" className="text-xs h-4 px-1">
+                            Urgente
+                          </Badge>
+                        )}
+                        {lead.campaign_name && (
+                          <Badge variant="secondary" className="text-xs h-4 px-1">
+                            Campanha
+                          </Badge>
+                        )}
+                        {leadData.message && (
+                          <Badge variant="outline" className="text-xs h-4 px-1">
+                            <MessageSquare className="w-2 h-2 mr-1" />
+                            Msg
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-
-                    {/* Badges de status */}
-                    <div className="flex flex-wrap gap-2">
-                      {leadData.isUrgent && (
-                        <Badge variant="destructive" className="text-xs">
-                          Urgente
-                        </Badge>
-                      )}
-                      {lead.campaign_name && (
-                        <Badge variant="secondary" className="text-xs">
-                          {lead.campaign_name}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </LeadDetailSheet>
             );
           })}
         </div>
