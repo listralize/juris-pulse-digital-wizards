@@ -12,10 +12,8 @@ import { toast } from 'sonner';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, signUp } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -25,22 +23,12 @@ const Login = () => {
     setLoading(true);
     
     try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password, fullName);
-        if (error) {
-          toast.error(`Erro no cadastro: ${error.message}`);
-        } else {
-          toast.success('Cadastro realizado! Verifique seu email.');
-          setIsSignUp(false);
-        }
+      const success = await login(email, password);
+      if (success) {
+        toast.success('Login realizado com sucesso!');
+        navigate('/admin');
       } else {
-        const success = await login(email, password);
-        if (success) {
-          toast.success('Login realizado com sucesso!');
-          navigate('/admin');
-        } else {
-          toast.error('Credenciais inválidas');
-        }
+        toast.error('Credenciais inválidas');
       }
     } catch (error) {
       toast.error('Erro no processo de autenticação');
@@ -55,26 +43,11 @@ const Login = () => {
       <Card className={`w-full max-w-md ${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'}`}>
         <CardHeader className="text-center">
           <CardTitle className={`text-2xl font-canela ${isDark ? 'text-white' : 'text-black'}`}>
-            {isSignUp ? 'Criar Conta' : 'Acesso Administrativo'}
+            Acesso Administrativo
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form id="admin-login-form" onSubmit={handleSubmit} className="space-y-4">
-            {isSignUp && (
-              <div>
-                <Label htmlFor="fullName" className={`${isDark ? 'text-white' : 'text-black'}`}>
-                  Nome Completo
-                </Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  required={isSignUp}
-                />
-              </div>
-            )}
             <div>
               <Label htmlFor="email" className={`${isDark ? 'text-white' : 'text-black'}`}>
                 Email
@@ -108,26 +81,9 @@ const Login = () => {
               className={`w-full ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
               disabled={loading}
             >
-              {loading ? 'Processando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
+              {loading ? 'Processando...' : 'Entrar'}
             </Button>
           </form>
-          
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className={`text-sm underline ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black'}`}
-            >
-              {isSignUp ? 'Já tem conta? Faça login' : 'Não tem conta? Cadastre-se'}
-            </button>
-          </div>
-
-          <div className={`mt-6 p-3 rounded text-xs ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
-            <p className={`${isDark ? 'text-blue-200' : 'text-blue-700'}`}>
-              <strong>🔒 Sistema Seguro:</strong><br />
-              Faça login com suas credenciais do Supabase para acessar o painel administrativo.
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

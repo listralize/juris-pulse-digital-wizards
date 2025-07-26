@@ -211,10 +211,10 @@ const Hero = () => {
                 <span>Role para baixo</span>
                 <ChevronDown className="w-4 h-4 animate-pulse" />
               </div>
-              <div className="flex flex-col gap-1">
-                <div className="w-1 h-1 bg-white rounded-full animate-bounce"></div>
-                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
               </div>
             </div>
           ) : (

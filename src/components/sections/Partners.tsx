@@ -138,7 +138,7 @@ const Partners = () => {
       {isDark && <NeuralBackground />}
       
       <div className="team-responsive-container w-full relative z-10" style={{ marginTop: '-100px' }}>
-        <div className="flex flex-col items-center justify-start flex-1" style={{ paddingTop: '80px' }}>
+        <div className="flex flex-col items-center justify-start flex-1" style={{ paddingTop: '230px' }}>
           {/* Header responsivo */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
