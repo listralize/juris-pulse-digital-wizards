@@ -194,11 +194,16 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Scroll indicator mais compacto */}
+      {/* Indicador de scroll intuitivo */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-        <div className="animate-bounce">
-          <div className="w-5 h-8 border-2 border-white rounded-full flex justify-center">
-            <div className="w-0.5 h-2 bg-white rounded-full mt-1.5 animate-pulse"></div>
+        <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
+            <span>Role para baixo</span>
+          </div>
+          <div className="flex gap-1">
+            <div className="w-1 h-1 bg-white rounded-full animate-pulse"></div>
+            <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
           </div>
         </div>
       </div>

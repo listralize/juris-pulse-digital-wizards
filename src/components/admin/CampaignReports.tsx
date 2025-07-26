@@ -111,20 +111,20 @@ export const CampaignReports: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Glassmorphism */}
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
+        {/* Header */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Relatórios de Campanha</h2>
-              <p className="text-white/70">
+              <h2 className="text-3xl font-bold text-foreground mb-2">Relatórios de Campanha</h2>
+              <p className="text-muted-foreground">
                 Visualize o desempenho das suas campanhas de marketing
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl px-4 py-2">
-                <Badge variant="outline" className="text-white border-white/30 bg-transparent">
+              <div className="bg-muted border border-border rounded-xl px-4 py-2">
+                <Badge variant="outline">
                   {reports.length} {reports.length === 1 ? 'relatório' : 'relatórios'}
                 </Badge>
               </div>
@@ -132,7 +132,7 @@ export const CampaignReports: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={loadReports}
-                className="backdrop-blur-sm bg-white/5 border-white/20 text-white hover:bg-white/10 rounded-xl"
+                className="rounded-xl"
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Atualizar
@@ -142,11 +142,11 @@ export const CampaignReports: React.FC = () => {
         </div>
 
         {reports.length === 0 ? (
-          <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl">
+          <div className="bg-card border border-border rounded-2xl shadow-lg">
             <div className="text-center py-16">
-              <BarChart3 className="w-16 h-16 mx-auto text-white/50 mb-6" />
-              <h3 className="text-2xl font-bold text-white mb-3">Nenhum relatório encontrado</h3>
-              <p className="text-white/70 max-w-md mx-auto">
+              <BarChart3 className="w-16 h-16 mx-auto text-muted-foreground mb-6" />
+              <h3 className="text-2xl font-bold text-foreground mb-3">Nenhum relatório encontrado</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
                 Crie seu primeiro relatório na aba "Analytics" usando o funil de conversão.
               </p>
             </div>
@@ -156,7 +156,7 @@ export const CampaignReports: React.FC = () => {
             {reports.map((report, index) => (
               <div 
                 key={report.id}
-                className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in"
+                className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <Collapsible 
