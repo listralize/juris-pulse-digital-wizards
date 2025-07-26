@@ -96,6 +96,30 @@ const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ 
     }
   };
 
+  const sendWelcomeEmail = async () => {
+    if (!email) {
+      toast.error('Email não disponível');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          name: name || 'Cliente',
+          email: email,
+          service: service || 'Consultoria Jurídica',
+          message: message || ''
+        }
+      });
+
+      if (error) throw error;
+      toast.success('Email de boas-vindas enviado!');
+    } catch (error) {
+      console.error('Erro ao enviar email:', error);
+      toast.error('Erro ao enviar email');
+    }
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -127,6 +151,14 @@ const LeadDetailSheet: React.FC<{ lead: Lead; children: React.ReactNode }> = ({ 
               </Button>
             )}
           </div>
+
+          {/* Ação para enviar email de boas-vindas */}
+          {email && (
+            <Button onClick={sendWelcomeEmail} variant="secondary" size="sm" className="w-full">
+              <Mail className="w-4 h-4 mr-2" />
+              Enviar Email de Boas-vindas
+            </Button>
+          )}
 
           {/* Informações principais - Grid compacto */}
           <div className="grid grid-cols-1 gap-3">
@@ -230,7 +262,7 @@ export const LeadsManagement: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('all');
   const [formFilter, setFormFilter] = useState('all');
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
-  const [currentView, setCurrentView] = useState<'cards' | 'table' | 'kanban'>('table');
+  const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
 
   // Carregar leads diretamente da tabela conversion_events
@@ -431,10 +463,9 @@ export const LeadsManagement: React.FC = () => {
           </SelectContent>
         </Select>
 
-        <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as 'cards' | 'table' | 'kanban')}>
+        <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as 'table' | 'kanban')}>
           <TabsList>
             <TabsTrigger value="table">Tabela</TabsTrigger>
-            <TabsTrigger value="cards">Cards</TabsTrigger>
             <TabsTrigger value="kanban">Kanban</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -442,10 +473,15 @@ export const LeadsManagement: React.FC = () => {
 
       {/* Visualização Kanban */}
       {currentView === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Coluna Novo */}
-          <div className="bg-muted/30 rounded-lg p-4">
-            <h3 className="font-semibold mb-3 text-center">Novo</h3>
+          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-center">Novo</h3>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                {filteredLeads.filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo').length}
+              </Badge>
+            </div>
             <div className="space-y-3">
               {filteredLeads
                 .filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo')
@@ -456,44 +492,62 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <Card key={lead.id} className="border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20 cursor-pointer hover:shadow-md transition-all">
-                      <CardContent className="p-3">
-                        <div className="space-y-2">
-                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                          {leadData.email && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Mail className="w-3 h-3" />
-                              <span className="truncate">{leadData.email}</span>
+                    <LeadDetailSheet key={lead.id} lead={lead}>
+                      <Card className="border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20 cursor-pointer hover:shadow-md transition-all">
+                        <CardContent className="p-3">
+                          <div className="space-y-2">
+                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                            {leadData.email && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Mail className="w-3 h-3" />
+                                <span className="text-muted-foreground truncate">{leadData.email}</span>
+                              </div>
+                            )}
+                            {phone && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Phone className="w-3 h-3" />
+                                <span className="text-muted-foreground">{phone}</span>
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                             </div>
-                          )}
-                          {phone && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Phone className="w-3 h-3 text-green-600" />
-                              <span className="truncate">{phone}</span>
+                            <div className="flex gap-1 pt-1">
+                              <Select 
+                                value={leadStatuses[lead.id] || 'novo'} 
+                                onValueChange={async (value) => {
+                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
+                                  toast.success(`Status atualizado para: ${value}`);
+                                }}
+                              >
+                                <SelectTrigger className="h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="novo">Novo</SelectItem>
+                                  <SelectItem value="contato">Em Contato</SelectItem>
+                                  <SelectItem value="qualificado">Qualificado</SelectItem>
+                                  <SelectItem value="cliente">Cliente</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
-                          )}
-                          <div className="flex gap-1 mt-2">
-                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
-                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'contato'})}>
-                              Contatar
-                            </Button>
-                            <LeadDetailSheet lead={lead}>
-                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                                <Eye className="w-3 h-3" />
-                              </Button>
-                            </LeadDetailSheet>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </LeadDetailSheet>
                   );
                 })}
             </div>
           </div>
 
           {/* Coluna Em Contato */}
-          <div className="bg-muted/30 rounded-lg p-4">
-            <h3 className="font-semibold mb-3 text-center">Em Contato</h3>
+          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-center">Em Contato</h3>
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                {filteredLeads.filter(lead => leadStatuses[lead.id] === 'contato').length}
+              </Badge>
+            </div>
             <div className="space-y-3">
               {filteredLeads
                 .filter(lead => leadStatuses[lead.id] === 'contato')
@@ -504,51 +558,62 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <Card key={lead.id} className="border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20 cursor-pointer hover:shadow-md transition-all">
-                      <CardContent className="p-3">
-                        <div className="space-y-2">
-                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                          {leadData.email && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Mail className="w-3 h-3" />
-                              <span className="truncate">{leadData.email}</span>
+                    <LeadDetailSheet key={lead.id} lead={lead}>
+                      <Card className="border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20 cursor-pointer hover:shadow-md transition-all">
+                        <CardContent className="p-3">
+                          <div className="space-y-2">
+                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                            {leadData.email && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Mail className="w-3 h-3" />
+                                <span className="text-muted-foreground truncate">{leadData.email}</span>
+                              </div>
+                            )}
+                            {phone && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Phone className="w-3 h-3" />
+                                <span className="text-muted-foreground">{phone}</span>
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                             </div>
-                          )}
-                          {phone && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Phone className="w-3 h-3 text-green-600" />
-                              <span className="truncate">{phone}</span>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                className="h-4 w-4 p-0 ml-auto"
-                                onClick={() => window.open(`https://wa.me/55${phone.replace(/\D/g, '')}`, '_blank')}
+                            <div className="flex gap-1 pt-1">
+                              <Select 
+                                value={leadStatuses[lead.id] || 'novo'} 
+                                onValueChange={async (value) => {
+                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
+                                  toast.success(`Status atualizado para: ${value}`);
+                                }}
                               >
-                                <ExternalLink className="w-3 h-3 text-green-600" />
-                              </Button>
+                                <SelectTrigger className="h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="novo">Novo</SelectItem>
+                                  <SelectItem value="contato">Em Contato</SelectItem>
+                                  <SelectItem value="qualificado">Qualificado</SelectItem>
+                                  <SelectItem value="cliente">Cliente</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
-                          )}
-                          <div className="flex gap-1 mt-2">
-                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
-                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'qualificado'})}>
-                              Qualificar
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
-                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'perdido'})}>
-                              Perder
-                            </Button>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </LeadDetailSheet>
                   );
                 })}
             </div>
           </div>
 
           {/* Coluna Qualificado */}
-          <div className="bg-muted/30 rounded-lg p-4">
-            <h3 className="font-semibold mb-3 text-center">Qualificado</h3>
+          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-center">Qualificado</h3>
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                {filteredLeads.filter(lead => leadStatuses[lead.id] === 'qualificado').length}
+              </Badge>
+            </div>
             <div className="space-y-3">
               {filteredLeads
                 .filter(lead => leadStatuses[lead.id] === 'qualificado')
@@ -559,44 +624,62 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <Card key={lead.id} className="border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 cursor-pointer hover:shadow-md transition-all">
-                      <CardContent className="p-3">
-                        <div className="space-y-2">
-                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                          {leadData.email && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Mail className="w-3 h-3" />
-                              <span className="truncate">{leadData.email}</span>
+                    <LeadDetailSheet key={lead.id} lead={lead}>
+                      <Card className="border-l-4 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 cursor-pointer hover:shadow-md transition-all">
+                        <CardContent className="p-3">
+                          <div className="space-y-2">
+                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                            {leadData.email && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Mail className="w-3 h-3" />
+                                <span className="text-muted-foreground truncate">{leadData.email}</span>
+                              </div>
+                            )}
+                            {phone && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Phone className="w-3 h-3" />
+                                <span className="text-muted-foreground">{phone}</span>
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                             </div>
-                          )}
-                          {phone && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Phone className="w-3 h-3 text-green-600" />
-                              <span className="truncate">{phone}</span>
+                            <div className="flex gap-1 pt-1">
+                              <Select 
+                                value={leadStatuses[lead.id] || 'novo'} 
+                                onValueChange={async (value) => {
+                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
+                                  toast.success(`Status atualizado para: ${value}`);
+                                }}
+                              >
+                                <SelectTrigger className="h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="novo">Novo</SelectItem>
+                                  <SelectItem value="contato">Em Contato</SelectItem>
+                                  <SelectItem value="qualificado">Qualificado</SelectItem>
+                                  <SelectItem value="cliente">Cliente</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
-                          )}
-                          <div className="flex gap-1 mt-2">
-                            <Button size="sm" variant="outline" className="h-6 text-xs flex-1"
-                              onClick={() => setLeadStatuses({...leadStatuses, [lead.id]: 'cliente'})}>
-                              Converter
-                            </Button>
-                            <LeadDetailSheet lead={lead}>
-                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                                <Eye className="w-3 h-3" />
-                              </Button>
-                            </LeadDetailSheet>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </LeadDetailSheet>
                   );
                 })}
             </div>
           </div>
 
           {/* Coluna Cliente */}
-          <div className="bg-muted/30 rounded-lg p-4">
-            <h3 className="font-semibold mb-3 text-center">Cliente</h3>
+          <div className="bg-muted/30 rounded-lg p-4 min-h-[600px]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-center">Cliente</h3>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                {filteredLeads.filter(lead => leadStatuses[lead.id] === 'cliente').length}
+              </Badge>
+            </div>
             <div className="space-y-3">
               {filteredLeads
                 .filter(lead => leadStatuses[lead.id] === 'cliente')
@@ -607,30 +690,49 @@ export const LeadsManagement: React.FC = () => {
                   const name = leadData.name || leadData.nome;
                   
                   return (
-                    <Card key={lead.id} className="border-l-4 border-l-purple-500 bg-purple-50/50 dark:bg-purple-950/20 cursor-pointer hover:shadow-md transition-all">
-                      <CardContent className="p-3">
-                        <div className="space-y-2">
-                          <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
-                          {leadData.email && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Mail className="w-3 h-3" />
-                              <span className="truncate">{leadData.email}</span>
+                    <LeadDetailSheet key={lead.id} lead={lead}>
+                      <Card className="border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 cursor-pointer hover:shadow-md transition-all">
+                        <CardContent className="p-3">
+                          <div className="space-y-2">
+                            <div className="font-medium text-sm">{name || 'Nome não informado'}</div>
+                            {leadData.email && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Mail className="w-3 h-3" />
+                                <span className="text-muted-foreground truncate">{leadData.email}</span>
+                              </div>
+                            )}
+                            {phone && (
+                              <div className="flex items-center gap-1 text-xs">
+                                <Phone className="w-3 h-3" />
+                                <span className="text-muted-foreground">{phone}</span>
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                             </div>
-                          )}
-                          {phone && (
-                            <div className="flex items-center gap-1 text-xs">
-                              <Phone className="w-3 h-3 text-green-600" />
-                              <span className="truncate">{phone}</span>
+                            <div className="flex gap-1 pt-1">
+                              <Select 
+                                value={leadStatuses[lead.id] || 'novo'} 
+                                onValueChange={async (value) => {
+                                  setLeadStatuses(prev => ({ ...prev, [lead.id]: value }));
+                                  toast.success(`Status atualizado para: ${value}`);
+                                }}
+                              >
+                                <SelectTrigger className="h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="novo">Novo</SelectItem>
+                                  <SelectItem value="contato">Em Contato</SelectItem>
+                                  <SelectItem value="qualificado">Qualificado</SelectItem>
+                                  <SelectItem value="cliente">Cliente</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
-                          )}
-                          <div className="text-center mt-2">
-                            <Badge variant="default" className="text-xs bg-purple-600">
-                              Cliente Ativo
-                            </Badge>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </LeadDetailSheet>
                   );
                 })}
             </div>
@@ -738,129 +840,6 @@ export const LeadsManagement: React.FC = () => {
               })}
             </TableBody>
           </Table>
-        </div>
-      )}
-
-      {/* Visualização em Cards */}
-      {currentView === 'cards' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {filteredLeads.map((lead, index) => {
-            const rawLeadData = lead.lead_data || {};
-            const leadData = parseLeadData(rawLeadData);
-            const isSelected = selectedLeads.has(lead.id);
-            const phone = leadData.phone || leadData.telefone;
-            const name = leadData.name || leadData.nome;
-            
-            // Cores alternadas para os cards
-            const cardColors = [
-              'border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20',
-              'border-l-green-500 bg-green-50/50 dark:bg-green-950/20',
-              'border-l-purple-500 bg-purple-50/50 dark:bg-purple-950/20',
-              'border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20',
-              'border-l-red-500 bg-red-50/50 dark:bg-red-950/20',
-              'border-l-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20',
-              'border-l-pink-500 bg-pink-50/50 dark:bg-pink-950/20',
-              'border-l-teal-500 bg-teal-50/50 dark:bg-teal-950/20'
-            ];
-            const colorClass = cardColors[index % cardColors.length];
-
-            return (
-              <LeadDetailSheet key={lead.id} lead={lead}>
-                <Card className={`${colorClass} border-l-4 cursor-pointer hover:shadow-md transition-all ${isSelected ? 'ring-2 ring-primary' : ''} h-fit`}>
-                  <CardContent className="p-3">
-                    <div className="space-y-2">
-                      {/* Checkbox e Nome */}
-                      <div className="flex items-start justify-between">
-                        <div 
-                          className="flex-1"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              const newSelected = new Set(selectedLeads);
-                              if (e.target.checked) {
-                                newSelected.add(lead.id);
-                              } else {
-                                newSelected.delete(lead.id);
-                              }
-                              setSelectedLeads(newSelected);
-                            }}
-                            className="rounded mr-2"
-                          />
-                          <span className="font-medium text-sm">
-                            {name || 'Nome não informado'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Contato rápido */}
-                      <div className="space-y-1">
-                        {leadData.email && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <Mail className="w-3 h-3 text-muted-foreground" />
-                            <span className="truncate">{leadData.email}</span>
-                          </div>
-                        )}
-                        {phone && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <Phone className="w-3 h-3 text-green-600" />
-                            <span className="truncate">{phone}</span>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-5 w-5 p-0 ml-auto"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(`https://wa.me/55${phone.replace(/\D/g, '')}`, '_blank');
-                              }}
-                            >
-                              <ExternalLink className="w-3 h-3 text-green-600" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Formulário e Data */}
-                      <div className="space-y-1">
-                        <Badge variant="outline" className="text-xs h-5">
-                          {lead.form_name || lead.form_id || 'N/A'}
-                        </Badge>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                        </div>
-                      </div>
-
-                      {/* Indicadores */}
-                      <div className="flex flex-wrap gap-1">
-                        {leadData.isUrgent && (
-                          <Badge variant="destructive" className="text-xs h-4 px-1">
-                            Urgente
-                          </Badge>
-                        )}
-                        {lead.campaign_name && (
-                          <Badge variant="secondary" className="text-xs h-4 px-1">
-                            Campanha
-                          </Badge>
-                        )}
-                        {leadData.message && (
-                          <Badge variant="outline" className="text-xs h-4 px-1">
-                            <MessageSquare className="w-2 h-2 mr-1" />
-                            Msg
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </LeadDetailSheet>
-            );
-          })}
         </div>
       )}
 
