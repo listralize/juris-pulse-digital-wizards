@@ -4,15 +4,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
-
 gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const logoRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
   const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  
-  const { theme } = useTheme();
+  const {
+    theme
+  } = useTheme();
   const isDark = theme === 'dark';
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -139,7 +139,6 @@ const Hero = () => {
       setIsMobile(width < 768);
       setIsTablet(width >= 768 && width < 1024);
     };
-    
     checkDeviceType();
     window.addEventListener('resize', checkDeviceType);
     return () => window.removeEventListener('resize', checkDeviceType);
@@ -149,7 +148,6 @@ const Hero = () => {
   useEffect(() => {
     // Só mostrar indicadores no desktop
     if (isMobile || isTablet) return;
-    
     const interval = setInterval(() => {
       setShowScrollIndicator(prev => !prev);
     }, 3000); // Alterna a cada 3 segundos
@@ -161,11 +159,10 @@ const Hero = () => {
   const handleAreasClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
     console.log('🎯 Hero: Navegando para seção areas');
-    
+
     // Disparar evento correto para o sistema de transição
-    window.dispatchEvent(new CustomEvent('sectionChange', { 
+    window.dispatchEvent(new CustomEvent('sectionChange', {
       detail: 'areas'
     }));
   };
@@ -188,9 +185,7 @@ const Hero = () => {
           </div>
         </div>
         
-        <h1 ref={headlineRef} className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-5 text-center max-w-3xl mx-auto font-canela tracking-tight text-white">
-          {heroTitle}
-        </h1>
+        
         
         <p ref={subheadlineRef} className="text-base md:text-lg lg:text-xl text-gray-200 mb-6 md:mb-8 text-center max-w-xl mx-auto font-satoshi leading-relaxed">
           {heroSubtitle}
@@ -202,18 +197,12 @@ const Hero = () => {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
-          <button 
-            onClick={handleAreasClick}
-            className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/30"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleAreasClick(e as any);
-              }
-            }}
-            aria-label="Navegar para a seção de áreas de atuação"
-          >
+          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/30" tabIndex={0} onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleAreasClick(e as any);
+          }
+        }} aria-label="Navegar para a seção de áreas de atuação">
             {secondaryButtonText}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
@@ -221,38 +210,44 @@ const Hero = () => {
       </div>
       
       {/* Indicador de scroll dinâmico alternado - APENAS DESKTOP */}
-      {!isMobile && !isTablet && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+      {!isMobile && !isTablet && <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
           <div className="flex flex-col items-center gap-3">
-            {showScrollIndicator ? (
-              <div className="flex flex-col items-center gap-2 animate-bounce">
+            {showScrollIndicator ? <div className="flex flex-col items-center gap-2 animate-bounce">
                 <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
                   <span>Role para baixo</span>
                   <ChevronDown className="w-4 h-4 animate-pulse" />
                 </div>
                 <div className="flex gap-1">
                   <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
-                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{
+              animationDelay: '0.3s'
+            }}></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{
+              animationDelay: '0.6s'
+            }}></div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2">
+              </div> : <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-3 text-white/80 text-sm font-medium">
-                  <ArrowLeft className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate' }} />
+                  <ArrowLeft className="w-4 h-4 animate-pulse" style={{
+              animation: 'pulse 1s infinite, translateX 2s infinite alternate'
+            }} />
                   <span>Use as setas</span>
-                  <ArrowRight className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate-reverse' }} />
+                  <ArrowRight className="w-4 h-4 animate-pulse" style={{
+              animation: 'pulse 1s infinite, translateX 2s infinite alternate-reverse'
+            }} />
                 </div>
                 <div className="flex gap-1">
                   <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
-                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{
+              animationDelay: '0.3s'
+            }}></div>
+                  <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{
+              animationDelay: '0.6s'
+            }}></div>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
-        </div>
-      )}
+        </div>}
     </section>;
 };
 export default Hero;
