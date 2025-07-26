@@ -102,18 +102,18 @@ const BlogPage = () => {
           </div>
         </div>
 
-        {/* Grid de Posts - com altura fixa e padding adequado para hover */}
+        {/* Grid de Posts - cards menores */}
         {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 1 }}>
             {filteredPosts.map((post, index) => (
-              <div key={post.id} className="p-3">
+              <div key={post.id} className="p-2">
                 <Card 
-                  className={`group cursor-pointer transition-all duration-500 hover:scale-[1.03] backdrop-blur-sm border h-[400px] flex flex-col opacity-0 animate-fade-in-up ${
+                  className={`group cursor-pointer transition-all duration-500 hover:scale-[1.03] backdrop-blur-sm border h-[320px] flex flex-col opacity-0 animate-fade-in-up ${
                     isDark 
                       ? 'bg-neutral-900/80 border-neutral-800/50 hover:border-neutral-700/60 shadow-2xl shadow-black/40 hover:shadow-indigo-500/20' 
                       : 'bg-white/80 border-gray-200/60 hover:border-gray-400/60 shadow-lg hover:shadow-xl'
                   }`}
-                  style={{ animationDelay: `${0.6 + index * 0.1}s`, opacity: 1 }}
+                  style={{ animationDelay: `${0.6 + index * 0.05}s`, opacity: 1 }}
                   onClick={() => navigate(`/blog/${post.slug}`)}
                 >
                   <CardContent className="p-0 h-full flex flex-col">
@@ -123,7 +123,7 @@ const BlogPage = () => {
                     }`}></div>
 
                     {post.banner && (
-                      <div className="relative overflow-hidden rounded-t-lg h-40 flex-shrink-0">
+                      <div className="relative overflow-hidden rounded-t-lg h-32 flex-shrink-0">
                         <img
                           src={post.banner}
                           alt={post.title}
@@ -133,8 +133,8 @@ const BlogPage = () => {
                           }}
                         />
                         {post.featured && (
-                          <div className="absolute top-3 right-3">
-                            <span className="premium-blog-badge">
+                          <div className="absolute top-2 right-2">
+                            <span className="premium-blog-badge text-xs px-2 py-1">
                               ⭐ DESTAQUE
                             </span>
                           </div>
@@ -142,7 +142,7 @@ const BlogPage = () => {
                       </div>
                     )}
                     
-                    <div className="p-4 flex-1 flex flex-col relative z-10">
+                    <div className="p-3 flex-1 flex flex-col relative z-10">
                       <div className="flex items-center gap-3 text-xs mb-2 flex-shrink-0">
                         <div className={`flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                           <Calendar className="w-3 h-3" />
@@ -154,21 +154,21 @@ const BlogPage = () => {
                         </div>
                       </div>
                       
-                      <h3 className={`font-semibold mb-2 text-sm group-hover:text-blue-500 transition-colors h-10 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`font-semibold mb-2 text-xs group-hover:text-blue-500 transition-colors h-8 overflow-hidden ${isDark ? 'text-white' : 'text-black'}`}>
                         {post.title}
                       </h3>
                       
-                      <p className={`mb-3 text-xs flex-1 overflow-hidden ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{
+                      <p className={`mb-2 text-xs flex-1 overflow-hidden ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{
                         display: '-webkit-box',
-                        WebkitLineClamp: 4,
+                        WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical'
                       }}>
                         {post.excerpt}
                       </p>
                       
                       {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-3 flex-shrink-0">
-                          {post.tags.slice(0, 2).map((tag) => (
+                        <div className="flex flex-wrap gap-1 mb-2 flex-shrink-0">
+                          {post.tags.slice(0, 1).map((tag) => (
                             <span 
                               key={tag}
                               className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
