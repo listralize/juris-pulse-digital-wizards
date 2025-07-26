@@ -11,11 +11,10 @@ const Hero = () => {
   const headlineRef = useRef<HTMLDivElement>(null);
   const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const {
-    theme
-  } = useTheme();
+  
+  const { theme } = useTheme();
   const isDark = theme === 'dark';
-
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   // Estados para os textos editáveis
   const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
   const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
@@ -131,6 +130,15 @@ const Hero = () => {
     };
   }, []);
 
+  // Alternância entre indicadores de scroll
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowScrollIndicator(prev => !prev);
+    }, 3000); // Alterna a cada 3 segundos
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Função para navegar para a seção de áreas
   const handleAreasClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -194,19 +202,35 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Indicador de scroll dinâmico */}
+      {/* Indicador de scroll dinâmico alternado */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-        <div className="flex flex-col items-center gap-3 animate-bounce">
-          <div className="flex items-center gap-2 text-white/80 text-sm font-medium animate-pulse">
-            <span className="animate-fade-in-out">Role para baixo</span>
-            <ChevronDown className="w-4 h-4" />
-          </div>
-          <div className="text-white/60 text-xs">ou</div>
-          <div className="flex items-center gap-2 text-white/80 text-sm font-medium animate-pulse" style={{ animationDelay: '2s' }}>
-            <ArrowLeft className="w-4 h-4" />
-            <span className="animate-fade-in-out" style={{ animationDelay: '2s' }}>Use as setas</span>
-            <ArrowRight className="w-4 h-4" />
-          </div>
+        <div className="flex flex-col items-center gap-3">
+          {showScrollIndicator ? (
+            <div className="flex flex-col items-center gap-2 animate-bounce">
+              <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
+                <span>Role para baixo</span>
+                <ChevronDown className="w-4 h-4 animate-pulse" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce"></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-3 text-white/80 text-sm font-medium">
+                <ArrowLeft className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate' }} />
+                <span>Use as setas</span>
+                <ArrowRight className="w-4 h-4 animate-pulse" style={{ animation: 'pulse 1s infinite, translateX 2s infinite alternate-reverse' }} />
+              </div>
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full animate-ping"></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>;
