@@ -129,16 +129,16 @@ const Partners = () => {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
-        marginTop: isMobile ? '-200px' : '-200px', // Sobe o conteúdo 200px
-        paddingTop: '300px' // Aumenta o padding para compensar
+        justifyContent: 'flex-start', // Mudando de center para flex-start
+        marginTop: '0px',
+        paddingTop: '50px' // Reduzindo significativamente o padding do topo
       }}
     >
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      <div className="team-responsive-container w-full relative z-10">
-        <div className="flex flex-col items-center justify-center flex-1">
+      <div className="team-responsive-container w-full relative z-10" style={{ marginTop: '-100px' }}>
+        <div className="flex flex-col items-center justify-start flex-1" style={{ paddingTop: '80px' }}>
           {/* Header responsivo */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
