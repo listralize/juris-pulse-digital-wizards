@@ -24,6 +24,8 @@ const About = () => {
   const [aboutImage, setAboutImage] = useState('/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
   const [aboutVideoStorageUrl, setAboutVideoStorageUrl] = useState('');
   const [mediaType, setMediaType] = useState('image');
+  const [teamVideoEnabled, setTeamVideoEnabled] = useState(false);
+  const [teamBackgroundVideo, setTeamBackgroundVideo] = useState('');
 
   // Carregar dados do Supabase
   useEffect(() => {
@@ -33,7 +35,7 @@ const About = () => {
         
         const { data: settings } = await supabase
           .from('site_settings')
-          .select('about_title, about_description, about_image, about_media_type, about_video_storage_url')
+          .select('about_title, about_description, about_image, about_media_type, about_video_storage_url, team_video_enabled, team_background_video')
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -45,6 +47,8 @@ const About = () => {
           setAboutImage(settings.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
           setAboutVideoStorageUrl(settings.about_video_storage_url || '');
           setMediaType(settings.about_media_type || 'image');
+          setTeamVideoEnabled(settings.team_video_enabled || false);
+          setTeamBackgroundVideo(settings.team_background_video || '');
         }
       } catch (error) {
         console.error('❌ Erro ao carregar dados do About:', error);
@@ -83,10 +87,20 @@ const About = () => {
       }
     };
 
+    const handleTeamVideoUpdate = (event: CustomEvent) => {
+      console.log('ℹ️ About: Recebendo atualização de vídeo da equipe:', event.detail);
+      const { team_video_enabled, team_background_video } = event.detail;
+      
+      setTeamVideoEnabled(team_video_enabled || false);
+      setTeamBackgroundVideo(team_background_video || '');
+    };
+
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    window.addEventListener('teamVideoSettingsUpdated', handleTeamVideoUpdate as EventListener);
     
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+      window.removeEventListener('teamVideoSettingsUpdated', handleTeamVideoUpdate as EventListener);
     };
   }, []);
 
@@ -180,8 +194,29 @@ const About = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Neural Background apenas no desktop e tema escuro */}
-      {isDark && !isMobile && (
+      {/* Vídeo de fundo da equipe */}
+      {teamVideoEnabled && teamBackgroundVideo && (
+        <div className="absolute inset-0 w-full h-full overflow-hidden" style={{ zIndex: 0 }}>
+          <video
+            src={teamBackgroundVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+          <div className={`absolute inset-0 ${isDark ? 'bg-black/40' : 'bg-black/20'}`} />
+        </div>
+      )}
+
+      {/* Neural Background apenas no desktop e tema escuro (quando não há vídeo) */}
+      {isDark && !isMobile && !teamVideoEnabled && (
         <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
           <NeuralBackground />
         </div>
@@ -194,17 +229,17 @@ const About = () => {
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
-              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark || teamVideoEnabled ? 'text-white' : 'text-black'}`}
             >
               {aboutTitle}
             </h2>
-            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
+            <div className={`w-16 h-0.5 mx-auto ${isDark || teamVideoEnabled ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
           {/* Content Grid - padronizado */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full">
             <div ref={contentRef}>
-              <p className={`text-base md:text-lg leading-relaxed font-satoshi ${isDark ? 'text-white/80' : 'text-black/80'}`}>
+              <p className={`text-base md:text-lg leading-relaxed font-satoshi ${isDark || teamVideoEnabled ? 'text-white/90' : 'text-black/80'}`}>
                 {aboutDescription}
               </p>
             </div>

@@ -293,18 +293,51 @@ export const LeadsManagement: React.FC = () => {
   // Salvar status do lead no banco
   const updateLeadStatus = async (leadId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
+      console.log(`🔄 Atualizando status do lead ${leadId} para ${newStatus}`);
+      
+      // Verificar se já existe um status para este lead
+      const { data: existingStatus, error: checkError } = await supabase
         .from('lead_status')
-        .upsert({
-          lead_id: leadId,
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        });
+        .select('id')
+        .eq('lead_id', leadId)
+        .maybeSingle();
 
-      if (error) {
-        console.error('❌ Erro ao atualizar status:', error);
-        toast.error('Erro ao atualizar status');
-        return;
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('❌ Erro ao verificar status existente:', checkError);
+        toast.error('Erro ao verificar status do lead');
+        return false;
+      }
+
+      if (existingStatus) {
+        // Atualizar status existente
+        const { error } = await supabase
+          .from('lead_status')
+          .update({
+            status: newStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('lead_id', leadId);
+
+        if (error) {
+          console.error('❌ Erro ao atualizar status:', error);
+          toast.error('Erro ao atualizar status do lead');
+          return false;
+        }
+      } else {
+        // Criar novo status
+        const { error } = await supabase
+          .from('lead_status')
+          .insert({
+            lead_id: leadId,
+            status: newStatus,
+            updated_by: null
+          });
+
+        if (error) {
+          console.error('❌ Erro ao criar status:', error);
+          toast.error('Erro ao criar status do lead');
+          return false;
+        }
       }
 
       // Atualizar estado local
@@ -313,7 +346,8 @@ export const LeadsManagement: React.FC = () => {
         [leadId]: newStatus
       }));
 
-      toast.success('Status atualizado!');
+      toast.success(`Status atualizado para: ${newStatus}!`);
+      return true;
     } catch (error) {
       console.error('❌ Erro ao atualizar status:', error);
       toast.error('Erro ao atualizar status');

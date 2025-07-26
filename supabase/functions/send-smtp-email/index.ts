@@ -105,10 +105,11 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
   `;
 };
 
-// Função para enviar email via GoDaddy SMTP usando webhook
+// Função para enviar email via GoDaddy SMTP
 async function sendSMTPEmail(to: string, subject: string, html: string) {
   const smtpEmail = Deno.env.get("SMTP_EMAIL") || "contato@stadv.com.br";
   const smtpPassword = Deno.env.get("SMTP_PASSWORD") || "";
+  const webhookUrl = Deno.env.get("EMAIL_WEBHOOK_URL");
   
   console.log("=== CONFIGURAÇÃO SMTP ===");
   console.log("Host: smtpout.secureserver.net");
@@ -118,12 +119,7 @@ async function sendSMTPEmail(to: string, subject: string, html: string) {
   console.log("Assunto:", subject);
   
   try {
-    // Usar um serviço externo para SMTP real - exemplo: SendGrid, MailerSend ou webhook personalizado
-    // Aqui você pode integrar com o serviço de sua escolha
-    
-    // Para demonstração, usando um webhook do Make.com ou Zapier que fará o envio SMTP
-    const webhookUrl = Deno.env.get("EMAIL_WEBHOOK_URL");
-    
+    // Se temos webhook configurado, usar webhook
     if (webhookUrl) {
       console.log("📤 Enviando via webhook para envio SMTP...");
       
@@ -165,7 +161,56 @@ async function sendSMTPEmail(to: string, subject: string, html: string) {
       }
     }
 
-    // Fallback: preparar dados para envio manual ou outro serviço
+    // Se temos credenciais SMTP, tentar envio direto via SMTP
+    if (smtpEmail && smtpPassword) {
+      console.log("📧 Tentando envio via SMTP direto...");
+      
+      try {
+        // Usar SMTPClient do Deno
+        const { SMTPClient } = await import('https://deno.land/x/denomailer@1.6.0/mod.ts');
+        
+        const client = new SMTPClient({
+          connection: {
+            hostname: 'smtpout.secureserver.net',
+            port: 465,
+            tls: true,
+            auth: {
+              username: smtpEmail,
+              password: smtpPassword,
+            },
+          },
+        });
+
+        await client.send({
+          from: smtpEmail,
+          to: to,
+          subject: subject,
+          content: html,
+          html: html,
+        });
+
+        await client.close();
+        console.log("✅ Email enviado via SMTP direto com sucesso");
+
+        return {
+          success: true,
+          messageId: `smtp-${Date.now()}`,
+          message: "Email enviado via SMTP com sucesso",
+          details: {
+            from: smtpEmail,
+            to: to,
+            subject: subject,
+            timestamp: new Date().toISOString()
+          }
+        };
+
+      } catch (smtpError) {
+        console.error("❌ Erro no envio SMTP direto:", smtpError);
+        // Continua para fallback
+      }
+    }
+
+    // Fallback: preparar dados para configuração manual
     const emailData = {
       from: {
         email: smtpEmail,
