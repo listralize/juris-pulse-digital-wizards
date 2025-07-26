@@ -673,11 +673,10 @@ export const MarketingManagement: React.FC = () => {
       </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
           <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
-          <TabsTrigger value="analytics">⚙️ Analytics</TabsTrigger>
           <TabsTrigger value="reports">📋 Relatórios</TabsTrigger>
         </TabsList>
 
@@ -1219,23 +1218,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           </Card>
         </TabsContent>
 
-        {/* ANALYTICS TAB */}
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>⚙️ Configurações Avançadas</CardTitle>
-              <CardDescription>
-                Configurações técnicas e integrações avançadas.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Configurações avançadas em desenvolvimento. Em breve: 
-                webhooks customizados, APIs externas, relatórios automatizados.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* REPORTS TAB */}
         <TabsContent value="reports" className="space-y-6">

@@ -101,10 +101,10 @@ export const CampaignReports: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-white/30 border-t-white rounded-full mx-auto mb-4"></div>
-          <p className="text-white/90">Carregando relatórios...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card border border-border rounded-2xl p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-muted-foreground/30 border-t-foreground rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando relatórios...</p>
         </div>
       </div>
     );
