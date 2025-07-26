@@ -3,13 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare } from 'lucide-react';
+import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BulkEmailSender } from './BulkEmailSender';
+import { ContactImporter } from './ContactImporter';
 
 // Interface do lead
 interface Lead {
@@ -214,6 +215,7 @@ export const LeadsManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [formFilter, setFormFilter] = useState('all');
+  const [serviceFilter, setServiceFilter] = useState('all');
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
   const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
@@ -221,6 +223,7 @@ export const LeadsManagement: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+  const [isContactImporterOpen, setIsContactImporterOpen] = useState(false);
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -558,8 +561,16 @@ export const LeadsManagement: React.FC = () => {
       });
     }
 
+    // Filtro por serviço
+    if (serviceFilter !== 'all') {
+      filtered = filtered.filter(lead => {
+        const leadData = parseLeadData(lead.lead_data);
+        return leadData.service?.toLowerCase().includes(serviceFilter.toLowerCase());
+      });
+    }
+
     setFilteredLeads(filtered);
-  }, [leads, searchQuery, dateFilter, formFilter]);
+  }, [leads, searchQuery, dateFilter, formFilter, serviceFilter]);
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -610,6 +621,11 @@ export const LeadsManagement: React.FC = () => {
             Kanban
           </Button>
           
+          <Button onClick={() => setIsContactImporterOpen(true)} variant="outline" size="sm">
+            <UserPlus className="h-4 w-4 mr-2" />
+            Gerenciar Contatos
+          </Button>
+          
           <Button onClick={exportLeads} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Exportar CSV
@@ -631,7 +647,7 @@ export const LeadsManagement: React.FC = () => {
       </div>
 
       {/* Filtros */}
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-6 gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -666,10 +682,27 @@ export const LeadsManagement: React.FC = () => {
           </SelectContent>
         </Select>
 
+        <Select value={serviceFilter} onValueChange={setServiceFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por serviço" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os serviços</SelectItem>
+            <SelectItem value="Direito Civil">Direito Civil</SelectItem>
+            <SelectItem value="Direito Trabalhista">Direito Trabalhista</SelectItem>
+            <SelectItem value="Direito Previdenciário">Direito Previdenciário</SelectItem>
+            <SelectItem value="Direito Empresarial">Direito Empresarial</SelectItem>
+            <SelectItem value="Direito Tributário">Direito Tributário</SelectItem>
+            <SelectItem value="Direito Família">Direito de Família</SelectItem>
+            <SelectItem value="Direito Consumidor">Direito do Consumidor</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Button variant="outline" onClick={() => {
           setSearchQuery('');
           setDateFilter('all');
           setFormFilter('all');
+          setServiceFilter('all');
         }}>
           <Filter className="h-4 w-4 mr-2" />
           Limpar Filtros
@@ -785,12 +818,19 @@ export const LeadsManagement: React.FC = () => {
                              <div className="space-y-1">
                                <div className="flex items-center gap-2">
                                  <Mail className="h-3 w-3" />
-                                 <span className="text-xs">{leadData.email || 'N/A'}</span>
+                                 <span className="text-sm">{leadData.email || 'N/A'}</span>
                                </div>
                                {leadData.phone && (
                                  <div className="flex items-center gap-2">
-                                   <MessageSquare className="h-3 w-3 text-green-600" />
-                                   <span className="text-xs">{leadData.phone}</span>
+                                   <a
+                                     href={`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                   >
+                                     <MessageSquare className="h-4 w-4" />
+                                     <span className="text-sm font-medium">WhatsApp</span>
+                                   </a>
                                  </div>
                                )}
                              </div>
@@ -885,10 +925,16 @@ export const LeadsManagement: React.FC = () => {
                               <p className="text-xs text-muted-foreground truncate">{leadData.email}</p>
                             </div>
                             {leadData.phone && (
-                              <div className="flex items-center gap-2">
-                                <MessageSquare className="h-3 w-3 text-green-600" />
-                                <p className="text-xs text-muted-foreground">{leadData.phone}</p>
-                              </div>
+                              <a
+                                href={`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MessageSquare className="h-4 w-4" />
+                                <span className="text-xs font-medium">WhatsApp</span>
+                              </a>
                             )}
                             <p className="text-xs">{leadData.service}</p>
                             <p className="text-xs text-muted-foreground">
@@ -914,6 +960,13 @@ export const LeadsManagement: React.FC = () => {
         emailTemplates={emailTemplates}
         selectedTemplate={selectedTemplate}
         setSelectedTemplate={setSelectedTemplate}
+      />
+
+      {/* Contact Importer */}
+      <ContactImporter
+        isOpen={isContactImporterOpen}
+        onClose={() => setIsContactImporterOpen(false)}
+        onContactsAdded={loadLeads}
       />
     </div>
   );

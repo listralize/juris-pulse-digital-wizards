@@ -14,11 +14,14 @@ interface EmailRequest {
   message?: string;
   customTitle?: string;
   customContent?: string;
+  logoUrl?: string;
 }
 
-const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string) => {
+const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string) => {
   const title = customTitle || "Obrigado pelo seu contato!";
   const content = customContent || `Agradecemos seu interesse em nossos serviços de ${service}. Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.`;
+  const defaultLogo = "https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png";
+  const emailLogo = logoUrl || defaultLogo;
   
   return `
     <!DOCTYPE html>
@@ -32,6 +35,10 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
         <div style="max-width: 600px; margin: 0 auto; background-color: #000000; color: #ffffff;">
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #1a1a1a, #333333); padding: 40px 20px; text-align: center;">
+                <!-- Logo -->
+                <div style="margin-bottom: 20px;">
+                    <img src="${emailLogo}" alt="Logo" style="max-width: 200px; height: auto; display: block; margin: 0 auto;" />
+                </div>
                 <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #ffffff;">
                     ${title}
                 </h1>
@@ -159,13 +166,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent }: EmailRequest = await req.json();
+    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl }: EmailRequest = await req.json();
 
     if (!to || !name) {
       throw new Error("Email e nome são obrigatórios");
     }
 
-    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent);
+    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl);
     const emailSubject = subject || `Obrigado pelo contato, ${name}! 📧`;
 
     const result = await sendEmail(to, emailSubject, emailHTML);
