@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
+
 gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const logoRef = useRef<HTMLDivElement>(null);
@@ -129,6 +130,25 @@ const Hero = () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
+
+  // Função para scroll suave para as áreas de atuação
+  const handleAreasClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Disparar evento para atualizar seção ativa
+    window.dispatchEvent(new CustomEvent('activeSectionChanged', { 
+      detail: { section: 'areas' } 
+    }));
+    
+    // Scroll suave para a seção
+    const areasSection = document.getElementById('areas');
+    if (areasSection) {
+      areasSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
       {/* Neural Background */}
       <div className="absolute inset-0 z-0 w-full h-full">
@@ -162,10 +182,21 @@ const Hero = () => {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
-          <a href={secondaryButtonLink} className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <button 
+            onClick={handleAreasClick}
+            className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/30"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAreasClick(e as any);
+              }
+            }}
+            aria-label="Navegar para a seção de áreas de atuação"
+          >
             {secondaryButtonText}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </a>
+          </button>
         </div>
       </div>
       
