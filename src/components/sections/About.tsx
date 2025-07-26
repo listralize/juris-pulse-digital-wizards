@@ -194,29 +194,8 @@ const About = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Vídeo de fundo da equipe */}
-      {teamVideoEnabled && teamBackgroundVideo && (
-        <div className="absolute inset-0 w-full h-full overflow-hidden" style={{ zIndex: 0 }}>
-          <video
-            src={teamBackgroundVideo}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center'
-            }}
-          />
-          <div className={`absolute inset-0 ${isDark ? 'bg-black/40' : 'bg-black/20'}`} />
-        </div>
-      )}
-
-      {/* Neural Background apenas no desktop e tema escuro (quando não há vídeo) */}
-      {isDark && !isMobile && !teamVideoEnabled && (
+      {/* Neural Background apenas no desktop e tema escuro */}
+      {isDark && !isMobile && (
         <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
           <NeuralBackground />
         </div>
@@ -229,17 +208,17 @@ const About = () => {
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
-              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark || teamVideoEnabled ? 'text-white' : 'text-black'}`}
+              className={`text-2xl md:text-3xl lg:text-4xl mb-3 font-canela ${isDark ? 'text-white' : 'text-black'}`}
             >
               {aboutTitle}
             </h2>
-            <div className={`w-16 h-0.5 mx-auto ${isDark || teamVideoEnabled ? 'bg-white/50' : 'bg-black/50'}`}></div>
+            <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
           {/* Content Grid - padronizado */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full">
             <div ref={contentRef}>
-              <p className={`text-base md:text-lg leading-relaxed font-satoshi ${isDark || teamVideoEnabled ? 'text-white/90' : 'text-black/80'}`}>
+              <p className={`text-base md:text-lg leading-relaxed font-satoshi ${isDark ? 'text-white/90' : 'text-black/80'}`}>
                 {aboutDescription}
               </p>
             </div>
