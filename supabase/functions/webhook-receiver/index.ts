@@ -52,21 +52,39 @@ const handler = async (req: Request): Promise<Response> => {
     let requestText: string = '';
     
     try {
-      requestText = await req.text();
-      console.log('📋 Dados brutos recebidos:', requestText);
+      const contentType = req.headers.get('content-type') || '';
+      console.log('📋 Content-Type:', contentType);
       
-      if (!requestText || requestText.trim() === '') {
-        throw new Error('Dados vazios recebidos');
+      if (contentType.includes('multipart/form-data')) {
+        // Parse multipart/form-data
+        console.log('🔄 Parseando dados multipart/form-data...');
+        const formData = await req.formData();
+        webhookData = {};
+        
+        for (const [key, value] of formData.entries()) {
+          webhookData[key] = value.toString();
+        }
+        
+        console.log('📋 Dados parseados do form-data:', JSON.stringify(webhookData, null, 2));
+      } else {
+        // Parse JSON
+        console.log('🔄 Parseando dados JSON...');
+        requestText = await req.text();
+        console.log('📋 Dados brutos recebidos:', requestText);
+        
+        if (!requestText || requestText.trim() === '') {
+          throw new Error('Dados vazios recebidos');
+        }
+        
+        webhookData = JSON.parse(requestText);
       }
-      
-      webhookData = JSON.parse(requestText);
     } catch (parseError) {
-      console.error('❌ Erro ao parsear JSON:', parseError);
+      console.error('❌ Erro ao parsear dados:', parseError);
       console.log('📋 Conteúdo que causou erro:', requestText);
       return new Response(
         JSON.stringify({ 
           error: 'Dados inválidos', 
-          details: 'JSON malformado ou vazio',
+          details: 'Erro ao processar dados recebidos',
           parseError: parseError.message,
           receivedData: requestText 
         }),
