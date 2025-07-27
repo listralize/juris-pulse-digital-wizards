@@ -36,9 +36,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Parse incoming webhook data
-    const webhookData: WebhookLeadData = await req.json();
-    console.log('📥 Dados recebidos:', webhookData);
+    // Parse incoming webhook data with error handling
+    let webhookData: WebhookLeadData;
+    try {
+      const requestText = await req.text();
+      console.log('📋 Dados brutos recebidos:', requestText);
+      
+      if (!requestText || requestText.trim() === '') {
+        throw new Error('Dados vazios recebidos');
+      }
+      
+      webhookData = JSON.parse(requestText);
+    } catch (parseError) {
+      console.error('❌ Erro ao parsear JSON:', parseError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Dados inválidos', 
+          details: 'JSON malformado ou vazio',
+          parseError: parseError.message 
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        }
+      );
+    }
+    
+    console.log('📥 Dados processados do webhook:', JSON.stringify(webhookData, null, 2));
 
     // Get webhook configuration
     const { data: configData, error: configError } = await supabase
