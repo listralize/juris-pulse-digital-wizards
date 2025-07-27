@@ -130,7 +130,12 @@ export const LeadWebhookManager: React.FC = () => {
 
         console.log('📥 Dados encontrados:', data);
 
-        if (data && (!webhookConfig.configured || !webhookConfig.last_received_data)) {
+        // Verificar se os dados são mais recentes que a última configuração
+        const lastConfigTime = localStorage.getItem('webhook_last_config_time');
+        const dataTime = new Date(data?.timestamp || data?.created_at || 0).getTime();
+        const configTime = lastConfigTime ? parseInt(lastConfigTime) : 0;
+        
+        if (data && dataTime > configTime) {
           let leadData;
           try {
             leadData = typeof data.lead_data === 'string' ? 
@@ -161,6 +166,9 @@ export const LeadWebhookManager: React.FC = () => {
             mappings: newMappings,
             last_received_data: leadData
           }));
+          
+          // Marcar o tempo desta configuração
+          localStorage.setItem('webhook_last_config_time', Date.now().toString());
           
           toast.success('Dados recebidos! Configure os mapeamentos e salve.');
           setIsEditing(true);
