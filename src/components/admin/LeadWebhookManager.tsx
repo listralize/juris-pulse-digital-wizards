@@ -116,31 +116,44 @@ export const LeadWebhookManager: React.FC = () => {
     setReceivedData(null);
     toast.info('Aguardando dados do webhook... Envie dados para configurar automaticamente.');
     
-    // Simular escuta por dados recebidos
-    const interval = setInterval(async () => {
+    // Verificar se há dados recebidos recentemente
+    const checkForRecentData = async () => {
       try {
-        // Verificar se há dados recebidos recentemente
+        console.log('🔍 Verificando dados recebidos...');
         const { data, error } = await supabase
           .from('conversion_events')
           .select('*')
           .eq('event_type', 'webhook_received')
-          .order('created_at', { ascending: false })
+          .order('timestamp', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (data && !webhookConfig.configured) {
-          const leadData = typeof data.lead_data === 'string' ? 
-            JSON.parse(data.lead_data) : data.lead_data;
+        console.log('📥 Dados encontrados:', data);
+
+        if (data && (!webhookConfig.configured || !webhookConfig.last_received_data)) {
+          let leadData;
+          try {
+            leadData = typeof data.lead_data === 'string' ? 
+              JSON.parse(data.lead_data) : data.lead_data;
+          } catch (e) {
+            leadData = data.lead_data;
+          }
+          
+          console.log('🎯 Dados do lead:', leadData);
           
           setReceivedData(leadData);
           setIsListening(false);
-          clearInterval(interval);
           
           // Auto configurar baseado nos dados recebidos
           const newMappings = Object.keys(leadData).map(key => ({
             webhookField: key,
-            systemField: systemFields.find(f => f.value === key)?.value || 'name',
-            required: key === 'name' || key === 'phone'
+            systemField: systemFields.find(f => f.value === key)?.value || 
+              (key.toLowerCase().includes('nome') || key.toLowerCase().includes('name') ? 'name' :
+               key.toLowerCase().includes('tel') || key.toLowerCase().includes('phone') ? 'phone' :
+               key.toLowerCase().includes('email') ? 'email' :
+               key.toLowerCase().includes('msg') || key.toLowerCase().includes('message') ? 'message' : 'name'),
+            required: key.toLowerCase().includes('nome') || key.toLowerCase().includes('name') || 
+                     key.toLowerCase().includes('tel') || key.toLowerCase().includes('phone')
           }));
           
           setWebhookConfig(prev => ({
@@ -151,20 +164,35 @@ export const LeadWebhookManager: React.FC = () => {
           
           toast.success('Dados recebidos! Configure os mapeamentos e salve.');
           setIsEditing(true);
+          return true;
         }
       } catch (error) {
-        console.error('Erro ao verificar dados recebidos:', error);
+        console.error('❌ Erro ao verificar dados recebidos:', error);
       }
-    }, 3000);
+      return false;
+    };
 
-    // Parar após 2 minutos
-    setTimeout(() => {
-      clearInterval(interval);
-      if (isListening) {
-        setIsListening(false);
-        toast.info('Tempo limite atingido. Tente novamente quando enviar dados.');
-      }
-    }, 120000);
+    // Verificar imediatamente
+    const foundData = await checkForRecentData();
+    
+    if (!foundData) {
+      // Configurar polling para verificar novos dados
+      const interval = setInterval(async () => {
+        const found = await checkForRecentData();
+        if (found) {
+          clearInterval(interval);
+        }
+      }, 5000); // Verificar a cada 5 segundos
+
+      // Parar após 3 minutos
+      setTimeout(() => {
+        clearInterval(interval);
+        if (isListening) {
+          setIsListening(false);
+          toast.info('Tempo limite atingido. Tente novamente quando enviar dados.');
+        }
+      }, 180000);
+    }
   };
 
   const testWebhook = async () => {

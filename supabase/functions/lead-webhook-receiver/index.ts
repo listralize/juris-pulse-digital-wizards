@@ -140,7 +140,8 @@ const handler = async (req: Request): Promise<Response> => {
       page_url: req.url,
       form_id: 'webhook_form',
       form_name: 'Webhook Lead Form',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString()
     };
 
     const { data: newLead, error: insertError } = await supabase
