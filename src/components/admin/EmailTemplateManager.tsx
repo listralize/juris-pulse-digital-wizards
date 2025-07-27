@@ -139,7 +139,7 @@ export const EmailTemplateManager: React.FC = () => {
       title: 'Obrigado pelo seu contato!',
       subject: 'Obrigado pelo contato, {name}! 📧',
       content: 'Agradecemos seu interesse em nossos serviços de {service}. Nossa equipe entrará em contato em breve.',
-      logo_url: 'https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png',
+      logo_url: '/logo-email.png',
       background_color: '#000000',
       text_color: '#ffffff',
       button_color: '#4CAF50',

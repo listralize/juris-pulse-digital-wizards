@@ -29,7 +29,7 @@ interface EmailRequest {
 const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string, backgroundColor?: string, textColor?: string, buttonColor?: string, customHtml?: string, buttonText?: string, buttonUrl?: string, secondaryButtonText?: string, secondaryButtonUrl?: string, showSecondaryButton?: boolean) => {
   const title = customTitle || "Obrigado pelo seu contato!";
   const content = customContent || `Agradecemos seu interesse em nossos serviços de ${service}. Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.`;
-  const defaultLogo = "https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png";
+  const defaultLogo = "https://stadv.com.br/logo-email.png";
   // Usar sempre a logoUrl fornecida, se não fornecida usar o defaultLogo
   const emailLogo = logoUrl || defaultLogo;
   
