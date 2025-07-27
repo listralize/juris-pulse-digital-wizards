@@ -83,7 +83,7 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
                     ${content}
                 </p>
 
-                ${message ? `
+                ${message && message.trim() !== '' ? `
                 <div style="background-color: #1a1a1a; padding: 20px; border-left: 4px solid #4CAF50; margin: 20px 0;">
                     <p style="margin: 0; font-size: 14px; color: #cccccc;">
                         <strong>Sua mensagem:</strong><br>
