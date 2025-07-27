@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BulkEmailSender } from './BulkEmailSender';
 import { ContactImporter } from './ContactImporter';
-import { WebhookManager } from './WebhookManager';
+import { LeadWebhookManager } from './LeadWebhookManager';
 
 // Interface do lead
 interface Lead {
@@ -225,7 +225,7 @@ export const LeadsManagement: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
   const [isContactImporterOpen, setIsContactImporterOpen] = useState(false);
-  const [isWebhookManagerOpen, setIsWebhookManagerOpen] = useState(false);
+  const [isLeadWebhookManagerOpen, setIsLeadWebhookManagerOpen] = useState(false);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
 
   // Carregar leads e status do kanban
@@ -400,8 +400,18 @@ export const LeadsManagement: React.FC = () => {
           name: leadData.name || 'Cliente',
           service: leadData.service || 'Consultoria Jurídica',
           message: leadData.message || '',
-          customTitle: template.subject.replace('{name}', leadData.name || ''),
-          customContent: template.content.replace('{name}', leadData.name || '').replace('{service}', leadData.service || 'Consultoria Jurídica')
+          customTitle: template.title,
+          customContent: template.content.replace('{name}', leadData.name || '').replace('{service}', leadData.service || 'Consultoria Jurídica'),
+          logoUrl: template.logo_url,
+          backgroundColor: template.background_color,
+          textColor: template.text_color,
+          buttonColor: template.button_color,
+          customHtml: template.custom_html,
+          buttonText: template.button_text,
+          buttonUrl: template.button_url,
+          secondaryButtonText: template.secondary_button_text,
+          secondaryButtonUrl: template.secondary_button_url,
+          showSecondaryButton: template.show_secondary_button
         }
       });
 
@@ -637,11 +647,11 @@ export const LeadsManagement: React.FC = () => {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setIsWebhookManagerOpen(true)}
+                onClick={() => setIsLeadWebhookManagerOpen(true)}
                 className="flex items-center gap-2"
               >
                 <Webhook className="w-4 h-4" />
-                Configurar Webhooks
+                Sistema de Webhook para Leads
               </Button>
           
           <Button onClick={exportLeads} variant="outline" size="sm">
@@ -972,17 +982,17 @@ export const LeadsManagement: React.FC = () => {
         onContactsAdded={loadLeads}
       />
 
-      {/* Webhook Manager Dialog */}
-      {isWebhookManagerOpen && (
+      {/* Lead Webhook Manager Dialog */}
+      {isLeadWebhookManagerOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Configuração de Webhooks</h2>
-              <Button variant="outline" onClick={() => setIsWebhookManagerOpen(false)}>
+              <h2 className="text-xl font-bold">Sistema de Webhook para Leads</h2>
+              <Button variant="outline" onClick={() => setIsLeadWebhookManagerOpen(false)}>
                 ✕
               </Button>
             </div>
-            <WebhookManager />
+            <LeadWebhookManager />
           </div>
         </div>
       )}

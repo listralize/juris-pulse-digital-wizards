@@ -30,7 +30,10 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
   const title = customTitle || "Obrigado pelo seu contato!";
   const content = customContent || `Agradecemos seu interesse em nossos serviços de ${service}. Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.`;
   const defaultLogo = "https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/logo-email.png";
+  // Usar sempre a logoUrl fornecida, se não fornecida usar o defaultLogo
   const emailLogo = logoUrl || defaultLogo;
+  
+  console.log('🖼️ Logo configurada para email:', emailLogo);
   const bgColor = backgroundColor || '#000000';
   const txtColor = textColor || '#ffffff';
   const btnColor = buttonColor || '#4CAF50';
