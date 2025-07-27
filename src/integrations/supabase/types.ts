@@ -20,6 +20,7 @@ export type Database = {
           created_at: string | null
           form_config: Json | null
           id: string
+          lead_webhook_config: string | null
           page_texts: Json | null
           service_pages: Json | null
           specialized_services: Json | null
@@ -32,6 +33,7 @@ export type Database = {
           created_at?: string | null
           form_config?: Json | null
           id?: string
+          lead_webhook_config?: string | null
           page_texts?: Json | null
           service_pages?: Json | null
           specialized_services?: Json | null
@@ -44,6 +46,7 @@ export type Database = {
           created_at?: string | null
           form_config?: Json | null
           id?: string
+          lead_webhook_config?: string | null
           page_texts?: Json | null
           service_pages?: Json | null
           specialized_services?: Json | null
