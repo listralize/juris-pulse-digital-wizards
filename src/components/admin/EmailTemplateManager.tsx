@@ -93,7 +93,11 @@ export const EmailTemplateManager: React.FC = () => {
         button_url: selectedTemplate.button_url || 'https://api.whatsapp.com/send?phone=5562994594496',
         secondary_button_text: selectedTemplate.secondary_button_text || 'Seguir no Instagram',
         secondary_button_url: selectedTemplate.secondary_button_url || 'https://instagram.com/seu_perfil',
-        show_secondary_button: selectedTemplate.show_secondary_button ?? true
+        show_secondary_button: selectedTemplate.show_secondary_button ?? true,
+        background_color: selectedTemplate.background_color || '#000000',
+        text_color: selectedTemplate.text_color || '#ffffff',
+        button_color: selectedTemplate.button_color || '#4CAF50',
+        custom_html: selectedTemplate.custom_html || ''
       };
 
       // Adicionar logo_url se estiver disponível
@@ -469,19 +473,33 @@ export const EmailTemplateManager: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="content">Conteúdo do Email</Label>
-                      <Textarea
-                        id="content"
-                        value={selectedTemplate.content}
-                        onChange={(e) => setSelectedTemplate({
-                          ...selectedTemplate,
-                          content: e.target.value
-                        })}
-                        rows={6}
-                        placeholder="Use {service} para o serviço e {name} para o nome do cliente"
-                      />
-                    </div>
+                     <div>
+                       <Label htmlFor="content">Conteúdo Principal do Email</Label>
+                       <div className="space-y-2">
+                         <Textarea
+                           id="content"
+                           value={selectedTemplate.content}
+                           onChange={(e) => setSelectedTemplate({
+                             ...selectedTemplate,
+                             content: e.target.value
+                           })}
+                           rows={12}
+                           placeholder="Digite o conteúdo principal do email. Use os campos disponíveis para personalizar. Por exemplo:
+
+Olá {name}!
+
+Agradecemos seu interesse em nossos serviços de {service}. Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.
+
+Sua mensagem: {message}
+
+Atenciosamente,
+Equipe Jurídica"
+                         />
+                         <div className="text-xs text-muted-foreground">
+                           💡 Dica: Use {'{name}'} para o nome, {'{service}'} para o serviço, {'{message}'} para mostrar a mensagem completa do cliente.
+                         </div>
+                       </div>
+                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                     <div>

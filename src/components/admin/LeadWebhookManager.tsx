@@ -313,16 +313,38 @@ export const LeadWebhookManager: React.FC = () => {
             <p className="text-sm text-muted-foreground mb-2">
               Use esta URL para enviar dados de leads para o sistema
             </p>
-            <div className="flex gap-2">
-              <Input
-                value="https://hmfsvccbyxhdwmrgcyff.supabase.co/functions/v1/lead-webhook-receiver"
-                readOnly
-                className="font-mono text-sm"
-              />
-              <Button onClick={generateWebhookUrl} variant="outline">
-                <Copy className="w-4 h-4 mr-1" />
-                Copiar
-              </Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value="https://hmfsvccbyxhdwmrgcyff.supabase.co/functions/v1/lead-webhook-receiver"
+                  readOnly
+                  className="font-mono text-sm"
+                />
+                <Button onClick={() => {
+                  navigator.clipboard.writeText('https://hmfsvccbyxhdwmrgcyff.supabase.co/functions/v1/lead-webhook-receiver');
+                  toast.success('URL copiada!');
+                }} variant="outline">
+                  <Copy className="w-4 h-4 mr-1" />
+                  Copiar
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value="https://hmfsvccbyxhdwmrgcyff.supabase.co/functions/v1/webhook-receiver"
+                  readOnly
+                  className="font-mono text-sm"
+                />
+                <Button onClick={() => {
+                  navigator.clipboard.writeText('https://hmfsvccbyxhdwmrgcyff.supabase.co/functions/v1/webhook-receiver');
+                  toast.success('URL alternativa copiada!');
+                }} variant="outline">
+                  <Copy className="w-4 h-4 mr-1" />
+                  URL Alternativa
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                💡 Use a primeira URL (recomendada) ou a alternativa se houver problemas
+              </p>
             </div>
           </div>
 

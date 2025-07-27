@@ -18,6 +18,16 @@ interface EmailTemplate {
   subject: string;
   title: string;
   content: string;
+  logo_url?: string;
+  background_color?: string;
+  text_color?: string;
+  button_color?: string;
+  custom_html?: string;
+  button_text?: string;
+  button_url?: string;
+  secondary_button_text?: string;
+  secondary_button_url?: string;
+  show_secondary_button?: boolean;
 }
 
 interface BulkEmailSenderProps {
@@ -93,17 +103,41 @@ export const BulkEmailSender: React.FC<BulkEmailSenderProps> = ({
         
         console.log(`📧 Enviando email ${i + 1}/${validLeads.length} para:`, leadData.email);
 
+        // Buscar template completo do banco de dados para ter todas as configurações
+        const { data: fullTemplate } = await supabase
+          .from('email_templates')
+          .select('*')
+          .eq('id', selectedTemplate.id)
+          .single();
+
+        const templateToUse = fullTemplate || selectedTemplate;
+
         const { data, error } = await supabase.functions.invoke('send-smtp-email', {
           body: {
             to: leadData.email,
-            subject: selectedTemplate.subject.replace('{name}', leadData.name || 'Cliente'),
+            subject: templateToUse.subject
+              .replace('{name}', leadData.name || 'Cliente')
+              .replace('{service}', leadData.service || 'Consultoria Jurídica'),
             name: leadData.name || 'Cliente',
             service: leadData.service || 'Consultoria Jurídica',
             message: leadData.message || '',
-            customTitle: selectedTemplate.title.replace('{name}', leadData.name || 'Cliente'),
-            customContent: selectedTemplate.content
+            customTitle: templateToUse.title
+              .replace('{name}', leadData.name || 'Cliente')
+              .replace('{service}', leadData.service || 'Consultoria Jurídica'),
+            customContent: templateToUse.content
               .replace('{name}', leadData.name || 'Cliente')
               .replace('{service}', leadData.service || 'nossos serviços')
+              .replace('{message}', leadData.message || ''),
+            logoUrl: templateToUse.logo_url,
+            backgroundColor: templateToUse.background_color,
+            textColor: templateToUse.text_color,
+            buttonColor: templateToUse.button_color,
+            customHtml: templateToUse.custom_html,
+            buttonText: templateToUse.button_text,
+            buttonUrl: templateToUse.button_url,
+            secondaryButtonText: templateToUse.secondary_button_text,
+            secondaryButtonUrl: templateToUse.secondary_button_url,
+            showSecondaryButton: templateToUse.show_secondary_button
           }
         });
 
