@@ -49,8 +49,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Parse incoming webhook data with error handling
     let webhookData: WebhookLeadData;
+    let requestText: string = '';
+    
     try {
-      const requestText = await req.text();
+      requestText = await req.text();
       console.log('📋 Dados brutos recebidos:', requestText);
       
       if (!requestText || requestText.trim() === '') {
@@ -60,12 +62,13 @@ const handler = async (req: Request): Promise<Response> => {
       webhookData = JSON.parse(requestText);
     } catch (parseError) {
       console.error('❌ Erro ao parsear JSON:', parseError);
-      console.log('📋 Conteúdo que causou erro:', await req.text());
+      console.log('📋 Conteúdo que causou erro:', requestText);
       return new Response(
         JSON.stringify({ 
           error: 'Dados inválidos', 
           details: 'JSON malformado ou vazio',
-          parseError: parseError.message 
+          parseError: parseError.message,
+          receivedData: requestText 
         }),
         {
           status: 400,
