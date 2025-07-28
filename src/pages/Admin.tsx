@@ -18,7 +18,7 @@ import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
 import { MarketingManagement } from '../components/admin/MarketingManagement';
 import { LeadsManagement } from '../components/admin/LeadsManagement';
-import { EmailTemplateManager } from '../components/admin/EmailTemplateManager';
+import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 const Admin = () => {
@@ -274,7 +274,7 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="email-templates">
-                <EmailTemplateManager />
+                <EnhancedEmailTemplateManager />
               </TabsContent>
 
               <TabsContent value="marketing">

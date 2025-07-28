@@ -215,10 +215,8 @@ const Partners = () => {
       {isDark && <NeuralBackground />}
       
       {/* Video de fundo ocupando toda a tela */}
-      <div className="absolute inset-0 overflow-hidden" style={{
-        left: '50%',
-        width: '100vw',
-        transform: 'translateX(-50%)'
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
+        zIndex: -1
       }}>
         <video
           id="team-background-video"
@@ -228,6 +226,11 @@ const Partners = () => {
           loop
           playsInline
           preload="auto"
+          style={{ 
+            minWidth: '100vw',
+            minHeight: '100vh',
+            objectFit: 'cover'
+          }}
         />
       </div>
       

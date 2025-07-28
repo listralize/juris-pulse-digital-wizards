@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BulkEmailSender } from './BulkEmailSender';
 import { ContactImporter } from './ContactImporter';
 import { LeadWebhookManager } from './LeadWebhookManager';
+import { KanbanGameification } from './KanbanGameification';
 
 // Interface do lead
 interface Lead {
@@ -833,19 +834,19 @@ export const LeadsManagement: React.FC = () => {
                                  <Mail className="h-3 w-3" />
                                  <span className="text-sm">{leadData.email || 'N/A'}</span>
                                </div>
-                               {leadData.phone && (
-                                 <div className="flex items-center gap-2">
-                                   <a
-                                     href={`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                   >
-                                     <MessageSquare className="h-4 w-4" />
-                                     <span className="text-sm font-medium">WhatsApp</span>
-                                   </a>
-                                 </div>
-                               )}
+                                {leadData.phone && (
+                                  <div className="flex items-center gap-2">
+                                    <a
+                                      href={`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                    >
+                                      <MessageSquare className="h-4 w-4" />
+                                      <span className="text-sm font-medium">WhatsApp</span>
+                                    </a>
+                                  </div>
+                                )}
                              </div>
                            </td>
                           <td className="p-2">{leadData.service || 'N/A'}</td>
@@ -885,6 +886,13 @@ export const LeadsManagement: React.FC = () => {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Gamificação */}
+      {currentView === 'kanban' && (
+        <div className="space-y-6">
+          <KanbanGameification leads={filteredLeads} leadStatuses={leadStatuses} />
+        </div>
       )}
 
       {/* Kanban Board */}
@@ -937,18 +945,18 @@ export const LeadsManagement: React.FC = () => {
                               <Mail className="h-3 w-3" />
                               <p className="text-xs text-muted-foreground truncate">{leadData.email}</p>
                             </div>
-                            {leadData.phone && (
-                              <a
-                                href={`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MessageSquare className="h-4 w-4" />
-                                <span className="text-xs font-medium">WhatsApp</span>
-                              </a>
-                            )}
+                             {leadData.phone && (
+                               <a
+                                 href={`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                 onClick={(e) => e.stopPropagation()}
+                               >
+                                 <MessageSquare className="h-4 w-4" />
+                                 <span className="text-xs font-medium">WhatsApp</span>
+                               </a>
+                             )}
                             <p className="text-xs">{leadData.service}</p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(lead.created_at).toLocaleDateString('pt-BR')}
