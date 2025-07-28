@@ -200,7 +200,21 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email e nome são obrigatórios");
     }
 
-    const emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton);
+    // Se customHtml estiver definido, usar ele diretamente
+    let emailHTML: string;
+    if (customHtml && customHtml.trim() !== '') {
+      // Substituir variáveis no HTML customizado
+      emailHTML = customHtml
+        .replace(/{name}/g, name)
+        .replace(/{service}/g, service)
+        .replace(/{message}/g, message || '')
+        .replace(/{email}/g, to)
+        .replace(/{date}/g, new Date().toLocaleDateString('pt-BR'))
+        .replace(/{time}/g, new Date().toLocaleTimeString('pt-BR'));
+    } else {
+      emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton);
+    }
+    
     const emailSubject = subject || `Obrigado pelo contato, ${name}! 📧`;
 
     const result = await sendEmail(to, emailSubject, emailHTML);
@@ -219,7 +233,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: "Verifique as configurações SMTP da GoDaddy"
+        details: "Verifique as configurações de email"
       }),
       {
         status: 500,
