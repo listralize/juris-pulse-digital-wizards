@@ -58,7 +58,7 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
         <title>${title}</title>
     </head>
     <body style="margin: 0; padding: 0; background-color: ${bgColor}; font-family: Arial, sans-serif;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: ${bgColor}; color: ${txtColor};">${customHtml ? `<div>${customHtml}</div>` : ''}
+        <div style="max-width: 600px; margin: 0 auto; background-color: ${bgColor}; color: ${txtColor};">
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #1a1a1a, #333333); padding: 40px 20px; text-align: center;">
                 <!-- Logo -->

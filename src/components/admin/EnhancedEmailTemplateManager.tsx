@@ -228,9 +228,28 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
   const generateEmailHTML = () => {
     if (!selectedTemplate) return '';
 
-    // Se há HTML customizado, usar ele com substituições de variáveis
+    // Se há HTML customizado, usar ele COMPLETO com substituições de variáveis
     if (selectedTemplate.custom_html && selectedTemplate.custom_html.trim() !== '') {
-      return selectedTemplate.custom_html
+      let customHtml = selectedTemplate.custom_html;
+      
+      // Verificar se já é um HTML completo (com DOCTYPE e html tags)
+      if (!customHtml.includes('<!DOCTYPE') && !customHtml.includes('<html')) {
+        // Se não é HTML completo, envolver em estrutura básica
+        customHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${selectedTemplate.title}</title>
+</head>
+<body>
+    ${customHtml}
+</body>
+</html>`;
+      }
+      
+      return customHtml
         .replace(/{name}/g, 'Teste')
         .replace(/{service}/g, 'Teste de Template')
         .replace(/{message}/g, 'Este é um email de teste do sistema.')
@@ -305,7 +324,6 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
                       <p style="margin: 5px 0; color: #cccccc; font-size: 14px;">🌐 <strong>Website:</strong> www.stadv.com.br</p>
                   </div>
 
-                  ${selectedTemplate.custom_html || ''}
               </div>
 
               <!-- Footer -->
@@ -672,7 +690,10 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
                           {showAdvanced && (
                             <div className="space-y-4">
                               <div>
-                                <Label htmlFor="custom_html">HTML Personalizado</Label>
+                                <Label htmlFor="custom_html">HTML Completo do Email</Label>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Aqui você pode criar o HTML completo do email. Use as variáveis {'{name}'}, {'{service}'}, {'{message}'}, etc. Se preenchido, este HTML será usado no lugar do template padrão.
+                                </p>
                                 <Textarea
                                   id="custom_html"
                                   value={selectedTemplate.custom_html || ''}
@@ -680,9 +701,35 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
                                     ...selectedTemplate,
                                     custom_html: e.target.value
                                   })}
-                                  placeholder="HTML adicional para inserir no final do email"
-                                  rows={4}
+                                  placeholder={`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Email Personalizado</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #000000; font-family: Arial, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #000000; color: #ffffff;">
+        <!-- Seu HTML aqui -->
+        <h1 style="color: #ffffff;">Olá {name}!</h1>
+        <p>Mensagem: {message}</p>
+        <a href="https://api.whatsapp.com/send?phone=5562994594496" style="background-color: #4CAF50; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px;">Falar no WhatsApp</a>
+    </div>
+</body>
+</html>`}
+                                  rows={20}
+                                  className="font-mono text-sm"
                                 />
+                              </div>
+                              
+                              <div className="p-4 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg">
+                                <h5 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">💡 Dicas importantes:</h5>
+                                <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                                  <li>• Se você preencher o HTML customizado, ele substituirá completamente o template padrão</li>
+                                  <li>• Use as variáveis: {'{name}'}, {'{service}'}, {'{message}'}, {'{email}'}, {'{date}'}, {'{time}'}</li>
+                                  <li>• Inclua estilos inline para melhor compatibilidade com clientes de email</li>
+                                  <li>• Teste sempre antes de usar em produção</li>
+                                </ul>
                               </div>
                             </div>
                           )}
