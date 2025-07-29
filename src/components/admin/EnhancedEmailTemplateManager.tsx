@@ -212,18 +212,7 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
           name: 'Teste',
           service: 'Teste de Template',
           message: 'Este é um email de teste do sistema.',
-          customTitle: selectedTemplate.title,
-          customContent: selectedTemplate.content.replace('{service}', 'teste').replace('{name}', 'Teste'),
-          logoUrl: selectedTemplate.logo_url,
-          backgroundColor: selectedTemplate.background_color,
-          textColor: selectedTemplate.text_color,
-          buttonColor: selectedTemplate.button_color,
-          customHtml: fullHtml, // Usar o HTML completo gerado
-          buttonText: selectedTemplate.button_text,
-          buttonUrl: selectedTemplate.button_url,
-          secondaryButtonText: selectedTemplate.secondary_button_text,
-          secondaryButtonUrl: selectedTemplate.secondary_button_url,
-          showSecondaryButton: selectedTemplate.show_secondary_button
+          customHtml: fullHtml // Usar o HTML completo gerado
         }
       });
 
@@ -239,6 +228,18 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
   const generateEmailHTML = () => {
     if (!selectedTemplate) return '';
 
+    // Se há HTML customizado, usar ele com substituições de variáveis
+    if (selectedTemplate.custom_html && selectedTemplate.custom_html.trim() !== '') {
+      return selectedTemplate.custom_html
+        .replace(/{name}/g, 'Teste')
+        .replace(/{service}/g, 'Teste de Template')
+        .replace(/{message}/g, 'Este é um email de teste do sistema.')
+        .replace(/{email}/g, testEmail)
+        .replace(/{date}/g, new Date().toLocaleDateString('pt-BR'))
+        .replace(/{time}/g, new Date().toLocaleTimeString('pt-BR'));
+    }
+
+    // Senão, gerar template padrão baseado nas configurações
     const content = selectedTemplate.content
       .replace(/{name}/g, 'Teste')
       .replace(/{service}/g, 'Teste de Template')

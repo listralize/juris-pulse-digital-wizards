@@ -289,6 +289,58 @@ export const LeadsManagement: React.FC = () => {
     }
   };
 
+  // Gerar HTML completo do email
+  const generateEmailHTML = (template: any, leadData: any) => {
+    if (!template.custom_html || template.custom_html.trim() === '') {
+      // Usar template padrão se não há HTML customizado
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${template.title || 'Email'}</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: ${template.background_color || '#000000'}; font-family: Arial, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: ${template.background_color || '#000000'}; color: ${template.text_color || '#ffffff'};">
+            <div style="background: linear-gradient(135deg, #1a1a1a, #333333); padding: 40px 20px; text-align: center;">
+              ${template.logo_url ? `<img src="${template.logo_url}" alt="Logo" style="max-width: 200px; height: auto; display: block; margin: 0 auto 20px;" />` : ''}
+              <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: ${template.text_color || '#ffffff'};">
+                ${template.title || 'Obrigado pelo seu contato!'}
+              </h1>
+            </div>
+            <div style="padding: 30px 20px; background-color: #111111;">
+              <p style="font-size: 18px; margin: 0 0 20px 0; color: ${template.text_color || '#ffffff'};">
+                Olá <strong style="color: ${template.button_color || '#4CAF50'};">${leadData.name || 'Cliente'}</strong>,
+              </p>
+              <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: ${template.text_color || '#ffffff'};">
+                ${(template.content || '').replace(/{name}/g, leadData.name || 'Cliente').replace(/{service}/g, leadData.service || 'Consultoria Jurídica')}
+              </p>
+              ${template.button_text && template.button_url ? `
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${template.button_url}" style="display: inline-block; background-color: ${template.button_color || '#4CAF50'}; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                    ${template.button_text}
+                  </a>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+    
+    // Usar HTML customizado e substituir variáveis
+    return template.custom_html
+      .replace(/{name}/g, leadData.name || 'Cliente')
+      .replace(/{service}/g, leadData.service || 'Consultoria Jurídica')
+      .replace(/{message}/g, leadData.message || '')
+      .replace(/{email}/g, leadData.email || '')
+      .replace(/{phone}/g, leadData.phone || '')
+      .replace(/{date}/g, new Date().toLocaleDateString('pt-BR'))
+      .replace(/{time}/g, new Date().toLocaleTimeString('pt-BR'));
+  };
+
   // Carregar templates de email
   const loadEmailTemplates = async () => {
     try {
@@ -400,6 +452,9 @@ export const LeadsManagement: React.FC = () => {
         lead: leadData.name
       });
 
+      // Gerar HTML completo do template
+      const fullHtml = generateEmailHTML(template, leadData);
+      
       const { data, error } = await supabase.functions.invoke('send-smtp-email', {
         body: {
           to: leadData.email,
@@ -407,18 +462,7 @@ export const LeadsManagement: React.FC = () => {
           name: leadData.name || 'Cliente',
           service: leadData.service || 'Consultoria Jurídica',
           message: leadData.message || '',
-          customTitle: template.title,
-          customContent: template.content.replace('{name}', leadData.name || '').replace('{service}', leadData.service || 'Consultoria Jurídica'),
-          logoUrl: template.logo_url,
-          backgroundColor: template.background_color,
-          textColor: template.text_color,
-          buttonColor: template.button_color,
-          customHtml: template.custom_html,
-          buttonText: template.button_text,
-          buttonUrl: template.button_url,
-          secondaryButtonText: template.secondary_button_text,
-          secondaryButtonUrl: template.secondary_button_url,
-          showSecondaryButton: template.show_secondary_button
+          customHtml: fullHtml
         }
       });
 
