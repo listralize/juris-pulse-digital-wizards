@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare, UserPlus, Webhook, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare, UserPlus, Webhook, ChevronLeft, ChevronRight, Edit, Save, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BulkEmailSender } from './BulkEmailSender';
 import { ContactImporter } from './ContactImporter';
 import { LeadWebhookManager } from './LeadWebhookManager';
-import { KanbanGameification } from './KanbanGameification';
+import { LeadsKanban } from './LeadsKanban';
+
 
 // Interface do lead
 interface Lead {
@@ -27,6 +28,17 @@ interface Lead {
   utm_content?: string;
   utm_term?: string;
   created_at: string;
+}
+
+// Interface para lead editável
+interface EditableLead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  service: string;
+  message: string;
+  urgent: boolean;
 }
 
 // Helper para parsear dados do lead
@@ -226,6 +238,13 @@ export const LeadsManagement: React.FC = () => {
   const [serviceFilter, setServiceFilter] = useState('all');
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
   const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
+  const [customDateStart, setCustomDateStart] = useState('');
+  const [customDateEnd, setCustomDateEnd] = useState('');
+  const [editingLead, setEditingLead] = useState<string | null>(null);
+  const [editableData, setEditableData] = useState<{ [key: string]: EditableLead }>({});
+  // Paginação para Kanban
+  const [kanbanCurrentPage, setKanbanCurrentPage] = useState(1);
+  const [kanbanLeadsPerPage] = useState(8);
   
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -613,22 +632,38 @@ export const LeadsManagement: React.FC = () => {
     // Filtro de data
     if (dateFilter !== 'all') {
       const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      let startDate: Date;
+      let endDate: Date | null = null;
+
+      switch (dateFilter) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'custom':
+          if (customDateStart && customDateEnd) {
+            startDate = new Date(customDateStart);
+            endDate = new Date(customDateEnd);
+            endDate.setHours(23, 59, 59, 999); // Fim do dia
+          } else {
+            startDate = new Date(0); // Se não há datas customizadas, mostrar tudo
+          }
+          break;
+        default:
+          startDate = new Date(0);
+      }
 
       filtered = filtered.filter(lead => {
         const leadDate = new Date(lead.created_at);
-        switch (dateFilter) {
-          case 'today':
-            return leadDate >= startOfDay;
-          case 'week':
-            return leadDate >= startOfWeek;
-          case 'month':
-            return leadDate >= startOfMonth;
-          default:
-            return true;
+        if (dateFilter === 'custom' && endDate) {
+          return leadDate >= startDate && leadDate <= endDate;
         }
+        return leadDate >= startDate;
       });
     }
 
@@ -751,8 +786,29 @@ export const LeadsManagement: React.FC = () => {
             <SelectItem value="today">Hoje</SelectItem>
             <SelectItem value="week">Esta semana</SelectItem>
             <SelectItem value="month">Este mês</SelectItem>
+            <SelectItem value="custom">Personalizado</SelectItem>
           </SelectContent>
         </Select>
+
+        {dateFilter === 'custom' && (
+          <div className="flex gap-2 items-center">
+            <input
+              type="date"
+              value={customDateStart}
+              onChange={(e) => setCustomDateStart(e.target.value)}
+              className="h-10 px-3 text-sm border rounded"
+              placeholder="Data inicial"
+            />
+            <span className="text-sm">até</span>
+            <input
+              type="date"
+              value={customDateEnd}
+              onChange={(e) => setCustomDateEnd(e.target.value)}
+              className="h-10 px-3 text-sm border rounded"
+              placeholder="Data final"
+            />
+          </div>
+        )}
 
         <Select value={serviceFilter} onValueChange={setServiceFilter}>
           <SelectTrigger>
@@ -1005,12 +1061,6 @@ export const LeadsManagement: React.FC = () => {
         </Card>
       )}
 
-      {/* Gamificação */}
-      {currentView === 'kanban' && (
-        <div className="space-y-6">
-          <KanbanGameification leads={filteredLeads} leadStatuses={leadStatuses} />
-        </div>
-      )}
 
       {/* Kanban Board */}
       {currentView === 'kanban' && (

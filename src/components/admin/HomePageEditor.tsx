@@ -390,6 +390,10 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
           <TabsContent value="hero" className="space-y-4">
             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Seção Hero</h3>
+            
+            {/* Vídeo de Fundo do Hero */}
+            <TeamVideoManagement />
+            
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <Label>Título Principal</Label>

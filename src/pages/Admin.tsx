@@ -155,7 +155,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
+              <TabsList className="hidden md:grid w-full grid-cols-6 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
