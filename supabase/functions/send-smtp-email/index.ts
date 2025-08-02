@@ -200,9 +200,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email e nome são obrigatórios");
     }
 
-    // Se customHtml estiver definido, usar ele diretamente
+    // SEMPRE usar customHtml se estiver definido, caso contrário usar template padrão
     let emailHTML: string;
     if (customHtml && customHtml.trim() !== '') {
+      console.log('🎨 Usando HTML customizado do template');
       // Substituir variáveis no HTML customizado
       emailHTML = customHtml
         .replace(/{name}/g, name)
@@ -212,6 +213,7 @@ const handler = async (req: Request): Promise<Response> => {
         .replace(/{date}/g, new Date().toLocaleDateString('pt-BR'))
         .replace(/{time}/g, new Date().toLocaleTimeString('pt-BR'));
     } else {
+      console.log('🔧 Usando template padrão (fallback)');
       emailHTML = createWelcomeEmailHTML(name, service, message, customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton);
     }
     

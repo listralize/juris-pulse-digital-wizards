@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare, UserPlus, Webhook } from 'lucide-react';
+import { Calendar, Download, Eye, FileText, Filter, Mail, Phone, Search, Table, Users, Send, MessageSquare, UserPlus, Webhook, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -226,6 +226,10 @@ export const LeadsManagement: React.FC = () => {
   const [serviceFilter, setServiceFilter] = useState('all');
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
   const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
+  
+  // Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [leadsPerPage] = useState(10);
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
   const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
@@ -462,7 +466,7 @@ export const LeadsManagement: React.FC = () => {
           name: leadData.name || 'Cliente',
           service: leadData.service || 'Consultoria Jurídica',
           message: leadData.message || '',
-          customHtml: fullHtml
+          customHtml: fullHtml // Enviar o HTML completo
         }
       });
 
@@ -637,6 +641,7 @@ export const LeadsManagement: React.FC = () => {
     }
 
     setFilteredLeads(filtered);
+    setCurrentPage(1); // Reset para primeira página quando filtros mudam
   }, [leads, searchQuery, dateFilter, serviceFilter]);
 
   // Carregar dados iniciais
@@ -832,32 +837,38 @@ export const LeadsManagement: React.FC = () => {
                 <p className="text-muted-foreground">Nenhum lead encontrado</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2 w-12">
-                        <Checkbox
-                          checked={selectedLeads.size === filteredLeads.length}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedLeads(new Set(filteredLeads.map(lead => lead.id)));
-                            } else {
-                              setSelectedLeads(new Set());
-                            }
-                          }}
-                        />
-                      </th>
-                       <th className="text-left p-2">Nome</th>
-                       <th className="text-left p-2">Contato</th>
-                       <th className="text-left p-2">Serviço</th>
-                       <th className="text-left p-2">Data</th>
-                       <th className="text-left p-2">Status</th>
-                       <th className="text-left p-2">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLeads.map((lead) => {
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2 w-12">
+                          <Checkbox
+                            checked={selectedLeads.size === filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).length && filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).length > 0}
+                            onCheckedChange={(checked) => {
+                              const paginatedLeads = filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage);
+                              if (checked) {
+                                setSelectedLeads(new Set([...selectedLeads, ...paginatedLeads.map(lead => lead.id)]));
+                              } else {
+                                const newSelected = new Set(selectedLeads);
+                                paginatedLeads.forEach(lead => newSelected.delete(lead.id));
+                                setSelectedLeads(newSelected);
+                              }
+                            }}
+                          />
+                        </th>
+                         <th className="text-left p-2">Nome</th>
+                         <th className="text-left p-2">Contato</th>
+                         <th className="text-left p-2">Serviço</th>
+                         <th className="text-left p-2">Data</th>
+                         <th className="text-left p-2">Status</th>
+                         <th className="text-left p-2">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLeads
+                        .slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage)
+                        .map((lead) => {
                       const leadData = parseLeadData(lead.lead_data);
                       const status = leadStatuses[lead.id] || 'novo';
                       
@@ -930,9 +941,65 @@ export const LeadsManagement: React.FC = () => {
                         </tr>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Paginação */}
+                {filteredLeads.length > leadsPerPage && (
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {Math.min((currentPage - 1) * leadsPerPage + 1, filteredLeads.length)} até {Math.min(currentPage * leadsPerPage, filteredLeads.length)} de {filteredLeads.length} leads
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                      </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.ceil(filteredLeads.length / leadsPerPage) }, (_, i) => i + 1)
+                          .filter(page => 
+                            page === 1 || 
+                            page === Math.ceil(filteredLeads.length / leadsPerPage) || 
+                            Math.abs(page - currentPage) <= 1
+                          )
+                          .map((page, index, array) => (
+                            <React.Fragment key={page}>
+                              {index > 0 && array[index - 1] !== page - 1 && (
+                                <span className="px-2 py-1 text-sm text-muted-foreground">...</span>
+                              )}
+                              <Button
+                                variant={page === currentPage ? "default" : "outline"}
+                                size="sm"
+                                className="w-8 h-8 p-0"
+                                onClick={() => setCurrentPage(page)}
+                              >
+                                {page}
+                              </Button>
+                            </React.Fragment>
+                          ))
+                        }
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredLeads.length / leadsPerPage), prev + 1))}
+                        disabled={currentPage === Math.ceil(filteredLeads.length / leadsPerPage)}
+                      >
+                        Próximo
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>

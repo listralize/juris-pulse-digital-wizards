@@ -144,10 +144,10 @@ export const KanbanGameification: React.FC<KanbanGameificationProps> = ({ leads,
   }, [leads, leadStatuses]);
 
   const getLevelColor = (level: number) => {
-    if (level >= 10) return 'bg-gradient-to-r from-purple-500 to-pink-500';
-    if (level >= 5) return 'bg-gradient-to-r from-blue-500 to-purple-500';
-    if (level >= 3) return 'bg-gradient-to-r from-green-500 to-blue-500';
-    return 'bg-gradient-to-r from-yellow-500 to-green-500';
+    if (level >= 10) return 'bg-purple-600 text-white';
+    if (level >= 5) return 'bg-blue-600 text-white';
+    if (level >= 3) return 'bg-green-600 text-white';
+    return 'bg-yellow-600 text-white';
   };
 
   const getProgressToNextLevel = () => {
@@ -222,10 +222,10 @@ export const KanbanGameification: React.FC<KanbanGameificationProps> = ({ leads,
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {recentlyUnlocked.map(achievement => (
-                <Badge 
+                 <Badge 
                   key={achievement.id} 
                   variant="secondary" 
-                  className="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200"
+                  className="flex items-center gap-2 p-2 bg-purple-100 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700"
                 >
                   {achievement.icon}
                   <div className="text-left">

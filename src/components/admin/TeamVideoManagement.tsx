@@ -110,8 +110,8 @@ export const TeamVideoManagement: React.FC = () => {
 
       toast.success('Configurações de vídeo salvas com sucesso!');
       
-      // Disparar evento para atualizar a seção Nossa Equipe
-      window.dispatchEvent(new CustomEvent('teamVideoSettingsUpdated', {
+      // Disparar evento para atualizar a seção Hero
+      window.dispatchEvent(new CustomEvent('heroVideoSettingsUpdated', {
         detail: {
           team_video_enabled: settings.team_video_enabled,
           team_background_video: videoUrl || null
@@ -225,10 +225,10 @@ export const TeamVideoManagement: React.FC = () => {
       <CardHeader>
         <CardTitle className={`${isDark ? 'text-white' : 'text-black'} flex items-center gap-2`}>
           <Video className="w-5 h-5" />
-          Vídeo de Fundo - Nossa Equipe
+          Vídeo de Fundo - Hero
         </CardTitle>
         <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Configure um vídeo de fundo para a seção "Nossa Equipe". O vídeo será reproduzido em loop sem som.
+          Configure um vídeo de fundo para a seção Hero. O vídeo será reproduzido em loop sem som.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -236,10 +236,10 @@ export const TeamVideoManagement: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <Label className={`text-base ${isDark ? 'text-white' : 'text-black'}`}>
-              Habilitar Vídeo de Fundo
+              Habilitar Vídeo de Fundo no Hero
             </Label>
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Ativar reprodução do vídeo de fundo na seção Nossa Equipe
+              Ativar reprodução do vídeo de fundo na seção Hero da página principal
             </p>
           </div>
           <Switch
