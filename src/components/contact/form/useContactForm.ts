@@ -15,8 +15,9 @@ interface ContactFormData {
   [key: string]: any;
 }
 
-export const useContactForm = () => {
-  const { formConfig } = useFormConfig();
+export const useContactForm = (externalFormConfig?: any) => {
+  const { formConfig: defaultFormConfig } = useFormConfig();
+  const formConfig = externalFormConfig || defaultFormConfig;
   const { trackConversion } = useAnalytics();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
@@ -70,7 +71,10 @@ export const useContactForm = () => {
         ...formData,
         customFields: customFieldsData,
         formConfig: {
-          redirectUrl: formConfig.redirectUrl
+          id: formConfig.id,
+          name: formConfig.name,
+          redirectUrl: formConfig.redirectUrl,
+          webhookUrl: formConfig.webhookUrl
         }
       };
 

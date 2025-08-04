@@ -8,13 +8,15 @@ import ContactFormContainer from './form/ContactFormContainer';
 interface UnifiedContactFormProps {
   preselectedService?: string;
   darkBackground?: boolean;
-  pageId?: string; // Adicionar propriedade para identificar a página
+  pageId?: string;
+  formId?: string; // Adicionar propriedade para identificar o formulário específico
 }
 
 const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({ 
   preselectedService,
   darkBackground = false,
-  pageId
+  pageId,
+  formId
 }) => {
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
@@ -80,8 +82,8 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
   console.log('📍 [UnifiedContactForm] PageId determinado:', currentPageId);
 
-  const { formConfig, isLoading } = useFormConfig(undefined, currentPageId);
-  const { formData, isSubmitting, updateField, handleSubmit } = useContactForm();
+  const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
+  const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
 
   // Pre-selecionar serviço se fornecido
   React.useEffect(() => {

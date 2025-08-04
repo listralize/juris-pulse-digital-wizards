@@ -11,7 +11,10 @@ interface ContactFormData {
   isUrgent: boolean;
   customFields?: { [key: string]: any };
   formConfig?: {
+    id?: string;
+    name?: string;
     redirectUrl?: string;
+    webhookUrl?: string;
   };
 }
 
@@ -57,7 +60,7 @@ serve(async (req) => {
     const headers = Object.fromEntries(req.headers.entries())
     const sessionId = crypto.randomUUID()
     const visitorId = headers['x-forwarded-for'] || 'unknown'
-    const formId = 'contact_form_default'
+    const formId = formConfig?.id || 'contact_form_default'
 
     // Função para extrair parâmetros UTM
     const getUTMParam = (param: string) => {
@@ -167,14 +170,27 @@ serve(async (req) => {
     }
 
     // 4. Enviar para webhook se configurado
-    let webhookUrl = ''
-    if (settingsData && settingsData.form_config) {
+    let webhookUrl = formConfig?.webhookUrl || ''
+    
+    // Se não há webhook específico no formConfig, buscar nas configurações gerais
+    if (!webhookUrl && settingsData && settingsData.form_config) {
       const config = settingsData.form_config as any
       
       if (config.forms && Array.isArray(config.forms)) {
-        const formWithWebhook = config.forms.find((form: any) => form.webhookUrl)
-        if (formWithWebhook) {
-          webhookUrl = formWithWebhook.webhookUrl
+        // Se temos um formId específico, buscar seu webhook
+        if (formConfig?.id) {
+          const specificForm = config.forms.find((form: any) => form.id === formConfig.id)
+          if (specificForm && specificForm.webhookUrl) {
+            webhookUrl = specificForm.webhookUrl
+          }
+        }
+        
+        // Fallback: buscar qualquer formulário com webhook
+        if (!webhookUrl) {
+          const formWithWebhook = config.forms.find((form: any) => form.webhookUrl)
+          if (formWithWebhook) {
+            webhookUrl = formWithWebhook.webhookUrl
+          }
         }
       } else if (config.webhookUrl) {
         webhookUrl = config.webhookUrl
@@ -189,7 +205,11 @@ serve(async (req) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(submissionData)
+          body: JSON.stringify({
+            ...submissionData,
+            formId: formConfig?.id,
+            formName: formConfig?.name
+          })
         })
 
         if (webhookResponse.ok) {
@@ -201,7 +221,7 @@ serve(async (req) => {
         console.error('❌ Erro ao enviar webhook:', webhookError)
       }
     } else {
-      console.log('⚠️ Webhook não configurado')
+      console.log('⚠️ Webhook não configurado para o formulário:', formConfig?.id || 'default')
     }
 
     console.log('✅ Formulário processado com sucesso:', { name, email, service })

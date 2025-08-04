@@ -82,11 +82,11 @@ const EmbedForm: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-fit bg-transparent">
+      <div className="w-full p-4">
         <UnifiedContactForm 
-          darkBackground={true}
-          pageId={`embed-${formId}`}
+          darkBackground={false}
+          formId={formId}
         />
       </div>
       
