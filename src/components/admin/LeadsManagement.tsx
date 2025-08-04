@@ -677,7 +677,8 @@ export const LeadsManagement: React.FC = () => {
 
     setFilteredLeads(filtered);
     setCurrentPage(1); // Reset para primeira página quando filtros mudam
-  }, [leads, searchQuery, dateFilter, serviceFilter]);
+    setKanbanCurrentPage(1); // Reset página do kanban
+  }, [leads, searchQuery, dateFilter, serviceFilter, customDateStart, customDateEnd]);
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -1064,79 +1065,12 @@ export const LeadsManagement: React.FC = () => {
 
       {/* Kanban Board */}
       {currentView === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {[
-            { key: 'novo', title: 'Novos', variant: 'secondary' as const },
-            { key: 'contato', title: 'Em Contato', variant: 'default' as const },
-            { key: 'qualificado', title: 'Qualificados', variant: 'default' as const },
-            { key: 'convertido', title: 'Convertidos', variant: 'outline' as const },
-            { key: 'descartado', title: 'Descartados', variant: 'destructive' as const }
-          ].map((column) => (
-            <Card key={column.key}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Badge variant={column.variant}>{column.title}</Badge>
-                  <span className="text-sm">
-                    ({filteredLeads.filter(lead => (leadStatuses[lead.id] || 'novo') === column.key).length})
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent 
-                className="space-y-2 min-h-[200px]"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const leadId = e.dataTransfer.getData('text/plain');
-                  updateLeadStatus(leadId, column.key);
-                }}
-              >
-                {filteredLeads
-                  .filter(lead => (leadStatuses[lead.id] || 'novo') === column.key)
-                  .map((lead) => {
-                    const leadData = parseLeadData(lead.lead_data);
-                    
-                    return (
-                      <Card 
-                        key={lead.id} 
-                        className="cursor-pointer hover:shadow-md transition-shadow"
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', lead.id);
-                        }}
-                        onClick={() => openLeadDetails(lead)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="space-y-2">
-                            <p className="font-medium text-sm">{leadData.name || 'Nome não informado'}</p>
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-3 w-3" />
-                              <p className="text-xs text-muted-foreground truncate">{leadData.email}</p>
-                            </div>
-                              {leadData.phone && (
-                                <a
-                                  href={`https://api.whatsapp.com/send?phone=${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MessageSquare className="h-4 w-4" />
-                                  <span className="text-xs font-medium">WhatsApp</span>
-                                </a>
-                              )}
-                            <p className="text-xs">{leadData.service}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <LeadsKanban
+          filteredLeads={filteredLeads}
+          leadStatuses={leadStatuses}
+          updateLeadStatus={updateLeadStatus}
+          onLeadClick={openLeadDetails}
+        />
       )}
 
       {/* Sheet de detalhes do lead */}
