@@ -89,9 +89,19 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
       return;
     }
 
+    // Encontrar o lead e atualizar o status
     const lead = filteredLeads.find(l => l.id === draggableId);
     if (lead) {
+      console.log('🎯 Movendo lead:', {
+        leadId: draggableId,
+        from: source.droppableId,
+        to: destination.droppableId,
+        leadName: parseLeadData(lead.lead_data).name
+      });
+      
       updateLeadStatus(lead.id, destination.droppableId);
+    } else {
+      console.error('❌ Lead não encontrado:', draggableId);
     }
   };
 

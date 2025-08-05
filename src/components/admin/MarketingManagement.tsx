@@ -260,6 +260,13 @@ export const MarketingManagement: React.FC = () => {
   };
   const implementFacebookPixel = (config: any) => {
     console.log('📘 Implementando Facebook Pixel:', config.pixelId);
+    
+    // Limpar instâncias anteriores do fbq
+    if ((window as any).fbq) {
+      delete (window as any).fbq;
+      delete (window as any)._fbq;
+    }
+    
     const fbPixelScript = document.createElement('script');
     fbPixelScript.setAttribute('data-marketing', 'facebook-pixel');
     fbPixelScript.innerHTML = `
@@ -273,14 +280,27 @@ export const MarketingManagement: React.FC = () => {
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '${config.pixelId}');
       fbq('track', 'PageView');
-      ${config.customCode || ''}
     `;
     document.head.appendChild(fbPixelScript);
+
+    // Adicionar código customizado se existir
+    if (config.customCode && config.customCode.trim()) {
+      // Extrair apenas o código JavaScript do customCode, removendo tags HTML
+      const jsCodeMatch = config.customCode.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+      if (jsCodeMatch && jsCodeMatch[1]) {
+        const customScript = document.createElement('script');
+        customScript.setAttribute('data-marketing', 'facebook-pixel-custom');
+        customScript.innerHTML = jsCodeMatch[1];
+        document.head.appendChild(customScript);
+      }
+    }
 
     // Adicionar noscript
     const noscript = document.createElement('noscript');
     noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${config.pixelId}&ev=PageView&noscript=1" />`;
     document.head.appendChild(noscript);
+    
+    console.log('✅ Facebook Pixel implementado com ID:', config.pixelId);
   };
   const implementGoogleAnalytics = (config: any) => {
     console.log('📊 Implementando Google Analytics:', config.measurementId);
