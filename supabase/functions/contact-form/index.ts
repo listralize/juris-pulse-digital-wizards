@@ -139,7 +139,17 @@ serve(async (req) => {
             customTitle: defaultTemplate.title,
             customContent: defaultTemplate.content
               .replace('{service}', service || 'nossos serviços')
-              .replace('{name}', name || 'cliente')
+              .replace('{name}', name || 'cliente'),
+            customHtml: defaultTemplate.custom_html,
+            buttonText: defaultTemplate.button_text,
+            buttonUrl: defaultTemplate.button_url,
+            secondaryButtonText: defaultTemplate.secondary_button_text,
+            secondaryButtonUrl: defaultTemplate.secondary_button_url,
+            showSecondaryButton: defaultTemplate.show_secondary_button,
+            logoUrl: defaultTemplate.logo_url,
+            backgroundColor: defaultTemplate.background_color,
+            textColor: defaultTemplate.text_color,
+            buttonColor: defaultTemplate.button_color
           }
         });
         

@@ -4,6 +4,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { ChevronLeft, ChevronRight, Mail, MessageSquare } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 interface Lead {
   id: string;
@@ -74,6 +75,26 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
     setKanbanCurrentPage(prev => Math.max(prev - 1, 1));
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const lead = filteredLeads.find(l => l.id === draggableId);
+    if (lead) {
+      updateLeadStatus(lead.id, destination.droppableId);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Paginação do Kanban */}
@@ -106,49 +127,74 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
         </div>
       </div>
       
-      {/* Board Kanban */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'].map(status => {
-          const allStatusLeads = filteredLeads.filter(lead => leadStatuses[lead.id] === status || (status === 'novo' && !leadStatuses[lead.id]));
-          const statusLeads = allStatusLeads.slice(kanbanIndexOfFirstLead, kanbanIndexOfLastLead);
-          
-          return (
-            <div key={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
-              <h3 className={`font-semibold mb-3 capitalize ${isDark ? 'text-white' : 'text-black'}`}>
-                {status} ({allStatusLeads.length})
-              </h3>
-              <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                {statusLeads.map(lead => {
-                  const leadData = parseLeadData(lead.lead_data);
-                  return (
-                    <div 
-                      key={lead.id}
-                      className={`p-3 rounded border cursor-pointer hover:shadow-md transition-shadow ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}
-                      onClick={() => onLeadClick(lead)}
+      {/* Board Kanban com Drag and Drop */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'].map(status => {
+            const allStatusLeads = filteredLeads.filter(lead => leadStatuses[lead.id] === status || (status === 'novo' && !leadStatuses[lead.id]));
+            const statusLeads = allStatusLeads.slice(kanbanIndexOfFirstLead, kanbanIndexOfLastLead);
+            
+            return (
+              <div key={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
+                <h3 className={`font-semibold mb-3 capitalize ${isDark ? 'text-white' : 'text-black'}`}>
+                  {status} ({allStatusLeads.length})
+                </h3>
+                <Droppable droppableId={status}>
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className={`space-y-2 max-h-[500px] overflow-y-auto ${
+                        snapshot.isDraggingOver ? 'bg-blue-50/50' : ''
+                      }`}
                     >
-                      <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-black'}`}>
-                        {leadData.name || 'Nome não informado'}
-                      </h4>
-                      <p className="text-xs text-muted-foreground">{leadData.email}</p>
-                      {leadData.service && (
-                        <p className="text-xs text-blue-600 mt-1">{leadData.service}</p>
-                      )}
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                        </span>
-                        {leadData.urgent && (
-                          <Badge variant="destructive" className="text-xs">Urgente</Badge>
-                        )}
-                      </div>
+                      {statusLeads.map((lead, index) => {
+                        const leadData = parseLeadData(lead.lead_data);
+                        return (
+                          <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`p-3 rounded border cursor-pointer hover:shadow-md transition-shadow ${
+                                  snapshot.isDragging 
+                                    ? 'shadow-lg rotate-2' 
+                                    : isDark 
+                                      ? 'bg-white/5 border-white/10 hover:bg-white/10' 
+                                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                }`}
+                                onClick={() => !snapshot.isDragging && onLeadClick(lead)}
+                              >
+                                <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+                                  {leadData.name || 'Nome não informado'}
+                                </h4>
+                                <p className="text-xs text-muted-foreground">{leadData.email}</p>
+                                {leadData.service && (
+                                  <p className="text-xs text-blue-600 mt-1">{leadData.service}</p>
+                                )}
+                                <div className="flex justify-between items-center mt-2">
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                                  </span>
+                                  {leadData.urgent && (
+                                    <Badge variant="destructive" className="text-xs">Urgente</Badge>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      {provided.placeholder}
                     </div>
-                  );
-                })}
+                  )}
+                </Droppable>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
     </div>
   );
 };
