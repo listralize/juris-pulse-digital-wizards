@@ -5,6 +5,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useGlobalMarketingScripts } from './hooks/useGlobalMarketingScripts';
 
 // Pages
 import Index from './pages/Index';
@@ -37,6 +38,9 @@ import Administrativo from './pages/areas/Administrativo';
 const queryClient = new QueryClient();
 
 function App() {
+  // Carregar scripts de marketing globalmente
+  useGlobalMarketingScripts();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
