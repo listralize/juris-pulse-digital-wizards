@@ -154,7 +154,7 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className={`space-y-2 max-h-[500px] overflow-y-auto ${
+                      className={`space-y-2 min-h-[200px] ${
                         snapshot.isDraggingOver ? 'bg-blue-50/50' : ''
                       }`}
                     >
