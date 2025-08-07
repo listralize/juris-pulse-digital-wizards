@@ -600,6 +600,12 @@ export const MarketingManagement: React.FC = () => {
 
       // Implementar scripts imediatamente após salvar
       implementMarketingScripts(marketingScripts);
+      
+      // Disparar evento para que outras páginas atualizem seus scripts
+      window.dispatchEvent(new CustomEvent('marketingSettingsUpdated', { 
+        detail: { settings: savedData[0] } 
+      }));
+      
       toast.success('Configurações salvas e implementadas no site!');
 
       // Aguardar e recarregar para confirmar persistência

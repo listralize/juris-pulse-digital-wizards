@@ -65,13 +65,27 @@ export const useGlobalMarketingScripts = () => {
           };
 
           implementMarketingScripts(scripts);
+          console.log('✅ Scripts globais implementados na página:', window.location.pathname);
         }
       } catch (error) {
         console.error('❌ Erro ao implementar scripts globalmente:', error);
       }
     };
 
+    // Executar imediatamente
     loadAndImplementScripts();
+    
+    // Reagir a mudanças de configuração em tempo real
+    const handleSettingsUpdate = () => {
+      console.log('🔄 Configurações de marketing atualizadas, recarregando scripts...');
+      loadAndImplementScripts();
+    };
+    
+    window.addEventListener('marketingSettingsUpdated', handleSettingsUpdate);
+    
+    return () => {
+      window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
+    };
   }, []);
 
   const removeExistingScripts = () => {

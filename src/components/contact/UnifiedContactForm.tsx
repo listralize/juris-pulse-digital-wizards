@@ -2,6 +2,7 @@
 import React from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
+import { useGlobalMarketingScripts } from "../../hooks/useGlobalMarketingScripts";
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
 
@@ -18,6 +19,8 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   pageId,
   formId
 }) => {
+  // Garantir que os scripts de marketing sejam carregados nesta página
+  useGlobalMarketingScripts();
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
     const pathname = window.location.pathname;
