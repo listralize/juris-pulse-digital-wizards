@@ -100,6 +100,20 @@ export const useContactForm = (externalFormConfig?: any) => {
           campaign: new URLSearchParams(window.location.search).get('utm_campaign') || 'organic'
         }
       );
+
+      // Disparar evento customizado para scripts de marketing
+      const successEvent = new CustomEvent('formSubmitSuccess', {
+        detail: {
+          formId: formConfig.id || 'default',
+          userData: {
+            email: submitData.email,
+            name: submitData.name,
+            service: submitData.service
+          }
+        }
+      });
+      document.dispatchEvent(successEvent);
+      console.log('🎯 Evento formSubmitSuccess disparado para marketing scripts');
       
       toast.success(formConfig.formTexts.successMessage);
       setIsSubmitted(true);

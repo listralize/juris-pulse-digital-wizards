@@ -86,19 +86,28 @@ export const useFormMarketingScripts = (formId: string) => {
     // Remover scripts antigos específicos deste formulário
     removeFormScripts(formConfig.formId);
 
-    // Facebook Pixel
-    if (formConfig.facebookPixel?.enabled && formConfig.facebookPixel?.pixelId) {
+    // Facebook Pixel - APENAS se estiver habilitado
+    if (formConfig.facebookPixel?.enabled === true && formConfig.facebookPixel?.pixelId) {
+      console.log(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
       implementFormFacebookPixel(formConfig);
+    } else {
+      console.log(`❌ Facebook Pixel DESABILITADO para formulário ${formConfig.formId}`);
     }
 
-    // Google Analytics
-    if (formConfig.googleAnalytics?.enabled && formConfig.googleAnalytics?.measurementId) {
+    // Google Analytics - APENAS se estiver habilitado
+    if (formConfig.googleAnalytics?.enabled === true && formConfig.googleAnalytics?.measurementId) {
+      console.log(`✅ Google Analytics HABILITADO para formulário ${formConfig.formId}`);
       implementFormGoogleAnalytics(formConfig);
+    } else {
+      console.log(`❌ Google Analytics DESABILITADO para formulário ${formConfig.formId}`);
     }
 
-    // Google Tag Manager
-    if (formConfig.googleTagManager?.enabled && formConfig.googleTagManager?.containerId) {
+    // Google Tag Manager - APENAS se estiver habilitado
+    if (formConfig.googleTagManager?.enabled === true && formConfig.googleTagManager?.containerId) {
+      console.log(`✅ Google Tag Manager HABILITADO para formulário ${formConfig.formId}`);
       implementFormGoogleTagManager(formConfig);
+    } else {
+      console.log(`❌ Google Tag Manager DESABILITADO para formulário ${formConfig.formId}`);
     }
   };
 
@@ -152,18 +161,19 @@ export const useFormMarketingScripts = (formId: string) => {
       console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
     }
 
-    // Adicionar listener específico para este formulário
-    const handleFormSubmit = (event: Event) => {
-      const form = event.target as HTMLFormElement;
-      if (form.id === formId || form.id === formConfig.submitButtonId?.replace('-', '_')) {
-        console.log(`📝 Formulário ${formId} enviado - rastreando com Facebook Pixel`);
+    // Adicionar listener específico para submissão bem-sucedida
+    const handleFormSuccess = (event: CustomEvent) => {
+      if (event.detail?.formId === formId) {
+        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
         if ((window as any).fbq) {
           (window as any).fbq('track', facebookPixel.eventType || 'Lead', {
             content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
             page_url: window.location.href,
-            pixel_id: pixelId
+            pixel_id: pixelId,
+            event_source_url: window.location.href,
+            user_data: event.detail?.userData || {}
           });
           console.log(`📊 Evento "${facebookPixel.eventType}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
         }
@@ -171,10 +181,10 @@ export const useFormMarketingScripts = (formId: string) => {
     };
 
     // Remover listener anterior
-    document.removeEventListener('submit', handleFormSubmit);
+    document.removeEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
     
-    // Adicionar novo listener
-    document.addEventListener('submit', handleFormSubmit, true);
+    // Adicionar novo listener para evento de sucesso
+    document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
   };
 
   const implementFormGoogleAnalytics = (formConfig: any) => {
@@ -200,17 +210,17 @@ export const useFormMarketingScripts = (formId: string) => {
       document.head.appendChild(configScript);
     }
 
-    // Adicionar listener específico para este formulário
-    const handleFormSubmit = (event: Event) => {
-      const form = event.target as HTMLFormElement;
-      if (form.id === formId || form.id === formConfig.submitButtonId?.replace('-', '_')) {
-        console.log(`📝 Formulário ${formId} enviado - rastreando com Google Analytics`);
+    // Adicionar listener específico para submissão bem-sucedida
+    const handleFormSuccess = (event: CustomEvent) => {
+      if (event.detail?.formId === formId) {
+        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Google Analytics`);
         
         if ((window as any).gtag) {
           (window as any).gtag('event', googleAnalytics.eventName || 'form_submit', {
             event_category: 'engagement',
             event_label: formId,
-            form_id: formId
+            form_id: formId,
+            user_data: event.detail?.userData || {}
           });
           console.log(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
         }
@@ -218,10 +228,10 @@ export const useFormMarketingScripts = (formId: string) => {
     };
 
     // Remover listener anterior
-    document.removeEventListener('submit', handleFormSubmit);
+    document.removeEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
     
-    // Adicionar novo listener
-    document.addEventListener('submit', handleFormSubmit, true);
+    // Adicionar novo listener para evento de sucesso
+    document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
   };
 
   const implementFormGoogleTagManager = (formConfig: any) => {
@@ -247,17 +257,17 @@ export const useFormMarketingScripts = (formId: string) => {
       document.body.appendChild(noscript);
     }
 
-    // Adicionar listener específico para este formulário
-    const handleFormSubmit = (event: Event) => {
-      const form = event.target as HTMLFormElement;
-      if (form.id === formId || form.id === formConfig.submitButtonId?.replace('-', '_')) {
-        console.log(`📝 Formulário ${formId} enviado - rastreando com GTM`);
+    // Adicionar listener específico para submissão bem-sucedida
+    const handleFormSuccess = (event: CustomEvent) => {
+      if (event.detail?.formId === formId) {
+        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com GTM`);
         
         if ((window as any).dataLayer) {
           (window as any).dataLayer.push({
             event: googleTagManager.eventName || 'form_submit',
             form_id: formId,
-            form_name: formConfig.campaignName || 'Form Submission'
+            form_name: formConfig.campaignName || 'Form Submission',
+            user_data: event.detail?.userData || {}
           });
           console.log(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
         }
@@ -265,9 +275,9 @@ export const useFormMarketingScripts = (formId: string) => {
     };
 
     // Remover listener anterior
-    document.removeEventListener('submit', handleFormSubmit);
+    document.removeEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
     
-    // Adicionar novo listener
-    document.addEventListener('submit', handleFormSubmit, true);
+    // Adicionar novo listener para evento de sucesso
+    document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
   };
 };
