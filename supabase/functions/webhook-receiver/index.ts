@@ -124,11 +124,19 @@ const handler = async (req: Request): Promise<Response> => {
     if (webhookConfig?.mappings && Array.isArray(webhookConfig.mappings)) {
       // Use configured mappings
       console.log('🔄 Usando mapeamentos configurados');
+      
+      // Primeiro, preservar todos os dados originais
+      mappedData = { ...webhookData };
+      
+      // Depois, aplicar os mapeamentos configurados
       for (const mapping of webhookConfig.mappings) {
-        if (mapping.webhookField && webhookData[mapping.webhookField]) {
+        if (mapping.webhookField && webhookData[mapping.webhookField] !== undefined) {
           mappedData[mapping.systemField] = webhookData[mapping.webhookField];
+          console.log(`📋 Mapeando: ${mapping.webhookField} -> ${mapping.systemField} = ${webhookData[mapping.webhookField]}`);
         }
       }
+      
+      console.log('📊 Dados após mapeamento configurado:', mappedData);
     } else {
       // Auto-mapping fallback
       console.log('🔄 Usando auto-mapeamento');

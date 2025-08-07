@@ -218,17 +218,39 @@ export const useGlobalMarketingScripts = () => {
       if (form.tagName === 'FORM') {
         console.log('📝 Formulário enviado - rastreando com Facebook Pixel');
         
+        // Buscar configuração personalizada do botão/form
+        const formId = form.id || 'unknown';
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const buttonId = submitButton?.id || '';
+        
         if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', {
-            content_name: 'Form Submission',
-            form_id: form.id || 'unknown',
-            page_url: window.location.href
-          });
-          
-          (window as any).fbq('track', 'Contact', {
-            content_name: 'Contact Form',
-            form_id: form.id || 'unknown'
-          });
+          // Evento personalizado baseado no ID do botão/form
+          if (buttonId.includes('lead') || formId.includes('lead')) {
+            (window as any).fbq('track', 'Lead', {
+              content_name: 'Lead Generation',
+              form_id: formId,
+              button_id: buttonId,
+              page_url: window.location.href
+            });
+            console.log('📊 Evento "Lead" rastreado para:', { formId, buttonId });
+          } else if (buttonId.includes('conversion') || formId.includes('conversion')) {
+            (window as any).fbq('track', 'Purchase', {
+              content_name: 'Conversion',
+              form_id: formId,
+              button_id: buttonId,
+              page_url: window.location.href
+            });
+            console.log('📊 Evento "Purchase" rastreado para:', { formId, buttonId });
+          } else {
+            // Evento padrão apenas se não houver configuração específica
+            (window as any).fbq('track', 'SubmitApplication', {
+              content_name: 'Form Submission',
+              form_id: formId,
+              button_id: buttonId,
+              page_url: window.location.href
+            });
+            console.log('📊 Evento "SubmitApplication" rastreado para:', { formId, buttonId });
+          }
         }
       }
     };

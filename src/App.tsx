@@ -41,6 +41,8 @@ function App() {
   // Carregar scripts de marketing globalmente
   useGlobalMarketingScripts();
   
+  console.log('🚀 App iniciado - scripts de marketing carregados globalmente');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
