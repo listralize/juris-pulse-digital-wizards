@@ -24,68 +24,13 @@ interface MarketingScripts {
 }
 
 export const useGlobalMarketingScripts = () => {
+  // Hook agora é usado apenas para configurações globais básicas (não formulários)
   useEffect(() => {
-    const loadAndImplementScripts = async () => {
-      try {
-        console.log('🌐 Carregando scripts de marketing globalmente...');
-        
-        const { data: settings, error } = await supabase
-          .from('marketing_settings')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (error) {
-          console.error('❌ Erro ao carregar scripts:', error);
-          return;
-        }
-
-        if (settings) {
-          const scripts: MarketingScripts = {
-            facebookPixel: {
-              enabled: settings.facebook_pixel_enabled || false,
-              pixelId: settings.facebook_pixel_id || '',
-              customCode: settings.facebook_custom_code || '',
-              conversionApiToken: settings.facebook_conversion_api_token || ''
-            },
-            googleAnalytics: {
-              enabled: settings.google_analytics_enabled || false,
-              measurementId: settings.google_analytics_id || '',
-              customCode: settings.google_analytics_custom_code || ''
-            },
-            googleTagManager: {
-              enabled: settings.google_tag_manager_enabled || false,
-              containerId: settings.google_tag_manager_id || ''
-            },
-            customScripts: {
-              head: settings.custom_head_scripts || '',
-              body: settings.custom_body_scripts || ''
-            }
-          };
-
-          implementMarketingScripts(scripts);
-          console.log('✅ Scripts globais implementados na página:', window.location.pathname);
-        }
-      } catch (error) {
-        console.error('❌ Erro ao implementar scripts globalmente:', error);
-      }
-    };
-
-    // Executar imediatamente
-    loadAndImplementScripts();
+    console.log('🌐 Hook de marketing global inicializado - apenas scripts básicos');
     
-    // Reagir a mudanças de configuração em tempo real
-    const handleSettingsUpdate = () => {
-      console.log('🔄 Configurações de marketing atualizadas, recarregando scripts...');
-      loadAndImplementScripts();
-    };
+    // Não implementar mais scripts automaticamente
+    // Os scripts serão implementados apenas quando formulários específicos forem configurados
     
-    window.addEventListener('marketingSettingsUpdated', handleSettingsUpdate);
-    
-    return () => {
-      window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
-    };
   }, []);
 
   const removeExistingScripts = () => {

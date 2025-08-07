@@ -41,6 +41,22 @@ interface FormTrackingConfig {
   webhookUrl?: string;
   enabled: boolean;
   campaign?: string;
+  campaignName?: string;
+  facebookPixel?: {
+    enabled: boolean;
+    pixelId: string;
+    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication';
+  };
+  googleAnalytics?: {
+    enabled: boolean;
+    measurementId: string;
+    eventName: string;
+  };
+  googleTagManager?: {
+    enabled: boolean;
+    containerId: string;
+    eventName: string;
+  };
 }
 interface ConversionTracking {
   systemForms: FormTrackingConfig[];
@@ -948,17 +964,182 @@ export const MarketingManagement: React.FC = () => {
                           </div>
                           <div>
                             <Label>Nome da Campanha</Label>
-                            <Input value={form.campaign || ''} onChange={e => {
+                            <Input value={form.campaignName} onChange={e => {
                       e.stopPropagation();
-                      updateSystemForm(index, 'campaign', e.target.value);
-                    }} placeholder="nome-da-campanha" onClick={e => e.stopPropagation()} />
+                      updateSystemForm(index, 'campaignName', e.target.value);
+                    }} placeholder="Nome da campanha" onClick={e => e.stopPropagation()} />
                           </div>
                         </div>
-                        
-                        {form.webhookUrl && <div>
-                            <Label>Webhook URL</Label>
-                            <Input value={form.webhookUrl} readOnly className="bg-muted" onClick={e => e.stopPropagation()} />
-                          </div>}
+
+                        {/* Facebook Pixel Config */}
+                        <div className="border-t pt-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <input 
+                              type="checkbox" 
+                              id={`fb-enabled-${index}`}
+                              checked={form.facebookPixel?.enabled || false}
+                              onChange={e => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'facebookPixel', {
+                                  ...form.facebookPixel,
+                                  enabled: e.target.checked
+                                });
+                              }}
+                              className="rounded" 
+                            />
+                            <Label htmlFor={`fb-enabled-${index}`}>📘 Facebook Pixel</Label>
+                          </div>
+                          
+                          {form.facebookPixel?.enabled && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Pixel ID</Label>
+                                <Input 
+                                  value={form.facebookPixel?.pixelId || ''}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'facebookPixel', {
+                                      ...form.facebookPixel,
+                                      pixelId: e.target.value
+                                    });
+                                  }}
+                                  placeholder="123456789"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                              <div>
+                                <Label>Tipo de Evento</Label>
+                                <select 
+                                  value={form.facebookPixel?.eventType || 'Lead'}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'facebookPixel', {
+                                      ...form.facebookPixel,
+                                      eventType: e.target.value
+                                    });
+                                  }}
+                                  className="w-full p-2 border rounded"
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  <option value="Lead">Lead</option>
+                                  <option value="Purchase">Purchase</option>
+                                  <option value="Contact">Contact</option>
+                                  <option value="SubmitApplication">SubmitApplication</option>
+                                </select>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Google Analytics Config */}
+                        <div className="border-t pt-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <input 
+                              type="checkbox" 
+                              id={`ga-enabled-${index}`}
+                              checked={form.googleAnalytics?.enabled || false}
+                              onChange={e => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'googleAnalytics', {
+                                  ...form.googleAnalytics,
+                                  enabled: e.target.checked
+                                });
+                              }}
+                              className="rounded" 
+                            />
+                            <Label htmlFor={`ga-enabled-${index}`}>📊 Google Analytics</Label>
+                          </div>
+                          
+                          {form.googleAnalytics?.enabled && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Measurement ID</Label>
+                                <Input 
+                                  value={form.googleAnalytics?.measurementId || ''}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleAnalytics', {
+                                      ...form.googleAnalytics,
+                                      measurementId: e.target.value
+                                    });
+                                  }}
+                                  placeholder="G-XXXXXXXXXX"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                              <div>
+                                <Label>Nome do Evento</Label>
+                                <Input 
+                                  value={form.googleAnalytics?.eventName || 'form_submit'}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleAnalytics', {
+                                      ...form.googleAnalytics,
+                                      eventName: e.target.value
+                                    });
+                                  }}
+                                  placeholder="form_submit"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Google Tag Manager Config */}
+                        <div className="border-t pt-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <input 
+                              type="checkbox" 
+                              id={`gtm-enabled-${index}`}
+                              checked={form.googleTagManager?.enabled || false}
+                              onChange={e => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'googleTagManager', {
+                                  ...form.googleTagManager,
+                                  enabled: e.target.checked
+                                });
+                              }}
+                              className="rounded" 
+                            />
+                            <Label htmlFor={`gtm-enabled-${index}`}>🏷️ Google Tag Manager</Label>
+                          </div>
+                          
+                          {form.googleTagManager?.enabled && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Container ID</Label>
+                                <Input 
+                                  value={form.googleTagManager?.containerId || ''}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleTagManager', {
+                                      ...form.googleTagManager,
+                                      containerId: e.target.value
+                                    });
+                                  }}
+                                  placeholder="GTM-XXXXXXX"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                              <div>
+                                <Label>Nome do Evento</Label>
+                                <Input 
+                                  value={form.googleTagManager?.eventName || 'form_submit'}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleTagManager', {
+                                      ...form.googleTagManager,
+                                      eventName: e.target.value
+                                    });
+                                  }}
+                                  placeholder="form_submit"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </>}
                   </div>)}
             </CardContent>
