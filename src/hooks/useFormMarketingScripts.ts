@@ -109,10 +109,18 @@ export const useFormMarketingScripts = (formId: string) => {
 
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
-    console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, facebookPixel.pixelId);
+    
+    // Validar se o pixelId é válido (apenas números)
+    const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
+    if (!pixelId || pixelId.length < 10) {
+      console.warn(`⚠️ Pixel ID inválido para formulário ${formId}:`, facebookPixel.pixelId);
+      return;
+    }
+    
+    console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
 
     // Verificar se este pixel específico já foi inicializado
-    const pixelKey = `fbq_pixel_${facebookPixel.pixelId}`;
+    const pixelKey = `fbq_pixel_${pixelId}`;
     if (!(window as any)[pixelKey]) {
       // Criar o script base do Facebook Pixel seguindo o modelo exato
       const fbPixelScript = document.createElement('script');
@@ -126,22 +134,22 @@ export const useFormMarketingScripts = (formId: string) => {
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '${facebookPixel.pixelId}');
+        fbq('init', '${pixelId}');
         fbq('track', 'PageView');
-        console.log('📘 Meta Pixel ${facebookPixel.pixelId} inicializado para formulário ${formId}');
+        console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId}');
       `;
       document.head.appendChild(fbPixelScript);
 
       // Adicionar noscript seguindo o modelo exato
       const noscript = document.createElement('noscript');
       noscript.setAttribute('data-form-marketing', formId);
-      noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${facebookPixel.pixelId}&ev=PageView&noscript=1" />`;
+      noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1" />`;
       document.head.appendChild(noscript);
 
       // Marcar este pixel como inicializado
       (window as any)[pixelKey] = true;
     } else {
-      console.log(`📘 Meta Pixel ${facebookPixel.pixelId} já estava inicializado para formulário ${formId}`);
+      console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
     }
 
     // Adicionar listener específico para este formulário
@@ -154,9 +162,10 @@ export const useFormMarketingScripts = (formId: string) => {
           (window as any).fbq('track', facebookPixel.eventType || 'Lead', {
             content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
-            page_url: window.location.href
+            page_url: window.location.href,
+            pixel_id: pixelId
           });
-          console.log(`📊 Evento "${facebookPixel.eventType}" rastreado para formulário: ${formId}`);
+          console.log(`📊 Evento "${facebookPixel.eventType}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
         }
       }
     };

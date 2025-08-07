@@ -993,24 +993,30 @@ export const MarketingManagement: React.FC = () => {
                           </div>
                           
                           {form.facebookPixel?.enabled && (
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-3">
                               <div>
-                                <Label>Pixel ID</Label>
+                                <Label className="text-sm font-medium">Pixel ID</Label>
                                 <Input 
                                   value={form.facebookPixel?.pixelId || ''}
                                   onChange={e => {
                                     e.stopPropagation();
+                                    // Validar se é apenas números (limpar qualquer código extra)
+                                    const pixelId = e.target.value.replace(/[^0-9]/g, '');
                                     updateSystemForm(index, 'facebookPixel', {
                                       ...form.facebookPixel,
-                                      pixelId: e.target.value
+                                      pixelId: pixelId
                                     });
                                   }}
-                                  placeholder="123456789"
+                                  placeholder="1024100955860841"
                                   onClick={e => e.stopPropagation()}
+                                  className="font-mono text-sm"
                                 />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Apenas números. Ex: 1024100955860841
+                                </p>
                               </div>
                               <div>
-                                <Label>Tipo de Evento</Label>
+                                <Label className="text-sm font-medium">Tipo de Evento</Label>
                                 <select 
                                   value={form.facebookPixel?.eventType || 'Lead'}
                                   onChange={e => {
@@ -1029,6 +1035,21 @@ export const MarketingManagement: React.FC = () => {
                                   <option value="SubmitApplication">SubmitApplication</option>
                                 </select>
                               </div>
+                              
+                              {/* Preview do código gerado */}
+                              {form.facebookPixel?.pixelId && (
+                                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                  <Label className="text-xs font-semibold text-blue-700">
+                                    ✅ Código que será gerado para este formulário:
+                                  </Label>
+                                  <div className="bg-white p-2 rounded border text-xs font-mono mt-2 overflow-x-auto">
+                                    <code className="text-blue-600">
+{`fbq('init', '${form.facebookPixel.pixelId}');
+fbq('track', 'PageView');`}
+                                    </code>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
