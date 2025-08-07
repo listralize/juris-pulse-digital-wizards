@@ -167,7 +167,11 @@ export const useFormMarketingScripts = (formId: string) => {
         console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
         if ((window as any).fbq) {
-          (window as any).fbq('track', facebookPixel.eventType || 'Lead', {
+          const eventType = facebookPixel.eventType === 'Custom' 
+            ? (facebookPixel.customEventName || 'CustomEvent')
+            : (facebookPixel.eventType || 'Lead');
+          
+          (window as any).fbq('track', eventType, {
             content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
             page_url: window.location.href,
@@ -175,7 +179,7 @@ export const useFormMarketingScripts = (formId: string) => {
             event_source_url: window.location.href,
             user_data: event.detail?.userData || {}
           });
-          console.log(`📊 Evento "${facebookPixel.eventType}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
+          console.log(`📊 Evento "${eventType}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
         }
       }
     };

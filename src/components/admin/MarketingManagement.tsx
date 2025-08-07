@@ -47,7 +47,8 @@ interface FormTrackingConfig {
   facebookPixel?: {
     enabled: boolean;
     pixelId: string;
-    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication';
+  eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication' | 'CompleteRegistration' | 'ViewContent' | 'AddToCart' | 'InitiateCheckout' | 'Custom';
+  customEventName?: string;
   };
   googleAnalytics?: {
     enabled: boolean;
@@ -1017,7 +1018,7 @@ export const MarketingManagement: React.FC = () => {
                               </div>
                               <div>
                                 <Label className="text-sm font-medium">Tipo de Evento</Label>
-                                <select 
+                                 <select 
                                   value={form.facebookPixel?.eventType || 'Lead'}
                                   onChange={e => {
                                     e.stopPropagation();
@@ -1032,8 +1033,33 @@ export const MarketingManagement: React.FC = () => {
                                   <option value="Lead">Lead</option>
                                   <option value="Purchase">Purchase</option>
                                   <option value="Contact">Contact</option>
-                                  <option value="SubmitApplication">SubmitApplication</option>
+                                  <option value="SubmitApplication">Submit Application</option>
+                                  <option value="CompleteRegistration">Complete Registration</option>
+                                  <option value="ViewContent">View Content</option>
+                                  <option value="AddToCart">Add to Cart</option>
+                                  <option value="InitiateCheckout">Initiate Checkout</option>
+                                  <option value="Custom">Evento Personalizado</option>
                                 </select>
+                                
+                                {form.facebookPixel?.eventType === 'Custom' && (
+                                  <div className="mt-2">
+                                    <Label className="text-sm font-medium">Nome do Evento Personalizado</Label>
+                                    <input
+                                      type="text"
+                                      placeholder="ex: custom_form_submit"
+                                      value={form.facebookPixel?.customEventName || ''}
+                                      onChange={e => {
+                                        e.stopPropagation();
+                                        updateSystemForm(index, 'facebookPixel', {
+                                          ...form.facebookPixel,
+                                          customEventName: e.target.value
+                                        });
+                                      }}
+                                      className="w-full p-2 border rounded mt-1"
+                                      onClick={e => e.stopPropagation()}
+                                    />
+                                  </div>
+                                )}
                               </div>
                               
                               {/* Preview do código gerado */}
@@ -1042,12 +1068,14 @@ export const MarketingManagement: React.FC = () => {
                                   <Label className="text-xs font-semibold text-blue-700">
                                     ✅ Código que será gerado para este formulário:
                                   </Label>
-                                  <div className="bg-white p-2 rounded border text-xs font-mono mt-2 overflow-x-auto">
-                                    <code className="text-blue-600">
+                                   <div className="bg-white p-2 rounded border text-xs font-mono mt-2 overflow-x-auto">
+                                     <code className="text-blue-600">
 {`fbq('init', '${form.facebookPixel.pixelId}');
-fbq('track', 'PageView');`}
-                                    </code>
-                                  </div>
+fbq('track', '${form.facebookPixel.eventType === 'Custom' 
+  ? (form.facebookPixel.customEventName || 'CustomEvent') 
+  : (form.facebookPixel.eventType || 'Lead')}');`}
+                                     </code>
+                                   </div>
                                 </div>
                               )}
                             </div>
