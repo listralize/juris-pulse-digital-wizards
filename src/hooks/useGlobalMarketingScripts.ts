@@ -88,6 +88,7 @@ export const useGlobalMarketingScripts = () => {
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '${config.pixelId}');
+      fbq('set', 'autoConfig', 'false', '${config.pixelId}');
     `;
     document.head.appendChild(fbPixelScript);
 

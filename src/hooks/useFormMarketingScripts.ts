@@ -158,7 +158,8 @@ export const useFormMarketingScripts = (formId: string) => {
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '${pixelId}');
-        console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId}');
+        fbq('set', 'autoConfig', 'false', '${pixelId}');
+        console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId} (autoConfig desativado)');
       `;
       document.head.appendChild(fbPixelScript);
 
@@ -179,6 +180,20 @@ export const useFormMarketingScripts = (formId: string) => {
           const eventType = facebookPixel.eventType === 'Custom' 
             ? (facebookPixel.customEventName || 'CustomEvent')
             : (facebookPixel.eventType || 'Lead');
+          
+          // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
+          const sentMap = (window as any).__formEventSent || {};
+          if (sentMap[formId]) {
+            console.log(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
+            return;
+          }
+          sentMap[formId] = true;
+          (window as any).__formEventSent = sentMap;
+          setTimeout(() => {
+            const m = (window as any).__formEventSent || {};
+            delete m[formId];
+            (window as any).__formEventSent = m;
+          }, 3000);
           
           (window as any).fbq('track', eventType, {
             content_name: formConfig.campaignName || 'Form Submission',
