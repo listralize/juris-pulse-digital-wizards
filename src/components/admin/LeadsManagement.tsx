@@ -262,32 +262,21 @@ export const LeadsManagement: React.FC = () => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Carregando leads das tabelas form_leads e conversion_events...');
+      console.log('🔄 Carregando leads da tabela conversion_events...');
       
-      const [formLeadsRes, convRes] = await Promise.all([
-        supabase
-          .from('form_leads')
-          .select('id, lead_data, created_at, form_id, form_name, source_page, utm_source, utm_medium, utm_campaign')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('conversion_events')
-          .select('id, lead_data, created_at, event_type, event_action, page_url, referrer, utm_source, utm_medium, utm_campaign, form_id, form_name')
-          .order('created_at', { ascending: false })
-      ]);
+      const { data: convData, error: convError } = await supabase
+        .from('conversion_events')
+        .select('id, lead_data, created_at, event_type, event_action, page_url, referrer, form_id, form_name, event_label, event_category')
+        .or('event_type.eq.form_submission,event_label.eq.contact_form')
+        .order('created_at', { ascending: false });
 
-      const leadsError = formLeadsRes.error || convRes.error;
-      if (leadsError) {
-        console.error('❌ Erro ao carregar leads:', leadsError);
+      if (convError) {
+        console.error('❌ Erro ao carregar leads:', convError);
         toast.error('Erro ao carregar leads');
         return;
       }
 
-      const leadsData = formLeadsRes.data || [];
-      const conversionsData = (convRes.data || []).filter((row: any) => {
-        const type = (row.event_type || '').toString().toLowerCase();
-        const action = (row.event_action || '').toString().toLowerCase();
-        return row.lead_data && (type.includes('form') || action === 'submit' || type === 'lead');
-      });
+      const conversionsData = (convData || []).filter((row: any) => !!row.lead_data);
 
       // Carregar status dos leads
       const { data: statusData, error: statusError } = await supabase
@@ -304,37 +293,22 @@ export const LeadsManagement: React.FC = () => {
         statusMap[status.lead_id] = status.status;
       });
 
-      // Normalizar leads para a interface local
-      const normalizedFormLeads: Lead[] = (leadsData || []).map((row: any) => ({
+      // Normalizar leads (apenas conversion_events)
+      const normalizedLeads: Lead[] = (conversionsData || []).map((row: any) => ({
         id: row.id,
         lead_data: row.lead_data,
-        event_type: 'form_lead',
-        page_url: row.source_page || undefined,
-        referrer: undefined,
-        utm_source: row.utm_source || undefined,
-        utm_medium: row.utm_medium || undefined,
-        utm_campaign: row.utm_campaign || undefined,
-        created_at: row.created_at,
-      }));
-
-      const normalizedConvLeads: Lead[] = (conversionsData || []).map((row: any) => ({
-        id: row.id,
-        lead_data: row.lead_data,
-        event_type: row.event_type || 'form_submit',
+        event_type: row.event_type || 'form_submission',
         page_url: row.page_url || undefined,
         referrer: row.referrer || undefined,
-        utm_source: row.utm_source || undefined,
-        utm_medium: row.utm_medium || undefined,
-        utm_campaign: row.utm_campaign || undefined,
+        utm_source: undefined,
+        utm_medium: undefined,
+        utm_campaign: undefined,
         created_at: row.created_at,
       }));
-
-      const allLeads: Lead[] = [...normalizedFormLeads, ...normalizedConvLeads]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
-      allLeads.forEach(lead => {
+      normalizedLeads.forEach(lead => {
         const leadData = parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
@@ -342,9 +316,9 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      console.log(`✅ ${allLeads.length} leads carregados (form_leads + conversion_events)`);
-      setLeads(allLeads);
-      setFilteredLeads(allLeads);
+      console.log(`✅ ${normalizedLeads.length} leads carregados (conversion_events)`);
+      setLeads(normalizedLeads);
+      setFilteredLeads(normalizedLeads);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
@@ -595,7 +569,7 @@ export const LeadsManagement: React.FC = () => {
 
     try {
       const { error } = await supabase
-        .from('form_leads')
+        .from('conversion_events')
         .delete()
         .in('id', Array.from(selectedLeads));
 

@@ -179,7 +179,7 @@ const Hero = () => {
       detail: 'areas'
     }));
   };
-  return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
+  return <section id="home" className="h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-black">
       {/* Neural Background */}
       <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
         {bgVideoEnabled && bgVideoUrl ? (
@@ -200,7 +200,7 @@ const Hero = () => {
       <div className=""></div>
       
       {/* conteúdo centralizado */}
-      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
+      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12 px-6">
         <div ref={logoRef} className="mb-6 md:mb-8 w-full max-w-sm md:max-w-lg mx-auto relative">
           <div className="logo-container relative">
             <img src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" alt="Serafim & Trombela Advocacia Logo" className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300" style={{
