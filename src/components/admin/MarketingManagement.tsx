@@ -477,16 +477,15 @@ export const MarketingManagement: React.FC = () => {
           views
         }));
 
-        // Submissões por formulário
-        const formSubmissionsMap = conversionsData.reduce((acc, conversion) => {
-          const formId = conversion.form_id || 'Formulário desconhecido';
+        // Submissões por formulário (baseado em leads)
+        const formSubmissionsMap = (leadsData || []).reduce((acc: Record<string, number>, lead: any) => {
+          const formId = lead.form_id || 'Formulário desconhecido';
           acc[formId] = (acc[formId] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
-        const formStats = Object.entries(formSubmissionsMap).sort(([, a], [, b]) => b - a).map(([formId, count]) => ({
-          formId,
-          count
-        }));
+        const formStats = Object.entries(formSubmissionsMap)
+          .sort(([, a], [, b]) => (b as number) - (a as number))
+          .map(([formId, count]) => ({ formId, count: count as number }));
         const topLocations: Array<{
           location: string;
           count: number;

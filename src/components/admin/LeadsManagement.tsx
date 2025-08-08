@@ -262,11 +262,11 @@ export const LeadsManagement: React.FC = () => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Carregando leads da tabela conversion_events...');
+      console.log('🔄 Carregando leads da tabela form_leads...');
       
       const { data: leadsData, error: leadsError } = await supabase
-        .from('conversion_events')
-        .select('*')
+        .from('form_leads')
+        .select('id, lead_data, created_at, form_id, form_name, source_page, utm_source, utm_medium, utm_campaign, utm_content, utm_term')
         .order('created_at', { ascending: false });
 
       if (leadsError) {
@@ -290,9 +290,24 @@ export const LeadsManagement: React.FC = () => {
         statusMap[status.lead_id] = status.status;
       });
 
+      // Normalizar leads para a interface local
+      const normalizedLeads: Lead[] = (leadsData || []).map((row: any) => ({
+        id: row.id,
+        lead_data: row.lead_data,
+        event_type: 'form_submit',
+        page_url: row.source_page || undefined,
+        referrer: undefined,
+        utm_source: row.utm_source || undefined,
+        utm_medium: row.utm_medium || undefined,
+        utm_campaign: row.utm_campaign || undefined,
+        utm_content: row.utm_content || undefined,
+        utm_term: row.utm_term || undefined,
+        created_at: row.created_at,
+      }));
+
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
-      leadsData?.forEach(lead => {
+      normalizedLeads.forEach(lead => {
         const leadData = parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
@@ -300,9 +315,9 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      console.log(`✅ ${leadsData?.length || 0} leads carregados`);
-      setLeads(leadsData || []);
-      setFilteredLeads(leadsData || []);
+      console.log(`✅ ${normalizedLeads.length} leads carregados (form_leads)`);
+      setLeads(normalizedLeads);
+      setFilteredLeads(normalizedLeads);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
@@ -553,7 +568,7 @@ export const LeadsManagement: React.FC = () => {
 
     try {
       const { error } = await supabase
-        .from('conversion_events')
+        .from('form_leads')
         .delete()
         .in('id', Array.from(selectedLeads));
 
@@ -843,18 +858,18 @@ export const LeadsManagement: React.FC = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{leads.length}</div>
+            <div className="text-2xl font-bold">{filteredLeads.length}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Novos</CardTitle>
-            <Badge variant="secondary">Novo</Badge>
+            <CardTitle className="text-sm font-medium">Hoje</CardTitle>
+            <Badge variant="secondary">Hoje</Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {leads.filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo').length}
+              {filteredLeads.filter(lead => new Date(lead.created_at).toDateString() === new Date().toDateString()).length}
             </div>
           </CardContent>
         </Card>
