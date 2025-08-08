@@ -214,23 +214,16 @@ const Partners = () => {
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      {/* Video de fundo ocupando toda a tela */}
-      <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
-        zIndex: -1
-      }}>
+      {/* Vídeo de fundo do time - escopo apenas nesta seção */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <video
           id="team-background-video"
-          className="w-full h-full object-cover opacity-30"
+          className="w-full h-full object-cover opacity-30 pointer-events-none"
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
-          style={{ 
-            minWidth: '100vw',
-            minHeight: '100vh',
-            objectFit: 'cover'
-          }}
         />
       </div>
       

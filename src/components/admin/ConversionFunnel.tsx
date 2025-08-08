@@ -620,69 +620,6 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         </Card>
       </div>
 
-      {/* Performance dos Formulários - USANDO A MESMA FONTE DOS CÁLCULOS DO FUNIL */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Performance dos Formulários - Tempo Real
-              <span className="text-sm text-muted-foreground font-normal">
-                (conversões por formulário - {periods.find(p => p.value === selectedPeriod)?.label.toLowerCase()})
-              </span>
-            </CardTitle>
-            
-            {/* Seletor de período para performance */}
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">Período:</Label>
-              <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-                <SelectTrigger className="w-[200px] h-8">
-                  <SelectValue placeholder="Selecione um período" />
-                </SelectTrigger>
-                <SelectContent>
-                  {periods.map(period => (
-                    <SelectItem key={period.value} value={period.value}>
-                      {period.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {formPerformanceData.length > 0 ? (
-              formPerformanceData.map((performance) => (
-                <div key={performance.formId} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <div>
-                      <span className="font-medium">{performance.formId}</span>
-                      <span className="text-sm text-muted-foreground ml-2">{performance.formName}</span>
-                      {performance.formId === selectedForm && (
-                        <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                          ✓ Rastreando no Funil
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{performance.count}</div>
-                    <div className="text-sm text-muted-foreground">conversões</div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhuma conversão encontrada para este período</p>
-                <p className="text-sm">Tente selecionar um período maior ou verificar se há dados de formulários</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
