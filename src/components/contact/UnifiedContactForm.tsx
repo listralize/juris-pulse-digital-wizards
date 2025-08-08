@@ -20,7 +20,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   formId
 }) => {
   // Implementar marketing scripts específicos para este formulário
-  useFormMarketingScripts(formId || 'contact-form-main');
+  
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
     const pathname = window.location.pathname;
@@ -87,6 +87,10 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
   const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
+
+  // Implementar marketing scripts usando o ID real do formulário
+  const activeFormId = (formId || formConfig?.id || 'default');
+  useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
   React.useEffect(() => {
