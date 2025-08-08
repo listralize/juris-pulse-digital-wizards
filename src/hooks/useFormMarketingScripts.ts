@@ -58,6 +58,8 @@ export const useFormMarketingScripts = (formId: string) => {
             implementFormScripts(formConfig);
           } else {
             console.log(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
+            // Garantir remoção de scripts e listeners se desativado
+            removeFormScripts(formId);
           }
         }
       } catch (error) {
@@ -77,6 +79,8 @@ export const useFormMarketingScripts = (formId: string) => {
 
     return () => {
       window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
+      // Remover listeners e scripts ao desmontar ou trocar de formulário
+      removeFormScripts(formId);
     };
   }, [formId]);
 
@@ -112,8 +116,18 @@ export const useFormMarketingScripts = (formId: string) => {
   };
 
   const removeFormScripts = (formId: string) => {
+    // Remover scripts do DOM
     const existingScripts = document.querySelectorAll(`[data-form-marketing="${formId}"]`);
     existingScripts.forEach(script => script.remove());
+
+    // Remover listeners registrados para este formulário (fb, ga, gtm)
+    const handlersMap = (window as any).__formMarketingHandlers || {};
+    const handlers = handlersMap[formId];
+    if (handlers?.fb) document.removeEventListener('formSubmitSuccess', handlers.fb);
+    if (handlers?.ga) document.removeEventListener('formSubmitSuccess', handlers.ga);
+    if (handlers?.gtm) document.removeEventListener('formSubmitSuccess', handlers.gtm);
+    delete handlersMap[formId];
+    (window as any).__formMarketingHandlers = handlersMap;
   };
 
   const implementFormFacebookPixel = (formConfig: any) => {
@@ -179,11 +193,15 @@ export const useFormMarketingScripts = (formId: string) => {
       }
     };
 
-    // Remover listener anterior
-    document.removeEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
-    
-    // Adicionar novo listener para evento de sucesso
+    // Registrar listener gerenciado (com remoção adequada)
+    const handlersMap = (window as any).__formMarketingHandlers || {};
+    // Remover anterior se existir
+    if (handlersMap[formId]?.fb) {
+      document.removeEventListener('formSubmitSuccess', handlersMap[formId].fb);
+    }
     document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
+    handlersMap[formId] = { ...(handlersMap[formId] || {}), fb: handleFormSuccess as EventListener };
+    (window as any).__formMarketingHandlers = handlersMap;
   };
 
   const implementFormGoogleAnalytics = (formConfig: any) => {
@@ -226,11 +244,14 @@ export const useFormMarketingScripts = (formId: string) => {
       }
     };
 
-    // Remover listener anterior
-    document.removeEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
-    
-    // Adicionar novo listener para evento de sucesso
+    // Registrar listener gerenciado (com remoção adequada)
+    const handlersMap = (window as any).__formMarketingHandlers || {};
+    if (handlersMap[formId]?.ga) {
+      document.removeEventListener('formSubmitSuccess', handlersMap[formId].ga);
+    }
     document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
+    handlersMap[formId] = { ...(handlersMap[formId] || {}), ga: handleFormSuccess as EventListener };
+    (window as any).__formMarketingHandlers = handlersMap;
   };
 
   const implementFormGoogleTagManager = (formConfig: any) => {
@@ -273,10 +294,13 @@ export const useFormMarketingScripts = (formId: string) => {
       }
     };
 
-    // Remover listener anterior
-    document.removeEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
-    
-    // Adicionar novo listener para evento de sucesso
+    // Registrar listener gerenciado (com remoção adequada)
+    const handlersMap = (window as any).__formMarketingHandlers || {};
+    if (handlersMap[formId]?.gtm) {
+      document.removeEventListener('formSubmitSuccess', handlersMap[formId].gtm);
+    }
     document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
+    handlersMap[formId] = { ...(handlersMap[formId] || {}), gtm: handleFormSuccess as EventListener };
+    (window as any).__formMarketingHandlers = handlersMap;
   };
 };

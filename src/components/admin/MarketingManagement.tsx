@@ -369,10 +369,11 @@ export const MarketingManagement: React.FC = () => {
     loadLinkTreeForms();
   }, []);
   useEffect(() => {
-    if (multipleFormsConfig?.forms) {
+    // Evitar sobrescrever configurações carregadas do banco
+    if (multipleFormsConfig?.forms && conversionTracking.systemForms.length === 0) {
       loadSystemForms();
     }
-  }, [multipleFormsConfig]);
+  }, [multipleFormsConfig, conversionTracking.systemForms.length]);
   const loadSystemForms = () => {
     if (multipleFormsConfig?.forms) {
       // Preservar configurações existentes ou criar novas
