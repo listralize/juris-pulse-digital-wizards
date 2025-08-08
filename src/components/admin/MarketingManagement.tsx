@@ -298,26 +298,10 @@ export const MarketingManagement: React.FC = () => {
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '${config.pixelId}');
-      fbq('track', 'PageView');
     `;
     document.head.appendChild(fbPixelScript);
 
-    // Adicionar código customizado se existir
-    if (config.customCode && config.customCode.trim()) {
-      // Extrair apenas o código JavaScript do customCode, removendo tags HTML
-      const jsCodeMatch = config.customCode.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-      if (jsCodeMatch && jsCodeMatch[1]) {
-        const customScript = document.createElement('script');
-        customScript.setAttribute('data-marketing', 'facebook-pixel-custom');
-        customScript.innerHTML = jsCodeMatch[1];
-        document.head.appendChild(customScript);
-      }
-    }
-
-    // Adicionar noscript
-    const noscript = document.createElement('noscript');
-    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${config.pixelId}&ev=PageView&noscript=1" />`;
-    document.head.appendChild(noscript);
+    // Não enviamos PageView automaticamente; os eventos serão disparados conforme configuração do formulário
     
     console.log('✅ Facebook Pixel implementado com ID:', config.pixelId);
   };

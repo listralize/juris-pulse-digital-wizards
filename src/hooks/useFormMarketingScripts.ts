@@ -144,16 +144,11 @@ export const useFormMarketingScripts = (formId: string) => {
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '${pixelId}');
-        fbq('track', 'PageView');
         console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId}');
       `;
       document.head.appendChild(fbPixelScript);
 
-      // Adicionar noscript seguindo o modelo exato
-      const noscript = document.createElement('noscript');
-      noscript.setAttribute('data-form-marketing', formId);
-      noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1" />`;
-      document.head.appendChild(noscript);
+      // Não rastreamos PageView automaticamente em formulários; eventos são disparados apenas no sucesso do envio
 
       // Marcar este pixel como inicializado
       (window as any)[pixelKey] = true;
