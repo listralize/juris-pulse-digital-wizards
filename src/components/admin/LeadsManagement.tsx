@@ -879,7 +879,7 @@ export const LeadsManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {leads.filter(lead => leadStatuses[lead.id] === 'contato').length}
+              {filteredLeads.filter(lead => leadStatuses[lead.id] === 'contato').length}
             </div>
           </CardContent>
         </Card>
@@ -891,7 +891,7 @@ export const LeadsManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {leads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
+              {filteredLeads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
             </div>
           </CardContent>
         </Card>
