@@ -266,7 +266,7 @@ export const LeadsManagement: React.FC = () => {
       
       const { data: leadsData, error: leadsError } = await supabase
         .from('form_leads')
-        .select('id, lead_data, created_at, form_id, form_name, source_page, utm_source, utm_medium, utm_campaign, utm_content, utm_term')
+        .select('id, lead_data, created_at, form_id, form_name, source_page, utm_source, utm_medium, utm_campaign')
         .order('created_at', { ascending: false });
 
       if (leadsError) {
@@ -300,8 +300,6 @@ export const LeadsManagement: React.FC = () => {
         utm_source: row.utm_source || undefined,
         utm_medium: row.utm_medium || undefined,
         utm_campaign: row.utm_campaign || undefined,
-        utm_content: row.utm_content || undefined,
-        utm_term: row.utm_term || undefined,
         created_at: row.created_at,
       }));
 

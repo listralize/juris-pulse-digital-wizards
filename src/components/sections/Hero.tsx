@@ -24,6 +24,9 @@ const Hero = () => {
   const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
+  // Vídeo de fundo da Home
+  const [bgVideoUrl, setBgVideoUrl] = useState<string | null>(null);
+  const [bgVideoEnabled, setBgVideoEnabled] = useState(false);
 
   // Carregar dados do Supabase e event listeners
   useEffect(() => {
@@ -46,6 +49,8 @@ const Hero = () => {
           if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
           if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
           if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
+          if (settings.team_background_video) setBgVideoUrl(settings.team_background_video);
+          if (typeof settings.team_video_enabled !== 'undefined') setBgVideoEnabled(!!settings.team_video_enabled);
         }
       } catch (error) {
         console.error('❌ Hero: Erro ao carregar dados:', error);
@@ -176,8 +181,19 @@ const Hero = () => {
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
       {/* Neural Background */}
-      <div className="absolute inset-0 z-0 w-full h-full">
-        <NeuralBackground />
+      <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
+        {bgVideoEnabled && bgVideoUrl ? (
+          <video
+            className="w-full h-full object-cover opacity-30"
+            autoPlay
+            muted
+            loop
+            playsInline
+            src={bgVideoUrl}
+          />
+        ) : (
+          <NeuralBackground />
+        )}
       </div>
       
       {/* Overlay gradient */}
