@@ -274,8 +274,10 @@ export type Database = {
           campaign_medium: string | null
           campaign_name: string | null
           campaign_source: string | null
+          capital: string | null
           conversion_value: number | null
           created_at: string
+          ddd: number | null
           event_action: string
           event_category: string | null
           event_label: string | null
@@ -286,7 +288,9 @@ export type Database = {
           lead_data: Json | null
           page_url: string
           referrer: string | null
+          region: string | null
           session_id: string
+          state: string | null
           timestamp: string
           user_agent: string | null
           visitor_id: string | null
@@ -295,8 +299,10 @@ export type Database = {
           campaign_medium?: string | null
           campaign_name?: string | null
           campaign_source?: string | null
+          capital?: string | null
           conversion_value?: number | null
           created_at?: string
+          ddd?: number | null
           event_action: string
           event_category?: string | null
           event_label?: string | null
@@ -307,7 +313,9 @@ export type Database = {
           lead_data?: Json | null
           page_url: string
           referrer?: string | null
+          region?: string | null
           session_id: string
+          state?: string | null
           timestamp?: string
           user_agent?: string | null
           visitor_id?: string | null
@@ -316,8 +324,10 @@ export type Database = {
           campaign_medium?: string | null
           campaign_name?: string | null
           campaign_source?: string | null
+          capital?: string | null
           conversion_value?: number | null
           created_at?: string
+          ddd?: number | null
           event_action?: string
           event_category?: string | null
           event_label?: string | null
@@ -328,10 +338,42 @@ export type Database = {
           lead_data?: Json | null
           page_url?: string
           referrer?: string | null
+          region?: string | null
           session_id?: string
+          state?: string | null
           timestamp?: string
           user_agent?: string | null
           visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      ddd_locations: {
+        Row: {
+          capital: string
+          created_at: string
+          ddd: number
+          id: string
+          region: string
+          state_code: string
+          state_name: string
+        }
+        Insert: {
+          capital: string
+          created_at?: string
+          ddd: number
+          id?: string
+          region: string
+          state_code: string
+          state_name: string
+        }
+        Update: {
+          capital?: string
+          created_at?: string
+          ddd?: number
+          id?: string
+          region?: string
+          state_code?: string
+          state_name?: string
         }
         Relationships: []
       }
@@ -1378,6 +1420,10 @@ export type Database = {
       cleanup_old_analytics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      extract_ddd_from_phone: {
+        Args: { phone_number: string }
+        Returns: number
       }
       has_role: {
         Args: {

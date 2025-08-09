@@ -203,6 +203,32 @@ const handler = async (req: Request): Promise<Response> => {
     const sessionId = `webhook-${timestamp}`;
     const visitorId = `webhook-visitor-${timestamp}`;
 
+    // Extrair DDD do telefone e obter localização
+    const phoneNumber = mappedData.phone || mappedData.telefone || '';
+    let locationData = {};
+    
+    if (phoneNumber) {
+      const { data: extractedDdd } = await supabase
+        .rpc('extract_ddd_from_phone', { phone_number: phoneNumber });
+      
+      if (extractedDdd) {
+        const { data: locationInfo } = await supabase
+          .from('ddd_locations')
+          .select('state_name, capital, region, ddd')
+          .eq('ddd', extractedDdd)
+          .maybeSingle();
+        
+        if (locationInfo) {
+          locationData = {
+            ddd: locationInfo.ddd,
+            state: locationInfo.state_name,
+            capital: locationInfo.capital,
+            region: locationInfo.region
+          };
+        }
+      }
+    }
+
     // Insert the lead data into conversion_events
     const { data, error } = await supabase
       .from('conversion_events')
@@ -224,7 +250,8 @@ const handler = async (req: Request): Promise<Response> => {
         form_name: mappedData.form_name || 'Webhook Lead Form',
         form_id: mappedData.form_id || 'webhook_form',
         timestamp: new Date().toISOString(),
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        ...locationData
       })
       .select()
       .single();

@@ -11,9 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Phone, Mail, Calendar, Globe, ExternalLink, MessageSquare, Database, Edit3, Check, X } from 'lucide-react';
+import { Phone, Mail, Calendar, Globe, ExternalLink, MessageSquare, Database, Edit3, Check, X, MapPin } from 'lucide-react';
 import { LeadComments } from './LeadComments';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Lead {
   id: string;
@@ -27,6 +28,10 @@ interface Lead {
   created_at: string;
   session_id: string;
   visitor_id?: string;
+  state?: string;
+  capital?: string;
+  region?: string;
+  ddd?: number;
 }
 
 interface LeadDetailDialogProps {
@@ -126,10 +131,41 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
     setEditValues({ ...editValues, [field]: value });
   };
 
-  const handleSave = (field: string) => {
-    // Aqui você pode implementar a lógica para salvar no backend
-    setEditingField(null);
-    toast({ title: `${field} atualizado!` });
+  const handleSave = async (field: string) => {
+    try {
+      const newValue = editValues[field];
+      
+      // Atualizar no Supabase
+      const { error } = await supabase
+        .from('conversion_events')
+        .update({
+          lead_data: {
+            ...leadData,
+            [field]: newValue
+          }
+        })
+        .eq('id', lead.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Atualizar localmente
+      lead.lead_data = {
+        ...leadData,
+        [field]: newValue
+      };
+
+      setEditingField(null);
+      toast({ title: `${field} atualizado com sucesso!` });
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      toast({ 
+        title: 'Erro ao salvar',
+        description: 'Não foi possível salvar a alteração.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -276,9 +312,18 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                     <div className="space-y-2">
                       <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
                       {renderEditableField('email', leadData.email, <Mail className="h-4 w-4" />)}
-                      {(leadData.phone || leadData.telefone) && 
-                        renderEditableField('phone', leadData.phone || leadData.telefone, <Phone className="h-4 w-4" />)
-                      }
+                      {renderEditableField('phone', leadData.phone || leadData.telefone, <Phone className="h-4 w-4" />)}
+                      {(lead.state || lead.region) && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Globe className="h-4 w-4" />
+                          <span>
+                            {lead.capital && `${lead.capital} - `}
+                            {lead.state && `${lead.state} `}
+                            {lead.region && `(${lead.region})`}
+                            {lead.ddd && ` - DDD ${lead.ddd}`}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>{new Date(lead.created_at).toLocaleString('pt-BR')}</span>
