@@ -57,14 +57,16 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
           WebkitOverflowScrolling: shouldAllowScroll ? 'touch' : 'auto',
           opacity: 1,
           visibility: 'visible',
-          padding: id === 'home' ? '0' : ((isMobile || isTablet) ? (isTablet ? '1.5rem' : '1rem') : '0.75rem'),
-          paddingBottom: id === 'home' ? '0' : ((isMobile || isTablet) ? '0' : '140px'),
+          padding: (isMobile || isTablet) ? 
+            (isTablet ? '1.5rem' : '1rem') : 
+            '0.75rem',
+          paddingBottom: (isMobile || isTablet) ? '0' : '140px',
           touchAction: shouldAllowScroll || (id === 'contact' && (isMobile || isTablet)) ? 'auto' : 'pan-y',
           margin: 0
         }}
       >
         <div 
-          className={`w-full ${id === 'home' ? 'max-w-none' : 'max-w-6xl'} mx-auto flex flex-col justify-center`} 
+          className="w-full max-w-6xl mx-auto flex flex-col justify-center" 
           style={{ 
             opacity: 1, 
             visibility: 'visible',

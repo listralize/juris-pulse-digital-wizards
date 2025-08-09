@@ -262,30 +262,18 @@ export const LeadsManagement: React.FC = () => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Carregando leads de conversion_events e form_leads...');
+      console.log('🔄 Carregando leads da tabela conversion_events...');
+      
+      const { data: leadsData, error: leadsError } = await supabase
+        .from('conversion_events')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      const [
-        { data: convData, error: convError },
-        { data: formData, error: formError }
-      ] = await Promise.all([
-        supabase
-          .from('conversion_events')
-          .select('id, lead_data, created_at, event_type, event_action, page_url, referrer, form_id, form_name, event_label, event_category')
-          .or('event_type.eq.form_submission,event_label.eq.contact_form,event_category.eq.lead'),
-        supabase
-          .from('form_leads')
-          .select('id, lead_data, created_at, source_page')
-      ]);
-
-      if (convError) {
-        console.error('❌ Erro ao carregar leads (conversion_events):', convError);
+      if (leadsError) {
+        console.error('❌ Erro ao carregar leads:', leadsError);
+        toast.error('Erro ao carregar leads');
+        return;
       }
-      if (formError) {
-        console.error('❌ Erro ao carregar leads (form_leads):', formError);
-      }
-
-      const conversionsData = (convData || []).filter((row: any) => !!row.lead_data);
-      const formLeadsData = (formData || []).filter((row: any) => !!row.lead_data);
 
       // Carregar status dos leads
       const { data: statusData, error: statusError } = await supabase
@@ -302,37 +290,9 @@ export const LeadsManagement: React.FC = () => {
         statusMap[status.lead_id] = status.status;
       });
 
-      // Normalizar e combinar leads das duas fontes
-      const normalizedConv: Lead[] = (conversionsData || []).map((row: any) => ({
-        id: row.id,
-        lead_data: row.lead_data,
-        event_type: row.event_type || 'form_submission',
-        page_url: row.page_url || undefined,
-        referrer: row.referrer || undefined,
-        utm_source: undefined,
-        utm_medium: undefined,
-        utm_campaign: undefined,
-        created_at: row.created_at,
-      }));
-
-      const normalizedForm: Lead[] = (formLeadsData || []).map((row: any) => ({
-        id: row.id,
-        lead_data: row.lead_data,
-        event_type: 'form_lead',
-        page_url: row.source_page || undefined,
-        referrer: undefined,
-        utm_source: undefined,
-        utm_medium: undefined,
-        utm_campaign: undefined,
-        created_at: row.created_at,
-      }));
-
-      const allLeads: Lead[] = [...normalizedConv, ...normalizedForm]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
-      allLeads.forEach(lead => {
+      leadsData?.forEach(lead => {
         const leadData = parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
@@ -340,9 +300,9 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      console.log(`✅ Leads carregados: conversion_events=${normalizedConv.length}, form_leads=${normalizedForm.length}, total=${allLeads.length}`);
-      setLeads(allLeads);
-      setFilteredLeads(allLeads);
+      console.log(`✅ ${leadsData?.length || 0} leads carregados`);
+      setLeads(leadsData || []);
+      setFilteredLeads(leadsData || []);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
@@ -883,18 +843,18 @@ export const LeadsManagement: React.FC = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredLeads.length}</div>
+            <div className="text-2xl font-bold">{leads.length}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hoje</CardTitle>
-            <Badge variant="secondary">Hoje</Badge>
+            <CardTitle className="text-sm font-medium">Novos</CardTitle>
+            <Badge variant="secondary">Novo</Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {filteredLeads.filter(lead => new Date(lead.created_at).toDateString() === new Date().toDateString()).length}
+              {leads.filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo').length}
             </div>
           </CardContent>
         </Card>
@@ -906,7 +866,7 @@ export const LeadsManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {filteredLeads.filter(lead => leadStatuses[lead.id] === 'contato').length}
+              {leads.filter(lead => leadStatuses[lead.id] === 'contato').length}
             </div>
           </CardContent>
         </Card>
@@ -918,7 +878,7 @@ export const LeadsManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {filteredLeads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
+              {leads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
             </div>
           </CardContent>
         </Card>

@@ -428,16 +428,14 @@ export const MarketingManagement: React.FC = () => {
         data: visitorsData
       } = await supabase.from('website_analytics').select('session_id, timestamp, page_url, page_title, device_type, browser').gte('timestamp', oneWeekAgo.toISOString());
 
-      // Carregar leads (formulários do site e webhooks)
-      const { data: leadsData } = await supabase
-        .from('form_leads')
-        .select('created_at, form_id')
-        .gte('created_at', oneWeekAgo.toISOString());
-
-      if (visitorsData && leadsData) {
+      // Carregar dados de conversões detalhadas
+      const {
+        data: conversionsData
+      } = await supabase.from('conversion_events').select('*').gte('timestamp', oneWeekAgo.toISOString());
+      if (visitorsData && conversionsData) {
         console.log('📊 Dados brutos carregados:', {
           visitorsCount: visitorsData.length,
-          leadsCount: leadsData.length
+          conversionsCount: conversionsData.length
         });
 
         // Calcular visitantes únicos
@@ -455,16 +453,16 @@ export const MarketingManagement: React.FC = () => {
         }).length;
         const thisWeekVisitors = visitorsData.length; // Todos os visitantes da última semana
 
-        // Calcular leads (conversões) de hoje, ontem e esta semana
-        const todayConversions = leadsData.filter(l => {
-          const convDate = new Date(l.created_at as string).toDateString();
+        // Calcular conversões de hoje, ontem e esta semana
+        const todayConversions = conversionsData.filter(c => {
+          const convDate = new Date(c.timestamp).toDateString();
           return convDate === today.toDateString();
         }).length;
-        const yesterdayConversions = leadsData.filter(l => {
-          const convDate = new Date(l.created_at as string).toDateString();
+        const yesterdayConversions = conversionsData.filter(c => {
+          const convDate = new Date(c.timestamp).toDateString();
           return convDate === yesterday.toDateString();
         }).length;
-        const thisWeekConversions = leadsData.length;
+        const thisWeekConversions = conversionsData.length;
 
         // Páginas mais visitadas
         const pageViewsMap = visitorsData.reduce((acc, visit) => {
@@ -477,15 +475,16 @@ export const MarketingManagement: React.FC = () => {
           views
         }));
 
-        // Submissões por formulário (baseado em leads)
-        const formSubmissionsMap = (leadsData || []).reduce((acc: Record<string, number>, lead: any) => {
-          const formId = lead.form_id || 'Formulário desconhecido';
+        // Submissões por formulário
+        const formSubmissionsMap = conversionsData.reduce((acc, conversion) => {
+          const formId = conversion.form_id || 'Formulário desconhecido';
           acc[formId] = (acc[formId] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
-        const formStats = Object.entries(formSubmissionsMap)
-          .sort(([, a], [, b]) => (b as number) - (a as number))
-          .map(([formId, count]) => ({ formId, count: count as number }));
+        const formStats = Object.entries(formSubmissionsMap).sort(([, a], [, b]) => b - a).map(([formId, count]) => ({
+          formId,
+          count
+        }));
         const topLocations: Array<{
           location: string;
           count: number;
@@ -1347,7 +1346,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Hoje</p>
-                    <p className="text-3xl font-bold">{analyticsData?.conversions.today || 0}</p>
+                    <p className="text-3xl font-bold">{analyticsData?.visitors.today || 0}</p>
                     <p className="text-sm text-muted-foreground">{analyticsData?.conversions.today || 0} conversões</p>
                   </div>
                   <Calendar className="h-8 w-8 text-orange-500" />

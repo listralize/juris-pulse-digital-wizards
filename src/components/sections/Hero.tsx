@@ -24,9 +24,6 @@ const Hero = () => {
   const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
-  // Vídeo de fundo da Home
-  const [bgVideoUrl, setBgVideoUrl] = useState<string | null>(null);
-  const [bgVideoEnabled, setBgVideoEnabled] = useState(false);
 
   // Carregar dados do Supabase e event listeners
   useEffect(() => {
@@ -49,8 +46,6 @@ const Hero = () => {
           if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
           if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
           if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
-          if (settings.team_background_video) setBgVideoUrl(settings.team_background_video);
-          if (typeof settings.team_video_enabled !== 'undefined') setBgVideoEnabled(!!settings.team_video_enabled);
         }
       } catch (error) {
         console.error('❌ Hero: Erro ao carregar dados:', error);
@@ -179,28 +174,17 @@ const Hero = () => {
       detail: 'areas'
     }));
   };
-  return <section id="home" className="h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-black">
+  return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
       {/* Neural Background */}
-      <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
-        {bgVideoEnabled && bgVideoUrl ? (
-          <video
-            className="w-full h-full object-cover opacity-30"
-            autoPlay
-            muted
-            loop
-            playsInline
-            src={bgVideoUrl}
-          />
-        ) : (
-          <NeuralBackground />
-        )}
+      <div className="absolute inset-0 z-0 w-full h-full">
+        <NeuralBackground />
       </div>
       
       {/* Overlay gradient */}
       <div className=""></div>
       
       {/* conteúdo centralizado */}
-      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12 px-6">
+      <div className="relative z-10 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
         <div ref={logoRef} className="mb-6 md:mb-8 w-full max-w-sm md:max-w-lg mx-auto relative">
           <div className="logo-container relative">
             <img src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" alt="Serafim & Trombela Advocacia Logo" className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300" style={{
