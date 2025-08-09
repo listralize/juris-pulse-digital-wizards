@@ -33,6 +33,9 @@ interface Lead {
   capital?: string;
   region?: string;
   ddd?: number;
+  ddd_locations?: {
+    cities?: string;
+  };
 }
 
 interface LeadDetailDialogProps {
@@ -326,17 +329,17 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                       <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
                       {renderEditableField('email', leadData.email, <Mail className="h-4 w-4" />)}
                        {renderEditableField('phone', leadData.phone || leadData.telefone, <Phone className="h-4 w-4" />)}
-                       {(lead.state || lead.region || lead.capital || lead.ddd) && (
-                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                           <MapPin className="h-4 w-4" />
-                           <span>
-                             {lead.capital && `${lead.capital}`}
-                             {lead.state && ` - ${lead.state}`}
-                             {lead.region && ` (${lead.region})`}
-                             {lead.ddd && ` - DDD ${lead.ddd}`}
-                           </span>
-                         </div>
-                       )}
+                        {(lead.state || lead.region || lead.capital || lead.ddd) && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="h-4 w-4" />
+                            <span>
+                              {lead.ddd_locations?.cities && `${lead.ddd_locations.cities}`}
+                              {lead.state && ` - ${lead.state}`}
+                              {lead.region && ` (${lead.region})`}
+                              {lead.ddd && ` - DDD ${lead.ddd}`}
+                            </span>
+                          </div>
+                        )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>{new Date(lead.created_at).toLocaleString('pt-BR')}</span>

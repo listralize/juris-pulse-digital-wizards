@@ -350,6 +350,7 @@ export type Database = {
       ddd_locations: {
         Row: {
           capital: string
+          cities: string | null
           created_at: string
           ddd: number
           id: string
@@ -359,6 +360,7 @@ export type Database = {
         }
         Insert: {
           capital: string
+          cities?: string | null
           created_at?: string
           ddd: number
           id?: string
@@ -368,6 +370,7 @@ export type Database = {
         }
         Update: {
           capital?: string
+          cities?: string | null
           created_at?: string
           ddd?: number
           id?: string

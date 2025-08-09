@@ -40,6 +40,9 @@ interface Lead {
   capital?: string;
   region?: string;
   ddd?: number;
+  ddd_locations?: {
+    cities?: string;
+  };
 }
 
 // Interface para lead editável
@@ -118,7 +121,11 @@ export const LeadsManagement: React.FC = () => {
       
       const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
-        .select('id, event_type, event_action, session_id, visitor_id, form_id, form_name, page_url, referrer, created_at, lead_data, state, capital, region, ddd')
+        .select(`
+          id, event_type, event_action, session_id, visitor_id, form_id, form_name, 
+          page_url, referrer, created_at, lead_data, state, capital, region, ddd,
+          ddd_locations!inner(cities)
+        `)
         .in('event_type', ['form_submission', 'webhook_received'])
         .order('created_at', { ascending: false });
 
