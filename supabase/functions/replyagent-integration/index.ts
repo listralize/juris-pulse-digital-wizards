@@ -48,6 +48,8 @@ serve(async (req) => {
       throw new Error('REPLYAGENT_API_KEY não configurada');
     }
 
+    console.log('🔑 API Key configurada:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NÃO ENCONTRADA');
+
     const { action, data } = await req.json();
 
     const headers = {
@@ -57,6 +59,45 @@ serve(async (req) => {
     };
 
     console.log(`🔄 Executando ação: ${action}`, data);
+    console.log('🌐 Headers sendo enviados:', {
+      'Authorization': `Bearer ${apiKey.substring(0, 10)}...`,
+      'Content-Type': 'application/json'
+    });
+
+    // Primeiro, vamos testar um endpoint simples para verificar a conectividade
+    if (action === 'test_connection') {
+      const testUrls = [
+        'https://ra-bcknd.com',
+        'https://ra-bcknd.com/api',
+        'https://ra-bcknd.com/v1',
+        'https://ra-bcknd.com/api/v1'
+      ];
+
+      for (const testUrl of testUrls) {
+        try {
+          console.log(`🧪 Testando conectividade: ${testUrl}`);
+          const testResponse = await fetch(testUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          console.log(`📊 Resposta de ${testUrl}: ${testResponse.status} ${testResponse.statusText}`);
+          const responseText = await testResponse.text();
+          console.log(`📄 Conteúdo da resposta: ${responseText.substring(0, 200)}...`);
+        } catch (error) {
+          console.log(`❌ Erro ao testar ${testUrl}:`, error.message);
+        }
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Teste de conectividade concluído, verifique os logs'
+      }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
 
     switch (action) {
       case 'find_contact_by_phone': {
@@ -200,22 +241,41 @@ serve(async (req) => {
           for (const endpoint of possibleEndpoints) {
             console.log(`🔍 Testando endpoint: ${endpoint}`);
             try {
-              const testResponse = await fetch(endpoint, { headers });
-              if (testResponse.ok) {
+              const testResponse = await fetch(endpoint, { 
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${apiKey}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              console.log(`📊 Status da resposta: ${testResponse.status} ${testResponse.statusText}`);
+              
+              if (testResponse.status === 200 || testResponse.status === 401) {
+                // 200 = sucesso, 401 = não autorizado (mas endpoint existe)
                 findResponse = testResponse;
                 workingEndpoint = endpoint.replace('/contacts', '');
-                console.log(`✅ Endpoint funcionando: ${workingEndpoint}`);
+                console.log(`✅ Endpoint encontrado: ${workingEndpoint}`);
+                
+                if (testResponse.status === 401) {
+                  console.log('🔐 Endpoint existe mas API key pode estar incorreta');
+                  throw new Error('API key incorreta ou expirada');
+                }
                 break;
               } else {
-                console.log(`❌ Endpoint falhou com status: ${testResponse.status}`);
+                const errorText = await testResponse.text();
+                console.log(`❌ Endpoint falhou - Status: ${testResponse.status}, Resposta: ${errorText.substring(0, 200)}`);
               }
             } catch (err) {
               console.log(`❌ Erro no endpoint ${endpoint}:`, err.message);
             }
           }
 
-          if (!findResponse || !findResponse.ok) {
-            throw new Error(`Nenhum endpoint da API funcionou. Verifique a URL base ou a chave da API.`);
+          if (!findResponse || (!findResponse.ok && findResponse.status !== 401)) {
+            console.log('🚨 NENHUM ENDPOINT FUNCIONOU - Detalhes:');
+            console.log('- URL base testada:', REPLYAGENT_API_BASE);
+            console.log('- API Key (primeiros 10 chars):', apiKey.substring(0, 10));
+            console.log('- Endpoints testados:', possibleEndpoints);
+            throw new Error(`API ReplyAgent inacessível. Verifique a URL base e a chave da API.`);
           }
 
           const contacts: APIContact[] = await findResponse.json();

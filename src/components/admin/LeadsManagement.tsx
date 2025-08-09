@@ -259,6 +259,7 @@ export const LeadsManagement: React.FC = () => {
   const [isContactImporterOpen, setIsContactImporterOpen] = useState(false);
   const [isLeadWebhookManagerOpen, setIsLeadWebhookManagerOpen] = useState(false);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
+  const [isProcessingAll, setIsProcessingAll] = useState(false);
   
   // Integração ReplyAgent
   const replyAgent = useReplyAgentIntegration();
@@ -375,6 +376,30 @@ export const LeadsManagement: React.FC = () => {
     if (result.success) {
       // Atualizar status do lead se foi processado com sucesso
       await updateLeadStatus(lead.id, 'contato');
+    }
+  };
+
+  // Função para testar conectividade ReplyAgent
+  const testReplyAgentConnection = async () => {
+    try {
+      setIsProcessingAll(true);
+      const response = await supabase.functions.invoke('replyagent-integration', {
+        body: {
+          action: 'test_connection',
+          data: {}
+        }
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      toast.success('Teste de conectividade executado. Verifique os logs da edge function para mais detalhes.');
+    } catch (error) {
+      console.error('Erro ao testar conectividade:', error);
+      toast.error('Erro ao testar conectividade: ' + error.message);
+    } finally {
+      setIsProcessingAll(false);
     }
   };
 
@@ -820,6 +845,17 @@ export const LeadsManagement: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            onClick={testReplyAgentConnection}
+            variant="outline"
+            size="sm"
+            disabled={isProcessingAll}
+            className="flex items-center gap-2"
+          >
+            <Webhook className="h-4 w-4" />
+            {isProcessingAll ? 'Testando...' : 'Testar ReplyAgent'}
+          </Button>
+
           <Button
             variant={currentView === 'table' ? 'default' : 'outline'}
             size="sm"
