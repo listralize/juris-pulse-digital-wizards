@@ -48,8 +48,10 @@ export const CitiesChart: React.FC = () => {
         startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
         break;
       case 'custom':
-        if (customStartDate && customEndDate) {
+        if (customStartDate) {
           startDate = new Date(customStartDate);
+        } else {
+          startDate = null; // Show all data if no start date
         }
         break;
       case 'total':
