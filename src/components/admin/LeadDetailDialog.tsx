@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Phone, Mail, Calendar, Globe, ExternalLink, MessageSquare, Database } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Phone, Mail, Calendar, Globe, ExternalLink, MessageSquare, Database, Edit3, Check, X } from 'lucide-react';
 import { LeadComments } from './LeadComments';
 import { useToast } from '@/hooks/use-toast';
 
@@ -103,6 +104,9 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
   setSelectedTemplate
 }) => {
   const { toast } = useToast();
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<{ [key: string]: string }>({});
+  const [showTechnicalModal, setShowTechnicalModal] = useState(false);
 
   if (!lead) return null;
 
@@ -117,263 +121,301 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
   
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${whatsappMessage}`;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+  const handleEdit = (field: string, value: string) => {
+    setEditingField(field);
+    setEditValues({ ...editValues, [field]: value });
+  };
+
+  const handleSave = (field: string) => {
+    // Aqui você pode implementar a lógica para salvar no backend
+    setEditingField(null);
+    toast({ title: `${field} atualizado!` });
+  };
+
+  const handleCancel = () => {
+    setEditingField(null);
+    setEditValues({});
+  };
+
+  // Função para renderizar campos editáveis
+  const renderEditableField = (field: string, value: string, icon: React.ReactNode) => {
+    const isEditing = editingField === field;
+    const currentValue = isEditing ? (editValues[field] ?? value) : value;
+
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        {icon}
+        {isEditing ? (
+          <div className="flex items-center gap-1 flex-1">
+            <Input 
+              value={currentValue}
+              onChange={(e) => setEditValues({ ...editValues, [field]: e.target.value })}
+              className="h-6 text-xs"
+            />
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleSave(field)}>
+              <Check className="h-3 w-3 text-green-600" />
+            </Button>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>
+              <X className="h-3 w-3 text-red-600" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 flex-1">
+            <span>{currentValue || 'Não informado'}</span>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
+              onClick={() => handleEdit(field, value)}
+            >
+              <Edit3 className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Função para obter campos dinâmicos do webhook
+  const getDynamicFields = () => {
+    const excludeKeys = [
+      'name', 'email', 'phone', 'telefone', 'service', 'message', 
+      'urgent', 'isUrgent', 'customFields', 'formConfig', 'timestamp', 
+      'webhook_timestamp', 'webhook_source', 'processing_method', 'subject', 'Assunto'
+    ];
+    
+    return Object.keys(leadData).filter(key => 
+      !excludeKeys.includes(key) &&
+      typeof leadData[key] !== 'object' &&
+      leadData[key] !== null &&
+      leadData[key] !== undefined &&
+      leadData[key] !== ''
+    );
+  };
+
+  const TechnicalModal = () => (
+    <Dialog open={showTechnicalModal} onOpenChange={setShowTechnicalModal}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Detalhes do Lead</span>
-            {leadData.urgent && (
-              <Badge variant="destructive">Urgente</Badge>
-            )}
+          <DialogTitle className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Dados Técnicos
           </DialogTitle>
         </DialogHeader>
+        <div className="space-y-2 text-xs">
+          <div className="grid grid-cols-1 gap-2">
+            <div className="p-2 bg-muted/30 rounded">
+              <span className="font-medium text-muted-foreground">ID do Lead:</span>
+              <span className="ml-2 break-all">{lead.id}</span>
+            </div>
+            <div className="p-2 bg-muted/30 rounded">
+              <span className="font-medium text-muted-foreground">Session ID:</span>
+              <span className="ml-2 break-all">{lead.session_id}</span>
+            </div>
+            {lead.form_id && (
+              <div className="p-2 bg-muted/30 rounded">
+                <span className="font-medium text-muted-foreground">Form ID:</span>
+                <span className="ml-2">{lead.form_id}</span>
+              </div>
+            )}
+            {lead.form_name && (
+              <div className="p-2 bg-muted/30 rounded">
+                <span className="font-medium text-muted-foreground">Formulário:</span>
+                <span className="ml-2">{lead.form_name}</span>
+              </div>
+            )}
+            {lead.page_url && (
+              <div className="p-2 bg-muted/30 rounded">
+                <span className="font-medium text-muted-foreground flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  Página:
+                </span>
+                <span className="ml-2 break-all">{lead.page_url}</span>
+              </div>
+            )}
+            {lead.referrer && (
+              <div className="p-2 bg-muted/30 rounded">
+                <span className="font-medium text-muted-foreground flex items-center gap-1">
+                  <ExternalLink className="h-3 w-3" />
+                  Origem:
+                </span>
+                <span className="ml-2 break-all">{lead.referrer}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="details">Informações</TabsTrigger>
-            <TabsTrigger value="comments">Comentários</TabsTrigger>
-            <TabsTrigger value="technical">Dados Técnicos</TabsTrigger>
-          </TabsList>
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Detalhes do Lead</span>
+              {leadData.urgent && (
+                <Badge variant="destructive">Urgente</Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="details">Informações</TabsTrigger>
+              <TabsTrigger value="comments">Comentários</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="details" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Informações do Lead */}
-              <Card>
-                <CardContent className="p-4 space-y-3">
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mail className="h-4 w-4" />
-                      <span>{leadData.email || 'Email não informado'}</span>
-                    </div>
-                    {leadData.phone && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Informações do Lead - 2 colunas */}
+              <div className="lg:col-span-2 space-y-4">
+                <Card>
+                  <CardContent className="p-4 space-y-3 group">
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
+                      {renderEditableField('email', leadData.email, <Mail className="h-4 w-4" />)}
+                      {(leadData.phone || leadData.telefone) && 
+                        renderEditableField('phone', leadData.phone || leadData.telefone, <Phone className="h-4 w-4" />)
+                      }
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        <span>{leadData.phone}</span>
+                        <Calendar className="h-4 w-4" />
+                        <span>{new Date(lead.created_at).toLocaleString('pt-BR')}</span>
+                      </div>
+                    </div>
+
+                    {leadData.service && (
+                      <div className="pt-2 border-t">
+                        <h4 className="text-sm font-medium text-foreground mb-1">Serviço</h4>
+                        <p className="text-sm">{leadData.service}</p>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(lead.created_at).toLocaleString('pt-BR')}</span>
-                    </div>
-                  </div>
 
-                  {leadData.service && (
-                    <div className="pt-2 border-t">
-                      <span className="text-xs font-medium text-muted-foreground">SERVIÇO</span>
-                      <p className="text-sm mt-1">{leadData.service}</p>
-                    </div>
-                  )}
-
-                  {(leadData.subject || leadData.Assunto) && (
-                    <div className="pt-2 border-t">
-                      <span className="text-xs font-medium text-muted-foreground">ASSUNTO</span>
-                      <p className="text-sm mt-1 p-2 bg-muted/30 rounded text-xs max-h-20 overflow-y-auto">
-                        {leadData.subject || leadData.Assunto}
-                      </p>
-                    </div>
-                  )}
-
-                  {leadData.source && (
-                    <div className="pt-2 border-t">
-                      <span className="text-xs font-medium text-muted-foreground">ORIGEM</span>
-                      <p className="text-sm mt-1">{leadData.source}</p>
-                    </div>
-                  )}
-
-                  {leadData.message && (
-                    <div className="pt-2 border-t">
-                      <span className="text-xs font-medium text-muted-foreground">MENSAGEM</span>
-                      <p className="text-sm mt-1 p-2 bg-muted/30 rounded text-xs max-h-20 overflow-y-auto">
-                        {leadData.message}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Campos customizados e extras */}
-                  {Object.keys(leadData).filter(key => 
-                    !['name', 'email', 'phone', 'service', 'message', 'source', 'urgent', 'isUrgent', 'customFields', 'formConfig', 'timestamp', 'webhook_timestamp', 'webhook_source', 'processing_method'].includes(key) &&
-                    typeof leadData[key] !== 'object' &&
-                    leadData[key] !== null &&
-                    leadData[key] !== undefined &&
-                    leadData[key] !== ''
-                  ).length > 0 && (
-                    <div className="pt-2 border-t">
-                      <span className="text-xs font-medium text-muted-foreground">CAMPOS ADICIONAIS</span>
-                      <div className="mt-1 space-y-1">
-                        {Object.keys(leadData).filter(key => 
-                          !['name', 'email', 'phone', 'service', 'message', 'source', 'urgent', 'isUrgent', 'customFields', 'formConfig', 'timestamp', 'webhook_timestamp', 'webhook_source', 'processing_method'].includes(key) &&
-                          typeof leadData[key] !== 'object' &&
-                          leadData[key] !== null &&
-                          leadData[key] !== undefined &&
-                          leadData[key] !== ''
-                        ).map((key) => (
-                          <div key={key} className="text-xs">
-                            <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                            <span className="ml-1">{String(leadData[key])}</span>
-                          </div>
-                        ))}
+                    {(leadData.subject || leadData.Assunto) && (
+                      <div className="pt-2 border-t">
+                        <h4 className="text-sm font-medium text-foreground mb-1">Assunto</h4>
+                        <p className="text-sm p-2 bg-muted/30 rounded max-h-20 overflow-y-auto">
+                          {leadData.subject || leadData.Assunto}
+                        </p>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Campos customizados estruturados */}
-                  {leadData.customFields && Object.keys(leadData.customFields).length > 0 && (
-                    <div className="pt-2 border-t">
-                      <span className="text-xs font-medium text-muted-foreground">CAMPOS CUSTOMIZADOS</span>
-                      <div className="mt-1 space-y-1">
-                        {Object.entries(leadData.customFields).map(([key, value]: [string, any]) => (
-                          <div key={key} className="text-xs">
-                            <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                            <span className="ml-1">{String(value)}</span>
-                          </div>
-                        ))}
+                    {leadData.message && (
+                      <div className="pt-2 border-t">
+                        <h4 className="text-sm font-medium text-foreground mb-1">Mensagem</h4>
+                        <p className="text-sm p-2 bg-muted/30 rounded max-h-20 overflow-y-auto">
+                          {leadData.message}
+                        </p>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    )}
 
-              {/* Ações */}
-              <Card>
-                <CardContent className="p-4 space-y-3">
-                  <h4 className="font-medium">Ações Rápidas</h4>
-                  
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      asChild
-                    >
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Phone className="h-4 w-4 text-green-600" />
-                        Contatar via WhatsApp
-                        <ExternalLink className="h-3 w-3 ml-auto" />
-                      </a>
-                    </Button>
+                    {/* Campos dinâmicos do webhook */}
+                    {getDynamicFields().map((key) => (
+                      <div key={key} className="pt-2 border-t">
+                        <h4 className="text-sm font-medium text-foreground mb-1 capitalize">
+                          {key.replace(/_/g, ' ')}
+                        </h4>
+                        <p className="text-sm">{String(leadData[key])}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
 
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        if (leadData.email) {
-                          navigator.clipboard.writeText(leadData.email);
-                          toast({ title: "Email copiado!" });
-                        }
-                      }}
-                    >
-                      <Mail className="h-4 w-4 text-blue-600" />
-                      Copiar Email
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      TEMPLATE DE EMAIL
-                    </label>
-                    <Select
-                      value={selectedTemplate?.id || ''}
-                      onValueChange={(value) => {
-                        const template = emailTemplates.find(t => t.id === value);
-                        setSelectedTemplate(template);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {emailTemplates.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              {/* Ações - 1 coluna à direita */}
+              <div className="space-y-4">
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <h4 className="font-medium">Ações Rápidas</h4>
                     
-                    <Button
-                      className="w-full"
-                      onClick={() => onSendEmail(lead)}
-                      disabled={!selectedTemplate}
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Enviar Email
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        asChild
+                      >
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          <Phone className="h-4 w-4 text-green-600" />
+                          Contatar via WhatsApp
+                          <ExternalLink className="h-3 w-3 ml-auto" />
+                        </a>
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          if (leadData.email) {
+                            navigator.clipboard.writeText(leadData.email);
+                            toast({ title: "Email copiado!" });
+                          }
+                        }}
+                      >
+                        <Mail className="h-4 w-4 text-blue-600" />
+                        Copiar Email
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setShowTechnicalModal(true)}
+                      >
+                        <Database className="h-4 w-4 text-gray-600" />
+                        Ver Dados Técnicos
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        TEMPLATE DE EMAIL
+                      </label>
+                      <Select
+                        value={selectedTemplate?.id || ''}
+                        onValueChange={(value) => {
+                          const template = emailTemplates.find(t => t.id === value);
+                          setSelectedTemplate(template);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {emailTemplates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button
+                        className="w-full"
+                        onClick={() => onSendEmail(lead)}
+                        disabled={!selectedTemplate}
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Enviar Email
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="comments" className="space-y-4">
             <LeadComments leadId={lead.id} />
           </TabsContent>
-
-          <TabsContent value="technical" className="space-y-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Database className="h-4 w-4" />
-                  <h4 className="font-medium">Dados Técnicos</h4>
-                </div>
-                
-                <div className="space-y-2 text-xs">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div className="p-2 bg-muted/30 rounded">
-                      <span className="font-medium text-muted-foreground">ID do Lead:</span>
-                      <span className="ml-2 break-all">{lead.id}</span>
-                    </div>
-                    
-                    <div className="p-2 bg-muted/30 rounded">
-                      <span className="font-medium text-muted-foreground">Session ID:</span>
-                      <span className="ml-2 break-all">{lead.session_id}</span>
-                    </div>
-                    
-                    {lead.form_id && (
-                      <div className="p-2 bg-muted/30 rounded">
-                        <span className="font-medium text-muted-foreground">Form ID:</span>
-                        <span className="ml-2">{lead.form_id}</span>
-                      </div>
-                    )}
-                    
-                    {lead.form_name && (
-                      <div className="p-2 bg-muted/30 rounded">
-                        <span className="font-medium text-muted-foreground">Formulário:</span>
-                        <span className="ml-2">{lead.form_name}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {lead.page_url && (
-                    <div className="p-2 bg-muted/30 rounded">
-                      <span className="font-medium text-muted-foreground flex items-center gap-1">
-                        <Globe className="h-3 w-3" />
-                        Página:
-                      </span>
-                      <span className="ml-2 break-all">{lead.page_url}</span>
-                    </div>
-                  )}
-                  
-                  {lead.referrer && (
-                    <div className="p-2 bg-muted/30 rounded">
-                      <span className="font-medium text-muted-foreground flex items-center gap-1">
-                        <ExternalLink className="h-3 w-3" />
-                        Origem:
-                      </span>
-                      <span className="ml-2 break-all">{lead.referrer}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
+    <TechnicalModal />
+    </>
   );
 };
