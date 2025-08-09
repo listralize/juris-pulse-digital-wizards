@@ -262,21 +262,30 @@ export const LeadsManagement: React.FC = () => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Carregando leads da tabela conversion_events...');
-      
-      const { data: convData, error: convError } = await supabase
-        .from('conversion_events')
-        .select('id, lead_data, created_at, event_type, event_action, page_url, referrer, form_id, form_name, event_label, event_category')
-        .or('event_type.eq.form_submission,event_label.eq.contact_form')
-        .order('created_at', { ascending: false });
+      console.log('🔄 Carregando leads de conversion_events e form_leads...');
+
+      const [
+        { data: convData, error: convError },
+        { data: formData, error: formError }
+      ] = await Promise.all([
+        supabase
+          .from('conversion_events')
+          .select('id, lead_data, created_at, event_type, event_action, page_url, referrer, form_id, form_name, event_label, event_category')
+          .or('event_type.eq.form_submission,event_label.eq.contact_form,event_category.eq.lead'),
+        supabase
+          .from('form_leads')
+          .select('id, lead_data, created_at, source_page')
+      ]);
 
       if (convError) {
-        console.error('❌ Erro ao carregar leads:', convError);
-        toast.error('Erro ao carregar leads');
-        return;
+        console.error('❌ Erro ao carregar leads (conversion_events):', convError);
+      }
+      if (formError) {
+        console.error('❌ Erro ao carregar leads (form_leads):', formError);
       }
 
       const conversionsData = (convData || []).filter((row: any) => !!row.lead_data);
+      const formLeadsData = (formData || []).filter((row: any) => !!row.lead_data);
 
       // Carregar status dos leads
       const { data: statusData, error: statusError } = await supabase
@@ -293,8 +302,8 @@ export const LeadsManagement: React.FC = () => {
         statusMap[status.lead_id] = status.status;
       });
 
-      // Normalizar leads (apenas conversion_events)
-      const normalizedLeads: Lead[] = (conversionsData || []).map((row: any) => ({
+      // Normalizar e combinar leads das duas fontes
+      const normalizedConv: Lead[] = (conversionsData || []).map((row: any) => ({
         id: row.id,
         lead_data: row.lead_data,
         event_type: row.event_type || 'form_submission',
@@ -306,9 +315,24 @@ export const LeadsManagement: React.FC = () => {
         created_at: row.created_at,
       }));
 
+      const normalizedForm: Lead[] = (formLeadsData || []).map((row: any) => ({
+        id: row.id,
+        lead_data: row.lead_data,
+        event_type: 'form_lead',
+        page_url: row.source_page || undefined,
+        referrer: undefined,
+        utm_source: undefined,
+        utm_medium: undefined,
+        utm_campaign: undefined,
+        created_at: row.created_at,
+      }));
+
+      const allLeads: Lead[] = [...normalizedConv, ...normalizedForm]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
-      normalizedLeads.forEach(lead => {
+      allLeads.forEach(lead => {
         const leadData = parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
@@ -316,9 +340,9 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      console.log(`✅ ${normalizedLeads.length} leads carregados (conversion_events)`);
-      setLeads(normalizedLeads);
-      setFilteredLeads(normalizedLeads);
+      console.log(`✅ Leads carregados: conversion_events=${normalizedConv.length}, form_leads=${normalizedForm.length}, total=${allLeads.length}`);
+      setLeads(allLeads);
+      setFilteredLeads(allLeads);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
