@@ -13,7 +13,7 @@ import { BulkEmailSender } from './BulkEmailSender';
 import { ContactImporter } from './ContactImporter';
 import { LeadWebhookManager } from './LeadWebhookManager';
 import { LeadsKanban } from './LeadsKanban';
-import { useReplyAgentIntegration } from '@/hooks/useReplyAgentIntegration';
+
 
 
 // Interface do lead
@@ -261,8 +261,6 @@ export const LeadsManagement: React.FC = () => {
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [isProcessingAll, setIsProcessingAll] = useState(false);
   
-  // Integração ReplyAgent
-  const replyAgent = useReplyAgentIntegration();
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -355,53 +353,6 @@ export const LeadsManagement: React.FC = () => {
     }
   };
 
-  // Processar lead automaticamente no ReplyAgent
-  const handleAutoProcessLead = async (lead: Lead) => {
-    const leadData = parseLeadData(lead.lead_data);
-    
-    if (!leadData.phone) {
-      toast.error('Lead não possui número de telefone');
-      return;
-    }
-
-    const result = await replyAgent.autoProcessLead({
-      name: leadData.name || 'Lead',
-      email: leadData.email || '',
-      phone: leadData.phone,
-      service: leadData.service || '',
-      message: leadData.message || '',
-      urgent: leadData.urgent || false
-    });
-
-    if (result.success) {
-      // Atualizar status do lead se foi processado com sucesso
-      await updateLeadStatus(lead.id, 'contato');
-    }
-  };
-
-  // Função para testar conectividade ReplyAgent
-  const testReplyAgentConnection = async () => {
-    try {
-      setIsProcessingAll(true);
-      const response = await supabase.functions.invoke('replyagent-integration', {
-        body: {
-          action: 'test_connection',
-          data: {}
-        }
-      });
-
-      if (response.error) {
-        throw response.error;
-      }
-
-      toast.success('Teste de conectividade executado. Verifique os logs da edge function para mais detalhes.');
-    } catch (error) {
-      console.error('Erro ao testar conectividade:', error);
-      toast.error('Erro ao testar conectividade: ' + error.message);
-    } finally {
-      setIsProcessingAll(false);
-    }
-  };
 
   // Gerar HTML completo do email
   const generateEmailHTML = (template: any, leadData: any) => {
@@ -845,16 +796,6 @@ export const LeadsManagement: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            onClick={testReplyAgentConnection}
-            variant="outline"
-            size="sm"
-            disabled={isProcessingAll}
-            className="flex items-center gap-2"
-          >
-            <Webhook className="h-4 w-4" />
-            {isProcessingAll ? 'Testando...' : 'Testar ReplyAgent'}
-          </Button>
 
           <Button
             variant={currentView === 'table' ? 'default' : 'outline'}
@@ -888,23 +829,6 @@ export const LeadsManagement: React.FC = () => {
               >
                 <Webhook className="w-4 h-4" />
                 Sistema de Webhook para Leads
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  // Processar todos os leads filtrados automaticamente
-                  filteredLeads.forEach(lead => {
-                    const leadData = parseLeadData(lead.lead_data);
-                    if (leadData.phone) {
-                      handleAutoProcessLead(lead);
-                    }
-                  });
-                }}
-                disabled={replyAgent.isLoading}
-                className="flex items-center gap-2"
-              >
-                <MessageSquare className="w-4 h-4" />
-                Processar no ReplyAgent
               </Button>
           
           <Button onClick={exportLeads} variant="outline" size="sm">
@@ -1294,15 +1218,6 @@ export const LeadsManagement: React.FC = () => {
                                  title="Ver detalhes"
                                >
                                  <Eye className="h-4 w-4" />
-                               </Button>
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 onClick={() => handleAutoProcessLead(lead)}
-                                 disabled={replyAgent.isLoading}
-                                 title="Processar no ReplyAgent"
-                               >
-                                 <UserPlus className="h-4 w-4" />
                                </Button>
                              </div>
                            </td>
