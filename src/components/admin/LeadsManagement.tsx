@@ -257,43 +257,6 @@ export const LeadsManagement: React.FC = () => {
   const [isContactImporterOpen, setIsContactImporterOpen] = useState(false);
   const [isLeadWebhookManagerOpen, setIsLeadWebhookManagerOpen] = useState(false);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
-  const [statusRecords, setStatusRecords] = useState<any[]>([]);
-
-  const getCurrentDateRange = () => {
-    const now = new Date();
-    let startDate: Date = new Date(0);
-    let endDate: Date | null = null;
-
-    switch (dateFilter) {
-      case 'today':
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        break;
-      case 'week':
-        startDate = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-        break;
-      case 'month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        break;
-      case 'custom':
-        if (customDateStart && customDateEnd) {
-          startDate = new Date(customDateStart);
-          endDate = new Date(customDateEnd);
-          endDate.setHours(23, 59, 59, 999);
-        }
-        break;
-    }
-
-    return { startDate, endDate };
-  };
-
-  const countStatusInRange = (status: string) => {
-    const { startDate, endDate } = getCurrentDateRange();
-    return statusRecords.filter((r: any) => {
-      if (r.status !== status) return false;
-      const d = new Date(r.created_at);
-      return endDate ? d >= startDate && d <= endDate : d >= startDate;
-    }).length;
-  };
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -304,7 +267,6 @@ export const LeadsManagement: React.FC = () => {
       const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
         .select('*')
-        .in('event_type', ['form_submission', 'webhook_received'])
         .order('created_at', { ascending: false });
 
       if (leadsError) {
@@ -322,19 +284,11 @@ export const LeadsManagement: React.FC = () => {
         console.error('❌ Erro ao carregar status:', statusError);
       }
 
-      // Mapear status (última alteração por lead)
-      const latestByLead: Record<string, { created_at: string; status: string }> = {};
-      (statusData || []).forEach((r: any) => {
-        const curr = latestByLead[r.lead_id];
-        if (!curr || new Date(r.created_at) > new Date(curr.created_at)) {
-          latestByLead[r.lead_id] = { created_at: r.created_at, status: r.status };
-        }
-      });
+      // Mapear status
       const statusMap: { [key: string]: string } = {};
-      Object.keys(latestByLead).forEach((leadId) => {
-        statusMap[leadId] = latestByLead[leadId].status;
+      statusData?.forEach(status => {
+        statusMap[status.lead_id] = status.status;
       });
-      setStatusRecords(statusData || []);
 
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
@@ -346,29 +300,9 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      // Deduplicar por email/telefone em janela de 30s
-      const toTime = (l: any) => new Date((l as any).timestamp || l.created_at).getTime();
-      const sorted = [...(leadsData || [])].sort((a, b) => toTime(a) - toTime(b));
-      const dedupMap: Record<string, number> = {};
-      const deduped: any[] = [];
-      for (const lead of sorted) {
-        const d = parseLeadData(lead.lead_data);
-        const email = (d.email || '').trim().toLowerCase();
-        const phone = (d.phone || d.telefone || '').toString().replace(/\D/g, '');
-        const key = email || phone ? `${email}|${phone}` : lead.id;
-        const ts = toTime(lead);
-        const last = dedupMap[key];
-        if (last && (ts - last) <= 30000) {
-          continue; // pular duplicado em <= 30s
-        }
-        dedupMap[key] = ts;
-        deduped.push(lead);
-      }
-      deduped.sort((a, b) => toTime(b) - toTime(a));
-
-      console.log(`✅ ${deduped.length} leads após deduplicação (30s)`);
-      setLeads(deduped || []);
-      setFilteredLeads(deduped || []);
+      console.log(`✅ ${leadsData?.length || 0} leads carregados`);
+      setLeads(leadsData || []);
+      setFilteredLeads(leadsData || []);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
@@ -458,28 +392,57 @@ export const LeadsManagement: React.FC = () => {
   const updateLeadStatus = async (leadId: string, newStatus: string) => {
     try {
       console.log(`🔄 Atualizando status do lead ${leadId} para ${newStatus}`);
-
-      // Registrar histórico: inserir nova linha com timestamp
-      const { error } = await supabase
+      
+      // Verificar se já existe um status para este lead
+      const { data: existingStatus, error: checkError } = await supabase
         .from('lead_status')
-        .insert({
-          lead_id: leadId,
-          status: newStatus,
-          updated_by: null
-        });
+        .select('id')
+        .eq('lead_id', leadId)
+        .maybeSingle();
 
-      if (error) {
-        console.error('❌ Erro ao registrar status:', error);
-        toast.error('Erro ao atualizar status do lead');
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('❌ Erro ao verificar status existente:', checkError);
+        toast.error('Erro ao verificar status do lead');
         return false;
       }
 
-      // Atualizar estado local com o status mais recente
+      if (existingStatus) {
+        // Atualizar status existente
+        const { error } = await supabase
+          .from('lead_status')
+          .update({
+            status: newStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('lead_id', leadId);
+
+        if (error) {
+          console.error('❌ Erro ao atualizar status:', error);
+          toast.error('Erro ao atualizar status do lead');
+          return false;
+        }
+      } else {
+        // Criar novo status
+        const { error } = await supabase
+          .from('lead_status')
+          .insert({
+            lead_id: leadId,
+            status: newStatus,
+            updated_by: null
+          });
+
+        if (error) {
+          console.error('❌ Erro ao criar status:', error);
+          toast.error('Erro ao criar status do lead');
+          return false;
+        }
+      }
+
+      // Atualizar estado local
       setLeadStatuses(prev => ({
         ...prev,
         [leadId]: newStatus
       }));
-      setStatusRecords(prev => [...prev, { lead_id: leadId, status: newStatus, created_at: new Date().toISOString() }]);
 
       toast.success(`Status atualizado para: ${newStatus}!`);
       return true;
@@ -696,11 +659,11 @@ export const LeadsManagement: React.FC = () => {
       }
 
       filtered = filtered.filter(lead => {
-        const eventDate = new Date((lead as any).timestamp || lead.created_at);
+        const leadDate = new Date(lead.created_at);
         if (dateFilter === 'custom' && endDate) {
-          return eventDate >= startDate && eventDate <= endDate;
+          return leadDate >= startDate && leadDate <= endDate;
         }
-        return eventDate >= startDate;
+        return leadDate >= startDate;
       });
     }
 
@@ -903,7 +866,7 @@ export const LeadsManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {countStatusInRange('contato')}
+              {leads.filter(lead => leadStatuses[lead.id] === 'contato').length}
             </div>
           </CardContent>
         </Card>
@@ -915,7 +878,7 @@ export const LeadsManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {countStatusInRange('convertido')}
+              {leads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
             </div>
           </CardContent>
         </Card>

@@ -89,17 +89,17 @@ export const useContactForm = (externalFormConfig?: any) => {
 
       console.log('✅ Resposta da edge function:', data);
       
-      // Rastrear conversão no analytics (desativado para evitar duplicidade com a Edge Function)
-      // await trackConversion(
-      //   formConfig.id || 'default',
-      //   formConfig.name || 'Formulário Principal',
-      //   submitData,
-      //   {
-      //     source: new URLSearchParams(window.location.search).get('utm_source') || 'direct',
-      //     medium: new URLSearchParams(window.location.search).get('utm_medium') || 'none',
-      //     campaign: new URLSearchParams(window.location.search).get('utm_campaign') || 'organic'
-      //   }
-      // );
+      // Rastrear conversão no analytics
+      await trackConversion(
+        formConfig.id || 'default',
+        formConfig.name || 'Formulário Principal',
+        submitData,
+        {
+          source: new URLSearchParams(window.location.search).get('utm_source') || 'direct',
+          medium: new URLSearchParams(window.location.search).get('utm_medium') || 'none',
+          campaign: new URLSearchParams(window.location.search).get('utm_campaign') || 'organic'
+        }
+      );
 
       // Disparar evento customizado para scripts de marketing
       const successEvent = new CustomEvent('formSubmitSuccess', {
