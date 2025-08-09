@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
-const REPLYAGENT_API_BASE = 'https://ra-bcknd.com/api';
+const REPLYAGENT_API_BASE = 'https://ra-bcknd.com';
 
 // Função para normalizar números de telefone
 const normalizePhoneNumber = (phone: string): string => {
@@ -186,13 +186,36 @@ serve(async (req) => {
         const { leadData } = data;
         
         try {
-          // 1. Buscar contato existente por telefone
-          const findResponse = await fetch(`${REPLYAGENT_API_BASE}/contacts`, {
-            headers
-          });
+          // Tentativa com diferentes endpoints possíveis
+          const possibleEndpoints = [
+            `${REPLYAGENT_API_BASE}/contacts`,
+            `${REPLYAGENT_API_BASE}/api/contacts`,
+            `${REPLYAGENT_API_BASE}/v1/contacts`,
+            `${REPLYAGENT_API_BASE}/api/v1/contacts`
+          ];
 
-          if (!findResponse.ok) {
-            throw new Error(`Erro na API: ${findResponse.status}`);
+          let findResponse = null;
+          let workingEndpoint = null;
+
+          for (const endpoint of possibleEndpoints) {
+            console.log(`🔍 Testando endpoint: ${endpoint}`);
+            try {
+              const testResponse = await fetch(endpoint, { headers });
+              if (testResponse.ok) {
+                findResponse = testResponse;
+                workingEndpoint = endpoint.replace('/contacts', '');
+                console.log(`✅ Endpoint funcionando: ${workingEndpoint}`);
+                break;
+              } else {
+                console.log(`❌ Endpoint falhou com status: ${testResponse.status}`);
+              }
+            } catch (err) {
+              console.log(`❌ Erro no endpoint ${endpoint}:`, err.message);
+            }
+          }
+
+          if (!findResponse || !findResponse.ok) {
+            throw new Error(`Nenhum endpoint da API funcionou. Verifique a URL base ou a chave da API.`);
           }
 
           const contacts: APIContact[] = await findResponse.json();
@@ -225,7 +248,7 @@ serve(async (req) => {
               ...(leadData.service && { company_name: leadData.service })
             };
 
-            const addResponse = await fetch(`${REPLYAGENT_API_BASE}/contacts`, {
+            const addResponse = await fetch(`${workingEndpoint}/contacts`, {
               method: 'POST',
               headers,
               body: JSON.stringify(contactData)
@@ -248,7 +271,7 @@ serve(async (req) => {
             console.log('⚙️ Configurando campos personalizados...');
             
             try {
-              const customFieldResponse = await fetch(`${REPLYAGENT_API_BASE}/contacts/${contactId}/set-custom-field`, {
+              const customFieldResponse = await fetch(`${workingEndpoint}/contacts/${contactId}/set-custom-field`, {
                 method: 'PUT',
                 headers,
                 body: JSON.stringify({
