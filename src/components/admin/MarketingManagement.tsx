@@ -1283,59 +1283,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           </Card>
 
           <ConversionFunnel analyticsData={analyticsData} />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>📄 Páginas com Mais Leads</CardTitle>
-                <CardDescription>Últimos 7 dias</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {analyticsData?.topPages && analyticsData.topPages.length > 0 ? <div className="space-y-3">
-                    {analyticsData.topPages.slice(0, 8).map((page, index) => <div key={page.page} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
-                          <span className="text-sm font-medium truncate">{page.page.replace(/^https?:\/\/[^\/]+/, '') || '/'}</span>
-                        </div>
-                        <Badge variant="outline">{page.count} leads</Badge>
-                      </div>)}
-                  </div> : <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhuma página com leads registrada</p>
-                  </div>}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>🗺️ DDDs com Mais Leads</CardTitle>
-                <CardDescription>Últimos 7 dias</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {analyticsData?.topDDDs && analyticsData.topDDDs.length > 0 ? (
-                  <div className="space-y-3">
-                    {analyticsData.topDDDs.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
-                          <span className="text-sm font-medium">DDD {item.ddd}</span>
-                        </div>
-                        <Badge variant="outline">{item.count} leads</Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhum dado de DDD disponível</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            
-            
-          </Card>
         </TabsContent>
 
 

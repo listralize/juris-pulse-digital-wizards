@@ -93,6 +93,7 @@ export const CitiesChart: React.FC = () => {
               textAnchor="end"
               height={80}
               fontSize={12}
+              tick={{ fill: 'hsl(var(--foreground))' }}
             />
             <YAxis />
             <Tooltip 
