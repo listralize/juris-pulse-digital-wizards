@@ -981,17 +981,29 @@ export const LeadsManagement: React.FC = () => {
                       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
                       endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
                       break;
-                    case 'custom':
-                      if (customDateStart && customDateEnd) {
-                        startDate = new Date(customDateStart);
-                        startDate.setHours(0, 0, 0, 0);
-                        endDate = new Date(customDateEnd);
-                        endDate.setHours(23, 59, 59, 999);
-                      } else {
-                        startDate = new Date(0);
-                        endDate = new Date();
-                      }
-                      break;
+                     case 'custom':
+                       if (customDateStart && customDateEnd) {
+                         // Parseamento manual para evitar problemas de timezone
+                         const startParts = customDateStart.split('-');
+                         const endParts = customDateEnd.split('-');
+                         
+                         startDate = new Date(
+                           parseInt(startParts[0]), 
+                           parseInt(startParts[1]) - 1, 
+                           parseInt(startParts[2]), 
+                           0, 0, 0, 0
+                         );
+                         endDate = new Date(
+                           parseInt(endParts[0]), 
+                           parseInt(endParts[1]) - 1, 
+                           parseInt(endParts[2]), 
+                           23, 59, 59, 999
+                         );
+                       } else {
+                         startDate = new Date(0);
+                         endDate = new Date();
+                       }
+                       break;
                     default:
                       startDate = new Date(0);
                       endDate = new Date();
@@ -1046,17 +1058,29 @@ export const LeadsManagement: React.FC = () => {
                       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
                       endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
                       break;
-                    case 'custom':
-                      if (customDateStart && customDateEnd) {
-                        startDate = new Date(customDateStart);
-                        startDate.setHours(0, 0, 0, 0);
-                        endDate = new Date(customDateEnd);
-                        endDate.setHours(23, 59, 59, 999);
-                      } else {
-                        startDate = new Date(0);
-                        endDate = new Date();
-                      }
-                      break;
+                     case 'custom':
+                       if (customDateStart && customDateEnd) {
+                         // Parseamento manual para evitar problemas de timezone
+                         const startParts = customDateStart.split('-');
+                         const endParts = customDateEnd.split('-');
+                         
+                         startDate = new Date(
+                           parseInt(startParts[0]), 
+                           parseInt(startParts[1]) - 1, 
+                           parseInt(startParts[2]), 
+                           0, 0, 0, 0
+                         );
+                         endDate = new Date(
+                           parseInt(endParts[0]), 
+                           parseInt(endParts[1]) - 1, 
+                           parseInt(endParts[2]), 
+                           23, 59, 59, 999
+                         );
+                       } else {
+                         startDate = new Date(0);
+                         endDate = new Date();
+                       }
+                       break;
                     default:
                       startDate = new Date(0);
                       endDate = new Date();
