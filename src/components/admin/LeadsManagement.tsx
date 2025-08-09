@@ -304,7 +304,7 @@ export const LeadsManagement: React.FC = () => {
       const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
         .select('*')
-        .eq('event_type', 'form_submission')
+        .in('event_type', ['form_submission', 'webhook_received'])
         .order('created_at', { ascending: false });
 
       if (leadsError) {
@@ -346,9 +346,29 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      console.log(`✅ ${leadsData?.length || 0} leads carregados`);
-      setLeads(leadsData || []);
-      setFilteredLeads(leadsData || []);
+      // Deduplicar por email/telefone em janela de 30s
+      const toTime = (l: any) => new Date((l as any).timestamp || l.created_at).getTime();
+      const sorted = [...(leadsData || [])].sort((a, b) => toTime(a) - toTime(b));
+      const dedupMap: Record<string, number> = {};
+      const deduped: any[] = [];
+      for (const lead of sorted) {
+        const d = parseLeadData(lead.lead_data);
+        const email = (d.email || '').trim().toLowerCase();
+        const phone = (d.phone || d.telefone || '').toString().replace(/\D/g, '');
+        const key = email || phone ? `${email}|${phone}` : lead.id;
+        const ts = toTime(lead);
+        const last = dedupMap[key];
+        if (last && (ts - last) <= 30000) {
+          continue; // pular duplicado em <= 30s
+        }
+        dedupMap[key] = ts;
+        deduped.push(lead);
+      }
+      deduped.sort((a, b) => toTime(b) - toTime(a));
+
+      console.log(`✅ ${deduped.length} leads após deduplicação (30s)`);
+      setLeads(deduped || []);
+      setFilteredLeads(deduped || []);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
