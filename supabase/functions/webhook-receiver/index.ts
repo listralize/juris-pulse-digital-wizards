@@ -136,19 +136,32 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
       
+      // Garantir que temos fonte identificada
+      mappedData.source = mappedData.source || 'Webhook - Sistema Configurado';
+      
       console.log('📊 Dados após mapeamento configurado:', mappedData);
     } else {
-      // Auto-mapping fallback
-      console.log('🔄 Usando auto-mapeamento');
-      mappedData = {
-        name: webhookData.name || webhookData.nome || webhookData.first_name || '',
-        email: webhookData.email || webhookData.e_mail || '',
-        phone: webhookData.phone || webhookData.telefone || webhookData.tel || '',
-        message: webhookData.message || webhookData.mensagem || webhookData.msg || '',
-        service: webhookData.service || webhookData.servico || webhookData.subject || 'Contato via Webhook',
+      // Auto-mapping fallback - preservar TODOS os dados originais
+      console.log('🔄 Usando auto-mapeamento melhorado');
+      
+      // Primeiro, preservar todos os dados originais
+      mappedData = { ...webhookData };
+      
+      // Depois, normalizar campos principais para o sistema
+      const normalizedData = {
+        name: webhookData.name || webhookData.nome || webhookData.first_name || webhookData.full_name || '',
+        email: webhookData.email || webhookData.e_mail || webhookData.mail || '',
+        phone: webhookData.phone || webhookData.telefone || webhookData.tel || webhookData.celular || '',
+        message: webhookData.message || webhookData.mensagem || webhookData.msg || webhookData.description || webhookData.observacoes || '',
+        service: webhookData.service || webhookData.servico || webhookData.subject || webhookData.assunto || 'Contato via Webhook',
         company: webhookData.company || webhookData.empresa || '',
-        ...webhookData
+        source: 'Webhook - Sistema Externo'
       };
+      
+      // Mesclar dados normalizados com os originais (dados originais têm prioridade se já existirem)
+      mappedData = { ...normalizedData, ...webhookData };
+      
+      console.log('📊 Auto-mapeamento aplicado - dados normalizados:', normalizedData);
     }
 
     console.log('📊 Dados mapeados:', mappedData);
@@ -199,10 +212,16 @@ const handler = async (req: Request): Promise<Response> => {
         event_label: 'webhook-receiver',
         visitor_id: visitorId,
         session_id: sessionId,
-        page_url: `http://hmfsvccbyxhdwmrgcyff.supabase.co/webhook-receiver`,
-        lead_data: mappedData,
-        form_name: 'Webhook Lead Form',
-        form_id: 'webhook_form',
+        page_url: mappedData.page_url || `https://hmfsvccbyxhdwmrgcyff.supabase.co/webhook-receiver`,
+        referrer: mappedData.referrer || 'webhook',
+        lead_data: {
+          ...mappedData,
+          webhook_timestamp: new Date().toISOString(),
+          webhook_source: 'webhook-receiver',
+          processing_method: webhookConfig ? 'configured_mapping' : 'auto_mapping'
+        },
+        form_name: mappedData.form_name || 'Webhook Lead Form',
+        form_id: mappedData.form_id || 'webhook_form',
         timestamp: new Date().toISOString(),
         created_at: new Date().toISOString()
       })

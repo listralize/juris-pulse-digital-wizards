@@ -49,22 +49,26 @@ const parseLeadData = (leadData: any) => {
       parsedData = leadData;
     }
 
-    // Extrair dados básicos
+    // Extrair dados básicos com fallbacks mais robustos
     const result = {
-      name: parsedData?.name || '',
-      email: parsedData?.email || '',
-      phone: parsedData?.phone || '',
-      service: parsedData?.service || 'Não especificado',
-      message: parsedData?.message || '',
+      name: parsedData?.name || parsedData?.nome || parsedData?.full_name || parsedData?.first_name || '',
+      email: parsedData?.email || parsedData?.e_mail || parsedData?.mail || '',
+      phone: parsedData?.phone || parsedData?.telefone || parsedData?.tel || parsedData?.celular || '',
+      service: parsedData?.service || parsedData?.servico || parsedData?.subject || parsedData?.assunto || 'Não especificado',
+      message: parsedData?.message || parsedData?.mensagem || parsedData?.msg || parsedData?.description || parsedData?.observacoes || '',
       urgent: parsedData?.urgent || parsedData?.isUrgent || false,
-      source: parsedData?.source || '',
-      timestamp: parsedData?.timestamp || '',
+      source: parsedData?.source || parsedData?.origem || '',
+      timestamp: parsedData?.timestamp || parsedData?.webhook_timestamp || '',
+      company: parsedData?.company || parsedData?.empresa || '',
       customFields: parsedData?.customFields || {},
       formConfig: parsedData?.formConfig || {},
+      processing_method: parsedData?.processing_method || '',
+      webhook_source: parsedData?.webhook_source || '',
+      // Preservar todos os outros dados originais
       ...parsedData
     };
 
-    // Se tem campos customizados, adicionar ao resultado
+    // Se tem campos customizados, mesclar com o resultado
     if (parsedData?.customFields && typeof parsedData.customFields === 'object') {
       Object.keys(parsedData.customFields).forEach(key => {
         if (!result[key]) {
@@ -72,6 +76,15 @@ const parseLeadData = (leadData: any) => {
         }
       });
     }
+
+    // Adicionar todos os campos que começam com letras minúsculas e não são objetos
+    Object.keys(parsedData).forEach(key => {
+      if (typeof parsedData[key] !== 'object' && parsedData[key] !== null && parsedData[key] !== undefined && parsedData[key] !== '') {
+        if (!result[key]) {
+          result[key] = parsedData[key];
+        }
+      }
+    });
 
     return result;
   } catch (error) {
@@ -169,14 +182,41 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                     </div>
                   )}
 
-                  {/* Campos customizados */}
-                  {leadData.customFields && Object.keys(leadData.customFields).length > 0 && (
+                  {/* Campos customizados e extras */}
+                  {Object.keys(leadData).filter(key => 
+                    !['name', 'email', 'phone', 'service', 'message', 'source', 'urgent', 'isUrgent', 'customFields', 'formConfig', 'timestamp', 'webhook_timestamp', 'webhook_source', 'processing_method'].includes(key) &&
+                    typeof leadData[key] !== 'object' &&
+                    leadData[key] !== null &&
+                    leadData[key] !== undefined &&
+                    leadData[key] !== ''
+                  ).length > 0 && (
                     <div className="pt-2 border-t">
                       <span className="text-xs font-medium text-muted-foreground">CAMPOS ADICIONAIS</span>
                       <div className="mt-1 space-y-1">
+                        {Object.keys(leadData).filter(key => 
+                          !['name', 'email', 'phone', 'service', 'message', 'source', 'urgent', 'isUrgent', 'customFields', 'formConfig', 'timestamp', 'webhook_timestamp', 'webhook_source', 'processing_method'].includes(key) &&
+                          typeof leadData[key] !== 'object' &&
+                          leadData[key] !== null &&
+                          leadData[key] !== undefined &&
+                          leadData[key] !== ''
+                        ).map((key) => (
+                          <div key={key} className="text-xs">
+                            <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
+                            <span className="ml-1">{String(leadData[key])}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Campos customizados estruturados */}
+                  {leadData.customFields && Object.keys(leadData.customFields).length > 0 && (
+                    <div className="pt-2 border-t">
+                      <span className="text-xs font-medium text-muted-foreground">CAMPOS CUSTOMIZADOS</span>
+                      <div className="mt-1 space-y-1">
                         {Object.entries(leadData.customFields).map(([key, value]: [string, any]) => (
                           <div key={key} className="text-xs">
-                            <span className="font-medium capitalize">{key}:</span>
+                            <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
                             <span className="ml-1">{String(value)}</span>
                           </div>
                         ))}
