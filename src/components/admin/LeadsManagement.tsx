@@ -1101,7 +1101,7 @@ export const LeadsManagement: React.FC = () => {
                             Math.abs(page - currentPage) <= 1
                           )
                           .map((page, index, array) => (
-                            <React.Fragment key={page}>
+                            <div key={page} className="flex items-center gap-1">
                               {index > 0 && array[index - 1] !== page - 1 && (
                                 <span className="px-2 py-1 text-sm text-muted-foreground">...</span>
                               )}
@@ -1113,7 +1113,7 @@ export const LeadsManagement: React.FC = () => {
                               >
                                 {page}
                               </Button>
-                            </React.Fragment>
+                            </div>
                           ))
                         }
                       </div>
