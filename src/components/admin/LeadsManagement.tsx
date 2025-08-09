@@ -250,6 +250,7 @@ export const LeadsManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [leadsPerPage] = useState(10);
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
+  const [leadStatusDates, setLeadStatusDates] = useState<{ [key: string]: { status: string, updated_at: string } }>({});
   const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -305,7 +306,7 @@ export const LeadsManagement: React.FC = () => {
 
       console.log(`✅ Leads processados: ${leadsData?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
       
-      // Carregar status dos leads
+      // Carregar status dos leads com suas datas de atualização
       const { data: statusData, error: statusError } = await supabase
         .from('lead_status')
         .select('*');
@@ -314,11 +315,18 @@ export const LeadsManagement: React.FC = () => {
         console.error('❌ Erro ao carregar status:', statusError);
       }
 
-      // Mapear status
+      // Mapear status e suas datas de atualização
       const statusMap: { [key: string]: string } = {};
+      const statusDatesMap: { [key: string]: { status: string, updated_at: string } } = {};
       statusData?.forEach(status => {
         statusMap[status.lead_id] = status.status;
+        statusDatesMap[status.lead_id] = {
+          status: status.status,
+          updated_at: status.updated_at
+        };
       });
+
+      console.log('📊 Status carregados:', statusDatesMap);
 
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
@@ -333,6 +341,7 @@ export const LeadsManagement: React.FC = () => {
       setLeads(deduplicatedLeads);
       setFilteredLeads(deduplicatedLeads);
       setLeadStatuses(statusMap);
+      setLeadStatusDates(statusDatesMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
       toast.error('Erro ao carregar leads');
@@ -471,6 +480,15 @@ export const LeadsManagement: React.FC = () => {
       setLeadStatuses(prev => ({
         ...prev,
         [leadId]: newStatus
+      }));
+      
+      // Atualizar também as datas dos status
+      setLeadStatusDates(prev => ({
+        ...prev,
+        [leadId]: {
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        }
       }));
 
       toast.success(`Status atualizado para: ${newStatus}!`);
@@ -910,16 +928,55 @@ export const LeadsManagement: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {(() => {
-                // Buscar status que foram alterados para 'contato' dentro do período
-                const statusEntries = Object.entries(leadStatuses);
                 let contactCount = 0;
                 
-                // Se não há filtro de data, mostrar todos os "Em Contato"
                 if (dateFilter === 'all') {
+                  // Se não há filtro de data, mostrar todos os "Em Contato"
                   contactCount = leads.filter(lead => leadStatuses[lead.id] === 'contato').length;
                 } else {
-                  // Para período específico, contar apenas os que têm status "contato"
-                  contactCount = filteredLeads.filter(lead => leadStatuses[lead.id] === 'contato').length;
+                  // Para período específico, verificar se o status foi alterado no período
+                  const now = new Date();
+                  let startDate: Date;
+                  let endDate: Date;
+
+                  switch (dateFilter) {
+                    case 'today':
+                      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+                      break;
+                    case 'week':
+                      const weekStart = new Date(now);
+                      weekStart.setDate(now.getDate() - 7);
+                      weekStart.setHours(0, 0, 0, 0);
+                      startDate = weekStart;
+                      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+                      break;
+                    case 'month':
+                      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+                      break;
+                    case 'custom':
+                      if (customDateStart && customDateEnd) {
+                        startDate = new Date(customDateStart);
+                        startDate.setHours(0, 0, 0, 0);
+                        endDate = new Date(customDateEnd);
+                        endDate.setHours(23, 59, 59, 999);
+                      } else {
+                        startDate = new Date(0);
+                        endDate = new Date();
+                      }
+                      break;
+                    default:
+                      startDate = new Date(0);
+                      endDate = new Date();
+                  }
+
+                  // Filtrar pelos status que foram alterados no período
+                  contactCount = Object.entries(leadStatusDates).filter(([leadId, statusInfo]) => {
+                    if (statusInfo.status !== 'contato') return false;
+                    const statusDate = new Date(statusInfo.updated_at);
+                    return statusDate >= startDate && statusDate <= endDate;
+                  }).length;
                 }
                 
                 return contactCount;
@@ -936,15 +993,55 @@ export const LeadsManagement: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {(() => {
-                // Buscar status que foram alterados para 'convertido' dentro do período
                 let convertedCount = 0;
                 
-                // Se não há filtro de data, mostrar todos os "Convertidos"
                 if (dateFilter === 'all') {
+                  // Se não há filtro de data, mostrar todos os "Convertidos"
                   convertedCount = leads.filter(lead => leadStatuses[lead.id] === 'convertido').length;
                 } else {
-                  // Para período específico, contar apenas os que têm status "convertido"
-                  convertedCount = filteredLeads.filter(lead => leadStatuses[lead.id] === 'convertido').length;
+                  // Para período específico, verificar se o status foi alterado no período
+                  const now = new Date();
+                  let startDate: Date;
+                  let endDate: Date;
+
+                  switch (dateFilter) {
+                    case 'today':
+                      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+                      break;
+                    case 'week':
+                      const weekStart = new Date(now);
+                      weekStart.setDate(now.getDate() - 7);
+                      weekStart.setHours(0, 0, 0, 0);
+                      startDate = weekStart;
+                      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+                      break;
+                    case 'month':
+                      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+                      break;
+                    case 'custom':
+                      if (customDateStart && customDateEnd) {
+                        startDate = new Date(customDateStart);
+                        startDate.setHours(0, 0, 0, 0);
+                        endDate = new Date(customDateEnd);
+                        endDate.setHours(23, 59, 59, 999);
+                      } else {
+                        startDate = new Date(0);
+                        endDate = new Date();
+                      }
+                      break;
+                    default:
+                      startDate = new Date(0);
+                      endDate = new Date();
+                  }
+
+                  // Filtrar pelos status que foram alterados no período
+                  convertedCount = Object.entries(leadStatusDates).filter(([leadId, statusInfo]) => {
+                    if (statusInfo.status !== 'convertido') return false;
+                    const statusDate = new Date(statusInfo.updated_at);
+                    return statusDate >= startDate && statusDate <= endDate;
+                  }).length;
                 }
                 
                 return convertedCount;
