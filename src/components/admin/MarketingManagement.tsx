@@ -7,7 +7,7 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw, Globe } from 'lucide-react';
+import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw, Globe, MapPin } from 'lucide-react';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { ConversionFunnel } from './ConversionFunnel';
 import { CampaignReports } from './CampaignReports';
+import { CitiesChart } from './CitiesChart';
 interface MarketingScripts {
   facebookPixel: {
     enabled: boolean;
@@ -683,11 +684,10 @@ export const MarketingManagement: React.FC = () => {
       </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
           <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
-          <TabsTrigger value="reports">📋 Relatórios</TabsTrigger>
         </TabsList>
 
         {/* SCRIPTS TAB */}
@@ -1267,72 +1267,19 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
 
         {/* DASHBOARD TAB */}
         <TabsContent value="dashboard" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Estatísticas dos Leads</h2>
-            <Button onClick={loadAnalyticsData} disabled={isLoading} variant="outline">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Atualizar Dados
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total de Leads</p>
-                    <p className="text-3xl font-bold">{analyticsData?.leads?.total || 0}</p>
-                    <p className="text-sm text-muted-foreground">Esta semana</p>
-                  </div>
-                  <Target className="h-8 w-8 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Hoje</p>
-                    <p className="text-3xl font-bold">{analyticsData?.leads?.today || 0}</p>
-                    {analyticsData?.leads?.growth !== undefined && (
-                      <p className={`text-sm flex items-center gap-1 ${analyticsData.leads.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        <TrendingUp className="w-3 h-3" />
-                        {analyticsData.leads.growth > 0 ? '+' : ''}{analyticsData.leads.growth.toFixed(1)}% vs ontem
-                      </p>
-                    )}
-                  </div>
-                  <Calendar className="h-8 w-8 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Estados Ativos</p>
-                    <p className="text-3xl font-bold">{analyticsData?.topStates?.length || 0}</p>
-                    <p className="text-sm text-muted-foreground">Diferentes estados</p>
-                  </div>
-                  <Globe className="h-8 w-8 text-purple-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">DDDs Únicos</p>
-                    <p className="text-3xl font-bold">{analyticsData?.topDDDs?.length || 0}</p>
-                    <p className="text-sm text-muted-foreground">Regiões diferentes</p>
-                  </div>
-                  <Users className="h-8 w-8 text-orange-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Gráfico de Cidades com Mais Leads */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Cidades com Mais Leads
+              </CardTitle>
+              <CardDescription>Últimos 7 dias</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CitiesChart />
+            </CardContent>
+          </Card>
 
           <ConversionFunnel analyticsData={analyticsData} />
 
@@ -1391,10 +1338,6 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
         </TabsContent>
 
 
-        {/* REPORTS TAB */}
-        <TabsContent value="reports" className="space-y-6">
-          <CampaignReports />
-        </TabsContent>
 
       </Tabs>
     </div>;
