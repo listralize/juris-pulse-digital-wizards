@@ -7,7 +7,7 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw } from 'lucide-react';
+import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw, Globe } from 'lucide-react';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { toast } from 'sonner';
@@ -77,36 +77,16 @@ interface ConversionTracking {
   };
 }
 interface AnalyticsData {
-  visitors: {
-    total: number;
-    unique: number;
-    today: number;
-    thisWeek: number;
-    growth: number;
-  };
-  conversions: {
+  leads: {
     total: number;
     today: number;
-    thisWeek: number;
-    conversionRate: number;
+    yesterday: number;
     growth: number;
   };
-  topPages: Array<{
-    page: string;
-    views: number;
-  }>;
-  formSubmissions: Array<{
-    formId: string;
-    count: number;
-  }>;
-  geographicData: Array<{
-    location: string;
-    count: number;
-  }>;
-  deviceData: Array<{
-    device: string;
-    count: number;
-  }>;
+  formStats: Record<string, number>;
+  topPages: Array<{ page: string; count: number }>;
+  topStates: Array<{ state: string; count: number }>;
+  topDDDs: Array<{ ddd: string; count: number }>;
   funnelData: {
     visitors: number;
     engagedUsers: number;
@@ -540,7 +520,7 @@ export const MarketingManagement: React.FC = () => {
           }
         };
         console.log('📈 Analytics calculados:', newAnalyticsData);
-        setAnalyticsData(newAnalyticsData);
+        setAnalyticsData(analyticsData);
       }
     } catch (error) {
       console.error('❌ Erro ao carregar dados de analytics:', error);
@@ -662,7 +642,7 @@ export const MarketingManagement: React.FC = () => {
   return <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Marketing & Analytics</h1>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
             Configure scripts de marketing, rastreamento de conversões e analise performance
           </p>
@@ -1288,7 +1268,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
         {/* DASHBOARD TAB */}
         <TabsContent value="dashboard" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Dashboard Analytics Funcional</h2>
+            <h2 className="text-2xl font-bold">Estatísticas dos Leads</h2>
             <Button onClick={loadAnalyticsData} disabled={isLoading} variant="outline">
               <RefreshCw className="w-4 h-4 mr-2" />
               Atualizar Dados
@@ -1300,43 +1280,11 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Visitantes Únicos</p>
-                    <p className="text-3xl font-bold">{analyticsData?.visitors.unique || 0}</p>
-                    {analyticsData?.visitors.growth !== undefined && <p className={`text-sm flex items-center gap-1 ${analyticsData.visitors.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        <TrendingUp className="w-3 h-3" />
-                        {analyticsData.visitors.growth > 0 ? '+' : ''}{analyticsData.visitors.growth.toFixed(1)}% hoje
-                      </p>}
+                    <p className="text-sm font-medium text-muted-foreground">Total de Leads</p>
+                    <p className="text-3xl font-bold">{analyticsData?.leads?.total || 0}</p>
+                    <p className="text-sm text-muted-foreground">Esta semana</p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total de Conversões</p>
-                    <p className="text-3xl font-bold">{analyticsData?.conversions.total || 0}</p>
-                    {analyticsData?.conversions.growth !== undefined && <p className={`text-sm flex items-center gap-1 ${analyticsData.conversions.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        <TrendingUp className="w-3 h-3" />
-                        {analyticsData.conversions.growth > 0 ? '+' : ''}{analyticsData.conversions.growth.toFixed(1)}% hoje
-                      </p>}
-                  </div>
-                  <Target className="h-8 w-8 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Taxa de Conversão</p>
-                    <p className="text-3xl font-bold">{analyticsData?.conversions.conversionRate.toFixed(2) || 0}%</p>
-                    <p className="text-sm text-muted-foreground">Meta: 3.5%</p>
-                  </div>
-                  <BarChart3 className="h-8 w-8 text-purple-500" />
+                  <Target className="h-8 w-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
@@ -1346,10 +1294,41 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Hoje</p>
-                    <p className="text-3xl font-bold">{analyticsData?.visitors.today || 0}</p>
-                    <p className="text-sm text-muted-foreground">{analyticsData?.conversions.today || 0} conversões</p>
+                    <p className="text-3xl font-bold">{analyticsData?.leads?.today || 0}</p>
+                    {analyticsData?.leads?.growth !== undefined && (
+                      <p className={`text-sm flex items-center gap-1 ${analyticsData.leads.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <TrendingUp className="w-3 h-3" />
+                        {analyticsData.leads.growth > 0 ? '+' : ''}{analyticsData.leads.growth.toFixed(1)}% vs ontem
+                      </p>
+                    )}
                   </div>
-                  <Calendar className="h-8 w-8 text-orange-500" />
+                  <Calendar className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Estados Ativos</p>
+                    <p className="text-3xl font-bold">{analyticsData?.topStates?.length || 0}</p>
+                    <p className="text-sm text-muted-foreground">Diferentes estados</p>
+                  </div>
+                  <Globe className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">DDDs Únicos</p>
+                    <p className="text-3xl font-bold">{analyticsData?.topDDDs?.length || 0}</p>
+                    <p className="text-sm text-muted-foreground">Regiões diferentes</p>
+                  </div>
+                  <Users className="h-8 w-8 text-orange-500" />
                 </div>
               </CardContent>
             </Card>
@@ -1360,7 +1339,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>📊 Páginas Mais Visitadas</CardTitle>
+                <CardTitle>📄 Páginas com Mais Leads</CardTitle>
                 <CardDescription>Últimos 7 dias</CardDescription>
               </CardHeader>
               <CardContent>
@@ -1370,35 +1349,37 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                           <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
                           <span className="text-sm font-medium truncate">{page.page.replace(/^https?:\/\/[^\/]+/, '') || '/'}</span>
                         </div>
-                        <Badge variant="outline">{page.views} views</Badge>
+                        <Badge variant="outline">{page.count} leads</Badge>
                       </div>)}
                   </div> : <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhuma visualização de página registrada</p>
+                    <p>Nenhuma página com leads registrada</p>
                   </div>}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>📱 Dispositivos dos Visitantes</CardTitle>
+                <CardTitle>🗺️ DDDs com Mais Leads</CardTitle>
                 <CardDescription>Últimos 7 dias</CardDescription>
               </CardHeader>
               <CardContent>
-                {analyticsData?.deviceData && analyticsData.deviceData.length > 0 ? <div className="space-y-3">
-                    {analyticsData.deviceData.map((device, index) => <div key={device.device} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium capitalize">{device.device}</span>
+                {analyticsData?.topDDDs && analyticsData.topDDDs.length > 0 ? (
+                  <div className="space-y-3">
+                    {analyticsData.topDDDs.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                          <span className="text-sm font-medium">DDD {item.ddd}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">{device.count}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {(device.count / (analyticsData?.visitors.unique || 1) * 100).toFixed(1)}%
-                          </p>
-                        </div>
-                      </div>)}
-                  </div> : <div className="text-center p-8 text-muted-foreground">
-                    <p>Nenhum dado de dispositivo disponível</p>
-                  </div>}
+                        <Badge variant="outline">{item.count} leads</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Nenhum dado de DDD disponível</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
