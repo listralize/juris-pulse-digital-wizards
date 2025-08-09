@@ -166,6 +166,15 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                     </div>
                   )}
 
+                  {(leadData.subject || leadData.Assunto) && (
+                    <div className="pt-2 border-t">
+                      <span className="text-xs font-medium text-muted-foreground">ASSUNTO</span>
+                      <p className="text-sm mt-1 p-2 bg-muted/30 rounded text-xs max-h-20 overflow-y-auto">
+                        {leadData.subject || leadData.Assunto}
+                      </p>
+                    </div>
+                  )}
+
                   {leadData.source && (
                     <div className="pt-2 border-t">
                       <span className="text-xs font-medium text-muted-foreground">ORIGEM</span>

@@ -155,6 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
         message: webhookData.message || webhookData.mensagem || webhookData.msg || webhookData.description || webhookData.observacoes || '',
         service: webhookData.service || webhookData.servico || webhookData.subject || webhookData.assunto || 'Contato via Webhook',
         company: webhookData.company || webhookData.empresa || '',
+        subject: webhookData.Assunto || webhookData.assunto || webhookData.subject || '',
         source: 'Webhook - Sistema Externo'
       };
       

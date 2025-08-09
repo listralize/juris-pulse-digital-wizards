@@ -45,7 +45,16 @@ export const LeadWebhookManager: React.FC = () => {
     { value: 'phone', label: 'Telefone' },
     { value: 'message', label: 'Mensagem' },
     { value: 'service', label: 'Serviço' },
-    { value: 'company', label: 'Empresa' }
+    { value: 'company', label: 'Empresa' },
+    { value: 'subject', label: 'Assunto' },
+    { value: 'address', label: 'Endereço' },
+    { value: 'age', label: 'Idade' },
+    { value: 'occupation', label: 'Profissão' },
+    { value: 'notes', label: 'Observações' },
+    { value: 'source', label: 'Origem' },
+    { value: 'campaign', label: 'Campanha' },
+    { value: 'description', label: 'Descrição' },
+    { value: 'urgency', label: 'Urgência' }
   ];
 
   const loadWebhookConfig = async () => {
@@ -150,16 +159,46 @@ export const LeadWebhookManager: React.FC = () => {
           setIsListening(false);
           
           // Auto configurar baseado nos dados recebidos
-          const newMappings = Object.keys(leadData).map(key => ({
-            webhookField: key,
-            systemField: systemFields.find(f => f.value === key)?.value || 
-              (key.toLowerCase().includes('nome') || key.toLowerCase().includes('name') ? 'name' :
-               key.toLowerCase().includes('tel') || key.toLowerCase().includes('phone') ? 'phone' :
-               key.toLowerCase().includes('email') ? 'email' :
-               key.toLowerCase().includes('msg') || key.toLowerCase().includes('message') ? 'message' : 'name'),
-            required: key.toLowerCase().includes('nome') || key.toLowerCase().includes('name') || 
-                     key.toLowerCase().includes('tel') || key.toLowerCase().includes('phone')
-          }));
+          const newMappings = Object.keys(leadData).map(key => {
+            let systemField = 'message'; // default
+            
+            // Mapeamento inteligente baseado no nome do campo
+            if (key.toLowerCase().includes('nome') || key.toLowerCase().includes('name')) {
+              systemField = 'name';
+            } else if (key.toLowerCase().includes('tel') || key.toLowerCase().includes('phone')) {
+              systemField = 'phone';
+            } else if (key.toLowerCase().includes('email') || key.toLowerCase().includes('mail')) {
+              systemField = 'email';
+            } else if (key.toLowerCase().includes('assunto') || key.toLowerCase().includes('subject')) {
+              systemField = 'subject';
+            } else if (key.toLowerCase().includes('msg') || key.toLowerCase().includes('message') || key.toLowerCase().includes('mensagem')) {
+              systemField = 'message';
+            } else if (key.toLowerCase().includes('servico') || key.toLowerCase().includes('service')) {
+              systemField = 'service';
+            } else if (key.toLowerCase().includes('empresa') || key.toLowerCase().includes('company')) {
+              systemField = 'company';
+            } else if (key.toLowerCase().includes('endereco') || key.toLowerCase().includes('address')) {
+              systemField = 'address';
+            } else if (key.toLowerCase().includes('idade') || key.toLowerCase().includes('age')) {
+              systemField = 'age';
+            } else if (key.toLowerCase().includes('profissao') || key.toLowerCase().includes('occupation')) {
+              systemField = 'occupation';
+            } else if (key.toLowerCase().includes('observacao') || key.toLowerCase().includes('notes')) {
+              systemField = 'notes';
+            } else if (key.toLowerCase().includes('origem') || key.toLowerCase().includes('source')) {
+              systemField = 'source';
+            } else if (key.toLowerCase().includes('campanha') || key.toLowerCase().includes('campaign')) {
+              systemField = 'campaign';
+            } else if (key.toLowerCase().includes('descricao') || key.toLowerCase().includes('description')) {
+              systemField = 'description';
+            }
+            
+            return {
+              webhookField: key,
+              systemField: systemField,
+              required: ['name', 'phone'].includes(systemField)
+            };
+          });
           
           setWebhookConfig(prev => ({
             ...prev,
