@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -116,6 +117,15 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
   if (!lead) return null;
 
   const leadData = parseLeadData(lead.lead_data);
+  
+  // Debug: log para verificar os dados de localização
+  console.log('Lead data:', { 
+    id: lead.id, 
+    state: lead.state, 
+    capital: lead.capital, 
+    region: lead.region, 
+    ddd: lead.ddd 
+  });
   const whatsappMessage = encodeURIComponent(
     `Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`
   );
@@ -295,6 +305,9 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                 <Badge variant="destructive">Urgente</Badge>
               )}
             </DialogTitle>
+            <DialogDescription>
+              Visualize e gerencie as informações do lead
+            </DialogDescription>
           </DialogHeader>
 
           <Tabs defaultValue="details" className="w-full">
@@ -312,18 +325,18 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                     <div className="space-y-2">
                       <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
                       {renderEditableField('email', leadData.email, <Mail className="h-4 w-4" />)}
-                      {renderEditableField('phone', leadData.phone || leadData.telefone, <Phone className="h-4 w-4" />)}
-                      {(lead.state || lead.region) && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Globe className="h-4 w-4" />
-                          <span>
-                            {lead.capital && `${lead.capital} - `}
-                            {lead.state && `${lead.state} `}
-                            {lead.region && `(${lead.region})`}
-                            {lead.ddd && ` - DDD ${lead.ddd}`}
-                          </span>
-                        </div>
-                      )}
+                       {renderEditableField('phone', leadData.phone || leadData.telefone, <Phone className="h-4 w-4" />)}
+                       {(lead.state || lead.region || lead.capital || lead.ddd) && (
+                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                           <MapPin className="h-4 w-4" />
+                           <span>
+                             {lead.capital && `${lead.capital}`}
+                             {lead.state && ` - ${lead.state}`}
+                             {lead.region && ` (${lead.region})`}
+                             {lead.ddd && ` - DDD ${lead.ddd}`}
+                           </span>
+                         </div>
+                       )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>{new Date(lead.created_at).toLocaleString('pt-BR')}</span>
