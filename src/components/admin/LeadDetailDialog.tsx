@@ -40,18 +40,40 @@ interface LeadDetailDialogProps {
 
 const parseLeadData = (leadData: any) => {
   try {
+    let parsedData: any = {};
+    
+    // Se leadData for string, faz parse JSON
     if (typeof leadData === 'string') {
-      return JSON.parse(leadData);
+      parsedData = JSON.parse(leadData);
+    } else if (leadData && typeof leadData === 'object') {
+      parsedData = leadData;
     }
-    return {
-      name: leadData?.name || '',
-      email: leadData?.email || '',
-      phone: leadData?.phone || '',
-      service: leadData?.service || '',
-      message: leadData?.message || '',
-      urgent: leadData?.urgent || false,
-      ...leadData
+
+    // Extrair dados básicos
+    const result = {
+      name: parsedData?.name || '',
+      email: parsedData?.email || '',
+      phone: parsedData?.phone || '',
+      service: parsedData?.service || 'Não especificado',
+      message: parsedData?.message || '',
+      urgent: parsedData?.urgent || parsedData?.isUrgent || false,
+      source: parsedData?.source || '',
+      timestamp: parsedData?.timestamp || '',
+      customFields: parsedData?.customFields || {},
+      formConfig: parsedData?.formConfig || {},
+      ...parsedData
     };
+
+    // Se tem campos customizados, adicionar ao resultado
+    if (parsedData?.customFields && typeof parsedData.customFields === 'object') {
+      Object.keys(parsedData.customFields).forEach(key => {
+        if (!result[key]) {
+          result[key] = parsedData.customFields[key];
+        }
+      });
+    }
+
+    return result;
   } catch (error) {
     console.error('Erro ao parsear lead_data:', error);
     return {};
@@ -131,12 +153,34 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                     </div>
                   )}
 
+                  {leadData.source && (
+                    <div className="pt-2 border-t">
+                      <span className="text-xs font-medium text-muted-foreground">ORIGEM</span>
+                      <p className="text-sm mt-1">{leadData.source}</p>
+                    </div>
+                  )}
+
                   {leadData.message && (
                     <div className="pt-2 border-t">
                       <span className="text-xs font-medium text-muted-foreground">MENSAGEM</span>
                       <p className="text-sm mt-1 p-2 bg-muted/30 rounded text-xs max-h-20 overflow-y-auto">
                         {leadData.message}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Campos customizados */}
+                  {leadData.customFields && Object.keys(leadData.customFields).length > 0 && (
+                    <div className="pt-2 border-t">
+                      <span className="text-xs font-medium text-muted-foreground">CAMPOS ADICIONAIS</span>
+                      <div className="mt-1 space-y-1">
+                        {Object.entries(leadData.customFields).map(([key, value]: [string, any]) => (
+                          <div key={key} className="text-xs">
+                            <span className="font-medium capitalize">{key}:</span>
+                            <span className="ml-1">{String(value)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>
