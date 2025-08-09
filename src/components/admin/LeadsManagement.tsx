@@ -676,7 +676,7 @@ export const LeadsManagement: React.FC = () => {
       });
     }
 
-    // Filtro de data
+    // Filtro de data - corrigindo para timezone local
     if (dateFilter !== 'all') {
       const now = new Date();
       let startDate: Date;
@@ -684,41 +684,67 @@ export const LeadsManagement: React.FC = () => {
 
       switch (dateFilter) {
         case 'today':
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          // Usar exatamente o dia atual no timezone local
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
           endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
           break;
         case 'week':
+          // Últimos 7 dias
           const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - 7);
+          weekStart.setDate(now.getDate() - 6); // Últimos 7 dias incluindo hoje
           weekStart.setHours(0, 0, 0, 0);
           startDate = weekStart;
           endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
           break;
         case 'month':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          // Mês atual
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
           endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
           break;
         case 'custom':
           if (customDateStart && customDateEnd) {
-            startDate = new Date(customDateStart);
-            startDate.setHours(0, 0, 0, 0); // Início do dia
-            endDate = new Date(customDateEnd);
-            endDate.setHours(23, 59, 59, 999); // Fim do dia
+            // Parseamento manual para evitar problemas de timezone
+            const startParts = customDateStart.split('-');
+            const endParts = customDateEnd.split('-');
+            
+            startDate = new Date(
+              parseInt(startParts[0]), 
+              parseInt(startParts[1]) - 1, 
+              parseInt(startParts[2]), 
+              0, 0, 0, 0
+            );
+            endDate = new Date(
+              parseInt(endParts[0]), 
+              parseInt(endParts[1]) - 1, 
+              parseInt(endParts[2]), 
+              23, 59, 59, 999
+            );
           } else {
-            startDate = new Date(0); // Se não há datas customizadas, mostrar tudo
+            startDate = new Date(0);
           }
           break;
         default:
           startDate = new Date(0);
       }
 
+      // Debug para acompanhar o filtro
+      console.log('🔍 Filtro de data aplicado:', {
+        filter: dateFilter,
+        startDate: startDate.toLocaleString('pt-BR'),
+        endDate: endDate?.toLocaleString('pt-BR'),
+        leadsAntesFiltro: leads.length
+      });
+
       filtered = filtered.filter(lead => {
         const leadDate = new Date(lead.created_at);
-        if (endDate) {
-          return leadDate >= startDate && leadDate <= endDate;
-        }
-        return leadDate >= startDate;
+        const inRange = endDate ? 
+          (leadDate >= startDate && leadDate <= endDate) : 
+          (leadDate >= startDate);
+        
+        return inRange;
       });
+
+      console.log('📊 Leads após filtro de data:', filtered.length);
     }
 
     // Filtro por serviço
