@@ -13,6 +13,7 @@ import { BulkEmailSender } from './BulkEmailSender';
 import { ContactImporter } from './ContactImporter';
 import { LeadWebhookManager } from './LeadWebhookManager';
 import { LeadsKanban } from './LeadsKanban';
+import { LeadComments } from './LeadComments';
 
 
 
@@ -197,6 +198,9 @@ const LeadDetailSheet: React.FC<{
               </div>
             </div>
           </div>
+
+          {/* Comentários */}
+          <LeadComments leadId={lead.id} />
 
           {/* Dados técnicos */}
           <div className="space-y-2">
