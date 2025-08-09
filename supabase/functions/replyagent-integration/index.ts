@@ -187,52 +187,58 @@ serve(async (req) => {
         
         try {
           // 1. Buscar contato existente por telefone
-          const findResponse = await fetch(`${req.url}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': req.headers.get('Authorization') || ''
-            },
-            body: JSON.stringify({
-              action: 'find_contact_by_phone',
-              data: { phone: leadData.phone }
-            })
+          const findResponse = await fetch(`${REPLYAGENT_API_BASE}/contacts`, {
+            headers
           });
 
-          const findResult = await findResponse.json();
-          let contactId = null;
+          if (!findResponse.ok) {
+            throw new Error(`Erro na API: ${findResponse.status}`);
+          }
 
-          if (findResult.found) {
-            contactId = findResult.contact.id;
+          const contacts: APIContact[] = await findResponse.json();
+          const normalizedSearchPhone = normalizePhoneNumber(leadData.phone);
+          
+          // Encontrar contato por telefone normalizado
+          const existingContact = contacts.find(c => {
+            if (!c.phone) return false;
+            const normalizedContactPhone = normalizePhoneNumber(c.phone);
+            return normalizedContactPhone === normalizedSearchPhone;
+          });
+
+          let contactId = null;
+          let wasNewContact = false;
+
+          if (existingContact) {
+            contactId = existingContact.id;
             console.log(`✅ Contato encontrado: ${contactId}`);
           } else {
             // 2. Criar novo contato se não existir
             console.log('📝 Criando novo contato...');
             
-            const addResponse = await fetch(`${req.url}`, {
+            const contactData = {
+              first_name: leadData.name?.split(' ')[0] || 'Lead',
+              ...(leadData.name?.split(' ').slice(1).join(' ') && { 
+                last_name: leadData.name.split(' ').slice(1).join(' ') 
+              }),
+              ...(leadData.phone && { primary_phone_number: leadData.phone }),
+              ...(leadData.email && { primary_email: leadData.email }),
+              ...(leadData.service && { company_name: leadData.service })
+            };
+
+            const addResponse = await fetch(`${REPLYAGENT_API_BASE}/contacts`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': req.headers.get('Authorization') || ''
-              },
-              body: JSON.stringify({
-                action: 'add_contact',
-                data: {
-                  first_name: leadData.name?.split(' ')[0] || 'Lead',
-                  last_name: leadData.name?.split(' ').slice(1).join(' ') || '',
-                  phone: leadData.phone,
-                  email: leadData.email,
-                  company_name: leadData.service
-                }
-              })
+              headers,
+              body: JSON.stringify(contactData)
             });
 
             const addResult = await addResponse.json();
             
-            if (addResult.success && addResult.data?.id) {
-              contactId = addResult.data.id;
+            if (addResponse.ok && addResult?.id) {
+              contactId = addResult.id;
+              wasNewContact = true;
               console.log(`✅ Novo contato criado: ${contactId}`);
             } else {
+              console.error('❌ Erro ao criar contato:', addResult);
               throw new Error('Falha ao criar contato');
             }
           }
@@ -241,27 +247,28 @@ serve(async (req) => {
           if (contactId && leadData.service) {
             console.log('⚙️ Configurando campos personalizados...');
             
-            await fetch(`${req.url}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': req.headers.get('Authorization') || ''
-              },
-              body: JSON.stringify({
-                action: 'set_custom_field',
-                data: {
-                  contact_id: contactId,
+            try {
+              const customFieldResponse = await fetch(`${REPLYAGENT_API_BASE}/contacts/${contactId}/set-custom-field`, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({
                   field_value: leadData.service,
                   system_name: 'service_interest'
-                }
-              })
-            });
+                })
+              });
+
+              if (customFieldResponse.ok) {
+                console.log('✅ Campo personalizado configurado');
+              }
+            } catch (fieldError) {
+              console.log('⚠️ Erro ao configurar campo personalizado (continuando):', fieldError);
+            }
           }
 
           return new Response(JSON.stringify({
             success: true,
             contact_id: contactId,
-            was_new_contact: !findResult.found,
+            was_new_contact: wasNewContact,
             message: `Lead processado com sucesso. Contact ID: ${contactId}`
           }), {
             headers: { 'Content-Type': 'application/json', ...corsHeaders }
