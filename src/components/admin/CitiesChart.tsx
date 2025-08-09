@@ -102,10 +102,10 @@ export const CitiesChart: React.FC = () => {
           
           // Se o DDD tem muitos leads (mais de 3), mostra como grupo DDD
           if (dddLeadsCount > 3) {
-            const key = `DDD ${lead.ddd} - ${lead.state}`;
+            const key = `DDD ${lead.ddd} - ${lead.capital || lead.state}`;
             acc[key] = {
               city: `DDD ${lead.ddd}`,
-              state: lead.state,
+              state: lead.capital || lead.state,
               count: (acc[key]?.count || 0) + 1,
               ddd: lead.ddd
             };
