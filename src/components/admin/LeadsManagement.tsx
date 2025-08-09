@@ -13,6 +13,7 @@ import { BulkEmailSender } from './BulkEmailSender';
 import { ContactImporter } from './ContactImporter';
 import { LeadWebhookManager } from './LeadWebhookManager';
 import { LeadsKanban } from './LeadsKanban';
+import { useReplyAgentIntegration } from '@/hooks/useReplyAgentIntegration';
 
 
 // Interface do lead
@@ -258,6 +259,9 @@ export const LeadsManagement: React.FC = () => {
   const [isContactImporterOpen, setIsContactImporterOpen] = useState(false);
   const [isLeadWebhookManagerOpen, setIsLeadWebhookManagerOpen] = useState(false);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
+  
+  // Integração ReplyAgent
+  const replyAgent = useReplyAgentIntegration();
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -347,6 +351,30 @@ export const LeadsManagement: React.FC = () => {
       toast.error('Erro ao carregar leads');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Processar lead automaticamente no ReplyAgent
+  const handleAutoProcessLead = async (lead: Lead) => {
+    const leadData = parseLeadData(lead.lead_data);
+    
+    if (!leadData.phone) {
+      toast.error('Lead não possui número de telefone');
+      return;
+    }
+
+    const result = await replyAgent.autoProcessLead({
+      name: leadData.name || 'Lead',
+      email: leadData.email || '',
+      phone: leadData.phone,
+      service: leadData.service || '',
+      message: leadData.message || '',
+      urgent: leadData.urgent || false
+    });
+
+    if (result.success) {
+      // Atualizar status do lead se foi processado com sucesso
+      await updateLeadStatus(lead.id, 'contato');
     }
   };
 
@@ -825,6 +853,23 @@ export const LeadsManagement: React.FC = () => {
                 <Webhook className="w-4 h-4" />
                 Sistema de Webhook para Leads
               </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  // Processar todos os leads filtrados automaticamente
+                  filteredLeads.forEach(lead => {
+                    const leadData = parseLeadData(lead.lead_data);
+                    if (leadData.phone) {
+                      handleAutoProcessLead(lead);
+                    }
+                  });
+                }}
+                disabled={replyAgent.isLoading}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Processar no ReplyAgent
+              </Button>
           
           <Button onClick={exportLeads} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
@@ -1198,20 +1243,33 @@ export const LeadsManagement: React.FC = () => {
                                  <SelectItem value="novo">Novo</SelectItem>
                                  <SelectItem value="contato">Em Contato</SelectItem>
                                  <SelectItem value="qualificado">Qualificado</SelectItem>
+                                 <SelectItem value="proposta">Proposta</SelectItem>
                                  <SelectItem value="convertido">Convertido</SelectItem>
                                  <SelectItem value="descartado">Descartado</SelectItem>
                                </SelectContent>
                             </Select>
                           </td>
-                          <td className="p-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openLeadDetails(lead)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </td>
+                           <td className="p-2">
+                             <div className="flex gap-1">
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => openLeadDetails(lead)}
+                                 title="Ver detalhes"
+                               >
+                                 <Eye className="h-4 w-4" />
+                               </Button>
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => handleAutoProcessLead(lead)}
+                                 disabled={replyAgent.isLoading}
+                                 title="Processar no ReplyAgent"
+                               >
+                                 <UserPlus className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </td>
                         </tr>
                       );
                     })}

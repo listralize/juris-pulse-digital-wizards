@@ -141,7 +141,27 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'].map(status => {
-            const allStatusLeads = filteredLeads.filter(lead => leadStatuses[lead.id] === status || (status === 'novo' && !leadStatuses[lead.id]));
+            // Mapear status da tabela para Kanban
+            const getKanbanStatus = (tableStatus: string) => {
+              const statusMap: { [key: string]: string } = {
+                'contato': 'contatado',
+                'em contato': 'contatado', 
+                'descartado': 'perdido',
+                'novo': 'novo',
+                'qualificado': 'qualificado',
+                'proposta': 'proposta', 
+                'convertido': 'convertido',
+                'perdido': 'perdido',
+                'contatado': 'contatado'
+              };
+              return statusMap[tableStatus?.toLowerCase()] || tableStatus;
+            };
+
+            const allStatusLeads = filteredLeads.filter(lead => {
+              const leadStatus = leadStatuses[lead.id];
+              const kanbanStatus = getKanbanStatus(leadStatus);
+              return kanbanStatus === status || (status === 'novo' && !leadStatus);
+            });
             const statusLeads = allStatusLeads.slice(kanbanIndexOfFirstLead, kanbanIndexOfLastLead);
             
             return (
