@@ -14,6 +14,7 @@ import { ContactImporter } from './ContactImporter';
 import { LeadWebhookManager } from './LeadWebhookManager';
 import { LeadsKanban } from './LeadsKanban';
 import { LeadComments } from './LeadComments';
+import { LeadDetailDialog } from './LeadDetailDialog';
 
 
 
@@ -22,6 +23,11 @@ interface Lead {
   id: string;
   lead_data: any;
   event_type: string;
+  event_action: string;
+  session_id: string;
+  visitor_id?: string;
+  form_id?: string;
+  form_name?: string;
   page_url?: string;
   referrer?: string;
   utm_source?: string;
@@ -65,173 +71,7 @@ const parseLeadData = (leadData: any) => {
   }
 };
 
-// Componente para detalhes do lead
-const LeadDetailSheet: React.FC<{
-  lead: Lead | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onSendEmail: (lead: Lead, templateId?: string) => void;
-  emailTemplates: any[];
-  selectedTemplate: any;
-  setSelectedTemplate: (template: any) => void;
-}> = ({ lead, isOpen, onClose, onSendEmail, emailTemplates, selectedTemplate, setSelectedTemplate }) => {
-  if (!lead) return null;
-
-  const leadData = parseLeadData(lead.lead_data);
-  const whatsappMessage = encodeURIComponent(
-    `Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`
-  );
-  
-  // Usar número do lead se disponível, senão usar número do escritório
-  const phoneNumber = leadData.phone ? 
-    leadData.phone.replace(/\D/g, '') : // Remove caracteres não numéricos
-    '5562994594496'; // Número padrão do escritório
-  
-  const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${whatsappMessage}`;
-
-  return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
-        <SheetHeader>
-          <SheetTitle>Detalhes do Lead</SheetTitle>
-        </SheetHeader>
-        
-        <div className="mt-6 space-y-6">
-          {/* Informações principais */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-lg">{leadData.name || 'Nome não informado'}</h3>
-              <p className="text-muted-foreground">{leadData.email || 'Email não informado'}</p>
-              {leadData.phone && (
-                <p className="text-muted-foreground">{leadData.phone}</p>
-              )}
-            </div>
-
-            {leadData.service && (
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">SERVIÇO:</span>
-                <p className="mt-1">{leadData.service}</p>
-              </div>
-            )}
-
-            {leadData.message && (
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">MENSAGEM:</span>
-                <p className="mt-1 p-3 bg-muted/30 rounded-md">{leadData.message}</p>
-              </div>
-            )}
-
-            {leadData.urgent && (
-              <Badge variant="destructive">Urgente</Badge>
-            )}
-          </div>
-
-          {/* Ações de contato */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Ações</h4>
-            
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-green-600" />
-                <a 
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-600 hover:underline"
-                >
-                  WhatsApp
-                </a>
-              </div>
-              
-              <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-blue-600" />
-                <button
-                  onClick={() => {
-                    if (leadData.email) {
-                      navigator.clipboard.writeText(leadData.email);
-                      toast.success('Email copiado!');
-                    }
-                  }}
-                  className="text-blue-600 hover:underline text-left"
-                >
-                  {leadData.email || 'Email não informado'}
-                </button>
-              </div>
-              
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium">Template:</span>
-                </div>
-                
-                <Select
-                  value={selectedTemplate?.id || ''}
-                  onValueChange={(value) => {
-                    const template = emailTemplates.find(t => t.id === value);
-                    setSelectedTemplate(template);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione um template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {emailTemplates.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onSendEmail(lead)}
-                  className="text-blue-600 hover:bg-blue-50"
-                  disabled={!selectedTemplate}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Enviar Email
-                </Button>
-              </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Comentários */}
-          <LeadComments leadId={lead.id} />
-
-          {/* Dados técnicos */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Dados Técnicos</h4>
-            
-            <div className="text-xs space-y-1">
-              <div className="p-2 bg-muted/30 rounded text-xs">
-                <span className="font-medium text-muted-foreground">DATA:</span>
-                <span className="ml-2">{new Date(lead.created_at).toLocaleString('pt-BR')}</span>
-              </div>
-              
-              {lead.page_url && (
-                <div className="p-2 bg-muted/30 rounded text-xs">
-                  <span className="font-medium text-muted-foreground">PÁGINA:</span>
-                  <span className="ml-2 break-all">{lead.page_url}</span>
-                </div>
-              )}
-              
-              {lead.referrer && (
-                <div className="p-2 bg-muted/30 rounded text-xs">
-                  <span className="font-medium text-muted-foreground">ORIGEM:</span>
-                  <span className="ml-2 break-all">{lead.referrer}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};
+// Componente para detalhes do lead foi movido para LeadDetailDialog.tsx
 
 export const LeadsManagement: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -1303,8 +1143,8 @@ export const LeadsManagement: React.FC = () => {
         />
       )}
 
-      {/* Sheet de detalhes do lead */}
-      <LeadDetailSheet
+      {/* Dialog de detalhes do lead */}
+      <LeadDetailDialog
         lead={selectedLead}
         isOpen={isDetailSheetOpen}
         onClose={() => setIsDetailSheetOpen(false)}
