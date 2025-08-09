@@ -121,25 +121,61 @@ export const LeadsManagement: React.FC = () => {
       
       const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
-        .select(`
-          id, event_type, event_action, session_id, visitor_id, form_id, form_name, 
-          page_url, referrer, created_at, lead_data, state, capital, region, ddd,
-          ddd_locations!inner(cities)
-        `)
+        .select('id, event_type, event_action, session_id, visitor_id, form_id, form_name, page_url, referrer, created_at, lead_data, state, capital, region, ddd')
         .in('event_type', ['form_submission', 'webhook_received'])
         .order('created_at', { ascending: false });
 
       if (leadsError) {
         console.error('❌ Erro ao carregar leads:', leadsError);
         toast.error('Erro ao carregar leads');
+        setLeads([]);
         return;
       }
+
+      // Buscar informações de cidades para os DDDs
+      const ddds = [...new Set(leadsData?.map(lead => lead.ddd).filter(Boolean))];
+      let dddLocationsMap = new Map();
+      
+      if (ddds.length > 0) {
+        const { data: dddData } = await supabase
+          .from('ddd_locations')
+          .select('ddd, cities')
+          .in('ddd', ddds);
+        
+        if (dddData) {
+          dddData.forEach(location => {
+            dddLocationsMap.set(location.ddd, location.cities);
+          });
+        }
+      }
+
+      // Enriquecer os leads com informações de cidade
+      const enrichedLeads = leadsData?.map(lead => ({
+        ...lead,
+        ddd_locations: lead.ddd ? { cities: dddLocationsMap.get(lead.ddd) } : null
+      })) || [];
+
+      // Processar e enriquecer dados
+      const processedLeads = enrichedLeads.map(lead => {
+        const leadData = lead.lead_data;
+        let parsedData = leadData;
+        
+        if (typeof leadData === 'string') {
+          try {
+            parsedData = JSON.parse(leadData);
+          } catch (e) {
+            console.error('Erro ao fazer parse do lead_data:', e);
+          }
+        }
+        
+        return { ...lead, lead_data: parsedData };
+      });
 
       // Remover duplicatas baseado em email/telefone apenas se intervalo <= 30 segundos
       const deduplicatedLeads: any[] = [];
       const seenLeads = new Map<string, any>();
 
-      leadsData?.forEach(lead => {
+      processedLeads?.forEach(lead => {
         const leadData = parseLeadData(lead.lead_data);
         const email = leadData.email?.toLowerCase() || '';
         const phone = leadData.phone?.replace(/\D/g, '') || '';
@@ -162,7 +198,7 @@ export const LeadsManagement: React.FC = () => {
         }
       });
 
-      console.log(`✅ Leads processados: ${leadsData?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
+      console.log(`✅ Leads processados: ${enrichedLeads?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
       
       // Carregar status dos leads com suas datas de atualização
       const { data: statusData, error: statusError } = await supabase
