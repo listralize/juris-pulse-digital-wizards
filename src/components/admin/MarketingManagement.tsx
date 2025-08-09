@@ -1275,7 +1275,7 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 <MapPin className="h-5 w-5" />
                 Cidades com Mais Leads
               </CardTitle>
-              <CardDescription>Últimos 7 dias</CardDescription>
+              <CardDescription>Análise por período selecionado</CardDescription>
             </CardHeader>
             <CardContent>
               <CitiesChart />
