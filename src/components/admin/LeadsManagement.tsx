@@ -36,6 +36,10 @@ interface Lead {
   utm_content?: string;
   utm_term?: string;
   created_at: string;
+  state?: string;
+  capital?: string;
+  region?: string;
+  ddd?: number;
 }
 
 // Interface para lead editável
@@ -114,7 +118,7 @@ export const LeadsManagement: React.FC = () => {
       
       const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
-        .select('*')
+        .select('id, event_type, event_action, session_id, visitor_id, form_id, form_name, page_url, referrer, created_at, lead_data, state, capital, region, ddd')
         .in('event_type', ['form_submission', 'webhook_received'])
         .order('created_at', { ascending: false });
 
