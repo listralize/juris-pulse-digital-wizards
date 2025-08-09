@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
-const REPLYAGENT_API_BASE = 'https://ra-bcknd.com/v1';
+const REPLYAGENT_API_BASE = 'https://ra-bcknd.com/api';
 
 // Função para normalizar números de telefone
 const normalizePhoneNumber = (phone: string): string => {
