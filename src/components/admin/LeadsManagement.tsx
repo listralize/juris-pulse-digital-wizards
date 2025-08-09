@@ -267,6 +267,7 @@ export const LeadsManagement: React.FC = () => {
       const { data: leadsData, error: leadsError } = await supabase
         .from('conversion_events')
         .select('*')
+        .in('event_type', ['form_submission', 'webhook_received'])
         .order('created_at', { ascending: false });
 
       if (leadsError) {
@@ -275,6 +276,35 @@ export const LeadsManagement: React.FC = () => {
         return;
       }
 
+      // Remover duplicatas baseado em email/telefone apenas se intervalo <= 30 segundos
+      const deduplicatedLeads: any[] = [];
+      const seenLeads = new Map<string, any>();
+
+      leadsData?.forEach(lead => {
+        const leadData = parseLeadData(lead.lead_data);
+        const email = leadData.email?.toLowerCase() || '';
+        const phone = leadData.phone?.replace(/\D/g, '') || '';
+        const key = email || phone;
+        
+        if (key && seenLeads.has(key)) {
+          const existingLead = seenLeads.get(key);
+          const timeDiff = Math.abs(new Date(lead.created_at).getTime() - new Date(existingLead.created_at).getTime());
+          
+          // Se diferença for <= 30 segundos (30000ms), considerar duplicata
+          if (timeDiff <= 30000) {
+            console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
+            return; // Pular este lead duplicado
+          }
+        }
+        
+        deduplicatedLeads.push(lead);
+        if (key) {
+          seenLeads.set(key, lead);
+        }
+      });
+
+      console.log(`✅ Leads processados: ${leadsData?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
+      
       // Carregar status dos leads
       const { data: statusData, error: statusError } = await supabase
         .from('lead_status')
@@ -292,7 +322,7 @@ export const LeadsManagement: React.FC = () => {
 
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
-      leadsData?.forEach(lead => {
+      deduplicatedLeads.forEach(lead => {
         const leadData = parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
@@ -300,9 +330,8 @@ export const LeadsManagement: React.FC = () => {
       });
       setAvailableServices(Array.from(servicesSet).sort());
 
-      console.log(`✅ ${leadsData?.length || 0} leads carregados`);
-      setLeads(leadsData || []);
-      setFilteredLeads(leadsData || []);
+      setLeads(deduplicatedLeads);
+      setFilteredLeads(deduplicatedLeads);
       setLeadStatuses(statusMap);
     } catch (error) {
       console.error('❌ Erro geral:', error);
@@ -638,16 +667,23 @@ export const LeadsManagement: React.FC = () => {
       switch (dateFilter) {
         case 'today':
           startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
           break;
         case 'week':
-          startDate = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - 7);
+          weekStart.setHours(0, 0, 0, 0);
+          startDate = weekStart;
+          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
           break;
         case 'month':
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
           break;
         case 'custom':
           if (customDateStart && customDateEnd) {
             startDate = new Date(customDateStart);
+            startDate.setHours(0, 0, 0, 0); // Início do dia
             endDate = new Date(customDateEnd);
             endDate.setHours(23, 59, 59, 999); // Fim do dia
           } else {
@@ -660,7 +696,7 @@ export const LeadsManagement: React.FC = () => {
 
       filtered = filtered.filter(lead => {
         const leadDate = new Date(lead.created_at);
-        if (dateFilter === 'custom' && endDate) {
+        if (endDate) {
           return leadDate >= startDate && leadDate <= endDate;
         }
         return leadDate >= startDate;
@@ -849,36 +885,70 @@ export const LeadsManagement: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Novos</CardTitle>
-            <Badge variant="secondary">Novo</Badge>
+            <CardTitle className="text-sm font-medium">Período Filtrado</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {leads.filter(lead => !leadStatuses[lead.id] || leadStatuses[lead.id] === 'novo').length}
-            </div>
+            <div className="text-2xl font-bold">{filteredLeads.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {dateFilter === 'all' ? 'Todos os períodos' : 
+               dateFilter === 'today' ? 'Hoje' :
+               dateFilter === 'week' ? 'Últimos 7 dias' :
+               dateFilter === 'month' ? 'Este mês' :
+               dateFilter === 'custom' && customDateStart && customDateEnd ? 
+                 `${new Date(customDateStart).toLocaleDateString('pt-BR')} - ${new Date(customDateEnd).toLocaleDateString('pt-BR')}` :
+                 'Período personalizado'}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Contato</CardTitle>
+            <CardTitle className="text-sm font-medium">Em Contato (Período)</CardTitle>
             <Badge variant="default">Contato</Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {leads.filter(lead => leadStatuses[lead.id] === 'contato').length}
+              {(() => {
+                // Buscar status que foram alterados para 'contato' dentro do período
+                const statusEntries = Object.entries(leadStatuses);
+                let contactCount = 0;
+                
+                // Se não há filtro de data, mostrar todos os "Em Contato"
+                if (dateFilter === 'all') {
+                  contactCount = leads.filter(lead => leadStatuses[lead.id] === 'contato').length;
+                } else {
+                  // Para período específico, contar apenas os que têm status "contato"
+                  contactCount = filteredLeads.filter(lead => leadStatuses[lead.id] === 'contato').length;
+                }
+                
+                return contactCount;
+              })()}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Convertidos</CardTitle>
+            <CardTitle className="text-sm font-medium">Convertidos (Período)</CardTitle>
             <Badge variant="outline">Convertido</Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {leads.filter(lead => leadStatuses[lead.id] === 'convertido').length}
+              {(() => {
+                // Buscar status que foram alterados para 'convertido' dentro do período
+                let convertedCount = 0;
+                
+                // Se não há filtro de data, mostrar todos os "Convertidos"
+                if (dateFilter === 'all') {
+                  convertedCount = leads.filter(lead => leadStatuses[lead.id] === 'convertido').length;
+                } else {
+                  // Para período específico, contar apenas os que têm status "convertido"
+                  convertedCount = filteredLeads.filter(lead => leadStatuses[lead.id] === 'convertido').length;
+                }
+                
+                return convertedCount;
+              })()}
             </div>
           </CardContent>
         </Card>
