@@ -5,20 +5,16 @@ const REPLYAGENT_API_BASE = 'https://ra-bcknd.com';
 
 // Função para normalizar números de telefone
 const normalizePhoneNumber = (phone: string): string => {
-  // Remove todos os caracteres não numéricos
   const digits = phone.replace(/\D/g, '');
   
-  // Se o número começa com código do país, remove-o para comparação
   if (digits.startsWith('55') && digits.length > 11) {
     return digits.substring(2);
   }
   
-  // Se tem 11 dígitos com 9 no início (celular), mantém
   if (digits.length === 11 && digits.startsWith('9')) {
     return digits;
   }
   
-  // Se tem 10 dígitos, adiciona o 9 na frente para celular
   if (digits.length === 10) {
     return '9' + digits;
   }
@@ -37,7 +33,6 @@ interface APIContact {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -51,20 +46,9 @@ serve(async (req) => {
     console.log('🔑 API Key configurada:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NÃO ENCONTRADA');
 
     const { action, data } = await req.json();
-
-    const headers = {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      ...corsHeaders
-    };
-
     console.log(`🔄 Executando ação: ${action}`, data);
-    console.log('🌐 Headers sendo enviados:', {
-      'Authorization': `Bearer ${apiKey.substring(0, 10)}...`,
-      'Content-Type': 'application/json'
-    });
 
-    // Primeiro, vamos testar um endpoint simples para verificar a conectividade
+    // Teste de conectividade
     if (action === 'test_connection') {
       const testUrls = [
         'https://ra-bcknd.com',
@@ -99,284 +83,150 @@ serve(async (req) => {
       });
     }
 
-    switch (action) {
-      case 'find_contact_by_phone': {
-        const { phone } = data;
+    // Processamento automático do lead
+    if (action === 'auto_process_lead') {
+      const { leadData } = data;
+      
+      try {
+        console.log('🔍 Iniciando processamento automático do lead...');
         
-        try {
-          // Buscar todos os contatos para encontrar por telefone
-          const response = await fetch(`${REPLYAGENT_API_BASE}/contacts`, {
-            headers
-          });
+        // Testar diferentes configurações de API
+        const authHeaders = [
+          { 'Authorization': `Bearer ${apiKey}` },
+          { 'Authorization': `Token ${apiKey}` },
+          { 'X-API-Key': apiKey },
+          { 'api-key': apiKey }
+        ];
 
-          if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status}`);
-          }
+        const baseUrls = [
+          'https://ra-bcknd.com',
+          'https://ra-bcknd.com/api',
+          'https://ra-bcknd.com/v1',
+          'https://ra-bcknd.com/api/v1'
+        ];
 
-          const contacts: APIContact[] = await response.json();
-          const normalizedSearchPhone = normalizePhoneNumber(phone);
-          
-          // Encontrar contato por telefone normalizado
-          const contact = contacts.find(c => {
-            if (!c.phone) return false;
-            const normalizedContactPhone = normalizePhoneNumber(c.phone);
-            return normalizedContactPhone === normalizedSearchPhone;
-          });
+        let workingConfig = null;
 
-          return new Response(JSON.stringify({
-            success: true,
-            contact: contact || null,
-            found: !!contact
-          }), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders }
-          });
-
-        } catch (error) {
-          console.error('❌ Erro ao buscar contato:', error);
-          return new Response(JSON.stringify({
-            success: false,
-            error: error.message,
-            contact: null,
-            found: false
-          }), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders }
-          });
-        }
-      }
-
-      case 'add_contact': {
-        const { first_name, last_name, phone, email, company_name } = data;
-        
-        const contactData = {
-          first_name,
-          ...(last_name && { last_name }),
-          ...(phone && { primary_phone_number: phone }),
-          ...(email && { primary_email: email }),
-          ...(company_name && { company_name })
-        };
-
-        const response = await fetch(`${REPLYAGENT_API_BASE}/contacts`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(contactData)
-        });
-
-        const result = await response.json();
-
-        return new Response(JSON.stringify({
-          success: response.ok,
-          data: result,
-          status: response.status
-        }), {
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }
-        });
-      }
-
-      case 'send_smart_flow': {
-        const { automation_id, contact_id } = data;
-        
-        const formData = new FormData();
-        formData.append('automation_id', automation_id.toString());
-        formData.append('contact_id', contact_id.toString());
-
-        const response = await fetch(`${REPLYAGENT_API_BASE}/send-a-flow`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            ...corsHeaders
-          },
-          body: formData
-        });
-
-        const result = await response.text(); // API pode retornar texto simples
-
-        return new Response(JSON.stringify({
-          success: response.ok,
-          data: result,
-          status: response.status
-        }), {
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }
-        });
-      }
-
-      case 'set_custom_field': {
-        const { contact_id, field_value, system_name } = data;
-        
-        const response = await fetch(`${REPLYAGENT_API_BASE}/contacts/${contact_id}/set-custom-field`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({
-            field_value,
-            system_name
-          })
-        });
-
-        const result = await response.json();
-
-        return new Response(JSON.stringify({
-          success: response.ok,
-          data: result,
-          status: response.status
-        }), {
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }
-        });
-      }
-
-      case 'auto_process_lead': {
-        // Processamento automático do lead
-        const { leadData } = data;
-        
-        try {
-          // Tentativa com diferentes endpoints possíveis
-          const possibleEndpoints = [
-            `${REPLYAGENT_API_BASE}/contacts`,
-            `${REPLYAGENT_API_BASE}/api/contacts`,
-            `${REPLYAGENT_API_BASE}/v1/contacts`,
-            `${REPLYAGENT_API_BASE}/api/v1/contacts`
-          ];
-
-          let findResponse = null;
-          let workingEndpoint = null;
-
-          for (const endpoint of possibleEndpoints) {
-            console.log(`🔍 Testando endpoint: ${endpoint}`);
+        // Encontrar configuração que funciona
+        for (const baseUrl of baseUrls) {
+          for (const authHeader of authHeaders) {
+            console.log(`🧪 Testando: ${baseUrl}/contacts com auth:`, Object.keys(authHeader)[0]);
+            
             try {
-              const testResponse = await fetch(endpoint, { 
+              const testResponse = await fetch(`${baseUrl}/contacts`, {
                 method: 'GET',
                 headers: {
-                  'Authorization': `Bearer ${apiKey}`,
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  ...authHeader
                 }
               });
-              console.log(`📊 Status da resposta: ${testResponse.status} ${testResponse.statusText}`);
               
-              if (testResponse.status === 200 || testResponse.status === 401) {
-                // 200 = sucesso, 401 = não autorizado (mas endpoint existe)
-                findResponse = testResponse;
-                workingEndpoint = endpoint.replace('/contacts', '');
-                console.log(`✅ Endpoint encontrado: ${workingEndpoint}`);
-                
-                if (testResponse.status === 401) {
-                  console.log('🔐 Endpoint existe mas API key pode estar incorreta');
-                  throw new Error('API key incorreta ou expirada');
-                }
+              console.log(`📊 Resposta: ${testResponse.status} ${testResponse.statusText}`);
+              
+              if (testResponse.status === 200) {
+                console.log('✅ Configuração funcionando!');
+                const contacts = await testResponse.json();
+                workingConfig = { baseUrl, authHeader, contacts };
                 break;
+              } else if (testResponse.status === 401) {
+                console.log('🔐 Endpoint existe mas auth pode estar incorreta');
+              } else if (testResponse.status === 404) {
+                console.log('❌ Endpoint não encontrado');
               } else {
-                const errorText = await testResponse.text();
-                console.log(`❌ Endpoint falhou - Status: ${testResponse.status}, Resposta: ${errorText.substring(0, 200)}`);
+                const responseText = await testResponse.text();
+                console.log(`🔍 Status ${testResponse.status}, Resposta: ${responseText.substring(0, 100)}`);
               }
-            } catch (err) {
-              console.log(`❌ Erro no endpoint ${endpoint}:`, err.message);
+            } catch (fetchError) {
+              console.log(`❌ Erro de fetch: ${fetchError.message}`);
             }
           }
-
-          if (!findResponse || (!findResponse.ok && findResponse.status !== 401)) {
-            console.log('🚨 NENHUM ENDPOINT FUNCIONOU - Detalhes:');
-            console.log('- URL base testada:', REPLYAGENT_API_BASE);
-            console.log('- API Key (primeiros 10 chars):', apiKey.substring(0, 10));
-            console.log('- Endpoints testados:', possibleEndpoints);
-            throw new Error(`API ReplyAgent inacessível. Verifique a URL base e a chave da API.`);
-          }
-
-          const contacts: APIContact[] = await findResponse.json();
-          const normalizedSearchPhone = normalizePhoneNumber(leadData.phone);
           
-          // Encontrar contato por telefone normalizado
-          const existingContact = contacts.find(c => {
-            if (!c.phone) return false;
-            const normalizedContactPhone = normalizePhoneNumber(c.phone);
-            return normalizedContactPhone === normalizedSearchPhone;
-          });
-
-          let contactId = null;
-          let wasNewContact = false;
-
-          if (existingContact) {
-            contactId = existingContact.id;
-            console.log(`✅ Contato encontrado: ${contactId}`);
-          } else {
-            // 2. Criar novo contato se não existir
-            console.log('📝 Criando novo contato...');
-            
-            const contactData = {
-              first_name: leadData.name?.split(' ')[0] || 'Lead',
-              ...(leadData.name?.split(' ').slice(1).join(' ') && { 
-                last_name: leadData.name.split(' ').slice(1).join(' ') 
-              }),
-              ...(leadData.phone && { primary_phone_number: leadData.phone }),
-              ...(leadData.email && { primary_email: leadData.email }),
-              ...(leadData.service && { company_name: leadData.service })
-            };
-
-            const addResponse = await fetch(`${workingEndpoint}/contacts`, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(contactData)
-            });
-
-            const addResult = await addResponse.json();
-            
-            if (addResponse.ok && addResult?.id) {
-              contactId = addResult.id;
-              wasNewContact = true;
-              console.log(`✅ Novo contato criado: ${contactId}`);
-            } else {
-              console.error('❌ Erro ao criar contato:', addResult);
-              throw new Error('Falha ao criar contato');
-            }
-          }
-
-          // 3. Configurar campos personalizados se necessário
-          if (contactId && leadData.service) {
-            console.log('⚙️ Configurando campos personalizados...');
-            
-            try {
-              const customFieldResponse = await fetch(`${workingEndpoint}/contacts/${contactId}/set-custom-field`, {
-                method: 'PUT',
-                headers,
-                body: JSON.stringify({
-                  field_value: leadData.service,
-                  system_name: 'service_interest'
-                })
-              });
-
-              if (customFieldResponse.ok) {
-                console.log('✅ Campo personalizado configurado');
-              }
-            } catch (fieldError) {
-              console.log('⚠️ Erro ao configurar campo personalizado (continuando):', fieldError);
-            }
-          }
-
-          return new Response(JSON.stringify({
-            success: true,
-            contact_id: contactId,
-            was_new_contact: wasNewContact,
-            message: `Lead processado com sucesso. Contact ID: ${contactId}`
-          }), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders }
-          });
-
-        } catch (error) {
-          console.error('❌ Erro no processamento automático:', error);
-          return new Response(JSON.stringify({
-            success: false,
-            error: error.message
-          }), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders }
-          });
+          if (workingConfig) break;
         }
-      }
 
-      default:
+        if (!workingConfig) {
+          throw new Error(`API ReplyAgent inacessível. Testados ${baseUrls.length} URLs e ${authHeaders.length} formatos de auth. Verifique a URL e API key.`);
+        }
+
+        console.log(`✅ Usando configuração: ${workingConfig.baseUrl} com ${Object.keys(workingConfig.authHeader)[0]}`);
+
+        // Buscar contato existente
+        const normalizedSearchPhone = normalizePhoneNumber(leadData.phone);
+        const existingContact = workingConfig.contacts.find((c: APIContact) => {
+          if (!c.phone) return false;
+          const normalizedContactPhone = normalizePhoneNumber(c.phone);
+          return normalizedContactPhone === normalizedSearchPhone;
+        });
+
+        let contactId = null;
+        let wasNewContact = false;
+
+        if (existingContact) {
+          contactId = existingContact.id;
+          console.log(`✅ Contato encontrado: ${contactId}`);
+        } else {
+          // Criar novo contato
+          console.log('📝 Criando novo contato...');
+          
+          const contactData = {
+            first_name: leadData.name?.split(' ')[0] || 'Lead',
+            ...(leadData.name?.split(' ').slice(1).join(' ') && { 
+              last_name: leadData.name.split(' ').slice(1).join(' ') 
+            }),
+            ...(leadData.phone && { primary_phone_number: leadData.phone }),
+            ...(leadData.email && { primary_email: leadData.email }),
+            ...(leadData.service && { company_name: leadData.service })
+          };
+
+          const addResponse = await fetch(`${workingConfig.baseUrl}/contacts`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...workingConfig.authHeader
+            },
+            body: JSON.stringify(contactData)
+          });
+
+          if (addResponse.ok) {
+            const addResult = await addResponse.json();
+            contactId = addResult.id;
+            wasNewContact = true;
+            console.log(`✅ Novo contato criado: ${contactId}`);
+          } else {
+            const errorText = await addResponse.text();
+            console.error('❌ Erro ao criar contato:', addResponse.status, errorText);
+            throw new Error(`Falha ao criar contato: ${addResponse.status} - ${errorText}`);
+          }
+        }
+
         return new Response(JSON.stringify({
-          success: false,
-          error: 'Ação não reconhecida'
+          success: true,
+          contact_id: contactId,
+          was_new_contact: wasNewContact,
+          message: `Lead processado com sucesso. Contact ID: ${contactId}`
         }), {
-          status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
+
+      } catch (error) {
+        console.error('❌ Erro no processamento automático:', error);
+        return new Response(JSON.stringify({
+          success: false,
+          error: error.message
+        }), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
     }
+
+    // Outras ações...
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Ação não reconhecida'
+    }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
 
   } catch (error) {
     console.error('❌ Erro na API ReplyAgent:', error);
