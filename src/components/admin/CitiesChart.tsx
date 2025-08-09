@@ -88,22 +88,44 @@ export const CitiesChart: React.FC = () => {
       const { data: leads } = await query;
 
       if (leads) {
-        // Contar por capital/estado
+        // Primeiro, contar por DDD para identificar grupos
+        const dddCount = leads.reduce((acc, lead) => {
+          if (lead.ddd) {
+            acc[lead.ddd] = (acc[lead.ddd] || 0) + 1;
+          }
+          return acc;
+        }, {} as Record<number, number>);
+
+        // Contar por cidade/DDD
         const cityCount = leads.reduce((acc, lead) => {
-          const key = `${lead.capital || 'Cidade não identificada'} - ${lead.state}`;
-          acc[key] = {
-            city: lead.capital || 'Cidade não identificada',
-            state: lead.state,
-            count: (acc[key]?.count || 0) + 1,
-            ddd: lead.ddd
-          };
+          const dddLeadsCount = dddCount[lead.ddd] || 0;
+          
+          // Se o DDD tem muitos leads (mais de 3), mostra como grupo DDD
+          if (dddLeadsCount > 3) {
+            const key = `DDD ${lead.ddd} - ${lead.state}`;
+            acc[key] = {
+              city: `DDD ${lead.ddd}`,
+              state: lead.state,
+              count: (acc[key]?.count || 0) + 1,
+              ddd: lead.ddd
+            };
+          } else {
+            // Se o DDD tem poucos leads, mostra por cidade
+            const key = `${lead.capital || 'Cidade não identificada'} - ${lead.state}`;
+            acc[key] = {
+              city: lead.capital || 'Cidade não identificada',
+              state: lead.state,
+              count: (acc[key]?.count || 0) + 1,
+              ddd: lead.ddd
+            };
+          }
           return acc;
         }, {} as Record<string, CityData>);
 
         // Converter para array e ordenar
         const sortedCities = Object.values(cityCount)
           .sort((a, b) => b.count - a.count)
-          .slice(0, 10); // Top 10 cidades
+          .slice(0, 10); // Top 10 cidades/DDDs
 
         setCitiesData(sortedCities);
       }
