@@ -40,8 +40,8 @@ const GlobalSocialProofManager: React.FC = () => {
   const loadConfig = async () => {
     try {
       const { data, error } = await supabase
-        .from('global_social_proof')
-        .select('*')
+        .from('admin_settings')
+        .select('global_social_proof')
         .order('updated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -51,8 +51,8 @@ const GlobalSocialProofManager: React.FC = () => {
         return;
       }
 
-      if (data) {
-        setConfig(data.config);
+      if (data && data.global_social_proof) {
+        setConfig(data.global_social_proof);
       }
     } catch (error) {
       console.error('Erro ao carregar prova social global:', error);
@@ -63,10 +63,10 @@ const GlobalSocialProofManager: React.FC = () => {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('global_social_proof')
+        .from('admin_settings')
         .upsert({
-          id: 1,
-          config: config,
+          id: '1',
+          global_social_proof: config,
           updated_at: new Date().toISOString()
         });
 

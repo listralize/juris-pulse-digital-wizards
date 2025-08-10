@@ -563,6 +563,24 @@ export type Database = {
         }
         Relationships: []
       }
+      global_social_proof: {
+        Row: {
+          config: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       law_categories: {
         Row: {
           banner_subtitle: string | null
