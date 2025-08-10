@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { ImageGallery } from './ImageGallery';
 import { StepFormPageCustomizer } from './StepFormPageCustomizer';
 import { VisualFlowEditor } from './VisualFlowEditor';
+import { SocialProofConfigEditor } from './StepFormConfigEditors';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -173,6 +174,7 @@ export const StepFormBuilder: React.FC = () => {
     if (!selectedForm) return;
 
     try {
+      // Garantir que todas as configurações estão incluídas
       const formData = {
         name: selectedForm.name,
         slug: selectedForm.slug,
@@ -183,8 +185,18 @@ export const StepFormBuilder: React.FC = () => {
         steps: selectedForm.steps,
         styles: selectedForm.styles,
         seo: selectedForm.seo,
-        footer_config: selectedForm.footer_config,
-        seo_config: selectedForm.seo_config,
+        footer_config: selectedForm.footer_config || {
+          enabled: false,
+          text: 'Atendemos todo o Brasil ✅',
+          background_color: '#1a1a1a',
+          text_color: '#ffffff',
+          font_size: 'text-sm'
+        },
+        seo_config: selectedForm.seo_config || {
+          meta_title: selectedForm.title,
+          meta_description: selectedForm.subtitle || '',
+          meta_keywords: ''
+        },
         tracking_config: trackingConfig,
         is_active: selectedForm.is_active
       };
@@ -197,17 +209,21 @@ export const StepFormBuilder: React.FC = () => {
           .eq('id', selectedForm.id);
         error = updateError;
       } else {
-        const { error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
           .from('step_forms')
-          .insert([formData]);
+          .insert([formData])
+          .select()
+          .single();
         error = insertError;
+        
+        if (!error && insertData) {
+          setSelectedForm({ ...selectedForm, id: insertData.id });
+        }
       }
 
       if (error) throw error;
 
       toast.success('Formulário salvo com sucesso!');
-      setSelectedForm(null);
-      setIsCreating(false);
       loadForms();
     } catch (error) {
       console.error('Erro ao salvar formulário:', error);
@@ -266,11 +282,21 @@ export const StepFormBuilder: React.FC = () => {
               <Save className="w-4 h-4 mr-2" />
               Salvar Formulário
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedForm(null);
+                setIsCreating(false);
+              }}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Cancelar
+            </Button>
           </div>
         </div>
 
         <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="visual" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               Editor Visual
@@ -508,6 +534,144 @@ export const StepFormBuilder: React.FC = () => {
                     </Button>
                   </CardContent>
                 </Card>
+
+                {/* Configuração do Rodapé */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configuração do Rodapé</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="footer_enabled"
+                        checked={selectedForm.footer_config?.enabled || false}
+                        onCheckedChange={(checked) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            footer_config: { ...selectedForm.footer_config, enabled: checked }
+                          })
+                        }
+                      />
+                      <Label htmlFor="footer_enabled">Habilitar Rodapé</Label>
+                    </div>
+
+                    {selectedForm.footer_config?.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Texto do Rodapé</Label>
+                          <Input
+                            value={selectedForm.footer_config?.text || ''}
+                            onChange={(e) => 
+                              setSelectedForm({
+                                ...selectedForm,
+                                footer_config: { ...selectedForm.footer_config, text: e.target.value }
+                              })
+                            }
+                            placeholder="Atendemos todo o Brasil ✅"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Cor de Fundo</Label>
+                            <Input
+                              type="color"
+                              value={selectedForm.footer_config?.background_color || '#1a1a1a'}
+                              onChange={(e) => 
+                                setSelectedForm({
+                                  ...selectedForm,
+                                  footer_config: { ...selectedForm.footer_config, background_color: e.target.value }
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label>Cor do Texto</Label>
+                            <Input
+                              type="color"
+                              value={selectedForm.footer_config?.text_color || '#ffffff'}
+                              onChange={(e) => 
+                                setSelectedForm({
+                                  ...selectedForm,
+                                  footer_config: { ...selectedForm.footer_config, text_color: e.target.value }
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Tamanho da Fonte</Label>
+                          <Select
+                            value={selectedForm.footer_config?.font_size || 'text-sm'}
+                            onValueChange={(value) => 
+                              setSelectedForm({
+                                ...selectedForm,
+                                footer_config: { ...selectedForm.footer_config, font_size: value }
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text-xs">Pequeno</SelectItem>
+                              <SelectItem value="text-sm">Médio</SelectItem>
+                              <SelectItem value="text-base">Grande</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Configurações de SEO */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configurações de SEO</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Meta Título</Label>
+                      <Input
+                        value={selectedForm.seo_config?.meta_title || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_title: e.target.value }
+                          })
+                        }
+                        placeholder="Título da página"
+                      />
+                    </div>
+                    <div>
+                      <Label>Meta Descrição</Label>
+                      <Textarea
+                        value={selectedForm.seo_config?.meta_description || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_description: e.target.value }
+                          })
+                        }
+                        placeholder="Descrição da página"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label>Palavras-chave</Label>
+                      <Input
+                        value={selectedForm.seo_config?.meta_keywords || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_keywords: e.target.value }
+                          })
+                        }
+                        placeholder="palavra1, palavra2, palavra3"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </TabsContent>
@@ -519,6 +683,27 @@ export const StepFormBuilder: React.FC = () => {
                 setSelectedForm({ ...selectedForm, [field]: value });
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="testimonials" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuração de Depoimentos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SocialProofConfigEditor
+                  step={selectedForm.steps?.[0] || { socialProofConfig: {} }}
+                  updateStep={(field, value) => {
+                    const updatedSteps = [...(selectedForm.steps || [])];
+                    if (!updatedSteps[0]) {
+                      updatedSteps[0] = { socialProofConfig: {} };
+                    }
+                    updatedSteps[0] = { ...updatedSteps[0], [field]: value };
+                    setSelectedForm({ ...selectedForm, steps: updatedSteps });
+                  }}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
