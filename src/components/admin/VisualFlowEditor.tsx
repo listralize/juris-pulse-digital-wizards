@@ -93,8 +93,8 @@ interface StepFormNode {
 // Componente de nó para perguntas
 const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
-    backgroundColor: data.backgroundColor || '#ffffff',
-    color: data.textColor || '#000000',
+    backgroundColor: data.backgroundColor || '#1a1a1a',
+    color: data.textColor || '#ffffff',
     borderColor: data.borderColor || '#3b82f6',
     borderRadius: data.borderRadius || '8px',
   };
@@ -112,9 +112,19 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
         {data.imageUrl && data.imagePosition === 'top' && (
           <img src={data.imageUrl} alt="Question media" className="w-full h-20 object-cover rounded mb-2" />
         )}
+        {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'top' && (
+          <div className="w-full h-20 bg-gray-800 rounded mb-2 flex items-center justify-center">
+            <Play className="w-6 h-6 text-gray-400" />
+          </div>
+        )}
         <div className="flex gap-2">
           {data.imageUrl && data.imagePosition === 'left' && (
             <img src={data.imageUrl} alt="Question media" className="w-16 h-16 object-cover rounded" />
+          )}
+          {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'left' && (
+            <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center">
+              <Play className="w-4 h-4 text-gray-400" />
+            </div>
           )}
           <div className="flex-1">
             <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Pergunta'}</h4>
@@ -125,11 +135,16 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
           {data.imageUrl && data.imagePosition === 'right' && (
             <img src={data.imageUrl} alt="Question media" className="w-16 h-16 object-cover rounded" />
           )}
+          {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'right' && (
+            <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center">
+              <Play className="w-4 h-4 text-gray-400" />
+            </div>
+          )}
         </div>
         {data.options && data.options.length > 0 && (
           <div className="space-y-1 mt-2">
             {data.options.slice(0, 3).map((option, index) => (
-              <div key={index} className="text-xs bg-gray-100 p-1 rounded">
+              <div key={index} className="text-xs bg-gray-800 p-1 rounded text-gray-300">
                 {option.text}
               </div>
             ))}
@@ -141,30 +156,45 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
         {data.imageUrl && data.imagePosition === 'bottom' && (
           <img src={data.imageUrl} alt="Question media" className="w-full h-20 object-cover rounded mt-2" />
         )}
+        {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'bottom' && (
+          <div className="w-full h-20 bg-gray-800 rounded mt-2 flex items-center justify-center">
+            <Play className="w-6 h-6 text-gray-400" />
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 // Componente de nó para formulários
-const FormNode = ({ data, id }: { data: any; id: string }) => {
+const FormNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#1a1a1a',
+    color: data.textColor || '#ffffff',
+    borderColor: data.borderColor || '#22c55e',
+    borderRadius: data.borderRadius || '8px',
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-green-500 min-w-[200px] max-w-[300px]">
+    <div 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+    >
       <div className="bg-green-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <FormInput className="w-4 h-4" />
         <span className="font-semibold text-sm">Formulário</span>
       </div>
-      <div className="p-3">
+      <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Novo Formulário'}</h4>
         {data.formFields && data.formFields.length > 0 && (
           <div className="space-y-1">
             {data.formFields.slice(0, 3).map((field: any, index: number) => (
-              <div key={index} className="text-xs bg-gray-100 p-1 rounded">
-                {field.name} ({field.type})
+              <div key={index} className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+                {field.label || field.name} ({field.type})
               </div>
             ))}
             {data.formFields.length > 3 && (
-              <div className="text-xs text-gray-500">+{data.formFields.length - 3} campos...</div>
+              <div className="text-xs opacity-50">+{data.formFields.length - 3} campos...</div>
             )}
           </div>
         )}
@@ -176,8 +206,8 @@ const FormNode = ({ data, id }: { data: any; id: string }) => {
 // Componente de nó para conteúdo
 const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
-    backgroundColor: data.backgroundColor || '#ffffff',
-    color: data.textColor || '#000000',
+    backgroundColor: data.backgroundColor || '#1a1a1a',
+    color: data.textColor || '#ffffff',
     borderColor: data.borderColor || '#8b5cf6',
     borderRadius: data.borderRadius || '8px',
   };
@@ -199,15 +229,15 @@ const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) =
         {data.imageUrl && data.mediaType === 'image' && (
           <div className="mb-2">
             <img src={data.imageUrl} alt="Content" className="w-full h-20 object-cover rounded" />
-            <div className="text-xs opacity-50 mt-1">Imagem</div>
+            <div className="text-xs opacity-50 mt-1 text-gray-400">Imagem</div>
           </div>
         )}
         {data.videoUrl && data.mediaType === 'video' && (
           <div className="mb-2">
-            <div className="w-full h-20 bg-gray-200 rounded flex items-center justify-center">
-              <Play className="w-6 h-6 text-gray-500" />
+            <div className="w-full h-20 bg-gray-800 rounded flex items-center justify-center">
+              <Play className="w-6 h-6 text-gray-400" />
             </div>
-            <div className="text-xs opacity-50 mt-1">Vídeo</div>
+            <div className="text-xs opacity-50 mt-1 text-gray-400">Vídeo</div>
           </div>
         )}
       </div>
@@ -216,22 +246,32 @@ const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) =
 };
 
 // Componente de nó para ofertas
-const OfferNode = ({ data, id }: { data: any; id: string }) => {
+const OfferNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#1a1a1a',
+    color: data.textColor || '#ffffff',
+    borderColor: data.borderColor || '#f97316',
+    borderRadius: data.borderRadius || '8px',
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-orange-500 min-w-[200px] max-w-[300px]">
+    <div 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+    >
       <div className="bg-orange-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <Gift className="w-4 h-4" />
         <span className="font-semibold text-sm">Oferta</span>
       </div>
-      <div className="p-3">
+      <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Oferta'}</h4>
         {data.offerConfig && (
           <div className="space-y-1">
-            <div className="text-xs bg-gray-100 p-1 rounded">
-              {data.offerConfig.originalPrice} → {data.offerConfig.salePrice}
+            <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+              {(data.offerConfig as OfferConfig).originalPrice} → {(data.offerConfig as OfferConfig).salePrice}
             </div>
-            <div className="text-xs text-orange-600 font-medium">
-              {data.offerConfig.discount}
+            <div className="text-xs text-orange-400 font-medium">
+              {(data.offerConfig as OfferConfig).discount}
             </div>
           </div>
         )}
@@ -241,18 +281,28 @@ const OfferNode = ({ data, id }: { data: any; id: string }) => {
 };
 
 // Componente de nó para timer
-const TimerNode = ({ data, id }: { data: any; id: string }) => {
+const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#1a1a1a',
+    color: data.textColor || '#ffffff',
+    borderColor: data.borderColor || '#ef4444',
+    borderRadius: data.borderRadius || '8px',
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-red-500 min-w-[200px] max-w-[300px]">
+    <div 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+    >
       <div className="bg-red-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <Timer className="w-4 h-4" />
         <span className="font-semibold text-sm">Timer</span>
       </div>
-      <div className="p-3">
+      <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Novo Timer'}</h4>
         {data.timerConfig && (
-          <div className="text-xs bg-gray-100 p-1 rounded">
-            Duração: {data.timerConfig.duration} min
+          <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+            Duração: {(data.timerConfig as TimerConfig).duration} min
           </div>
         )}
       </div>
@@ -261,25 +311,35 @@ const TimerNode = ({ data, id }: { data: any; id: string }) => {
 };
 
 // Componente de nó para prova social
-const SocialProofNode = ({ data, id }: { data: any; id: string }) => {
+const SocialProofNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#1a1a1a',
+    color: data.textColor || '#ffffff',
+    borderColor: data.borderColor || '#6366f1',
+    borderRadius: data.borderRadius || '8px',
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-indigo-500 min-w-[200px] max-w-[300px]">
+    <div 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+    >
       <div className="bg-indigo-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <BarChart3 className="w-4 h-4" />
         <span className="font-semibold text-sm">Prova Social</span>
       </div>
-      <div className="p-3">
+      <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Prova Social'}</h4>
         {data.socialProofConfig && (
           <div className="space-y-1">
-            {data.socialProofConfig.testimonials && (
-              <div className="text-xs bg-gray-100 p-1 rounded">
-                {data.socialProofConfig.testimonials.length} depoimentos
+            {(data.socialProofConfig as SocialProofConfig).testimonials && (
+              <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+                {(data.socialProofConfig as SocialProofConfig).testimonials?.length} depoimentos
               </div>
             )}
-            {data.socialProofConfig.stats && (
-              <div className="text-xs bg-gray-100 p-1 rounded">
-                {data.socialProofConfig.stats.length} estatísticas
+            {(data.socialProofConfig as SocialProofConfig).stats && (
+              <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+                {(data.socialProofConfig as SocialProofConfig).stats?.length} estatísticas
               </div>
             )}
           </div>
@@ -375,7 +435,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   return (
     <div className="h-[80vh] w-full flex bg-background">
       {/* Área do Flow */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-gray-900">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -385,7 +445,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           fitView
-          className="bg-background"
+          className="bg-gray-900"
         >
           <Controls />
           <MiniMap />
@@ -573,7 +633,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <Label>Cor de Fundo</Label>
               <Input
                 type="color"
-                value={(node.data.backgroundColor as string) || '#ffffff'}
+                value={(node.data.backgroundColor as string) || '#1a1a1a'}
                 onChange={(e) => handleUpdate('backgroundColor', e.target.value)}
               />
             </div>
@@ -581,7 +641,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <Label>Cor do Texto</Label>
               <Input
                 type="color"
-                value={(node.data.textColor as string) || '#000000'}
+                value={(node.data.textColor as string) || '#ffffff'}
                 onChange={(e) => handleUpdate('textColor', e.target.value)}
               />
             </div>

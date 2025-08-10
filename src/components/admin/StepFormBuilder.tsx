@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGallery } from './ImageGallery';
+import { StepFormPageCustomizer } from './StepFormPageCustomizer';
 import { VisualFlowEditor } from './VisualFlowEditor';
 
 // Tipos baseados na estrutura da tabela step_forms
@@ -269,7 +270,7 @@ export const StepFormBuilder: React.FC = () => {
         </div>
 
         <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="visual" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               Editor Visual
@@ -277,6 +278,10 @@ export const StepFormBuilder: React.FC = () => {
             <TabsTrigger value="code" className="flex items-center gap-2">
               <Code2 className="w-4 h-4" />
               Editor de Código
+            </TabsTrigger>
+            <TabsTrigger value="page" className="flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              Personalização
             </TabsTrigger>
           </TabsList>
 
@@ -501,6 +506,15 @@ export const StepFormBuilder: React.FC = () => {
                 </Card>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="page" className="space-y-6">
+            <StepFormPageCustomizer
+              formData={selectedForm}
+              onUpdate={(field, value) => {
+                setSelectedForm({ ...selectedForm, [field]: value });
+              }}
+            />
           </TabsContent>
         </Tabs>
 
