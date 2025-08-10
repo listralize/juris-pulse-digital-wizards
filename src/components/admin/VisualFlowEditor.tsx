@@ -24,6 +24,7 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { 
   MessageSquare, 
   FormInput, 
@@ -34,8 +35,10 @@ import {
   Plus,
   Save,
   Eye,
-  Play
+  Play,
+  Trash2
 } from 'lucide-react';
+import { ImageGallery } from './ImageGallery';
 
 // Tipos de nós customizados
 interface QuestionOption {
@@ -464,6 +467,8 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow?.edges || initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showImageGallery, setShowImageGallery] = useState(false);
+  const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -504,8 +509,38 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     );
   };
 
+  const deleteNode = (nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+    setSelectedNode(null);
+  };
+
   const handleSave = () => {
     onSave({ nodes, edges });
+  };
+
+  const openImageGallery = (field: 'imageUrl' | 'videoUrl') => {
+    setImageGalleryField(field);
+    setShowImageGallery(true);
+  };
+
+  const handleImageSelect = (url: string) => {
+    if (selectedNode) {
+      if (imageGalleryField === 'imageUrl') {
+        updateNode(selectedNode.id, { 
+          imageUrl: url, 
+          mediaType: 'image',
+          videoUrl: undefined // Limpar vídeo se selecionou imagem
+        });
+      } else {
+        updateNode(selectedNode.id, { 
+          videoUrl: url, 
+          mediaType: 'video',
+          imageUrl: undefined // Limpar imagem se selecionou vídeo
+        });
+      }
+    }
+    setShowImageGallery(false);
   };
 
   return (
@@ -595,9 +630,18 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white">
-                Editar {selectedNode.type?.charAt(0).toUpperCase() + selectedNode.type?.slice(1)}
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white">
+                  Editar {selectedNode.type?.charAt(0).toUpperCase() + selectedNode.type?.slice(1)}
+                </CardTitle>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteNode(selectedNode.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -648,12 +692,23 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     <>
                       <div>
                         <Label className="text-gray-300">URL da Imagem</Label>
-                        <Input
-                          value={String(selectedNode.data.imageUrl || '')}
-                          onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
-                          placeholder="URL da imagem"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            value={String(selectedNode.data.imageUrl || '')}
+                            onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
+                            placeholder="URL da imagem"
+                            className="bg-gray-700 border-gray-600 text-white flex-1"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openImageGallery('imageUrl')}
+                            className="whitespace-nowrap"
+                          >
+                            <ImageIcon className="w-4 h-4 mr-1" />
+                            Galeria
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label className="text-gray-300">Posição da Imagem</Label>
@@ -688,12 +743,23 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     <>
                       <div>
                         <Label className="text-gray-300">URL do Vídeo</Label>
-                        <Input
-                          value={String(selectedNode.data.videoUrl || '')}
-                          onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
-                          placeholder="URL do vídeo"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            value={String(selectedNode.data.videoUrl || '')}
+                            onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
+                            placeholder="URL do vídeo"
+                            className="bg-gray-700 border-gray-600 text-white flex-1"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openImageGallery('videoUrl')}
+                            className="whitespace-nowrap"
+                          >
+                            <ImageIcon className="w-4 h-4 mr-1" />
+                            Galeria
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label className="text-gray-300">Posição do Vídeo</Label>
@@ -844,12 +910,23 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     <>
                       <div>
                         <Label className="text-gray-300">URL da Imagem</Label>
-                        <Input
-                          value={String(selectedNode.data.imageUrl || '')}
-                          onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
-                          placeholder="URL da imagem"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            value={String(selectedNode.data.imageUrl || '')}
+                            onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
+                            placeholder="URL da imagem"
+                            className="bg-gray-700 border-gray-600 text-white flex-1"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openImageGallery('imageUrl')}
+                            className="whitespace-nowrap"
+                          >
+                            <ImageIcon className="w-4 h-4 mr-1" />
+                            Galeria
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label className="text-gray-300">Altura da Imagem</Label>
@@ -867,12 +944,23 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     <>
                       <div>
                         <Label className="text-gray-300">URL do Vídeo</Label>
-                        <Input
-                          value={String(selectedNode.data.videoUrl || '')}
-                          onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
-                          placeholder="URL do vídeo"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            value={String(selectedNode.data.videoUrl || '')}
+                            onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
+                            placeholder="URL do vídeo"
+                            className="bg-gray-700 border-gray-600 text-white flex-1"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openImageGallery('videoUrl')}
+                            className="whitespace-nowrap"
+                          >
+                            <ImageIcon className="w-4 h-4 mr-1" />
+                            Galeria
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label className="text-gray-300">Altura do Vídeo</Label>
@@ -975,6 +1063,18 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           </Card>
         </div>
       )}
+
+      {/* Galeria de Imagens */}
+      <ImageGallery
+        isOpen={showImageGallery}
+        onClose={() => setShowImageGallery(false)}
+        onSelectImage={handleImageSelect}
+        selectedImage={
+          imageGalleryField === 'imageUrl' 
+            ? String(selectedNode?.data.imageUrl || '') 
+            : String(selectedNode?.data.videoUrl || '')
+        }
+      />
     </div>
   );
 };
