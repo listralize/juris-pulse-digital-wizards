@@ -67,6 +67,10 @@ interface StepFormStep {
   imageHeight?: string;
   videoWidth?: string;
   videoHeight?: string;
+  // Configurações adicionais de vídeo
+  videoAutoplay?: boolean;
+  videoMuted?: boolean;
+  videoLoop?: boolean;
   // Novos campos para ofertas e elementos interativos
   offerConfig?: {
     title?: string;
@@ -917,12 +921,21 @@ export const StepFormBuilder: React.FC = () => {
                             </div>
                             <div>
                               <Label className="text-sm font-medium">URL da Mídia</Label>
-                              <Input
-                                value={step.mediaUrl || ''}
-                                onChange={(e) => updateStep(index, 'mediaUrl', e.target.value)}
-                                placeholder="https://example.com/image.jpg"
-                                className="mt-1"
-                              />
+                              <div className="flex gap-2 mt-1">
+                                <Input
+                                  value={step.mediaUrl || ''}
+                                  onChange={(e) => updateStep(index, 'mediaUrl', e.target.value)}
+                                  placeholder="https://example.com/media.jpg ou selecione da galeria"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => setShowImageGallery(true)}
+                                >
+                                  <ImageIcon className="w-4 h-4 mr-2" />
+                                  Galeria
+                                </Button>
+                              </div>
                             </div>
                             <div className="lg:col-span-2">
                               <Label className="text-sm font-medium">Legenda (opcional)</Label>
@@ -950,12 +963,130 @@ export const StepFormBuilder: React.FC = () => {
                                 className="mt-1"
                               />
                             </div>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            💡 Use para mostrar imagens ou vídeos explicativos. A ação do botão pode ser um ID de etapa ou URL externo.
-                          </div>
-                        </div>
-                      )}
+                           </div>
+
+                           {/* Configurações específicas para vídeo */}
+                           {step.mediaType === 'video' && (
+                             <div className="grid grid-cols-2 gap-4 mt-4">
+                               <div className="space-y-4">
+                                 <h4 className="font-medium">Configurações do Vídeo</h4>
+                                 <div className="flex items-center space-x-2">
+                                   <Switch
+                                     id={`autoplay-${index}`}
+                                     checked={step.videoAutoplay || false}
+                                     onCheckedChange={(checked) => updateStep(index, 'videoAutoplay', checked)}
+                                   />
+                                   <Label htmlFor={`autoplay-${index}`}>Autoplay</Label>
+                                 </div>
+                                 <div className="flex items-center space-x-2">
+                                   <Switch
+                                     id={`muted-${index}`}
+                                     checked={step.videoMuted || false}
+                                     onCheckedChange={(checked) => updateStep(index, 'videoMuted', checked)}
+                                   />
+                                   <Label htmlFor={`muted-${index}`}>Mudo</Label>
+                                 </div>
+                                 <div className="flex items-center space-x-2">
+                                   <Switch
+                                     id={`loop-${index}`}
+                                     checked={step.videoLoop || false}
+                                     onCheckedChange={(checked) => updateStep(index, 'videoLoop', checked)}
+                                   />
+                                   <Label htmlFor={`loop-${index}`}>Loop</Label>
+                                 </div>
+                               </div>
+                               <div className="space-y-4">
+                                 <h4 className="font-medium">Dimensões</h4>
+                                 <div>
+                                   <Label className="text-sm">Largura</Label>
+                                   <Input
+                                     value={step.videoWidth || '560'}
+                                     onChange={(e) => updateStep(index, 'videoWidth', e.target.value)}
+                                     placeholder="560"
+                                   />
+                                 </div>
+                                 <div>
+                                   <Label className="text-sm">Altura</Label>
+                                   <Input
+                                     value={step.videoHeight || '315'}
+                                     onChange={(e) => updateStep(index, 'videoHeight', e.target.value)}
+                                     placeholder="315"
+                                   />
+                                 </div>
+                               </div>
+                             </div>
+                           )}
+
+                           {/* Configurações específicas para imagem */}
+                           {step.mediaType === 'image' && (
+                             <div className="grid grid-cols-2 gap-4 mt-4">
+                               <div>
+                                 <Label className="text-sm">Largura da Imagem</Label>
+                                 <Input
+                                   value={step.imageWidth || 'auto'}
+                                   onChange={(e) => updateStep(index, 'imageWidth', e.target.value)}
+                                   placeholder="auto ou 400px"
+                                 />
+                               </div>
+                               <div>
+                                 <Label className="text-sm">Altura da Imagem</Label>
+                                 <Input
+                                   value={step.imageHeight || '400px'}
+                                   onChange={(e) => updateStep(index, 'imageHeight', e.target.value)}
+                                   placeholder="400px"
+                                 />
+                               </div>
+                             </div>
+                           )}
+
+                           {/* Configurações para carrossel */}
+                           {step.mediaType === 'carousel' && (
+                             <div className="space-y-4 mt-4">
+                               <h4 className="font-medium">Configurações do Carrossel</h4>
+                               <div className="grid grid-cols-2 gap-4">
+                                 <div className="flex items-center space-x-2">
+                                   <Switch
+                                     id={`autoplay-carousel-${index}`}
+                                     checked={step.carouselAutoplay || false}
+                                     onCheckedChange={(checked) => updateStep(index, 'carouselAutoplay', checked)}
+                                   />
+                                   <Label htmlFor={`autoplay-carousel-${index}`}>Autoplay</Label>
+                                 </div>
+                                 <div className="flex items-center space-x-2">
+                                   <Switch
+                                     id={`dots-${index}`}
+                                     checked={step.carouselShowDots || true}
+                                     onCheckedChange={(checked) => updateStep(index, 'carouselShowDots', checked)}
+                                   />
+                                   <Label htmlFor={`dots-${index}`}>Mostrar Pontos</Label>
+                                 </div>
+                               </div>
+                               <div>
+                                 <Label className="text-sm">Intervalo (ms)</Label>
+                                 <Input
+                                   type="number"
+                                   value={step.carouselInterval || 5000}
+                                   onChange={(e) => updateStep(index, 'carouselInterval', parseInt(e.target.value))}
+                                   placeholder="5000"
+                                 />
+                               </div>
+                               <div>
+                                 <Label className="text-sm">URLs das Imagens (uma por linha)</Label>
+                                 <Textarea
+                                   rows={4}
+                                   value={(step.carouselImages || []).join('\n')}
+                                   onChange={(e) => updateStep(index, 'carouselImages', e.target.value.split('\n').filter(url => url.trim()))}
+                                   placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                                 />
+                               </div>
+                             </div>
+                           )}
+                           
+                           <div className="text-xs text-muted-foreground">
+                             💡 Use para mostrar imagens ou vídeos explicativos. A ação do botão pode ser um ID de etapa ou URL externo.
+                           </div>
+                         </div>
+                       )}
                    </CardContent>
                  </Card>
                ))}

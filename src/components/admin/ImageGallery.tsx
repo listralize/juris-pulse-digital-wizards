@@ -15,13 +15,19 @@ interface ImageGalleryProps {
   onClose: () => void;
 }
 
+interface MediaFile {
+  url: string;
+  name: string;
+  type: 'image' | 'video';
+}
+
 export const ImageGallery: React.FC<ImageGalleryProps> = ({
   onSelectImage,
   selectedImage,
   isOpen,
   onClose
 }) => {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -49,18 +55,22 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
       if (error) throw error;
 
-      const imageFiles = data
+      const mediaFiles = data
         ?.filter(file => 
-          file.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
+          file.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|mov|avi|mkv)$/i)
         )
         .map(file => {
           const { data: urlData } = supabase.storage
             .from('videos')
             .getPublicUrl(file.name);
-          return urlData.publicUrl;
+          return {
+            url: urlData.publicUrl,
+            name: file.name,
+            type: file.name.toLowerCase().match(/\.(mp4|mov|avi|mkv)$/i) ? 'video' as const : 'image' as const
+          };
         }) || [];
 
-      setImages(imageFiles);
+      setImages(mediaFiles);
     } catch (error) {
       console.error('Erro ao carregar imagens:', error);
       toast.error('Erro ao carregar galeria');
@@ -74,14 +84,15 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
     if (!file) return;
 
     // Validar tipo de arquivo
-    if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecione apenas arquivos de imagem');
+    const allowedTypes = ['image/', 'video/'];
+    if (!allowedTypes.some(type => file.type.startsWith(type))) {
+      toast.error('Por favor, selecione apenas arquivos de imagem ou vídeo');
       return;
     }
 
     setUploading(true);
     try {
-      const fileName = `logo_${Date.now()}_${file.name}`;
+      const fileName = `media_${Date.now()}_${file.name}`;
       
       const { error: uploadError } = await supabase.storage
         .from('videos')
@@ -93,12 +104,12 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
         .from('videos')
         .getPublicUrl(fileName);
 
-      toast.success('Imagem enviada com sucesso!');
+      toast.success('Arquivo enviado com sucesso!');
       onSelectImage(urlData.publicUrl);
       loadImages(); // Recarregar galeria
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      toast.error('Erro ao enviar imagem');
+      toast.error('Erro ao enviar arquivo');
     } finally {
       setUploading(false);
       event.target.value = ''; // Limpar input
@@ -111,7 +122,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5" />
-            Galeria de Imagens
+            Galeria de Mídia
           </DialogTitle>
         </DialogHeader>
 
@@ -119,14 +130,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
           {/* Upload Section */}
           <Card>
             <CardContent className="p-4">
-              <Label htmlFor="image-upload" className="block mb-2 font-medium">
-                Enviar Nova Imagem
+              <Label htmlFor="media-upload" className="block mb-2 font-medium">
+                Enviar Nova Mídia
               </Label>
               <div className="flex items-center gap-4">
                 <Input
-                  id="image-upload"
+                  id="media-upload"
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   onChange={handleFileUpload}
                   disabled={uploading}
                   className="flex-1"
@@ -148,28 +159,47 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {images.map((imageUrl, index) => (
+                {images.map((mediaFile, index) => (
                   <div
                     key={index}
                     className={`relative cursor-pointer group rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === imageUrl
+                      selectedImage === mediaFile.url
                         ? 'border-primary ring-2 ring-primary/20'
                         : 'border-border hover:border-primary/50'
                     }`}
                     onClick={() => {
-                      onSelectImage(imageUrl);
+                      onSelectImage(mediaFile.url);
                       onClose();
                     }}
                   >
-                    <div className="aspect-square">
-                      <img
-                        src={imageUrl}
-                        alt={`Imagem ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+                    <div className="aspect-square relative">
+                      {mediaFile.type === 'video' ? (
+                        <>
+                          <video
+                            src={mediaFile.url}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            onMouseEnter={(e) => e.currentTarget.play()}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.pause();
+                              e.currentTarget.currentTime = 0;
+                            }}
+                          />
+                          <div className="absolute top-2 left-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                            VIDEO
+                          </div>
+                        </>
+                      ) : (
+                        <img
+                          src={mediaFile.url}
+                          alt={`Mídia ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
                     </div>
-                    {selectedImage === imageUrl && (
+                    {selectedImage === mediaFile.url && (
                       <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                         <div className="bg-primary text-primary-foreground rounded-full p-2">
                           <Check className="w-4 h-4" />
@@ -182,8 +212,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
                 {images.length === 0 && !loading && (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
                     <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Nenhuma imagem encontrada</p>
-                    <p className="text-sm">Faça upload da primeira imagem</p>
+                    <p>Nenhuma mídia encontrada</p>
+                    <p className="text-sm">Faça upload do primeiro arquivo</p>
                   </div>
                 )}
               </div>

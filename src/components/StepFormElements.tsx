@@ -10,17 +10,17 @@ export const renderStepElement = (element: any) => {
     case 'image':
       return (
         <div className="w-full flex justify-center">
-          {element.content ? (
+          {element.content || element.mediaUrl ? (
             <img 
-              src={element.content} 
-              alt={element.alt || 'Image'}
+              src={element.content || element.mediaUrl} 
+              alt={element.alt || element.mediaCaption || 'Image'}
               className="max-w-full h-auto rounded-lg shadow-lg"
               style={{ 
                 maxHeight: element.imageHeight || '400px',
                 width: element.imageWidth || 'auto'
               }}
               onError={(e) => {
-                console.error('Erro ao carregar imagem:', element.content);
+                console.error('Erro ao carregar imagem:', element.content || element.mediaUrl);
                 e.currentTarget.src = '/placeholder.svg';
               }}
             />
@@ -32,14 +32,14 @@ export const renderStepElement = (element: any) => {
         </div>
       );
 
-    case 'video':
+     case 'video':
       return (
         <div className="w-full flex justify-center">
-          {element.content ? (
+          {element.content || element.mediaUrl ? (
             // Check if it's a YouTube URL
-            element.content.includes('youtube.com') || element.content.includes('youtu.be') ? (
+            (element.content || element.mediaUrl).includes('youtube.com') || (element.content || element.mediaUrl).includes('youtu.be') ? (
               <iframe
-                src={getYouTubeEmbedUrl(element.content)}
+                src={getYouTubeEmbedUrl(element.content || element.mediaUrl, element.videoAutoplay)}
                 width={element.videoWidth || "560"}
                 height={element.videoHeight || "315"}
                 frameBorder="0"
@@ -49,15 +49,18 @@ export const renderStepElement = (element: any) => {
               />
             ) : (
               <video 
-                src={element.content} 
-                controls
+                src={element.content || element.mediaUrl} 
+                controls={!element.videoAutoplay}
+                autoPlay={element.videoAutoplay || false}
+                muted={element.videoMuted || false}
+                loop={element.videoLoop || false}
                 className="max-w-full rounded-lg shadow-lg"
                 style={{ 
                   maxHeight: element.videoHeight || '400px',
                   width: element.videoWidth || 'auto'
                 }}
                 onError={(e) => {
-                  console.error('Erro ao carregar vídeo:', element.content);
+                  console.error('Erro ao carregar vídeo:', element.content || element.mediaUrl);
                 }}
               >
                 <p>Seu navegador não suporta vídeos HTML5.</p>
@@ -72,7 +75,12 @@ export const renderStepElement = (element: any) => {
       );
 
     case 'carousel':
-      return <ImageCarousel config={element} />;
+      return <ImageCarousel config={{
+        images: element.carouselImages || [],
+        autoplay: element.carouselAutoplay || false,
+        showDots: element.carouselShowDots !== false,
+        interval: element.carouselInterval || 5000
+      }} />;
 
     case 'text':
       return (
@@ -95,7 +103,7 @@ export const renderStepElement = (element: any) => {
 };
 
 // Helper function to convert YouTube URLs to embed URLs
-const getYouTubeEmbedUrl = (url: string) => {
+const getYouTubeEmbedUrl = (url: string, autoplay?: boolean) => {
   let videoId = '';
   
   if (url.includes('youtube.com/watch?v=')) {
@@ -106,7 +114,8 @@ const getYouTubeEmbedUrl = (url: string) => {
     return url; // Already an embed URL
   }
   
-  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
+  const autoplayParam = autoplay ? '1' : '0';
+  return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplayParam}&rel=0&mute=1`;
 };
 
 // Image Carousel Component
