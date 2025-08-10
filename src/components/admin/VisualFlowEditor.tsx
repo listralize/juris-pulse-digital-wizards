@@ -13,6 +13,7 @@ import {
   NodeTypes,
   EdgeTypes,
   Position,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from '../ui/button';
@@ -36,6 +37,35 @@ import {
 } from 'lucide-react';
 
 // Tipos de nós customizados
+interface QuestionOption {
+  text: string;
+  value: string;
+  nextStep?: string;
+}
+
+interface FormField {
+  name: string;
+  type: string;
+  placeholder: string;
+  required: boolean;
+  label?: string;
+}
+
+interface OfferConfig {
+  originalPrice?: string;
+  salePrice?: string;
+  discount?: string;
+}
+
+interface TimerConfig {
+  duration?: number;
+}
+
+interface SocialProofConfig {
+  testimonials?: any[];
+  stats?: any[];
+}
+
 interface StepFormNode {
   id: string;
   type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'socialProof';
@@ -43,45 +73,73 @@ interface StepFormNode {
   data: {
     title: string;
     description?: string;
-    options?: Array<{
-      text: string;
-      value: string;
-      nextStep?: string;
-    }>;
-    formFields?: Array<{
-      name: string;
-      type: string;
-      placeholder: string;
-      required: boolean;
-    }>;
+    imageUrl?: string;
+    imagePosition?: 'top' | 'left' | 'right' | 'bottom';
+    videoUrl?: string;
+    mediaType?: 'image' | 'video';
+    backgroundColor?: string;
+    textColor?: string;
+    borderColor?: string;
+    borderRadius?: string;
+    options?: QuestionOption[];
+    formFields?: FormField[];
+    offerConfig?: OfferConfig;
+    timerConfig?: TimerConfig;
+    socialProofConfig?: SocialProofConfig;
     config?: any;
   };
 }
 
 // Componente de nó para perguntas
-const QuestionNode = ({ data, id }: { data: any; id: string }) => {
+const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#ffffff',
+    color: data.textColor || '#000000',
+    borderColor: data.borderColor || '#3b82f6',
+    borderRadius: data.borderRadius || '8px',
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-blue-500 min-w-[200px] max-w-[300px]">
+    <div 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+    >
       <div className="bg-blue-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <MessageSquare className="w-4 h-4" />
         <span className="font-semibold text-sm">Pergunta</span>
       </div>
-      <div className="p-3">
-        <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Pergunta'}</h4>
-        {data.description && (
-          <p className="text-xs text-gray-600 mb-2">{data.description}</p>
+      <div className="p-3" style={{ color: nodeStyle.color }}>
+        {data.imageUrl && data.imagePosition === 'top' && (
+          <img src={data.imageUrl} alt="Question media" className="w-full h-20 object-cover rounded mb-2" />
         )}
+        <div className="flex gap-2">
+          {data.imageUrl && data.imagePosition === 'left' && (
+            <img src={data.imageUrl} alt="Question media" className="w-16 h-16 object-cover rounded" />
+          )}
+          <div className="flex-1">
+            <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Pergunta'}</h4>
+            {data.description && (
+              <p className="text-xs opacity-75 mb-2">{data.description}</p>
+            )}
+          </div>
+          {data.imageUrl && data.imagePosition === 'right' && (
+            <img src={data.imageUrl} alt="Question media" className="w-16 h-16 object-cover rounded" />
+          )}
+        </div>
         {data.options && data.options.length > 0 && (
-          <div className="space-y-1">
-            {data.options.slice(0, 3).map((option: any, index: number) => (
+          <div className="space-y-1 mt-2">
+            {data.options.slice(0, 3).map((option, index) => (
               <div key={index} className="text-xs bg-gray-100 p-1 rounded">
                 {option.text}
               </div>
             ))}
             {data.options.length > 3 && (
-              <div className="text-xs text-gray-500">+{data.options.length - 3} mais...</div>
+              <div className="text-xs opacity-50">+{data.options.length - 3} mais...</div>
             )}
           </div>
+        )}
+        {data.imageUrl && data.imagePosition === 'bottom' && (
+          <img src={data.imageUrl} alt="Question media" className="w-full h-20 object-cover rounded mt-2" />
         )}
       </div>
     </div>
@@ -116,21 +174,40 @@ const FormNode = ({ data, id }: { data: any; id: string }) => {
 };
 
 // Componente de nó para conteúdo
-const ContentNode = ({ data, id }: { data: any; id: string }) => {
+const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#ffffff',
+    color: data.textColor || '#000000',
+    borderColor: data.borderColor || '#8b5cf6',
+    borderRadius: data.borderRadius || '8px',
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-purple-500 min-w-[200px] max-w-[300px]">
+    <div 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+    >
       <div className="bg-purple-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <ImageIcon className="w-4 h-4" />
         <span className="font-semibold text-sm">Conteúdo</span>
       </div>
-      <div className="p-3">
+      <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Novo Conteúdo'}</h4>
         {data.description && (
-          <p className="text-xs text-gray-600 mb-2">{data.description}</p>
+          <p className="text-xs opacity-75 mb-2">{data.description}</p>
         )}
-        {data.mediaUrl && (
-          <div className="text-xs bg-gray-100 p-1 rounded">
-            Mídia: {data.mediaType || 'image'}
+        {data.imageUrl && data.mediaType === 'image' && (
+          <div className="mb-2">
+            <img src={data.imageUrl} alt="Content" className="w-full h-20 object-cover rounded" />
+            <div className="text-xs opacity-50 mt-1">Imagem</div>
+          </div>
+        )}
+        {data.videoUrl && data.mediaType === 'video' && (
+          <div className="mb-2">
+            <div className="w-full h-20 bg-gray-200 rounded flex items-center justify-center">
+              <Play className="w-6 h-6 text-gray-500" />
+            </div>
+            <div className="text-xs opacity-50 mt-1">Vídeo</div>
           </div>
         )}
       </div>
@@ -296,7 +373,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   };
 
   return (
-    <div className="h-[80vh] w-full flex">
+    <div className="h-[80vh] w-full flex bg-background">
       {/* Área do Flow */}
       <div className="flex-1 relative">
         <ReactFlow
@@ -308,15 +385,15 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           fitView
-          className="bg-gray-50"
+          className="bg-background"
         >
           <Controls />
           <MiniMap />
-          <Background variant="dots" gap={12} size={1} />
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         </ReactFlow>
 
         {/* Toolbar flutuante */}
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2 flex gap-2 z-10">
+        <div className="absolute top-4 left-4 bg-card rounded-lg shadow-lg p-2 flex gap-2 z-10 border">
           <Button
             size="sm"
             variant="outline"
@@ -374,7 +451,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         </div>
 
         {/* Botões de ação */}
-        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-2 flex gap-2 z-10">
+        <div className="absolute top-4 right-4 bg-card rounded-lg shadow-lg p-2 flex gap-2 z-10 border">
           <Button
             size="sm"
             variant="outline"
@@ -396,14 +473,14 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       </div>
 
       {/* Painel lateral para edição */}
-      <div className="w-80 bg-white border-l border-gray-200 p-4 overflow-y-auto">
+      <div className="w-80 bg-card border-l border-border p-4 overflow-y-auto">
         {selectedNode ? (
           <NodeEditor
             node={selectedNode}
             onUpdate={(updates) => updateNodeData(selectedNode.id, updates)}
           />
         ) : (
-          <div className="text-center text-gray-500 mt-8">
+          <div className="text-center text-muted-foreground mt-8">
             <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">Selecione um nó para editar suas propriedades</p>
           </div>
@@ -425,21 +502,39 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
   };
 
   const handleOptionUpdate = (index: number, field: string, value: string) => {
-    const options = [...(node.data.options || [])];
+    const options = [...((node.data.options as QuestionOption[]) || [])];
     options[index] = { ...options[index], [field]: value };
     onUpdate({ options });
   };
 
   const addOption = () => {
-    const options = [...(node.data.options || [])];
+    const options = [...((node.data.options as QuestionOption[]) || [])];
     options.push({ text: 'Nova opção', value: `opt_${Date.now()}` });
     onUpdate({ options });
   };
 
   const removeOption = (index: number) => {
-    const options = [...(node.data.options || [])];
+    const options = [...((node.data.options as QuestionOption[]) || [])];
     options.splice(index, 1);
     onUpdate({ options });
+  };
+
+  const handleFormFieldUpdate = (index: number, field: string, value: string) => {
+    const formFields = [...((node.data.formFields as FormField[]) || [])];
+    formFields[index] = { ...formFields[index], [field]: value };
+    onUpdate({ formFields });
+  };
+
+  const addFormField = () => {
+    const formFields = [...((node.data.formFields as FormField[]) || [])];
+    formFields.push({ name: 'campo', type: 'text', placeholder: 'Digite aqui...', required: false, label: '' });
+    onUpdate({ formFields });
+  };
+
+  const removeFormField = (index: number) => {
+    const formFields = [...((node.data.formFields as FormField[]) || [])];
+    formFields.splice(index, 1);
+    onUpdate({ formFields });
   };
 
   return (
@@ -455,7 +550,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
           <Label htmlFor="title">Título</Label>
           <Input
             id="title"
-            value={node.data.title || ''}
+            value={(node.data.title as string) || ''}
             onChange={(e) => handleUpdate('title', e.target.value)}
           />
         </div>
@@ -464,11 +559,113 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
           <Label htmlFor="description">Descrição</Label>
           <Textarea
             id="description"
-            value={node.data.description || ''}
+            value={(node.data.description as string) || ''}
             onChange={(e) => handleUpdate('description', e.target.value)}
             rows={3}
           />
         </div>
+
+        {/* Configurações de aparência */}
+        <div className="space-y-3">
+          <h4 className="font-medium">Aparência</h4>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label>Cor de Fundo</Label>
+              <Input
+                type="color"
+                value={(node.data.backgroundColor as string) || '#ffffff'}
+                onChange={(e) => handleUpdate('backgroundColor', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Cor do Texto</Label>
+              <Input
+                type="color"
+                value={(node.data.textColor as string) || '#000000'}
+                onChange={(e) => handleUpdate('textColor', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Cor da Borda</Label>
+              <Input
+                type="color"
+                value={(node.data.borderColor as string) || '#3b82f6'}
+                onChange={(e) => handleUpdate('borderColor', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Raio da Borda</Label>
+              <Input
+                placeholder="8px"
+                value={(node.data.borderRadius as string) || '8px'}
+                onChange={(e) => handleUpdate('borderRadius', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Mídia para pergunta e conteúdo */}
+        {(node.type === 'question' || node.type === 'content') && (
+          <div className="space-y-3">
+            <h4 className="font-medium">Mídia</h4>
+            <div>
+              <Label>Tipo de Mídia</Label>
+            <Select
+              value={(node.data.mediaType as string) || 'image'}
+              onValueChange={(value) => handleUpdate('mediaType', value)}
+            >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="image">Imagem</SelectItem>
+                  <SelectItem value="video">Vídeo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {node.data.mediaType === 'image' && (
+              <>
+                <div>
+                  <Label>URL da Imagem</Label>
+                <Input
+                  placeholder="https://..."
+                  value={(node.data.imageUrl as string) || ''}
+                  onChange={(e) => handleUpdate('imageUrl', e.target.value)}
+                />
+                </div>
+                {node.type === 'question' && (
+                  <div>
+                    <Label>Posição da Imagem</Label>
+                  <Select
+                    value={(node.data.imagePosition as string) || 'top'}
+                    onValueChange={(value) => handleUpdate('imagePosition', value)}
+                  >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top">Acima</SelectItem>
+                        <SelectItem value="left">Esquerda</SelectItem>
+                        <SelectItem value="right">Direita</SelectItem>
+                        <SelectItem value="bottom">Abaixo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
+            )}
+            {node.data.mediaType === 'video' && (
+              <div>
+                <Label>URL do Vídeo</Label>
+              <Input
+                placeholder="https://..."
+                value={(node.data.videoUrl as string) || ''}
+                onChange={(e) => handleUpdate('videoUrl', e.target.value)}
+              />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Opções para nós de pergunta */}
         {node.type === 'question' && (
@@ -480,11 +677,11 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               </Button>
             </div>
             <div className="space-y-2">
-              {(node.data.options || []).map((option: any, index: number) => (
+              {((node.data.options as QuestionOption[]) || []).map((option, index) => (
                 <div key={index} className="flex gap-2">
                   <Input
                     placeholder="Texto da opção"
-                    value={option.text}
+                    value={option.text || ''}
                     onChange={(e) => handleOptionUpdate(index, 'text', e.target.value)}
                     className="flex-1"
                   />
@@ -501,6 +698,66 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
           </div>
         )}
 
+        {/* Campos para nós de formulário */}
+        {node.type === 'form' && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label>Campos do Formulário</Label>
+              <Button size="sm" variant="outline" onClick={addFormField}>
+                <Plus className="w-3 h-3" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {((node.data.formFields as FormField[]) || []).map((field, index) => (
+                <div key={index} className="space-y-2 p-2 border rounded">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Nome do campo"
+                      value={field.name || ''}
+                      onChange={(e) => handleFormFieldUpdate(index, 'name', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => removeFormField(index)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Label (identificador)"
+                    value={field.label || ''}
+                    onChange={(e) => handleFormFieldUpdate(index, 'label', e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select
+                      value={field.type || 'text'}
+                      onValueChange={(value) => handleFormFieldUpdate(index, 'type', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Texto</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="phone">Telefone</SelectItem>
+                        <SelectItem value="number">Número</SelectItem>
+                        <SelectItem value="textarea">Área de Texto</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="Placeholder"
+                      value={field.placeholder || ''}
+                      onChange={(e) => handleFormFieldUpdate(index, 'placeholder', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Configurações específicas por tipo de nó */}
         {node.type === 'offer' && (
           <div className="space-y-3">
@@ -509,9 +766,9 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <Label>Preço Original</Label>
               <Input
                 placeholder="R$ 197,00"
-                value={node.data.offerConfig?.originalPrice || ''}
+                value={(node.data.offerConfig as OfferConfig)?.originalPrice || ''}
                 onChange={(e) => handleUpdate('offerConfig', {
-                  ...node.data.offerConfig,
+                  ...(node.data.offerConfig as OfferConfig || {}),
                   originalPrice: e.target.value
                 })}
               />
@@ -520,9 +777,9 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <Label>Preço Promocional</Label>
               <Input
                 placeholder="R$ 97,00"
-                value={node.data.offerConfig?.salePrice || ''}
+                value={(node.data.offerConfig as OfferConfig)?.salePrice || ''}
                 onChange={(e) => handleUpdate('offerConfig', {
-                  ...node.data.offerConfig,
+                  ...(node.data.offerConfig as OfferConfig || {}),
                   salePrice: e.target.value
                 })}
               />
@@ -531,9 +788,9 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <Label>Desconto</Label>
               <Input
                 placeholder="50% OFF"
-                value={node.data.offerConfig?.discount || ''}
+                value={(node.data.offerConfig as OfferConfig)?.discount || ''}
                 onChange={(e) => handleUpdate('offerConfig', {
-                  ...node.data.offerConfig,
+                  ...(node.data.offerConfig as OfferConfig || {}),
                   discount: e.target.value
                 })}
               />
@@ -549,9 +806,9 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <Input
                 type="number"
                 placeholder="30"
-                value={node.data.timerConfig?.duration || ''}
+                value={(node.data.timerConfig as TimerConfig)?.duration?.toString() || ''}
                 onChange={(e) => handleUpdate('timerConfig', {
-                  ...node.data.timerConfig,
+                  ...(node.data.timerConfig as TimerConfig || {}),
                   duration: parseInt(e.target.value) || 30
                 })}
               />

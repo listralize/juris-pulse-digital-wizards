@@ -73,7 +73,7 @@ export const StepFormBuilder: React.FC = () => {
       if (error) throw error;
       
       if (data?.tracking_config) {
-        setTrackingConfig(data.tracking_config);
+        setTrackingConfig(data.tracking_config as any);
       }
     } catch (error) {
       console.error('Erro ao carregar configurações de tracking:', error);

@@ -20,7 +20,7 @@ import { MarketingManagement } from '../components/admin/MarketingManagement';
 import { LeadsManagement } from '../components/admin/LeadsManagement';
 import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
 import { StepFormBuilder } from '../components/admin/StepFormBuilder';
-import { TestimonialsManager } from '../components/admin/TestimonialsManager';
+
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 const Admin = () => {
@@ -200,11 +200,6 @@ const Admin = () => {
                   <span className="hidden sm:inline">Formulários Step</span>
                   <span className="sm:hidden">Forms</span>
                 </TabsTrigger>
-                <TabsTrigger value="testimonials" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
-                  <Users className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Depoimentos</span>
-                  <span className="sm:hidden">Depoimentos</span>
-                </TabsTrigger>
                 <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
                   <Briefcase className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -261,12 +256,6 @@ const Admin = () => {
                         Formulários Step
                       </div>
                     </SelectItem>
-                    <SelectItem value="testimonials">
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        Depoimentos
-                      </div>
-                    </SelectItem>
                     <SelectItem value="marketing">
                       <div className="flex items-center gap-2">
                         <Briefcase className="w-4 h-4" />
@@ -305,9 +294,6 @@ const Admin = () => {
                 <StepFormBuilder />
               </TabsContent>
 
-              <TabsContent value="testimonials">
-                <TestimonialsManager />
-              </TabsContent>
 
               <TabsContent value="marketing">
                 <MarketingManagement />

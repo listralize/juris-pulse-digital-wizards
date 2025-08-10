@@ -1298,6 +1298,7 @@ export type Database = {
           styles: Json
           subtitle: string | null
           title: string
+          tracking_config: Json | null
           updated_at: string
           webhook_url: string
         }
@@ -1315,6 +1316,7 @@ export type Database = {
           styles?: Json
           subtitle?: string | null
           title: string
+          tracking_config?: Json | null
           updated_at?: string
           webhook_url: string
         }
@@ -1332,6 +1334,7 @@ export type Database = {
           styles?: Json
           subtitle?: string | null
           title?: string
+          tracking_config?: Json | null
           updated_at?: string
           webhook_url?: string
         }
