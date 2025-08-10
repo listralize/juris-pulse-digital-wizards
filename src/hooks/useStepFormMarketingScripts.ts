@@ -1,0 +1,315 @@
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface StepFormMarketingConfig {
+  facebookPixel?: {
+    enabled: boolean;
+    pixelId: string;
+    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication' | 'CompleteRegistration' | 'ViewContent' | 'AddToCart' | 'InitiateCheckout' | 'Custom';
+    customEventName?: string;
+  };
+  googleAnalytics?: {
+    enabled: boolean;
+    measurementId: string;
+    eventName: string;
+  };
+  googleTagManager?: {
+    enabled: boolean;
+    containerId: string;
+    eventName: string;
+  };
+}
+
+export const useStepFormMarketingScripts = (formSlug: string) => {
+  useEffect(() => {
+    if (!formSlug) return;
+
+    const loadStepFormConfig = async () => {
+      try {
+        console.log(`📋 Carregando configuração de marketing para StepForm: ${formSlug}`);
+        
+        const { data: settings, error } = await supabase
+          .from('marketing_settings')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error('❌ Erro ao carregar configuração:', error);
+          return;
+        }
+
+        if (settings && settings.form_tracking_config) {
+          let trackingConfig;
+          if (typeof settings.form_tracking_config === 'string') {
+            trackingConfig = JSON.parse(settings.form_tracking_config);
+          } else {
+            trackingConfig = settings.form_tracking_config;
+          }
+          
+          const stepFormConfig = trackingConfig.stepForms?.find(
+            (form: any) => form.slug === formSlug && form.enabled
+          );
+
+          if (stepFormConfig) {
+            console.log(`✅ Configuração encontrada para StepForm ${formSlug}:`, stepFormConfig);
+            implementStepFormScripts(stepFormConfig);
+          } else {
+            console.log(`ℹ️ Nenhuma configuração ativa encontrada para StepForm: ${formSlug}`);
+            removeStepFormScripts(formSlug);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar configuração do StepForm:', error);
+      }
+    };
+
+    loadStepFormConfig();
+
+    // Escutar atualizações de configuração
+    const handleSettingsUpdate = () => {
+      console.log(`🔄 Recarregando configuração para StepForm: ${formSlug}`);
+      loadStepFormConfig();
+    };
+
+    window.addEventListener('marketingSettingsUpdated', handleSettingsUpdate);
+
+    return () => {
+      window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
+      removeStepFormScripts(formSlug);
+    };
+  }, [formSlug]);
+
+  const implementStepFormScripts = (stepFormConfig: any) => {
+    console.log(`🚀 Implementando scripts para StepForm ${stepFormConfig.slug}:`, stepFormConfig);
+
+    // Remover scripts antigos específicos deste StepForm
+    removeStepFormScripts(stepFormConfig.slug);
+
+    // Facebook Pixel - APENAS se estiver habilitado
+    if (stepFormConfig.facebookPixel?.enabled === true && stepFormConfig.facebookPixel?.pixelId) {
+      console.log(`✅ Facebook Pixel HABILITADO para StepForm ${stepFormConfig.slug}`);
+      implementStepFormFacebookPixel(stepFormConfig);
+    } else {
+      console.log(`❌ Facebook Pixel DESABILITADO para StepForm ${stepFormConfig.slug}`);
+    }
+
+    // Google Analytics - APENAS se estiver habilitado
+    if (stepFormConfig.googleAnalytics?.enabled === true && stepFormConfig.googleAnalytics?.measurementId) {
+      console.log(`✅ Google Analytics HABILITADO para StepForm ${stepFormConfig.slug}`);
+      implementStepFormGoogleAnalytics(stepFormConfig);
+    } else {
+      console.log(`❌ Google Analytics DESABILITADO para StepForm ${stepFormConfig.slug}`);
+    }
+
+    // Google Tag Manager - APENAS se estiver habilitado
+    if (stepFormConfig.googleTagManager?.enabled === true && stepFormConfig.googleTagManager?.containerId) {
+      console.log(`✅ Google Tag Manager HABILITADO para StepForm ${stepFormConfig.slug}`);
+      implementStepFormGoogleTagManager(stepFormConfig);
+    } else {
+      console.log(`❌ Google Tag Manager DESABILITADO para StepForm ${stepFormConfig.slug}`);
+    }
+  };
+
+  const removeStepFormScripts = (formSlug: string) => {
+    // Remover scripts do DOM
+    const existingScripts = document.querySelectorAll(`[data-stepform-marketing="${formSlug}"]`);
+    existingScripts.forEach(script => script.remove());
+
+    // Remover listeners registrados para este StepForm
+    const handlersMap = (window as any).__stepFormMarketingHandlers || {};
+    const handlers = handlersMap[formSlug];
+    if (handlers?.fb) document.removeEventListener('stepFormSubmitSuccess', handlers.fb);
+    if (handlers?.ga) document.removeEventListener('stepFormSubmitSuccess', handlers.ga);
+    if (handlers?.gtm) document.removeEventListener('stepFormSubmitSuccess', handlers.gtm);
+    delete handlersMap[formSlug];
+    (window as any).__stepFormMarketingHandlers = handlersMap;
+  };
+
+  const implementStepFormFacebookPixel = (stepFormConfig: any) => {
+    const { slug, facebookPixel } = stepFormConfig;
+    
+    // Validar se o pixelId é válido (apenas números)
+    const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
+    if (!pixelId || pixelId.length < 10) {
+      console.warn(`⚠️ Pixel ID inválido para StepForm ${slug}:`, facebookPixel.pixelId);
+      return;
+    }
+    
+    console.log(`📘 Implementando Facebook Pixel para StepForm ${slug}:`, pixelId);
+
+    // Verificar se este pixel específico já foi inicializado
+    const pixelKey = `fbq_pixel_${pixelId}`;
+    if (!(window as any)[pixelKey]) {
+      // Criar o script base do Facebook Pixel
+      const fbPixelScript = document.createElement('script');
+      fbPixelScript.setAttribute('data-stepform-marketing', slug);
+      fbPixelScript.innerHTML = `
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${pixelId}');
+        fbq('set', 'autoConfig', 'false', '${pixelId}');
+        console.log('📘 Meta Pixel ${pixelId} inicializado para StepForm ${slug} (autoConfig desativado)');
+      `;
+      document.head.appendChild(fbPixelScript);
+
+      // Marcar este pixel como inicializado
+      (window as any)[pixelKey] = true;
+    } else {
+      console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para StepForm ${slug}`);
+    }
+
+    // Adicionar listener específico para submissão bem-sucedida do StepForm
+    const handleStepFormSuccess = (event: CustomEvent) => {
+      if (event.detail?.formSlug === slug) {
+        console.log(`✅ StepForm ${slug} enviado com SUCESSO - rastreando com Facebook Pixel`);
+        
+        if ((window as any).fbq) {
+          const eventType = facebookPixel.eventType === 'Custom' 
+            ? (facebookPixel.customEventName || 'CustomEvent')
+            : (facebookPixel.eventType || 'Lead');
+          
+          // De-dup: evitar múltiplos eventos por submissão do mesmo StepForm
+          const sentMap = (window as any).__stepFormEventSent || {};
+          if (sentMap[slug]) {
+            console.log(`⏭️ Evento ignorado (duplicado) para StepForm: ${slug}`);
+            return;
+          }
+          sentMap[slug] = true;
+          (window as any).__stepFormEventSent = sentMap;
+          setTimeout(() => {
+            const m = (window as any).__stepFormEventSent || {};
+            delete m[slug];
+            (window as any).__stepFormEventSent = m;
+          }, 3000);
+          
+          (window as any).fbq('track', eventType, {
+            content_name: stepFormConfig.name || 'StepForm Submission',
+            form_id: slug,
+            page_url: window.location.href,
+            pixel_id: pixelId,
+            event_source_url: window.location.href,
+            user_data: event.detail?.userData || {}
+          });
+          console.log(`📊 Evento "${eventType}" rastreado para StepForm: ${slug} com pixel: ${pixelId}`);
+        }
+      }
+    };
+
+    // Registrar listener gerenciado
+    const handlersMap = (window as any).__stepFormMarketingHandlers || {};
+    if (handlersMap[slug]?.fb) {
+      document.removeEventListener('stepFormSubmitSuccess', handlersMap[slug].fb);
+    }
+    document.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
+    handlersMap[slug] = { ...(handlersMap[slug] || {}), fb: handleStepFormSuccess as EventListener };
+    (window as any).__stepFormMarketingHandlers = handlersMap;
+  };
+
+  const implementStepFormGoogleAnalytics = (stepFormConfig: any) => {
+    const { slug, googleAnalytics } = stepFormConfig;
+    console.log(`📊 Implementando Google Analytics para StepForm ${slug}:`, googleAnalytics.measurementId);
+
+    // Verificar se o GA base já existe
+    if (!(window as any).gtag) {
+      const gtagScript = document.createElement('script');
+      gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalytics.measurementId}`;
+      gtagScript.async = true;
+      gtagScript.setAttribute('data-stepform-marketing', slug);
+      document.head.appendChild(gtagScript);
+
+      const configScript = document.createElement('script');
+      configScript.setAttribute('data-stepform-marketing', slug);
+      configScript.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${googleAnalytics.measurementId}');
+      `;
+      document.head.appendChild(configScript);
+    }
+
+    // Adicionar listener específico para submissão bem-sucedida do StepForm
+    const handleStepFormSuccess = (event: CustomEvent) => {
+      if (event.detail?.formSlug === slug) {
+        console.log(`✅ StepForm ${slug} enviado com SUCESSO - rastreando com Google Analytics`);
+        
+        if ((window as any).gtag) {
+          (window as any).gtag('event', googleAnalytics.eventName || 'form_submit', {
+            event_category: 'engagement',
+            event_label: slug,
+            form_id: slug,
+            user_data: event.detail?.userData || {}
+          });
+          console.log(`📊 Evento "${googleAnalytics.eventName}" rastreado para StepForm: ${slug}`);
+        }
+      }
+    };
+
+    // Registrar listener gerenciado
+    const handlersMap = (window as any).__stepFormMarketingHandlers || {};
+    if (handlersMap[slug]?.ga) {
+      document.removeEventListener('stepFormSubmitSuccess', handlersMap[slug].ga);
+    }
+    document.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
+    handlersMap[slug] = { ...(handlersMap[slug] || {}), ga: handleStepFormSuccess as EventListener };
+    (window as any).__stepFormMarketingHandlers = handlersMap;
+  };
+
+  const implementStepFormGoogleTagManager = (stepFormConfig: any) => {
+    const { slug, googleTagManager } = stepFormConfig;
+    console.log(`🏷️ Implementando Google Tag Manager para StepForm ${slug}:`, googleTagManager.containerId);
+
+    // Verificar se o GTM base já existe
+    if (!(window as any).dataLayer) {
+      const gtmScript = document.createElement('script');
+      gtmScript.setAttribute('data-stepform-marketing', slug);
+      gtmScript.innerHTML = `
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','${googleTagManager.containerId}');
+      `;
+      document.head.appendChild(gtmScript);
+
+      const noscript = document.createElement('noscript');
+      noscript.setAttribute('data-stepform-marketing', slug);
+      noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${googleTagManager.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+      document.body.appendChild(noscript);
+    }
+
+    // Adicionar listener específico para submissão bem-sucedida do StepForm
+    const handleStepFormSuccess = (event: CustomEvent) => {
+      if (event.detail?.formSlug === slug) {
+        console.log(`✅ StepForm ${slug} enviado com SUCESSO - rastreando com GTM`);
+        
+        if ((window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: googleTagManager.eventName || 'form_submit',
+            form_id: slug,
+            form_name: stepFormConfig.name || 'StepForm Submission',
+            user_data: event.detail?.userData || {}
+          });
+          console.log(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${slug}`);
+        }
+      }
+    };
+
+    // Registrar listener gerenciado
+    const handlersMap = (window as any).__stepFormMarketingHandlers || {};
+    if (handlersMap[slug]?.gtm) {
+      document.removeEventListener('stepFormSubmitSuccess', handlersMap[slug].gtm);
+    }
+    document.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
+    handlersMap[slug] = { ...(handlersMap[slug] || {}), gtm: handleStepFormSuccess as EventListener };
+    (window as any).__stepFormMarketingHandlers = handlersMap;
+  };
+};

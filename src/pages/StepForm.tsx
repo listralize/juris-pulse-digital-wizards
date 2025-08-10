@@ -9,6 +9,7 @@ import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
+import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 
 interface StepFormData {
   id: string;
@@ -121,6 +122,9 @@ const StepForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{[key: string]: number}>({});
+
+  // Load marketing scripts for this step form
+  useStepFormMarketingScripts(slug || '');
 
   useEffect(() => {
     if (slug) {
@@ -269,37 +273,13 @@ const StepForm: React.FC = () => {
         console.log('Lead salvo com sucesso no sistema');
       }
 
-      // Enviar eventos de conversão
-      if (typeof window !== 'undefined') {
-        // Facebook Pixel
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', {
-            value: 0,
-            currency: 'BRL',
-            content_name: form?.name,
-            content_category: 'StepForm'
-          });
-        }
-
-        // Google Analytics
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'form_submit', {
-            event_category: 'engagement',
-            event_label: form?.name,
-            custom_parameter: 'stepform_completion'
-          });
-        }
-
-        // Google Tag Manager
-        if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: 'stepform_submit',
-            formName: form?.name,
-            formId: form?.id,
-            leadStatus: 'new'
-          });
-        }
-      }
+       // Dispatch success event for marketing tracking
+       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { 
+         detail: { 
+           formSlug: slug,
+           userData: formResponses 
+         } 
+       }));
 
       // Enviar para webhook se configurado
       if (form?.webhook_url) {
