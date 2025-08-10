@@ -32,7 +32,7 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form';
+  type: 'question' | 'form' | 'content';
   options?: Array<{
     text: string;
     value: string;
@@ -44,6 +44,11 @@ interface StepFormStep {
     placeholder: string;
     required: boolean;
   }>;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  mediaCaption?: string;
+  buttonText?: string;
+  buttonAction?: string;
   backStep?: string;
 }
 
@@ -151,17 +156,47 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
-  const addStep = () => {
+  const addStep = (type: 'question' | 'form' | 'content' = 'question') => {
     if (!selectedForm) return;
 
-    const newStep: StepFormStep = {
+    const baseStep = {
       id: `step_${Date.now()}`,
-      title: 'Nova Etapa',
-      type: 'question',
-      options: [
-        { text: 'Opção 1', value: 'opcao1' }
-      ]
+      title: 'Nova Etapa'
     };
+
+    let newStep: StepFormStep;
+
+    switch (type) {
+      case 'question':
+        newStep = {
+          ...baseStep,
+          type: 'question',
+          options: [
+            { text: 'Opção 1', value: 'opcao1' }
+          ]
+        };
+        break;
+      case 'form':
+        newStep = {
+          ...baseStep,
+          type: 'form',
+          formFields: [
+            { name: 'name', type: 'text', placeholder: 'Digite seu nome', required: true }
+          ]
+        };
+        break;
+      case 'content':
+        newStep = {
+          ...baseStep,
+          type: 'content',
+          description: 'Adicione conteúdo de imagem ou vídeo',
+          buttonText: 'Continuar',
+          buttonAction: 'next'
+        };
+        break;
+      default:
+        newStep = { ...baseStep, type: 'question', options: [] };
+    }
 
     setSelectedForm({
       ...selectedForm,
@@ -208,6 +243,34 @@ export const StepFormBuilder: React.FC = () => {
     } catch (error) {
       console.error('Erro ao excluir formulário:', error);
       toast.error('Erro ao excluir formulário');
+    }
+  };
+
+  // Funções auxiliares para styling
+  const getStepBorderColor = (type: string) => {
+    switch (type) {
+      case 'question': return 'border-l-blue-500';
+      case 'content': return 'border-l-purple-500';
+      case 'form': return 'border-l-green-500';
+      default: return 'border-l-gray-500';
+    }
+  };
+
+  const getStepTypeColor = (type: string) => {
+    switch (type) {
+      case 'question': return 'text-blue-600 border-blue-200';
+      case 'content': return 'text-purple-600 border-purple-200';
+      case 'form': return 'text-green-600 border-green-200';
+      default: return 'text-gray-600 border-gray-200';
+    }
+  };
+
+  const getStepTypeLabel = (type: string) => {
+    switch (type) {
+      case 'question': return 'Pergunta';
+      case 'content': return 'Conteúdo';
+      case 'form': return 'Formulário';
+      default: return 'Desconhecido';
     }
   };
 
@@ -317,19 +380,36 @@ export const StepFormBuilder: React.FC = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Etapas do Formulário</CardTitle>
-              <Button onClick={addStep} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Etapa
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => addStep('question')} size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Pergunta
+                </Button>
+                <Button onClick={() => addStep('content')} size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Conteúdo
+                </Button>
+                <Button onClick={() => addStep('form')} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Formulário
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {selectedForm.steps.map((step, index) => (
-                <Card key={step.id} className="border-l-4 border-l-primary">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline">Etapa {index + 1}</Badge>
+                <Card key={step.id} className={`border-l-4 ${getStepBorderColor(step.type)}`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className="px-3 py-1">
+                          Etapa {index + 1}
+                        </Badge>
+                        <Badge variant="outline" className={getStepTypeColor(step.type)}>
+                          {getStepTypeLabel(step.type)}
+                        </Badge>
+                      </div>
                       <Button
                         variant="destructive"
                         size="sm"
@@ -339,41 +419,46 @@ export const StepFormBuilder: React.FC = () => {
                       </Button>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                       <div>
-                        <Label>ID da Etapa</Label>
+                        <Label className="text-sm font-medium">ID da Etapa</Label>
                         <Input
                           value={step.id}
                           onChange={(e) => updateStep(index, 'id', e.target.value)}
+                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label>Tipo</Label>
+                        <Label className="text-sm font-medium">Tipo</Label>
                         <Select
                           value={step.type}
                           onValueChange={(value) => updateStep(index, 'type', value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="mt-1">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="question">Pergunta</SelectItem>
-                            <SelectItem value="form">Formulário</SelectItem>
+                            <SelectItem value="question">📋 Pergunta/Escolha</SelectItem>
+                            <SelectItem value="content">🎬 Conteúdo (Imagem/Vídeo)</SelectItem>
+                            <SelectItem value="form">📝 Formulário</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="md:col-span-2">
-                        <Label>Título</Label>
+                      <div className="lg:col-span-2">
+                        <Label className="text-sm font-medium">Título</Label>
                         <Input
                           value={step.title}
                           onChange={(e) => updateStep(index, 'title', e.target.value)}
+                          className="mt-1"
                         />
                       </div>
-                      <div className="md:col-span-2">
-                        <Label>Descrição (opcional)</Label>
+                      <div className="lg:col-span-2">
+                        <Label className="text-sm font-medium">Descrição (opcional)</Label>
                         <Textarea
                           value={step.description || ''}
                           onChange={(e) => updateStep(index, 'description', e.target.value)}
+                          className="mt-1"
+                          rows={3}
                         />
                       </div>
                     </div>
@@ -546,12 +631,72 @@ export const StepFormBuilder: React.FC = () => {
                              </Card>
                            ))}
                          </div>
-                       </div>
-                     )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                        </div>
+                      )}
+
+                      {step.type === 'content' && (
+                        <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div>
+                              <Label className="text-sm font-medium">Tipo de Mídia</Label>
+                              <Select
+                                value={step.mediaType || 'image'}
+                                onValueChange={(value) => updateStep(index, 'mediaType', value)}
+                              >
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="image">🖼️ Imagem</SelectItem>
+                                  <SelectItem value="video">🎥 Vídeo</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">URL da Mídia</Label>
+                              <Input
+                                value={step.mediaUrl || ''}
+                                onChange={(e) => updateStep(index, 'mediaUrl', e.target.value)}
+                                placeholder="https://example.com/image.jpg"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div className="lg:col-span-2">
+                              <Label className="text-sm font-medium">Legenda (opcional)</Label>
+                              <Input
+                                value={step.mediaCaption || ''}
+                                onChange={(e) => updateStep(index, 'mediaCaption', e.target.value)}
+                                placeholder="Legenda para a mídia"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Texto do Botão</Label>
+                              <Input
+                                value={step.buttonText || 'Continuar'}
+                                onChange={(e) => updateStep(index, 'buttonText', e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Ação do Botão</Label>
+                              <Input
+                                value={step.buttonAction || ''}
+                                onChange={(e) => updateStep(index, 'buttonAction', e.target.value)}
+                                placeholder="ID da próxima etapa ou URL"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            💡 Use para mostrar imagens ou vídeos explicativos. A ação do botão pode ser um ID de etapa ou URL externo.
+                          </div>
+                        </div>
+                      )}
+                   </CardContent>
+                 </Card>
+               ))}
+             </div>
           </CardContent>
         </Card>
       </div>

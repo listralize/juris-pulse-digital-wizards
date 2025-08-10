@@ -34,7 +34,7 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form';
+  type: 'question' | 'form' | 'content';
   options?: Array<{
     text: string;
     value: string;
@@ -46,6 +46,11 @@ interface StepFormStep {
     placeholder: string;
     required: boolean;
   }>;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  mediaCaption?: string;
+  buttonText?: string;
+  buttonAction?: string;
   backStep?: string;
 }
 
@@ -144,29 +149,44 @@ const StepForm: React.FC = () => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!form?.webhook_url) {
-      toast.error('Webhook não configurado');
-      return;
-    }
-
     try {
-      const allData = { ...answers, ...formData };
+      const allData = { 
+        ...answers, 
+        ...formData,
+        form_name: form?.name,
+        form_id: form?.slug
+      };
       
-      const response = await fetch(form.webhook_url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(allData),
-      });
+      // Salvar no sistema de leads do Supabase
+      const { error: leadError } = await supabase
+        .from('form_leads')
+        .insert([{
+          lead_data: allData,
+          form_id: form?.slug || 'step_form',
+          form_name: form?.name || 'Step Form',
+          source_page: window.location.href,
+          session_id: `session_${Date.now()}`,
+          visitor_id: `visitor_${Math.random().toString(36).substr(2, 9)}`,
+          status: 'new'
+        }]);
 
-      if (response.ok) {
-        toast.success('Formulário enviado com sucesso!');
-        // Aqui você pode redirecionar para uma página de sucesso
-        // navigate('/obrigado');
-      } else {
-        throw new Error('Erro ao enviar formulário');
+      if (leadError) {
+        console.error('Erro ao salvar lead:', leadError);
       }
+
+      // Enviar para webhook se configurado
+      if (form?.webhook_url) {
+        await fetch(form.webhook_url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(allData),
+        });
+      }
+
+      toast.success('Formulário enviado com sucesso!');
+      navigate('/obrigado');
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
       toast.error('Erro ao enviar formulário');
@@ -285,6 +305,51 @@ const StepForm: React.FC = () => {
                       {option.text}
                     </Button>
                   ))}
+                </div>
+              )}
+
+              {currentStep.type === 'content' && (
+                <div className="text-center space-y-6">
+                  {currentStep.mediaUrl && (
+                    <div className="mb-6">
+                      {currentStep.mediaType === 'video' ? (
+                        <video 
+                          controls 
+                          className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                          poster={currentStep.mediaUrl.replace(/\.(mp4|webm|ogg)$/, '.jpg')}
+                        >
+                          <source src={currentStep.mediaUrl} type="video/mp4" />
+                          Seu navegador não suporta vídeos.
+                        </video>
+                      ) : (
+                        <img 
+                          src={currentStep.mediaUrl} 
+                          alt={currentStep.mediaCaption || currentStep.title}
+                          className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                        />
+                      )}
+                      {currentStep.mediaCaption && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {currentStep.mediaCaption}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
+                  <Button
+                    className="px-8 py-3"
+                    style={{
+                      backgroundColor: form.styles.primary_color || '#4CAF50',
+                      borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
+                    }}
+                    onClick={() => {
+                      if (currentStep.buttonAction) {
+                        goToNextStep(currentStep.buttonAction);
+                      }
+                    }}
+                  >
+                    {currentStep.buttonText || 'Continuar'}
+                  </Button>
                 </div>
               )}
 
