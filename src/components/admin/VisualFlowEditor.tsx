@@ -433,7 +433,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   };
 
   return (
-    <div className="h-[80vh] w-full flex bg-background">
+    <div className="h-[80vh] w-full flex bg-gray-900">
       {/* Área do Flow */}
       <div className="flex-1 relative bg-gray-900">
         <ReactFlow
@@ -446,19 +446,20 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           nodeTypes={nodeTypes}
           fitView
           className="bg-gray-900"
+          style={{ backgroundColor: '#111827' }}
         >
           <Controls />
-          <MiniMap />
-          <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+          <MiniMap className="bg-gray-800" />
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#374151" />
         </ReactFlow>
 
         {/* Toolbar flutuante */}
-        <div className="absolute top-4 left-4 bg-card rounded-lg shadow-lg p-2 flex gap-2 z-10 border">
+        <div className="absolute top-4 left-4 bg-gray-800 rounded-lg shadow-lg p-2 flex gap-2 z-10 border border-gray-700">
           <Button
             size="sm"
             variant="outline"
             onClick={() => addNewNode('question')}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <MessageSquare className="w-4 h-4" />
             Pergunta
@@ -467,7 +468,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             size="sm"
             variant="outline"
             onClick={() => addNewNode('form')}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <FormInput className="w-4 h-4" />
             Formulário
@@ -476,7 +477,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             size="sm"
             variant="outline"
             onClick={() => addNewNode('content')}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <ImageIcon className="w-4 h-4" />
             Conteúdo
@@ -485,7 +486,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             size="sm"
             variant="outline"
             onClick={() => addNewNode('offer')}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <Gift className="w-4 h-4" />
             Oferta
@@ -494,7 +495,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             size="sm"
             variant="outline"
             onClick={() => addNewNode('timer')}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <Timer className="w-4 h-4" />
             Timer
@@ -503,7 +504,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             size="sm"
             variant="outline"
             onClick={() => addNewNode('socialProof')}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <BarChart3 className="w-4 h-4" />
             Prova Social
@@ -511,12 +512,12 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         </div>
 
         {/* Botões de ação */}
-        <div className="absolute top-4 right-4 bg-card rounded-lg shadow-lg p-2 flex gap-2 z-10 border">
+        <div className="absolute top-4 right-4 bg-gray-800 rounded-lg shadow-lg p-2 flex gap-2 z-10 border border-gray-700">
           <Button
             size="sm"
             variant="outline"
             onClick={() => setShowPreview(!showPreview)}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
           >
             <Eye className="w-4 h-4" />
             {showPreview ? 'Editar' : 'Preview'}
@@ -524,7 +525,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           <Button
             size="sm"
             onClick={handleSave}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700"
           >
             <Save className="w-4 h-4" />
             Salvar
@@ -533,14 +534,14 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       </div>
 
       {/* Painel lateral para edição */}
-      <div className="w-80 bg-card border-l border-border p-4 overflow-y-auto">
+      <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
         {selectedNode ? (
           <NodeEditor
             node={selectedNode}
             onUpdate={(updates) => updateNodeData(selectedNode.id, updates)}
           />
         ) : (
-          <div className="text-center text-muted-foreground mt-8">
+          <div className="text-center text-gray-400 mt-8">
             <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">Selecione um nó para editar suas propriedades</p>
           </div>
@@ -564,6 +565,12 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
   const handleOptionUpdate = (index: number, field: string, value: string) => {
     const options = [...((node.data.options as QuestionOption[]) || [])];
     options[index] = { ...options[index], [field]: value };
+    onUpdate({ options });
+  };
+
+  const handleOptionNextStepUpdate = (index: number, nextStep: string) => {
+    const options = [...((node.data.options as QuestionOption[]) || [])];
+    options[index] = { ...options[index], nextStep };
     onUpdate({ options });
   };
 
@@ -738,20 +745,27 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
             </div>
             <div className="space-y-2">
               {((node.data.options as QuestionOption[]) || []).map((option, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="space-y-2 p-2 border rounded">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Texto da opção"
+                      value={option.text || ''}
+                      onChange={(e) => handleOptionUpdate(index, 'text', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => removeOption(index)}
+                    >
+                      ×
+                    </Button>
+                  </div>
                   <Input
-                    placeholder="Texto da opção"
-                    value={option.text || ''}
-                    onChange={(e) => handleOptionUpdate(index, 'text', e.target.value)}
-                    className="flex-1"
+                    placeholder="ID do próximo nó (para conexão)"
+                    value={option.nextStep || ''}
+                    onChange={(e) => handleOptionNextStepUpdate(index, e.target.value)}
                   />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => removeOption(index)}
-                  >
-                    ×
-                  </Button>
                 </div>
               ))}
             </div>

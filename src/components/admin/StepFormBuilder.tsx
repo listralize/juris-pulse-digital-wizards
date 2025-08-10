@@ -283,6 +283,10 @@ export const StepFormBuilder: React.FC = () => {
               <Palette className="w-4 h-4" />
               Personalização
             </TabsTrigger>
+            <TabsTrigger value="testimonials" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Depoimentos
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="visual" className="space-y-6">
