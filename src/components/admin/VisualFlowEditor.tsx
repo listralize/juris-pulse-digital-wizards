@@ -165,8 +165,18 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
         {data.options && data.options.length > 0 && (
           <div className="space-y-1 mt-2">
             {data.options.slice(0, 3).map((option, index) => (
-              <div key={index} className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+              <div 
+                key={index} 
+                className="text-xs bg-gray-800 p-2 rounded text-gray-300 border border-gray-600 hover:bg-gray-700 cursor-pointer relative"
+              >
                 {option.text}
+                <Handle 
+                  type="source" 
+                  position={Position.Right} 
+                  id={`option-${index}`}
+                  style={{ right: '-8px', top: '50%', transform: 'translateY(-50%)' }}
+                  className="w-3 h-3 bg-green-500"
+                />
               </div>
             ))}
             {data.options.length > 3 && (
@@ -188,16 +198,6 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
           </div>
         )}
       </div>
-      {data.options && data.options.map((option, index) => (
-        <Handle 
-          key={index}
-          type="source" 
-          position={Position.Bottom} 
-          id={`option-${index}`}
-          style={{ left: `${20 + (index * 30)}%` }}
-          className="w-3 h-3 bg-green-500"
-        />
-      ))}
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-blue-500" />
     </div>
   );
@@ -467,14 +467,14 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   }, []);
 
-  const addNewNode = (type: string) => {
+  const addNode = (type: string) => {
     const newId = `${type}_${Date.now()}`;
     const newNode: Node = {
       id: newId,
@@ -494,7 +494,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     setNodes((nds) => nds.concat(newNode));
   };
 
-  const updateNodeData = (nodeId: string, updates: any) => {
+  const updateNode = (nodeId: string, updates: any) => {
     setNodes((nds) =>
       nds.map((node) =>
         node.id === nodeId
@@ -521,513 +521,460 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           fitView
-          className="bg-gray-900"
-          style={{ backgroundColor: '#111827' }}
+          className="w-full h-full"
+          style={{ backgroundColor: "#1a1a1a" }}
         >
           <Controls />
           <MiniMap className="bg-gray-800" />
-          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#374151" />
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#333" />
         </ReactFlow>
 
-        {/* Toolbar flutuante */}
-        <div className="absolute top-4 left-4 bg-gray-800 rounded-lg shadow-lg p-2 flex gap-2 z-10 border border-gray-700">
+        {/* Botões flutuantes para adicionar nós */}
+        <div className="absolute top-4 left-4 flex gap-2 flex-wrap max-w-xs">
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => addNewNode('question')}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            onClick={() => addNode('question')}
+            className="bg-blue-500 hover:bg-blue-600"
           >
-            <MessageSquare className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4 mr-1" />
             Pergunta
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => addNewNode('form')}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            onClick={() => addNode('form')}
+            className="bg-green-500 hover:bg-green-600"
           >
-            <FormInput className="w-4 h-4" />
+            <FormInput className="w-4 h-4 mr-1" />
             Formulário
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => addNewNode('content')}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            onClick={() => addNode('content')}
+            className="bg-purple-500 hover:bg-purple-600"
           >
-            <ImageIcon className="w-4 h-4" />
+            <ImageIcon className="w-4 h-4 mr-1" />
             Conteúdo
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => addNewNode('offer')}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            onClick={() => addNode('offer')}
+            className="bg-orange-500 hover:bg-orange-600"
           >
-            <Gift className="w-4 h-4" />
+            <Gift className="w-4 h-4 mr-1" />
             Oferta
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => addNewNode('timer')}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            onClick={() => addNode('timer')}
+            className="bg-red-500 hover:bg-red-600"
           >
-            <Timer className="w-4 h-4" />
+            <Timer className="w-4 h-4 mr-1" />
             Timer
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => addNewNode('socialProof')}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            onClick={() => addNode('socialProof')}
+            className="bg-indigo-500 hover:bg-indigo-600"
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className="w-4 h-4 mr-1" />
             Prova Social
           </Button>
         </div>
 
-        {/* Botões de ação */}
-        <div className="absolute top-4 right-4 bg-gray-800 rounded-lg shadow-lg p-2 flex gap-2 z-10 border border-gray-700">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowPreview(!showPreview)}
-            className="flex items-center gap-1 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
-          >
-            <Eye className="w-4 h-4" />
-            {showPreview ? 'Editar' : 'Preview'}
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700"
-          >
-            <Save className="w-4 h-4" />
-            Salvar
+        {/* Botão de salvar */}
+        <div className="absolute top-4 right-4">
+          <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+            <Save className="w-4 h-4 mr-2" />
+            Salvar Fluxo
           </Button>
         </div>
       </div>
 
-      {/* Painel lateral para edição */}
-      <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
-        {selectedNode ? (
-          <NodeEditor
-            node={selectedNode}
-            onUpdate={(updates) => updateNodeData(selectedNode.id, updates)}
-          />
-        ) : (
-          <div className="text-center text-gray-400 mt-8">
-            <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">Selecione um nó para editar suas propriedades</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Componente para editar propriedades do nó
-interface NodeEditorProps {
-  node: Node;
-  onUpdate: (updates: any) => void;
-}
-
-const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
-  const handleUpdate = (field: string, value: any) => {
-    onUpdate({ [field]: value });
-  };
-
-  const handleOptionUpdate = (index: number, field: string, value: string) => {
-    const options = [...((node.data.options as QuestionOption[]) || [])];
-    options[index] = { ...options[index], [field]: value };
-    onUpdate({ options });
-  };
-
-  const handleOptionNextStepUpdate = (index: number, nextStep: string) => {
-    const options = [...((node.data.options as QuestionOption[]) || [])];
-    options[index] = { ...options[index], nextStep };
-    onUpdate({ options });
-  };
-
-  const addOption = () => {
-    const options = [...((node.data.options as QuestionOption[]) || [])];
-    options.push({ text: 'Nova opção', value: `opt_${Date.now()}` });
-    onUpdate({ options });
-  };
-
-  const removeOption = (index: number) => {
-    const options = [...((node.data.options as QuestionOption[]) || [])];
-    options.splice(index, 1);
-    onUpdate({ options });
-  };
-
-  const handleFormFieldUpdate = (index: number, field: string, value: string) => {
-    const formFields = [...((node.data.formFields as FormField[]) || [])];
-    formFields[index] = { ...formFields[index], [field]: value };
-    onUpdate({ formFields });
-  };
-
-  const addFormField = () => {
-    const formFields = [...((node.data.formFields as FormField[]) || [])];
-    formFields.push({ name: 'campo', type: 'text', placeholder: 'Digite aqui...', required: false, label: '' });
-    onUpdate({ formFields });
-  };
-
-  const removeFormField = (index: number) => {
-    const formFields = [...((node.data.formFields as FormField[]) || [])];
-    formFields.splice(index, 1);
-    onUpdate({ formFields });
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Badge variant="outline">{node.type}</Badge>
-          Editar Nó
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="title">Título</Label>
-          <Input
-            id="title"
-            value={(node.data.title as string) || ''}
-            onChange={(e) => handleUpdate('title', e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="description">Descrição</Label>
-          <Textarea
-            id="description"
-            value={(node.data.description as string) || ''}
-            onChange={(e) => handleUpdate('description', e.target.value)}
-            rows={3}
-          />
-        </div>
-
-        {/* Configurações de aparência */}
-        <div className="space-y-3">
-          <h4 className="font-medium">Aparência</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label>Cor de Fundo</Label>
-              <Input
-                type="color"
-                value={(node.data.backgroundColor as string) || '#1a1a1a'}
-                onChange={(e) => handleUpdate('backgroundColor', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label>Cor do Texto</Label>
-              <Input
-                type="color"
-                value={(node.data.textColor as string) || '#ffffff'}
-                onChange={(e) => handleUpdate('textColor', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label>Cor da Borda</Label>
-              <Input
-                type="color"
-                value={(node.data.borderColor as string) || '#3b82f6'}
-                onChange={(e) => handleUpdate('borderColor', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label>Raio da Borda</Label>
-              <Input
-                placeholder="8px"
-                value={(node.data.borderRadius as string) || '8px'}
-                onChange={(e) => handleUpdate('borderRadius', e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Dimensões para nó de conteúdo */}
-        {node.type === 'content' && (
-          <div className="space-y-3">
-            <h4 className="font-medium">Dimensões</h4>
-            <div className="grid grid-cols-2 gap-2">
+      {/* Painel lateral de edição */}
+      {selectedNode && (
+        <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
+          <Card className="bg-gray-900 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">
+                Editar {selectedNode.type?.charAt(0).toUpperCase() + selectedNode.type?.slice(1)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label>Largura</Label>
+                <Label className="text-gray-300">Título</Label>
                 <Input
-                  placeholder="300px"
-                  value={(node.data.width as string) || '300px'}
-                  onChange={(e) => handleUpdate('width', e.target.value)}
+                  value={String(selectedNode.data.title || '')}
+                  onChange={(e) => updateNode(selectedNode.id, { title: e.target.value })}
+                  className="bg-gray-700 border-gray-600 text-white"
                 />
               </div>
+
               <div>
-                <Label>Altura</Label>
-                <Input
-                  placeholder="auto"
-                  value={(node.data.height as string) || 'auto'}
-                  onChange={(e) => handleUpdate('height', e.target.value)}
+                <Label className="text-gray-300">Descrição</Label>
+                <Textarea
+                  value={String(selectedNode.data.description || '')}
+                  onChange={(e) => updateNode(selectedNode.id, { description: e.target.value })}
+                  className="bg-gray-700 border-gray-600 text-white"
                 />
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Mídia para pergunta e conteúdo */}
-        {(node.type === 'question' || node.type === 'content') && (
-          <div className="space-y-3">
-            <h4 className="font-medium">Mídia</h4>
-            <div>
-              <Label>Tipo de Mídia</Label>
-            <Select
-              value={(node.data.mediaType as string) || 'image'}
-              onValueChange={(value) => handleUpdate('mediaType', value)}
-            >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="image">Imagem</SelectItem>
-                  <SelectItem value="video">Vídeo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {node.data.mediaType === 'image' && (
-              <>
-                <div>
-                  <Label>URL da Imagem</Label>
-                 <Input
-                   placeholder="https://..."
-                   value={(node.data.imageUrl as string) || ''}
-                   onChange={(e) => handleUpdate('imageUrl', e.target.value)}
-                 />
-                 </div>
-                 <div>
-                   <Label>Altura da Imagem</Label>
-                   <Input
-                     placeholder="80px"
-                     value={(node.data.imageHeight as string) || '80px'}
-                     onChange={(e) => handleUpdate('imageHeight', e.target.value)}
-                   />
-                 </div>
-                 {node.type === 'question' && (
-                   <div>
-                     <Label>Posição da Imagem</Label>
-                   <Select
-                     value={(node.data.imagePosition as string) || 'top'}
-                     onValueChange={(value) => handleUpdate('imagePosition', value)}
-                   >
-                       <SelectTrigger>
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="top">Acima</SelectItem>
-                         <SelectItem value="left">Esquerda</SelectItem>
-                         <SelectItem value="right">Direita</SelectItem>
-                         <SelectItem value="bottom">Abaixo</SelectItem>
-                       </SelectContent>
-                     </Select>
-                   </div>
-                 )}
-               </>
-             )}
-             {node.data.mediaType === 'video' && (
-               <>
-                 <div>
-                   <Label>URL do Vídeo</Label>
-                   <Input
-                     placeholder="https://..."
-                     value={(node.data.videoUrl as string) || ''}
-                     onChange={(e) => handleUpdate('videoUrl', e.target.value)}
-                   />
-                 </div>
-                 <div>
-                   <Label>Altura do Vídeo</Label>
-                   <Input
-                     placeholder="80px"
-                     value={(node.data.videoHeight as string) || '80px'}
-                     onChange={(e) => handleUpdate('videoHeight', e.target.value)}
-                   />
-                 </div>
-                 {node.type === 'question' && (
-                   <div>
-                     <Label>Posição do Vídeo</Label>
-                     <Select
-                       value={(node.data.imagePosition as string) || 'top'}
-                       onValueChange={(value) => handleUpdate('imagePosition', value)}
-                     >
-                       <SelectTrigger>
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="top">Acima</SelectItem>
-                         <SelectItem value="left">Esquerda</SelectItem>
-                         <SelectItem value="right">Direita</SelectItem>
-                         <SelectItem value="bottom">Abaixo</SelectItem>
-                       </SelectContent>
-                     </Select>
-                   </div>
-                 )}
-               </>
-             )}
-          </div>
-        )}
-
-        {/* Opções para nós de pergunta */}
-        {node.type === 'question' && (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label>Opções</Label>
-              <Button size="sm" variant="outline" onClick={addOption}>
-                <Plus className="w-3 h-3" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {((node.data.options as QuestionOption[]) || []).map((option, index) => (
-                <div key={index} className="space-y-2 p-2 border rounded">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Texto da opção"
-                      value={option.text || ''}
-                      onChange={(e) => handleOptionUpdate(index, 'text', e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => removeOption(index)}
+              {selectedNode.type === 'question' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-gray-300">Imagem/Vídeo</Label>
+                    <Select 
+                      value={String(selectedNode.data.mediaType || 'none')}
+                      onValueChange={(value) => {
+                        const mediaType = value === 'none' ? undefined : value;
+                        updateNode(selectedNode.id, { 
+                          mediaType,
+                          imageUrl: mediaType === 'image' ? selectedNode.data.imageUrl : undefined,
+                          videoUrl: mediaType === 'video' ? selectedNode.data.videoUrl : undefined
+                        });
+                      }}
                     >
-                      ×
-                    </Button>
-                  </div>
-                  <Input
-                    placeholder="ID do próximo nó (para conexão)"
-                    value={option.nextStep || ''}
-                    onChange={(e) => handleOptionNextStepUpdate(index, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Campos para nós de formulário */}
-        {node.type === 'form' && (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label>Campos do Formulário</Label>
-              <Button size="sm" variant="outline" onClick={addFormField}>
-                <Plus className="w-3 h-3" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {((node.data.formFields as FormField[]) || []).map((field, index) => (
-                <div key={index} className="space-y-2 p-2 border rounded">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Nome do campo"
-                      value={field.name || ''}
-                      onChange={(e) => handleFormFieldUpdate(index, 'name', e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => removeFormField(index)}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                  <Input
-                    placeholder="Label (identificador)"
-                    value={field.label || ''}
-                    onChange={(e) => handleFormFieldUpdate(index, 'label', e.target.value)}
-                  />
-                  <div className="grid grid-cols-2 gap-2">
-                    <Select
-                      value={field.type || 'text'}
-                      onValueChange={(value) => handleFormFieldUpdate(index, 'type', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
+                      <SelectTrigger className="bg-gray-700 border-gray-600">
+                        <SelectValue placeholder="Selecione o tipo de mídia" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="text">Texto</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="phone">Telefone</SelectItem>
-                        <SelectItem value="number">Número</SelectItem>
-                        <SelectItem value="textarea">Área de Texto</SelectItem>
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        <SelectItem value="image">Imagem</SelectItem>
+                        <SelectItem value="video">Vídeo</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {selectedNode.data.mediaType === 'image' && (
+                    <>
+                      <div>
+                        <Label className="text-gray-300">URL da Imagem</Label>
+                        <Input
+                          value={String(selectedNode.data.imageUrl || '')}
+                          onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
+                          placeholder="URL da imagem"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-300">Posição da Imagem</Label>
+                        <Select 
+                          value={String(selectedNode.data.imagePosition || 'top')}
+                          onValueChange={(value) => updateNode(selectedNode.id, { imagePosition: value })}
+                        >
+                          <SelectTrigger className="bg-gray-700 border-gray-600">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="top">Acima do texto</SelectItem>
+                            <SelectItem value="left">À esquerda</SelectItem>
+                            <SelectItem value="right">À direita</SelectItem>
+                            <SelectItem value="bottom">Abaixo do texto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-gray-300">Altura da Imagem</Label>
+                        <Input
+                          value={String(selectedNode.data.imageHeight || '80px')}
+                          onChange={(e) => updateNode(selectedNode.id, { imageHeight: e.target.value })}
+                          placeholder="ex: 120px"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {selectedNode.data.mediaType === 'video' && (
+                    <>
+                      <div>
+                        <Label className="text-gray-300">URL do Vídeo</Label>
+                        <Input
+                          value={String(selectedNode.data.videoUrl || '')}
+                          onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
+                          placeholder="URL do vídeo"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-300">Posição do Vídeo</Label>
+                        <Select 
+                          value={String(selectedNode.data.imagePosition || 'top')} 
+                          onValueChange={(value) => updateNode(selectedNode.id, { imagePosition: value })}
+                        >
+                          <SelectTrigger className="bg-gray-700 border-gray-600">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="top">Acima do texto</SelectItem>
+                            <SelectItem value="left">À esquerda</SelectItem>
+                            <SelectItem value="right">À direita</SelectItem>
+                            <SelectItem value="bottom">Abaixo do texto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-gray-300">Altura do Vídeo</Label>
+                        <Input
+                          value={String(selectedNode.data.videoHeight || '80px')}
+                          onChange={(e) => updateNode(selectedNode.id, { videoHeight: e.target.value })}
+                          placeholder="ex: 120px"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cor de Fundo</Label>
                     <Input
-                      placeholder="Placeholder"
-                      value={field.placeholder || ''}
-                      onChange={(e) => handleFormFieldUpdate(index, 'placeholder', e.target.value)}
+                      type="color"
+                      value={String(selectedNode.data.backgroundColor || '#1a1a1a')}
+                      onChange={(e) => updateNode(selectedNode.id, { backgroundColor: e.target.value })}
+                      className="bg-gray-700 border-gray-600"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cor do Texto</Label>
+                    <Input
+                      type="color"
+                      value={String(selectedNode.data.textColor || '#ffffff')}
+                      onChange={(e) => updateNode(selectedNode.id, { textColor: e.target.value })}
+                      className="bg-gray-700 border-gray-600"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cor da Borda</Label>
+                    <Input
+                      type="color"
+                      value={String(selectedNode.data.borderColor || '#3b82f6')}
+                      onChange={(e) => updateNode(selectedNode.id, { borderColor: e.target.value })}
+                      className="bg-gray-700 border-gray-600"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-300">Opções</Label>
+                    {Array.isArray(selectedNode.data.options) && selectedNode.data.options.map((option: QuestionOption, index: number) => (
+                      <div key={index} className="flex gap-2 mt-2">
+                        <Input
+                          value={option.text}
+                          onChange={(e) => {
+                            const newOptions = [...(Array.isArray(selectedNode.data.options) ? selectedNode.data.options : [])];
+                            newOptions[index] = { ...option, text: e.target.value };
+                            updateNode(selectedNode.id, { options: newOptions });
+                          }}
+                          placeholder="Texto da opção"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            const newOptions = Array.isArray(selectedNode.data.options) ? selectedNode.data.options.filter((_: any, i: number) => i !== index) : [];
+                            updateNode(selectedNode.id, { options: newOptions });
+                          }}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const newOptions = [...(Array.isArray(selectedNode.data.options) ? selectedNode.data.options : []), { text: 'Nova opção', value: `opt${Date.now()}` }];
+                        updateNode(selectedNode.id, { options: newOptions });
+                      }}
+                      className="mt-2"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar Opção
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {selectedNode.type === 'content' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-gray-300">Largura do Nó</Label>
+                    <Input
+                      value={String(selectedNode.data.width || '300px')}
+                      onChange={(e) => updateNode(selectedNode.id, { width: e.target.value })}
+                      placeholder="ex: 400px"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-300">Altura do Nó</Label>
+                    <Input
+                      value={String(selectedNode.data.height || 'auto')}
+                      onChange={(e) => updateNode(selectedNode.id, { height: e.target.value })}
+                      placeholder="ex: 300px ou auto"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-300">Imagem/Vídeo</Label>
+                    <Select 
+                      value={String(selectedNode.data.mediaType || 'none')} 
+                      onValueChange={(value) => {
+                        const mediaType = value === 'none' ? undefined : value;
+                        updateNode(selectedNode.id, { 
+                          mediaType,
+                          imageUrl: mediaType === 'image' ? selectedNode.data.imageUrl : undefined,
+                          videoUrl: mediaType === 'video' ? selectedNode.data.videoUrl : undefined
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="bg-gray-700 border-gray-600">
+                        <SelectValue placeholder="Selecione o tipo de mídia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        <SelectItem value="image">Imagem</SelectItem>
+                        <SelectItem value="video">Vídeo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedNode.data.mediaType === 'image' && (
+                    <>
+                      <div>
+                        <Label className="text-gray-300">URL da Imagem</Label>
+                        <Input
+                          value={String(selectedNode.data.imageUrl || '')}
+                          onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
+                          placeholder="URL da imagem"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-300">Altura da Imagem</Label>
+                        <Input
+                          value={String(selectedNode.data.imageHeight || '120px')}
+                          onChange={(e) => updateNode(selectedNode.id, { imageHeight: e.target.value })}
+                          placeholder="ex: 150px"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {selectedNode.data.mediaType === 'video' && (
+                    <>
+                      <div>
+                        <Label className="text-gray-300">URL do Vídeo</Label>
+                        <Input
+                          value={String(selectedNode.data.videoUrl || '')}
+                          onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
+                          placeholder="URL do vídeo"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-300">Altura do Vídeo</Label>
+                        <Input
+                          value={String(selectedNode.data.videoHeight || '120px')}
+                          onChange={(e) => updateNode(selectedNode.id, { videoHeight: e.target.value })}
+                          placeholder="ex: 150px"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cor de Fundo</Label>
+                    <Input
+                      type="color"
+                      value={String(selectedNode.data.backgroundColor || '#1a1a1a')}
+                      onChange={(e) => updateNode(selectedNode.id, { backgroundColor: e.target.value })}
+                      className="bg-gray-700 border-gray-600"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cor do Texto</Label>
+                    <Input
+                      type="color"
+                      value={String(selectedNode.data.textColor || '#ffffff')}
+                      onChange={(e) => updateNode(selectedNode.id, { textColor: e.target.value })}
+                      className="bg-gray-700 border-gray-600"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cor da Borda</Label>
+                    <Input
+                      type="color"
+                      value={String(selectedNode.data.borderColor || '#8b5cf6')}
+                      onChange={(e) => updateNode(selectedNode.id, { borderColor: e.target.value })}
+                      className="bg-gray-700 border-gray-600"
                     />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* Configurações específicas por tipo de nó */}
-        {node.type === 'offer' && (
-          <div className="space-y-3">
-            <h4 className="font-medium">Configuração da Oferta</h4>
-            <div>
-              <Label>Preço Original</Label>
-              <Input
-                placeholder="R$ 197,00"
-                value={(node.data.offerConfig as OfferConfig)?.originalPrice || ''}
-                onChange={(e) => handleUpdate('offerConfig', {
-                  ...(node.data.offerConfig as OfferConfig || {}),
-                  originalPrice: e.target.value
-                })}
-              />
-            </div>
-            <div>
-              <Label>Preço Promocional</Label>
-              <Input
-                placeholder="R$ 97,00"
-                value={(node.data.offerConfig as OfferConfig)?.salePrice || ''}
-                onChange={(e) => handleUpdate('offerConfig', {
-                  ...(node.data.offerConfig as OfferConfig || {}),
-                  salePrice: e.target.value
-                })}
-              />
-            </div>
-            <div>
-              <Label>Desconto</Label>
-              <Input
-                placeholder="50% OFF"
-                value={(node.data.offerConfig as OfferConfig)?.discount || ''}
-                onChange={(e) => handleUpdate('offerConfig', {
-                  ...(node.data.offerConfig as OfferConfig || {}),
-                  discount: e.target.value
-                })}
-              />
-            </div>
-          </div>
-        )}
-
-        {node.type === 'timer' && (
-          <div className="space-y-3">
-            <h4 className="font-medium">Configuração do Timer</h4>
-            <div>
-              <Label>Duração (minutos)</Label>
-              <Input
-                type="number"
-                placeholder="30"
-                value={(node.data.timerConfig as TimerConfig)?.duration?.toString() || ''}
-                onChange={(e) => handleUpdate('timerConfig', {
-                  ...(node.data.timerConfig as TimerConfig || {}),
-                  duration: parseInt(e.target.value) || 30
-                })}
-              />
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              {selectedNode.type === 'form' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-gray-300">Campos do Formulário</Label>
+                    {Array.isArray(selectedNode.data.formFields) && selectedNode.data.formFields.map((field: FormField, index: number) => (
+                      <div key={index} className="grid grid-cols-2 gap-2 mt-2">
+                        <Input
+                          value={field.name}
+                          onChange={(e) => {
+                            const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
+                            newFields[index] = { ...field, name: e.target.value };
+                            updateNode(selectedNode.id, { formFields: newFields });
+                          }}
+                          placeholder="Nome do campo"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                        <Select
+                          value={field.type}
+                          onValueChange={(value) => {
+                            const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
+                            newFields[index] = { ...field, type: value };
+                            updateNode(selectedNode.id, { formFields: newFields });
+                          }}
+                        >
+                          <SelectTrigger className="bg-gray-700 border-gray-600">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Texto</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="tel">Telefone</SelectItem>
+                            <SelectItem value="number">Número</SelectItem>
+                            <SelectItem value="textarea">Área de texto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : []), 
+                          { name: 'campo', type: 'text', placeholder: 'Digite...', required: false }
+                        ];
+                        updateNode(selectedNode.id, { formFields: newFields });
+                      }}
+                      className="mt-2"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar Campo
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
   );
 };

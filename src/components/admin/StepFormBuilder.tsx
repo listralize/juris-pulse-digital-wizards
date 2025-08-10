@@ -340,12 +340,24 @@ export const StepFormBuilder: React.FC = () => {
                       offerConfig: node.data.offerConfig,
                       timerConfig: node.data.timerConfig,
                       socialProofConfig: node.data.socialProofConfig,
+                      imageUrl: node.data.imageUrl,
+                      videoUrl: node.data.videoUrl,
+                      mediaType: node.data.mediaType,
+                      imagePosition: node.data.imagePosition,
+                      imageHeight: node.data.imageHeight,
+                      videoHeight: node.data.videoHeight,
+                      backgroundColor: node.data.backgroundColor,
+                      textColor: node.data.textColor,
+                      borderColor: node.data.borderColor,
+                      width: node.data.width,
+                      height: node.data.height,
                     }));
                     setSelectedForm({
                       ...selectedForm,
                       steps: convertedSteps
                     });
-                    toast.success('Fluxo atualizado com sucesso!');
+                    // Salvar automaticamente
+                    saveForm();
                   }}
                   initialFlow={{
                     nodes: selectedForm.steps?.map((step: any, index: number) => ({
@@ -360,6 +372,17 @@ export const StepFormBuilder: React.FC = () => {
                         offerConfig: step.offerConfig,
                         timerConfig: step.timerConfig,
                         socialProofConfig: step.socialProofConfig,
+                        imageUrl: step.imageUrl,
+                        videoUrl: step.videoUrl,
+                        mediaType: step.mediaType,
+                        imagePosition: step.imagePosition,
+                        imageHeight: step.imageHeight,
+                        videoHeight: step.videoHeight,
+                        backgroundColor: step.backgroundColor,
+                        textColor: step.textColor,
+                        borderColor: step.borderColor,
+                        width: step.width,
+                        height: step.height,
                       }
                     })) || [],
                     edges: []
