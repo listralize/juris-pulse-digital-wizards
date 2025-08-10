@@ -8,7 +8,7 @@ import Navbar from '../components/navbar';
 import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
-import { SocialProofCarousel } from '../components/SocialProofCarousel';
+import { TestimonialCarousel } from '../components/TestimonialCarousel';
 import { useTheme } from '../components/ThemeProvider';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -115,9 +115,19 @@ const Index = () => {
       
       <SectionsContainer />
       
-      {/* Adicionar prova social entre as seções */}
-      <div className="relative z-10">
-        <SocialProofCarousel />
+      {/* Seção de Depoimentos */}
+      <div className="relative z-10 py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              O que nossos clientes dizem
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Veja os depoimentos de quem já confiou em nossos serviços jurídicos
+            </p>
+          </div>
+          <TestimonialCarousel />
+        </div>
       </div>
 
       {/* Popup Legal discreto */}

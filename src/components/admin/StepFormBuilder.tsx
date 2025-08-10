@@ -7,12 +7,13 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
-import { Plus, Trash2, ArrowLeft, ArrowRight, Save, Eye, Image as ImageIcon, Video as VideoIcon, Timer, Gift, CreditCard, Zap, Target, Gauge } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGallery } from './ImageGallery';
-import { OfferConfigEditor, TimerConfigEditor, SocialProofConfigEditor } from './StepFormConfigEditors';
+import { VisualFlowEditor } from './VisualFlowEditor';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -28,81 +29,11 @@ type StepFormData = {
   seo: any; // JSONB
   footer_config?: any; // JSONB
   seo_config?: any; // JSONB
+  tracking_config?: any; // JSONB
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
 };
-
-interface StepFormStep {
-  id: string;
-  title: string;
-  description?: string;
-  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'countdown' | 'quiz_result';
-  options?: Array<{
-    text: string;
-    value: string;
-    nextStep?: string;
-    actionType?: 'next_step' | 'external_url';
-  }>;
-  formFields?: Array<{
-    name: string;
-    type: string;
-    placeholder: string;
-    required: boolean;
-  }>;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video' | 'carousel';
-  mediaCaption?: string;
-  buttonText?: string;
-  buttonAction?: string;
-  buttonActionType?: 'next_step' | 'external_url';
-  backStep?: string;
-  // Campos para carrossel
-  carouselImages?: string[];
-  carouselAutoplay?: boolean;
-  carouselShowDots?: boolean;
-  carouselInterval?: number;
-  // Campos para dimensões de imagem/vídeo
-  imageWidth?: string;
-  imageHeight?: string;
-  videoWidth?: string;
-  videoHeight?: string;
-  // Configurações adicionais de vídeo
-  videoAutoplay?: boolean;
-  videoMuted?: boolean;
-  videoLoop?: boolean;
-  // Novos campos para ofertas e elementos interativos
-  offerConfig?: {
-    title?: string;
-    originalPrice?: string;
-    salePrice?: string;
-    discount?: string;
-    features?: string[];
-    ctaText?: string;
-    ctaUrl?: string;
-    urgencyText?: string;
-  };
-  timerConfig?: {
-    duration?: number; // em minutos
-    showHours?: boolean;
-    showMinutes?: boolean;
-    showSeconds?: boolean;
-    onExpireAction?: string;
-    onExpireUrl?: string;
-  };
-  socialProofConfig?: {
-    testimonials?: Array<{
-      name: string;
-      text: string;
-      rating?: number;
-      image?: string;
-    }>;
-    stats?: Array<{
-      number: string;
-      label: string;
-    }>;
-  };
-}
 
 export const StepFormBuilder: React.FC = () => {
   const [forms, setForms] = useState<StepFormData[]>([]);
@@ -111,10 +42,61 @@ export const StepFormBuilder: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
+  const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
+  const [trackingConfig, setTrackingConfig] = useState({
+    facebook_pixel: false,
+    google_analytics: false,
+    google_tag_manager: false,
+    pixel_id: '',
+    ga_id: '',
+    gtm_id: ''
+  });
 
   useEffect(() => {
     loadForms();
   }, []);
+
+  useEffect(() => {
+    if (selectedForm?.id) {
+      loadTrackingConfig(selectedForm.id);
+    }
+  }, [selectedForm?.id]);
+
+  const loadTrackingConfig = async (formId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('step_forms')
+        .select('tracking_config')
+        .eq('id', formId)
+        .single();
+
+      if (error) throw error;
+      
+      if (data?.tracking_config) {
+        setTrackingConfig(data.tracking_config);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações de tracking:', error);
+    }
+  };
+
+  const saveTrackingConfig = async () => {
+    if (!selectedForm?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('step_forms')
+        .update({ tracking_config: trackingConfig })
+        .eq('id', selectedForm.id);
+
+      if (error) throw error;
+      
+      toast.success('Configurações de rastreamento salvas!');
+    } catch (error) {
+      console.error('Erro ao salvar tracking:', error);
+      toast.error('Erro ao salvar configurações de rastreamento');
+    }
+  };
 
   const loadForms = async () => {
     try {
@@ -171,6 +153,14 @@ export const StepFormBuilder: React.FC = () => {
         meta_description: 'Complete nosso formulário interativo',
         meta_keywords: ''
       },
+      tracking_config: {
+        facebook_pixel: false,
+        google_analytics: false,
+        google_tag_manager: false,
+        pixel_id: '',
+        ga_id: '',
+        gtm_id: ''
+      },
       is_active: true
     };
     
@@ -194,6 +184,7 @@ export const StepFormBuilder: React.FC = () => {
         seo: selectedForm.seo,
         footer_config: selectedForm.footer_config,
         seo_config: selectedForm.seo_config,
+        tracking_config: trackingConfig,
         is_active: selectedForm.is_active
       };
 
@@ -223,118 +214,6 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
-  const addStep = (type: 'question' | 'form' | 'content' | 'offer' | 'timer' = 'question') => {
-    if (!selectedForm) return;
-
-    const baseStep = {
-      id: `step_${Date.now()}`,
-      title: 'Nova Etapa'
-    };
-
-    let newStep: StepFormStep;
-
-    switch (type) {
-      case 'question':
-        newStep = {
-          ...baseStep,
-          type: 'question',
-          options: [
-            { text: 'Opção 1', value: 'opcao1', actionType: 'next_step' }
-          ]
-        };
-        break;
-      case 'form':
-        newStep = {
-          ...baseStep,
-          type: 'form',
-          formFields: [
-            { name: 'name', type: 'text', placeholder: 'Digite seu nome', required: true }
-          ]
-        };
-        break;
-      case 'content':
-        newStep = {
-          ...baseStep,
-          type: 'content',
-          description: 'Adicione conteúdo de imagem ou vídeo',
-          buttonText: 'Continuar',
-          buttonAction: 'next',
-          buttonActionType: 'next_step'
-        };
-        break;
-      case 'offer':
-        newStep = {
-          ...baseStep,
-          type: 'offer',
-          title: 'Oferta Especial',
-          description: 'Aproveite nossa oferta limitada',
-          offerConfig: {
-            title: 'Plano Premium',
-            originalPrice: 'R$ 197,00',
-            salePrice: 'R$ 97,00',
-            discount: '50% OFF',
-            features: ['Acesso completo', 'Suporte prioritário', 'Garantia 30 dias'],
-            ctaText: 'Garantir Oferta',
-            ctaUrl: '',
-            urgencyText: 'Restam apenas 24 horas!'
-          },
-          buttonText: 'Garantir Agora',
-          buttonActionType: 'external_url'
-        };
-        break;
-      case 'timer':
-        newStep = {
-          ...baseStep,
-          type: 'timer',
-          title: 'Oferta por Tempo Limitado',
-          description: 'Aproveite antes que o tempo acabe!',
-          timerConfig: {
-            duration: 30, // 30 minutos
-            showHours: true,
-            showMinutes: true,
-            showSeconds: true,
-            onExpireAction: 'redirect',
-            onExpireUrl: ''
-          },
-          buttonText: 'Continuar',
-          buttonActionType: 'next_step'
-        };
-        break;
-      default:
-        newStep = { ...baseStep, type: 'question', options: [] };
-    }
-
-    setSelectedForm({
-      ...selectedForm,
-      steps: [...selectedForm.steps, newStep]
-    });
-  };
-
-  const updateStep = (stepIndex: number, field: keyof StepFormStep, value: any) => {
-    if (!selectedForm) return;
-
-    const updatedSteps = [...selectedForm.steps];
-    updatedSteps[stepIndex] = {
-      ...updatedSteps[stepIndex],
-      [field]: value
-    };
-
-    setSelectedForm({
-      ...selectedForm,
-      steps: updatedSteps
-    });
-  };
-
-  const deleteStep = (stepIndex: number) => {
-    if (!selectedForm) return;
-
-    const updatedSteps = selectedForm.steps.filter((_, index) => index !== stepIndex);
-    setSelectedForm({
-      ...selectedForm,
-      steps: updatedSteps
-    });
-  };
-
   const deleteForm = async (formId: string) => {
     try {
       const { error } = await supabase
@@ -349,43 +228,6 @@ export const StepFormBuilder: React.FC = () => {
     } catch (error) {
       console.error('Erro ao excluir formulário:', error);
       toast.error('Erro ao excluir formulário');
-    }
-  };
-
-  // Funções auxiliares para styling
-  const getStepBorderColor = (type: string) => {
-    switch (type) {
-      case 'question': return 'border-l-blue-500';
-      case 'content': return 'border-l-purple-500';
-      case 'form': return 'border-l-green-500';
-      case 'offer': return 'border-l-orange-500';
-      case 'timer': return 'border-l-red-500';
-      
-      default: return 'border-l-gray-500';
-    }
-  };
-
-  const getStepTypeColor = (type: string) => {
-    switch (type) {
-      case 'question': return 'text-blue-600 border-blue-200';
-      case 'content': return 'text-purple-600 border-purple-200';
-      case 'form': return 'text-green-600 border-green-200';
-      case 'offer': return 'text-orange-600 border-orange-200';
-      case 'timer': return 'text-red-600 border-red-200';
-      
-      default: return 'text-gray-600 border-gray-200';
-    }
-  };
-
-  const getStepTypeLabel = (type: string) => {
-    switch (type) {
-      case 'question': return 'Pergunta';
-      case 'content': return 'Conteúdo';
-      case 'form': return 'Formulário';
-      case 'offer': return 'Oferta';
-      case 'timer': return 'Timer';
-      
-      default: return 'Desconhecido';
     }
   };
 
@@ -426,673 +268,252 @@ export const StepFormBuilder: React.FC = () => {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Configurações Gerais
-              {selectedForm.id && (
-                <Badge variant="outline" className="text-xs">
-                  URL: /form/{selectedForm.slug}
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Nome do Formulário</Label>
-                <Input
-                  id="name"
-                  value={selectedForm.name}
-                  onChange={(e) => setSelectedForm({ ...selectedForm, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="slug">Slug (URL)</Label>
-                <Input
-                  id="slug"
-                  value={selectedForm.slug}
-                  onChange={(e) => setSelectedForm({ ...selectedForm, slug: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="title">Título</Label>
-                <Input
-                  id="title"
-                  value={selectedForm.title}
-                  onChange={(e) => setSelectedForm({ ...selectedForm, title: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="subtitle">Subtítulo</Label>
-                <Input
-                  id="subtitle"
-                  value={selectedForm.subtitle || ''}
-                  onChange={(e) => setSelectedForm({ ...selectedForm, subtitle: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="logo_url">Logo do Formulário</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="logo_url"
-                    value={selectedForm.logo_url || ''}
-                    onChange={(e) => setSelectedForm({ ...selectedForm, logo_url: e.target.value })}
-                    placeholder="URL da imagem ou selecione da galeria"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowImageGallery(true)}
-                  >
-                    <ImageIcon className="w-4 h-4 mr-2" />
-                    Galeria
-                  </Button>
-                </div>
-                {selectedForm.logo_url && (
-                  <div className="mt-2">
-                    <img 
-                      src={selectedForm.logo_url} 
-                      alt="Preview do logo" 
-                      className="max-w-xs h-16 object-contain border rounded"
-                    />
-                  </div>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="webhook_url">Webhook URL</Label>
-                <Input
-                  id="webhook_url"
-                  value={selectedForm.webhook_url}
-                  onChange={(e) => setSelectedForm({ ...selectedForm, webhook_url: e.target.value })}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="visual" className="flex items-center gap-2">
+              <Edit3 className="w-4 h-4" />
+              Editor Visual
+            </TabsTrigger>
+            <TabsTrigger value="code" className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              Editor de Código
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Configurações de Estilo e Footer */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Personalização e Footer</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="primary_color">Cor Primária</Label>
-                <Input
-                  id="primary_color"
-                  type="color"
-                  value={selectedForm.styles?.primary_color || '#4CAF50'}
-                  onChange={(e) => setSelectedForm({ 
-                    ...selectedForm, 
-                    styles: { ...selectedForm.styles, primary_color: e.target.value }
-                  })}
+          <TabsContent value="visual" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Editor Visual de Fluxo
+                  {selectedForm.id && (
+                    <Badge variant="outline" className="text-xs">
+                      URL: /form/{selectedForm.slug}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <VisualFlowEditor
+                  onSave={(flow) => {
+                    const convertedSteps = flow.nodes.map(node => ({
+                      id: node.id,
+                      title: node.data.title,
+                      description: node.data.description,
+                      type: node.type,
+                      options: node.data.options,
+                      formFields: node.data.formFields,
+                      offerConfig: node.data.offerConfig,
+                      timerConfig: node.data.timerConfig,
+                      socialProofConfig: node.data.socialProofConfig,
+                    }));
+                    setSelectedForm({
+                      ...selectedForm,
+                      steps: convertedSteps
+                    });
+                    toast.success('Fluxo atualizado com sucesso!');
+                  }}
+                  initialFlow={{
+                    nodes: selectedForm.steps?.map((step: any, index: number) => ({
+                      id: step.id || `step_${index}`,
+                      type: step.type || 'question',
+                      position: { x: (index % 3) * 300, y: Math.floor(index / 3) * 200 },
+                      data: {
+                        title: step.title,
+                        description: step.description,
+                        options: step.options,
+                        formFields: step.formFields,
+                        offerConfig: step.offerConfig,
+                        timerConfig: step.timerConfig,
+                        socialProofConfig: step.socialProofConfig,
+                      }
+                    })) || [],
+                    edges: []
+                  }}
                 />
-              </div>
-              <div>
-                <Label htmlFor="background_color">Cor de Fundo</Label>
-                <Input
-                  id="background_color"
-                  type="color"
-                  value={selectedForm.styles?.background_color || '#ffffff'}
-                  onChange={(e) => setSelectedForm({ 
-                    ...selectedForm, 
-                    styles: { ...selectedForm.styles, background_color: e.target.value }
-                  })}
-                />
-              </div>
-            </div>
-            
-            {/* Configuração do Footer */}
-            <div className="space-y-4 border-t pt-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="footer_enabled" className="text-base font-semibold">
-                  Rodapé Personalizado
-                </Label>
-                <Switch
-                  id="footer_enabled"
-                  checked={selectedForm.footer_config?.enabled || false}
-                  onCheckedChange={(checked) => setSelectedForm({ 
-                    ...selectedForm, 
-                    footer_config: { 
-                      ...selectedForm.footer_config, 
-                      enabled: checked 
-                    }
-                  })}
-                />
-              </div>
-              
-              {selectedForm.footer_config?.enabled && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4 border-l-2 border-primary/20">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="footer_text">Texto do Rodapé</Label>
-                    <Textarea
-                      id="footer_text"
-                      value={selectedForm.footer_config?.text || ''}
-                      onChange={(e) => setSelectedForm({ 
-                        ...selectedForm, 
-                        footer_config: { 
-                          ...selectedForm.footer_config, 
-                          text: e.target.value 
-                        }
-                      })}
-                      placeholder="Ex: Atendemos todo o Brasil ✅"
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="code" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Configurações Gerais
+                  {selectedForm.id && (
+                    <Badge variant="outline" className="text-xs">
+                      URL: /form/{selectedForm.slug}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Nome do Formulário</Label>
+                    <Input
+                      id="name"
+                      value={selectedForm.name}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, name: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="footer_bg_color">Cor de Fundo do Rodapé</Label>
+                    <Label htmlFor="slug">Slug (URL)</Label>
                     <Input
-                      id="footer_bg_color"
-                      type="color"
-                      value={selectedForm.footer_config?.background_color || '#1a1a1a'}
-                      onChange={(e) => setSelectedForm({ 
-                        ...selectedForm, 
-                        footer_config: { 
-                          ...selectedForm.footer_config, 
-                          background_color: e.target.value 
-                        }
-                      })}
+                      id="slug"
+                      value={selectedForm.slug}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, slug: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="footer_text_color">Cor do Texto do Rodapé</Label>
+                    <Label htmlFor="title">Título</Label>
                     <Input
-                      id="footer_text_color"
-                      type="color"
-                      value={selectedForm.footer_config?.text_color || '#ffffff'}
-                      onChange={(e) => setSelectedForm({ 
-                        ...selectedForm, 
-                        footer_config: { 
-                          ...selectedForm.footer_config, 
-                          text_color: e.target.value 
-                        }
-                      })}
+                      id="title"
+                      value={selectedForm.title}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, title: e.target.value })}
                     />
                   </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Etapas do Formulário</CardTitle>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-                <Button onClick={() => addStep('question')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
-                  <Target className="w-4 h-4 mb-1" />
-                  <span className="text-xs">Pergunta</span>
-                </Button>
-                <Button onClick={() => addStep('content')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
-                  <ImageIcon className="w-4 h-4 mb-1" />
-                  <span className="text-xs">Conteúdo</span>
-                </Button>
-                <Button onClick={() => addStep('form')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
-                  <Plus className="w-4 h-4 mb-1" />
-                  <span className="text-xs">Formulário</span>
-                </Button>
-                <Button onClick={() => addStep('offer')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
-                  <Gift className="w-4 h-4 mb-1" />
-                  <span className="text-xs">Oferta</span>
-                </Button>
-                <Button onClick={() => addStep('timer')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
-                  <Timer className="w-4 h-4 mb-1" />
-                  <span className="text-xs">Timer</span>
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {selectedForm.steps.map((step, index) => (
-                <Card key={step.id} className={`border-l-4 ${getStepBorderColor(step.type)}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="px-3 py-1">
-                          Etapa {index + 1}
-                        </Badge>
-                        <Badge variant="outline" className={getStepTypeColor(step.type)}>
-                          {getStepTypeLabel(step.type)}
-                        </Badge>
-                      </div>
+                  <div>
+                    <Label htmlFor="subtitle">Subtítulo</Label>
+                    <Input
+                      id="subtitle"
+                      value={selectedForm.subtitle || ''}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, subtitle: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="logo_url">Logo do Formulário</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="logo_url"
+                        value={selectedForm.logo_url || ''}
+                        onChange={(e) => setSelectedForm({ ...selectedForm, logo_url: e.target.value })}
+                        placeholder="URL da imagem ou selecione da galeria"
+                      />
                       <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteStep(index)}
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowImageGallery(true)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Galeria
                       </Button>
                     </div>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                      <div>
-                        <Label className="text-sm font-medium">ID da Etapa</Label>
-                        <Input
-                          value={step.id}
-                          onChange={(e) => updateStep(index, 'id', e.target.value)}
-                          className="mt-1"
+                    {selectedForm.logo_url && (
+                      <div className="mt-2">
+                        <img 
+                          src={selectedForm.logo_url} 
+                          alt="Preview do logo" 
+                          className="max-w-xs h-16 object-contain border rounded"
                         />
                       </div>
-                      <div>
-                        <Label className="text-sm font-medium">Tipo</Label>
-                        <Select
-                          value={step.type}
-                          onValueChange={(value) => updateStep(index, 'type', value)}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="question">🎯 Pergunta/Escolha</SelectItem>
-                            <SelectItem value="content">🎬 Conteúdo (Imagem/Vídeo)</SelectItem>
-                            <SelectItem value="form">📝 Formulário</SelectItem>
-                            <SelectItem value="offer">🎁 Oferta/Produto</SelectItem>
-                            <SelectItem value="timer">⏰ Timer/Urgência</SelectItem>
-                            
-                          </SelectContent>
-                        </Select>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="webhook_url">URL do Webhook</Label>
+                    <Input
+                      id="webhook_url"
+                      value={selectedForm.webhook_url}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, webhook_url: e.target.value })}
+                      placeholder="https://exemplo.com/webhook"
+                    />
+                  </div>
+                </div>
+
+                {/* Seção de Configurações de Rastreamento */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Códigos de Rastreamento</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="facebook_pixel"
+                            checked={trackingConfig.facebook_pixel}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, facebook_pixel: checked }))
+                            }
+                          />
+                          <Label htmlFor="facebook_pixel">Facebook Pixel</Label>
+                        </div>
+                        {trackingConfig.facebook_pixel && (
+                          <Input
+                            placeholder="ID do Pixel"
+                            value={trackingConfig.pixel_id}
+                            onChange={(e) => 
+                              setTrackingConfig(prev => ({ ...prev, pixel_id: e.target.value }))
+                            }
+                          />
+                        )}
                       </div>
-                      <div className="lg:col-span-2">
-                        <Label className="text-sm font-medium">Título</Label>
-                        <Input
-                          value={step.title}
-                          onChange={(e) => updateStep(index, 'title', e.target.value)}
-                          className="mt-1"
-                        />
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="google_analytics"
+                            checked={trackingConfig.google_analytics}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, google_analytics: checked }))
+                            }
+                          />
+                          <Label htmlFor="google_analytics">Google Analytics</Label>
+                        </div>
+                        {trackingConfig.google_analytics && (
+                          <Input
+                            placeholder="ID do GA"
+                            value={trackingConfig.ga_id}
+                            onChange={(e) => 
+                              setTrackingConfig(prev => ({ ...prev, ga_id: e.target.value }))
+                            }
+                          />
+                        )}
                       </div>
-                      <div className="lg:col-span-2">
-                        <Label className="text-sm font-medium">Descrição (opcional)</Label>
-                        <Textarea
-                          value={step.description || ''}
-                          onChange={(e) => updateStep(index, 'description', e.target.value)}
-                          className="mt-1"
-                          rows={3}
-                        />
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="google_tag_manager"
+                            checked={trackingConfig.google_tag_manager}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, google_tag_manager: checked }))
+                            }
+                          />
+                          <Label htmlFor="google_tag_manager">Google Tag Manager</Label>
+                        </div>
+                        {trackingConfig.google_tag_manager && (
+                          <Input
+                            placeholder="ID do GTM"
+                            value={trackingConfig.gtm_id}
+                            onChange={(e) => 
+                              setTrackingConfig(prev => ({ ...prev, gtm_id: e.target.value }))
+                            }
+                          />
+                        )}
                       </div>
                     </div>
+                    
+                    <Button onClick={saveTrackingConfig} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Configurações de Rastreamento
+                    </Button>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-                     {step.type === 'question' && (
-                       <div className="mt-6">
-                         <div className="flex items-center justify-between mb-4">
-                           <Label className="text-base font-semibold">Opções de Resposta</Label>
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => {
-                               const newOptions = [...(step.options || []), { text: '', value: '', nextStep: '' }];
-                               updateStep(index, 'options', newOptions);
-                             }}
-                           >
-                             <Plus className="w-4 h-4 mr-2" />
-                             Adicionar Opção
-                           </Button>
-                         </div>
-                         <div className="space-y-3">
-                           {step.options?.map((option, optionIndex) => (
-                             <Card key={optionIndex} className="p-4">
-                               <div className="grid grid-cols-1 gap-3">
-                                 <div>
-                                   <Label className="text-sm font-medium">Texto do Botão</Label>
-                                   <Input
-                                     placeholder="Ex: Quero me divorciar"
-                                     value={option.text}
-                                     onChange={(e) => {
-                                       const newOptions = [...(step.options || [])];
-                                       newOptions[optionIndex] = { ...option, text: e.target.value };
-                                       updateStep(index, 'options', newOptions);
-                                     }}
-                                   />
-                                 </div>
-                                 <div className="grid grid-cols-2 gap-3">
-                                   <div>
-                                     <Label className="text-sm font-medium">Valor (salvo nos dados)</Label>
-                                     <Input
-                                       placeholder="divorcio"
-                                       value={option.value}
-                                       onChange={(e) => {
-                                         const newOptions = [...(step.options || [])];
-                                         newOptions[optionIndex] = { ...option, value: e.target.value };
-                                         updateStep(index, 'options', newOptions);
-                                       }}
-                                     />
-                                   </div>
-                                   <div>
-                                     <Label className="text-sm font-medium">Próxima Etapa</Label>
-                                     <div className="flex gap-1">
-                                       <Input
-                                         placeholder="ID da etapa ou URL"
-                                         value={option.nextStep || ''}
-                                         onChange={(e) => {
-                                           const newOptions = [...(step.options || [])];
-                                           newOptions[optionIndex] = { ...option, nextStep: e.target.value };
-                                           updateStep(index, 'options', newOptions);
-                                         }}
-                                       />
-                                       <Button
-                                         variant="destructive"
-                                         size="sm"
-                                         onClick={() => {
-                                           const newOptions = step.options?.filter((_, i) => i !== optionIndex) || [];
-                                           updateStep(index, 'options', newOptions);
-                                         }}
-                                       >
-                                         <Trash2 className="w-4 h-4" />
-                                       </Button>
-                                     </div>
-                                   </div>
-                                 </div>
-                                 <div className="text-xs text-muted-foreground">
-                                   💡 Dica: Use IDs de outras etapas (ex: "step2") ou URLs externos (ex: "https://site.com")
-                                 </div>
-                               </div>
-                             </Card>
-                           ))}
-                         </div>
-                       </div>
-                     )}
-
-                     {step.type === 'form' && (
-                       <div className="mt-6">
-                         <div className="flex items-center justify-between mb-4">
-                           <Label className="text-base font-semibold">Campos do Formulário</Label>
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => {
-                               const newFields = [...(step.formFields || []), { 
-                                 name: '', 
-                                 type: 'text', 
-                                 placeholder: '', 
-                                 required: true 
-                               }];
-                               updateStep(index, 'formFields', newFields);
-                             }}
-                           >
-                             <Plus className="w-4 h-4 mr-2" />
-                             Adicionar Campo
-                           </Button>
-                         </div>
-                         <div className="space-y-3">
-                           {step.formFields?.map((field, fieldIndex) => (
-                             <Card key={fieldIndex} className="p-4">
-                               <div className="grid grid-cols-1 gap-3">
-                                 <div className="grid grid-cols-2 gap-3">
-                                   <div>
-                                     <Label className="text-sm font-medium">Nome do Campo</Label>
-                                     <Input
-                                       placeholder="nome"
-                                       value={field.name}
-                                       onChange={(e) => {
-                                         const newFields = [...(step.formFields || [])];
-                                         newFields[fieldIndex] = { ...field, name: e.target.value };
-                                         updateStep(index, 'formFields', newFields);
-                                       }}
-                                     />
-                                   </div>
-                                   <div>
-                                     <Label className="text-sm font-medium">Tipo</Label>
-                                     <Select
-                                       value={field.type}
-                                       onValueChange={(value) => {
-                                         const newFields = [...(step.formFields || [])];
-                                         newFields[fieldIndex] = { ...field, type: value };
-                                         updateStep(index, 'formFields', newFields);
-                                       }}
-                                     >
-                                       <SelectTrigger>
-                                         <SelectValue />
-                                       </SelectTrigger>
-                                       <SelectContent>
-                                         <SelectItem value="text">Texto</SelectItem>
-                                         <SelectItem value="email">Email</SelectItem>
-                                         <SelectItem value="tel">Telefone</SelectItem>
-                                         <SelectItem value="textarea">Área de Texto</SelectItem>
-                                       </SelectContent>
-                                     </Select>
-                                   </div>
-                                 </div>
-                                 <div>
-                                   <Label className="text-sm font-medium">Placeholder</Label>
-                                   <div className="flex gap-1">
-                                     <Input
-                                       placeholder="Digite seu nome"
-                                       value={field.placeholder}
-                                       onChange={(e) => {
-                                         const newFields = [...(step.formFields || [])];
-                                         newFields[fieldIndex] = { ...field, placeholder: e.target.value };
-                                         updateStep(index, 'formFields', newFields);
-                                       }}
-                                     />
-                                     <Button
-                                       variant="destructive"
-                                       size="sm"
-                                       onClick={() => {
-                                         const newFields = step.formFields?.filter((_, i) => i !== fieldIndex) || [];
-                                         updateStep(index, 'formFields', newFields);
-                                       }}
-                                     >
-                                       <Trash2 className="w-4 h-4" />
-                                     </Button>
-                                   </div>
-                                 </div>
-                               </div>
-                             </Card>
-                           ))}
-                         </div>
-                        </div>
-                      )}
-
-                        {(step.type === 'offer' || step.type === 'timer') && (
-                          <div className="mt-6 space-y-4">
-                            {step.type === 'offer' && <OfferConfigEditor step={step} updateStep={(field, value) => {
-                              const updatedSteps = [...selectedForm.steps];
-                              updatedSteps[index] = { ...updatedSteps[index], [field]: value };
-                              setSelectedForm({ ...selectedForm, steps: updatedSteps });
-                            }} />}
-                            {step.type === 'timer' && <TimerConfigEditor step={step} updateStep={(field, value) => {
-                              const updatedSteps = [...selectedForm.steps];
-                              updatedSteps[index] = { ...updatedSteps[index], [field]: value };
-                              setSelectedForm({ ...selectedForm, steps: updatedSteps });
-                            }} />}
-                          </div>
-                        )}
-
-                       {step.type === 'content' && (
-                        <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-sm font-medium">Tipo de Mídia</Label>
-                              <Select
-                                value={step.mediaType || 'image'}
-                                onValueChange={(value) => updateStep(index, 'mediaType', value)}
-                              >
-                                <SelectTrigger className="mt-1">
-                                  <SelectValue />
-                                </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="image">🖼️ Imagem</SelectItem>
-                              <SelectItem value="video">🎥 Vídeo</SelectItem>
-                              <SelectItem value="carousel">🎠 Carrossel de Imagens</SelectItem>
-                            </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">URL da Mídia</Label>
-                              <div className="flex gap-2 mt-1">
-                                <Input
-                                  value={step.mediaUrl || ''}
-                                  onChange={(e) => updateStep(index, 'mediaUrl', e.target.value)}
-                                  placeholder="https://example.com/media.jpg ou selecione da galeria"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={() => setShowImageGallery(true)}
-                                >
-                                  <ImageIcon className="w-4 h-4 mr-2" />
-                                  Galeria
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="lg:col-span-2">
-                              <Label className="text-sm font-medium">Legenda (opcional)</Label>
-                              <Input
-                                value={step.mediaCaption || ''}
-                                onChange={(e) => updateStep(index, 'mediaCaption', e.target.value)}
-                                placeholder="Legenda para a mídia"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Texto do Botão</Label>
-                              <Input
-                                value={step.buttonText || 'Continuar'}
-                                onChange={(e) => updateStep(index, 'buttonText', e.target.value)}
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Ação do Botão</Label>
-                              <Input
-                                value={step.buttonAction || ''}
-                                onChange={(e) => updateStep(index, 'buttonAction', e.target.value)}
-                                placeholder="ID da próxima etapa ou URL"
-                                className="mt-1"
-                              />
-                            </div>
-                           </div>
-
-                           {/* Configurações específicas para vídeo */}
-                           {step.mediaType === 'video' && (
-                             <div className="grid grid-cols-2 gap-4 mt-4">
-                               <div className="space-y-4">
-                                 <h4 className="font-medium">Configurações do Vídeo</h4>
-                                 <div className="flex items-center space-x-2">
-                                   <Switch
-                                     id={`autoplay-${index}`}
-                                     checked={step.videoAutoplay || false}
-                                     onCheckedChange={(checked) => updateStep(index, 'videoAutoplay', checked)}
-                                   />
-                                   <Label htmlFor={`autoplay-${index}`}>Autoplay</Label>
-                                 </div>
-                                 <div className="flex items-center space-x-2">
-                                   <Switch
-                                     id={`muted-${index}`}
-                                     checked={step.videoMuted || false}
-                                     onCheckedChange={(checked) => updateStep(index, 'videoMuted', checked)}
-                                   />
-                                   <Label htmlFor={`muted-${index}`}>Mudo</Label>
-                                 </div>
-                                 <div className="flex items-center space-x-2">
-                                   <Switch
-                                     id={`loop-${index}`}
-                                     checked={step.videoLoop || false}
-                                     onCheckedChange={(checked) => updateStep(index, 'videoLoop', checked)}
-                                   />
-                                   <Label htmlFor={`loop-${index}`}>Loop</Label>
-                                 </div>
-                               </div>
-                               <div className="space-y-4">
-                                 <h4 className="font-medium">Dimensões</h4>
-                                 <div>
-                                   <Label className="text-sm">Largura</Label>
-                                   <Input
-                                     value={step.videoWidth || '560'}
-                                     onChange={(e) => updateStep(index, 'videoWidth', e.target.value)}
-                                     placeholder="560"
-                                   />
-                                 </div>
-                                 <div>
-                                   <Label className="text-sm">Altura</Label>
-                                   <Input
-                                     value={step.videoHeight || '315'}
-                                     onChange={(e) => updateStep(index, 'videoHeight', e.target.value)}
-                                     placeholder="315"
-                                   />
-                                 </div>
-                               </div>
-                             </div>
-                           )}
-
-                           {/* Configurações específicas para imagem */}
-                           {step.mediaType === 'image' && (
-                             <div className="grid grid-cols-2 gap-4 mt-4">
-                               <div>
-                                 <Label className="text-sm">Largura da Imagem</Label>
-                                 <Input
-                                   value={step.imageWidth || 'auto'}
-                                   onChange={(e) => updateStep(index, 'imageWidth', e.target.value)}
-                                   placeholder="auto ou 400px"
-                                 />
-                               </div>
-                               <div>
-                                 <Label className="text-sm">Altura da Imagem</Label>
-                                 <Input
-                                   value={step.imageHeight || '400px'}
-                                   onChange={(e) => updateStep(index, 'imageHeight', e.target.value)}
-                                   placeholder="400px"
-                                 />
-                               </div>
-                             </div>
-                           )}
-
-                           {/* Configurações para carrossel */}
-                           {step.mediaType === 'carousel' && (
-                             <div className="space-y-4 mt-4">
-                               <h4 className="font-medium">Configurações do Carrossel</h4>
-                               <div className="grid grid-cols-2 gap-4">
-                                 <div className="flex items-center space-x-2">
-                                   <Switch
-                                     id={`autoplay-carousel-${index}`}
-                                     checked={step.carouselAutoplay || false}
-                                     onCheckedChange={(checked) => updateStep(index, 'carouselAutoplay', checked)}
-                                   />
-                                   <Label htmlFor={`autoplay-carousel-${index}`}>Autoplay</Label>
-                                 </div>
-                                 <div className="flex items-center space-x-2">
-                                   <Switch
-                                     id={`dots-${index}`}
-                                     checked={step.carouselShowDots || true}
-                                     onCheckedChange={(checked) => updateStep(index, 'carouselShowDots', checked)}
-                                   />
-                                   <Label htmlFor={`dots-${index}`}>Mostrar Pontos</Label>
-                                 </div>
-                               </div>
-                               <div>
-                                 <Label className="text-sm">Intervalo (ms)</Label>
-                                 <Input
-                                   type="number"
-                                   value={step.carouselInterval || 5000}
-                                   onChange={(e) => updateStep(index, 'carouselInterval', parseInt(e.target.value))}
-                                   placeholder="5000"
-                                 />
-                               </div>
-                               <div>
-                                 <Label className="text-sm">URLs das Imagens (uma por linha)</Label>
-                                 <Textarea
-                                   rows={4}
-                                   value={(step.carouselImages || []).join('\n')}
-                                   onChange={(e) => updateStep(index, 'carouselImages', e.target.value.split('\n').filter(url => url.trim()))}
-                                   placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                                 />
-                               </div>
-                             </div>
-                           )}
-                           
-                           <div className="text-xs text-muted-foreground">
-                             💡 Use para mostrar imagens ou vídeos explicativos. A ação do botão pode ser um ID de etapa ou URL externo.
-                           </div>
-                         </div>
-                       )}
-                   </CardContent>
-                 </Card>
-               ))}
-             </div>
-          </CardContent>
-        </Card>
+        {/* Galeria de Imagens */}
+        <ImageGallery
+          isOpen={showImageGallery}
+          onClose={() => setShowImageGallery(false)}
+          onSelectImage={(url) => {
+            setSelectedForm({ ...selectedForm, logo_url: url });
+            setShowImageGallery(false);
+          }}
+          selectedImage={selectedForm.logo_url}
+        />
       </div>
     );
   }
