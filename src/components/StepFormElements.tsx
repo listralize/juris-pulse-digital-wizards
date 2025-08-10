@@ -36,20 +36,33 @@ export const renderStepElement = (element: any) => {
       return (
         <div className="w-full flex justify-center">
           {element.content ? (
-            <video 
-              src={element.content} 
-              controls
-              className="max-w-full rounded-lg shadow-lg"
-              style={{ 
-                maxHeight: element.videoHeight || '400px',
-                width: element.videoWidth || 'auto'
-              }}
-              onError={(e) => {
-                console.error('Erro ao carregar vídeo:', element.content);
-              }}
-            >
-              <p>Seu navegador não suporta vídeos HTML5.</p>
-            </video>
+            // Check if it's a YouTube URL
+            element.content.includes('youtube.com') || element.content.includes('youtu.be') ? (
+              <iframe
+                src={getYouTubeEmbedUrl(element.content)}
+                width={element.videoWidth || "560"}
+                height={element.videoHeight || "315"}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="rounded-lg shadow-lg max-w-full"
+              />
+            ) : (
+              <video 
+                src={element.content} 
+                controls
+                className="max-w-full rounded-lg shadow-lg"
+                style={{ 
+                  maxHeight: element.videoHeight || '400px',
+                  width: element.videoWidth || 'auto'
+                }}
+                onError={(e) => {
+                  console.error('Erro ao carregar vídeo:', element.content);
+                }}
+              >
+                <p>Seu navegador não suporta vídeos HTML5.</p>
+              </video>
+            )
           ) : (
             <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
               <p className="text-muted-foreground">Vídeo não encontrado</p>
@@ -57,6 +70,9 @@ export const renderStepElement = (element: any) => {
           )}
         </div>
       );
+
+    case 'carousel':
+      return <ImageCarousel config={element} />;
 
     case 'text':
       return (
@@ -76,6 +92,108 @@ export const renderStepElement = (element: any) => {
     default:
       return null;
   }
+};
+
+// Helper function to convert YouTube URLs to embed URLs
+const getYouTubeEmbedUrl = (url: string) => {
+  let videoId = '';
+  
+  if (url.includes('youtube.com/watch?v=')) {
+    videoId = url.split('v=')[1].split('&')[0];
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1].split('?')[0];
+  } else if (url.includes('youtube.com/embed/')) {
+    return url; // Already an embed URL
+  }
+  
+  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
+};
+
+// Image Carousel Component
+interface ImageCarouselProps {
+  config: {
+    images?: string[];
+    autoplay?: boolean;
+    showDots?: boolean;
+    interval?: number;
+  };
+}
+
+export const ImageCarousel: React.FC<ImageCarouselProps> = ({ config }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { images = [], autoplay = false, showDots = true, interval = 5000 } = config;
+
+  useEffect(() => {
+    if (autoplay && images.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % images.length);
+      }, interval);
+      return () => clearInterval(timer);
+    }
+  }, [autoplay, images.length, interval]);
+
+  if (!images.length) {
+    return (
+      <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhuma imagem adicionada ao carrossel</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full">
+      <div className="relative overflow-hidden rounded-lg shadow-lg">
+        <div 
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((image, index) => (
+            <div key={index} className="w-full flex-shrink-0">
+              <img
+                src={image}
+                alt={`Slide ${index + 1}`}
+                className="w-full h-64 object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder.svg';
+                }}
+              />
+            </div>
+          ))}
+        </div>
+        
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={() => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+            >
+              ←
+            </button>
+            <button
+              onClick={() => setCurrentIndex((prev) => (prev + 1) % images.length)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+            >
+              →
+            </button>
+          </>
+        )}
+      </div>
+      
+      {showDots && images.length > 1 && (
+        <div className="flex justify-center mt-4 gap-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                index === currentIndex ? 'bg-primary' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 interface OfferElementProps {

@@ -8,7 +8,7 @@ import { Badge } from '../components/ui/badge';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
-import { OfferElement, TimerElement, SocialProofElement } from '../components/StepFormElements';
+import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
 
 interface StepFormData {
   id: string;
@@ -62,12 +62,22 @@ interface StepFormStep {
     required: boolean;
   }>;
   mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  mediaType?: 'image' | 'video' | 'carousel';
   mediaCaption?: string;
   buttonText?: string;
   buttonAction?: string;
   buttonActionType?: 'next_step' | 'external_url';
   backStep?: string;
+  // Campos para carrossel
+  carouselImages?: string[];
+  carouselAutoplay?: boolean;
+  carouselShowDots?: boolean;
+  carouselInterval?: number;
+  // Campos para dimensões de imagem/vídeo
+  imageWidth?: string;
+  imageHeight?: string;
+  videoWidth?: string;
+  videoHeight?: string;
   // Novos campos para ofertas e elementos interativos
   offerConfig?: {
     title?: string;
@@ -437,29 +447,35 @@ const StepForm: React.FC = () => {
 
               {currentStep.type === 'content' && (
                 <div className="text-center space-y-6">
+                  {/* Media Content */}
                   {currentStep.mediaUrl && (
                     <div className="mb-6">
-                      {currentStep.mediaType === 'video' ? (
-                        <video 
-                          controls 
-                          className="w-full max-w-md mx-auto rounded-lg shadow-lg"
-                          poster={currentStep.mediaUrl.replace(/\.(mp4|webm|ogg)$/, '.jpg')}
-                        >
-                          <source src={currentStep.mediaUrl} type="video/mp4" />
-                          Seu navegador não suporta vídeos.
-                        </video>
-                      ) : (
-                        <img 
-                          src={currentStep.mediaUrl} 
-                          alt={currentStep.mediaCaption || currentStep.title}
-                          className="w-full max-w-md mx-auto rounded-lg shadow-lg"
-                        />
-                      )}
+                      {renderStepElement({
+                        type: currentStep.mediaType,
+                        content: currentStep.mediaUrl,
+                        imageWidth: currentStep.imageWidth,
+                        imageHeight: currentStep.imageHeight,
+                        videoWidth: currentStep.videoWidth,
+                        videoHeight: currentStep.videoHeight
+                      })}
                       {currentStep.mediaCaption && (
                         <p className="text-sm text-muted-foreground mt-2">
                           {currentStep.mediaCaption}
                         </p>
                       )}
+                    </div>
+                  )}
+                  
+                  {/* Carousel Content */}
+                  {currentStep.mediaType === 'carousel' && currentStep.carouselImages && (
+                    <div className="mb-6">
+                      {renderStepElement({
+                        type: 'carousel',
+                        images: currentStep.carouselImages,
+                        autoplay: currentStep.carouselAutoplay,
+                        showDots: currentStep.carouselShowDots,
+                        interval: currentStep.carouselInterval
+                      })}
                     </div>
                   )}
                   

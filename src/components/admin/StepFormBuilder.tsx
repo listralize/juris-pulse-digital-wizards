@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGallery } from './ImageGallery';
+import { OfferConfigEditor, TimerConfigEditor, SocialProofConfigEditor } from './StepFormConfigEditors';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -50,12 +51,22 @@ interface StepFormStep {
     required: boolean;
   }>;
   mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  mediaType?: 'image' | 'video' | 'carousel';
   mediaCaption?: string;
   buttonText?: string;
   buttonAction?: string;
   buttonActionType?: 'next_step' | 'external_url';
   backStep?: string;
+  // Campos para carrossel
+  carouselImages?: string[];
+  carouselAutoplay?: boolean;
+  carouselShowDots?: boolean;
+  carouselInterval?: number;
+  // Campos para dimensões de imagem/vídeo
+  imageWidth?: string;
+  imageHeight?: string;
+  videoWidth?: string;
+  videoHeight?: string;
   // Novos campos para ofertas e elementos interativos
   offerConfig?: {
     title?: string;
@@ -897,7 +908,27 @@ export const StepFormBuilder: React.FC = () => {
                         </div>
                       )}
 
-                      {step.type === 'content' && (
+                       {(step.type === 'offer' || step.type === 'timer' || step.type === 'social_proof') && (
+                         <div className="mt-6 space-y-4">
+                           {step.type === 'offer' && <OfferConfigEditor step={step} updateStep={(field, value) => {
+                             const updatedSteps = [...selectedForm.steps];
+                             updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+                             setSelectedForm({ ...selectedForm, steps: updatedSteps });
+                           }} />}
+                           {step.type === 'timer' && <TimerConfigEditor step={step} updateStep={(field, value) => {
+                             const updatedSteps = [...selectedForm.steps];
+                             updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+                             setSelectedForm({ ...selectedForm, steps: updatedSteps });
+                           }} />}
+                           {step.type === 'social_proof' && <SocialProofConfigEditor step={step} updateStep={(field, value) => {
+                             const updatedSteps = [...selectedForm.steps];
+                             updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+                             setSelectedForm({ ...selectedForm, steps: updatedSteps });
+                           }} />}
+                         </div>
+                       )}
+
+                       {step.type === 'content' && (
                         <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <div>
@@ -909,10 +940,11 @@ export const StepFormBuilder: React.FC = () => {
                                 <SelectTrigger className="mt-1">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="image">🖼️ Imagem</SelectItem>
-                                  <SelectItem value="video">🎥 Vídeo</SelectItem>
-                                </SelectContent>
+                            <SelectContent>
+                              <SelectItem value="image">🖼️ Imagem</SelectItem>
+                              <SelectItem value="video">🎥 Vídeo</SelectItem>
+                              <SelectItem value="carousel">🎠 Carrossel de Imagens</SelectItem>
+                            </SelectContent>
                               </Select>
                             </div>
                             <div>
