@@ -356,8 +356,13 @@ export const StepFormBuilder: React.FC = () => {
                       ...selectedForm,
                       steps: convertedSteps
                     });
-                    // Salvar automaticamente
-                    saveForm();
+                  }}
+                  formStyles={selectedForm.styles || {}}
+                  onStyleChange={(styles) => {
+                    setSelectedForm({
+                      ...selectedForm,
+                      styles: styles
+                    });
                   }}
                   initialFlow={{
                     nodes: selectedForm.steps?.map((step: any, index: number) => ({

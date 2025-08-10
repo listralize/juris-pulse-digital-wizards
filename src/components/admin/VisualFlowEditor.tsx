@@ -457,11 +457,20 @@ const initialEdges: Edge[] = [];
 interface VisualFlowEditorProps {
   onSave: (flow: { nodes: Node[]; edges: Edge[] }) => void;
   initialFlow?: { nodes: Node[]; edges: Edge[] };
+  formStyles?: {
+    backgroundColor?: string;
+    textColor?: string;
+    primaryColor?: string;
+    buttonStyle?: string;
+  };
+  onStyleChange?: (styles: any) => void;
 }
 
 export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({ 
   onSave, 
-  initialFlow 
+  initialFlow,
+  formStyles = {},
+  onStyleChange 
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialFlow?.nodes || initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow?.edges || initialEdges);
@@ -478,6 +487,17 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   }, []);
+
+  // Auto-save quando há mudanças
+  useEffect(() => {
+    const autoSaveTimer = setTimeout(() => {
+      if (nodes.length > 0) {
+        onSave({ nodes, edges });
+      }
+    }, 1000);
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [nodes, edges, onSave]);
 
   const addNode = (type: string) => {
     const newId = `${type}_${Date.now()}`;
@@ -790,34 +810,39 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     </>
                   )}
 
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Cor de Fundo</Label>
-                    <Input
-                      type="color"
-                      value={String(selectedNode.data.backgroundColor || '#1a1a1a')}
-                      onChange={(e) => updateNode(selectedNode.id, { backgroundColor: e.target.value })}
-                      className="bg-gray-700 border-gray-600"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Cor do Texto</Label>
-                    <Input
-                      type="color"
-                      value={String(selectedNode.data.textColor || '#ffffff')}
-                      onChange={(e) => updateNode(selectedNode.id, { textColor: e.target.value })}
-                      className="bg-gray-700 border-gray-600"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Cor da Borda</Label>
-                    <Input
-                      type="color"
-                      value={String(selectedNode.data.borderColor || '#3b82f6')}
-                      onChange={(e) => updateNode(selectedNode.id, { borderColor: e.target.value })}
-                      className="bg-gray-700 border-gray-600"
-                    />
+                  {/* Configurações da Página */}
+                  <div className="space-y-4 p-4 bg-gray-800 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-300 mb-3">Configurações da Página</h4>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Cor de Fundo da Página</Label>
+                      <Input
+                        type="color"
+                        value={formStyles?.backgroundColor || '#ffffff'}
+                        onChange={(e) => onStyleChange?.({ ...formStyles, backgroundColor: e.target.value })}
+                        className="bg-gray-700 border-gray-600"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Cor do Texto da Página</Label>
+                      <Input
+                        type="color"
+                        value={formStyles?.textColor || '#000000'}
+                        onChange={(e) => onStyleChange?.({ ...formStyles, textColor: e.target.value })}
+                        className="bg-gray-700 border-gray-600"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Cor Primária (Botões)</Label>
+                      <Input
+                        type="color"
+                        value={formStyles?.primaryColor || '#4CAF50'}
+                        onChange={(e) => onStyleChange?.({ ...formStyles, primaryColor: e.target.value })}
+                        className="bg-gray-700 border-gray-600"
+                      />
+                    </div>
                   </div>
 
                   <div>
