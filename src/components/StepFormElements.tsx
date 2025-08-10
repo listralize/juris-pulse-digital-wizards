@@ -2,7 +2,81 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Star, Timer as TimerIcon, Gift, TrendingUp, CheckCircle } from 'lucide-react';
+import { Star, Timer as TimerIcon, Gift, TrendingUp, CheckCircle, Video, Image as ImageIcon } from 'lucide-react';
+
+// Renderizar elementos simples de imagem/vídeo
+export const renderStepElement = (element: any) => {
+  switch (element.type) {
+    case 'image':
+      return (
+        <div className="w-full flex justify-center">
+          {element.content ? (
+            <img 
+              src={element.content} 
+              alt={element.alt || 'Image'}
+              className="max-w-full h-auto rounded-lg shadow-lg"
+              style={{ 
+                maxHeight: element.imageHeight || '400px',
+                width: element.imageWidth || 'auto'
+              }}
+              onError={(e) => {
+                console.error('Erro ao carregar imagem:', element.content);
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+            />
+          ) : (
+            <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+              <p className="text-muted-foreground">Imagem não encontrada</p>
+            </div>
+          )}
+        </div>
+      );
+
+    case 'video':
+      return (
+        <div className="w-full flex justify-center">
+          {element.content ? (
+            <video 
+              src={element.content} 
+              controls
+              className="max-w-full rounded-lg shadow-lg"
+              style={{ 
+                maxHeight: element.videoHeight || '400px',
+                width: element.videoWidth || 'auto'
+              }}
+              onError={(e) => {
+                console.error('Erro ao carregar vídeo:', element.content);
+              }}
+            >
+              <p>Seu navegador não suporta vídeos HTML5.</p>
+            </video>
+          ) : (
+            <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+              <p className="text-muted-foreground">Vídeo não encontrado</p>
+            </div>
+          )}
+        </div>
+      );
+
+    case 'text':
+      return (
+        <div className="text-center space-y-4">
+          {element.title && (
+            <h3 className="text-2xl font-bold">{element.title}</h3>
+          )}
+          {element.content && (
+            <div 
+              className="text-lg"
+              dangerouslySetInnerHTML={{ __html: element.content }}
+            />
+          )}
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
 
 interface OfferElementProps {
   config: {

@@ -64,9 +64,15 @@ interface FormTrackingConfig {
   };
 }
 interface ConversionTracking {
-  systemForms: FormTrackingConfig[];
-  linkTreeForms: string[];
-  customForms: Array<{
+          systemForms: FormTrackingConfig[];
+          linkTreeForms: string[];
+          stepForms: Array<{
+            id: string;
+            name: string;
+            slug: string;
+            enabled: boolean;
+          }>;
+          customForms: Array<{
     name: string;
     id: string;
     campaign: string;
@@ -129,6 +135,7 @@ export const MarketingManagement: React.FC = () => {
   const [conversionTracking, setConversionTracking] = useState<ConversionTracking>({
     systemForms: [],
     linkTreeForms: [],
+    stepForms: [],
     customForms: [],
     events: {
       formSubmission: true,
@@ -190,6 +197,7 @@ export const MarketingManagement: React.FC = () => {
             setConversionTracking({
               systemForms: trackingConfig.systemForms || [],
               linkTreeForms: trackingConfig.linkTreeForms || [],
+              stepForms: trackingConfig.stepForms || [],
               customForms: trackingConfig.customForms || [],
               events: trackingConfig.events || {
                 formSubmission: true,
@@ -349,6 +357,7 @@ export const MarketingManagement: React.FC = () => {
     forceReloadFromDatabase();
     loadAnalyticsData();
     loadLinkTreeForms();
+    loadStepForms();
   }, []);
   useEffect(() => {
     // Evitar sobrescrever configurações carregadas do banco
@@ -391,6 +400,31 @@ export const MarketingManagement: React.FC = () => {
         setConversionTracking(prev => ({
           ...prev,
           linkTreeForms: linkTreeFormIds
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar formulários do LinkTree:', error);
+    }
+  };
+
+  const loadStepForms = async () => {
+    try {
+      const { data: stepForms } = await supabase
+        .from('step_forms')
+        .select('id, name, slug, is_active')
+        .eq('is_active', true);
+
+      if (stepForms) {
+        const stepFormConfigs = stepForms.map(form => ({
+          id: form.id,
+          name: form.name,
+          slug: form.slug,
+          enabled: false
+        }));
+
+        setConversionTracking(prev => ({
+          ...prev,
+          stepForms: stepFormConfigs
         }));
       }
     } catch (error) {
@@ -1159,6 +1193,75 @@ fbq('track', '${form.facebookPixel.eventType === 'Custom'
                         </div>
                       </>}
                   </div>)}
+            </CardContent>
+          </Card>
+
+          {/* Step Forms */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                📋 Formulários StepForm
+                <Button variant="outline" size="sm" onClick={loadStepForms}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Atualizar
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Formulários criados no módulo StepForm com rastreamento de conversão.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {conversionTracking.stepForms.length === 0 ? (
+                <div className="text-center p-8 text-muted-foreground">
+                  <p>Nenhum formulário StepForm encontrado.</p>
+                  <p className="text-sm">Crie formulários no módulo StepForm Builder.</p>
+                </div>
+              ) : (
+                conversionTracking.stepForms.map((form, index) => (
+                  <div key={form.id} className={`border rounded-lg p-4 space-y-3 ${form.enabled ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">StepForm</Badge>
+                        <span className="font-medium">{form.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          /form/{form.slug}
+                        </Badge>
+                        {form.enabled && (
+                          <Badge variant="default" className="text-xs">
+                            ✓ Rastreando
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id={`stepform-enabled-${index}`} 
+                          checked={form.enabled} 
+                          onChange={(e) => {
+                            const updatedStepForms = [...conversionTracking.stepForms];
+                            updatedStepForms[index] = { ...form, enabled: e.target.checked };
+                            setConversionTracking(prev => ({
+                              ...prev,
+                              stepForms: updatedStepForms
+                            }));
+                          }}
+                          className="rounded" 
+                        />
+                        <Label htmlFor={`stepform-enabled-${index}`}>Ativar</Label>
+                      </div>
+                    </div>
+                    
+                    {form.enabled && (
+                      <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
+                        <p><strong>Rastreamento Automático:</strong></p>
+                        <p>• Pixel do Facebook: Evento 'Lead' enviado automaticamente</p>
+                        <p>• Google Analytics: Evento 'form_submit' com parâmetros personalizados</p>
+                        <p>• URL: <code>/form/{form.slug}</code></p>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 

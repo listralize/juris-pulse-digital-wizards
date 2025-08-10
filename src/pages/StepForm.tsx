@@ -212,28 +212,45 @@ const StepForm: React.FC = () => {
       const currentIndex = form?.steps.findIndex(step => step.id === currentStepId) || 0;
       const completionPercentage = ((currentIndex + 1) / totalSteps) * 100;
       
-      // Salvar no sistema de leads do Supabase com dados melhorados
+      // Obter parâmetros UTM
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmData = {
+        utm_source: urlParams.get('utm_source'),
+        utm_medium: urlParams.get('utm_medium'),
+        utm_campaign: urlParams.get('utm_campaign'),
+        utm_term: urlParams.get('utm_term'),
+        utm_content: urlParams.get('utm_content')
+      };
+
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Extrair campos específicos dos dados do formulário
+      const formResponses = { ...answers, ...formData };
+      
+      // Salvar no banco de dados
+      const leadData = {
+        lead_data: allData,
+        form_id: `stepform_${form?.id}`,
+        form_name: form?.name || 'Step Form',
+        name: formResponses.name || formResponses.nome || '',
+        email: formResponses.email || '',
+        phone: formResponses.phone || formResponses.telefone || '',
+        message: formResponses.message || formResponses.mensagem || JSON.stringify(formResponses),
+        form_step_data: formResponses,
+        completion_percentage: completionPercentage,
+        referrer: document.referrer || '',
+        utm_source: utmData.utm_source,
+        utm_medium: utmData.utm_medium,
+        utm_campaign: utmData.utm_campaign,
+        utm_term: utmData.utm_term,
+        utm_content: utmData.utm_content,
+        session_id: sessionId,
+        lead_status: 'new'
+      };
+
       const { error: leadError } = await supabase
         .from('form_leads')
-        .insert([{
-          lead_data: allData,
-          form_id: form?.slug || 'step_form',
-          form_name: form?.name || 'Step Form',
-          source_page: window.location.href,
-          session_id: `session_${Date.now()}`,
-          visitor_id: `visitor_${Math.random().toString(36).substr(2, 9)}`,
-          status: 'new',
-          form_step_data: { 
-            current_step: currentStepId,
-            completed_steps: Object.keys(answers),
-            answers: answers 
-          },
-          completion_percentage: completionPercentage,
-          referrer: document.referrer || null,
-          utm_source: new URLSearchParams(window.location.search).get('utm_source'),
-          utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
-          utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign')
-        }]);
+        .insert([leadData]);
 
       if (leadError) {
         console.error('Erro ao salvar lead:', leadError);
@@ -242,15 +259,53 @@ const StepForm: React.FC = () => {
         console.log('Lead salvo com sucesso no sistema');
       }
 
+      // Enviar eventos de conversão
+      if (typeof window !== 'undefined') {
+        // Facebook Pixel
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'Lead', {
+            value: 0,
+            currency: 'BRL',
+            content_name: form?.name,
+            content_category: 'StepForm'
+          });
+        }
+
+        // Google Analytics
+        if ((window as any).gtag) {
+          (window as any).gtag('event', 'form_submit', {
+            event_category: 'engagement',
+            event_label: form?.name,
+            custom_parameter: 'stepform_completion'
+          });
+        }
+
+        // Google Tag Manager
+        if ((window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: 'stepform_submit',
+            formName: form?.name,
+            formId: form?.id,
+            leadStatus: 'new'
+          });
+        }
+      }
+
       // Enviar para webhook se configurado
       if (form?.webhook_url) {
         try {
           await fetch(form.webhook_url, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(allData),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              formId: form.id,
+              formName: form.name,
+              responses: formResponses,
+              submissionDate: new Date().toISOString(),
+              sessionId: sessionId,
+              leadData,
+              ...utmData
+            })
           });
         } catch (webhookError) {
           console.error('Erro ao enviar webhook:', webhookError);

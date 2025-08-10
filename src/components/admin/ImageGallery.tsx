@@ -34,9 +34,18 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
   const loadImages = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.storage
+      // Primeiro tentar bucket 'videos'
+      let { data, error } = await supabase.storage
         .from('videos')
         .list('', { limit: 100 });
+
+      // Se o bucket 'videos' não existir, criar
+      if (error && error.message.includes('not found')) {
+        await supabase.storage.createBucket('videos', { public: true });
+        ({ data, error } = await supabase.storage
+          .from('videos')
+          .list('', { limit: 100 }));
+      }
 
       if (error) throw error;
 

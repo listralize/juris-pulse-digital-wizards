@@ -7,7 +7,7 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
-import { Plus, Trash2, ArrowLeft, ArrowRight, Save, Eye, Image as ImageIcon, Timer, Gift, CreditCard, Zap, Target, Gauge } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Save, Eye, Image as ImageIcon, Video as VideoIcon, Timer, Gift, CreditCard, Zap, Target, Gauge } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
