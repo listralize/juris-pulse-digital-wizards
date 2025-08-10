@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail, FormInput } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { useSupabasePageTexts } from '../hooks/useSupabasePageTexts';
@@ -19,6 +19,7 @@ import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
 import { MarketingManagement } from '../components/admin/MarketingManagement';
 import { LeadsManagement } from '../components/admin/LeadsManagement';
 import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
+import { StepFormBuilder } from '../components/admin/StepFormBuilder';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 const Admin = () => {
@@ -155,7 +156,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="hidden md:grid w-full grid-cols-6 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
+              <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -192,6 +193,11 @@ const Admin = () => {
                   <Mail className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="hidden sm:inline">Templates Email</span>
                   <span className="sm:hidden">Email</span>
+                </TabsTrigger>
+                <TabsTrigger value="step-forms" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <FormInput className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Formulários Step</span>
+                  <span className="sm:hidden">Forms</span>
                 </TabsTrigger>
                 <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
                   <Briefcase className="w-3 h-3 md:w-4 md:h-4" />
@@ -243,6 +249,12 @@ const Admin = () => {
                         Email
                       </div>
                     </SelectItem>
+                    <SelectItem value="step-forms">
+                      <div className="flex items-center gap-2">
+                        <FormInput className="w-4 h-4" />
+                        Formulários Step
+                      </div>
+                    </SelectItem>
                     <SelectItem value="marketing">
                       <div className="flex items-center gap-2">
                         <Briefcase className="w-4 h-4" />
@@ -275,6 +287,10 @@ const Admin = () => {
 
               <TabsContent value="email-templates">
                 <EnhancedEmailTemplateManager />
+              </TabsContent>
+
+              <TabsContent value="step-forms">
+                <StepFormBuilder />
               </TabsContent>
 
               <TabsContent value="marketing">
