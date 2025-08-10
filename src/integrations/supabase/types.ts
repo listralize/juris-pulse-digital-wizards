@@ -473,19 +473,26 @@ export type Database = {
       form_leads: {
         Row: {
           browser: string | null
+          capital: string | null
           city: string | null
+          completion_percentage: number | null
           conversion_value: number | null
           country: string | null
           created_at: string
+          ddd: number | null
           device_type: string | null
           form_id: string | null
           form_name: string | null
+          form_step_data: Json | null
           id: string
           ip_address: string | null
           is_whatsapp_conversion: boolean | null
           lead_data: Json
+          referrer: string | null
+          region: string | null
           session_id: string
           source_page: string | null
+          state: string | null
           status: string | null
           updated_at: string
           user_agent: string | null
@@ -496,19 +503,26 @@ export type Database = {
         }
         Insert: {
           browser?: string | null
+          capital?: string | null
           city?: string | null
+          completion_percentage?: number | null
           conversion_value?: number | null
           country?: string | null
           created_at?: string
+          ddd?: number | null
           device_type?: string | null
           form_id?: string | null
           form_name?: string | null
+          form_step_data?: Json | null
           id?: string
           ip_address?: string | null
           is_whatsapp_conversion?: boolean | null
           lead_data: Json
+          referrer?: string | null
+          region?: string | null
           session_id: string
           source_page?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
           user_agent?: string | null
@@ -519,19 +533,26 @@ export type Database = {
         }
         Update: {
           browser?: string | null
+          capital?: string | null
           city?: string | null
+          completion_percentage?: number | null
           conversion_value?: number | null
           country?: string | null
           created_at?: string
+          ddd?: number | null
           device_type?: string | null
           form_id?: string | null
           form_name?: string | null
+          form_step_data?: Json | null
           id?: string
           ip_address?: string | null
           is_whatsapp_conversion?: boolean | null
           lead_data?: Json
+          referrer?: string | null
+          region?: string | null
           session_id?: string
           source_page?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
           user_agent?: string | null
@@ -1244,11 +1265,13 @@ export type Database = {
       step_forms: {
         Row: {
           created_at: string
+          footer_config: Json | null
           id: string
           is_active: boolean
           logo_url: string | null
           name: string
           seo: Json
+          seo_config: Json | null
           slug: string
           steps: Json
           styles: Json
@@ -1259,11 +1282,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          footer_config?: Json | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name: string
           seo?: Json
+          seo_config?: Json | null
           slug: string
           steps?: Json
           styles?: Json
@@ -1274,11 +1299,13 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          footer_config?: Json | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name?: string
           seo?: Json
+          seo_config?: Json | null
           slug?: string
           steps?: Json
           styles?: Json

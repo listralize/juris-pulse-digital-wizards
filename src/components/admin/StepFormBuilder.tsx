@@ -6,10 +6,12 @@ import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
-import { Plus, Trash2, ArrowLeft, ArrowRight, Save, Eye } from 'lucide-react';
+import { Switch } from '../ui/switch';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Save, Eye, Image as ImageIcon, Timer, Gift, CreditCard, Zap, Target, Gauge } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { ImageGallery } from './ImageGallery';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -23,6 +25,8 @@ type StepFormData = {
   steps: any; // JSONB
   styles: any; // JSONB
   seo: any; // JSONB
+  footer_config?: any; // JSONB
+  seo_config?: any; // JSONB
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -32,11 +36,12 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form' | 'content';
+  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'social_proof' | 'countdown' | 'quiz_result';
   options?: Array<{
     text: string;
     value: string;
     nextStep?: string;
+    actionType?: 'next_step' | 'external_url';
   }>;
   formFields?: Array<{
     name: string;
@@ -49,7 +54,39 @@ interface StepFormStep {
   mediaCaption?: string;
   buttonText?: string;
   buttonAction?: string;
+  buttonActionType?: 'next_step' | 'external_url';
   backStep?: string;
+  // Novos campos para ofertas e elementos interativos
+  offerConfig?: {
+    title?: string;
+    originalPrice?: string;
+    salePrice?: string;
+    discount?: string;
+    features?: string[];
+    ctaText?: string;
+    ctaUrl?: string;
+    urgencyText?: string;
+  };
+  timerConfig?: {
+    duration?: number; // em minutos
+    showHours?: boolean;
+    showMinutes?: boolean;
+    showSeconds?: boolean;
+    onExpireAction?: string;
+    onExpireUrl?: string;
+  };
+  socialProofConfig?: {
+    testimonials?: Array<{
+      name: string;
+      text: string;
+      rating?: number;
+      image?: string;
+    }>;
+    stats?: Array<{
+      number: string;
+      label: string;
+    }>;
+  };
 }
 
 export const StepFormBuilder: React.FC = () => {
@@ -58,6 +95,7 @@ export const StepFormBuilder: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
+  const [showImageGallery, setShowImageGallery] = useState(false);
 
   useEffect(() => {
     loadForms();
@@ -93,7 +131,7 @@ export const StepFormBuilder: React.FC = () => {
         title: 'Bem-vindo',
         type: 'question',
         options: [
-          { text: 'Começar', value: 'comecar', nextStep: 'step2' }
+          { text: 'Começar', value: 'comecar', nextStep: 'step2', actionType: 'next_step' }
         ]
       }],
       styles: {
@@ -105,6 +143,18 @@ export const StepFormBuilder: React.FC = () => {
       seo: {
         meta_title: 'Formulário Interativo',
         meta_description: 'Complete nosso formulário interativo'
+      },
+      footer_config: {
+        enabled: false,
+        text: 'Atendemos todo o Brasil ✅',
+        background_color: '#1a1a1a',
+        text_color: '#ffffff',
+        font_size: 'text-sm'
+      },
+      seo_config: {
+        meta_title: 'Formulário Interativo',
+        meta_description: 'Complete nosso formulário interativo',
+        meta_keywords: ''
       },
       is_active: true
     };
@@ -127,6 +177,8 @@ export const StepFormBuilder: React.FC = () => {
         steps: selectedForm.steps,
         styles: selectedForm.styles,
         seo: selectedForm.seo,
+        footer_config: selectedForm.footer_config,
+        seo_config: selectedForm.seo_config,
         is_active: selectedForm.is_active
       };
 
@@ -156,7 +208,7 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
-  const addStep = (type: 'question' | 'form' | 'content' = 'question') => {
+  const addStep = (type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'social_proof' = 'question') => {
     if (!selectedForm) return;
 
     const baseStep = {
@@ -172,7 +224,7 @@ export const StepFormBuilder: React.FC = () => {
           ...baseStep,
           type: 'question',
           options: [
-            { text: 'Opção 1', value: 'opcao1' }
+            { text: 'Opção 1', value: 'opcao1', actionType: 'next_step' }
           ]
         };
         break;
@@ -191,7 +243,69 @@ export const StepFormBuilder: React.FC = () => {
           type: 'content',
           description: 'Adicione conteúdo de imagem ou vídeo',
           buttonText: 'Continuar',
-          buttonAction: 'next'
+          buttonAction: 'next',
+          buttonActionType: 'next_step'
+        };
+        break;
+      case 'offer':
+        newStep = {
+          ...baseStep,
+          type: 'offer',
+          title: 'Oferta Especial',
+          description: 'Aproveite nossa oferta limitada',
+          offerConfig: {
+            title: 'Plano Premium',
+            originalPrice: 'R$ 197,00',
+            salePrice: 'R$ 97,00',
+            discount: '50% OFF',
+            features: ['Acesso completo', 'Suporte prioritário', 'Garantia 30 dias'],
+            ctaText: 'Garantir Oferta',
+            ctaUrl: '',
+            urgencyText: 'Restam apenas 24 horas!'
+          },
+          buttonText: 'Garantir Agora',
+          buttonActionType: 'external_url'
+        };
+        break;
+      case 'timer':
+        newStep = {
+          ...baseStep,
+          type: 'timer',
+          title: 'Oferta por Tempo Limitado',
+          description: 'Aproveite antes que o tempo acabe!',
+          timerConfig: {
+            duration: 30, // 30 minutos
+            showHours: true,
+            showMinutes: true,
+            showSeconds: true,
+            onExpireAction: 'redirect',
+            onExpireUrl: ''
+          },
+          buttonText: 'Continuar',
+          buttonActionType: 'next_step'
+        };
+        break;
+      case 'social_proof':
+        newStep = {
+          ...baseStep,
+          type: 'social_proof',
+          title: 'O Que Nossos Clientes Dizem',
+          socialProofConfig: {
+            testimonials: [
+              {
+                name: 'Maria Silva',
+                text: 'Excelente atendimento, super recomendo!',
+                rating: 5,
+                image: ''
+              }
+            ],
+            stats: [
+              { number: '1000+', label: 'Clientes Atendidos' },
+              { number: '98%', label: 'Satisfação' }
+            ]
+          },
+          buttonText: 'Continuar',
+          buttonActionType: 'next_step'
         };
         break;
       default:
@@ -252,6 +366,9 @@ export const StepFormBuilder: React.FC = () => {
       case 'question': return 'border-l-blue-500';
       case 'content': return 'border-l-purple-500';
       case 'form': return 'border-l-green-500';
+      case 'offer': return 'border-l-orange-500';
+      case 'timer': return 'border-l-red-500';
+      case 'social_proof': return 'border-l-yellow-500';
       default: return 'border-l-gray-500';
     }
   };
@@ -261,6 +378,9 @@ export const StepFormBuilder: React.FC = () => {
       case 'question': return 'text-blue-600 border-blue-200';
       case 'content': return 'text-purple-600 border-purple-200';
       case 'form': return 'text-green-600 border-green-200';
+      case 'offer': return 'text-orange-600 border-orange-200';
+      case 'timer': return 'text-red-600 border-red-200';
+      case 'social_proof': return 'text-yellow-600 border-yellow-200';
       default: return 'text-gray-600 border-gray-200';
     }
   };
@@ -270,6 +390,9 @@ export const StepFormBuilder: React.FC = () => {
       case 'question': return 'Pergunta';
       case 'content': return 'Conteúdo';
       case 'form': return 'Formulário';
+      case 'offer': return 'Oferta';
+      case 'timer': return 'Timer';
+      case 'social_proof': return 'Prova Social';
       default: return 'Desconhecido';
     }
   };
@@ -356,13 +479,33 @@ export const StepFormBuilder: React.FC = () => {
                   onChange={(e) => setSelectedForm({ ...selectedForm, subtitle: e.target.value })}
                 />
               </div>
-              <div>
-                <Label htmlFor="logo_url">URL do Logo</Label>
-                <Input
-                  id="logo_url"
-                  value={selectedForm.logo_url || ''}
-                  onChange={(e) => setSelectedForm({ ...selectedForm, logo_url: e.target.value })}
-                />
+              <div className="space-y-2">
+                <Label htmlFor="logo_url">Logo do Formulário</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="logo_url"
+                    value={selectedForm.logo_url || ''}
+                    onChange={(e) => setSelectedForm({ ...selectedForm, logo_url: e.target.value })}
+                    placeholder="URL da imagem ou selecione da galeria"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowImageGallery(true)}
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Galeria
+                  </Button>
+                </div>
+                {selectedForm.logo_url && (
+                  <div className="mt-2">
+                    <img 
+                      src={selectedForm.logo_url} 
+                      alt="Preview do logo" 
+                      className="max-w-xs h-16 object-contain border rounded"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <Label htmlFor="webhook_url">Webhook URL</Label>
@@ -376,22 +519,139 @@ export const StepFormBuilder: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Configurações de Estilo e Footer */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Personalização e Footer</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="primary_color">Cor Primária</Label>
+                <Input
+                  id="primary_color"
+                  type="color"
+                  value={selectedForm.styles?.primary_color || '#4CAF50'}
+                  onChange={(e) => setSelectedForm({ 
+                    ...selectedForm, 
+                    styles: { ...selectedForm.styles, primary_color: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="background_color">Cor de Fundo</Label>
+                <Input
+                  id="background_color"
+                  type="color"
+                  value={selectedForm.styles?.background_color || '#ffffff'}
+                  onChange={(e) => setSelectedForm({ 
+                    ...selectedForm, 
+                    styles: { ...selectedForm.styles, background_color: e.target.value }
+                  })}
+                />
+              </div>
+            </div>
+            
+            {/* Configuração do Footer */}
+            <div className="space-y-4 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="footer_enabled" className="text-base font-semibold">
+                  Rodapé Personalizado
+                </Label>
+                <Switch
+                  id="footer_enabled"
+                  checked={selectedForm.footer_config?.enabled || false}
+                  onCheckedChange={(checked) => setSelectedForm({ 
+                    ...selectedForm, 
+                    footer_config: { 
+                      ...selectedForm.footer_config, 
+                      enabled: checked 
+                    }
+                  })}
+                />
+              </div>
+              
+              {selectedForm.footer_config?.enabled && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4 border-l-2 border-primary/20">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="footer_text">Texto do Rodapé</Label>
+                    <Textarea
+                      id="footer_text"
+                      value={selectedForm.footer_config?.text || ''}
+                      onChange={(e) => setSelectedForm({ 
+                        ...selectedForm, 
+                        footer_config: { 
+                          ...selectedForm.footer_config, 
+                          text: e.target.value 
+                        }
+                      })}
+                      placeholder="Ex: Atendemos todo o Brasil ✅"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="footer_bg_color">Cor de Fundo do Rodapé</Label>
+                    <Input
+                      id="footer_bg_color"
+                      type="color"
+                      value={selectedForm.footer_config?.background_color || '#1a1a1a'}
+                      onChange={(e) => setSelectedForm({ 
+                        ...selectedForm, 
+                        footer_config: { 
+                          ...selectedForm.footer_config, 
+                          background_color: e.target.value 
+                        }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="footer_text_color">Cor do Texto do Rodapé</Label>
+                    <Input
+                      id="footer_text_color"
+                      type="color"
+                      value={selectedForm.footer_config?.text_color || '#ffffff'}
+                      onChange={(e) => setSelectedForm({ 
+                        ...selectedForm, 
+                        footer_config: { 
+                          ...selectedForm.footer_config, 
+                          text_color: e.target.value 
+                        }
+                      })}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Etapas do Formulário</CardTitle>
-              <div className="flex gap-2">
-                <Button onClick={() => addStep('question')} size="sm" variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Pergunta
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                <Button onClick={() => addStep('question')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
+                  <Target className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Pergunta</span>
                 </Button>
-                <Button onClick={() => addStep('content')} size="sm" variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Conteúdo
+                <Button onClick={() => addStep('content')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
+                  <ImageIcon className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Conteúdo</span>
                 </Button>
-                <Button onClick={() => addStep('form')} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Formulário
+                <Button onClick={() => addStep('form')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
+                  <Plus className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Formulário</span>
+                </Button>
+                <Button onClick={() => addStep('offer')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
+                  <Gift className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Oferta</span>
+                </Button>
+                <Button onClick={() => addStep('timer')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
+                  <Timer className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Timer</span>
+                </Button>
+                <Button onClick={() => addStep('social_proof')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
+                  <Zap className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Prova Social</span>
                 </Button>
               </div>
             </div>
@@ -438,9 +698,12 @@ export const StepFormBuilder: React.FC = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="question">📋 Pergunta/Escolha</SelectItem>
+                            <SelectItem value="question">🎯 Pergunta/Escolha</SelectItem>
                             <SelectItem value="content">🎬 Conteúdo (Imagem/Vídeo)</SelectItem>
                             <SelectItem value="form">📝 Formulário</SelectItem>
+                            <SelectItem value="offer">🎁 Oferta/Produto</SelectItem>
+                            <SelectItem value="timer">⏰ Timer/Urgência</SelectItem>
+                            <SelectItem value="social_proof">⚡ Prova Social</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

@@ -4,9 +4,11 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { OfferElement, TimerElement, SocialProofElement } from '../components/StepFormElements';
 
 interface StepFormData {
   id: string;
@@ -27,6 +29,18 @@ interface StepFormData {
     meta_title?: string;
     meta_description?: string;
   };
+  footer_config?: {
+    enabled?: boolean;
+    text?: string;
+    background_color?: string;
+    text_color?: string;
+    font_size?: string;
+  };
+  seo_config?: {
+    meta_title?: string;
+    meta_description?: string;
+    meta_keywords?: string;
+  };
   is_active: boolean;
 }
 
@@ -34,11 +48,12 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form' | 'content';
+  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'social_proof';
   options?: Array<{
     text: string;
     value: string;
     nextStep?: string;
+    actionType?: 'next_step' | 'external_url';
   }>;
   formFields?: Array<{
     name: string;
@@ -51,7 +66,39 @@ interface StepFormStep {
   mediaCaption?: string;
   buttonText?: string;
   buttonAction?: string;
+  buttonActionType?: 'next_step' | 'external_url';
   backStep?: string;
+  // Novos campos para ofertas e elementos interativos
+  offerConfig?: {
+    title?: string;
+    originalPrice?: string;
+    salePrice?: string;
+    discount?: string;
+    features?: string[];
+    ctaText?: string;
+    ctaUrl?: string;
+    urgencyText?: string;
+  };
+  timerConfig?: {
+    duration?: number;
+    showHours?: boolean;
+    showMinutes?: boolean;
+    showSeconds?: boolean;
+    onExpireAction?: string;
+    onExpireUrl?: string;
+  };
+  socialProofConfig?: {
+    testimonials?: Array<{
+      name: string;
+      text: string;
+      rating?: number;
+      image?: string;
+    }>;
+    stats?: Array<{
+      number: string;
+      label: string;
+    }>;
+  };
 }
 
 const StepForm: React.FC = () => {
@@ -63,6 +110,7 @@ const StepForm: React.FC = () => {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [timeLeft, setTimeLeft] = useState<{[key: string]: number}>({});
 
   useEffect(() => {
     if (slug) {
@@ -97,7 +145,9 @@ const StepForm: React.FC = () => {
         ...data,
         steps: (data.steps as unknown) as StepFormStep[],
         styles: (data.styles as unknown) as any,
-        seo: (data.seo as unknown) as any
+        seo: (data.seo as unknown) as any,
+        footer_config: (data.footer_config as unknown) as any,
+        seo_config: (data.seo_config as unknown) as any
       };
       
       setForm(formData);
@@ -128,11 +178,11 @@ const StepForm: React.FC = () => {
     setCurrentStepId(stepId);
   };
 
-  const goToNextStep = (nextStepId?: string) => {
+  const goToNextStep = (nextStepId?: string, actionType?: 'next_step' | 'external_url') => {
     if (nextStepId) {
-      // Se é um URL externo, redireciona
-      if (nextStepId.startsWith('http')) {
-        window.location.href = nextStepId;
+      // Se actionType é external_url ou nextStepId começa com http, redireciona
+      if (actionType === 'external_url' || nextStepId.startsWith('http')) {
+        window.open(nextStepId, '_blank');
         return;
       }
       
@@ -157,7 +207,12 @@ const StepForm: React.FC = () => {
         form_id: form?.slug
       };
       
-      // Salvar no sistema de leads do Supabase
+      // Calcular porcentagem de conclusão
+      const totalSteps = form?.steps.length || 1;
+      const currentIndex = form?.steps.findIndex(step => step.id === currentStepId) || 0;
+      const completionPercentage = ((currentIndex + 1) / totalSteps) * 100;
+      
+      // Salvar no sistema de leads do Supabase com dados melhorados
       const { error: leadError } = await supabase
         .from('form_leads')
         .insert([{
@@ -167,22 +222,39 @@ const StepForm: React.FC = () => {
           source_page: window.location.href,
           session_id: `session_${Date.now()}`,
           visitor_id: `visitor_${Math.random().toString(36).substr(2, 9)}`,
-          status: 'new'
+          status: 'new',
+          form_step_data: { 
+            current_step: currentStepId,
+            completed_steps: Object.keys(answers),
+            answers: answers 
+          },
+          completion_percentage: completionPercentage,
+          referrer: document.referrer || null,
+          utm_source: new URLSearchParams(window.location.search).get('utm_source'),
+          utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
+          utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign')
         }]);
 
       if (leadError) {
         console.error('Erro ao salvar lead:', leadError);
+        toast.error('Erro ao salvar lead no sistema');
+      } else {
+        console.log('Lead salvo com sucesso no sistema');
       }
 
       // Enviar para webhook se configurado
       if (form?.webhook_url) {
-        await fetch(form.webhook_url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(allData),
-        });
+        try {
+          await fetch(form.webhook_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(allData),
+          });
+        } catch (webhookError) {
+          console.error('Erro ao enviar webhook:', webhookError);
+        }
       }
 
       toast.success('Formulário enviado com sucesso!');
@@ -297,10 +369,10 @@ const StepForm: React.FC = () => {
                       style={{
                         borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
                       }}
-                      onClick={() => {
-                        saveAnswer(currentStep.id, option.value);
-                        goToNextStep(option.nextStep);
-                      }}
+                       onClick={() => {
+                         saveAnswer(currentStep.id, option.value);
+                         goToNextStep(option.nextStep, option.actionType);
+                       }}
                     >
                       {option.text}
                     </Button>
@@ -342,11 +414,11 @@ const StepForm: React.FC = () => {
                       backgroundColor: form.styles.primary_color || '#4CAF50',
                       borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
                     }}
-                    onClick={() => {
-                      if (currentStep.buttonAction) {
-                        goToNextStep(currentStep.buttonAction);
-                      }
-                    }}
+                     onClick={() => {
+                       if (currentStep.buttonAction) {
+                         goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
+                       }
+                     }}
                   >
                     {currentStep.buttonText || 'Continuar'}
                   </Button>
@@ -396,14 +468,94 @@ const StepForm: React.FC = () => {
                   </Button>
                 </form>
               )}
+
+              {currentStep.type === 'offer' && currentStep.offerConfig && (
+                <OfferElement
+                  config={currentStep.offerConfig}
+                  onAction={(url) => {
+                    if (url) {
+                      goToNextStep(url, 'external_url');
+                    } else if (currentStep.buttonAction) {
+                      goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
+                    }
+                  }}
+                  primaryColor={form.styles.primary_color || '#4CAF50'}
+                  buttonStyle={form.styles.button_style || 'rounded'}
+                />
+              )}
+
+              {currentStep.type === 'timer' && currentStep.timerConfig && (
+                <div className="space-y-6">
+                  <TimerElement
+                    config={currentStep.timerConfig}
+                    onExpire={(action, url) => {
+                      if (action === 'redirect' && url) {
+                        goToNextStep(url, 'external_url');
+                      } else if (currentStep.buttonAction) {
+                        goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
+                      }
+                    }}
+                    primaryColor={form.styles.primary_color || '#4CAF50'}
+                  />
+                  
+                  <Button
+                    className="w-full"
+                    style={{
+                      backgroundColor: form.styles.primary_color || '#4CAF50',
+                      borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
+                    }}
+                    onClick={() => {
+                      if (currentStep.buttonAction) {
+                        goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
+                      }
+                    }}
+                  >
+                    {currentStep.buttonText || 'Continuar'}
+                  </Button>
+                </div>
+              )}
+
+              {currentStep.type === 'social_proof' && currentStep.socialProofConfig && (
+                <div className="space-y-6">
+                  <SocialProofElement
+                    config={currentStep.socialProofConfig}
+                    primaryColor={form.styles.primary_color || '#4CAF50'}
+                  />
+                  
+                  <Button
+                    className="w-full"
+                    style={{
+                      backgroundColor: form.styles.primary_color || '#4CAF50',
+                      borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
+                    }}
+                    onClick={() => {
+                      if (currentStep.buttonAction) {
+                        goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
+                      }
+                    }}
+                  >
+                    {currentStep.buttonText || 'Continuar'}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Footer */}
-        <div className="text-center mt-8 opacity-60">
-          <p>Atendemos todo o Brasil ✅</p>
-        </div>
+        {/* Custom Footer */}
+        {form.footer_config?.enabled && (
+          <div 
+            className="text-center mt-8 p-4 rounded-lg"
+            style={{
+              backgroundColor: form.footer_config.background_color || '#1a1a1a',
+              color: form.footer_config.text_color || '#ffffff'
+            }}
+          >
+            <p className={form.footer_config.font_size || 'text-sm'}>
+              {form.footer_config.text || 'Atendemos todo o Brasil ✅'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
