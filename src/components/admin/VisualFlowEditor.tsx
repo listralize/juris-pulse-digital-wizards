@@ -14,6 +14,7 @@ import {
   EdgeTypes,
   Position,
   BackgroundVariant,
+  Handle,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from '../ui/button';
@@ -75,8 +76,12 @@ interface StepFormNode {
     description?: string;
     imageUrl?: string;
     imagePosition?: 'top' | 'left' | 'right' | 'bottom';
+    imageHeight?: string;
     videoUrl?: string;
+    videoHeight?: string;
     mediaType?: 'image' | 'video';
+    width?: string;
+    height?: string;
     backgroundColor?: string;
     textColor?: string;
     borderColor?: string;
@@ -101,29 +106,40 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
 
   return (
     <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-blue-500" />
       <div className="bg-blue-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <MessageSquare className="w-4 h-4" />
         <span className="font-semibold text-sm">Pergunta</span>
       </div>
       <div className="p-3" style={{ color: nodeStyle.color }}>
-        {data.imageUrl && data.imagePosition === 'top' && (
+        {data.imageUrl && data.mediaType === 'image' && data.imagePosition === 'top' && (
           <img src={data.imageUrl} alt="Question media" className="w-full h-20 object-cover rounded mb-2" />
         )}
         {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'top' && (
-          <div className="w-full h-20 bg-gray-800 rounded mb-2 flex items-center justify-center">
+          <div className="w-full h-20 bg-gray-800 rounded mb-2 flex items-center justify-center relative">
             <Play className="w-6 h-6 text-gray-400" />
+            <video 
+              src={data.videoUrl} 
+              className="absolute inset-0 w-full h-full object-cover rounded opacity-50"
+              muted
+            />
           </div>
         )}
         <div className="flex gap-2">
-          {data.imageUrl && data.imagePosition === 'left' && (
+          {data.imageUrl && data.mediaType === 'image' && data.imagePosition === 'left' && (
             <img src={data.imageUrl} alt="Question media" className="w-16 h-16 object-cover rounded" />
           )}
           {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'left' && (
-            <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center">
+            <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center relative">
               <Play className="w-4 h-4 text-gray-400" />
+              <video 
+                src={data.videoUrl} 
+                className="absolute inset-0 w-full h-full object-cover rounded opacity-50"
+                muted
+              />
             </div>
           )}
           <div className="flex-1">
@@ -132,12 +148,17 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
               <p className="text-xs opacity-75 mb-2">{data.description}</p>
             )}
           </div>
-          {data.imageUrl && data.imagePosition === 'right' && (
+          {data.imageUrl && data.mediaType === 'image' && data.imagePosition === 'right' && (
             <img src={data.imageUrl} alt="Question media" className="w-16 h-16 object-cover rounded" />
           )}
           {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'right' && (
-            <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center">
+            <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center relative">
               <Play className="w-4 h-4 text-gray-400" />
+              <video 
+                src={data.videoUrl} 
+                className="absolute inset-0 w-full h-full object-cover rounded opacity-50"
+                muted
+              />
             </div>
           )}
         </div>
@@ -153,15 +174,31 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
             )}
           </div>
         )}
-        {data.imageUrl && data.imagePosition === 'bottom' && (
+        {data.imageUrl && data.mediaType === 'image' && data.imagePosition === 'bottom' && (
           <img src={data.imageUrl} alt="Question media" className="w-full h-20 object-cover rounded mt-2" />
         )}
         {data.videoUrl && data.mediaType === 'video' && data.imagePosition === 'bottom' && (
-          <div className="w-full h-20 bg-gray-800 rounded mt-2 flex items-center justify-center">
+          <div className="w-full h-20 bg-gray-800 rounded mt-2 flex items-center justify-center relative">
             <Play className="w-6 h-6 text-gray-400" />
+            <video 
+              src={data.videoUrl} 
+              className="absolute inset-0 w-full h-full object-cover rounded opacity-50"
+              muted
+            />
           </div>
         )}
       </div>
+      {data.options && data.options.map((option, index) => (
+        <Handle 
+          key={index}
+          type="source" 
+          position={Position.Bottom} 
+          id={`option-${index}`}
+          style={{ left: `${20 + (index * 30)}%` }}
+          className="w-3 h-3 bg-green-500"
+        />
+      ))}
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-blue-500" />
     </div>
   );
 };
@@ -177,9 +214,10 @@ const FormNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
 
   return (
     <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-green-500" />
       <div className="bg-green-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <FormInput className="w-4 h-4" />
         <span className="font-semibold text-sm">Formulário</span>
@@ -199,6 +237,8 @@ const FormNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
           </div>
         )}
       </div>
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-green-500" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-green-500" />
     </div>
   );
 };
@@ -212,11 +252,23 @@ const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) =
     borderRadius: data.borderRadius || '8px',
   };
 
+  const nodeWidth = data.width || '300px';
+  const nodeHeight = data.height || 'auto';
+
   return (
     <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
-      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
+      className="rounded-lg shadow-lg border-2 min-w-[200px] resize overflow-hidden relative" 
+      style={{ 
+        backgroundColor: nodeStyle.backgroundColor, 
+        borderColor: nodeStyle.borderColor, 
+        borderRadius: nodeStyle.borderRadius,
+        width: nodeWidth,
+        height: nodeHeight,
+        maxWidth: '500px',
+        maxHeight: '400px'
+      }}
     >
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-purple-500" />
       <div className="bg-purple-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <ImageIcon className="w-4 h-4" />
         <span className="font-semibold text-sm">Conteúdo</span>
@@ -228,19 +280,34 @@ const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) =
         )}
         {data.imageUrl && data.mediaType === 'image' && (
           <div className="mb-2">
-            <img src={data.imageUrl} alt="Content" className="w-full h-20 object-cover rounded" />
+            <img 
+              src={data.imageUrl} 
+              alt="Content" 
+              className="w-full object-cover rounded"
+              style={{ height: data.imageHeight || '80px' }}
+            />
             <div className="text-xs opacity-50 mt-1 text-gray-400">Imagem</div>
           </div>
         )}
         {data.videoUrl && data.mediaType === 'video' && (
           <div className="mb-2">
-            <div className="w-full h-20 bg-gray-800 rounded flex items-center justify-center">
-              <Play className="w-6 h-6 text-gray-400" />
+            <div 
+              className="w-full bg-gray-800 rounded flex items-center justify-center relative overflow-hidden"
+              style={{ height: data.videoHeight || '80px' }}
+            >
+              <Play className="w-6 h-6 text-gray-400 z-10" />
+              <video 
+                src={data.videoUrl} 
+                className="absolute inset-0 w-full h-full object-cover opacity-50"
+                muted
+              />
             </div>
             <div className="text-xs opacity-50 mt-1 text-gray-400">Vídeo</div>
           </div>
         )}
       </div>
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-purple-500" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-purple-500" />
     </div>
   );
 };
@@ -256,9 +323,10 @@ const OfferNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
 
   return (
     <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-orange-500" />
       <div className="bg-orange-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <Gift className="w-4 h-4" />
         <span className="font-semibold text-sm">Oferta</span>
@@ -276,6 +344,8 @@ const OfferNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
           </div>
         )}
       </div>
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-orange-500" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-orange-500" />
     </div>
   );
 };
@@ -291,9 +361,10 @@ const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
 
   return (
     <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-red-500" />
       <div className="bg-red-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <Timer className="w-4 h-4" />
         <span className="font-semibold text-sm">Timer</span>
@@ -306,6 +377,8 @@ const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
           </div>
         )}
       </div>
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-red-500" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-red-500" />
     </div>
   );
 };
@@ -321,9 +394,10 @@ const SocialProofNode = ({ data, id }: { data: StepFormNode['data']; id: string 
 
   return (
     <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px]" 
+      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-indigo-500" />
       <div className="bg-indigo-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <BarChart3 className="w-4 h-4" />
         <span className="font-semibold text-sm">Prova Social</span>
@@ -345,6 +419,8 @@ const SocialProofNode = ({ data, id }: { data: StepFormNode['data']; id: string 
           </div>
         )}
       </div>
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-indigo-500" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-indigo-500" />
     </div>
   );
 };
@@ -671,6 +747,31 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
           </div>
         </div>
 
+        {/* Dimensões para nó de conteúdo */}
+        {node.type === 'content' && (
+          <div className="space-y-3">
+            <h4 className="font-medium">Dimensões</h4>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Largura</Label>
+                <Input
+                  placeholder="300px"
+                  value={(node.data.width as string) || '300px'}
+                  onChange={(e) => handleUpdate('width', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Altura</Label>
+                <Input
+                  placeholder="auto"
+                  value={(node.data.height as string) || 'auto'}
+                  onChange={(e) => handleUpdate('height', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mídia para pergunta e conteúdo */}
         {(node.type === 'question' || node.type === 'content') && (
           <div className="space-y-3">
@@ -694,43 +795,80 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               <>
                 <div>
                   <Label>URL da Imagem</Label>
-                <Input
-                  placeholder="https://..."
-                  value={(node.data.imageUrl as string) || ''}
-                  onChange={(e) => handleUpdate('imageUrl', e.target.value)}
-                />
-                </div>
-                {node.type === 'question' && (
-                  <div>
-                    <Label>Posição da Imagem</Label>
-                  <Select
-                    value={(node.data.imagePosition as string) || 'top'}
-                    onValueChange={(value) => handleUpdate('imagePosition', value)}
-                  >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="top">Acima</SelectItem>
-                        <SelectItem value="left">Esquerda</SelectItem>
-                        <SelectItem value="right">Direita</SelectItem>
-                        <SelectItem value="bottom">Abaixo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </>
-            )}
-            {node.data.mediaType === 'video' && (
-              <div>
-                <Label>URL do Vídeo</Label>
-              <Input
-                placeholder="https://..."
-                value={(node.data.videoUrl as string) || ''}
-                onChange={(e) => handleUpdate('videoUrl', e.target.value)}
-              />
-              </div>
-            )}
+                 <Input
+                   placeholder="https://..."
+                   value={(node.data.imageUrl as string) || ''}
+                   onChange={(e) => handleUpdate('imageUrl', e.target.value)}
+                 />
+                 </div>
+                 <div>
+                   <Label>Altura da Imagem</Label>
+                   <Input
+                     placeholder="80px"
+                     value={(node.data.imageHeight as string) || '80px'}
+                     onChange={(e) => handleUpdate('imageHeight', e.target.value)}
+                   />
+                 </div>
+                 {node.type === 'question' && (
+                   <div>
+                     <Label>Posição da Imagem</Label>
+                   <Select
+                     value={(node.data.imagePosition as string) || 'top'}
+                     onValueChange={(value) => handleUpdate('imagePosition', value)}
+                   >
+                       <SelectTrigger>
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="top">Acima</SelectItem>
+                         <SelectItem value="left">Esquerda</SelectItem>
+                         <SelectItem value="right">Direita</SelectItem>
+                         <SelectItem value="bottom">Abaixo</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 )}
+               </>
+             )}
+             {node.data.mediaType === 'video' && (
+               <>
+                 <div>
+                   <Label>URL do Vídeo</Label>
+                   <Input
+                     placeholder="https://..."
+                     value={(node.data.videoUrl as string) || ''}
+                     onChange={(e) => handleUpdate('videoUrl', e.target.value)}
+                   />
+                 </div>
+                 <div>
+                   <Label>Altura do Vídeo</Label>
+                   <Input
+                     placeholder="80px"
+                     value={(node.data.videoHeight as string) || '80px'}
+                     onChange={(e) => handleUpdate('videoHeight', e.target.value)}
+                   />
+                 </div>
+                 {node.type === 'question' && (
+                   <div>
+                     <Label>Posição do Vídeo</Label>
+                     <Select
+                       value={(node.data.imagePosition as string) || 'top'}
+                       onValueChange={(value) => handleUpdate('imagePosition', value)}
+                     >
+                       <SelectTrigger>
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="top">Acima</SelectItem>
+                         <SelectItem value="left">Esquerda</SelectItem>
+                         <SelectItem value="right">Direita</SelectItem>
+                         <SelectItem value="bottom">Abaixo</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 )}
+               </>
+             )}
           </div>
         )}
 
