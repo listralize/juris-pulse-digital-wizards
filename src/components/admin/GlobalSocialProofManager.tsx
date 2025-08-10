@@ -52,7 +52,7 @@ const GlobalSocialProofManager: React.FC = () => {
       }
 
       if (data && data.global_social_proof) {
-        setConfig(data.global_social_proof);
+        setConfig(data.global_social_proof as unknown as SocialProofConfig);
       }
     } catch (error) {
       console.error('Erro ao carregar prova social global:', error);
@@ -66,7 +66,7 @@ const GlobalSocialProofManager: React.FC = () => {
         .from('admin_settings')
         .upsert({
           id: '1',
-          global_social_proof: config,
+          global_social_proof: config as any,
           updated_at: new Date().toISOString()
         });
 

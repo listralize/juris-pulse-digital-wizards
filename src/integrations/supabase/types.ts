@@ -19,6 +19,7 @@ export type Database = {
           categories: Json | null
           created_at: string | null
           form_config: Json | null
+          global_social_proof: Json | null
           id: string
           lead_webhook_config: string | null
           page_texts: Json | null
@@ -32,6 +33,7 @@ export type Database = {
           categories?: Json | null
           created_at?: string | null
           form_config?: Json | null
+          global_social_proof?: Json | null
           id?: string
           lead_webhook_config?: string | null
           page_texts?: Json | null
@@ -45,6 +47,7 @@ export type Database = {
           categories?: Json | null
           created_at?: string | null
           form_config?: Json | null
+          global_social_proof?: Json | null
           id?: string
           lead_webhook_config?: string | null
           page_texts?: Json | null

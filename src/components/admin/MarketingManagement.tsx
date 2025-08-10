@@ -736,9 +736,10 @@ export const MarketingManagement: React.FC = () => {
       </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
+          <TabsTrigger value="social-proof">⚡ Prova Social</TabsTrigger>
           <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
         </TabsList>
 
@@ -1635,6 +1636,11 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                 </div>}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* PROVA SOCIAL GLOBAL TAB */}
+        <TabsContent value="social-proof" className="space-y-6">
+          <GlobalSocialProofManager />
         </TabsContent>
 
         {/* DASHBOARD TAB */}

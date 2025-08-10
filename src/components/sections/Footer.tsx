@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
+import GlobalSocialProof from '../GlobalSocialProof';
 
 interface FooterProps {
   respectTheme?: boolean;
@@ -104,7 +105,9 @@ const Footer: React.FC<FooterProps> = ({
   }, []);
 
   return (
-    <footer 
+    <>
+      <GlobalSocialProof />
+      <footer
       className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}
       style={{
         margin: '0',
@@ -224,7 +227,8 @@ const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   );
 };
 

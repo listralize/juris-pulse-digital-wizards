@@ -296,29 +296,6 @@ export const StepFormBuilder: React.FC = () => {
           buttonActionType: 'next_step'
         };
         break;
-      case 'social_proof':
-        newStep = {
-          ...baseStep,
-          type: 'social_proof',
-          title: 'O Que Nossos Clientes Dizem',
-          socialProofConfig: {
-            testimonials: [
-              {
-                name: 'Maria Silva',
-                text: 'Excelente atendimento, super recomendo!',
-                rating: 5,
-                image: ''
-              }
-            ],
-            stats: [
-              { number: '1000+', label: 'Clientes Atendidos' },
-              { number: '98%', label: 'Satisfação' }
-            ]
-          },
-          buttonText: 'Continuar',
-          buttonActionType: 'next_step'
-        };
-        break;
       default:
         newStep = { ...baseStep, type: 'question', options: [] };
     }

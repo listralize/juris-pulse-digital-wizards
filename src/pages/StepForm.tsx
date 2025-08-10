@@ -565,30 +565,6 @@ const StepForm: React.FC = () => {
                   </Button>
                 </div>
               )}
-
-              {currentStep.type === 'social_proof' && currentStep.socialProofConfig && (
-                <div className="space-y-6">
-                  <SocialProofElement
-                    config={currentStep.socialProofConfig}
-                    primaryColor={form.styles.primary_color || '#4CAF50'}
-                  />
-                  
-                  <Button
-                    className="w-full"
-                    style={{
-                      backgroundColor: form.styles.primary_color || '#4CAF50',
-                      borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
-                    }}
-                    onClick={() => {
-                      if (currentStep.buttonAction) {
-                        goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
-                      }
-                    }}
-                  >
-                    {currentStep.buttonText || 'Continuar'}
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         )}

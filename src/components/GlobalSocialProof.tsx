@@ -35,7 +35,7 @@ const GlobalSocialProof: React.FC = () => {
         }
 
         if (data && data.global_social_proof) {
-          setConfig(data.global_social_proof);
+          setConfig(data.global_social_proof as unknown as SocialProofConfig);
         }
       } catch (error) {
         console.error('Erro ao carregar prova social global:', error);
