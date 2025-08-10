@@ -19,6 +19,7 @@ import NotFound from './pages/NotFound';
 import PoliticaPrivacidade from './pages/PoliticaPrivacidade';
 import TermosUso from './pages/TermosUso';
 import EmbedForm from './pages/EmbedForm';
+import StepForm from './pages/StepForm';
 
 // Dynamic routes
 import DynamicServiceRoutes from './components/DynamicServiceRoutes';
@@ -63,6 +64,9 @@ function App() {
                 
                 {/* Embed form route */}
                 <Route path="/embed/form/:formId" element={<EmbedForm />} />
+                
+                {/* Step form route */}
+                <Route path="/form/:slug" element={<StepForm />} />
                 
                 {/* Static area pages (fallbacks for existing URLs) */}
                 <Route path="/areas/familia" element={<Familia />} />

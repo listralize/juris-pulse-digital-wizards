@@ -250,9 +250,16 @@ export const StepFormBuilder: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Configurações Gerais</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Configurações Gerais
+              {selectedForm.id && (
+                <Badge variant="outline" className="text-xs">
+                  URL: /form/{selectedForm.slug}
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="name">Nome do Formulário</Label>
@@ -371,65 +378,176 @@ export const StepFormBuilder: React.FC = () => {
                       </div>
                     </div>
 
-                    {step.type === 'question' && (
-                      <div className="mt-4">
-                        <Label>Opções de Resposta</Label>
-                        <div className="space-y-2 mt-2">
-                          {step.options?.map((option, optionIndex) => (
-                            <div key={optionIndex} className="flex gap-2">
-                              <Input
-                                placeholder="Texto da opção"
-                                value={option.text}
-                                onChange={(e) => {
-                                  const newOptions = [...(step.options || [])];
-                                  newOptions[optionIndex] = { ...option, text: e.target.value };
-                                  updateStep(index, 'options', newOptions);
-                                }}
-                              />
-                              <Input
-                                placeholder="Valor"
-                                value={option.value}
-                                onChange={(e) => {
-                                  const newOptions = [...(step.options || [])];
-                                  newOptions[optionIndex] = { ...option, value: e.target.value };
-                                  updateStep(index, 'options', newOptions);
-                                }}
-                              />
-                              <Input
-                                placeholder="Próxima etapa (ID)"
-                                value={option.nextStep || ''}
-                                onChange={(e) => {
-                                  const newOptions = [...(step.options || [])];
-                                  newOptions[optionIndex] = { ...option, nextStep: e.target.value };
-                                  updateStep(index, 'options', newOptions);
-                                }}
-                              />
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => {
-                                  const newOptions = step.options?.filter((_, i) => i !== optionIndex) || [];
-                                  updateStep(index, 'options', newOptions);
-                                }}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const newOptions = [...(step.options || []), { text: '', value: '', nextStep: '' }];
-                              updateStep(index, 'options', newOptions);
-                            }}
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Adicionar Opção
-                          </Button>
-                        </div>
-                      </div>
-                    )}
+                     {step.type === 'question' && (
+                       <div className="mt-6">
+                         <div className="flex items-center justify-between mb-4">
+                           <Label className="text-base font-semibold">Opções de Resposta</Label>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => {
+                               const newOptions = [...(step.options || []), { text: '', value: '', nextStep: '' }];
+                               updateStep(index, 'options', newOptions);
+                             }}
+                           >
+                             <Plus className="w-4 h-4 mr-2" />
+                             Adicionar Opção
+                           </Button>
+                         </div>
+                         <div className="space-y-3">
+                           {step.options?.map((option, optionIndex) => (
+                             <Card key={optionIndex} className="p-4">
+                               <div className="grid grid-cols-1 gap-3">
+                                 <div>
+                                   <Label className="text-sm font-medium">Texto do Botão</Label>
+                                   <Input
+                                     placeholder="Ex: Quero me divorciar"
+                                     value={option.text}
+                                     onChange={(e) => {
+                                       const newOptions = [...(step.options || [])];
+                                       newOptions[optionIndex] = { ...option, text: e.target.value };
+                                       updateStep(index, 'options', newOptions);
+                                     }}
+                                   />
+                                 </div>
+                                 <div className="grid grid-cols-2 gap-3">
+                                   <div>
+                                     <Label className="text-sm font-medium">Valor (salvo nos dados)</Label>
+                                     <Input
+                                       placeholder="divorcio"
+                                       value={option.value}
+                                       onChange={(e) => {
+                                         const newOptions = [...(step.options || [])];
+                                         newOptions[optionIndex] = { ...option, value: e.target.value };
+                                         updateStep(index, 'options', newOptions);
+                                       }}
+                                     />
+                                   </div>
+                                   <div>
+                                     <Label className="text-sm font-medium">Próxima Etapa</Label>
+                                     <div className="flex gap-1">
+                                       <Input
+                                         placeholder="ID da etapa ou URL"
+                                         value={option.nextStep || ''}
+                                         onChange={(e) => {
+                                           const newOptions = [...(step.options || [])];
+                                           newOptions[optionIndex] = { ...option, nextStep: e.target.value };
+                                           updateStep(index, 'options', newOptions);
+                                         }}
+                                       />
+                                       <Button
+                                         variant="destructive"
+                                         size="sm"
+                                         onClick={() => {
+                                           const newOptions = step.options?.filter((_, i) => i !== optionIndex) || [];
+                                           updateStep(index, 'options', newOptions);
+                                         }}
+                                       >
+                                         <Trash2 className="w-4 h-4" />
+                                       </Button>
+                                     </div>
+                                   </div>
+                                 </div>
+                                 <div className="text-xs text-muted-foreground">
+                                   💡 Dica: Use IDs de outras etapas (ex: "step2") ou URLs externos (ex: "https://site.com")
+                                 </div>
+                               </div>
+                             </Card>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+
+                     {step.type === 'form' && (
+                       <div className="mt-6">
+                         <div className="flex items-center justify-between mb-4">
+                           <Label className="text-base font-semibold">Campos do Formulário</Label>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => {
+                               const newFields = [...(step.formFields || []), { 
+                                 name: '', 
+                                 type: 'text', 
+                                 placeholder: '', 
+                                 required: true 
+                               }];
+                               updateStep(index, 'formFields', newFields);
+                             }}
+                           >
+                             <Plus className="w-4 h-4 mr-2" />
+                             Adicionar Campo
+                           </Button>
+                         </div>
+                         <div className="space-y-3">
+                           {step.formFields?.map((field, fieldIndex) => (
+                             <Card key={fieldIndex} className="p-4">
+                               <div className="grid grid-cols-1 gap-3">
+                                 <div className="grid grid-cols-2 gap-3">
+                                   <div>
+                                     <Label className="text-sm font-medium">Nome do Campo</Label>
+                                     <Input
+                                       placeholder="nome"
+                                       value={field.name}
+                                       onChange={(e) => {
+                                         const newFields = [...(step.formFields || [])];
+                                         newFields[fieldIndex] = { ...field, name: e.target.value };
+                                         updateStep(index, 'formFields', newFields);
+                                       }}
+                                     />
+                                   </div>
+                                   <div>
+                                     <Label className="text-sm font-medium">Tipo</Label>
+                                     <Select
+                                       value={field.type}
+                                       onValueChange={(value) => {
+                                         const newFields = [...(step.formFields || [])];
+                                         newFields[fieldIndex] = { ...field, type: value };
+                                         updateStep(index, 'formFields', newFields);
+                                       }}
+                                     >
+                                       <SelectTrigger>
+                                         <SelectValue />
+                                       </SelectTrigger>
+                                       <SelectContent>
+                                         <SelectItem value="text">Texto</SelectItem>
+                                         <SelectItem value="email">Email</SelectItem>
+                                         <SelectItem value="tel">Telefone</SelectItem>
+                                         <SelectItem value="textarea">Área de Texto</SelectItem>
+                                       </SelectContent>
+                                     </Select>
+                                   </div>
+                                 </div>
+                                 <div>
+                                   <Label className="text-sm font-medium">Placeholder</Label>
+                                   <div className="flex gap-1">
+                                     <Input
+                                       placeholder="Digite seu nome"
+                                       value={field.placeholder}
+                                       onChange={(e) => {
+                                         const newFields = [...(step.formFields || [])];
+                                         newFields[fieldIndex] = { ...field, placeholder: e.target.value };
+                                         updateStep(index, 'formFields', newFields);
+                                       }}
+                                     />
+                                     <Button
+                                       variant="destructive"
+                                       size="sm"
+                                       onClick={() => {
+                                         const newFields = step.formFields?.filter((_, i) => i !== fieldIndex) || [];
+                                         updateStep(index, 'formFields', newFields);
+                                       }}
+                                     >
+                                       <Trash2 className="w-4 h-4" />
+                                     </Button>
+                                   </div>
+                                 </div>
+                               </div>
+                             </Card>
+                           ))}
+                         </div>
+                       </div>
+                     )}
                   </CardContent>
                 </Card>
               ))}
@@ -468,14 +586,31 @@ export const StepFormBuilder: React.FC = () => {
               <p className="text-sm text-muted-foreground">{form.title}</p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">
-                  <strong>URL:</strong> /{form.slug}
-                </p>
-                <p className="text-sm">
-                  <strong>Etapas:</strong> {form.steps.length}
-                </p>
+              <div className="space-y-3">
+                <div className="p-3 bg-muted rounded-md">
+                  <p className="text-sm font-medium mb-1">URL do Formulário:</p>
+                  <p className="text-sm font-mono text-primary">
+                    {window.location.origin}/form/{form.slug}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Etapas:</span> {form.steps.length}
+                  </div>
+                  <div>
+                    <span className="font-medium">Webhook:</span>{' '}
+                    {form.webhook_url ? '✅ Configurado' : '❌ Não configurado'}
+                  </div>
+                </div>
                 <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`/form/${form.slug}`, '_blank')}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Visualizar
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
