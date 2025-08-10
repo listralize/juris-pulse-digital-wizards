@@ -28,8 +28,11 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
   onClose
 }) => {
   const [images, setImages] = useState<MediaFile[]>([]);
+  const [filteredImages, setFilteredImages] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFolder, setSelectedFolder] = useState('all');
 
   useEffect(() => {
     if (isOpen) {
@@ -71,12 +74,47 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
         }) || [];
 
       setImages(mediaFiles);
+      setFilteredImages(mediaFiles);
     } catch (error) {
       console.error('Erro ao carregar imagens:', error);
       toast.error('Erro ao carregar galeria');
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    filterImages();
+  }, [images, searchTerm, selectedFolder]);
+
+  const filterImages = () => {
+    let filtered = images;
+
+    // Filtrar por termo de busca
+    if (searchTerm) {
+      filtered = filtered.filter(image => 
+        image.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filtrar por pasta/tipo
+    if (selectedFolder !== 'all') {
+      filtered = filtered.filter(image => image.type === selectedFolder);
+    }
+
+    setFilteredImages(filtered);
+  };
+
+  const getFolders = () => {
+    const types = [...new Set(images.map(img => img.type))];
+    return [
+      { value: 'all', label: 'Todos os arquivos', count: images.length },
+      ...types.map(type => ({
+        value: type,
+        label: type === 'image' ? 'Imagens' : 'Vídeos',
+        count: images.filter(img => img.type === type).length
+      }))
+    ];
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +188,43 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
             </CardContent>
           </Card>
 
+          {/* Search and Filter */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="search" className="block mb-2 font-medium">
+                    Buscar Arquivos
+                  </Label>
+                  <Input
+                    id="search"
+                    type="text"
+                    placeholder="Digite o nome do arquivo..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="folder" className="block mb-2 font-medium">
+                    Filtrar por Tipo
+                  </Label>
+                  <select
+                    id="folder"
+                    className="w-full p-2 border border-input rounded-md bg-background"
+                    value={selectedFolder}
+                    onChange={(e) => setSelectedFolder(e.target.value)}
+                  >
+                    {getFolders().map(folder => (
+                      <option key={folder.value} value={folder.value}>
+                        {folder.label} ({folder.count})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Gallery Grid */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Selecionar da Galeria</h3>
@@ -159,7 +234,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {images.map((mediaFile, index) => (
+                {filteredImages.map((mediaFile, index) => (
                   <div
                     key={index}
                     className={`relative cursor-pointer group rounded-lg overflow-hidden border-2 transition-all ${
@@ -209,7 +284,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                   </div>
                 ))}
-                {images.length === 0 && !loading && (
+                {filteredImages.length === 0 && !loading && (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
                     <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>Nenhuma mídia encontrada</p>

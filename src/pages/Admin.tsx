@@ -20,6 +20,7 @@ import { MarketingManagement } from '../components/admin/MarketingManagement';
 import { LeadsManagement } from '../components/admin/LeadsManagement';
 import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
 import { StepFormBuilder } from '../components/admin/StepFormBuilder';
+import { TestimonialsManager } from '../components/admin/TestimonialsManager';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
 const Admin = () => {
@@ -291,6 +292,10 @@ const Admin = () => {
 
               <TabsContent value="step-forms">
                 <StepFormBuilder />
+              </TabsContent>
+
+              <TabsContent value="testimonials">
+                <TestimonialsManager />
               </TabsContent>
 
               <TabsContent value="marketing">

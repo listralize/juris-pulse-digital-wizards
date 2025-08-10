@@ -8,6 +8,7 @@ import Navbar from '../components/navbar';
 import FloatingFooter from '../components/FloatingFooter';
 import LegalPopup from '../components/legal/LegalPopup';
 import SectionsContainer from '../components/SectionsContainer';
+import { SocialProofCarousel } from '../components/SocialProofCarousel';
 import { useTheme } from '../components/ThemeProvider';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -113,6 +114,11 @@ const Index = () => {
       {!isMobile && !isTablet && <FloatingFooter />}
       
       <SectionsContainer />
+      
+      {/* Adicionar prova social entre as seções */}
+      <div className="relative z-10">
+        <SocialProofCarousel />
+      </div>
 
       {/* Popup Legal discreto */}
       <LegalPopup 

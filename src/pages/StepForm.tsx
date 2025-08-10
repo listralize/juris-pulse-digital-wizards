@@ -79,6 +79,10 @@ interface StepFormStep {
   imageHeight?: string;
   videoWidth?: string;
   videoHeight?: string;
+  // Configurações adicionais de vídeo
+  videoAutoplay?: boolean;
+  videoMuted?: boolean;
+  videoLoop?: boolean;
   // Novos campos para ofertas e elementos interativos
   offerConfig?: {
     title?: string;
@@ -273,13 +277,28 @@ const StepForm: React.FC = () => {
         console.log('Lead salvo com sucesso no sistema');
       }
 
-       // Dispatch success event for marketing tracking
-       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { 
-         detail: { 
-           formSlug: slug,
-           userData: formResponses 
-         } 
-       }));
+      // Dispatch success event for marketing tracking
+      window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { 
+        detail: { 
+          formSlug: slug,
+          userData: formResponses 
+        } 
+      }));
+
+      // Dispatch Facebook Pixel events
+      if ((window as any).fbq) {
+        (window as any).fbq('track', 'Lead', {
+          content_name: form?.name || 'Step Form',
+          content_category: 'form_submission',
+          value: 1,
+          currency: 'BRL'
+        });
+        
+        (window as any).fbq('track', 'CompleteRegistration', {
+          content_name: form?.name || 'Step Form',
+          status: 'completed'
+        });
+      }
 
       // Enviar para webhook se configurado
       if (form?.webhook_url) {
@@ -404,24 +423,64 @@ const StepForm: React.FC = () => {
                 <p className="text-muted-foreground mb-6">{currentStep.description}</p>
               )}
 
-              {currentStep.type === 'question' && currentStep.options && (
-                <div className="space-y-3">
-                  {currentStep.options.map((option, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="w-full justify-start p-4 h-auto text-left"
-                      style={{
-                        borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
-                      }}
-                       onClick={() => {
-                         saveAnswer(currentStep.id, option.value);
-                         goToNextStep(option.nextStep, option.actionType);
-                       }}
-                    >
-                      {option.text}
-                    </Button>
-                  ))}
+              {currentStep.type === 'question' && (
+                <div className="space-y-6">
+                  {/* Media Content for Question */}
+                  {currentStep.mediaUrl && (
+                    <div className="mb-6">
+                      {renderStepElement({
+                        type: currentStep.mediaType,
+                        content: currentStep.mediaUrl,
+                        imageWidth: currentStep.imageWidth,
+                        imageHeight: currentStep.imageHeight,
+                        videoWidth: currentStep.videoWidth,
+                        videoHeight: currentStep.videoHeight,
+                        videoAutoplay: currentStep.videoAutoplay,
+                        videoMuted: currentStep.videoMuted,
+                        videoLoop: currentStep.videoLoop
+                      })}
+                      {currentStep.mediaCaption && (
+                        <p className="text-sm text-muted-foreground mt-2 text-center">
+                          {currentStep.mediaCaption}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Carousel Content for Question */}
+                  {currentStep.mediaType === 'carousel' && currentStep.carouselImages && (
+                    <div className="mb-6">
+                      {renderStepElement({
+                        type: 'carousel',
+                        images: currentStep.carouselImages,
+                        autoplay: currentStep.carouselAutoplay,
+                        showDots: currentStep.carouselShowDots,
+                        interval: currentStep.carouselInterval
+                      })}
+                    </div>
+                  )}
+
+                  {/* Question Options */}
+                  {currentStep.options && (
+                    <div className="space-y-3">
+                      {currentStep.options.map((option, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          className="w-full justify-start p-4 h-auto text-left"
+                          style={{
+                            borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
+                          }}
+                           onClick={() => {
+                             saveAnswer(currentStep.id, option.value);
+                             goToNextStep(option.nextStep, option.actionType);
+                           }}
+                        >
+                          {option.text}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
