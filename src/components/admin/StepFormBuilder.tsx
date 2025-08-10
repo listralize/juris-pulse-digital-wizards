@@ -11,6 +11,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Tipos baseados na estrutura da tabela step_forms
+type StepFormData = {
+  id?: string;
+  name: string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  logo_url?: string;
+  webhook_url: string;
+  steps: any; // JSONB
+  styles: any; // JSONB
+  seo: any; // JSONB
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
 interface StepFormStep {
   id: string;
   title: string;
@@ -30,31 +47,9 @@ interface StepFormStep {
   backStep?: string;
 }
 
-interface StepForm {
-  id?: string;
-  name: string;
-  slug: string;
-  title: string;
-  subtitle?: string;
-  logo_url?: string;
-  webhook_url: string;
-  steps: StepFormStep[];
-  styles: {
-    primary_color: string;
-    background_color: string;
-    text_color: string;
-    button_style: string;
-  };
-  seo: {
-    meta_title: string;
-    meta_description: string;
-  };
-  is_active: boolean;
-}
-
 export const StepFormBuilder: React.FC = () => {
-  const [forms, setForms] = useState<StepForm[]>([]);
-  const [selectedForm, setSelectedForm] = useState<StepForm | null>(null);
+  const [forms, setForms] = useState<StepFormData[]>([]);
+  const [selectedForm, setSelectedForm] = useState<StepFormData | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
@@ -82,7 +77,7 @@ export const StepFormBuilder: React.FC = () => {
   };
 
   const createNewForm = () => {
-    const newForm: StepForm = {
+    const newForm: StepFormData = {
       name: 'Novo Formulário',
       slug: 'novo-formulario',
       title: 'Formulário Interativo',
