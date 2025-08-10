@@ -37,7 +37,7 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'social_proof' | 'countdown' | 'quiz_result';
+  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'countdown' | 'quiz_result';
   options?: Array<{
     text: string;
     value: string;
@@ -219,7 +219,7 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
-  const addStep = (type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'social_proof' = 'question') => {
+  const addStep = (type: 'question' | 'form' | 'content' | 'offer' | 'timer' = 'question') => {
     if (!selectedForm) return;
 
     const baseStep = {
@@ -379,7 +379,7 @@ export const StepFormBuilder: React.FC = () => {
       case 'form': return 'border-l-green-500';
       case 'offer': return 'border-l-orange-500';
       case 'timer': return 'border-l-red-500';
-      case 'social_proof': return 'border-l-yellow-500';
+      
       default: return 'border-l-gray-500';
     }
   };
@@ -391,7 +391,7 @@ export const StepFormBuilder: React.FC = () => {
       case 'form': return 'text-green-600 border-green-200';
       case 'offer': return 'text-orange-600 border-orange-200';
       case 'timer': return 'text-red-600 border-red-200';
-      case 'social_proof': return 'text-yellow-600 border-yellow-200';
+      
       default: return 'text-gray-600 border-gray-200';
     }
   };
@@ -403,7 +403,7 @@ export const StepFormBuilder: React.FC = () => {
       case 'form': return 'Formulário';
       case 'offer': return 'Oferta';
       case 'timer': return 'Timer';
-      case 'social_proof': return 'Prova Social';
+      
       default: return 'Desconhecido';
     }
   };
@@ -660,10 +660,6 @@ export const StepFormBuilder: React.FC = () => {
                   <Timer className="w-4 h-4 mb-1" />
                   <span className="text-xs">Timer</span>
                 </Button>
-                <Button onClick={() => addStep('social_proof')} size="sm" variant="outline" className="flex flex-col h-auto py-3">
-                  <Zap className="w-4 h-4 mb-1" />
-                  <span className="text-xs">Prova Social</span>
-                </Button>
               </div>
             </div>
           </CardHeader>
@@ -714,7 +710,7 @@ export const StepFormBuilder: React.FC = () => {
                             <SelectItem value="form">📝 Formulário</SelectItem>
                             <SelectItem value="offer">🎁 Oferta/Produto</SelectItem>
                             <SelectItem value="timer">⏰ Timer/Urgência</SelectItem>
-                            <SelectItem value="social_proof">⚡ Prova Social</SelectItem>
+                            
                           </SelectContent>
                         </Select>
                       </div>
@@ -908,25 +904,20 @@ export const StepFormBuilder: React.FC = () => {
                         </div>
                       )}
 
-                       {(step.type === 'offer' || step.type === 'timer' || step.type === 'social_proof') && (
-                         <div className="mt-6 space-y-4">
-                           {step.type === 'offer' && <OfferConfigEditor step={step} updateStep={(field, value) => {
-                             const updatedSteps = [...selectedForm.steps];
-                             updatedSteps[index] = { ...updatedSteps[index], [field]: value };
-                             setSelectedForm({ ...selectedForm, steps: updatedSteps });
-                           }} />}
-                           {step.type === 'timer' && <TimerConfigEditor step={step} updateStep={(field, value) => {
-                             const updatedSteps = [...selectedForm.steps];
-                             updatedSteps[index] = { ...updatedSteps[index], [field]: value };
-                             setSelectedForm({ ...selectedForm, steps: updatedSteps });
-                           }} />}
-                           {step.type === 'social_proof' && <SocialProofConfigEditor step={step} updateStep={(field, value) => {
-                             const updatedSteps = [...selectedForm.steps];
-                             updatedSteps[index] = { ...updatedSteps[index], [field]: value };
-                             setSelectedForm({ ...selectedForm, steps: updatedSteps });
-                           }} />}
-                         </div>
-                       )}
+                        {(step.type === 'offer' || step.type === 'timer') && (
+                          <div className="mt-6 space-y-4">
+                            {step.type === 'offer' && <OfferConfigEditor step={step} updateStep={(field, value) => {
+                              const updatedSteps = [...selectedForm.steps];
+                              updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+                              setSelectedForm({ ...selectedForm, steps: updatedSteps });
+                            }} />}
+                            {step.type === 'timer' && <TimerConfigEditor step={step} updateStep={(field, value) => {
+                              const updatedSteps = [...selectedForm.steps];
+                              updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+                              setSelectedForm({ ...selectedForm, steps: updatedSteps });
+                            }} />}
+                          </div>
+                        )}
 
                        {step.type === 'content' && (
                         <div className="space-y-4 p-4 bg-muted/30 rounded-lg">

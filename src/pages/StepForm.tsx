@@ -49,7 +49,7 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'social_proof';
+  type: 'question' | 'form' | 'content' | 'offer' | 'timer';
   options?: Array<{
     text: string;
     value: string;

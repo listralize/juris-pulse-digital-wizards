@@ -17,6 +17,7 @@ import { useFormConfig } from '@/hooks/useFormConfig';
 import { ConversionFunnel } from './ConversionFunnel';
 import { CampaignReports } from './CampaignReports';
 import { CitiesChart } from './CitiesChart';
+import GlobalSocialProofManager from './GlobalSocialProofManager';
 interface MarketingScripts {
   facebookPixel: {
     enabled: boolean;
