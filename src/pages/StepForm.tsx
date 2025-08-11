@@ -314,6 +314,7 @@ const StepForm: React.FC = () => {
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
+    console.log('🚨 HANDLEFORMSUBMIT CHAMADO!');
     e.preventDefault();
     const { toast } = useToast();
     
@@ -855,6 +856,9 @@ const StepForm: React.FC = () => {
                   <Button 
                     type="submit"
                     className="w-full"
+                    onClick={(e) => {
+                      console.log('🔥 BOTÃO CLICADO!', { currentStepType: currentStep?.type });
+                    }}
                     style={{
                       backgroundColor: form.styles.primary_color || '#4CAF50',
                       borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
