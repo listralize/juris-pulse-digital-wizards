@@ -303,8 +303,8 @@ const StepForm: React.FC = () => {
     }
   };
 
-  const handleFormSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     console.log('🚀 Iniciando envio do formulário...');
     setLoading(true);
     
@@ -848,8 +848,7 @@ const StepForm: React.FC = () => {
                   ))}
                   
                    <Button 
-                     type="button"
-                     onClick={() => handleFormSubmit()}
+                     type="submit"
                      className="w-full"
                      disabled={loading}
                      style={{
