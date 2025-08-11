@@ -43,6 +43,15 @@ interface StepFormData {
     meta_keywords?: string;
   };
   is_active: boolean;
+  flow_config?: {
+    edges?: Array<{
+      id: string;
+      source: string;
+      target: string;
+      sourceHandle?: string;
+      targetHandle?: string;
+    }>;
+  };
 }
 
 interface StepFormStep {
@@ -165,7 +174,8 @@ const StepForm: React.FC = () => {
         styles: (data.styles as unknown) as any,
         seo: (data.seo as unknown) as any,
         footer_config: (data.footer_config as unknown) as any,
-        seo_config: (data.seo_config as unknown) as any
+        seo_config: (data.seo_config as unknown) as any,
+        flow_config: (data.flow_config as unknown) as any
       };
       
       setForm(formData);
@@ -196,21 +206,48 @@ const StepForm: React.FC = () => {
     setCurrentStepId(stepId);
   };
 
-  const goToNextStep = (nextStepId?: string, actionType?: 'next_step' | 'external_url') => {
-    if (nextStepId) {
+  // Função para encontrar o próximo step usando flow_config (edges)
+  const getNextStepFromFlow = (currentStepId: string, selectedOption?: string) => {
+    if (!form?.flow_config?.edges) {
+      return null;
+    }
+
+    // Procurar por uma edge que conecta o step atual
+    const edge = form.flow_config.edges.find(edge => 
+      edge.source === currentStepId
+    );
+
+    return edge ? edge.target : null;
+  };
+
+  const goToNextStep = (nextStepId?: string, actionType?: 'next_step' | 'external_url', selectedOption?: string) => {
+    // Primeiro, tentar usar o nextStepId fornecido
+    let targetStepId = nextStepId;
+    
+    // Se não há nextStepId, tentar usar as conexões do flow_config
+    if (!targetStepId) {
+      targetStepId = getNextStepFromFlow(currentStepId, selectedOption);
+    }
+    
+    if (targetStepId) {
       // Se actionType é external_url ou nextStepId começa com http, redireciona
-      if (actionType === 'external_url' || nextStepId.startsWith('http')) {
-        window.open(nextStepId, '_blank');
+      if (actionType === 'external_url' || targetStepId.startsWith('http')) {
+        window.open(targetStepId, '_blank');
         return;
       }
       
       // Se é um ID de step, vai para essa etapa
-      const targetStep = form?.steps.find(step => step.id === nextStepId);
+      const targetStep = form?.steps.find(step => step.id === targetStepId);
       if (targetStep) {
-        setCurrentStepId(nextStepId);
+        setCurrentStepId(targetStepId);
       } else {
-        toast.error(`Etapa "${nextStepId}" não encontrada`);
+        toast.error(`Etapa "${targetStepId}" não encontrada`);
+        console.error('Steps disponíveis:', form?.steps.map(s => s.id));
+        console.error('Tentando ir para:', targetStepId);
       }
+    } else {
+      console.warn('Nenhuma próxima etapa encontrada para:', currentStepId);
+      console.log('Flow config edges:', form?.flow_config?.edges);
     }
   };
 
@@ -218,6 +255,12 @@ const StepForm: React.FC = () => {
     e.preventDefault();
     
     try {
+      console.log('📋 Iniciando envio do formulário step form...', { 
+        currentStepId, 
+        formData, 
+        answers 
+      });
+
       const allData = { 
         ...answers, 
         ...formData,
@@ -245,6 +288,8 @@ const StepForm: React.FC = () => {
       // Extrair campos específicos dos dados do formulário
       const formResponses = { ...answers, ...formData };
       
+      console.log('💾 Salvando lead no banco de dados...', { formResponses, completionPercentage });
+      
       // Salvar no banco de dados
       const leadData = {
         lead_data: allData,
@@ -271,11 +316,14 @@ const StepForm: React.FC = () => {
         .insert([leadData]);
 
       if (leadError) {
-        console.error('Erro ao salvar lead:', leadError);
+        console.error('❌ Erro ao salvar lead:', leadError);
         toast.error('Erro ao salvar lead no sistema');
+        throw leadError;
       } else {
-        console.log('Lead salvo com sucesso no sistema');
+        console.log('✅ Lead salvo com sucesso no sistema');
       }
+
+      console.log('🎯 Disparando eventos de marketing...', { formSlug: slug });
 
       // Dispatch success event for marketing tracking
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { 
@@ -285,25 +333,33 @@ const StepForm: React.FC = () => {
         } 
       }));
 
-      // Dispatch Facebook Pixel events
+      // Dispatch Facebook Pixel events diretamente também
       if ((window as any).fbq) {
-        (window as any).fbq('track', 'Lead', {
-          content_name: form?.name || 'Step Form',
-          content_category: 'form_submission',
-          value: 1,
-          currency: 'BRL'
-        });
-        
-        (window as any).fbq('track', 'CompleteRegistration', {
-          content_name: form?.name || 'Step Form',
-          status: 'completed'
-        });
+        try {
+          (window as any).fbq('track', 'Lead', {
+            content_name: form?.name || 'Step Form',
+            content_category: 'form_submission',
+            value: 1,
+            currency: 'BRL'
+          });
+          
+          (window as any).fbq('track', 'CompleteRegistration', {
+            content_name: form?.name || 'Step Form',
+            status: 'completed'
+          });
+          
+          console.log('📘 Eventos Facebook Pixel disparados diretamente');
+        } catch (fbError) {
+          console.error('❌ Erro no Facebook Pixel:', fbError);
+        }
       }
+
+      console.log('🔗 Enviando para webhook...', { webhookUrl: form?.webhook_url });
 
       // Enviar para webhook se configurado
       if (form?.webhook_url) {
         try {
-          await fetch(form.webhook_url, {
+          const webhookResponse = await fetch(form.webhook_url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -316,16 +372,24 @@ const StepForm: React.FC = () => {
               ...utmData
             })
           });
+
+          if (!webhookResponse.ok) {
+            throw new Error(`Webhook response: ${webhookResponse.status}`);
+          }
+
+          console.log('✅ Webhook enviado com sucesso');
         } catch (webhookError) {
-          console.error('Erro ao enviar webhook:', webhookError);
+          console.error('❌ Erro ao enviar webhook:', webhookError);
+          // Não falhar o formulário por causa do webhook
         }
       }
 
       toast.success('Formulário enviado com sucesso!');
+      console.log('🎉 Formulário enviado com sucesso! Redirecionando...');
       navigate('/obrigado');
     } catch (error) {
-      console.error('Erro ao enviar formulário:', error);
-      toast.error('Erro ao enviar formulário');
+      console.error('❌ Erro geral ao enviar formulário:', error);
+      toast.error('Erro ao enviar formulário. Tente novamente.');
     }
   };
 
@@ -471,10 +535,10 @@ const StepForm: React.FC = () => {
                           style={{
                             borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
                           }}
-                           onClick={() => {
-                             saveAnswer(currentStep.id, option.value);
-                             goToNextStep(option.nextStep, option.actionType);
-                           }}
+                          onClick={() => {
+                            saveAnswer(currentStep.id, option.value);
+                            goToNextStep(option.nextStep, option.actionType, option.value);
+                          }}
                         >
                           {option.text}
                         </Button>

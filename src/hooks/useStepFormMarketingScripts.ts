@@ -24,61 +24,71 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
     if (!formSlug) return;
 
-    const loadStepFormConfig = async () => {
-      try {
-        console.log(`📋 Carregando configuração de marketing para StepForm: ${formSlug}`);
-        
-        const { data: settings, error } = await supabase
-          .from('marketing_settings')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+  const loadStepFormConfig = async () => {
+    try {
+      console.log(`📋 Carregando configuração de marketing para StepForm: ${formSlug}`);
+      
+      // Buscar diretamente na tabela step_forms
+      const { data: stepForm, error } = await supabase
+        .from('step_forms')
+        .select('tracking_config, name, id')
+        .eq('slug', formSlug)
+        .eq('is_active', true)
+        .single();
 
-        if (error) {
-          console.error('❌ Erro ao carregar configuração:', error);
-          return;
-        }
-
-        if (settings && settings.form_tracking_config) {
-          let trackingConfig;
-          if (typeof settings.form_tracking_config === 'string') {
-            trackingConfig = JSON.parse(settings.form_tracking_config);
-          } else {
-            trackingConfig = settings.form_tracking_config;
-          }
-          
-          const stepFormConfig = trackingConfig.stepForms?.find(
-            (form: any) => form.slug === formSlug && form.enabled
-          );
-
-          if (stepFormConfig) {
-            console.log(`✅ Configuração encontrada para StepForm ${formSlug}:`, stepFormConfig);
-            implementStepFormScripts(stepFormConfig);
-          } else {
-            console.log(`ℹ️ Nenhuma configuração ativa encontrada para StepForm: ${formSlug}`);
-            removeStepFormScripts(formSlug);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Erro ao carregar configuração do StepForm:', error);
+      if (error) {
+        console.error('❌ Erro ao carregar step form:', error);
+        return;
       }
-    };
 
+      if (stepForm && stepForm.tracking_config) {
+        console.log(`✅ Configuração encontrada para StepForm ${formSlug}:`, stepForm.tracking_config);
+        
+        // Criar config compatível com a estrutura esperada
+        const trackingConfig = stepForm.tracking_config as any;
+        const stepFormConfig = {
+          slug: formSlug,
+          name: stepForm.name,
+          id: stepForm.id,
+          enabled: true,
+          facebookPixel: trackingConfig?.facebook_pixel || {
+            enabled: false,
+            pixel_id: ''
+          },
+          googleAnalytics: trackingConfig?.google_analytics || {
+            enabled: false,
+            tracking_id: ''
+          },
+          googleTagManager: trackingConfig?.google_tag_manager || {
+            enabled: false,
+            container_id: ''
+          }
+        };
+        
+        implementStepFormScripts(stepFormConfig);
+      } else {
+        console.log(`ℹ️ Nenhuma configuração encontrada para StepForm: ${formSlug}`);
+        removeStepFormScripts(formSlug);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar configuração do StepForm:', error);
+    }
+  };
+
+  loadStepFormConfig();
+
+  // Escutar atualizações de configuração
+  const handleSettingsUpdate = () => {
+    console.log(`🔄 Recarregando configuração para StepForm: ${formSlug}`);
     loadStepFormConfig();
+  };
 
-    // Escutar atualizações de configuração
-    const handleSettingsUpdate = () => {
-      console.log(`🔄 Recarregando configuração para StepForm: ${formSlug}`);
-      loadStepFormConfig();
-    };
+  window.addEventListener('marketingSettingsUpdated', handleSettingsUpdate);
 
-    window.addEventListener('marketingSettingsUpdated', handleSettingsUpdate);
-
-    return () => {
-      window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
-      removeStepFormScripts(formSlug);
-    };
+  return () => {
+    window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
+    removeStepFormScripts(formSlug);
+  };
   }, [formSlug]);
 
   const implementStepFormScripts = (stepFormConfig: any) => {
@@ -88,7 +98,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     removeStepFormScripts(stepFormConfig.slug);
 
     // Facebook Pixel - APENAS se estiver habilitado
-    if (stepFormConfig.facebookPixel?.enabled === true && stepFormConfig.facebookPixel?.pixelId) {
+    if (stepFormConfig.facebookPixel?.enabled === true && stepFormConfig.facebookPixel?.pixel_id) {
       console.log(`✅ Facebook Pixel HABILITADO para StepForm ${stepFormConfig.slug}`);
       implementStepFormFacebookPixel(stepFormConfig);
     } else {
@@ -96,7 +106,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     }
 
     // Google Analytics - APENAS se estiver habilitado
-    if (stepFormConfig.googleAnalytics?.enabled === true && stepFormConfig.googleAnalytics?.measurementId) {
+    if (stepFormConfig.googleAnalytics?.enabled === true && stepFormConfig.googleAnalytics?.tracking_id) {
       console.log(`✅ Google Analytics HABILITADO para StepForm ${stepFormConfig.slug}`);
       implementStepFormGoogleAnalytics(stepFormConfig);
     } else {
@@ -104,7 +114,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     }
 
     // Google Tag Manager - APENAS se estiver habilitado
-    if (stepFormConfig.googleTagManager?.enabled === true && stepFormConfig.googleTagManager?.containerId) {
+    if (stepFormConfig.googleTagManager?.enabled === true && stepFormConfig.googleTagManager?.container_id) {
       console.log(`✅ Google Tag Manager HABILITADO para StepForm ${stepFormConfig.slug}`);
       implementStepFormGoogleTagManager(stepFormConfig);
     } else {
@@ -131,9 +141,9 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     const { slug, facebookPixel } = stepFormConfig;
     
     // Validar se o pixelId é válido (apenas números)
-    const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
+    const pixelId = facebookPixel.pixel_id?.replace(/[^0-9]/g, '');
     if (!pixelId || pixelId.length < 10) {
-      console.warn(`⚠️ Pixel ID inválido para StepForm ${slug}:`, facebookPixel.pixelId);
+      console.warn(`⚠️ Pixel ID inválido para StepForm ${slug}:`, facebookPixel.pixel_id);
       return;
     }
     
@@ -215,12 +225,12 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
   const implementStepFormGoogleAnalytics = (stepFormConfig: any) => {
     const { slug, googleAnalytics } = stepFormConfig;
-    console.log(`📊 Implementando Google Analytics para StepForm ${slug}:`, googleAnalytics.measurementId);
+    console.log(`📊 Implementando Google Analytics para StepForm ${slug}:`, googleAnalytics.tracking_id);
 
     // Verificar se o GA base já existe
     if (!(window as any).gtag) {
       const gtagScript = document.createElement('script');
-      gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalytics.measurementId}`;
+      gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalytics.tracking_id}`;
       gtagScript.async = true;
       gtagScript.setAttribute('data-stepform-marketing', slug);
       document.head.appendChild(gtagScript);
@@ -231,7 +241,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '${googleAnalytics.measurementId}');
+        gtag('config', '${googleAnalytics.tracking_id}');
       `;
       document.head.appendChild(configScript);
     }
@@ -265,7 +275,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
   const implementStepFormGoogleTagManager = (stepFormConfig: any) => {
     const { slug, googleTagManager } = stepFormConfig;
-    console.log(`🏷️ Implementando Google Tag Manager para StepForm ${slug}:`, googleTagManager.containerId);
+    console.log(`🏷️ Implementando Google Tag Manager para StepForm ${slug}:`, googleTagManager.container_id);
 
     // Verificar se o GTM base já existe
     if (!(window as any).dataLayer) {
@@ -276,13 +286,13 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','${googleTagManager.containerId}');
+        })(window,document,'script','dataLayer','${googleTagManager.container_id}');
       `;
       document.head.appendChild(gtmScript);
 
       const noscript = document.createElement('noscript');
       noscript.setAttribute('data-stepform-marketing', slug);
-      noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${googleTagManager.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+      noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${googleTagManager.container_id}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
       document.body.appendChild(noscript);
     }
 
