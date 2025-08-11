@@ -100,7 +100,7 @@ interface StepFormNode {
 }
 
 // Componente de nó para perguntas
-const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
     backgroundColor: data.backgroundColor || '#1a1a1a',
     color: data.textColor || '#ffffff',
@@ -170,7 +170,7 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
           <div className="space-y-1 mt-2">
             {data.options.slice(0, 3).map((option, index) => (
               <div 
-                key={index} 
+                key={`${option.text}-${index}`}
                 className="text-xs bg-gray-800 p-2 rounded text-gray-300 border border-gray-600 hover:bg-gray-700 cursor-pointer relative"
               >
                 {option.text}
@@ -205,10 +205,10 @@ const QuestionNode = ({ data, id }: { data: StepFormNode['data']; id: string }) 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-blue-500" />
     </div>
   );
-};
+});
 
 // Componente de nó para formulários
-const FormNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+const FormNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
     backgroundColor: data.backgroundColor || '#1a1a1a',
     color: data.textColor || '#ffffff',
@@ -228,11 +228,14 @@ const FormNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
       </div>
       <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Novo Formulário'}</h4>
+        {data.description && (
+          <p className="text-xs opacity-75 mb-2">{data.description}</p>
+        )}
         {data.formFields && data.formFields.length > 0 && (
           <div className="space-y-1">
             {data.formFields.slice(0, 3).map((field: any, index: number) => (
-              <div key={index} className="text-xs bg-gray-800 p-1 rounded text-gray-300">
-                {field.label || field.name} ({field.type})
+              <div key={`${field.name}-${index}`} className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+                {field.label || field.placeholder || field.name} ({field.type})
               </div>
             ))}
             {data.formFields.length > 3 && (
@@ -245,10 +248,10 @@ const FormNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-green-500" />
     </div>
   );
-};
+});
 
 // Componente de nó para conteúdo
-const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+const ContentNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
     backgroundColor: data.backgroundColor || '#1a1a1a',
     color: data.textColor || '#ffffff',
@@ -302,7 +305,7 @@ const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) =
               <Play className="w-6 h-6 text-gray-400 z-10" />
               <video 
                 src={data.videoUrl} 
-                className="absolute inset-0 w-full h-full object-cover opacity-50"
+                className="absolute inset-0 w-full h-full object-cover rounded opacity-50"
                 muted
               />
             </div>
@@ -314,10 +317,10 @@ const ContentNode = ({ data, id }: { data: StepFormNode['data']; id: string }) =
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-purple-500" />
     </div>
   );
-};
+});
 
 // Componente de nó para ofertas
-const OfferNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+const OfferNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
     backgroundColor: data.backgroundColor || '#1a1a1a',
     color: data.textColor || '#ffffff',
@@ -337,6 +340,9 @@ const OfferNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
       </div>
       <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Oferta'}</h4>
+        {data.description && (
+          <p className="text-xs opacity-75 mb-2">{data.description}</p>
+        )}
         {data.offerConfig && (
           <div className="space-y-1">
             <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
@@ -352,10 +358,10 @@ const OfferNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-orange-500" />
     </div>
   );
-};
+});
 
 // Componente de nó para timer
-const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
+const TimerNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
     backgroundColor: data.backgroundColor || '#1a1a1a',
     color: data.textColor || '#ffffff',
@@ -375,6 +381,9 @@ const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
       </div>
       <div className="p-3" style={{ color: nodeStyle.color }}>
         <h4 className="font-medium text-sm mb-2">{data.title || 'Novo Timer'}</h4>
+        {data.description && (
+          <p className="text-xs opacity-75 mb-2">{data.description}</p>
+        )}
         {data.timerConfig && (
           <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
             Duração: {(data.timerConfig as TimerConfig).duration} min
@@ -385,7 +394,7 @@ const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-red-500" />
     </div>
   );
-};
+});
 
 // Tipos de nós personalizados
 const nodeTypes: NodeTypes = {
