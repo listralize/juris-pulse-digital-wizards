@@ -147,7 +147,13 @@ const StepForm: React.FC = () => {
 
   useEffect(() => {
     if (form && form.steps.length > 0) {
-      setCurrentStepId(form.steps[0].id);
+      // Determinar o primeiro step baseado no flow_config
+      const firstStepId = getFirstStepFromFlow() || form.steps[0].id;
+      console.log('🚀 Definindo step inicial:', firstStepId, { 
+        flowConfig: form.flow_config,
+        availableSteps: form.steps.map(s => s.id)
+      });
+      setCurrentStepId(firstStepId);
       updateProgress();
     }
   }, [form]);
@@ -206,9 +212,29 @@ const StepForm: React.FC = () => {
     setCurrentStepId(stepId);
   };
 
+  // Função para encontrar o primeiro step baseado no flow_config
+  const getFirstStepFromFlow = () => {
+    if (!form?.flow_config?.edges || form.flow_config.edges.length === 0) {
+      return null;
+    }
+
+    // Encontrar steps que não são alvos de nenhuma edge (steps iniciais)
+    const allTargets = form.flow_config.edges.map(edge => edge.target);
+    const firstStep = form.steps.find(step => !allTargets.includes(step.id));
+    
+    console.log('🔍 Procurando primeiro step:', {
+      allTargets,
+      firstStepFound: firstStep?.id,
+      edges: form.flow_config.edges
+    });
+    
+    return firstStep?.id || null;
+  };
+
   // Função para encontrar o próximo step usando flow_config (edges)
   const getNextStepFromFlow = (currentStepId: string, selectedOption?: string) => {
     if (!form?.flow_config?.edges) {
+      console.warn('❌ Sem flow_config.edges definido');
       return null;
     }
 
@@ -217,10 +243,25 @@ const StepForm: React.FC = () => {
       edge.source === currentStepId
     );
 
+    console.log('🔗 Procurando próximo step:', {
+      currentStepId,
+      edges: form.flow_config.edges,
+      foundEdge: edge,
+      targetStep: edge?.target
+    });
+
     return edge ? edge.target : null;
   };
 
   const goToNextStep = (nextStepId?: string, actionType?: 'next_step' | 'external_url', selectedOption?: string) => {
+    console.log('➡️ Tentando ir para próximo step:', {
+      nextStepId,
+      actionType,
+      selectedOption,
+      currentStepId,
+      hasFlowConfig: !!form?.flow_config?.edges
+    });
+
     // Primeiro, tentar usar o nextStepId fornecido
     let targetStepId = nextStepId;
     
@@ -229,9 +270,12 @@ const StepForm: React.FC = () => {
       targetStepId = getNextStepFromFlow(currentStepId, selectedOption);
     }
     
+    console.log('🎯 Step alvo determinado:', targetStepId);
+    
     if (targetStepId) {
       // Se actionType é external_url ou nextStepId começa com http, redireciona
       if (actionType === 'external_url' || targetStepId.startsWith('http')) {
+        console.log('🌐 Redirecionando para URL externa:', targetStepId);
         window.open(targetStepId, '_blank');
         return;
       }
@@ -239,15 +283,17 @@ const StepForm: React.FC = () => {
       // Se é um ID de step, vai para essa etapa
       const targetStep = form?.steps.find(step => step.id === targetStepId);
       if (targetStep) {
+        console.log('✅ Navegando para step:', targetStepId);
         setCurrentStepId(targetStepId);
       } else {
         toast.error(`Etapa "${targetStepId}" não encontrada`);
-        console.error('Steps disponíveis:', form?.steps.map(s => s.id));
-        console.error('Tentando ir para:', targetStepId);
+        console.error('❌ Steps disponíveis:', form?.steps.map(s => s.id));
+        console.error('❌ Tentando ir para:', targetStepId);
       }
     } else {
-      console.warn('Nenhuma próxima etapa encontrada para:', currentStepId);
-      console.log('Flow config edges:', form?.flow_config?.edges);
+      console.warn('⚠️ Nenhuma próxima etapa encontrada para:', currentStepId);
+      console.log('📊 Flow config edges:', form?.flow_config?.edges);
+      toast.warning('Nenhuma próxima etapa configurada. Verifique as conexões no editor visual.');
     }
   };
 
