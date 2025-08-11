@@ -821,6 +821,9 @@ const StepForm: React.FC = () => {
 
               {currentStep.type === 'form' && (
                 <form onSubmit={handleFormSubmit} className="space-y-4">
+                  <div className="bg-yellow-100 p-2 rounded mb-4">
+                    <p className="text-sm">Debug: Form detectado, onSubmit configurado</p>
+                  </div>
                   {currentStep.formFields?.map((field, index) => (
                     <div key={index}>
                       {field.type === 'textarea' ? (
@@ -850,19 +853,25 @@ const StepForm: React.FC = () => {
                     </div>
                   ))}
                   
-                  <Button 
-                    type="submit"
-                    className="w-full"
-                    onClick={(e) => {
-                      console.log('🔥 BOTÃO CLICADO!', { currentStepType: currentStep?.type });
-                    }}
-                    style={{
-                      backgroundColor: form.styles.primary_color || '#4CAF50',
-                      borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
-                    }}
-                  >
-                    Enviar Formulário
-                  </Button>
+                   <Button 
+                     type="submit"
+                     className="w-full"
+                     onClick={(e) => {
+                       console.log('🔥 BOTÃO CLICADO!', { 
+                         currentStepType: currentStep?.type,
+                         formData,
+                         timestamp: new Date().toISOString()
+                       });
+                       // Note: Este onClick é só para debug, o submit é tratado pelo onSubmit do form
+                     }}
+                     disabled={loading}
+                     style={{
+                       backgroundColor: form.styles.primary_color || '#4CAF50',
+                       borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
+                     }}
+                   >
+                     {loading ? 'Enviando...' : 'Enviar Formulário'}
+                   </Button>
                 </form>
               )}
 
