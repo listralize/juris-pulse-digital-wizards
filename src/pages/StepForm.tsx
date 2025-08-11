@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { Card, CardContent } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { supabase } from '../integrations/supabase/client';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
@@ -188,7 +188,12 @@ const StepForm: React.FC = () => {
       setForm(formData);
     } catch (error) {
       console.error('Erro ao carregar formulário:', error);
-      toast.error('Formulário não encontrado');
+      const { toast } = useToast();
+      toast({
+        title: "Erro",
+        description: "Formulário não encontrado",
+        variant: "destructive"
+      });
       navigate('/');
     } finally {
       setLoading(false);
@@ -287,27 +292,48 @@ const StepForm: React.FC = () => {
         console.log('✅ Navegando para step:', targetStepId);
         setCurrentStepId(targetStepId);
       } else {
-        toast.error(`Etapa "${targetStepId}" não encontrada`);
+        const { toast } = useToast();
+        toast({
+          title: "Erro de navegação",
+          description: `Etapa "${targetStepId}" não encontrada`,
+          variant: "destructive"
+        });
         console.error('❌ Steps disponíveis:', form?.steps.map(s => s.id));
         console.error('❌ Tentando ir para:', targetStepId);
       }
     } else {
       console.warn('⚠️ Nenhuma próxima etapa encontrada para:', currentStepId);
       console.log('📊 Flow config edges:', form?.flow_config?.edges);
-      toast.warning('Nenhuma próxima etapa configurada. Verifique as conexões no editor visual.');
+      const { toast } = useToast();
+      toast({
+        title: "Aviso",
+        description: "Nenhuma próxima etapa configurada. Verifique as conexões no editor visual.",
+        variant: "default"
+      });
     }
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { toast } = useToast();
+    
+    console.log('🚀 Iniciando handleFormSubmit...', { currentStepId, formData, answers });
     
     // Validar campos obrigatórios primeiro
     const currentStep = getCurrentStep();
     if (currentStep?.type === 'form') {
       const requiredFields = currentStep.formFields?.filter(field => field.required) || [];
+      console.log('📋 Validando campos obrigatórios:', requiredFields);
+      
       for (const field of requiredFields) {
         if (!formData[field.name] || formData[field.name].toString().trim() === '') {
-          toast.error(`Campo "${field.label || field.placeholder || field.name}" é obrigatório`);
+          const errorMsg = `Campo "${field.label || field.placeholder || field.name}" é obrigatório`;
+          console.error('❌ Campo obrigatório vazio:', field.name);
+          toast({
+            title: "Campo obrigatório",
+            description: errorMsg,
+            variant: "destructive"
+          });
           return;
         }
       }
@@ -376,8 +402,18 @@ const StepForm: React.FC = () => {
         .single();
 
       if (leadError) {
-        console.error('❌ Erro ao salvar lead:', leadError);
-        toast.error('Erro ao salvar dados. Tente novamente.');
+        console.error('❌ Erro detalhado ao salvar lead:', {
+          error: leadError,
+          leadData: leadData,
+          message: leadError.message,
+          details: leadError.details,
+          hint: leadError.hint
+        });
+        toast({
+          title: "Erro ao salvar dados",
+          description: `Erro: ${leadError.message || 'Erro desconhecido'}`,
+          variant: "destructive"
+        });
         return;
       }
 
@@ -518,13 +554,21 @@ const StepForm: React.FC = () => {
         } catch (webhookError) {
           console.error('❌ Erro ao enviar webhook:', webhookError);
           // Não falhar o formulário por causa do webhook
-          toast.warning('Dados salvos, mas houve erro no envio do webhook');
+          toast({
+            title: "Aviso",
+            description: "Dados salvos, mas houve erro no envio do webhook",
+            variant: "default"
+          });
         }
       } else {
         console.log('ℹ️ Nenhum webhook configurado para este formulário');
       }
 
-      toast.success('Formulário enviado com sucesso!');
+      toast({
+        title: "Sucesso!",
+        description: "Formulário enviado com sucesso!",
+        variant: "default"
+      });
       console.log('🎉 Formulário enviado com sucesso! Redirecionando...');
       
       // Aguardar um pouco para garantir que os eventos de marketing foram processados
@@ -533,8 +577,16 @@ const StepForm: React.FC = () => {
       }, 1000);
       
     } catch (error) {
-      console.error('❌ Erro geral ao enviar formulário:', error);
-      toast.error('Erro ao enviar formulário. Tente novamente.');
+      console.error('❌ Erro geral ao enviar formulário:', {
+        error: error,
+        message: (error as Error)?.message,
+        stack: (error as Error)?.stack
+      });
+      toast({
+        title: "Erro no formulário",
+        description: `Erro: ${(error as Error)?.message || 'Erro desconhecido'}`,
+        variant: "destructive"
+      });
     }
   };
 
