@@ -129,6 +129,7 @@ interface StepFormStep {
 const StepForm: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [form, setForm] = useState<StepFormData | null>(null);
   const [currentStepId, setCurrentStepId] = useState<string>('');
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -188,7 +189,6 @@ const StepForm: React.FC = () => {
       setForm(formData);
     } catch (error) {
       console.error('Erro ao carregar formulário:', error);
-      const { toast } = useToast();
       toast({
         title: "Erro",
         description: "Formulário não encontrado",
@@ -292,7 +292,6 @@ const StepForm: React.FC = () => {
         console.log('✅ Navegando para step:', targetStepId);
         setCurrentStepId(targetStepId);
       } else {
-        const { toast } = useToast();
         toast({
           title: "Erro de navegação",
           description: `Etapa "${targetStepId}" não encontrada`,
@@ -304,7 +303,6 @@ const StepForm: React.FC = () => {
     } else {
       console.warn('⚠️ Nenhuma próxima etapa encontrada para:', currentStepId);
       console.log('📊 Flow config edges:', form?.flow_config?.edges);
-      const { toast } = useToast();
       toast({
         title: "Aviso",
         description: "Nenhuma próxima etapa configurada. Verifique as conexões no editor visual.",
@@ -316,7 +314,6 @@ const StepForm: React.FC = () => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     console.log('🚨 HANDLEFORMSUBMIT CHAMADO!');
     e.preventDefault();
-    const { toast } = useToast();
     
     console.log('🚀 INICIANDO handleFormSubmit...', { 
       currentStepId, 
