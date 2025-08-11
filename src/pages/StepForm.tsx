@@ -176,9 +176,16 @@ const StepForm: React.FC = () => {
         .select('*')
         .eq('slug', slug)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        console.warn('⚠️ Formulário não encontrado para slug:', slug);
+        toast({ title: 'Aviso', description: 'Formulário não encontrado', variant: 'destructive' });
+        navigate('/');
+        setLoading(false);
+        return;
+      }
       
       // Converter os dados do Supabase para o formato esperado
       const formData: StepFormData = {
@@ -405,7 +412,7 @@ const StepForm: React.FC = () => {
         .single();
 
       if (leadError) {
-        console.error('❌ Erro detalhado ao salvar lead:', {
+        console.error('❌ Erro detalhado ao salvar lead (form_leads):', {
           error: leadError,
           leadData: leadData,
           message: leadError.message,
@@ -413,14 +420,14 @@ const StepForm: React.FC = () => {
           hint: leadError.hint
         });
         toast({
-          title: "Erro ao salvar dados",
-          description: `Erro: ${leadError.message || 'Erro desconhecido'}`,
-          variant: "destructive"
+          title: "Aviso",
+          description: `Não foi possível salvar em form_leads. Continuando o envio...`,
+          variant: "default"
         });
-        return;
+        // Não interromper o fluxo — seguimos salvando conversion_events, disparando marketing e webhook
+      } else {
+        console.log('✅ Lead salvo com sucesso:', savedLead);
       }
-
-      console.log('✅ Lead salvo com sucesso:', savedLead);
 
       // Salvar evento de conversão
       try {
