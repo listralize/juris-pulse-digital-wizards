@@ -133,6 +133,9 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
   const digits = String(rawPhone).replace(/\D/g, '');
   const phoneNumber = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
   
+  const whatsappMessage = encodeURIComponent(
+    `Olá${leadData.name ? ` ${leadData.name}` : ''}! Recebemos seu contato sobre ${leadData.service || 'nossos serviços'}.`
+  );
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${whatsappMessage}`;
 
   const handleEdit = (field: string, value: string) => {
