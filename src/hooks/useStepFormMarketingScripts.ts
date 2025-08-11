@@ -46,25 +46,31 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         
         // Criar config compatível com a estrutura esperada
         const trackingConfig = stepForm.tracking_config as any;
+        
+        // Verificar se há pixel_id no nível principal ou dentro de facebook_pixel
+        const pixelId = trackingConfig?.pixel_id || trackingConfig?.facebook_pixel?.pixel_id || '';
+        const fbEnabled = trackingConfig?.facebook_pixel?.enabled || (pixelId && pixelId.length > 0);
+        
         const stepFormConfig = {
           slug: formSlug,
           name: stepForm.name,
           id: stepForm.id,
           enabled: true,
-          facebookPixel: trackingConfig?.facebook_pixel || {
-            enabled: false,
-            pixel_id: ''
+          facebookPixel: {
+            enabled: fbEnabled,
+            pixel_id: pixelId
           },
-          googleAnalytics: trackingConfig?.google_analytics || {
-            enabled: false,
-            tracking_id: ''
+          googleAnalytics: {
+            enabled: trackingConfig?.google_analytics?.enabled || false,
+            tracking_id: trackingConfig?.google_analytics?.tracking_id || ''
           },
-          googleTagManager: trackingConfig?.google_tag_manager || {
-            enabled: false,
-            container_id: ''
+          googleTagManager: {
+            enabled: trackingConfig?.google_tag_manager?.enabled || false,
+            container_id: trackingConfig?.google_tag_manager?.container_id || ''
           }
         };
         
+        console.log(`🎯 Config processada para StepForm ${formSlug}:`, stepFormConfig);
         implementStepFormScripts(stepFormConfig);
       } else {
         console.log(`ℹ️ Nenhuma configuração encontrada para StepForm: ${formSlug}`);

@@ -314,29 +314,40 @@ const StepForm: React.FC = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🚀 Iniciando envio do formulário...');
     setLoading(true);
     
     // Verificar se o form está carregado
     if (!form) {
+      console.error('❌ Formulário não carregado');
       toast({
         title: "Erro",
         description: "Formulário não carregado. Recarregue a página.",
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
+    console.log('📋 Form atual:', form);
+    console.log('📊 Dados do formulário:', formData);
+    console.log('💬 Respostas:', answers);
+    
     // Validar campos obrigatórios primeiro
     const currentStep = getCurrentStep();
+    console.log('⚡ Step atual:', currentStep);
     
     if (currentStep?.type === 'form') {
       const requiredFields = currentStep.formFields?.filter(field => field.required) || [];
+      console.log('📝 Campos obrigatórios:', requiredFields);
       
       for (const field of requiredFields) {
         const fieldValue = formData[field.name];
+        console.log(`🔍 Verificando campo ${field.name}:`, fieldValue);
         
         if (!fieldValue || fieldValue.toString().trim() === '') {
           const errorMsg = `Campo "${field.label || field.placeholder || field.name}" é obrigatório`;
+          console.error('❌ Campo obrigatório não preenchido:', field.name);
           toast({
             title: "Campo obrigatório",
             description: errorMsg,
@@ -347,6 +358,8 @@ const StepForm: React.FC = () => {
         }
       }
     }
+    
+    console.log('✅ Validação de campos concluída');
     try {
       const allData = { 
         ...answers, 
