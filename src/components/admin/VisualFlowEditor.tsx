@@ -430,46 +430,22 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   formData,
   onUpdate
 }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(
-    formData?.steps?.map((step: any, index: number) => ({
-      id: step.id || `step_${index}`,
-      type: step.type || 'question',
-      position: { x: (index % 3) * 300, y: Math.floor(index / 3) * 200 },
-      data: {
-        title: step.title,
-        description: step.description,
-        options: step.options,
-        formFields: step.formFields,
-        offerConfig: step.offerConfig,
-        timerConfig: step.timerConfig,
-        socialProofConfig: step.socialProofConfig,
-        imageUrl: step.imageUrl,
-        videoUrl: step.videoUrl,
-        mediaType: step.mediaType,
-        imagePosition: step.imagePosition,
-        imageHeight: step.imageHeight,
-        videoHeight: step.videoHeight,
-        backgroundColor: step.backgroundColor,
-        textColor: step.textColor,
-        borderColor: step.borderColor,
-        width: step.width,
-        height: step.height,
-      }
-    })) || initialNodes
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    formData?.flowConfig?.edges || initialEdges
   );
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
   const initialDataRef = useRef(false);
 
-  // Sync nodes with formData changes
+  // Sync nodes with formData changes and load edges
   useEffect(() => {
-    if (formData?.steps && formData.steps.length > 0) {
+    if (formData?.steps && formData.steps.length > 0 && !initialDataRef.current) {
       const updatedNodes = formData.steps.map((step: any, index: number) => ({
         id: step.id || `step_${index}`,
         type: step.type || 'question',
-        position: { x: (index % 3) * 300, y: Math.floor(index / 3) * 200 },
+        position: step.position || { x: (index % 3) * 300, y: Math.floor(index / 3) * 200 },
         data: {
           title: step.title,
           description: step.description,
@@ -492,9 +468,15 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         }
       }));
       setNodes(updatedNodes);
+      
+      // Carregar conexões salvas
+      if (formData.flowConfig?.edges && Array.isArray(formData.flowConfig.edges)) {
+        setEdges(formData.flowConfig.edges);
+      }
+      
       initialDataRef.current = true;
     }
-  }, [formData?.steps, setNodes]);
+  }, [formData?.steps, formData?.flowConfig, setNodes, setEdges]);
 
   // Update selectedNode when nodes change
   useEffect(() => {
@@ -532,16 +514,30 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         borderColor: node.data.borderColor,
         width: node.data.width,
         height: node.data.height,
-        config: node.data.config
+        config: node.data.config,
+        position: node.position // Salvar posição do nó
       }));
       
+      // Incluir as conexões no salvamento
+      const flowConfig = {
+        steps: flowData,
+        edges: edges.map(edge => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle: edge.sourceHandle,
+          targetHandle: edge.targetHandle
+        }))
+      };
+      
       onUpdate('steps', flowData);
+      onUpdate('flowConfig', flowConfig);
       toast.success('Fluxo salvo com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar fluxo:', error);
       toast.error('Erro ao salvar o fluxo');
     }
-  }, [nodes, onUpdate]);
+  }, [nodes, edges, onUpdate]);
 
   // Removed auto-save to prevent loops
 
