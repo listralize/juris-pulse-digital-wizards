@@ -432,7 +432,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    formData?.flowConfig?.edges || initialEdges
+    formData?.flowConfig?.edges || formData?.flow_config?.edges || initialEdges
   );
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showImageGallery, setShowImageGallery] = useState(false);
@@ -470,13 +470,14 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       setNodes(updatedNodes);
       
       // Carregar conexões salvas
-      if (formData.flowConfig?.edges && Array.isArray(formData.flowConfig.edges)) {
-        setEdges(formData.flowConfig.edges);
+      if ((formData.flowConfig?.edges || formData.flow_config?.edges) && 
+          Array.isArray(formData.flowConfig?.edges || formData.flow_config?.edges)) {
+        setEdges(formData.flowConfig?.edges || formData.flow_config?.edges);
       }
       
       initialDataRef.current = true;
     }
-  }, [formData?.steps, formData?.flowConfig, setNodes, setEdges]);
+  }, [formData?.steps, formData?.flowConfig, formData?.flow_config, setNodes, setEdges]);
 
   // Update selectedNode when nodes change
   useEffect(() => {

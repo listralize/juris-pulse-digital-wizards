@@ -110,7 +110,13 @@ export const StepFormBuilder: React.FC = () => {
 
       if (error) throw error;
       
-      setForms(data || []);
+      // Mapear flow_config para flowConfig
+      const formsWithFlowConfig = (data || []).map(form => ({
+        ...form,
+        flowConfig: form.flow_config
+      }));
+      
+      setForms(formsWithFlowConfig);
     } catch (error) {
       console.error('Erro ao carregar formulários:', error);
       toast.error('Erro ao carregar formulários');
@@ -335,9 +341,12 @@ export const StepFormBuilder: React.FC = () => {
                   onUpdate={async (field, value) => {
                     if (selectedForm?.id) {
                       try {
+                        // Mapear flowConfig para flow_config
+                        const dbField = field === 'flowConfig' ? 'flow_config' : field;
+                        
                         const { error } = await supabase
                           .from('step_forms')
-                          .update({ [field]: value })
+                          .update({ [dbField]: value })
                           .eq('id', selectedForm.id);
                         
                         if (error) throw error;
@@ -350,6 +359,11 @@ export const StepFormBuilder: React.FC = () => {
                           .single();
                           
                         if (fetchError) throw fetchError;
+                        
+                         // Mapear flow_config de volta para flowConfig
+                         if (updatedData.flow_config) {
+                           (updatedData as any).flowConfig = updatedData.flow_config;
+                         }
                         
                         setSelectedForm(updatedData);
                         
@@ -364,6 +378,9 @@ export const StepFormBuilder: React.FC = () => {
                         console.error('Erro ao salvar:', error);
                         toast.error('Erro ao salvar alterações');
                       }
+                    } else {
+                      // Se não tem ID ainda, apenas atualiza localmente
+                      setSelectedForm({ ...selectedForm, [field]: value });
                     }
                   }}
                 />

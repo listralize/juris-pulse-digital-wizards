@@ -1286,6 +1286,7 @@ export type Database = {
       step_forms: {
         Row: {
           created_at: string
+          flow_config: Json | null
           footer_config: Json | null
           id: string
           is_active: boolean
@@ -1304,6 +1305,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          flow_config?: Json | null
           footer_config?: Json | null
           id?: string
           is_active?: boolean
@@ -1322,6 +1324,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          flow_config?: Json | null
           footer_config?: Json | null
           id?: string
           is_active?: boolean
