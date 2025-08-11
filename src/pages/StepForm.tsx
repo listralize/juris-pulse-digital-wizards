@@ -317,16 +317,38 @@ const StepForm: React.FC = () => {
     e.preventDefault();
     const { toast } = useToast();
     
-    console.log('🚀 Iniciando handleFormSubmit...', { currentStepId, formData, answers });
+    console.log('🚀 INICIANDO handleFormSubmit...', { 
+      currentStepId, 
+      formData, 
+      answers, 
+      form: form?.name,
+      formSteps: form?.steps?.length 
+    });
+    
+    // Verificar se o form está carregado
+    if (!form) {
+      console.error('❌ Form não carregado!');
+      toast({
+        title: "Erro",
+        description: "Formulário não carregado. Recarregue a página.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Validar campos obrigatórios primeiro
     const currentStep = getCurrentStep();
+    console.log('📋 Current step:', { currentStep, type: currentStep?.type });
+    
     if (currentStep?.type === 'form') {
       const requiredFields = currentStep.formFields?.filter(field => field.required) || [];
       console.log('📋 Validando campos obrigatórios:', requiredFields);
       
       for (const field of requiredFields) {
-        if (!formData[field.name] || formData[field.name].toString().trim() === '') {
+        const fieldValue = formData[field.name];
+        console.log(`🔍 Validando campo ${field.name}:`, fieldValue);
+        
+        if (!fieldValue || fieldValue.toString().trim() === '') {
           const errorMsg = `Campo "${field.label || field.placeholder || field.name}" é obrigatório`;
           console.error('❌ Campo obrigatório vazio:', field.name);
           toast({
@@ -591,7 +613,10 @@ const StepForm: React.FC = () => {
   };
 
   const getCurrentStep = () => {
-    return form?.steps.find(step => step.id === currentStepId);
+    console.log('🔍 getCurrentStep chamado:', { currentStepId, formSteps: form?.steps?.length });
+    const step = form?.steps?.find(step => step.id === currentStepId);
+    console.log('🔍 Step encontrado:', step);
+    return step;
   };
 
   const getBackStep = (currentStep: StepFormStep) => {
