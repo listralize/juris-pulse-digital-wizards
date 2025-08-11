@@ -1030,6 +1030,7 @@ export const LeadsManagement: React.FC = () => {
                          <th className="text-left p-2">Nome</th>
                          <th className="text-left p-2">Contato</th>
                          <th className="text-left p-2">Serviço</th>
+                         <th className="text-left p-2">Localização</th>
                          <th className="text-left p-2">Data</th>
                          <th className="text-left p-2">Status</th>
                          <th className="text-left p-2">Ações</th>
@@ -1089,6 +1090,12 @@ export const LeadsManagement: React.FC = () => {
                              </div>
                            </td>
                           <td className="p-2">{leadData.service || 'N/A'}</td>
+                          <td className="p-2 text-sm text-muted-foreground">
+                            {(lead as any).ddd_locations?.cities && `${(lead as any).ddd_locations.cities}`}
+                            {lead.state && ` - ${lead.state}`}
+                            {lead.region && ` (${lead.region})`}
+                            {lead.ddd && ` - DDD ${lead.ddd}`}
+                          </td>
                           <td className="p-2">{new Date(lead.created_at).toLocaleDateString('pt-BR')}</td>
                           <td className="p-2">
                             <Select
