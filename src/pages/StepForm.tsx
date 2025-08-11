@@ -354,22 +354,19 @@ const StepForm: React.FC = () => {
       // Salvar no banco de dados
       const leadData = {
         lead_data: allData,
-        form_id: `stepform_${form?.id}`,
+        form_id: form?.slug || form?.id || 'stepform',
         form_name: form?.name || 'Step Form',
-        name: formResponses.name || formResponses.nome || '',
-        email: formResponses.email || '',
-        phone: formResponses.phone || formResponses.telefone || formResponses.tel || '',
-        message: formResponses.message || formResponses.mensagem || JSON.stringify(formResponses),
         form_step_data: formResponses,
         completion_percentage: completionPercentage,
         referrer: document.referrer || '',
         utm_source: utmData.utm_source,
         utm_medium: utmData.utm_medium,
         utm_campaign: utmData.utm_campaign,
-        utm_term: utmData.utm_term,
-        utm_content: utmData.utm_content,
         session_id: sessionId,
-        lead_status: 'new'
+        visitor_id: `stepform_${Date.now()}`,
+        source_page: window.location.href,
+        user_agent: navigator.userAgent,
+        status: 'new'
       };
 
       const { data: savedLead, error: leadError } = await supabase
