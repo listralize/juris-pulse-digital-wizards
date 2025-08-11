@@ -331,16 +331,33 @@ export const StepFormBuilder: React.FC = () => {
                 <VisualFlowEditor
                   formData={selectedForm}
                   onUpdate={async (field, value) => {
-                    const updated = { ...selectedForm, [field]: value };
-                    setSelectedForm(updated);
-                    
-                    if (updated.id) {
+                    if (selectedForm?.id) {
                       try {
                         const { error } = await supabase
                           .from('step_forms')
                           .update({ [field]: value })
-                          .eq('id', updated.id);
+                          .eq('id', selectedForm.id);
+                        
                         if (error) throw error;
+                        
+                        // Recarregar dados atualizados do banco
+                        const { data: updatedData, error: fetchError } = await supabase
+                          .from('step_forms')
+                          .select('*')
+                          .eq('id', selectedForm.id)
+                          .single();
+                          
+                        if (fetchError) throw fetchError;
+                        
+                        setSelectedForm(updatedData);
+                        
+                        // Atualizar também a lista de forms
+                        setForms(prevForms => 
+                          prevForms.map(form => 
+                            form.id === selectedForm.id ? updatedData : form
+                          )
+                        );
+                        
                       } catch (error) {
                         console.error('Erro ao salvar:', error);
                         toast.error('Erro ao salvar alterações');
