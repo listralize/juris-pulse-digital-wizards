@@ -125,7 +125,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     // Remover listeners registrados para este StepForm
     const handlersMap = (window as any).__stepFormMarketingHandlers || {};
     const handlers = handlersMap[formSlug];
-    if (handlers?.fb) document.removeEventListener('stepFormSubmitSuccess', handlers.fb);
+    if (handlers?.fb) window.removeEventListener('stepFormSubmitSuccess', handlers.fb as EventListener);
     if (handlers?.ga) document.removeEventListener('stepFormSubmitSuccess', handlers.ga);
     if (handlers?.gtm) document.removeEventListener('stepFormSubmitSuccess', handlers.gtm);
     delete handlersMap[formSlug];
@@ -167,8 +167,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
       // Marcar este pixel como inicializado
       (window as any)[pixelKey] = true;
+      try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (init)`); } catch(e) {}
     } else {
       console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para StepForm ${slug}`);
+      try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (reuse)`); } catch(e) {}
     }
 
     // Adicionar listener específico para submissão bem-sucedida do StepForm
@@ -211,9 +213,9 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     // Registrar listener gerenciado
     const handlersMap = (window as any).__stepFormMarketingHandlers || {};
     if (handlersMap[slug]?.fb) {
-      document.removeEventListener('stepFormSubmitSuccess', handlersMap[slug].fb);
+      window.removeEventListener('stepFormSubmitSuccess', handlersMap[slug].fb as EventListener);
     }
-    document.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
+    window.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
     handlersMap[slug] = { ...(handlersMap[slug] || {}), fb: handleStepFormSuccess as EventListener };
     (window as any).__stepFormMarketingHandlers = handlersMap;
   };
