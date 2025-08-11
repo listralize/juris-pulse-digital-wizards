@@ -26,23 +26,20 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
   const loadStepFormConfig = async () => {
     try {
-      console.log(`📋 Carregando configuração de marketing para StepForm: ${formSlug}`);
-      
-      // Buscar diretamente na tabela step_forms
+      // Buscar diretamente na tabela step_forms - otimizado para buscar apenas o necessário
       const { data: stepForm, error } = await supabase
         .from('step_forms')
         .select('tracking_config, name, id')
         .eq('slug', formSlug)
         .eq('is_active', true)
-        .single();
+        .maybeSingle(); // Usar maybeSingle para evitar erro se não encontrar
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('❌ Erro ao carregar step form:', error);
         return;
       }
 
       if (stepForm && stepForm.tracking_config) {
-        console.log(`✅ Configuração encontrada para StepForm ${formSlug}:`, stepForm.tracking_config);
         
         // Criar config compatível com a estrutura esperada
         const trackingConfig = stepForm.tracking_config as any;
@@ -73,7 +70,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         console.log(`🎯 Config processada para StepForm ${formSlug}:`, stepFormConfig);
         implementStepFormScripts(stepFormConfig);
       } else {
-        console.log(`ℹ️ Nenhuma configuração encontrada para StepForm: ${formSlug}`);
+        // Remover scripts se não há configuração
         removeStepFormScripts(formSlug);
       }
     } catch (error) {
@@ -81,18 +78,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     }
   };
 
+  // Carregar configuração imediatamente sem debounce
   loadStepFormConfig();
 
-  // Escutar atualizações de configuração
-  const handleSettingsUpdate = () => {
-    console.log(`🔄 Recarregando configuração para StepForm: ${formSlug}`);
-    loadStepFormConfig();
-  };
-
-  window.addEventListener('marketingSettingsUpdated', handleSettingsUpdate);
-
   return () => {
-    window.removeEventListener('marketingSettingsUpdated', handleSettingsUpdate);
     removeStepFormScripts(formSlug);
   };
   }, [formSlug]);

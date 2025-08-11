@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -139,37 +139,38 @@ const StepForm: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{[key: string]: number}>({});
 
-  // Load marketing scripts for this step form
-  useStepFormMarketingScripts(slug || '');
+  // Load marketing scripts for this step form - usando memo para evitar recarregamentos
+  const marketingSlug = useMemo(() => slug || '', [slug]);
+  useStepFormMarketingScripts(marketingSlug);
 
   useEffect(() => {
     if (slug) {
-      console.log('🔄 Carregando formulário e forçando reload de scripts de marketing...');
       loadForm();
-      // Forçar recarga dos scripts de marketing
-      window.dispatchEvent(new CustomEvent('marketingSettingsUpdated'));
     }
   }, [slug]);
 
   useEffect(() => {
-    if (form && form.steps.length > 0) {
-      // Determinar o primeiro step baseado no flow_config
+    if (form && form.steps.length > 0 && !currentStepId) {
+      // Determinar o primeiro step baseado no flow_config - só uma vez
       const firstStepId = getFirstStepFromFlow() || form.steps[0].id;
-      console.log('🚀 Definindo step inicial:', firstStepId, { 
-        flowConfig: form.flow_config,
-        availableSteps: form.steps.map(s => s.id)
-      });
       setCurrentStepId(firstStepId);
-      updateProgress();
     }
-  }, [form]);
+  }, [form, currentStepId]);
 
+  // Atualizar progresso quando step muda - memorizado para evitar cálculos desnecessários
   useEffect(() => {
-    updateProgress();
+    if (form && currentStepId) {
+      const currentIndex = form.steps.findIndex(step => step.id === currentStepId);
+      if (currentIndex !== -1) {
+        const progressPercent = ((currentIndex + 1) / form.steps.length) * 100;
+        setProgress(progressPercent);
+      }
+    }
   }, [currentStepId, form]);
 
   const loadForm = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('step_forms')
         .select('*')
@@ -191,6 +192,7 @@ const StepForm: React.FC = () => {
       };
       
       setForm(formData);
+      setLoading(false);
     } catch (error) {
       console.error('Erro ao carregar formulário:', error);
       toast({
@@ -199,27 +201,13 @@ const StepForm: React.FC = () => {
         variant: "destructive"
       });
       navigate('/');
-    } finally {
       setLoading(false);
     }
   };
 
-  const updateProgress = () => {
-    if (!form || !currentStepId) return;
-    
-    const currentIndex = form.steps.findIndex(step => step.id === currentStepId);
-    if (currentIndex !== -1) {
-      const progressPercent = ((currentIndex + 1) / form.steps.length) * 100;
-      setProgress(progressPercent);
-    }
-  };
 
   const saveAnswer = (key: string, value: string) => {
     setAnswers(prev => ({ ...prev, [key]: value }));
-  };
-
-  const goToStep = (stepId: string) => {
-    setCurrentStepId(stepId);
   };
 
   // Função para encontrar o primeiro step baseado no flow_config
@@ -702,7 +690,7 @@ const StepForm: React.FC = () => {
               {getBackStep(currentStep) && (
                 <Button
                   variant="ghost"
-                  onClick={() => goToStep(getBackStep(currentStep)!)}
+                  onClick={() => setCurrentStepId(getBackStep(currentStep)!)}
                   className="mb-4 p-0 h-auto"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
