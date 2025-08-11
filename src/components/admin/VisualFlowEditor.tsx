@@ -15,6 +15,10 @@ import {
   Position,
   BackgroundVariant,
   Handle,
+  BaseEdge,
+  EdgeLabelRenderer,
+  getBezierPath,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from '../ui/button';
@@ -360,7 +364,7 @@ const OfferNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: st
   );
 });
 
-// Componente de nó para timer
+// Componente de nó para timer (mantido apenas para compatibilidade visual de formulários antigos)
 const TimerNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: string }) => {
   const nodeStyle = {
     backgroundColor: data.backgroundColor || '#1a1a1a',
@@ -377,18 +381,10 @@ const TimerNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: st
       <Handle type="target" position={Position.Top} className="w-3 h-3 bg-red-500" />
       <div className="bg-red-500 text-white p-2 rounded-t-lg flex items-center gap-2">
         <Timer className="w-4 h-4" />
-        <span className="font-semibold text-sm">Timer</span>
+        <span className="font-semibold text-sm">Timer (descontinuado)</span>
       </div>
       <div className="p-3" style={{ color: nodeStyle.color }}>
-        <h4 className="font-medium text-sm mb-2">{data.title || 'Novo Timer'}</h4>
-        {data.description && (
-          <p className="text-xs opacity-75 mb-2">{data.description}</p>
-        )}
-        {data.timerConfig && (
-          <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
-            Duração: {(data.timerConfig as TimerConfig).duration} min
-          </div>
-        )}
+        <p className="text-xs opacity-75 mb-2">Elemento legado. Não adicione novos timers.</p>
       </div>
       <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-red-500" />
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-red-500" />
@@ -403,6 +399,31 @@ const nodeTypes: NodeTypes = {
   content: ContentNode,
   offer: OfferNode,
   timer: TimerNode,
+};
+
+// Borda com botão para deletar a ligação
+const ButtonEdge: React.FC<any> = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style = {}, markerEnd }: any) => {
+  const { setEdges } = useReactFlow();
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition,
+  });
+  const onEdgeClick = () => {
+    setEdges((eds: Edge[]) => eds.filter((e) => e.id !== id));
+  };
+  return (
+    <>
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+      <EdgeLabelRenderer>
+        <div style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` }} className="nodrag nopan">
+          <button onClick={onEdgeClick} className="w-6 h-6 rounded-full bg-gray-700 text-white text-xs">×</button>
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+};
+
+const edgeTypes: EdgeTypes = {
+  button: ButtonEdge,
 };
 
 // Configuração inicial de nós
@@ -472,7 +493,8 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       // Carregar conexões salvas
       if ((formData.flowConfig?.edges || formData.flow_config?.edges) && 
           Array.isArray(formData.flowConfig?.edges || formData.flow_config?.edges)) {
-        setEdges(formData.flowConfig?.edges || formData.flow_config?.edges);
+        const loaded = (formData.flowConfig?.edges || formData.flow_config?.edges).map((e: any) => ({ ...e, type: 'button' }));
+        setEdges(loaded);
       }
       
       initialDataRef.current = true;
@@ -544,7 +566,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   // Removed auto-save to prevent loops
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({ ...params, type: 'button' }, eds)),
     [setEdges]
   );
 
@@ -624,6 +646,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           className="w-full h-full"
           style={{ backgroundColor: "#1a1a1a" }}
@@ -667,14 +690,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             <Gift className="w-4 h-4 mr-1" />
             Oferta
           </Button>
-          <Button
-            size="sm"
-            onClick={() => addNode('timer')}
-            className="bg-red-500 hover:bg-red-600"
-          >
-            <Timer className="w-4 h-4 mr-1" />
-            Timer
-          </Button>
+          {/* Timer removido conforme solicitação - não é mais possível adicionar */}
         </div>
 
         {/* Botão de salvar */}
@@ -749,107 +765,25 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     </Select>
                   </div>
 
-                  {selectedNode.data.mediaType === 'image' && (
-                    <>
-                      <div>
-                        <Label className="text-gray-300">URL da Imagem</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            value={String(selectedNode.data.imageUrl || '')}
-                            onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
-                            placeholder="URL da imagem"
-                            className="bg-gray-700 border-gray-600 text-white flex-1"
-                          />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openImageGallery('imageUrl')}
-                            className="whitespace-nowrap"
-                          >
-                            <ImageIcon className="w-4 h-4 mr-1" />
-                            Galeria
-                          </Button>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-gray-300">Posição da Imagem</Label>
-                        <Select 
-                          value={String(selectedNode.data.imagePosition || 'top')}
-                          onValueChange={(value) => updateNode(selectedNode.id, { imagePosition: value })}
-                        >
-                          <SelectTrigger className="bg-gray-700 border-gray-600">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="top">Acima do texto</SelectItem>
-                            <SelectItem value="left">À esquerda</SelectItem>
-                            <SelectItem value="right">À direita</SelectItem>
-                            <SelectItem value="bottom">Abaixo do texto</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-gray-300">Altura da Imagem</Label>
-                        <Input
-                          value={String(selectedNode.data.imageHeight || '80px')}
-                          onChange={(e) => updateNode(selectedNode.id, { imageHeight: e.target.value })}
-                          placeholder="ex: 120px"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {selectedNode.data.mediaType === 'video' && (
-                    <>
-                      <div>
-                        <Label className="text-gray-300">URL do Vídeo</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            value={String(selectedNode.data.videoUrl || '')}
-                            onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
-                            placeholder="URL do vídeo"
-                            className="bg-gray-700 border-gray-600 text-white flex-1"
-                          />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openImageGallery('videoUrl')}
-                            className="whitespace-nowrap"
-                          >
-                            <ImageIcon className="w-4 h-4 mr-1" />
-                            Galeria
-                          </Button>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-gray-300">Posição do Vídeo</Label>
-                        <Select 
-                          value={String(selectedNode.data.imagePosition || 'top')} 
-                          onValueChange={(value) => updateNode(selectedNode.id, { imagePosition: value })}
-                        >
-                          <SelectTrigger className="bg-gray-700 border-gray-600">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="top">Acima do texto</SelectItem>
-                            <SelectItem value="left">À esquerda</SelectItem>
-                            <SelectItem value="right">À direita</SelectItem>
-                            <SelectItem value="bottom">Abaixo do texto</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-gray-300">Altura do Vídeo</Label>
-                        <Input
-                          value={String(selectedNode.data.videoHeight || '80px')}
-                          onChange={(e) => updateNode(selectedNode.id, { videoHeight: e.target.value })}
-                          placeholder="ex: 120px"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
-                      </div>
-                    </>
-                  )}
+                  {/* Cor global dos botões do formulário */}
+                  <div>
+                    <Label className="text-gray-300">Cor dos botões (global)</Label>
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        type="color"
+                        value={String(formData?.styles?.primary_color || '#4CAF50')}
+                        onChange={(e) => onUpdate && onUpdate('styles', { ...(formData.styles || {}), primary_color: e.target.value })}
+                        className="w-16 bg-gray-700 border-gray-600"
+                      />
+                      <Input
+                        value={String(formData?.styles?.primary_color || '#4CAF50')}
+                        onChange={(e) => onUpdate && onUpdate('styles', { ...(formData.styles || {}), primary_color: e.target.value })}
+                        placeholder="#4CAF50"
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">Essa cor será aplicada a todos os botões no formulário.</p>
+                  </div>
 
                   <div>
                     <Label className="text-gray-300">Opções</Label>

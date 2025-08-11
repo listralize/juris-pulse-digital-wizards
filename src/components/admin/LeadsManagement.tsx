@@ -1077,32 +1077,29 @@ export const LeadsManagement: React.FC = () => {
                                    <Mail className="h-4 w-4" />
                                  </button>
                                </div>
-                               {(leadData.phone || leadData.telefone || leadData.tel || leadData.celular) && (
-                                 <div className="flex items-center gap-2">
-                                   {(() => {
-                                     const raw = leadData.phone || leadData.telefone || leadData.tel || leadData.celular || '';
-                                     const digits = String(raw).replace(/\D/g, '');
-                                     const normalized = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
-                                     const waUrl = `https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(`Olá ${leadData.name || ''}, vi que você entrou em contato conosco através do site. Como posso ajudar?`)}`;
-                                     return (
-                                       <a
-                                         href={waUrl}
-                                         target="_blank"
-                                         rel="noopener noreferrer"
-                                         className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                       >
-                                         <MessageSquare className="h-4 w-4" />
-                                         <span className="text-sm font-medium">WhatsApp</span>
-                                       </a>
-                                     );
-                                   })()}
-                                 </div>
-                               )}
+                               {(() => {
+                                 const raw = leadData.phone || leadData.telefone || leadData.tel || leadData.celular || '';
+                                 if (!raw) return null;
+                                 const digits = String(raw).replace(/\D/g, '');
+                                 const normalized = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
+                                 const waUrl = `https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(`Olá ${leadData.name || ''}, vi que você entrou em contato conosco através do site. Como posso ajudar?`)}`;
+                                 return (
+                                   <a
+                                     href={waUrl}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                   >
+                                     <MessageSquare className="h-4 w-4" />
+                                     <span className="text-sm font-medium">WhatsApp</span>
+                                   </a>
+                                 );
+                               })()}
                              </div>
                            </td>
                           <td className="p-2">
-                            <div className="max-w-[220px] truncate" title={leadData.service || 'N/A'}>
-                              {leadData.service || 'N/A'}
+                            <div className="max-w-[220px] truncate" title={(lead.form_name || leadData.service || 'N/A') as string}>
+                              {lead.form_name || leadData.service || 'N/A'}
                             </div>
                           </td>
                           <td className="p-2 text-sm text-muted-foreground">

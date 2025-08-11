@@ -716,19 +716,21 @@ const StepForm: React.FC = () => {
                     <div className="space-y-3">
                       {currentStep.options.map((option, index) => (
                         <Button
-                          key={index}
-                          variant="outline"
-                          className="w-full justify-start p-4 h-auto text-left"
-                          style={{
-                            borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
-                          }}
-                          onClick={() => {
-                            saveAnswer(currentStep.id, option.text);
-                            goToNextStep(option.nextStep, option.actionType, option.text);
-                          }}
-                        >
-                          {option.text}
-                        </Button>
+                           key={index}
+                           variant="outline"
+                           className="w-full justify-start p-4 h-auto text-left"
+                           style={{
+                             borderColor: form.styles.primary_color || '#4CAF50',
+                             color: form.styles.primary_color || '#4CAF50',
+                             borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
+                           }}
+                           onClick={() => {
+                             saveAnswer(currentStep.id, option.text);
+                             goToNextStep(option.nextStep, option.actionType, option.text);
+                           }}
+                         >
+                           {option.text}
+                         </Button>
                       ))}
                     </div>
                   )}
@@ -847,36 +849,7 @@ const StepForm: React.FC = () => {
                 />
               )}
 
-              {currentStep.type === 'timer' && currentStep.timerConfig && (
-                <div className="space-y-6">
-                  <TimerElement
-                    config={currentStep.timerConfig}
-                    onExpire={(action, url) => {
-                      if (action === 'redirect' && url) {
-                        goToNextStep(url, 'external_url');
-                      } else if (currentStep.buttonAction) {
-                        goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
-                      }
-                    }}
-                    primaryColor={form.styles.primary_color || '#4CAF50'}
-                  />
-                  
-                  <Button
-                    className="w-full"
-                    style={{
-                      backgroundColor: form.styles.primary_color || '#4CAF50',
-                      borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
-                    }}
-                    onClick={() => {
-                      if (currentStep.buttonAction) {
-                        goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
-                      }
-                    }}
-                  >
-                    {currentStep.buttonText || 'Continuar'}
-                  </Button>
-                </div>
-              )}
+              {/* Timer removido conforme solicitação */}
             </CardContent>
           </Card>
         )}

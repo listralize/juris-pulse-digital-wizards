@@ -717,15 +717,22 @@ export const StepFormBuilder: React.FC = () => {
               <CardHeader>
                 <CardTitle>Depoimentos do Formulário</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Funcionalidade em desenvolvimento. Em breve você poderá gerenciar depoimentos específicos para cada formulário.
+                  Configure depoimentos e estatísticas exibidos em etapas de Prova Social.
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <p>Depoimentos personalizados por formulário</p>
-                  <p className="text-sm">Em breve nesta seção!</p>
-                </div>
+                <SocialProofConfigEditor
+                  step={{ socialProofConfig: (selectedForm.seo_config as any)?.social_proof || {} }}
+                  updateStep={(_, value) => {
+                    setSelectedForm({
+                      ...selectedForm,
+                      seo_config: {
+                        ...(selectedForm.seo_config || {}),
+                        social_proof: value,
+                      },
+                    });
+                  }}
+                />
               </CardContent>
             </Card>
           </TabsContent>
