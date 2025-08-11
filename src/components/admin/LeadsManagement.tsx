@@ -1066,17 +1066,25 @@ export const LeadsManagement: React.FC = () => {
                                  <span className="text-sm">{leadData.email || 'N/A'}</span>
                                </div>
                                  {leadData.phone && (
-                                   <div className="flex items-center gap-2">
-                                     <a
-                                       href={`https://api.whatsapp.com/send?phone=${leadData.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`}
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                     >
-                                       <MessageSquare className="h-4 w-4" />
-                                       <span className="text-sm font-medium">WhatsApp</span>
-                                     </a>
-                                   </div>
+                                    <div className="flex items-center gap-2">
+                                      {(() => {
+                                        const raw = leadData.phone || '';
+                                        const digits = String(raw).replace(/\D/g, '');
+                                        const normalized = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
+                                        const waUrl = `https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`;
+                                        return (
+                                          <a
+                                            href={waUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                          >
+                                            <MessageSquare className="h-4 w-4" />
+                                            <span className="text-sm font-medium">WhatsApp</span>
+                                          </a>
+                                        );
+                                      })()}
+                                    </div>
                                  )}
                              </div>
                            </td>

@@ -129,13 +129,9 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
     region: lead.region, 
     ddd: lead.ddd 
   });
-  const whatsappMessage = encodeURIComponent(
-    `Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`
-  );
-  
-  const phoneNumber = leadData.phone ? 
-    leadData.phone.replace(/\D/g, '') : 
-    '5562994594496';
+  const rawPhone = leadData.phone || leadData.telefone || leadData.tel || leadData.celular || '';
+  const digits = String(rawPhone).replace(/\D/g, '');
+  const phoneNumber = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
   
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${whatsappMessage}`;
 

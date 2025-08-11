@@ -75,6 +75,9 @@ interface StepFormStep {
   }>;
   mediaUrl?: string;
   mediaType?: 'image' | 'video' | 'carousel';
+  // Compatibilidade com o editor visual (Image/Video)
+  imageUrl?: string;
+  videoUrl?: string;
   mediaCaption?: string;
   buttonText?: string;
   buttonAction?: string;
@@ -359,9 +362,11 @@ const StepForm: React.FC = () => {
     
     console.log('✅ Validação de campos concluída');
     try {
+      const serviceName = form?.title || document.title || form?.name || 'Consultoria Jurídica';
       const allData = { 
         ...answers, 
         ...formData,
+        service: serviceName,
         form_name: form?.name,
         form_id: form?.slug,
         timestamp: new Date().toISOString()
@@ -440,7 +445,7 @@ const StepForm: React.FC = () => {
           event_label: form?.slug || 'stepform',
           form_id: form?.id || 'stepform',
           form_name: form?.name || 'Step Form',
-          lead_data: formResponses,
+          lead_data: { service: serviceName, ...formResponses },
           conversion_value: 1,
           page_url: window.location.href,
           referrer: document.referrer || null,
@@ -672,11 +677,11 @@ const StepForm: React.FC = () => {
               {currentStep.type === 'question' && (
                 <div className="space-y-6">
                   {/* Media Content for Question */}
-                  {currentStep.mediaUrl && (
+                  {(currentStep.mediaUrl || currentStep.imageUrl || currentStep.videoUrl) && (
                     <div className="mb-6">
                       {renderStepElement({
                         type: currentStep.mediaType,
-                        content: currentStep.mediaUrl,
+                        content: currentStep.mediaUrl || currentStep.imageUrl || currentStep.videoUrl,
                         imageWidth: currentStep.imageWidth,
                         imageHeight: currentStep.imageHeight,
                         videoWidth: currentStep.videoWidth,
@@ -718,8 +723,8 @@ const StepForm: React.FC = () => {
                             borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
                           }}
                           onClick={() => {
-                            saveAnswer(currentStep.id, option.value);
-                            goToNextStep(option.nextStep, option.actionType, option.value);
+                            saveAnswer(currentStep.id, option.text);
+                            goToNextStep(option.nextStep, option.actionType, option.text);
                           }}
                         >
                           {option.text}
@@ -733,11 +738,11 @@ const StepForm: React.FC = () => {
               {currentStep.type === 'content' && (
                 <div className="text-center space-y-6">
                   {/* Media Content */}
-                  {currentStep.mediaUrl && (
+                  {(currentStep.mediaUrl || currentStep.imageUrl || currentStep.videoUrl) && (
                     <div className="mb-6">
                       {renderStepElement({
                         type: currentStep.mediaType,
-                        content: currentStep.mediaUrl,
+                        content: currentStep.mediaUrl || currentStep.imageUrl || currentStep.videoUrl,
                         imageWidth: currentStep.imageWidth,
                         imageHeight: currentStep.imageHeight,
                         videoWidth: currentStep.videoWidth,
