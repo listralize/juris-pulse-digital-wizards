@@ -144,7 +144,10 @@ const StepForm: React.FC = () => {
 
   useEffect(() => {
     if (slug) {
+      console.log('🔄 Carregando formulário e forçando reload de scripts de marketing...');
       loadForm();
+      // Forçar recarga dos scripts de marketing
+      window.dispatchEvent(new CustomEvent('marketingSettingsUpdated'));
     }
   }, [slug]);
 
@@ -465,14 +468,15 @@ const StepForm: React.FC = () => {
       console.log('🎯 Disparando eventos de marketing...', { formSlug: slug });
 
       // Dispatch marketing success event
-      window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { 
-        detail: { 
-          formSlug: slug,
-          formId: form?.id,
-          formName: form?.name,
-          userData: formResponses 
-        } 
-      }));
+      const eventDetail = { 
+        formSlug: slug,
+        formId: form?.id,
+        formName: form?.name,
+        userData: formResponses 
+      };
+      
+      console.log('📢 Evento de sucesso sendo disparado:', eventDetail);
+      window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
 
       // Dispatch Facebook Pixel events se disponível
       if ((window as any).fbq) {
@@ -493,10 +497,12 @@ const StepForm: React.FC = () => {
             form_id: form?.slug
           });
           
-          console.log('✅ Eventos Facebook Pixel disparados');
+          console.log('✅ Eventos Facebook Pixel disparados com sucesso');
         } catch (fbError) {
           console.error('❌ Erro no Facebook Pixel:', fbError);
         }
+      } else {
+        console.warn('⚠️ Facebook Pixel não encontrado no window');
       }
 
       // Dispatch Google Analytics se disponível
@@ -511,10 +517,12 @@ const StepForm: React.FC = () => {
             form_name: form?.name
           });
           
-          console.log('✅ Eventos Google Analytics disparados');
+          console.log('✅ Eventos Google Analytics disparados com sucesso');
         } catch (gaError) {
           console.error('❌ Erro no Google Analytics:', gaError);
         }
+      } else {
+        console.warn('⚠️ Google Analytics não encontrado no window');
       }
 
       console.log('🔗 Enviando para webhook...', { webhookUrl: form?.webhook_url });
@@ -586,12 +594,16 @@ const StepForm: React.FC = () => {
       // Aguardar um pouco para garantir que os eventos de marketing foram processados
       setTimeout(() => {
         const redirectUrl = form?.redirect_url || '/obrigado';
+        console.log('🔗 Redirecionando para:', redirectUrl);
+        
         if (redirectUrl.startsWith('http')) {
+          console.log('🌐 Redirecionamento externo:', redirectUrl);
           window.location.href = redirectUrl;
         } else {
+          console.log('🏠 Redirecionamento interno:', redirectUrl);
           navigate(redirectUrl);
         }
-      }, 1000);
+      }, 1500);
       
     } catch (error) {
       console.error('❌ Erro geral ao enviar formulário:', {
