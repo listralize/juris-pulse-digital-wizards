@@ -66,7 +66,7 @@ const parseLeadData = (leadData: any) => {
     return {
       name: leadData?.name || leadData?.nome || '',
       email: leadData?.email || '',
-      phone: leadData?.phone || leadData?.telefone || '',
+      phone: leadData?.phone || leadData?.telefone || leadData?.tel || leadData?.celular || '',
       service: leadData?.service || leadData?.servico || '',
       message: leadData?.message || leadData?.mensagem || '',
       urgent: leadData?.urgent || leadData?.urgente || false,
@@ -1063,33 +1063,48 @@ export const LeadsManagement: React.FC = () => {
                            <td className="p-2">
                              <div className="space-y-1">
                                <div className="flex items-center gap-2">
-                                 <Mail className="h-3 w-3" />
-                                 <span className="text-sm">{leadData.email || 'N/A'}</span>
+                                 <button
+                                   type="button"
+                                   onClick={() => {
+                                     if (leadData.email) {
+                                       navigator.clipboard.writeText(leadData.email);
+                                       toast.success('Email copiado!');
+                                     }
+                                   }}
+                                   className="text-muted-foreground hover:text-foreground transition-colors"
+                                   title={leadData.email || 'Copiar email'}
+                                 >
+                                   <Mail className="h-4 w-4" />
+                                 </button>
                                </div>
-                                 {leadData.phone && (
-                                    <div className="flex items-center gap-2">
-                                      {(() => {
-                                        const raw = leadData.phone || '';
-                                        const digits = String(raw).replace(/\D/g, '');
-                                        const normalized = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
-                                        const waUrl = `https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(`Olá ${leadData.name}, vi que você entrou em contato conosco através do site. Como posso ajudá-lo(a)?`)}`;
-                                        return (
-                                          <a
-                                            href={waUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                          >
-                                            <MessageSquare className="h-4 w-4" />
-                                            <span className="text-sm font-medium">WhatsApp</span>
-                                          </a>
-                                        );
-                                      })()}
-                                    </div>
-                                 )}
+                               {(leadData.phone || leadData.telefone || leadData.tel || leadData.celular) && (
+                                 <div className="flex items-center gap-2">
+                                   {(() => {
+                                     const raw = leadData.phone || leadData.telefone || leadData.tel || leadData.celular || '';
+                                     const digits = String(raw).replace(/\D/g, '');
+                                     const normalized = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
+                                     const waUrl = `https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(`Olá ${leadData.name || ''}, vi que você entrou em contato conosco através do site. Como posso ajudar?`)}`;
+                                     return (
+                                       <a
+                                         href={waUrl}
+                                         target="_blank"
+                                         rel="noopener noreferrer"
+                                         className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                       >
+                                         <MessageSquare className="h-4 w-4" />
+                                         <span className="text-sm font-medium">WhatsApp</span>
+                                       </a>
+                                     );
+                                   })()}
+                                 </div>
+                               )}
                              </div>
                            </td>
-                          <td className="p-2">{leadData.service || 'N/A'}</td>
+                          <td className="p-2">
+                            <div className="max-w-[220px] truncate" title={leadData.service || 'N/A'}>
+                              {leadData.service || 'N/A'}
+                            </div>
+                          </td>
                           <td className="p-2 text-sm text-muted-foreground">
                             {(lead as any).ddd_locations?.cities && `${(lead as any).ddd_locations.cities}`}
                             {lead.state && ` - ${lead.state}`}

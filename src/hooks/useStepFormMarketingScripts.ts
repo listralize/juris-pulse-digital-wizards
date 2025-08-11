@@ -45,8 +45,8 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         const trackingConfig = stepForm.tracking_config as any;
         
         // Verificar se há pixel_id no nível principal ou dentro de facebook_pixel
-        const pixelId = trackingConfig?.pixel_id || trackingConfig?.facebook_pixel?.pixel_id || '';
-        const fbEnabled = trackingConfig?.facebook_pixel?.enabled || (pixelId && pixelId.length > 0);
+         const pixelId = trackingConfig?.pixel_id || trackingConfig?.facebook_pixel?.pixel_id || '';
+         const fbEnabled = (trackingConfig?.facebook_pixel === true) || (trackingConfig?.facebook_pixel?.enabled === true) || (pixelId && String(pixelId).length > 0);
         
         const stepFormConfig = {
           slug: formSlug,

@@ -307,10 +307,14 @@ export const StepFormBuilder: React.FC = () => {
         </div>
 
         <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="visual" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               Editor Visual
+            </TabsTrigger>
+            <TabsTrigger value="code" className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              Editor de Código
             </TabsTrigger>
             <TabsTrigger value="page" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />
@@ -376,6 +380,325 @@ export const StepFormBuilder: React.FC = () => {
                     }
                   }}
                 />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="code" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Configurações Gerais
+                  {selectedForm.id && (
+                    <Badge variant="outline" className="text-xs">
+                      URL: /form/{selectedForm.slug}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Nome do Formulário</Label>
+                    <Input
+                      id="name"
+                      value={selectedForm.name}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="slug">Slug (URL)</Label>
+                    <Input
+                      id="slug"
+                      value={selectedForm.slug}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, slug: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="title">Título</Label>
+                    <Input
+                      id="title"
+                      value={selectedForm.title}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, title: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subtitle">Subtítulo</Label>
+                    <Input
+                      id="subtitle"
+                      value={selectedForm.subtitle || ''}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, subtitle: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="logo_url">Logo do Formulário</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="logo_url"
+                        value={selectedForm.logo_url || ''}
+                        onChange={(e) => setSelectedForm({ ...selectedForm, logo_url: e.target.value })}
+                        placeholder="URL da imagem ou selecione da galeria"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowImageGallery(true)}
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Galeria
+                      </Button>
+                    </div>
+                    {selectedForm.logo_url && (
+                      <div className="mt-2">
+                        <img 
+                          src={selectedForm.logo_url} 
+                          alt="Preview do logo" 
+                          className="max-w-xs h-16 object-contain border rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="webhook_url">URL do Webhook</Label>
+                    <Input
+                      id="webhook_url"
+                      value={selectedForm.webhook_url}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, webhook_url: e.target.value })}
+                      placeholder="https://exemplo.com/webhook"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="redirect_url">URL de Redirecionamento</Label>
+                    <Input
+                      id="redirect_url"
+                      value={selectedForm.redirect_url || '/obrigado'}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, redirect_url: e.target.value })}
+                      placeholder="/obrigado ou https://seusite.com/sucesso"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      URL para onde o usuário será redirecionado após enviar o formulário
+                    </p>
+                  </div>
+                </div>
+
+                {/* Seção de Configurações de Rastreamento */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Códigos de Rastreamento</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="facebook_pixel"
+                            checked={trackingConfig.facebook_pixel}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, facebook_pixel: checked }))
+                            }
+                          />
+                          <Label htmlFor="facebook_pixel">Facebook Pixel</Label>
+                        </div>
+                        {trackingConfig.facebook_pixel && (
+                          <Input
+                            placeholder="ID do Pixel"
+                            value={trackingConfig.pixel_id}
+                            onChange={(e) => 
+                              setTrackingConfig(prev => ({ ...prev, pixel_id: e.target.value }))
+                            }
+                          />
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="google_analytics"
+                            checked={trackingConfig.google_analytics}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, google_analytics: checked }))
+                            }
+                          />
+                          <Label htmlFor="google_analytics">Google Analytics</Label>
+                        </div>
+                        {trackingConfig.google_analytics && (
+                          <Input
+                            placeholder="ID do GA"
+                            value={trackingConfig.ga_id}
+                            onChange={(e) => 
+                              setTrackingConfig(prev => ({ ...prev, ga_id: e.target.value }))
+                            }
+                          />
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="google_tag_manager"
+                            checked={trackingConfig.google_tag_manager}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, google_tag_manager: checked }))
+                            }
+                          />
+                          <Label htmlFor="google_tag_manager">Google Tag Manager</Label>
+                        </div>
+                        {trackingConfig.google_tag_manager && (
+                          <Input
+                            placeholder="ID do GTM"
+                            value={trackingConfig.gtm_id}
+                            onChange={(e) => 
+                              setTrackingConfig(prev => ({ ...prev, gtm_id: e.target.value }))
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+                    
+                    <Button onClick={saveTrackingConfig} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Configurações de Rastreamento
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Configuração do Rodapé */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configuração do Rodapé</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="footer_enabled"
+                        checked={selectedForm.footer_config?.enabled || false}
+                        onCheckedChange={(checked) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            footer_config: { ...selectedForm.footer_config, enabled: checked }
+                          })
+                        }
+                      />
+                      <Label htmlFor="footer_enabled">Habilitar Rodapé</Label>
+                    </div>
+
+                    {selectedForm.footer_config?.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Texto do Rodapé</Label>
+                          <Input
+                            value={selectedForm.footer_config?.text || ''}
+                            onChange={(e) => 
+                              setSelectedForm({
+                                ...selectedForm,
+                                footer_config: { ...selectedForm.footer_config, text: e.target.value }
+                              })
+                            }
+                            placeholder="Atendemos todo o Brasil ✅"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Cor de Fundo</Label>
+                            <Input
+                              type="color"
+                              value={selectedForm.footer_config?.background_color || '#1a1a1a'}
+                              onChange={(e) => 
+                                setSelectedForm({
+                                  ...selectedForm,
+                                  footer_config: { ...selectedForm.footer_config, background_color: e.target.value }
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label>Cor do Texto</Label>
+                            <Input
+                              type="color"
+                              value={selectedForm.footer_config?.text_color || '#ffffff'}
+                              onChange={(e) => 
+                                setSelectedForm({
+                                  ...selectedForm,
+                                  footer_config: { ...selectedForm.footer_config, text_color: e.target.value }
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Tamanho da Fonte</Label>
+                          <Select
+                            value={selectedForm.footer_config?.font_size || 'text-sm'}
+                            onValueChange={(value) => 
+                              setSelectedForm({
+                                ...selectedForm,
+                                footer_config: { ...selectedForm.footer_config, font_size: value }
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text-xs">Pequeno</SelectItem>
+                              <SelectItem value="text-sm">Médio</SelectItem>
+                              <SelectItem value="text-base">Grande</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Configurações de SEO */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configurações de SEO</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Meta Título</Label>
+                      <Input
+                        value={selectedForm.seo_config?.meta_title || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_title: e.target.value }
+                          })
+                        }
+                        placeholder="Título da página"
+                      />
+                    </div>
+                    <div>
+                      <Label>Meta Descrição</Label>
+                      <Textarea
+                        value={selectedForm.seo_config?.meta_description || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_description: e.target.value }
+                          })
+                        }
+                        placeholder="Descrição da página"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label>Palavras-chave</Label>
+                      <Input
+                        value={selectedForm.seo_config?.meta_keywords || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_keywords: e.target.value }
+                          })
+                        }
+                        placeholder="palavra1, palavra2, palavra3"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </TabsContent>
