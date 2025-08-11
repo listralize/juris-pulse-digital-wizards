@@ -473,52 +473,10 @@ const StepForm: React.FC = () => {
       console.log('📢 Evento de sucesso sendo disparado:', eventDetail);
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
 
-      // Dispatch Facebook Pixel events se disponível
-      if ((window as any).fbq) {
-        try {
-          console.log('📘 Disparando eventos Facebook Pixel...');
-          
-          (window as any).fbq('track', 'Lead', {
-            content_name: form?.name || 'Step Form',
-            content_category: 'step_form_submission',
-            value: 100,
-            currency: 'BRL',
-            form_id: form?.slug
-          });
-          
-          (window as any).fbq('track', 'CompleteRegistration', {
-            content_name: form?.name || 'Step Form',
-            status: 'completed',
-            form_id: form?.slug
-          });
-          
-          console.log('✅ Eventos Facebook Pixel disparados com sucesso');
-        } catch (fbError) {
-          console.error('❌ Erro no Facebook Pixel:', fbError);
-        }
-      } else {
-        console.warn('⚠️ Facebook Pixel não encontrado no window');
-      }
+      // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.
+      // O hook useStepFormMarketingScripts ouvirá 'stepFormSubmitSuccess' e enviará o evento configurado.
 
-      // Dispatch Google Analytics se disponível
-      if ((window as any).gtag) {
-        try {
-          console.log('📊 Disparando eventos Google Analytics...');
-          
-          (window as any).gtag('event', 'form_submit', {
-            event_category: 'engagement',
-            event_label: form?.slug || 'stepform',
-            form_id: form?.slug,
-            form_name: form?.name
-          });
-          
-          console.log('✅ Eventos Google Analytics disparados com sucesso');
-        } catch (gaError) {
-          console.error('❌ Erro no Google Analytics:', gaError);
-        }
-      } else {
-        console.warn('⚠️ Google Analytics não encontrado no window');
-      }
+      // Eventos diretos do Google Analytics removidos; o hook cuidará via stepFormSubmitSuccess.
 
       console.log('🔗 Enviando para webhook...', { webhookUrl: form?.webhook_url });
 
