@@ -68,6 +68,7 @@ interface StepFormStep {
   formFields?: Array<{
     name: string;
     type: string;
+    label?: string;
     placeholder: string;
     required: boolean;
   }>;
@@ -300,18 +301,32 @@ const StepForm: React.FC = () => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validar campos obrigatórios primeiro
+    const currentStep = getCurrentStep();
+    if (currentStep?.type === 'form') {
+      const requiredFields = currentStep.formFields?.filter(field => field.required) || [];
+      for (const field of requiredFields) {
+        if (!formData[field.name] || formData[field.name].toString().trim() === '') {
+          toast.error(`Campo "${field.label || field.placeholder || field.name}" é obrigatório`);
+          return;
+        }
+      }
+    }
+    
     try {
       console.log('📋 Iniciando envio do formulário step form...', { 
         currentStepId, 
         formData, 
-        answers 
+        answers,
+        formSlug: slug
       });
 
       const allData = { 
         ...answers, 
         ...formData,
         form_name: form?.name,
-        form_id: form?.slug
+        form_id: form?.slug,
+        timestamp: new Date().toISOString()
       };
       
       // Calcular porcentagem de conclusão
@@ -329,7 +344,7 @@ const StepForm: React.FC = () => {
         utm_content: urlParams.get('utm_content')
       };
 
-      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const sessionId = `stepform_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Extrair campos específicos dos dados do formulário
       const formResponses = { ...answers, ...formData };
@@ -343,7 +358,7 @@ const StepForm: React.FC = () => {
         form_name: form?.name || 'Step Form',
         name: formResponses.name || formResponses.nome || '',
         email: formResponses.email || '',
-        phone: formResponses.phone || formResponses.telefone || '',
+        phone: formResponses.phone || formResponses.telefone || formResponses.tel || '',
         message: formResponses.message || formResponses.mensagem || JSON.stringify(formResponses),
         form_step_data: formResponses,
         completion_percentage: completionPercentage,
@@ -357,82 +372,169 @@ const StepForm: React.FC = () => {
         lead_status: 'new'
       };
 
-      const { error: leadError } = await supabase
+      const { data: savedLead, error: leadError } = await supabase
         .from('form_leads')
-        .insert([leadData]);
+        .insert([leadData])
+        .select()
+        .single();
 
       if (leadError) {
         console.error('❌ Erro ao salvar lead:', leadError);
-        toast.error('Erro ao salvar lead no sistema');
-        throw leadError;
-      } else {
-        console.log('✅ Lead salvo com sucesso no sistema');
+        toast.error('Erro ao salvar dados. Tente novamente.');
+        return;
+      }
+
+      console.log('✅ Lead salvo com sucesso:', savedLead);
+
+      // Salvar evento de conversão
+      try {
+        const conversionData = {
+          session_id: sessionId,
+          visitor_id: `stepform_${Date.now()}`,
+          event_type: 'form_submission',
+          event_category: 'step_form',
+          event_action: 'submit',
+          event_label: form?.slug || 'stepform',
+          form_id: form?.id || 'stepform',
+          form_name: form?.name || 'Step Form',
+          lead_data: formResponses,
+          conversion_value: 1,
+          page_url: window.location.href,
+          referrer: document.referrer || null,
+          user_agent: navigator.userAgent
+        };
+
+        const { error: conversionError } = await supabase
+          .from('conversion_events')
+          .insert([conversionData]);
+
+        if (conversionError) {
+          console.warn('⚠️ Erro ao salvar evento de conversão:', conversionError);
+        } else {
+          console.log('✅ Evento de conversão salvo');
+        }
+      } catch (conversionError) {
+        console.warn('⚠️ Erro ao processar evento de conversão:', conversionError);
       }
 
       console.log('🎯 Disparando eventos de marketing...', { formSlug: slug });
 
-      // Dispatch success event for marketing tracking
+      // Dispatch marketing success event
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { 
         detail: { 
           formSlug: slug,
+          formId: form?.id,
+          formName: form?.name,
           userData: formResponses 
         } 
       }));
 
-      // Dispatch Facebook Pixel events diretamente também
+      // Dispatch Facebook Pixel events se disponível
       if ((window as any).fbq) {
         try {
+          console.log('📘 Disparando eventos Facebook Pixel...');
+          
           (window as any).fbq('track', 'Lead', {
             content_name: form?.name || 'Step Form',
-            content_category: 'form_submission',
-            value: 1,
-            currency: 'BRL'
+            content_category: 'step_form_submission',
+            value: 100,
+            currency: 'BRL',
+            form_id: form?.slug
           });
           
           (window as any).fbq('track', 'CompleteRegistration', {
             content_name: form?.name || 'Step Form',
-            status: 'completed'
+            status: 'completed',
+            form_id: form?.slug
           });
           
-          console.log('📘 Eventos Facebook Pixel disparados diretamente');
+          console.log('✅ Eventos Facebook Pixel disparados');
         } catch (fbError) {
           console.error('❌ Erro no Facebook Pixel:', fbError);
+        }
+      }
+
+      // Dispatch Google Analytics se disponível
+      if ((window as any).gtag) {
+        try {
+          console.log('📊 Disparando eventos Google Analytics...');
+          
+          (window as any).gtag('event', 'form_submit', {
+            event_category: 'engagement',
+            event_label: form?.slug || 'stepform',
+            form_id: form?.slug,
+            form_name: form?.name
+          });
+          
+          console.log('✅ Eventos Google Analytics disparados');
+        } catch (gaError) {
+          console.error('❌ Erro no Google Analytics:', gaError);
         }
       }
 
       console.log('🔗 Enviando para webhook...', { webhookUrl: form?.webhook_url });
 
       // Enviar para webhook se configurado
-      if (form?.webhook_url) {
+      if (form?.webhook_url && form.webhook_url.trim()) {
         try {
+          const webhookPayload = {
+            formId: form.id,
+            formSlug: form.slug,
+            formName: form.name,
+            responses: formResponses,
+            allData: allData,
+            submissionDate: new Date().toISOString(),
+            sessionId: sessionId,
+            leadId: savedLead?.id,
+            completionPercentage,
+            ...utmData,
+            metadata: {
+              page_url: window.location.href,
+              referrer: document.referrer,
+              user_agent: navigator.userAgent
+            }
+          };
+
+          console.log('📦 Payload do webhook:', webhookPayload);
+
           const webhookResponse = await fetch(form.webhook_url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              formId: form.id,
-              formName: form.name,
-              responses: formResponses,
-              submissionDate: new Date().toISOString(),
-              sessionId: sessionId,
-              leadData,
-              ...utmData
-            })
+            headers: { 
+              'Content-Type': 'application/json',
+              'User-Agent': 'StepForm-Webhook/1.0'
+            },
+            body: JSON.stringify(webhookPayload)
+          });
+
+          const responseText = await webhookResponse.text();
+          console.log('📥 Resposta do webhook:', {
+            status: webhookResponse.status,
+            statusText: webhookResponse.statusText,
+            response: responseText
           });
 
           if (!webhookResponse.ok) {
-            throw new Error(`Webhook response: ${webhookResponse.status}`);
+            throw new Error(`Webhook failed: ${webhookResponse.status} - ${responseText}`);
           }
 
           console.log('✅ Webhook enviado com sucesso');
         } catch (webhookError) {
           console.error('❌ Erro ao enviar webhook:', webhookError);
           // Não falhar o formulário por causa do webhook
+          toast.warning('Dados salvos, mas houve erro no envio do webhook');
         }
+      } else {
+        console.log('ℹ️ Nenhum webhook configurado para este formulário');
       }
 
       toast.success('Formulário enviado com sucesso!');
       console.log('🎉 Formulário enviado com sucesso! Redirecionando...');
-      navigate('/obrigado');
+      
+      // Aguardar um pouco para garantir que os eventos de marketing foram processados
+      setTimeout(() => {
+        navigate('/obrigado');
+      }, 1000);
+      
     } catch (error) {
       console.error('❌ Erro geral ao enviar formulário:', error);
       toast.error('Erro ao enviar formulário. Tente novamente.');
