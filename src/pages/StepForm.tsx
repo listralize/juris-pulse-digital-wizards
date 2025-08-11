@@ -303,8 +303,8 @@ const StepForm: React.FC = () => {
     }
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFormSubmit = async (e?: any) => {
+    e?.preventDefault?.();
     console.log('🚀 Iniciando envio do formulário...');
     setLoading(true);
     
@@ -817,7 +817,7 @@ const StepForm: React.FC = () => {
               )}
 
               {currentStep.type === 'form' && (
-                <form onSubmit={handleFormSubmit} className="space-y-4">
+                <form noValidate onSubmit={handleFormSubmit} onSubmitCapture={handleFormSubmit} className="space-y-4">
                   {currentStep.formFields?.map((field, index) => (
                     <div key={index}>
                       {field.type === 'textarea' ? (
@@ -848,7 +848,8 @@ const StepForm: React.FC = () => {
                   ))}
                   
                    <Button 
-                     type="submit"
+                     type="button"
+                     onClick={() => handleFormSubmit()}
                      className="w-full"
                      disabled={loading}
                      style={{
