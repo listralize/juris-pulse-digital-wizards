@@ -498,18 +498,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     }
   }, [nodes, onUpdate]);
 
-  // Auto save quando nodes mudam
-  useEffect(() => {
-    if (initialDataRef.current) {
-      const timeoutId = setTimeout(() => {
-        if (nodes.length > 0) {
-          saveFlow();
-        }
-      }, 1000);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [nodes, saveFlow]);
+  // Removed auto-save to prevent loops
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
