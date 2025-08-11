@@ -344,6 +344,8 @@ export const StepFormBuilder: React.FC = () => {
                         // Mapear flowConfig para flow_config
                         const dbField = field === 'flowConfig' ? 'flow_config' : field;
                         
+                        console.log('Salvando campo:', field, '-> DB campo:', dbField, 'valor:', value);
+                        
                         const { error } = await supabase
                           .from('step_forms')
                           .update({ [dbField]: value })

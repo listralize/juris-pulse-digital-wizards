@@ -521,7 +521,6 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       
       // Incluir as conexões no salvamento
       const flowConfig = {
-        steps: flowData,
         edges: edges.map(edge => ({
           id: edge.id,
           source: edge.source,
@@ -530,6 +529,8 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           targetHandle: edge.targetHandle
         }))
       };
+      
+      console.log('Salvando flowConfig:', flowConfig);
       
       onUpdate('steps', flowData);
       onUpdate('flowConfig', flowConfig);
