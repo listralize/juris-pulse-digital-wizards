@@ -32,6 +32,7 @@ type StepFormData = {
   footer_config?: any; // JSONB
   seo_config?: any; // JSONB
   tracking_config?: any; // JSONB
+  flowConfig?: any; // JSONB para salvar posições e conexões do fluxo visual
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -198,6 +199,7 @@ export const StepFormBuilder: React.FC = () => {
           meta_keywords: ''
         },
         tracking_config: trackingConfig,
+        flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
         is_active: selectedForm.is_active
       };
 
@@ -683,6 +685,24 @@ export const StepFormBuilder: React.FC = () => {
                 setSelectedForm({ ...selectedForm, [field]: value });
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="testimonials" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Depoimentos do Formulário</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Funcionalidade em desenvolvimento. Em breve você poderá gerenciar depoimentos específicos para cada formulário.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p>Depoimentos personalizados por formulário</p>
+                  <p className="text-sm">Em breve nesta seção!</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
         </Tabs>
