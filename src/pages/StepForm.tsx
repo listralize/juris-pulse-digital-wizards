@@ -19,6 +19,7 @@ interface StepFormData {
   subtitle?: string;
   logo_url?: string;
   webhook_url: string;
+  redirect_url?: string;
   steps: StepFormStep[];
   styles: {
     primary_color?: string;
@@ -315,17 +316,8 @@ const StepForm: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     
-    console.log('🚀 INICIANDO handleFormSubmit...', { 
-      currentStepId, 
-      formData, 
-      answers, 
-      form: form?.name,
-      formSteps: form?.steps?.length 
-    });
-    
     // Verificar se o form está carregado
     if (!form) {
-      console.error('❌ Form não carregado!');
       toast({
         title: "Erro",
         description: "Formulário não carregado. Recarregue a página.",
@@ -336,37 +328,26 @@ const StepForm: React.FC = () => {
     
     // Validar campos obrigatórios primeiro
     const currentStep = getCurrentStep();
-    console.log('📋 Current step:', { currentStep, type: currentStep?.type });
     
     if (currentStep?.type === 'form') {
       const requiredFields = currentStep.formFields?.filter(field => field.required) || [];
-      console.log('📋 Validando campos obrigatórios:', requiredFields);
       
       for (const field of requiredFields) {
         const fieldValue = formData[field.name];
-        console.log(`🔍 Validando campo ${field.name}:`, fieldValue);
         
         if (!fieldValue || fieldValue.toString().trim() === '') {
           const errorMsg = `Campo "${field.label || field.placeholder || field.name}" é obrigatório`;
-          console.error('❌ Campo obrigatório vazio:', field.name);
           toast({
             title: "Campo obrigatório",
             description: errorMsg,
             variant: "destructive"
           });
+          setLoading(false);
           return;
         }
       }
     }
-    
     try {
-      console.log('📋 Iniciando envio do formulário step form...', { 
-        currentStepId, 
-        formData, 
-        answers,
-        formSlug: slug
-      });
-
       const allData = { 
         ...answers, 
         ...formData,
@@ -394,8 +375,6 @@ const StepForm: React.FC = () => {
 
       // Extrair campos específicos dos dados do formulário
       const formResponses = { ...answers, ...formData };
-      
-      console.log('💾 Salvando lead no banco de dados...', { formResponses, completionPercentage });
       
       // Salvar no banco de dados
       const leadData = {
@@ -593,7 +572,12 @@ const StepForm: React.FC = () => {
       
       // Aguardar um pouco para garantir que os eventos de marketing foram processados
       setTimeout(() => {
-        navigate('/obrigado');
+        const redirectUrl = form?.redirect_url || '/obrigado';
+        if (redirectUrl.startsWith('http')) {
+          window.location.href = redirectUrl;
+        } else {
+          navigate(redirectUrl);
+        }
       }, 1000);
       
     } catch (error) {
@@ -613,9 +597,7 @@ const StepForm: React.FC = () => {
   };
 
   const getCurrentStep = () => {
-    console.log('🔍 getCurrentStep chamado:', { currentStepId, formSteps: form?.steps?.length });
     const step = form?.steps?.find(step => step.id === currentStepId);
-    console.log('🔍 Step encontrado:', step);
     return step;
   };
 

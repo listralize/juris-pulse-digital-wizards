@@ -26,6 +26,7 @@ type StepFormData = {
   subtitle?: string;
   logo_url?: string;
   webhook_url: string;
+  redirect_url?: string;
   steps: any; // JSONB
   styles: any; // JSONB
   seo: any; // JSONB
@@ -132,6 +133,7 @@ export const StepFormBuilder: React.FC = () => {
       title: 'Formulário Interativo',
       subtitle: 'Complete as etapas para prosseguir',
       webhook_url: '',
+      redirect_url: '/obrigado',
       steps: [{
         id: 'inicio',
         title: 'Bem-vindo',
@@ -189,6 +191,7 @@ export const StepFormBuilder: React.FC = () => {
         subtitle: selectedForm.subtitle,
         logo_url: selectedForm.logo_url,
         webhook_url: selectedForm.webhook_url,
+        redirect_url: selectedForm.redirect_url,
         steps: selectedForm.steps,
         styles: selectedForm.styles,
         seo: selectedForm.seo,
@@ -472,6 +475,18 @@ export const StepFormBuilder: React.FC = () => {
                       onChange={(e) => setSelectedForm({ ...selectedForm, webhook_url: e.target.value })}
                       placeholder="https://exemplo.com/webhook"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="redirect_url">URL de Redirecionamento</Label>
+                    <Input
+                      id="redirect_url"
+                      value={selectedForm.redirect_url || '/obrigado'}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, redirect_url: e.target.value })}
+                      placeholder="/obrigado ou https://seusite.com/sucesso"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      URL para onde o usuário será redirecionado após enviar o formulário
+                    </p>
                   </div>
                 </div>
 
