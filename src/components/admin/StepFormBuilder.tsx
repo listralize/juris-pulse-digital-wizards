@@ -329,68 +329,23 @@ export const StepFormBuilder: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <VisualFlowEditor
-                  onSave={(flow) => {
-                    const convertedSteps = flow.nodes.map(node => ({
-                      id: node.id,
-                      title: node.data.title,
-                      description: node.data.description,
-                      type: node.type,
-                      options: node.data.options,
-                      formFields: node.data.formFields,
-                      offerConfig: node.data.offerConfig,
-                      timerConfig: node.data.timerConfig,
-                      socialProofConfig: node.data.socialProofConfig,
-                      imageUrl: node.data.imageUrl,
-                      videoUrl: node.data.videoUrl,
-                      mediaType: node.data.mediaType,
-                      imagePosition: node.data.imagePosition,
-                      imageHeight: node.data.imageHeight,
-                      videoHeight: node.data.videoHeight,
-                      backgroundColor: node.data.backgroundColor,
-                      textColor: node.data.textColor,
-                      borderColor: node.data.borderColor,
-                      width: node.data.width,
-                      height: node.data.height,
-                    }));
-                    setSelectedForm({
-                      ...selectedForm,
-                      steps: convertedSteps
-                    });
-                  }}
-                  formStyles={selectedForm.styles || {}}
-                  onStyleChange={(styles) => {
-                    setSelectedForm({
-                      ...selectedForm,
-                      styles: styles
-                    });
-                  }}
-                  initialFlow={{
-                    nodes: selectedForm.steps?.map((step: any, index: number) => ({
-                      id: step.id || `step_${index}`,
-                      type: step.type || 'question',
-                      position: { x: (index % 3) * 300, y: Math.floor(index / 3) * 200 },
-                      data: {
-                        title: step.title,
-                        description: step.description,
-                        options: step.options,
-                        formFields: step.formFields,
-                        offerConfig: step.offerConfig,
-                        timerConfig: step.timerConfig,
-                        socialProofConfig: step.socialProofConfig,
-                        imageUrl: step.imageUrl,
-                        videoUrl: step.videoUrl,
-                        mediaType: step.mediaType,
-                        imagePosition: step.imagePosition,
-                        imageHeight: step.imageHeight,
-                        videoHeight: step.videoHeight,
-                        backgroundColor: step.backgroundColor,
-                        textColor: step.textColor,
-                        borderColor: step.borderColor,
-                        width: step.width,
-                        height: step.height,
+                  formData={selectedForm}
+                  onUpdate={async (field, value) => {
+                    const updated = { ...selectedForm, [field]: value };
+                    setSelectedForm(updated);
+                    
+                    if (updated.id) {
+                      try {
+                        const { error } = await supabase
+                          .from('step_forms')
+                          .update({ [field]: value })
+                          .eq('id', updated.id);
+                        if (error) throw error;
+                      } catch (error) {
+                        console.error('Erro ao salvar:', error);
+                        toast.error('Erro ao salvar alterações');
                       }
-                    })) || [],
-                    edges: []
+                    }
                   }}
                 />
               </CardContent>
@@ -713,26 +668,6 @@ export const StepFormBuilder: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="testimonials" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuração de Depoimentos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SocialProofConfigEditor
-                  step={selectedForm.steps?.[0] || { socialProofConfig: {} }}
-                  updateStep={(field, value) => {
-                    const updatedSteps = [...(selectedForm.steps || [])];
-                    if (!updatedSteps[0]) {
-                      updatedSteps[0] = { socialProofConfig: {} };
-                    }
-                    updatedSteps[0] = { ...updatedSteps[0], [field]: value };
-                    setSelectedForm({ ...selectedForm, steps: updatedSteps });
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         {/* Galeria de Imagens */}

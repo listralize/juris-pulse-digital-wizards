@@ -39,6 +39,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { ImageGallery } from './ImageGallery';
+import { toast } from 'sonner';
 
 // Tipos de nós customizados
 interface QuestionOption {
@@ -386,48 +387,6 @@ const TimerNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => 
   );
 };
 
-// Componente de nó para prova social
-const SocialProofNode = ({ data, id }: { data: StepFormNode['data']; id: string }) => {
-  const nodeStyle = {
-    backgroundColor: data.backgroundColor || '#1a1a1a',
-    color: data.textColor || '#ffffff',
-    borderColor: data.borderColor || '#6366f1',
-    borderRadius: data.borderRadius || '8px',
-  };
-
-  return (
-    <div 
-      className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
-      style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
-    >
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-indigo-500" />
-      <div className="bg-indigo-500 text-white p-2 rounded-t-lg flex items-center gap-2">
-        <BarChart3 className="w-4 h-4" />
-        <span className="font-semibold text-sm">Prova Social</span>
-      </div>
-      <div className="p-3" style={{ color: nodeStyle.color }}>
-        <h4 className="font-medium text-sm mb-2">{data.title || 'Nova Prova Social'}</h4>
-        {data.socialProofConfig && (
-          <div className="space-y-1">
-            {(data.socialProofConfig as SocialProofConfig).testimonials && (
-              <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
-                {(data.socialProofConfig as SocialProofConfig).testimonials?.length} depoimentos
-              </div>
-            )}
-            {(data.socialProofConfig as SocialProofConfig).stats && (
-              <div className="text-xs bg-gray-800 p-1 rounded text-gray-300">
-                {(data.socialProofConfig as SocialProofConfig).stats?.length} estatísticas
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-indigo-500" />
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-indigo-500" />
-    </div>
-  );
-};
-
 // Tipos de nós personalizados
 const nodeTypes: NodeTypes = {
   question: QuestionNode,
@@ -435,7 +394,6 @@ const nodeTypes: NodeTypes = {
   content: ContentNode,
   offer: OfferNode,
   timer: TimerNode,
-  socialProof: SocialProofNode,
 };
 
 // Configuração inicial de nós
@@ -455,29 +413,103 @@ const initialNodes: Node[] = [
 const initialEdges: Edge[] = [];
 
 interface VisualFlowEditorProps {
-  onSave: (flow: { nodes: Node[]; edges: Edge[] }) => void;
-  initialFlow?: { nodes: Node[]; edges: Edge[] };
-  formStyles?: {
-    backgroundColor?: string;
-    textColor?: string;
-    primaryColor?: string;
-    buttonStyle?: string;
-  };
-  onStyleChange?: (styles: any) => void;
+  formData: any;
+  onUpdate: (field: string, value: any) => void;
 }
 
 export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({ 
-  onSave, 
-  initialFlow,
-  formStyles = {},
-  onStyleChange 
+  formData,
+  onUpdate
 }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialFlow?.nodes || initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow?.edges || initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    formData?.steps?.map((step: any, index: number) => ({
+      id: step.id || `step_${index}`,
+      type: step.type || 'question',
+      position: { x: (index % 3) * 300, y: Math.floor(index / 3) * 200 },
+      data: {
+        title: step.title,
+        description: step.description,
+        options: step.options,
+        formFields: step.formFields,
+        offerConfig: step.offerConfig,
+        timerConfig: step.timerConfig,
+        socialProofConfig: step.socialProofConfig,
+        imageUrl: step.imageUrl,
+        videoUrl: step.videoUrl,
+        mediaType: step.mediaType,
+        imagePosition: step.imagePosition,
+        imageHeight: step.imageHeight,
+        videoHeight: step.videoHeight,
+        backgroundColor: step.backgroundColor,
+        textColor: step.textColor,
+        borderColor: step.borderColor,
+        width: step.width,
+        height: step.height,
+      }
+    })) || initialNodes
+  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
+  const initialDataRef = useRef(false);
+
+  // Mark initial data as loaded
+  useEffect(() => {
+    if (formData?.steps && !initialDataRef.current) {
+      initialDataRef.current = true;
+    }
+  }, [formData]);
+
+  // Save flow callback
+  const saveFlow = useCallback(async () => {
+    if (!onUpdate) return;
+    
+    try {
+      const flowData = nodes.map(node => ({
+        id: node.id,
+        type: node.data.type || node.type,
+        title: node.data.title,
+        description: node.data.description,
+        options: node.data.options,
+        formFields: node.data.formFields,
+        offerConfig: node.data.offerConfig,
+        timerConfig: node.data.timerConfig,
+        socialProofConfig: node.data.socialProofConfig,
+        mediaType: node.data.mediaType,
+        imageUrl: node.data.imageUrl,
+        videoUrl: node.data.videoUrl,
+        imagePosition: node.data.imagePosition,
+        imageHeight: node.data.imageHeight,
+        videoHeight: node.data.videoHeight,
+        backgroundColor: node.data.backgroundColor,
+        textColor: node.data.textColor,
+        borderColor: node.data.borderColor,
+        width: node.data.width,
+        height: node.data.height,
+        config: node.data.config
+      }));
+      
+      onUpdate('steps', flowData);
+      toast.success('Fluxo salvo com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar fluxo:', error);
+      toast.error('Erro ao salvar o fluxo');
+    }
+  }, [nodes, onUpdate]);
+
+  // Auto save quando nodes mudam
+  useEffect(() => {
+    if (initialDataRef.current) {
+      const timeoutId = setTimeout(() => {
+        if (nodes.length > 0) {
+          saveFlow();
+        }
+      }, 1000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [nodes, saveFlow]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -487,17 +519,6 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   }, []);
-
-  // Auto-save quando há mudanças
-  useEffect(() => {
-    const autoSaveTimer = setTimeout(() => {
-      if (nodes.length > 0) {
-        onSave({ nodes, edges });
-      }
-    }, 1000);
-
-    return () => clearTimeout(autoSaveTimer);
-  }, [nodes, edges, onSave]);
 
   const addNode = (type: string) => {
     const newId = `${type}_${Date.now()}`;
@@ -512,7 +533,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         title: `Nova ${type}`,
         description: '',
         options: type === 'question' ? [{ text: 'Opção 1', value: 'opt1' }] : undefined,
-        formFields: type === 'form' ? [{ name: 'name', type: 'text', placeholder: 'Nome', required: true }] : undefined,
+        formFields: type === 'form' ? [{ name: 'nome', type: 'text', placeholder: 'Digite seu nome', label: 'Digite seu nome', required: true }] : undefined,
       },
     };
 
@@ -535,10 +556,6 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     setSelectedNode(null);
   };
 
-  const handleSave = () => {
-    onSave({ nodes, edges });
-  };
-
   const openImageGallery = (field: 'imageUrl' | 'videoUrl') => {
     setImageGalleryField(field);
     setShowImageGallery(true);
@@ -550,13 +567,13 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         updateNode(selectedNode.id, { 
           imageUrl: url, 
           mediaType: 'image',
-          videoUrl: undefined // Limpar vídeo se selecionou imagem
+          videoUrl: undefined
         });
       } else {
         updateNode(selectedNode.id, { 
           videoUrl: url, 
           mediaType: 'video',
-          imageUrl: undefined // Limpar imagem se selecionou vídeo
+          imageUrl: undefined
         });
       }
     }
@@ -626,19 +643,11 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             <Timer className="w-4 h-4 mr-1" />
             Timer
           </Button>
-          <Button
-            size="sm"
-            onClick={() => addNode('socialProof')}
-            className="bg-indigo-500 hover:bg-indigo-600"
-          >
-            <BarChart3 className="w-4 h-4 mr-1" />
-            Prova Social
-          </Button>
         </div>
 
         {/* Botão de salvar */}
         <div className="absolute top-4 right-4">
-          <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={saveFlow} className="bg-green-600 hover:bg-green-700">
             <Save className="w-4 h-4 mr-2" />
             Salvar Fluxo
           </Button>
@@ -809,41 +818,6 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                       </div>
                     </>
                   )}
-
-                  {/* Configurações da Página */}
-                  <div className="space-y-4 p-4 bg-gray-800 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-300 mb-3">Configurações da Página</h4>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Cor de Fundo da Página</Label>
-                      <Input
-                        type="color"
-                        value={formStyles?.backgroundColor || '#ffffff'}
-                        onChange={(e) => onStyleChange?.({ ...formStyles, backgroundColor: e.target.value })}
-                        className="bg-gray-700 border-gray-600"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Cor do Texto da Página</Label>
-                      <Input
-                        type="color"
-                        value={formStyles?.textColor || '#000000'}
-                        onChange={(e) => onStyleChange?.({ ...formStyles, textColor: e.target.value })}
-                        className="bg-gray-700 border-gray-600"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Cor Primária (Botões)</Label>
-                      <Input
-                        type="color"
-                        value={formStyles?.primaryColor || '#4CAF50'}
-                        onChange={(e) => onStyleChange?.({ ...formStyles, primaryColor: e.target.value })}
-                        className="bg-gray-700 border-gray-600"
-                      />
-                    </div>
-                  </div>
 
                   <div>
                     <Label className="text-gray-300">Opções</Label>
@@ -1036,43 +1010,88 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                   <div>
                     <Label className="text-gray-300">Campos do Formulário</Label>
                     {Array.isArray(selectedNode.data.formFields) && selectedNode.data.formFields.map((field: FormField, index: number) => (
-                      <div key={index} className="grid grid-cols-2 gap-2 mt-2">
-                        <Input
-                          value={field.name}
-                          onChange={(e) => {
-                            const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
-                            newFields[index] = { ...field, name: e.target.value };
-                            updateNode(selectedNode.id, { formFields: newFields });
-                          }}
-                          placeholder="Nome do campo"
-                          className="bg-gray-700 border-gray-600 text-white"
-                        />
-                        <Select
-                          value={field.type}
-                          onValueChange={(value) => {
-                            const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
-                            newFields[index] = { ...field, type: value };
-                            updateNode(selectedNode.id, { formFields: newFields });
-                          }}
-                        >
-                          <SelectTrigger className="bg-gray-700 border-gray-600">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="text">Texto</SelectItem>
-                            <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="tel">Telefone</SelectItem>
-                            <SelectItem value="number">Número</SelectItem>
-                            <SelectItem value="textarea">Área de texto</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div key={index} className="space-y-2 p-3 bg-gray-800 rounded-lg mt-2">
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="text-xs">{field.name || `campo_${index + 1}`}</Badge>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              const newFields = (Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : []).filter((_, i) => i !== index);
+                              updateNode(selectedNode.id, { formFields: newFields });
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs text-gray-400">ID do Campo</Label>
+                            <Input
+                              value={field.name}
+                              onChange={(e) => {
+                                const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
+                                newFields[index] = { ...field, name: e.target.value };
+                                updateNode(selectedNode.id, { formFields: newFields });
+                              }}
+                              placeholder="nome_campo"
+                              className="bg-gray-700 border-gray-600 text-white text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-gray-400">Tipo</Label>
+                            <Select
+                              value={field.type}
+                              onValueChange={(value) => {
+                                const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
+                                newFields[index] = { ...field, type: value };
+                                updateNode(selectedNode.id, { formFields: newFields });
+                              }}
+                            >
+                              <SelectTrigger className="bg-gray-700 border-gray-600 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="text">Texto</SelectItem>
+                                <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="tel">Telefone</SelectItem>
+                                <SelectItem value="number">Número</SelectItem>
+                                <SelectItem value="textarea">Área de texto</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-gray-400">Label/Placeholder</Label>
+                          <Input
+                            value={field.label || field.placeholder || ''}
+                            onChange={(e) => {
+                              const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : [])];
+                              newFields[index] = { 
+                                ...field, 
+                                label: e.target.value,
+                                placeholder: e.target.value 
+                              };
+                              updateNode(selectedNode.id, { formFields: newFields });
+                            }}
+                            placeholder="Ex: Escreva seu nome aqui"
+                            className="bg-gray-700 border-gray-600 text-white text-xs"
+                          />
+                        </div>
                       </div>
                     ))}
                     <Button
                       size="sm"
                       onClick={() => {
+                        const fieldCount = (Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields.length : 0) + 1;
                         const newFields = [...(Array.isArray(selectedNode.data.formFields) ? selectedNode.data.formFields : []), 
-                          { name: 'campo', type: 'text', placeholder: 'Digite...', required: false }
+                          { 
+                            name: `campo_${fieldCount}`, 
+                            type: 'text', 
+                            placeholder: 'Digite aqui...', 
+                            label: 'Digite aqui...',
+                            required: false 
+                          }
                         ];
                         updateNode(selectedNode.id, { formFields: newFields });
                       }}
