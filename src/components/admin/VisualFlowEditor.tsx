@@ -633,16 +633,20 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     if (!nodeToDuplicate) return;
 
     const newId = `${nodeId}_copy_${Date.now()}`;
+    
+    // Serialize and deserialize to create a complete deep copy
+    const duplicatedData = JSON.parse(JSON.stringify(nodeToDuplicate.data));
+    
     const newNode = {
-      ...nodeToDuplicate,
       id: newId,
+      type: nodeToDuplicate.type,
       position: {
         x: nodeToDuplicate.position.x + 250,
         y: nodeToDuplicate.position.y + 150,
       },
       data: {
-        ...nodeToDuplicate.data,
-        title: `${nodeToDuplicate.data.title} (Cópia)`,
+        ...duplicatedData,
+        title: `${duplicatedData.title} (Cópia)`,
       },
     };
 
