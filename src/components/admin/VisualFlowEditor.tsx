@@ -628,6 +628,29 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     setSelectedNode(null);
   };
 
+  const duplicateNode = (nodeId: string) => {
+    const nodeToDuplicate = nodes.find((node) => node.id === nodeId);
+    if (!nodeToDuplicate) return;
+
+    const newId = `${nodeId}_copy_${Date.now()}`;
+    const newNode = {
+      ...nodeToDuplicate,
+      id: newId,
+      position: {
+        x: nodeToDuplicate.position.x + 150,
+        y: nodeToDuplicate.position.y + 50,
+      },
+      data: {
+        ...nodeToDuplicate.data,
+        title: `${nodeToDuplicate.data.title} (Cópia)`,
+      },
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+    setSelectedNode(newNode);
+    toast.success('Nó duplicado com sucesso!');
+  };
+
   const openImageGallery = (field: 'imageUrl' | 'videoUrl') => {
     setImageGalleryField(field);
     setShowImageGallery(true);
@@ -734,13 +757,22 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                 <CardTitle className="text-card-foreground">
                   Editar {selectedNode.type?.charAt(0).toUpperCase() + selectedNode.type?.slice(1)}
                 </CardTitle>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => deleteNode(selectedNode.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => duplicateNode(selectedNode.id)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => deleteNode(selectedNode.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
