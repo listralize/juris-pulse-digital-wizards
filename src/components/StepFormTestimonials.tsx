@@ -80,7 +80,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
       const stepFormConfig = data?.global_social_proof as any;
       console.log('Config de prova social:', stepFormConfig);
       
-      if (stepFormConfig?.enabled && (stepFormConfig?.testimonials?.length > 0 || stepFormConfig?.stats?.length > 0)) {
+      if (stepFormConfig && (stepFormConfig?.testimonials?.length > 0 || stepFormConfig?.stats?.length > 0)) {
         setSocialProofConfig(stepFormConfig as SocialProofConfig);
         console.log('Prova social ativada:', stepFormConfig);
       } else {
@@ -92,7 +92,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
     }
   };
 
-  if (!socialProofConfig?.enabled || (!socialProofConfig.testimonials?.length && !socialProofConfig.stats?.length)) {
+  if (!socialProofConfig || (!socialProofConfig.testimonials?.length && !socialProofConfig.stats?.length)) {
     return null;
   }
 

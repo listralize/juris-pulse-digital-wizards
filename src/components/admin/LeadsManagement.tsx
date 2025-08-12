@@ -105,8 +105,8 @@ export const LeadsManagement: React.FC = () => {
     }
   };
 
-  // Helper para parsear dados do lead (síncrono)
-  const parseLeadData = (leadData: any) => {
+  // Helper para parsear dados do lead (assíncrono)
+  const parseLeadData = async (leadData: any) => {
     try {
       if (typeof leadData === 'string') {
         leadData = JSON.parse(leadData);
@@ -214,7 +214,23 @@ export const LeadsManagement: React.FC = () => {
           // Validar se é um DDD válido (11-99)
           if (ddd >= 11 && ddd <= 99) {
             extractedData.ddd = ddd;
-            // Localização será populada pelo trigger do banco ou pela função loadLeads
+            
+            // Buscar localização no banco de dados
+            try {
+              const { data: locationData } = await supabase
+                .from('ddd_locations')
+                .select('state_name, capital, region')
+                .eq('ddd', ddd)
+                .maybeSingle();
+              
+              if (locationData) {
+                extractedData.state = locationData.state_name;
+                extractedData.capital = locationData.capital;
+                extractedData.region = locationData.region;
+              }
+            } catch (error) {
+              console.error('Erro ao buscar localização:', error);
+            }
           }
         }
       }
@@ -313,7 +329,7 @@ export const LeadsManagement: React.FC = () => {
       const seenLeads = new Map<string, any>();
 
       for (const lead of processedLeads) {
-        const leadData = parseLeadData(lead.lead_data);
+        const leadData = await parseLeadData(lead.lead_data);
         const email = leadData.email?.toLowerCase() || '';
         const phone = leadData.phone?.replace(/\D/g, '') || '';
         const key = email || phone;
@@ -362,7 +378,7 @@ export const LeadsManagement: React.FC = () => {
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
       for (const lead of deduplicatedLeads) {
-        const leadData = parseLeadData(lead.lead_data);
+        const leadData = await parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
         }
@@ -541,7 +557,7 @@ export const LeadsManagement: React.FC = () => {
     }
 
     try {
-      const leadData = parseLeadData(lead.lead_data);
+      const leadData = await parseLeadData(lead.lead_data);
       
       if (!leadData.email) {
         toast.error('Email do lead não encontrado');
@@ -660,7 +676,7 @@ export const LeadsManagement: React.FC = () => {
 
     const csvData = [];
     for (const lead of filteredLeads) {
-      const leadData = parseLeadData(lead.lead_data);
+      const leadData = await parseLeadData(lead.lead_data);
       csvData.push({
         'Nome': leadData.name || '',
         'Email': leadData.email || '',
@@ -698,8 +714,8 @@ export const LeadsManagement: React.FC = () => {
 
       // Filtro de busca
       if (searchQuery) {
-        const filteredPromises = filtered.map(lead => {
-          const leadData = parseLeadData(lead.lead_data);
+        const filteredPromises = await Promise.all(filtered.map(async (lead) => {
+          const leadData = await parseLeadData(lead.lead_data);
           const searchLower = searchQuery.toLowerCase();
           const matches = (
             leadData.name?.toLowerCase().includes(searchLower) ||
@@ -708,7 +724,7 @@ export const LeadsManagement: React.FC = () => {
             leadData.service?.toLowerCase().includes(searchLower)
           );
           return matches ? lead : null;
-        });
+        }));
         
         filtered = filteredPromises.filter(lead => lead !== null) as Lead[];
       }
@@ -776,10 +792,10 @@ export const LeadsManagement: React.FC = () => {
 
       // Filtro por serviço
       if (serviceFilter !== 'all') {
-        const serviceFilteredPromises = filtered.map(lead => {
-          const leadData = parseLeadData(lead.lead_data);
+        const serviceFilteredPromises = await Promise.all(filtered.map(async (lead) => {
+          const leadData = await parseLeadData(lead.lead_data);
           return leadData.service === serviceFilter ? lead : null;
-        });
+        }));
         
         filtered = serviceFilteredPromises.filter(lead => lead !== null) as Lead[];
       }

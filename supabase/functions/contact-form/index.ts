@@ -82,6 +82,34 @@ serve(async (req) => {
       redirectUrl: formConfig?.redirectUrl || ''
     }
 
+    // Extrair DDD e buscar localização
+    let ddd = null;
+    let locationInfo = null;
+    
+    if (phone && phone.trim()) {
+      const phoneNumbers = phone.replace(/\D/g, '');
+      
+      if (phoneNumbers.length >= 10) {
+        if (phoneNumbers.startsWith('55') && phoneNumbers.length >= 12) {
+          ddd = parseInt(phoneNumbers.substring(2, 4));
+        } else {
+          ddd = parseInt(phoneNumbers.substring(0, 2));
+        }
+        
+        if (ddd >= 11 && ddd <= 99) {
+          const { data: locationData } = await supabase
+            .from('ddd_locations')
+            .select('state_name, capital, region')
+            .eq('ddd', ddd)
+            .maybeSingle();
+          
+          if (locationData) {
+            locationInfo = locationData;
+          }
+        }
+      }
+    }
+
     // 1. Salvar evento de conversão no Supabase
     console.log('💾 Salvando evento de conversão...')
     const { error: conversionError } = await supabase
@@ -101,7 +129,11 @@ serve(async (req) => {
         conversion_value: 1,
         campaign_source: getUTMParam('utm_source'),
         campaign_medium: getUTMParam('utm_medium'),
-        campaign_name: getUTMParam('utm_campaign')
+        campaign_name: getUTMParam('utm_campaign'),
+        ddd: ddd,
+        state: locationInfo?.state_name,
+        capital: locationInfo?.capital,
+        region: locationInfo?.region
       });
 
     if (conversionError) {
