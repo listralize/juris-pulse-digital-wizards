@@ -76,14 +76,25 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                     checked={selectedLeads.has(lead.id)}
                     onCheckedChange={() => toggleSelectLead(lead.id)}
                   />
-                  <div>
-                    <div className="font-medium text-sm">
-                      {leadData.name || 'Nome não informado'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {leadData.email || 'Email não informado'}
-                    </div>
-                  </div>
+                   <div>
+                     <div className="font-medium text-sm flex items-center gap-2">
+                       {leadData.name || 'Nome não informado'}
+                       {leadData.email && leadData.email !== 'Email não informado' && (
+                         <Button
+                           size="sm"
+                           variant="ghost"
+                           onClick={() => copyToClipboard(leadData.email, 'email')}
+                           className="p-1 h-6 w-6"
+                           title="Copiar email"
+                         >
+                           <Copy className="w-3 h-3" />
+                         </Button>
+                       )}
+                     </div>
+                     <div className="text-xs text-gray-500 truncate max-w-[200px]">
+                       {leadData.email || 'Email não informado'}
+                     </div>
+                   </div>
                 </div>
                 <Badge variant="outline" className={
                   status === 'novo' ? 'bg-blue-50 text-blue-700' :
@@ -95,50 +106,44 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                 </Badge>
               </div>
 
-              <div className="space-y-2 text-sm">
-                <div><strong>Telefone:</strong> {leadData.phone || 'N/A'}</div>
-                <div><strong>Serviço:</strong> {leadData.service || lead.form_name || 'N/A'}</div>
-                <div><strong>Localização:</strong> {lead.state ? `${lead.state} - ${lead.region}` : 'N/A'}</div>
-                <div><strong>Data:</strong> {new Date(lead.created_at).toLocaleDateString('pt-BR')}</div>
-              </div>
+               <div className="space-y-2 text-sm">
+                 <div className="flex items-center gap-2">
+                   <strong>Telefone:</strong> 
+                   <span>{leadData.phone || 'N/A'}</span>
+                   {leadData.phone && leadData.phone !== 'N/A' && (
+                     <Button
+                       size="sm"
+                       variant="ghost"
+                       onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}`, '_blank')}
+                       className="p-1 h-6 w-6"
+                       title="Abrir WhatsApp"
+                     >
+                       <MessageSquare className="w-3 h-3" />
+                     </Button>
+                   )}
+                 </div>
+                 <div><strong>Serviço:</strong> {leadData.service || lead.form_name || 'N/A'}</div>
+                 <div><strong>Localização:</strong> {lead.state ? `${lead.state} - ${lead.region}` : 'N/A'}</div>
+                 <div><strong>Data:</strong> {new Date(lead.created_at).toLocaleDateString('pt-BR')}</div>
+               </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" variant="outline" onClick={() => viewLeadDetails(lead)}>
-                  <Eye className="w-3 h-3 mr-1" />
-                  Ver
-                </Button>
-                {leadData.phone && (
-                  <Button
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}`, '_blank')}
-                  >
-                    <MessageSquare className="w-3 h-3 mr-1" />
-                    WhatsApp
-                  </Button>
-                )}
-                {leadData.email && leadData.email !== 'Email não informado' && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => copyToClipboard(leadData.email, 'email')}
-                  >
-                    <Copy className="w-3 h-3 mr-1" />
-                    Email
-                  </Button>
-                )}
-                <Select value={status} onValueChange={(value) => updateLeadStatus(lead.id, value)}>
-                  <SelectTrigger className="w-20 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="novo">Novo</SelectItem>
-                    <SelectItem value="contato">Contato</SelectItem>
-                    <SelectItem value="cliente">Cliente</SelectItem>
-                    <SelectItem value="perdido">Perdido</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+               <div className="flex gap-2 pt-2">
+                 <Button size="sm" variant="outline" onClick={() => viewLeadDetails(lead)}>
+                   <Eye className="w-3 h-3 mr-1" />
+                   Ver
+                 </Button>
+                 <Select value={status} onValueChange={(value) => updateLeadStatus(lead.id, value)}>
+                   <SelectTrigger className="w-20 h-8">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="novo">Novo</SelectItem>
+                     <SelectItem value="contato">Contato</SelectItem>
+                     <SelectItem value="cliente">Cliente</SelectItem>
+                     <SelectItem value="perdido">Perdido</SelectItem>
+                   </SelectContent>
+                 </Select>
+               </div>
             </div>
           );
         })}
@@ -184,13 +189,39 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                     </div>
                   </td>
                   <td className="p-2">
-                    <div className="max-w-[200px] truncate">
-                      {leadData.email || 'Email não informado'}
+                    <div className="flex items-center gap-2">
+                      {leadData.email && leadData.email !== 'Email não informado' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => copyToClipboard(leadData.email, 'email')}
+                          title="Copiar email"
+                          className="p-1 h-8 w-8"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                        {leadData.email || 'N/A'}
+                      </span>
                     </div>
                   </td>
                   <td className="p-2">
-                    <div className="max-w-[120px] truncate">
-                      {leadData.phone || 'N/A'}
+                    <div className="flex items-center gap-2">
+                      {leadData.phone && leadData.phone !== 'N/A' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}`, '_blank')}
+                          title="Abrir WhatsApp"
+                          className="p-1 h-8 w-8"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <span className="text-xs text-muted-foreground truncate max-w-[80px]">
+                        {leadData.phone || 'N/A'}
+                      </span>
                     </div>
                   </td>
                   <td className="p-2 text-sm text-muted-foreground">
@@ -221,29 +252,9 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                   </td>
                   <td className="p-2">
                     <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => viewLeadDetails(lead)}>
+                      <Button size="sm" variant="ghost" onClick={() => viewLeadDetails(lead)} title="Ver detalhes">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      {leadData.phone && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}`, '_blank')}
-                          title="Abrir WhatsApp"
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {leadData.email && leadData.email !== 'Email não informado' && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard(leadData.email, 'email')}
-                          title="Copiar email"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      )}
                     </div>
                   </td>
                 </tr>

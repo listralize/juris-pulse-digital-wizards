@@ -50,11 +50,11 @@ export const GalleryButton: React.FC<GalleryButtonProps> = ({
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <DialogHeader>
+        <DialogContent className="max-w-6xl h-[85vh] p-2">
+          <DialogHeader className="px-4 pt-4">
             <DialogTitle>Galeria de Imagens</DialogTitle>
           </DialogHeader>
-          <div className="h-full overflow-y-auto">
+          <div className="h-full overflow-y-auto p-4">
             <UniversalGallery onSelect={handleImageSelect} />
           </div>
         </DialogContent>

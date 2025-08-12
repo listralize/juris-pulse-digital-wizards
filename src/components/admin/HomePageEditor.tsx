@@ -12,6 +12,7 @@ import { useTheme } from '../ThemeProvider';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { supabase } from '../../integrations/supabase/client';
 import { TeamVideoManagement } from './TeamVideoManagement';
+import { GalleryButton } from './GalleryButton';
 import { toast } from 'sonner';
 
 interface HomePageEditorProps {
@@ -452,12 +453,18 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               </div>
               <div>
                 <Label>Imagem de Fundo</Label>
-                <Input
-                  value={pageTexts.heroBackgroundImage || ''}
-                  onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
-                  className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                  placeholder="URL da imagem de fundo"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={pageTexts.heroBackgroundImage || ''}
+                    onChange={(e) => handleInputChange('heroBackgroundImage', e.target.value)}
+                    className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} flex-1`}
+                    placeholder="URL da imagem de fundo"
+                  />
+                  <GalleryButton
+                    onSelect={(url) => handleInputChange('heroBackgroundImage', url)}
+                    size="sm"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -637,12 +644,18 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                     </div>
                     <div className="md:col-span-2">
                       <Label className="text-sm">URL da Foto</Label>
-                      <Input
-                        value={member.image || ''}
-                        onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
-                        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                        placeholder="/lovable-uploads/foto.png"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={member.image || ''}
+                          onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
+                          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'} flex-1`}
+                          placeholder="/lovable-uploads/foto.png"
+                        />
+                        <GalleryButton
+                          onSelect={(url) => onUpdateTeamMember(member.id, 'image', url)}
+                          size="sm"
+                        />
+                      </div>
                     </div>
                     <div className="md:col-span-2">
                       <Label className="text-sm">Descrição</Label>

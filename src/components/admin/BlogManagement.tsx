@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, Save, Edit, Trash2, Eye, RefreshCw, X } from 'lucide-r
 import { BlogPost } from '../../types/blogTypes';
 import { toast } from 'sonner';
 import { GalleryButton } from './GalleryButton';
+import { VisualBlogEditor } from './VisualBlogEditor';
 
 interface BlogManagementProps {
   blogPosts: BlogPost[];
@@ -41,7 +42,6 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
       excerpt: '',
       banner: '',
       author: 'Autor',
-      authorImage: '',
       publishedAt: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
       slug: 'novo-post-' + Date.now(),
@@ -335,17 +335,10 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
               </div>
             </div>
             
-            <div>
-              <Label htmlFor="content">Conteúdo</Label>
-              <Textarea
-                id="content"
-                value={selectedPost.content}
-                onChange={(e) => updatePost('content', e.target.value)}
-                placeholder="Conteúdo do post (HTML permitido)"
-                rows={15}
-                className="font-mono text-sm"
-              />
-            </div>
+            <VisualBlogEditor
+              content={selectedPost.content}
+              onChange={(content) => updatePost('content', content)}
+            />
           </div>
         </CardContent>
       </Card>
