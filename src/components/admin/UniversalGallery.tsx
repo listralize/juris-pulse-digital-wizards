@@ -53,7 +53,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     try {
       setLoading(true);
       
-      // Buscar arquivos do bucket 'website-gallery'
       const { data: storageFiles, error: storageError } = await supabase.storage
         .from('website-gallery')
         .list('', {
@@ -69,7 +68,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
             .from('website-gallery')
             .getPublicUrl(file.name);
 
-          // Determinar tipo baseado na extensão
           const extension = file.name.split('.').pop()?.toLowerCase() || '';
           let type: 'image' | 'video' | 'file' = 'file';
           
@@ -86,7 +84,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
             type,
             size: file.metadata?.size || 0,
             created_at: file.created_at || new Date().toISOString(),
-            tags: [], // Por enquanto sem tags
+            tags: [],
             folder: file.name.includes('/') ? file.name.split('/')[0] : undefined
           } as MediaFile;
         })
@@ -125,7 +123,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
 
       await Promise.all(uploadPromises);
       toast.success(`${uploadedFiles.length} arquivo(s) enviado(s) com sucesso!`);
-      loadFiles(); // Recarregar lista
+      loadFiles();
     } catch (error: any) {
       console.error('Erro no upload:', error);
       toast.error('Erro ao fazer upload dos arquivos');
@@ -149,7 +147,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
 
   const handleConfirmSelection = () => {
     if (selectedFiles.length > 0 && onSelect) {
-      // Para seleção múltipla, chamamos onSelect para cada arquivo
       selectedFiles.forEach(file => onSelect(file));
       setIsDialogOpen(false);
       setSelectedFiles([]);
@@ -212,9 +209,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col">
-          {/* Barra de ferramentas */}
           <div className="flex flex-wrap gap-4 p-4 border-b">
-            {/* Upload */}
             <div className="relative">
               <input
                 type="file"
@@ -229,7 +224,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
               </Button>
             </div>
 
-            {/* Busca */}
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400" />
               <Input
@@ -240,7 +234,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
               />
             </div>
 
-            {/* Filtros */}
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-32">
                 <SelectValue />
@@ -253,7 +246,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
               </SelectContent>
             </Select>
 
-            {/* Modo de visualização */}
             <div className="flex gap-1 border rounded">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -272,7 +264,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
             </div>
           </div>
 
-          {/* Lista de arquivos */}
           <div className="flex-1 overflow-auto p-4">
             {loading ? (
               <div className="flex items-center justify-center h-32">
@@ -351,9 +342,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
                               className="w-full h-full object-cover rounded"
                             />
                           ) : (
-                            <div className="text-4xl text-gray-400">
-                              {getFileIcon(file.type)}
-                            </div>
+                            getFileIcon(file.type)
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -382,7 +371,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
             )}
           </div>
 
-          {/* Rodapé com seleção múltipla */}
           {allowMultiple && selectedFiles.length > 0 && (
             <div className="border-t p-4 flex items-center justify-between">
               <span className="text-sm text-gray-600">
