@@ -362,7 +362,7 @@ const StepForm: React.FC = () => {
     
     console.log('✅ Validação de campos concluída');
     try {
-      const serviceName = form?.title || document.title || form?.name || 'Consultoria Jurídica';
+      const serviceName = form?.name || form?.title || document.title || 'Consultoria Jurídica';
       const allData = { 
         ...answers, 
         ...formData,
