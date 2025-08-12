@@ -65,30 +65,47 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
 
   const loadStepFormSocialProof = async () => {
     try {
+      console.log('🔄 Carregando prova social do StepForm...');
+      
       const { data, error } = await supabase
         .from('admin_settings')
         .select('global_social_proof')
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao carregar prova social do step form:', error);
+        console.error('❌ Erro ao carregar prova social:', error);
         return;
       }
 
-      console.log('Dados carregados da tabela admin_settings:', data);
+      console.log('📊 Dados da admin_settings:', data);
       
       const stepFormConfig = data?.global_social_proof as any;
-      console.log('Config de prova social:', stepFormConfig);
+      console.log('📋 Config de prova social:', stepFormConfig);
       
-      if (stepFormConfig?.enabled && (stepFormConfig?.testimonials?.length > 0 || stepFormConfig?.stats?.length > 0)) {
-        setSocialProofConfig(stepFormConfig as SocialProofConfig);
-        console.log('Prova social ativada:', stepFormConfig);
+      if (stepFormConfig?.enabled) {
+        const hasTestimonials = stepFormConfig.testimonials && stepFormConfig.testimonials.length > 0;
+        const hasStats = stepFormConfig.stats && stepFormConfig.stats.length > 0;
+        
+        if (hasTestimonials || hasStats) {
+          console.log('✅ Prova social ativada com conteúdo');
+          setSocialProofConfig({
+            enabled: true,
+            testimonials: stepFormConfig.testimonials || [],
+            stats: stepFormConfig.stats || [],
+            autoRotate: stepFormConfig.autoRotate ?? true,
+            rotationInterval: stepFormConfig.rotationInterval ?? 5000,
+            primaryColor: stepFormConfig.primaryColor || '#4CAF50'
+          });
+        } else {
+          console.log('⚠️ Prova social ativada mas sem conteúdo');
+          setSocialProofConfig(null);
+        }
       } else {
-        console.log('Prova social não está ativada ou não tem conteúdo');
+        console.log('📋 Prova social desativada');
         setSocialProofConfig(null);
       }
     } catch (error) {
-      console.error('Erro ao carregar prova social do step form:', error);
+      console.error('❌ Erro ao carregar prova social:', error);
     }
   };
 

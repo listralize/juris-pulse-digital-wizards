@@ -85,24 +85,78 @@ export const LeadsManagement: React.FC = () => {
   const [isProcessingAll, setIsProcessingAll] = useState(false);
 
   // Função para buscar localização baseada no DDD
-  const getLocationByDDD = async (ddd: number) => {
-    try {
-      const { data, error } = await supabase
-        .from('ddd_locations')
-        .select('state_name, capital, region')
-        .eq('ddd', ddd)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Erro ao buscar localização por DDD:', error);
-        return null;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Erro ao buscar localização por DDD:', error);
-      return null;
-    }
+  const getLocationByDDD = (ddd: number): { state: string; city: string } | null => {
+    const dddMap: { [key: number]: { state: string; city: string } } = {
+      11: { state: 'SP', city: 'São Paulo' },
+      12: { state: 'SP', city: 'São José dos Campos' },
+      13: { state: 'SP', city: 'Santos' },
+      14: { state: 'SP', city: 'Bauru' },
+      15: { state: 'SP', city: 'Sorocaba' },
+      16: { state: 'SP', city: 'Ribeirão Preto' },
+      17: { state: 'SP', city: 'São José do Rio Preto' },
+      18: { state: 'SP', city: 'Presidente Prudente' },
+      19: { state: 'SP', city: 'Campinas' },
+      21: { state: 'RJ', city: 'Rio de Janeiro' },
+      22: { state: 'RJ', city: 'Campos dos Goytacazes' },
+      24: { state: 'RJ', city: 'Volta Redonda' },
+      27: { state: 'ES', city: 'Vitória' },
+      28: { state: 'ES', city: 'Cachoeiro de Itapemirim' },
+      31: { state: 'MG', city: 'Belo Horizonte' },
+      32: { state: 'MG', city: 'Juiz de Fora' },
+      33: { state: 'MG', city: 'Governador Valadares' },
+      34: { state: 'MG', city: 'Uberlândia' },
+      35: { state: 'MG', city: 'Poços de Caldas' },
+      37: { state: 'MG', city: 'Divinópolis' },
+      38: { state: 'MG', city: 'Montes Claros' },
+      41: { state: 'PR', city: 'Curitiba' },
+      42: { state: 'PR', city: 'Ponta Grossa' },
+      43: { state: 'PR', city: 'Londrina' },
+      44: { state: 'PR', city: 'Maringá' },
+      45: { state: 'PR', city: 'Foz do Iguaçu' },
+      46: { state: 'PR', city: 'Francisco Beltrão' },
+      47: { state: 'SC', city: 'Joinville' },
+      48: { state: 'SC', city: 'Florianópolis' },
+      49: { state: 'SC', city: 'Chapecó' },
+      51: { state: 'RS', city: 'Porto Alegre' },
+      53: { state: 'RS', city: 'Pelotas' },
+      54: { state: 'RS', city: 'Caxias do Sul' },
+      55: { state: 'RS', city: 'Santa Maria' },
+      61: { state: 'DF', city: 'Brasília' },
+      62: { state: 'GO', city: 'Goiânia' },
+      63: { state: 'TO', city: 'Palmas' },
+      64: { state: 'GO', city: 'Rio Verde' },
+      65: { state: 'MT', city: 'Cuiabá' },
+      66: { state: 'MT', city: 'Rondonópolis' },
+      67: { state: 'MS', city: 'Campo Grande' },
+      68: { state: 'AC', city: 'Rio Branco' },
+      69: { state: 'RO', city: 'Porto Velho' },
+      71: { state: 'BA', city: 'Salvador' },
+      73: { state: 'BA', city: 'Ilhéus' },
+      74: { state: 'BA', city: 'Juazeiro' },
+      75: { state: 'BA', city: 'Feira de Santana' },
+      77: { state: 'BA', city: 'Barreiras' },
+      79: { state: 'SE', city: 'Aracaju' },
+      81: { state: 'PE', city: 'Recife' },
+      82: { state: 'AL', city: 'Maceió' },
+      83: { state: 'PB', city: 'João Pessoa' },
+      84: { state: 'RN', city: 'Natal' },
+      85: { state: 'CE', city: 'Fortaleza' },
+      86: { state: 'PI', city: 'Teresina' },
+      87: { state: 'PE', city: 'Petrolina' },
+      88: { state: 'CE', city: 'Juazeiro do Norte' },
+      89: { state: 'PI', city: 'Picos' },
+      91: { state: 'PA', city: 'Belém' },
+      92: { state: 'AM', city: 'Manaus' },
+      93: { state: 'PA', city: 'Santarém' },
+      94: { state: 'PA', city: 'Marabá' },
+      95: { state: 'RR', city: 'Boa Vista' },
+      96: { state: 'AP', city: 'Macapá' },
+      97: { state: 'AM', city: 'Tefé' },
+      98: { state: 'MA', city: 'São Luís' },
+      99: { state: 'MA', city: 'Imperatriz' }
+    };
+    
+    return dddMap[ddd] || null;
   };
 
   // Helper para parsear dados do lead
@@ -216,11 +270,11 @@ export const LeadsManagement: React.FC = () => {
             extractedData.ddd = ddd;
             
             // Buscar localização baseada no DDD
-            const locationData = await getLocationByDDD(ddd);
+            const locationData = getLocationByDDD(ddd);
             if (locationData) {
-              extractedData.state = locationData.state_name;
-              extractedData.capital = locationData.capital;
-              extractedData.region = locationData.region;
+              extractedData.state = locationData.state;
+              extractedData.capital = locationData.city;
+              extractedData.region = locationData.state;
             }
           }
         }
