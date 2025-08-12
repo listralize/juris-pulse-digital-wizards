@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, Users, CheckCircle, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TestimonialData {
   name: string;
@@ -39,6 +40,7 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
   const [socialProofConfig, setSocialProofConfig] = useState<SocialProofConfig | null>(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (config) {
@@ -89,7 +91,8 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
     }
   }, [socialProofConfig, isVisible]);
 
-  if (!socialProofConfig?.enabled || (!socialProofConfig.testimonials?.length && !socialProofConfig.stats?.length)) {
+  // Só renderizar no mobile ou se não estiver habilitado
+  if (!socialProofConfig?.enabled || (!socialProofConfig.testimonials?.length && !socialProofConfig.stats?.length) || !isMobile) {
     return null;
   }
 
@@ -128,7 +131,7 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className={`bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-6 shadow-lg relative ${className}`}
+          className={`fixed bottom-4 left-4 right-4 z-50 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-4 shadow-lg ${className}`}
         >
           {/* Estatísticas */}
           {socialProofConfig.stats?.length > 0 && (

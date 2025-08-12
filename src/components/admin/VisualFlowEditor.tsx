@@ -21,6 +21,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import './VisualFlowEditor.css';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -704,7 +705,23 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         >
           <Controls />
           <MiniMap className="bg-card" />
-          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color={"hsl(var(--border))"} />
+          <Background 
+            variant={BackgroundVariant.Dots} 
+            gap={20} 
+            size={1.5}
+            color="rgba(59, 130, 246, 0.3)"
+          />
+          
+          {/* SVG para gradiente futurista */}
+          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+            <defs>
+              <radialGradient id="futuristicGradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(59, 130, 246, 0.6)" />
+                <stop offset="50%" stopColor="rgba(147, 51, 234, 0.4)" />
+                <stop offset="100%" stopColor="rgba(34, 197, 94, 0.2)" />
+              </radialGradient>
+            </defs>
+          </svg>
         </ReactFlow>
 
         {/* Botões flutuantes para adicionar nós */}
