@@ -17,8 +17,6 @@ import { LeadComments } from './LeadComments';
 import { LeadDetailDialog } from './LeadDetailDialog';
 import { ResponsiveLeadsTable } from './ResponsiveLeadsTable';
 
-
-
 // Interface do lead
 interface Lead {
   id: string;
@@ -57,109 +55,6 @@ interface EditableLead {
   urgent: boolean;
 }
 
-// Helper para parsear dados do lead
-const parseLeadData = (leadData: any) => {
-  try {
-    if (typeof leadData === 'string') {
-      leadData = JSON.parse(leadData);
-    }
-    
-    // Extrair dados de diferentes estruturas
-    let extractedData = {
-      name: 'Nome não informado',
-      email: 'Email não informado', 
-      phone: 'N/A',
-      service: 'N/A',
-      message: '',
-      urgent: false
-    };
-
-    // Tentar extrair nome
-    extractedData.name = leadData?.name || leadData?.nome || leadData?.Name || 
-                        leadData?.userName || leadData?.user_name || 
-                        leadData?.fullName || leadData?.full_name || 'Nome não informado';
-
-    // Tentar extrair email
-    extractedData.email = leadData?.email || leadData?.Email || 
-                         leadData?.userEmail || leadData?.user_email || 'Email não informado';
-
-    // Tentar extrair telefone - parsing mais abrangente para stepform
-    const phoneFields = [
-      leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone,
-      leadData?.['Telefone/WhatsApp'], leadData?.whatsapp, leadData?.Whatsapp,
-      leadData?.phoneNumber, leadData?.phone_number, leadData?.userPhone, 
-      leadData?.user_phone, leadData?.tel, leadData?.celular
-    ];
-    
-    // Primeiro, tentar campos diretos
-    let foundPhone = phoneFields.find(field => 
-      field && typeof field === 'string' && field.trim() !== '' && field !== 'N/A'
-    );
-    
-    // Para stepform, verificar também os fields diretos do objeto
-    if (!foundPhone && typeof leadData === 'object') {
-      const stepFormFields = Object.entries(leadData || {});
-      for (const [key, value] of stepFormFields) {
-        if (typeof value === 'string' && value.trim() !== '') {
-          // Verificar se é um campo que pode conter telefone
-          if (key.toLowerCase().includes('telefone') || 
-              key.toLowerCase().includes('phone') ||
-              key.toLowerCase().includes('whatsapp') ||
-              key.toLowerCase().includes('tel') ||
-              key.toLowerCase().includes('celular') ||
-              /^\(?[\d\s\-\(\)+]{10,}$/.test(value)) {
-            const cleanPhone = value.replace(/\D/g, '');
-            if (cleanPhone.length >= 10) {
-              foundPhone = value;
-              break;
-            }
-          }
-        }
-      }
-    }
-    
-    // Se não encontrou, verificar em respostas mapeadas
-    if (!foundPhone && leadData?.respostas_mapeadas) {
-      const mappedValues = Object.values(leadData.respostas_mapeadas);
-      foundPhone = mappedValues.find(val => 
-        typeof val === 'string' && 
-        val.trim() !== '' && 
-        /\d{8,}/.test(val.replace(/\D/g, '')) &&
-        val.replace(/\D/g, '').length >= 10
-      );
-    }
-    
-    extractedData.phone = foundPhone || 'N/A';
-
-    // Tentar extrair serviço
-    extractedData.service = leadData?.service || leadData?.servico || leadData?.Service || 
-                           leadData?.serviceType || leadData?.service_type || 
-                           leadData?.category || leadData?.categoria || 'N/A';
-
-    // Tentar extrair mensagem
-    extractedData.message = leadData?.message || leadData?.mensagem || leadData?.Message || 
-                           leadData?.description || leadData?.descricao || 
-                           leadData?.comment || leadData?.comentario || '';
-
-    // Tentar extrair urgência
-    extractedData.urgent = leadData?.urgent || leadData?.urgente || false;
-
-    return { ...extractedData, ...leadData };
-  } catch (error) {
-    console.error('Erro ao parsear lead_data:', error);
-    return {
-      name: 'Erro ao carregar dados',
-      email: 'Erro ao carregar dados',
-      phone: 'N/A',
-      service: 'N/A',
-      message: '',
-      urgent: false
-    };
-  }
-};
-
-// Componente para detalhes do lead foi movido para LeadDetailDialog.tsx
-
 export const LeadsManagement: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
@@ -174,11 +69,8 @@ export const LeadsManagement: React.FC = () => {
   const [customDateEnd, setCustomDateEnd] = useState('');
   const [editingLead, setEditingLead] = useState<string | null>(null);
   const [editableData, setEditableData] = useState<{ [key: string]: EditableLead }>({});
-  // Paginação para Kanban
   const [kanbanCurrentPage, setKanbanCurrentPage] = useState(1);
   const [kanbanLeadsPerPage] = useState(8);
-  
-  // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [leadsPerPage] = useState(10);
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
@@ -191,7 +83,158 @@ export const LeadsManagement: React.FC = () => {
   const [isLeadWebhookManagerOpen, setIsLeadWebhookManagerOpen] = useState(false);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [isProcessingAll, setIsProcessingAll] = useState(false);
-  
+
+  // Função para buscar localização baseada no DDD
+  const parseLeadData = async (leadData: any) => {
+    try {
+      if (typeof leadData === 'string') {
+        leadData = JSON.parse(leadData);
+      }
+      
+      // Extrair dados de diferentes estruturas
+      let extractedData = {
+        name: 'Nome não informado',
+        email: 'Email não informado', 
+        phone: 'N/A',
+        service: 'N/A',
+        message: '',
+        urgent: false,
+        ddd: null as number | null,
+        state: null as string | null,
+        capital: null as string | null,
+        region: null as string | null
+      };
+
+      // Tentar extrair nome
+      extractedData.name = leadData?.name || leadData?.nome || leadData?.Name || 
+                          leadData?.userName || leadData?.user_name || 
+                          leadData?.fullName || leadData?.full_name || 'Nome não informado';
+
+      // Tentar extrair email
+      extractedData.email = leadData?.email || leadData?.Email || 
+                           leadData?.userEmail || leadData?.user_email || 'Email não informado';
+
+      // Tentar extrair telefone - parsing mais abrangente para stepform
+      const phoneFields = [
+        leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone,
+        leadData?.['Telefone/WhatsApp'], leadData?.whatsapp, leadData?.Whatsapp,
+        leadData?.phoneNumber, leadData?.phone_number, leadData?.userPhone, 
+        leadData?.user_phone, leadData?.tel, leadData?.celular
+      ];
+      
+      // Primeiro tentar campos diretos
+      let foundPhone = phoneFields.find(field => 
+        field && typeof field === 'string' && field.trim() !== '' && field !== 'N/A'
+      );
+
+      if (!foundPhone && typeof leadData === 'object') {
+        // Primeiro verificar em respostas_mapeadas para stepform
+        if (leadData?.respostas_mapeadas) {
+          const mappedEntries = Object.entries(leadData.respostas_mapeadas);
+          for (const [key, value] of mappedEntries) {
+            if (typeof value === 'string' && value.trim() !== '') {
+              // Verificar se é um campo que pode conter telefone
+              if (key.toLowerCase().includes('telefone') || 
+                  key.toLowerCase().includes('phone') ||
+                  key.toLowerCase().includes('whatsapp') ||
+                  key.toLowerCase().includes('tel') ||
+                  key.toLowerCase().includes('celular') ||
+                  /^\(?[\d\s\-\(\)+]{10,}$/.test(value)) {
+                const cleanPhone = value.replace(/\D/g, '');
+                if (cleanPhone.length >= 10) {
+                  foundPhone = value;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
+        // Se ainda não encontrou, verificar nos campos diretos
+        if (!foundPhone) {
+          const stepFormFields = Object.entries(leadData || {});
+          for (const [key, value] of stepFormFields) {
+            if (typeof value === 'string' && value.trim() !== '') {
+              // Verificar se é um campo que pode conter telefone
+              if (key.toLowerCase().includes('telefone') || 
+                  key.toLowerCase().includes('phone') ||
+                  key.toLowerCase().includes('whatsapp') ||
+                  key.toLowerCase().includes('tel') ||
+                  key.toLowerCase().includes('celular') ||
+                  /^\(?[\d\s\-\(\)+]{10,}$/.test(value)) {
+                const cleanPhone = value.replace(/\D/g, '');
+                if (cleanPhone.length >= 10) {
+                  foundPhone = value;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      extractedData.phone = foundPhone || 'N/A';
+
+      // Extrair DDD e localização se temos telefone
+      if (foundPhone && foundPhone !== 'N/A') {
+        const phoneNumbers = foundPhone.replace(/\D/g, '');
+        let ddd = null;
+        
+        // Extrair DDD baseado no tamanho do número
+        if (phoneNumbers.length >= 10) {
+          if (phoneNumbers.startsWith('55') && phoneNumbers.length >= 12) {
+            // Número com código do país (55)
+            ddd = parseInt(phoneNumbers.substring(2, 4));
+          } else {
+            // Número sem código do país
+            ddd = parseInt(phoneNumbers.substring(0, 2));
+          }
+          
+          // Validar se é um DDD válido (11-99)
+          if (ddd >= 11 && ddd <= 99) {
+            extractedData.ddd = ddd;
+            
+            // Buscar localização baseada no DDD
+            const locationData = await getLocationByDDD(ddd);
+            if (locationData) {
+              extractedData.state = locationData.state_name;
+              extractedData.capital = locationData.capital;
+              extractedData.region = locationData.region;
+            }
+          }
+        }
+      }
+
+      // Tentar extrair serviço
+      extractedData.service = leadData?.service || leadData?.servico || leadData?.Service || 
+                             leadData?.serviceType || leadData?.service_type || 
+                             leadData?.category || leadData?.categoria || 'N/A';
+
+      // Tentar extrair mensagem
+      extractedData.message = leadData?.message || leadData?.mensagem || leadData?.Message || 
+                             leadData?.description || leadData?.descricao || 
+                             leadData?.comment || leadData?.comentario || '';
+
+      // Tentar extrair urgência
+      extractedData.urgent = leadData?.urgent || leadData?.urgente || false;
+
+      return { ...extractedData, ...leadData };
+    } catch (error) {
+      console.error('Erro ao parsear lead_data:', error);
+      return {
+        name: 'Erro ao carregar dados',
+        email: 'Erro ao carregar dados',
+        phone: 'N/A',
+        service: 'N/A',
+        message: '',
+        urgent: false,
+        ddd: null,
+        state: null,
+        capital: null,
+        region: null
+      };
+    }
+  };
 
   // Carregar leads e status do kanban
   const loadLeads = async () => {
@@ -255,8 +298,8 @@ export const LeadsManagement: React.FC = () => {
       const deduplicatedLeads: any[] = [];
       const seenLeads = new Map<string, any>();
 
-      processedLeads?.forEach(lead => {
-        const leadData = parseLeadData(lead.lead_data);
+      for (const lead of processedLeads) {
+        const leadData = await parseLeadData(lead.lead_data);
         const email = leadData.email?.toLowerCase() || '';
         const phone = leadData.phone?.replace(/\D/g, '') || '';
         const key = email || phone;
@@ -268,7 +311,7 @@ export const LeadsManagement: React.FC = () => {
           // Se diferença for <= 30 segundos (30000ms), considerar duplicata
           if (timeDiff <= 30000) {
             console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
-            return; // Pular este lead duplicado
+            continue; // Pular este lead duplicado
           }
         }
         
@@ -276,7 +319,7 @@ export const LeadsManagement: React.FC = () => {
         if (key) {
           seenLeads.set(key, lead);
         }
-      });
+      }
 
       console.log(`✅ Leads processados: ${enrichedLeads?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
       
@@ -304,12 +347,12 @@ export const LeadsManagement: React.FC = () => {
 
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
-      deduplicatedLeads.forEach(lead => {
-        const leadData = parseLeadData(lead.lead_data);
+      for (const lead of deduplicatedLeads) {
+        const leadData = await parseLeadData(lead.lead_data);
         if (leadData.service && leadData.service !== 'N/A') {
           servicesSet.add(leadData.service);
         }
-      });
+      }
       setAvailableServices(Array.from(servicesSet).sort());
 
       setLeads(deduplicatedLeads);
@@ -484,7 +527,7 @@ export const LeadsManagement: React.FC = () => {
     }
 
     try {
-      const leadData = parseLeadData(lead.lead_data);
+      const leadData = await parseLeadData(lead.lead_data);
       
       if (!leadData.email) {
         toast.error('Email do lead não encontrado');
@@ -595,15 +638,16 @@ export const LeadsManagement: React.FC = () => {
   };
 
   // Exportar leads
-  const exportLeads = () => {
+  const exportLeads = async () => {
     if (filteredLeads.length === 0) {
       toast.error('Não há leads para exportar');
       return;
     }
 
-    const csvData = filteredLeads.map(lead => {
-      const leadData = parseLeadData(lead.lead_data);
-      return {
+    const csvData = [];
+    for (const lead of filteredLeads) {
+      const leadData = await parseLeadData(lead.lead_data);
+      csvData.push({
         'Nome': leadData.name || '',
         'Email': leadData.email || '',
         'Telefone': leadData.phone || '',
@@ -613,8 +657,8 @@ export const LeadsManagement: React.FC = () => {
         'Página': lead.page_url || '',
         'Origem': lead.referrer || '',
         'Status': leadStatuses[lead.id] || 'novo'
-      };
-    });
+      });
+    }
 
     const headers = Object.keys(csvData[0]).join(',');
     const rows = csvData.map(row => Object.values(row).map(value => `"${value}"`).join(','));
@@ -635,104 +679,105 @@ export const LeadsManagement: React.FC = () => {
 
   // Filtrar leads
   useEffect(() => {
-    let filtered = [...leads];
+    const filterLeads = async () => {
+      let filtered = [...leads];
 
-    // Filtro de busca
-    if (searchQuery) {
-      filtered = filtered.filter(lead => {
-        const leadData = parseLeadData(lead.lead_data);
-        const searchLower = searchQuery.toLowerCase();
-        return (
-          leadData.name?.toLowerCase().includes(searchLower) ||
-          leadData.email?.toLowerCase().includes(searchLower) ||
-          leadData.phone?.includes(searchQuery) ||
-          leadData.service?.toLowerCase().includes(searchLower)
-        );
-      });
-    }
-
-    // Filtro de data - corrigindo para timezone local
-    if (dateFilter !== 'all') {
-      const now = new Date();
-      let startDate: Date;
-      let endDate: Date | null = null;
-
-      switch (dateFilter) {
-        case 'today':
-          // Usar exatamente o dia atual no timezone local
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-          break;
-        case 'week':
-          // Últimos 7 dias
-          const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - 6); // Últimos 7 dias incluindo hoje
-          weekStart.setHours(0, 0, 0, 0);
-          startDate = weekStart;
-          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-          break;
-        case 'month':
-          // Mês atual
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-          endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-          break;
-        case 'custom':
-          if (customDateStart && customDateEnd) {
-            // Parseamento manual para evitar problemas de timezone
-            const startParts = customDateStart.split('-');
-            const endParts = customDateEnd.split('-');
-            
-            startDate = new Date(
-              parseInt(startParts[0]), 
-              parseInt(startParts[1]) - 1, 
-              parseInt(startParts[2]), 
-              0, 0, 0, 0
-            );
-            endDate = new Date(
-              parseInt(endParts[0]), 
-              parseInt(endParts[1]) - 1, 
-              parseInt(endParts[2]), 
-              23, 59, 59, 999
-            );
-          } else {
-            startDate = new Date(0);
-          }
-          break;
-        default:
-          startDate = new Date(0);
+      // Filtro de busca
+      if (searchQuery) {
+        const filteredPromises = filtered.map(async lead => {
+          const leadData = await parseLeadData(lead.lead_data);
+          const searchLower = searchQuery.toLowerCase();
+          const matches = (
+            leadData.name?.toLowerCase().includes(searchLower) ||
+            leadData.email?.toLowerCase().includes(searchLower) ||
+            leadData.phone?.includes(searchQuery) ||
+            leadData.service?.toLowerCase().includes(searchLower)
+          );
+          return matches ? lead : null;
+        });
+        
+        const filteredResults = await Promise.all(filteredPromises);
+        filtered = filteredResults.filter(lead => lead !== null) as Lead[];
       }
 
-      // Debug para acompanhar o filtro
-      console.log('🔍 Filtro de data aplicado:', {
-        filter: dateFilter,
-        startDate: startDate.toLocaleString('pt-BR'),
-        endDate: endDate?.toLocaleString('pt-BR'),
-        leadsAntesFiltro: leads.length
-      });
+      // Filtro de data - corrigindo para timezone local
+      if (dateFilter !== 'all') {
+        const now = new Date();
+        let startDate: Date;
+        let endDate: Date | null = null;
 
-      filtered = filtered.filter(lead => {
-        const leadDate = new Date(lead.created_at);
-        const inRange = endDate ? 
-          (leadDate >= startDate && leadDate <= endDate) : 
-          (leadDate >= startDate);
+        switch (dateFilter) {
+          case 'today':
+            // Usar exatamente o dia atual no timezone local
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+            endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+            break;
+          case 'week':
+            // Últimos 7 dias
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - 6); // Últimos 7 dias incluindo hoje
+            weekStart.setHours(0, 0, 0, 0);
+            startDate = weekStart;
+            endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+            break;
+          case 'month':
+            // Mês atual
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+            break;
+          case 'custom':
+            if (customDateStart && customDateEnd) {
+              // Parseamento manual para evitar problemas de timezone
+              const startParts = customDateStart.split('-');
+              const endParts = customDateEnd.split('-');
+              
+              startDate = new Date(
+                parseInt(startParts[0]), 
+                parseInt(startParts[1]) - 1, 
+                parseInt(startParts[2]), 
+                0, 0, 0, 0
+              );
+              endDate = new Date(
+                parseInt(endParts[0]), 
+                parseInt(endParts[1]) - 1, 
+                parseInt(endParts[2]), 
+                23, 59, 59, 999
+              );
+            } else {
+              startDate = new Date(0);
+            }
+            break;
+          default:
+            startDate = new Date(0);
+        }
+
+        filtered = filtered.filter(lead => {
+          const leadDate = new Date(lead.created_at);
+          const inRange = endDate ? 
+            (leadDate >= startDate && leadDate <= endDate) : 
+            (leadDate >= startDate);
+          
+          return inRange;
+        });
+      }
+
+      // Filtro por serviço
+      if (serviceFilter !== 'all') {
+        const serviceFilteredPromises = filtered.map(async lead => {
+          const leadData = await parseLeadData(lead.lead_data);
+          return leadData.service === serviceFilter ? lead : null;
+        });
         
-        return inRange;
-      });
+        const serviceFilteredResults = await Promise.all(serviceFilteredPromises);
+        filtered = serviceFilteredResults.filter(lead => lead !== null) as Lead[];
+      }
 
-      console.log('📊 Leads após filtro de data:', filtered.length);
-    }
+      setFilteredLeads(filtered);
+      setCurrentPage(1); // Reset para primeira página quando filtros mudam
+      setKanbanCurrentPage(1); // Reset página do kanban
+    };
 
-    // Filtro por serviço
-    if (serviceFilter !== 'all') {
-      filtered = filtered.filter(lead => {
-        const leadData = parseLeadData(lead.lead_data);
-        return leadData.service === serviceFilter;
-      });
-    }
-
-    setFilteredLeads(filtered);
-    setCurrentPage(1); // Reset para primeira página quando filtros mudam
-    setKanbanCurrentPage(1); // Reset página do kanban
+    filterLeads();
   }, [leads, searchQuery, dateFilter, serviceFilter, customDateStart, customDateEnd]);
 
   // Carregar dados iniciais
@@ -959,7 +1004,7 @@ export const LeadsManagement: React.FC = () => {
                       break;
                      case 'custom':
                        if (customDateStart && customDateEnd) {
-                         // Parseamento manual para evitar problemas de timezone
+                         // Parseamento manual para evitar problema de timezone
                          const startParts = customDateStart.split('-');
                          const endParts = customDateEnd.split('-');
                          
@@ -1036,7 +1081,7 @@ export const LeadsManagement: React.FC = () => {
                       break;
                      case 'custom':
                        if (customDateStart && customDateEnd) {
-                         // Parseamento manual para evitar problemas de timezone
+                         // Parseamento manual para evitar problema de timezone
                          const startParts = customDateStart.split('-');
                          const endParts = customDateEnd.split('-');
                          

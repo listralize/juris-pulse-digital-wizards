@@ -109,6 +109,8 @@
     -moz-osx-font-smoothing: grayscale;
     overflow: auto !important;
     cursor: none;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
   /* Mobile/Tablet optimizations */
