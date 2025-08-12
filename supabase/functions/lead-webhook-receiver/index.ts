@@ -130,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
         email: webhookData.email || webhookData.e_mail || '',
         phone: webhookData.phone || webhookData.telefone || webhookData.telephone || '',
         message: webhookData.message || webhookData.mensagem || webhookData.msg || '',
-        service: webhookData.service || webhookData.servico || 'Contato via Webhook',
+        service: webhookData.service || webhookData.servico || webhookConfig?.defaultService || 'Contato via Webhook',
         ...webhookData // Include all original data
       };
     }
@@ -185,7 +185,7 @@ const handler = async (req: Request): Promise<Response> => {
       visitor_id: `webhook-visitor-${Date.now()}`,
       page_url: req.url,
       form_id: 'webhook_form',
-      form_name: 'Webhook Lead Form',
+      form_name: webhookConfig?.defaultService || 'Webhook Lead Form',
       timestamp: new Date().toISOString(),
       created_at: new Date().toISOString()
     };
