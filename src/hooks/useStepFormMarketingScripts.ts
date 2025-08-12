@@ -321,22 +321,33 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         console.log(`✅ StepForm ${slug} enviado com SUCESSO - rastreando com GTM`);
         
         if ((window as any).dataLayer) {
-          const eventData = {
-            event: googleTagManager.eventName || 'form_submit',
-            form_id: slug,
-            form_name: stepFormConfig.name || 'StepForm Submission',
-            form_slug: slug,
-            user_data: event.detail?.userData || {},
-            // Adicionar dados extras para melhor rastreamento
-            event_category: 'step_form',
-            event_action: 'form_submission',
-            event_label: stepFormConfig.name || slug,
-            timestamp: new Date().toISOString()
-          };
+          // Disparar evento padrão 'submit' do GTM
+          (window as any).dataLayer.push({
+            event: 'submit',
+            gtm: {
+              formId: slug,
+              formName: stepFormConfig.name || 'StepForm Submission',
+              formType: 'step_form'
+            }
+          });
           
-          (window as any).dataLayer.push(eventData);
-          console.log(`📊 Evento "${googleTagManager.eventName || 'form_submit'}" enviado para GTM:`, eventData);
-          console.log(`🏷️ DataLayer atual:`, (window as any).dataLayer);
+          // Também disparar evento personalizado se configurado
+          if (googleTagManager.eventName && googleTagManager.eventName !== 'submit') {
+            (window as any).dataLayer.push({
+              event: googleTagManager.eventName,
+              form_id: slug,
+              form_name: stepFormConfig.name || 'StepForm Submission',
+              form_slug: slug,
+              user_data: event.detail?.userData || {},
+              event_category: 'step_form',
+              event_action: 'form_submission',
+              event_label: stepFormConfig.name || slug,
+              timestamp: new Date().toISOString()
+            });
+          }
+          
+          console.log(`📊 Evento 'submit' padrão enviado para GTM`);
+          console.log(`🏷️ DataLayer após submissão:`, (window as any).dataLayer);
         } else {
           console.error(`❌ dataLayer não encontrado para GTM no StepForm ${slug}`);
         }
