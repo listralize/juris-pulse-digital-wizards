@@ -709,16 +709,16 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             variant={BackgroundVariant.Dots} 
             gap={20} 
             size={1.5}
-            color="rgba(59, 130, 246, 0.3)"
+            color="rgba(156, 163, 175, 0.3)"
           />
           
-          {/* SVG para gradiente futurista */}
+          {/* SVG para gradiente futurista cinza */}
           <svg style={{ position: 'absolute', width: 0, height: 0 }}>
             <defs>
               <radialGradient id="futuristicGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(59, 130, 246, 0.6)" />
-                <stop offset="50%" stopColor="rgba(147, 51, 234, 0.4)" />
-                <stop offset="100%" stopColor="rgba(34, 197, 94, 0.2)" />
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.4)" />
+                <stop offset="50%" stopColor="rgba(156, 163, 175, 0.3)" />
+                <stop offset="100%" stopColor="rgba(229, 231, 235, 0.2)" />
               </radialGradient>
             </defs>
           </svg>

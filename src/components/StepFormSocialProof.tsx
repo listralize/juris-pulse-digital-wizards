@@ -91,8 +91,8 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
     }
   }, [socialProofConfig, isVisible]);
 
-  // Só renderizar no mobile ou se não estiver habilitado
-  if (!socialProofConfig?.enabled || (!socialProofConfig.testimonials?.length && !socialProofConfig.stats?.length) || !isMobile) {
+  // Renderizar sempre se estiver habilitado
+  if (!socialProofConfig?.enabled || (!socialProofConfig.testimonials?.length && !socialProofConfig.stats?.length)) {
     return null;
   }
 
@@ -131,7 +131,7 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className={`fixed bottom-4 left-4 right-4 z-50 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-4 shadow-lg ${className}`}
+          className={`${isMobile ? 'fixed bottom-4 left-4 right-4 z-50' : 'relative'} bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-4 shadow-lg ${className}`}
         >
           {/* Estatísticas */}
           {socialProofConfig.stats?.length > 0 && (
@@ -180,24 +180,15 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
                         "{socialProofConfig.testimonials[currentTestimonialIndex].text}"
                       </blockquote>
                       
-                      <div className="flex items-center justify-center gap-3">
-                        {socialProofConfig.testimonials[currentTestimonialIndex].image && (
-                          <img
-                            src={socialProofConfig.testimonials[currentTestimonialIndex].image}
-                            alt={socialProofConfig.testimonials[currentTestimonialIndex].name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                        )}
-                        <div>
-                          <div className="font-semibold text-gray-800">
-                            {socialProofConfig.testimonials[currentTestimonialIndex].name}
-                          </div>
-                          {socialProofConfig.testimonials[currentTestimonialIndex].role && (
-                            <div className="text-sm text-gray-600">
-                              {socialProofConfig.testimonials[currentTestimonialIndex].role}
-                            </div>
-                          )}
+                      <div className="text-center">
+                        <div className="font-semibold text-gray-800">
+                          {socialProofConfig.testimonials[currentTestimonialIndex].name}
                         </div>
+                        {socialProofConfig.testimonials[currentTestimonialIndex].role && (
+                          <div className="text-sm text-gray-600">
+                            {socialProofConfig.testimonials[currentTestimonialIndex].role}
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
