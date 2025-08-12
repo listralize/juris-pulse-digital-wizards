@@ -452,6 +452,16 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   formData,
   onUpdate
 }) => {
+  // Todos os hooks devem ser chamados primeiro
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    formData?.flowConfig?.edges || formData?.flow_config?.edges || initialEdges
+  );
+  const [selectedNode, setSelectedNode] = useState<Node<StepFormNode['data']> | null>(null);
+  const [showImageGallery, setShowImageGallery] = useState(false);
+  const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
+  const initialDataRef = useRef(false);
+  const rfInstance = useRef<any>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -463,6 +473,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Agora o retorno condicional após todos os hooks
   if (isMobile) {
     return (
       <div className="flex items-center justify-center h-96 text-center p-8">
@@ -478,15 +489,6 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       </div>
     );
   }
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(
-    formData?.flowConfig?.edges || formData?.flow_config?.edges || initialEdges
-  );
-  const [selectedNode, setSelectedNode] = useState<Node<StepFormNode['data']> | null>(null);
-  const [showImageGallery, setShowImageGallery] = useState(false);
-  const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
-  const initialDataRef = useRef(false);
-  const rfInstance = useRef<any>(null);
 
   // Sync nodes with formData changes and load edges
   useEffect(() => {
