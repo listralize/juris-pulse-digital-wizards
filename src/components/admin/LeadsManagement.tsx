@@ -1098,8 +1098,8 @@ export const LeadsManagement: React.FC = () => {
                              </div>
                            </td>
                           <td className="p-2">
-                            <div className="max-w-[220px] truncate" title={(lead.form_name || leadData.service || 'N/A') as string}>
-                              {lead.form_name || leadData.service || 'N/A'}
+                            <div className="max-w-[220px] truncate" title={(leadData.service || lead.form_name || 'N/A') as string}>
+                              {leadData.service || lead.form_name || 'N/A'}
                             </div>
                           </td>
                           <td className="p-2 text-sm text-muted-foreground">
