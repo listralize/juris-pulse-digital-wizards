@@ -85,6 +85,27 @@ export const LeadsManagement: React.FC = () => {
   const [isProcessingAll, setIsProcessingAll] = useState(false);
 
   // Função para buscar localização baseada no DDD
+  const getLocationByDDD = async (ddd: number) => {
+    try {
+      const { data, error } = await supabase
+        .from('ddd_locations')
+        .select('state_name, capital, region')
+        .eq('ddd', ddd)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Erro ao buscar localização por DDD:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar localização por DDD:', error);
+      return null;
+    }
+  };
+
+  // Helper para parsear dados do lead
   const parseLeadData = async (leadData: any) => {
     try {
       if (typeof leadData === 'string') {
