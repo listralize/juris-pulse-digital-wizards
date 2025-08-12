@@ -68,9 +68,12 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
       const { data, error } = await supabase
         .from('admin_settings')
         .select('global_social_proof')
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao carregar prova social do step form:', error);
+        return;
+      }
 
       const stepFormConfig = data?.global_social_proof as any;
       if (stepFormConfig?.enabled) {

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Trash2, Star, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, Star, TrendingUp, Save } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +31,8 @@ interface SocialProofConfig {
   testimonials: TestimonialData[];
   stats: StatData[];
   primaryColor: string;
+  autoRotate?: boolean;
+  rotationInterval?: number;
 }
 
 interface StepFormSocialProofManagerProps {
@@ -49,7 +51,9 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
     enabled: false,
     testimonials: [],
     stats: [],
-    primaryColor: '#4CAF50'
+    primaryColor: '#4CAF50',
+    autoRotate: true,
+    rotationInterval: 5000
   });
 
   const [loading, setLoading] = useState(false);
@@ -65,12 +69,20 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
       const { data, error } = await supabase
         .from('admin_settings')
         .select('global_social_proof')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao carregar configuração:', error);
+        return;
+      }
 
       if (data?.global_social_proof) {
-        setConfig(data.global_social_proof as unknown as SocialProofConfig);
+        const loadedConfig = data.global_social_proof as unknown as SocialProofConfig;
+        setConfig({
+          ...loadedConfig,
+          autoRotate: loadedConfig.autoRotate ?? true,
+          rotationInterval: loadedConfig.rotationInterval ?? 5000
+        });
       }
     } catch (error) {
       console.error('Erro ao carregar configuração:', error);
@@ -207,15 +219,42 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
 
           {config.enabled && (
             <div className="space-y-6">
-              {/* Cor Primária */}
-              <div>
-                <Label className={isDark ? 'text-white' : 'text-black'}>Cor Primária</Label>
-                <Input
-                  type="color"
-                  value={config.primaryColor}
-                  onChange={(e) => updateConfig('primaryColor', e.target.value)}
-                  className="w-20 h-10"
-                />
+              {/* Configurações de Carrossel */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className={isDark ? 'text-white' : 'text-black'}>Cor Primária</Label>
+                  <Input
+                    type="color"
+                    value={config.primaryColor}
+                    onChange={(e) => updateConfig('primaryColor', e.target.value)}
+                    className="w-20 h-10"
+                  />
+                </div>
+                <div>
+                  <Label className={isDark ? 'text-white' : 'text-black'}>
+                    Rotação Automática
+                  </Label>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={config.autoRotate}
+                      onCheckedChange={(checked) => updateConfig('autoRotate', checked)}
+                    />
+                    <span className="text-sm">Ativar carrossel</span>
+                  </div>
+                  {config.autoRotate && (
+                    <div className="mt-2">
+                      <Label className="text-sm">Intervalo (ms)</Label>
+                      <Input
+                        type="number"
+                        value={config.rotationInterval || 5000}
+                        onChange={(e) => updateConfig('rotationInterval', parseInt(e.target.value))}
+                        min="1000"
+                        max="30000"
+                        className="w-24"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Estatísticas */}
@@ -331,7 +370,7 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
               {(config.testimonials.length > 0 || config.stats.length > 0) && (
                 <div className="space-y-4">
                   <Label className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-                    Preview
+                    Preview do Carrossel
                   </Label>
                   <Card className="p-4 bg-gray-50 dark:bg-gray-900">
                     {config.stats.length > 0 && (
@@ -373,6 +412,11 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
                             </div>
                           ))}
                         </div>
+                        {config.testimonials.length > 1 && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            + {config.testimonials.length - 1} depoimentos em carrossel
+                          </p>
+                        )}
                       </div>
                     )}
                   </Card>
@@ -382,6 +426,7 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
               {/* Salvar */}
               <div className="flex justify-end">
                 <Button onClick={saveConfig} disabled={loading}>
+                  <Save className="w-4 h-4 mr-2" />
                   {loading ? 'Salvando...' : 'Salvar Configuração'}
                 </Button>
               </div>

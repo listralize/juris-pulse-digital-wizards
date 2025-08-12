@@ -83,12 +83,21 @@ const parseLeadData = (leadData: any) => {
     extractedData.email = leadData?.email || leadData?.Email || 
                          leadData?.userEmail || leadData?.user_email || 'Email não informado';
 
-    // Tentar extrair telefone - melhor parsing para stepform leads
-    extractedData.phone = leadData?.phone || leadData?.telefone || leadData?.Phone || 
-                         leadData?.['Telefone/WhatsApp'] || leadData?.whatsapp || 
-                         leadData?.phoneNumber || leadData?.phone_number || 
-                         leadData?.userPhone || leadData?.user_phone || 
-                         leadData?.tel || leadData?.celular || 'N/A';
+    // Tentar extrair telefone - parsing mais abrangente para stepform
+    const phoneFields = [
+      leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone,
+      leadData?.['Telefone/WhatsApp'], leadData?.whatsapp, leadData?.Whatsapp,
+      leadData?.phoneNumber, leadData?.phone_number, leadData?.userPhone, 
+      leadData?.user_phone, leadData?.tel, leadData?.celular,
+      // Verificar em respostas mapeadas também
+      ...(leadData?.respostas_mapeadas ? Object.values(leadData.respostas_mapeadas).filter(val => 
+        typeof val === 'string' && /\d{8,}/.test(val.replace(/\D/g, ''))
+      ) : [])
+    ];
+    
+    extractedData.phone = phoneFields.find(field => 
+      field && typeof field === 'string' && field.trim() !== '' && field !== 'N/A'
+    ) || 'N/A';
 
     // Tentar extrair serviço
     extractedData.service = leadData?.service || leadData?.servico || leadData?.Service || 

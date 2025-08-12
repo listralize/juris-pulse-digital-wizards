@@ -205,7 +205,7 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                    </td>
                    <td className="p-2">
                      <div className="flex items-center gap-2">
-                       {leadData.phone && leadData.phone !== 'N/A' && leadData.phone !== 'Não informado' && (
+                       {leadData.phone && leadData.phone !== 'N/A' && leadData.phone !== 'Não informado' && leadData.phone.trim() !== '' && (
                          <Button
                            size="sm"
                            variant="ghost"
