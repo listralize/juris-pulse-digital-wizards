@@ -216,11 +216,20 @@ export const LeadsManagement: React.FC = () => {
             extractedData.ddd = ddd;
             
             // Buscar localização baseada no DDD
-            const locationData = await getLocationByDDD(ddd);
-            if (locationData) {
-              extractedData.state = locationData.state_name;
-              extractedData.capital = locationData.capital;
-              extractedData.region = locationData.region;
+            try {
+              const { data: locationData, error } = await supabase
+                .from('ddd_locations')
+                .select('state_name, capital, region')
+                .eq('ddd', ddd)
+                .maybeSingle();
+              
+              if (!error && locationData) {
+                extractedData.state = locationData.state_name;
+                extractedData.capital = locationData.capital;
+                extractedData.region = locationData.region;
+              }
+            } catch (error) {
+              console.error('Erro ao buscar localização por DDD:', error);
             }
           }
         }
