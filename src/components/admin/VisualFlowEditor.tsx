@@ -172,7 +172,7 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
         </div>
         {data.options && data.options.length > 0 && (
           <div className="space-y-1 mt-2">
-            {data.options.slice(0, 3).map((option, index) => (
+            {data.options.map((option, index) => (
               <div 
                 key={`${option.text}-${index}`}
                 className="text-xs bg-gray-800 p-2 rounded text-gray-300 border border-gray-600 hover:bg-gray-700 cursor-pointer relative"
@@ -187,9 +187,6 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
                 />
               </div>
             ))}
-            {data.options.length > 3 && (
-              <div className="text-xs opacity-50">+{data.options.length - 3} mais...</div>
-            )}
           </div>
         )}
         {data.imageUrl && data.mediaType === 'image' && data.imagePosition === 'bottom' && (
@@ -494,7 +491,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       // Carregar conexões salvas
       if ((formData.flowConfig?.edges || formData.flow_config?.edges) && 
           Array.isArray(formData.flowConfig?.edges || formData.flow_config?.edges)) {
-        const loaded = (formData.flowConfig?.edges || formData.flow_config?.edges).map((e: any) => ({ ...e, type: 'button' }));
+        const loaded = (formData.flowConfig?.edges || formData.flow_config?.edges).map((e: any) => ({ ...e, type: 'smoothstep' }));
         setEdges(loaded);
       }
       
@@ -567,7 +564,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   // Removed auto-save to prevent loops
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, type: 'button' }, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({ ...params, type: 'smoothstep' }, eds)),
     [setEdges]
   );
 
