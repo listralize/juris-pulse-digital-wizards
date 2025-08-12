@@ -57,7 +57,10 @@ export const StepFormBuilder: React.FC = () => {
     ga_id: '',
     ga_event_name: 'form_submit',
     gtm_id: '',
-    gtm_event_name: 'form_submit'
+    gtm_event_name: 'form_submit',
+    // Códigos customizados
+    custom_head_html: '',
+    custom_body_html: ''
   });
 
   useEffect(() => {
@@ -92,6 +95,8 @@ export const StepFormBuilder: React.FC = () => {
         ga_event_name: cfg?.ga_event_name ?? cfg?.google_analytics?.event_name ?? 'form_submit',
         gtm_id: cfg?.gtm_id ?? cfg?.google_tag_manager?.container_id ?? '',
         gtm_event_name: cfg?.gtm_event_name ?? cfg?.google_tag_manager?.event_name ?? 'form_submit',
+        custom_head_html: cfg?.custom_head_html ?? cfg?.head_html ?? '',
+        custom_body_html: cfg?.custom_body_html ?? cfg?.body_html ?? ''
       };
       setTrackingConfig(normalized);
     } catch (error) {
@@ -120,6 +125,8 @@ export const StepFormBuilder: React.FC = () => {
           container_id: trackingConfig.gtm_id,
           event_name: trackingConfig.gtm_event_name || 'form_submit',
         },
+        custom_head_html: trackingConfig.custom_head_html,
+        custom_body_html: trackingConfig.custom_body_html,
       };
 
       const { error } = await supabase
@@ -258,6 +265,8 @@ export const StepFormBuilder: React.FC = () => {
             container_id: trackingConfig.gtm_id,
             event_name: trackingConfig.gtm_event_name || 'form_submit',
           },
+          custom_head_html: trackingConfig.custom_head_html,
+          custom_body_html: trackingConfig.custom_body_html,
         },
         flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
         is_active: selectedForm.is_active
@@ -659,7 +668,28 @@ export const StepFormBuilder: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    
+
+                    {/* Códigos personalizados do Tag Manager */}
+                    <div className="space-y-3">
+                      <Label>Código HEAD (HTML completo)</Label>
+                      <Textarea
+                        placeholder="Cole aqui o snippet completo que vai no <head>"
+                        value={trackingConfig.custom_head_html}
+                        onChange={(e) => setTrackingConfig(prev => ({ ...prev, custom_head_html: e.target.value }))}
+                        rows={6}
+                      />
+                      <Label>Código BODY (noscript/HTML)</Label>
+                      <Textarea
+                        placeholder="Cole aqui o snippet <noscript> que vai no <body>"
+                        value={trackingConfig.custom_body_html}
+                        onChange={(e) => setTrackingConfig(prev => ({ ...prev, custom_body_html: e.target.value }))}
+                        rows={4}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Dica: você pode usar estes campos para colar o código completo do Google Tag Manager (HEAD e BODY) específico deste Step Form.
+                      </p>
+                    </div>
+
                     <Button onClick={saveTrackingConfig} className="w-full">
                       <Save className="w-4 h-4 mr-2" />
                       Salvar Configurações de Rastreamento

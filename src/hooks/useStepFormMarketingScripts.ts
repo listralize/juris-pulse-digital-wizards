@@ -68,7 +68,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             enabled: trackingConfig?.google_tag_manager?.enabled || false,
             container_id: trackingConfig?.google_tag_manager?.container_id || trackingConfig?.gtm_id || '',
             eventName: trackingConfig?.google_tag_manager?.event_name || trackingConfig?.gtm_event_name || 'form_submit'
-          }
+          },
+          // Códigos personalizados (Head e Body)
+          customHeadHtml: trackingConfig?.custom_head_html || trackingConfig?.head_html || '',
+          customBodyHtml: trackingConfig?.custom_body_html || trackingConfig?.body_html || ''
         };
         
         console.log(`🎯 Config processada para StepForm ${formSlug}:`, stepFormConfig);
@@ -118,6 +121,14 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       implementStepFormGoogleTagManager(stepFormConfig);
     } else {
       console.log(`❌ Google Tag Manager DESABILITADO para StepForm ${stepFormConfig.slug}`);
+    }
+
+    // Códigos personalizados (Head e Body)
+    if (stepFormConfig.customHeadHtml) {
+      implementStepFormCustomHead(stepFormConfig);
+    }
+    if (stepFormConfig.customBodyHtml) {
+      implementStepFormCustomBody(stepFormConfig);
     }
   };
 
@@ -322,5 +333,65 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     document.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
     handlersMap[slug] = { ...(handlersMap[slug] || {}), gtm: handleStepFormSuccess as EventListener };
     (window as any).__stepFormMarketingHandlers = handlersMap;
+  };
+
+  // ===== Helpers para códigos customizados (Head e Body) =====
+  const extractScriptsFromHtml = (html: string) => {
+    const scripts: Array<{ content: string; async: boolean; src?: string }> = [];
+    const regex = /<script([^>]*)>([\s\S]*?)<\/script>/gi;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(html))) {
+      const attrs = match[1] || '';
+      const content = match[2] || '';
+      const asyncAttr = /\basync\b/i.test(attrs);
+      const srcMatch = attrs.match(/src=["']([^"']+)["']/i);
+      scripts.push({ content, async: asyncAttr, src: srcMatch?.[1] });
+    }
+    return scripts;
+  };
+
+  const implementStepFormCustomHead = (stepFormConfig: any) => {
+    const { slug, customHeadHtml } = stepFormConfig;
+    try {
+      const scripts = extractScriptsFromHtml(String(customHeadHtml || ''));
+      if (scripts.length === 0 && customHeadHtml) {
+        // Não há <script>, criar um script com o conteúdo inteiro
+        const s = document.createElement('script');
+        s.setAttribute('data-stepform-marketing', slug);
+        s.text = String(customHeadHtml);
+        document.head.appendChild(s);
+        return;
+      }
+      scripts.forEach((scr) => {
+        const s = document.createElement('script');
+        s.setAttribute('data-stepform-marketing', slug);
+        if (scr.src) {
+          s.src = scr.src;
+          s.async = scr.async;
+        } else {
+          s.text = scr.content;
+          s.async = scr.async;
+        }
+        document.head.appendChild(s);
+      });
+      console.log(`🧩 Head custom do StepForm ${slug} injetado`);
+    } catch (e) {
+      console.warn('Falha ao injetar head custom do StepForm:', e);
+    }
+  };
+
+  const implementStepFormCustomBody = (stepFormConfig: any) => {
+    const { slug, customBodyHtml } = stepFormConfig;
+    try {
+      const nsMatch = String(customBodyHtml || '').match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i);
+      const html = nsMatch ? nsMatch[1] : String(customBodyHtml || '');
+      const nos = document.createElement('noscript');
+      nos.setAttribute('data-stepform-marketing', slug);
+      nos.innerHTML = html;
+      document.body.appendChild(nos);
+      console.log(`🧩 Body custom do StepForm ${slug} injetado`);
+    } catch (e) {
+      console.warn('Falha ao injetar body custom do StepForm:', e);
+    }
   };
 };
