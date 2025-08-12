@@ -102,11 +102,11 @@ export const useLeadsData = (): LeadsData => {
     }
   };
 
-  // Carregar leads com deduplicação no servidor
+  // Carregar leads
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Carregando leads da tabela conversion_events...');
+      console.log('🔄 Iniciando carregamento de leads...');
       
       const { data, error } = await supabase
         .from('conversion_events')
@@ -114,64 +114,39 @@ export const useLeadsData = (): LeadsData => {
         .eq('event_type', 'form_submission')
         .order('created_at', { ascending: false });
 
+      console.log('📊 Resposta da query conversion_events:', { data, error });
+
       if (error) {
         console.error('❌ Erro ao carregar leads:', error);
         toast.error('Erro ao carregar leads');
         return;
       }
 
-      if (!data || data.length === 0) {
-        console.log('📊 Nenhum lead encontrado');
-        setLeads([]);
-        return;
-      }
+      console.log('📈 Total de conversion_events encontrados:', data?.length || 0);
 
-      console.log(`📈 Total de conversion_events encontrados: ${data.length}`);
-
-      // Processar e dedupplicar leads
-      const leadMap = new Map<string, any>();
-      
-      for (const lead of data) {
+      // Filtrar apenas leads válidos e adicionar status padrão
+      const validLeads = (data || []).filter(lead => {
+        // Verificar se tem dados válidos de lead
         if (!lead.lead_data || typeof lead.lead_data !== 'object') {
-          continue;
+          console.log('❌ Lead inválido - sem lead_data:', lead.id);
+          return false;
         }
         
         const leadData = lead.lead_data as any;
-        const name = leadData.name || leadData.nome || leadData.Nome || '';
-        const email = leadData.email || leadData.Email || '';
-        const phone = leadData.phone || leadData.telefone || leadData.whatsapp || leadData.Telefone || '';
+        const isValid = leadData?.name || leadData?.nome || leadData?.email;
         
-        // Pelo menos nome ou email deve existir
-        if (!name && !email) {
-          continue;
+        if (!isValid) {
+          console.log('❌ Lead inválido - sem nome/email:', lead.id, leadData);
         }
         
-        // Chave para deduplicação (email ou telefone se disponível)
-        const key = email || phone || name;
-        
-        // Se já existe, manter o mais recente
-        if (leadMap.has(key)) {
-          const existingLead = leadMap.get(key);
-          const existingTime = new Date(existingLead.created_at).getTime();
-          const currentTime = new Date(lead.created_at).getTime();
-          
-          if (currentTime > existingTime) {
-            const timeDiff = currentTime - existingTime;
-            console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
-            leadMap.set(key, lead);
-          }
-        } else {
-          leadMap.set(key, lead);
-        }
-      }
-
-      // Converter mapa para array e processar dados
-      const processedLeads = Array.from(leadMap.values()).map(lead => {
+        return isValid;
+      }).map(lead => {
         const leadData = lead.lead_data as any;
         
-        // Mapear e normalizar dados
+        // Mapear dados do stepform para formato padrão
         const mappedLeadData = {
           ...leadData,
+          // Garantir que nome, email e telefone estejam no formato correto
           name: leadData.name || leadData.nome || leadData.Nome || 'N/A',
           email: leadData.email || leadData.Email || 'N/A', 
           phone: leadData.phone || leadData.telefone || leadData.whatsapp || leadData.Telefone || 'N/A',
@@ -181,13 +156,13 @@ export const useLeadsData = (): LeadsData => {
         return {
           ...lead,
           lead_data: mappedLeadData,
-          status: 'new'
+          status: 'new' // Status padrão para todos os leads
         };
       });
 
-      console.log(`✅ Leads processados: ${data.length} -> ${processedLeads.length} (após deduplicação)`);
-      setLeads(processedLeads);
-      
+      console.log('✅ Leads válidos após filtro:', validLeads.length);
+      console.log('📋 Amostra dos leads:', validLeads.slice(0, 2));
+      setLeads(validLeads);
     } catch (error) {
       console.error('❌ Erro geral ao carregar leads:', error);
       toast.error('Erro ao carregar leads');
@@ -241,37 +216,26 @@ export const useLeadsData = (): LeadsData => {
   };
 
   useEffect(() => {
-    let isMounted = true;
+    refreshLeads();
     
-    const initializeData = async () => {
-      if (isMounted) {
-        await refreshLeads();
-      }
-    };
-    
-    initializeData();
-    
-    // Configurar atualização em tempo real (sem auto-refresh)
+    // Configurar atualização em tempo real
     const channel = supabase
       .channel('conversion_events_changes')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'conversion_events'
         },
         (payload) => {
-          console.log('📊 Novo lead recebido:', payload);
-          if (isMounted) {
-            refreshLeads();
-          }
+          console.log('📊 Lead atualizado em tempo real:', payload);
+          refreshLeads();
         }
       )
       .subscribe();
 
     return () => {
-      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, []);

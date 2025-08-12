@@ -66,36 +66,26 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
   const loadConfig = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Carregando configuração de prova social...');
-      
       const { data, error } = await supabase
         .from('admin_settings')
         .select('global_social_proof')
         .maybeSingle();
 
-      console.log('📊 Dados carregados:', { data, error });
-
       if (error && error.code !== 'PGRST116') {
-        console.error('❌ Erro ao carregar configuração:', error);
+        console.error('Erro ao carregar configuração:', error);
         return;
       }
 
       if (data?.global_social_proof) {
         const loadedConfig = data.global_social_proof as unknown as SocialProofConfig;
-        console.log('✅ Configuração carregada:', loadedConfig);
         setConfig({
-          enabled: loadedConfig.enabled || false,
-          testimonials: loadedConfig.testimonials || [],
-          stats: loadedConfig.stats || [],
-          primaryColor: loadedConfig.primaryColor || '#4CAF50',
+          ...loadedConfig,
           autoRotate: loadedConfig.autoRotate ?? true,
           rotationInterval: loadedConfig.rotationInterval ?? 5000
         });
-      } else {
-        console.log('📋 Nenhuma configuração encontrada, usando padrão');
       }
     } catch (error) {
-      console.error('❌ Erro geral ao carregar configuração:', error);
+      console.error('Erro ao carregar configuração:', error);
     } finally {
       setLoading(false);
     }

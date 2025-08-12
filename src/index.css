@@ -631,31 +631,12 @@
   height: clamp(0.5rem, 1.5vw, 0.75rem);
 }
 
-/* Remove visual editor artifacts and animations */
+/* Remove visual editor artifacts */
 * {
   background-image: none !important;
-  animation: none !important;
 }
 
-body, html, div, canvas {
+body, html {
   background-image: none !important;
   background-pattern: none !important;
-  background: none !important;
-}
-
-/* Remove any checkerboard or grid patterns */
-.react-flow__background,
-.react-flow__background-variant-dots,
-.react-flow__background-variant-lines,
-.react-flow__background-variant-cross {
-  display: none !important;
-  background: transparent !important;
-  background-image: none !important;
-}
-
-/* Ensure clean background for editors */
-.fabric-canvas-wrapper,
-.canvas-container {
-  background: var(--background) !important;
-  background-image: none !important;
 }
