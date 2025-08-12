@@ -52,8 +52,12 @@ export const StepFormBuilder: React.FC = () => {
     google_analytics: false,
     google_tag_manager: false,
     pixel_id: '',
+    event_type: 'Lead',
+    custom_event_name: '',
     ga_id: '',
-    gtm_id: ''
+    ga_event_name: 'form_submit',
+    gtm_id: '',
+    gtm_event_name: 'form_submit'
   });
 
   useEffect(() => {
@@ -76,9 +80,20 @@ export const StepFormBuilder: React.FC = () => {
 
       if (error) throw error;
       
-      if (data?.tracking_config) {
-        setTrackingConfig(data.tracking_config as any);
-      }
+      const cfg = (data?.tracking_config || {}) as any;
+      const normalized = {
+        facebook_pixel: cfg?.facebook_pixel?.enabled ?? cfg?.facebook_pixel ?? false,
+        google_analytics: cfg?.google_analytics?.enabled ?? cfg?.google_analytics ?? false,
+        google_tag_manager: cfg?.google_tag_manager?.enabled ?? cfg?.google_tag_manager ?? false,
+        pixel_id: cfg?.pixel_id ?? cfg?.facebook_pixel?.pixel_id ?? '',
+        event_type: cfg?.event_type ?? cfg?.facebook_pixel?.event_type ?? 'Lead',
+        custom_event_name: cfg?.custom_event_name ?? cfg?.facebook_pixel?.custom_event_name ?? '',
+        ga_id: cfg?.ga_id ?? cfg?.google_analytics?.tracking_id ?? '',
+        ga_event_name: cfg?.ga_event_name ?? cfg?.google_analytics?.event_name ?? 'form_submit',
+        gtm_id: cfg?.gtm_id ?? cfg?.google_tag_manager?.container_id ?? '',
+        gtm_event_name: cfg?.gtm_event_name ?? cfg?.google_tag_manager?.event_name ?? 'form_submit',
+      };
+      setTrackingConfig(normalized);
     } catch (error) {
       console.error('Erro ao carregar configurações de tracking:', error);
     }
@@ -88,9 +103,28 @@ export const StepFormBuilder: React.FC = () => {
     if (!selectedForm?.id) return;
 
     try {
+      const nested = {
+        facebook_pixel: {
+          enabled: trackingConfig.facebook_pixel,
+          pixel_id: trackingConfig.pixel_id,
+          event_type: trackingConfig.event_type || 'Lead',
+          custom_event_name: trackingConfig.event_type === 'Custom' ? (trackingConfig.custom_event_name || 'CustomEvent') : undefined,
+        },
+        google_analytics: {
+          enabled: trackingConfig.google_analytics,
+          tracking_id: trackingConfig.ga_id,
+          event_name: trackingConfig.ga_event_name || 'form_submit',
+        },
+        google_tag_manager: {
+          enabled: trackingConfig.google_tag_manager,
+          container_id: trackingConfig.gtm_id,
+          event_name: trackingConfig.gtm_event_name || 'form_submit',
+        },
+      };
+
       const { error } = await supabase
         .from('step_forms')
-        .update({ tracking_config: trackingConfig })
+        .update({ tracking_config: nested })
         .eq('id', selectedForm.id);
 
       if (error) throw error;
@@ -207,7 +241,24 @@ export const StepFormBuilder: React.FC = () => {
           meta_description: selectedForm.subtitle || '',
           meta_keywords: ''
         },
-        tracking_config: trackingConfig,
+        tracking_config: {
+          facebook_pixel: {
+            enabled: trackingConfig.facebook_pixel,
+            pixel_id: trackingConfig.pixel_id,
+            event_type: trackingConfig.event_type || 'Lead',
+            custom_event_name: trackingConfig.event_type === 'Custom' ? (trackingConfig.custom_event_name || 'CustomEvent') : undefined,
+          },
+          google_analytics: {
+            enabled: trackingConfig.google_analytics,
+            tracking_id: trackingConfig.ga_id,
+            event_name: trackingConfig.ga_event_name || 'form_submit',
+          },
+          google_tag_manager: {
+            enabled: trackingConfig.google_tag_manager,
+            container_id: trackingConfig.gtm_id,
+            event_name: trackingConfig.gtm_event_name || 'form_submit',
+          },
+        },
         flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
         is_active: selectedForm.is_active
       };
@@ -500,13 +551,47 @@ export const StepFormBuilder: React.FC = () => {
                           <Label htmlFor="facebook_pixel">Facebook Pixel</Label>
                         </div>
                         {trackingConfig.facebook_pixel && (
-                          <Input
-                            placeholder="ID do Pixel"
-                            value={trackingConfig.pixel_id}
-                            onChange={(e) => 
-                              setTrackingConfig(prev => ({ ...prev, pixel_id: e.target.value }))
-                            }
-                          />
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="ID do Pixel"
+                              value={trackingConfig.pixel_id}
+                              onChange={(e) => 
+                                setTrackingConfig(prev => ({ ...prev, pixel_id: e.target.value }))
+                              }
+                            />
+                            <div>
+                              <Label>Tipo de Evento</Label>
+                              <Select
+                                value={trackingConfig.event_type}
+                                onValueChange={(value) => setTrackingConfig(prev => ({ ...prev, event_type: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Lead">Lead</SelectItem>
+                                  <SelectItem value="Contact">Contact</SelectItem>
+                                  <SelectItem value="SubmitApplication">Submit Application</SelectItem>
+                                  <SelectItem value="CompleteRegistration">Complete Registration</SelectItem>
+                                  <SelectItem value="ViewContent">View Content</SelectItem>
+                                  <SelectItem value="AddToCart">Add To Cart</SelectItem>
+                                  <SelectItem value="InitiateCheckout">Initiate Checkout</SelectItem>
+                                  <SelectItem value="Purchase">Purchase</SelectItem>
+                                  <SelectItem value="Custom">Custom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {trackingConfig.event_type === 'Custom' && (
+                              <div>
+                                <Label>Nome do Evento Customizado</Label>
+                                <Input
+                                  placeholder="ex: LeadQualificado"
+                                  value={trackingConfig.custom_event_name}
+                                  onChange={(e) => setTrackingConfig(prev => ({ ...prev, custom_event_name: e.target.value }))}
+                                />
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
 
@@ -522,13 +607,23 @@ export const StepFormBuilder: React.FC = () => {
                           <Label htmlFor="google_analytics">Google Analytics</Label>
                         </div>
                         {trackingConfig.google_analytics && (
-                          <Input
-                            placeholder="ID do GA"
-                            value={trackingConfig.ga_id}
-                            onChange={(e) => 
-                              setTrackingConfig(prev => ({ ...prev, ga_id: e.target.value }))
-                            }
-                          />
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="ID do GA"
+                              value={trackingConfig.ga_id}
+                              onChange={(e) => 
+                                setTrackingConfig(prev => ({ ...prev, ga_id: e.target.value }))
+                              }
+                            />
+                            <div>
+                              <Label>Nome do Evento</Label>
+                              <Input
+                                placeholder="form_submit"
+                                value={trackingConfig.ga_event_name}
+                                onChange={(e) => setTrackingConfig(prev => ({ ...prev, ga_event_name: e.target.value }))}
+                              />
+                            </div>
+                          </div>
                         )}
                       </div>
 
@@ -544,13 +639,23 @@ export const StepFormBuilder: React.FC = () => {
                           <Label htmlFor="google_tag_manager">Google Tag Manager</Label>
                         </div>
                         {trackingConfig.google_tag_manager && (
-                          <Input
-                            placeholder="ID do GTM"
-                            value={trackingConfig.gtm_id}
-                            onChange={(e) => 
-                              setTrackingConfig(prev => ({ ...prev, gtm_id: e.target.value }))
-                            }
-                          />
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="ID do GTM"
+                              value={trackingConfig.gtm_id}
+                              onChange={(e) => 
+                                setTrackingConfig(prev => ({ ...prev, gtm_id: e.target.value }))
+                              }
+                            />
+                            <div>
+                              <Label>Nome do Evento</Label>
+                              <Input
+                                placeholder="form_submit"
+                                value={trackingConfig.gtm_event_name}
+                                onChange={(e) => setTrackingConfig(prev => ({ ...prev, gtm_event_name: e.target.value }))}
+                              />
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>

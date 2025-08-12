@@ -55,15 +55,19 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           enabled: true,
           facebookPixel: {
             enabled: fbEnabled,
-            pixel_id: pixelId
+            pixel_id: pixelId,
+            eventType: trackingConfig?.facebook_pixel?.event_type || trackingConfig?.event_type || 'Lead',
+            customEventName: trackingConfig?.facebook_pixel?.custom_event_name || trackingConfig?.custom_event_name || ''
           },
           googleAnalytics: {
             enabled: trackingConfig?.google_analytics?.enabled || false,
-            tracking_id: trackingConfig?.google_analytics?.tracking_id || ''
+            tracking_id: trackingConfig?.google_analytics?.tracking_id || trackingConfig?.ga_id || '',
+            eventName: trackingConfig?.google_analytics?.event_name || trackingConfig?.ga_event_name || 'form_submit'
           },
           googleTagManager: {
             enabled: trackingConfig?.google_tag_manager?.enabled || false,
-            container_id: trackingConfig?.google_tag_manager?.container_id || ''
+            container_id: trackingConfig?.google_tag_manager?.container_id || trackingConfig?.gtm_id || '',
+            eventName: trackingConfig?.google_tag_manager?.event_name || trackingConfig?.gtm_event_name || 'form_submit'
           }
         };
         
