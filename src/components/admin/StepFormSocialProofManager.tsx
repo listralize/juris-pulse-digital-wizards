@@ -105,21 +105,27 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
         throw fetchError;
       }
 
-      // Prepara os dados para upsert
-      const dataToSave = {
-        ...(existingData || {}),
-        global_social_proof: config as any,
-        updated_at: new Date().toISOString()
-      };
-
-      const { error } = await supabase
-        .from('admin_settings')
-        .upsert(dataToSave, { 
-          onConflict: 'id',
-          ignoreDuplicates: false 
-        });
-
-      if (error) throw error;
+      // Se não existem dados, criar novo registro
+      if (!existingData) {
+        const { error } = await supabase
+          .from('admin_settings')
+          .insert({
+            global_social_proof: config as any
+          });
+        
+        if (error) throw error;
+      } else {
+        // Atualizar registro existente
+        const { error } = await supabase
+          .from('admin_settings')
+          .update({
+            global_social_proof: config as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+        
+        if (error) throw error;
+      }
 
       // Also update the local formData
       onUpdate('social_proof_config', config);

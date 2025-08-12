@@ -80,11 +80,12 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
       const stepFormConfig = data?.global_social_proof as any;
       console.log('Config de prova social:', stepFormConfig);
       
-      if (stepFormConfig?.enabled) {
+      if (stepFormConfig?.enabled && (stepFormConfig?.testimonials?.length > 0 || stepFormConfig?.stats?.length > 0)) {
         setSocialProofConfig(stepFormConfig as SocialProofConfig);
         console.log('Prova social ativada:', stepFormConfig);
       } else {
-        console.log('Prova social não está ativada ou não existe');
+        console.log('Prova social não está ativada ou não tem conteúdo');
+        setSocialProofConfig(null);
       }
     } catch (error) {
       console.error('Erro ao carregar prova social do step form:', error);

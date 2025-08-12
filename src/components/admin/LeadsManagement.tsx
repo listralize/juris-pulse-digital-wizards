@@ -96,6 +96,28 @@ const parseLeadData = (leadData: any) => {
       field && typeof field === 'string' && field.trim() !== '' && field !== 'N/A'
     );
     
+    // Para stepform, verificar também os fields diretos do objeto
+    if (!foundPhone && typeof leadData === 'object') {
+      const stepFormFields = Object.entries(leadData || {});
+      for (const [key, value] of stepFormFields) {
+        if (typeof value === 'string' && value.trim() !== '') {
+          // Verificar se é um campo que pode conter telefone
+          if (key.toLowerCase().includes('telefone') || 
+              key.toLowerCase().includes('phone') ||
+              key.toLowerCase().includes('whatsapp') ||
+              key.toLowerCase().includes('tel') ||
+              key.toLowerCase().includes('celular') ||
+              /^\(?[\d\s\-\(\)+]{10,}$/.test(value)) {
+            const cleanPhone = value.replace(/\D/g, '');
+            if (cleanPhone.length >= 10) {
+              foundPhone = value;
+              break;
+            }
+          }
+        }
+      }
+    }
+    
     // Se não encontrou, verificar em respostas mapeadas
     if (!foundPhone && leadData?.respostas_mapeadas) {
       const mappedValues = Object.values(leadData.respostas_mapeadas);
@@ -103,17 +125,6 @@ const parseLeadData = (leadData: any) => {
         typeof val === 'string' && 
         val.trim() !== '' && 
         /\d{8,}/.test(val.replace(/\D/g, '')) &&
-        val.replace(/\D/g, '').length >= 10
-      );
-    }
-    
-    // Se ainda não encontrou, verificar diretamente no leadData por padrões de telefone
-    if (!foundPhone) {
-      const allValues = Object.values(leadData || {});
-      foundPhone = allValues.find(val => 
-        typeof val === 'string' && 
-        val.trim() !== '' && 
-        /^\(?[\d\s\-\(\)]{10,}$/.test(val) &&
         val.replace(/\D/g, '').length >= 10
       );
     }
