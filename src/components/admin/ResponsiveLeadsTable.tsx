@@ -111,10 +111,20 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                   <Button
                     size="sm" 
                     variant="outline"
-                    onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone}`, '_blank')}
+                    onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}`, '_blank')}
                   >
                     <MessageSquare className="w-3 h-3 mr-1" />
                     WhatsApp
+                  </Button>
+                )}
+                {leadData.email && leadData.email !== 'Email não informado' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(leadData.email, 'email')}
+                  >
+                    <Copy className="w-3 h-3 mr-1" />
+                    Email
                   </Button>
                 )}
                 <Select value={status} onValueChange={(value) => updateLeadStatus(lead.id, value)}>
@@ -218,18 +228,22 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone}`, '_blank')}
+                          onClick={() => window.open(`https://api.whatsapp.com/send?phone=55${leadData.phone.replace(/\D/g, '')}`, '_blank')}
+                          title="Abrir WhatsApp"
                         >
                           <MessageSquare className="w-4 h-4" />
                         </Button>
                       )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => copyToClipboard(leadData.email, 'email')}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
+                      {leadData.email && leadData.email !== 'Email não informado' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => copyToClipboard(leadData.email, 'email')}
+                          title="Copiar email"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -15,6 +15,7 @@ import { LinkTreePreview } from '@/components/LinkTreePreview';
 import { useToast } from '@/hooks/use-toast';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { IconSelector } from './IconSelector';
+import { GalleryButton } from './GalleryButton';
 export function LinkTreeManagement() {
   const [linkTree, setLinkTree] = useState<LinkTree | null>(null);
   const [items, setItems] = useState<LinkTreeItem[]>([]);
@@ -1763,15 +1764,22 @@ export function LinkTreeManagement() {
                             className="h-8 text-sm" 
                           />
                         </div>
-                        <div>
-                          <Label className="text-xs font-medium">Thumbnail (opcional)</Label>
-                          <Input 
-                            value={newItem.card_image} 
-                            onChange={e => setNewItem(prev => ({ ...prev, card_image: e.target.value }))} 
-                            placeholder="https://exemplo.com/thumbnail.jpg" 
-                            className="h-8 text-sm" 
-                          />
-                        </div>
+                          <div>
+                           <Label className="text-xs font-medium">Thumbnail (opcional)</Label>
+                           <div className="flex gap-2">
+                             <Input 
+                               value={newItem.card_image} 
+                               onChange={e => setNewItem(prev => ({ ...prev, card_image: e.target.value }))} 
+                               placeholder="https://exemplo.com/thumbnail.jpg" 
+                               className="h-8 text-sm flex-1" 
+                             />
+                             <GalleryButton
+                               onSelect={(url) => setNewItem(prev => ({ ...prev, card_image: url }))}
+                               size="sm"
+                               className="px-2"
+                             />
+                           </div>
+                         </div>
                       </div>
                       <div>
                         <Label className="text-xs font-medium">Descrição</Label>
@@ -1800,15 +1808,22 @@ export function LinkTreeManagement() {
                             className="text-sm" 
                           />
                         </div>
-                        <div>
-                          <Label className="text-xs font-medium">Imagem de Fundo (opcional)</Label>
-                          <Input 
-                            value={newItem.card_image} 
-                            onChange={e => setNewItem(prev => ({ ...prev, card_image: e.target.value }))} 
-                            placeholder="https://exemplo.com/imagem.jpg" 
-                            className="h-8 text-sm" 
-                          />
-                        </div>
+                         <div>
+                           <Label className="text-xs font-medium">Imagem de Fundo (opcional)</Label>
+                           <div className="flex gap-2">
+                             <Input 
+                               value={newItem.card_image} 
+                               onChange={e => setNewItem(prev => ({ ...prev, card_image: e.target.value }))} 
+                               placeholder="https://exemplo.com/imagem.jpg" 
+                               className="h-8 text-sm flex-1" 
+                             />
+                             <GalleryButton
+                               onSelect={(url) => setNewItem(prev => ({ ...prev, card_image: url }))}
+                               size="sm"
+                               className="px-2"
+                             />
+                           </div>
+                         </div>
                       </div>
                     </div>
                   )}

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Save, Trash2, Users } from 'lucide-react';
 import { TeamMember } from '../../types/adminTypes';
 import { useTheme } from '../ThemeProvider';
+import { GalleryButton } from './GalleryButton';
 
 interface TeamManagementProps {
   teamMembers: TeamMember[];
@@ -109,18 +110,11 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                     placeholder="URL da imagem ou selecione da galeria"
                     className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
+                  <GalleryButton
+                    onSelect={(url) => onUpdateTeamMember(member.id, 'image', url)}
                     size="sm"
-                    onClick={() => {
-                      // TODO: Implementar abertura da galeria
-                      console.log('Abrir galeria para membro:', member.id);
-                    }}
                     className="px-3"
-                  >
-                    📁
-                  </Button>
+                  />
                 </div>
               </div>
               <div className="md:col-span-2">

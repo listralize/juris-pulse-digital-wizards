@@ -64,18 +64,55 @@ const parseLeadData = (leadData: any) => {
       leadData = JSON.parse(leadData);
     }
     
-    return {
-      name: leadData?.name || leadData?.nome || '',
-      email: leadData?.email || '',
-      phone: leadData?.phone || leadData?.telefone || leadData?.tel || leadData?.celular || '',
-      service: leadData?.service || leadData?.servico || '',
-      message: leadData?.message || leadData?.mensagem || '',
-      urgent: leadData?.urgent || leadData?.urgente || false,
-      ...leadData
+    // Extrair dados de diferentes estruturas
+    let extractedData = {
+      name: 'Nome não informado',
+      email: 'Email não informado', 
+      phone: 'N/A',
+      service: 'N/A',
+      message: '',
+      urgent: false
     };
+
+    // Tentar extrair nome
+    extractedData.name = leadData?.name || leadData?.nome || leadData?.Name || 
+                        leadData?.userName || leadData?.user_name || 
+                        leadData?.fullName || leadData?.full_name || 'Nome não informado';
+
+    // Tentar extrair email
+    extractedData.email = leadData?.email || leadData?.Email || 
+                         leadData?.userEmail || leadData?.user_email || 'Email não informado';
+
+    // Tentar extrair telefone
+    extractedData.phone = leadData?.phone || leadData?.telefone || leadData?.Phone || 
+                         leadData?.phoneNumber || leadData?.phone_number || 
+                         leadData?.userPhone || leadData?.user_phone || 
+                         leadData?.tel || leadData?.celular || 'N/A';
+
+    // Tentar extrair serviço
+    extractedData.service = leadData?.service || leadData?.servico || leadData?.Service || 
+                           leadData?.serviceType || leadData?.service_type || 
+                           leadData?.category || leadData?.categoria || 'N/A';
+
+    // Tentar extrair mensagem
+    extractedData.message = leadData?.message || leadData?.mensagem || leadData?.Message || 
+                           leadData?.description || leadData?.descricao || 
+                           leadData?.comment || leadData?.comentario || '';
+
+    // Tentar extrair urgência
+    extractedData.urgent = leadData?.urgent || leadData?.urgente || false;
+
+    return { ...extractedData, ...leadData };
   } catch (error) {
     console.error('Erro ao parsear lead_data:', error);
-    return {};
+    return {
+      name: 'Erro ao carregar dados',
+      email: 'Erro ao carregar dados',
+      phone: 'N/A',
+      service: 'N/A',
+      message: '',
+      urgent: false
+    };
   }
 };
 

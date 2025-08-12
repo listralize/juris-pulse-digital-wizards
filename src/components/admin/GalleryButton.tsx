@@ -1,0 +1,64 @@
+import React, { useState } from 'react';
+import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { UniversalGallery } from './UniversalGallery';
+
+interface MediaFile {
+  id: string;
+  name: string;
+  url: string;
+  type: 'image' | 'video' | 'file';
+  size: number;
+  created_at: string;
+  tags: string[];
+  folder?: string;
+}
+
+interface GalleryButtonProps {
+  onSelect: (url: string) => void;
+  disabled?: boolean;
+  variant?: 'outline' | 'default' | 'ghost';
+  size?: 'sm' | 'default' | 'lg';
+  className?: string;
+}
+
+export const GalleryButton: React.FC<GalleryButtonProps> = ({
+  onSelect,
+  disabled = false,
+  variant = 'outline',
+  size = 'sm',
+  className = ''
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleImageSelect = (file: MediaFile) => {
+    onSelect(file.url);
+    setIsOpen(false);
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant={variant}
+        size={size}
+        onClick={() => setIsOpen(true)}
+        disabled={disabled}
+        className={className}
+      >
+        📁 Galeria
+      </Button>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Galeria de Imagens</DialogTitle>
+          </DialogHeader>
+          <div className="h-full overflow-y-auto">
+            <UniversalGallery onSelect={handleImageSelect} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};

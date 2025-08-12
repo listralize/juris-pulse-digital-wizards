@@ -452,6 +452,32 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   formData,
   onUpdate
 }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <div className="flex items-center justify-center h-96 text-center p-8">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-muted-foreground">
+            Editor Visual Indisponível
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-md">
+            O editor visual de fluxo não está disponível em dispositivos móveis. 
+            Acesse através de um computador ou tablet para uma melhor experiência.
+          </p>
+        </div>
+      </div>
+    );
+  }
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(
     formData?.flowConfig?.edges || formData?.flow_config?.edges || initialEdges

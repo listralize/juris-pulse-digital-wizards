@@ -10,6 +10,7 @@ import { Switch } from '../ui/switch';
 import { ArrowLeft, Plus, Save, Edit, Trash2, Eye, RefreshCw, X } from 'lucide-react';
 import { BlogPost } from '../../types/blogTypes';
 import { toast } from 'sonner';
+import { GalleryButton } from './GalleryButton';
 
 interface BlogManagementProps {
   blogPosts: BlogPost[];
@@ -227,12 +228,19 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
               
               <div>
                 <Label htmlFor="banner">URL do Banner</Label>
-                <Input
-                  id="banner"
-                  value={selectedPost.banner}
-                  onChange={(e) => updatePost('banner', e.target.value)}
-                  placeholder="URL da imagem de banner"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="banner"
+                    value={selectedPost.banner}
+                    onChange={(e) => updatePost('banner', e.target.value)}
+                    placeholder="URL da imagem de banner"
+                    className="flex-1"
+                  />
+                  <GalleryButton
+                    onSelect={(url) => updatePost('banner', url)}
+                    size="sm"
+                  />
+                </div>
               </div>
               
               <div>

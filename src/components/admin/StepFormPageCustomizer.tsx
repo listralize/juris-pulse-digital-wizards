@@ -31,11 +31,10 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
 
   return (
     <Tabs defaultValue="layout" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="layout">Layout</TabsTrigger>
         <TabsTrigger value="style">Estilos</TabsTrigger>
-        <TabsTrigger value="social-proof">Prova Social</TabsTrigger>
-        <TabsTrigger value="seo">SEO</TabsTrigger>
+        <TabsTrigger value="social-proof">Depoimentos</TabsTrigger>
       </TabsList>
 
       <TabsContent value="layout" className="space-y-6 mt-6">
@@ -429,16 +428,6 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
         />
       </TabsContent>
 
-      <TabsContent value="seo" className="space-y-6 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Configurações de SEO</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Configurações de SEO serão implementadas aqui</p>
-          </CardContent>
-        </Card>
-      </TabsContent>
     </Tabs>
   );
 };
