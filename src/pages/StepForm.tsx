@@ -59,7 +59,7 @@ interface StepFormStep {
   id: string;
   title: string;
   description?: string;
-  type: 'question' | 'form' | 'content' | 'offer' | 'timer';
+  type: 'question' | 'form' | 'content' | 'offer' | 'timer' | 'socialProof';
   options?: Array<{
     text: string;
     value: string;
@@ -832,6 +832,15 @@ const StepForm: React.FC = () => {
                      {loading ? 'Enviando...' : 'Enviar Formulário'}
                    </Button>
                 </form>
+              )}
+              {/* Prova Social (Depoimentos/Estatísticas) */}
+              {currentStep.socialProofConfig && (currentStep.socialProofConfig.testimonials?.length > 0 || currentStep.socialProofConfig.stats?.length > 0) && (
+                <div className="mt-6">
+                  <SocialProofElement
+                    config={currentStep.socialProofConfig}
+                    primaryColor={form.styles.primary_color || '#4CAF50'}
+                  />
+                </div>
               )}
 
               {currentStep.type === 'offer' && currentStep.offerConfig && (

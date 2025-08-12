@@ -117,8 +117,8 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
       className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-blue-500" />
-      <div className="bg-blue-500 text-white p-2 rounded-t-lg flex items-center gap-2">
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-accent" />
+      <div className="bg-secondary text-secondary-foreground p-2 rounded-t-lg flex items-center gap-2">
         <MessageSquare className="w-4 h-4" />
         <span className="font-semibold text-sm">Pergunta</span>
       </div>
@@ -175,7 +175,7 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
             {data.options.map((option, index) => (
               <div 
                 key={`${option.text}-${index}`}
-                className="text-xs bg-gray-800 p-2 rounded text-gray-300 border border-gray-600 hover:bg-gray-700 cursor-pointer relative"
+                className="text-xs bg-muted p-2 rounded text-muted-foreground border border-border hover:bg-accent cursor-pointer relative"
               >
                 {option.text}
                 <Handle 
@@ -183,7 +183,7 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
                   position={Position.Right} 
                   id={`option-${index}`}
                   style={{ right: '-8px', top: '50%', transform: 'translateY(-50%)' }}
-                  className="w-3 h-3 bg-green-500"
+                  className="w-3 h-3 bg-accent"
                 />
               </div>
             ))}
@@ -203,7 +203,7 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-blue-500" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-accent" />
     </div>
   );
 });
@@ -222,8 +222,8 @@ const FormNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: str
       className="rounded-lg shadow-lg border-2 min-w-[200px] max-w-[300px] relative" 
       style={{ backgroundColor: nodeStyle.backgroundColor, borderColor: nodeStyle.borderColor, borderRadius: nodeStyle.borderRadius }}
     >
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-green-500" />
-      <div className="bg-green-500 text-white p-2 rounded-t-lg flex items-center gap-2">
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-accent" />
+      <div className="bg-secondary text-secondary-foreground p-2 rounded-t-lg flex items-center gap-2">
         <FormInput className="w-4 h-4" />
         <span className="font-semibold text-sm">Formulário</span>
       </div>
@@ -234,19 +234,16 @@ const FormNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: str
         )}
         {data.formFields && data.formFields.length > 0 && (
           <div className="space-y-1">
-            {data.formFields.slice(0, 3).map((field: any, index: number) => (
-              <div key={`${field.name}-${index}`} className="text-xs bg-gray-800 p-1 rounded text-gray-300">
+            {data.formFields.map((field: any, index: number) => (
+              <div key={`${field.name}-${index}`} className="text-xs bg-muted p-1 rounded text-muted-foreground">
                 {field.label || field.placeholder || field.name} ({field.type})
               </div>
             ))}
-            {data.formFields.length > 3 && (
-              <div className="text-xs opacity-50">+{data.formFields.length - 3} campos...</div>
-            )}
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-green-500" />
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-green-500" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-accent" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-accent" />
     </div>
   );
 });
@@ -276,8 +273,8 @@ const ContentNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: 
         maxHeight: '400px'
       }}
     >
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-purple-500" />
-      <div className="bg-purple-500 text-white p-2 rounded-t-lg flex items-center gap-2">
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-accent" />
+      <div className="bg-secondary text-secondary-foreground p-2 rounded-t-lg flex items-center gap-2">
         <ImageIcon className="w-4 h-4" />
         <span className="font-semibold text-sm">Conteúdo</span>
       </div>
@@ -294,7 +291,7 @@ const ContentNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: 
               className="w-full object-cover rounded"
               style={{ height: data.imageHeight || '80px' }}
             />
-            <div className="text-xs opacity-50 mt-1 text-gray-400">Imagem</div>
+            <div className="text-xs opacity-50 mt-1 text-muted-foreground">Imagem</div>
           </div>
         )}
         {data.videoUrl && data.mediaType === 'video' && (
@@ -303,19 +300,19 @@ const ContentNode = React.memo(({ data, id }: { data: StepFormNode['data']; id: 
               className="w-full bg-gray-800 rounded flex items-center justify-center relative overflow-hidden"
               style={{ height: data.videoHeight || '80px' }}
             >
-              <Play className="w-6 h-6 text-gray-400 z-10" />
+              <Play className="w-6 h-6 text-muted-foreground z-10" />
               <video 
                 src={data.videoUrl} 
                 className="absolute inset-0 w-full h-full object-cover rounded opacity-50"
                 muted
               />
             </div>
-            <div className="text-xs opacity-50 mt-1 text-gray-400">Vídeo</div>
+            <div className="text-xs opacity-50 mt-1 text-muted-foreground">Vídeo</div>
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-purple-500" />
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-purple-500" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-accent" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-accent" />
     </div>
   );
 });
@@ -484,6 +481,10 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           borderColor: step.borderColor,
           width: step.width,
           height: step.height,
+          carouselImages: step.carouselImages,
+          carouselAutoplay: step.carouselAutoplay,
+          carouselShowDots: step.carouselShowDots,
+          carouselInterval: step.carouselInterval,
         }
       }));
       setNodes(updatedNodes);
@@ -535,6 +536,10 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         borderColor: node.data.borderColor,
         width: node.data.width,
         height: node.data.height,
+        carouselImages: node.data.carouselImages,
+        carouselAutoplay: node.data.carouselAutoplay,
+        carouselShowDots: node.data.carouselShowDots,
+        carouselInterval: node.data.carouselInterval,
         config: node.data.config,
         position: node.position // Salvar posição do nó
       }));
@@ -642,9 +647,9 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   };
 
   return (
-    <div className="h-[80vh] w-full flex bg-gray-900">
+    <div className="h-[80vh] w-full flex bg-background">
       {/* Área do Flow */}
-      <div className="flex-1 relative bg-gray-900">
+      <div className="flex-1 relative bg-background">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -662,11 +667,11 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             try { instance.fitView({ padding: 0.2 }); } catch {}
           }}
           className="w-full h-full"
-          style={{ backgroundColor: "#1a1a1a" }}
+          style={{}}
         >
           <Controls />
-          <MiniMap className="bg-gray-800" />
-          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#333" />
+          <MiniMap className="bg-card" />
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color={"hsl(var(--border))"} />
         </ReactFlow>
 
         {/* Botões flutuantes para adicionar nós */}
@@ -695,14 +700,6 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             <ImageIcon className="w-4 h-4 mr-1" />
             Conteúdo
           </Button>
-          <Button
-            size="sm"
-            onClick={() => addNode('offer')}
-            className="bg-orange-500 hover:bg-orange-600"
-          >
-            <Gift className="w-4 h-4 mr-1" />
-            Oferta
-          </Button>
           {/* Timer removido conforme solicitação - não é mais possível adicionar */}
           <Button
             size="sm"
@@ -728,7 +725,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           <Card className="bg-card border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white">
+                <CardTitle className="text-card-foreground">
                   Editar {selectedNode.type?.charAt(0).toUpperCase() + selectedNode.type?.slice(1)}
                 </CardTitle>
                 <Button
@@ -742,27 +739,27 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-gray-300">Título</Label>
+                <Label className="text-muted-foreground">Título</Label>
                 <Input
                   value={String(selectedNode.data.title || '')}
                   onChange={(e) => updateNode(selectedNode.id, { title: e.target.value })}
-                  className=""
+                  className="bg-secondary border-border text-foreground"
                 />
               </div>
 
               <div>
-                <Label className="text-gray-300">Descrição</Label>
+                <Label className="text-muted-foreground">Descrição</Label>
                 <Textarea
                   value={String(selectedNode.data.description || '')}
                   onChange={(e) => updateNode(selectedNode.id, { description: e.target.value })}
-                  className=""
+                  className="bg-secondary border-border text-foreground"
                 />
               </div>
 
               {selectedNode.type === 'question' && (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-gray-300">Imagem/Vídeo</Label>
+                    <Label className="text-muted-foreground">Imagem/Vídeo</Label>
                     <Select 
                       value={String(selectedNode.data.mediaType || 'none')}
                       onValueChange={(value) => {
@@ -774,7 +771,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                         });
                       }}
                     >
-                      <SelectTrigger className="bg-gray-700 border-gray-600">
+                      <SelectTrigger className="bg-secondary border-border">
                         <SelectValue placeholder="Selecione o tipo de mídia" />
                       </SelectTrigger>
                       <SelectContent>
@@ -789,13 +786,13 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     <div className="space-y-3">
                       {selectedNode.data.mediaType === 'image' && (
                         <div>
-                          <Label className="text-gray-300">URL da Imagem</Label>
+                          <Label className="text-muted-foreground">URL da Imagem</Label>
                           <div className="flex gap-2">
                             <Input
                               value={String(selectedNode.data.imageUrl || '')}
                               onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
                               placeholder="URL da imagem"
-                              className="flex-1"
+                              className="flex-1 bg-secondary border-border text-foreground"
                             />
                             <Button size="sm" variant="outline" onClick={() => openImageGallery('imageUrl')} className="whitespace-nowrap">
                               <ImageIcon className="w-4 h-4 mr-1" />
@@ -803,24 +800,25 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                             </Button>
                           </div>
                           <div className="mt-2">
-                            <Label className="text-gray-300">Altura da Imagem</Label>
+                            <Label className="text-muted-foreground">Altura da Imagem</Label>
                             <Input
                               value={String(selectedNode.data.imageHeight || '120px')}
                               onChange={(e) => updateNode(selectedNode.id, { imageHeight: e.target.value })}
                               placeholder="ex: 150px"
+                              className="bg-secondary border-border text-foreground"
                             />
                           </div>
                         </div>
                       )}
                       {selectedNode.data.mediaType === 'video' && (
                         <div>
-                          <Label className="text-gray-300">URL do Vídeo</Label>
+                          <Label className="text-muted-foreground">URL do Vídeo</Label>
                           <div className="flex gap-2">
                             <Input
                               value={String(selectedNode.data.videoUrl || '')}
                               onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
                               placeholder="URL do vídeo"
-                              className="flex-1"
+                              className="flex-1 bg-secondary border-border text-foreground"
                             />
                             <Button size="sm" variant="outline" onClick={() => openImageGallery('videoUrl')} className="whitespace-nowrap">
                               <ImageIcon className="w-4 h-4 mr-1" />
@@ -828,22 +826,23 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                             </Button>
                           </div>
                           <div className="mt-2">
-                            <Label className="text-gray-300">Altura do Vídeo</Label>
+                            <Label className="text-muted-foreground">Altura do Vídeo</Label>
                             <Input
                               value={String(selectedNode.data.videoHeight || '120px')}
                               onChange={(e) => updateNode(selectedNode.id, { videoHeight: e.target.value })}
                               placeholder="ex: 150px"
+                              className="bg-secondary border-border text-foreground"
                             />
                           </div>
                         </div>
                       )}
                       <div>
-                        <Label className="text-gray-300">Posição da mídia</Label>
+                        <Label className="text-muted-foreground">Posição da mídia</Label>
                         <Select
                           value={String(selectedNode.data.imagePosition || 'top')}
                           onValueChange={(value) => updateNode(selectedNode.id, { imagePosition: value as 'top' | 'left' | 'right' | 'bottom' })}
                         >
-                          <SelectTrigger className="bg-gray-700 border-gray-600">
+                          <SelectTrigger className="bg-secondary border-border">
                             <SelectValue placeholder="Posição" />
                           </SelectTrigger>
                           <SelectContent>
@@ -921,21 +920,21 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
               {selectedNode.type === 'content' && (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-gray-300">Largura do Nó</Label>
+                    <Label className="text-muted-foreground">Largura do Nó</Label>
                     <Input
                       value={String(selectedNode.data.width || '300px')}
                       onChange={(e) => updateNode(selectedNode.id, { width: e.target.value })}
                       placeholder="ex: 400px"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-secondary border-border text-foreground"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-300">Altura do Nó</Label>
+                    <Label className="text-muted-foreground">Altura do Nó</Label>
                     <Input
                       value={String(selectedNode.data.height || 'auto')}
                       onChange={(e) => updateNode(selectedNode.id, { height: e.target.value })}
                       placeholder="ex: 300px ou auto"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-secondary border-border text-foreground"
                     />
                   </div>
 
@@ -952,13 +951,14 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                         });
                       }}
                     >
-                      <SelectTrigger className="bg-gray-700 border-gray-600">
+                      <SelectTrigger className="bg-secondary border-border">
                         <SelectValue placeholder="Selecione o tipo de mídia" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Nenhum</SelectItem>
                         <SelectItem value="image">Imagem</SelectItem>
                         <SelectItem value="video">Vídeo</SelectItem>
+                        <SelectItem value="carousel">Carrossel</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1031,33 +1031,124 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                     </>
                   )}
 
+                  {selectedNode.data.mediaType === 'carousel' && (
+                    <>
+                      <div>
+                        <Label className="text-muted-foreground">Imagens do Carrossel</Label>
+                        <div className="space-y-2">
+                          {(selectedNode.data.carouselImages || []).map((url: string, index: number) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <Input
+                                value={url}
+                                onChange={(e) => {
+                                  const imgs = [...(selectedNode.data.carouselImages || [])];
+                                  imgs[index] = e.target.value;
+                                  updateNode(selectedNode.id, { carouselImages: imgs });
+                                }}
+                                placeholder="URL da imagem"
+                                className="bg-secondary border-border text-foreground flex-1"
+                              />
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  const imgs = (selectedNode.data.carouselImages || []).filter((_: any, i: number) => i !== index);
+                                  updateNode(selectedNode.id, { carouselImages: imgs });
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateNode(selectedNode.id, { carouselImages: [...(selectedNode.data.carouselImages || []), ''] })}
+                            >
+                              <Plus className="w-4 h-4 mr-1" /> Adicionar URL
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openImageGallery('imageUrl')}
+                            >
+                              <ImageIcon className="w-4 h-4 mr-1" /> Galeria
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <Label className="text-muted-foreground">Autoplay</Label>
+                          <Select
+                            value={String(selectedNode.data.carouselAutoplay ? 'true' : 'false')}
+                            onValueChange={(val) => updateNode(selectedNode.id, { carouselAutoplay: val === 'true' })}
+                          >
+                            <SelectTrigger className="bg-secondary border-border">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Ativado</SelectItem>
+                              <SelectItem value="false">Desativado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground">Mostrar Dots</Label>
+                          <Select
+                            value={String(selectedNode.data.carouselShowDots !== false)}
+                            onValueChange={(val) => updateNode(selectedNode.id, { carouselShowDots: val === 'true' })}
+                          >
+                            <SelectTrigger className="bg-secondary border-border">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Sim</SelectItem>
+                              <SelectItem value="false">Não</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground">Intervalo (ms)</Label>
+                          <Input
+                            type="number"
+                            value={Number(selectedNode.data.carouselInterval || 5000)}
+                            onChange={(e) => updateNode(selectedNode.id, { carouselInterval: parseInt(e.target.value) || 5000 })}
+                            className="bg-secondary border-border text-foreground"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Cor de Fundo</Label>
+                    <Label className="text-muted-foreground">Cor de Fundo</Label>
                     <Input
                       type="color"
                       value={String(selectedNode.data.backgroundColor || '#1a1a1a')}
                       onChange={(e) => updateNode(selectedNode.id, { backgroundColor: e.target.value })}
-                      className="bg-gray-700 border-gray-600"
+                      className="bg-secondary border-border"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Cor do Texto</Label>
+                    <Label className="text-muted-foreground">Cor do Texto</Label>
                     <Input
                       type="color"
                       value={String(selectedNode.data.textColor || '#ffffff')}
                       onChange={(e) => updateNode(selectedNode.id, { textColor: e.target.value })}
-                      className="bg-gray-700 border-gray-600"
+                      className="bg-secondary border-border"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Cor da Borda</Label>
+                    <Label className="text-muted-foreground">Cor da Borda</Label>
                     <Input
                       type="color"
                       value={String(selectedNode.data.borderColor || '#8b5cf6')}
                       onChange={(e) => updateNode(selectedNode.id, { borderColor: e.target.value })}
-                      className="bg-gray-700 border-gray-600"
+                      className="bg-secondary border-border"
                     />
                   </div>
                 </div>
