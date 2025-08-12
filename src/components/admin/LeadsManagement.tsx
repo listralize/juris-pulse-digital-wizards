@@ -83,8 +83,9 @@ const parseLeadData = (leadData: any) => {
     extractedData.email = leadData?.email || leadData?.Email || 
                          leadData?.userEmail || leadData?.user_email || 'Email não informado';
 
-    // Tentar extrair telefone
+    // Tentar extrair telefone - melhor parsing para stepform leads
     extractedData.phone = leadData?.phone || leadData?.telefone || leadData?.Phone || 
+                         leadData?.['Telefone/WhatsApp'] || leadData?.whatsapp || 
                          leadData?.phoneNumber || leadData?.phone_number || 
                          leadData?.userPhone || leadData?.user_phone || 
                          leadData?.tel || leadData?.celular || 'N/A';

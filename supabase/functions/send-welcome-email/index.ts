@@ -43,7 +43,7 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string) 
                 </p>
                 
                 <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #cccccc;">
-                    Agradecemos seu interesse em nossos serviços de <strong style="color: #4CAF50;">${service}</strong>. 
+                    Agradecemos seu interesse em nossos serviços${service && service !== '*service*' ? ` de <strong style="color: #4CAF50;">${service}</strong>` : ''}. 
                     Nossa equipe de advogados especializados analisará sua solicitação e retornará o contato o mais breve possível.
                 </p>
 

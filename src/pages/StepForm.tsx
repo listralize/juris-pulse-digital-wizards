@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
-import { StepFormSocialProof } from '../components/StepFormSocialProof';
+import { StepFormTestimonials } from '../components/StepFormTestimonials';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 
 interface StepFormData {
@@ -430,8 +430,10 @@ const StepForm: React.FC = () => {
       const extractedData = {
         name: formData.name || formData.Nome || mappedResponses.Nome || mappedResponses.name || '',
         email: formData.email || formData.Email || mappedResponses.Email || mappedResponses.email || '',
-        phone: formData.phone || formData.telefone || formData.whatsapp || 
-               mappedResponses.telefone || mappedResponses.phone || mappedResponses.whatsapp || '',
+                phone: formData.phone || formData.telefone || formData.whatsapp || 
+                formData['Telefone/WhatsApp'] || mappedResponses.telefone || 
+                mappedResponses.phone || mappedResponses.whatsapp || 
+                mappedResponses['Telefone/WhatsApp'] || '',
       };
       
       // Salvar no banco de dados
@@ -981,6 +983,9 @@ const StepForm: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Depoimentos fixos acima do rodapé */}
+      <StepFormTestimonials formId={form.slug} />
     </div>
   );
 };
