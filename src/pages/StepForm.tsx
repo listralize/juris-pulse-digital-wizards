@@ -480,7 +480,7 @@ const StepForm: React.FC = () => {
         console.log('✅ Lead salvo com sucesso:', savedLead);
       }
 
-      // Salvar evento de conversão
+      // Salvar evento de conversão com dados mapeados corretamente
       try {
         const conversionData = {
           session_id: sessionId,
@@ -491,7 +491,12 @@ const StepForm: React.FC = () => {
           event_label: form?.slug || 'stepform',
           form_id: form?.id || 'stepform',
           form_name: form?.name || 'Step Form',
-          lead_data: { service: serviceName, ...formResponses },
+          lead_data: {
+            ...extractedData,
+            service: serviceName,
+            respostas_mapeadas: mappedResponses,
+            ...mappedResponses
+          },
           conversion_value: 1,
           page_url: window.location.href,
           referrer: document.referrer || null,
@@ -531,17 +536,43 @@ const StepForm: React.FC = () => {
 
       console.log('🔗 Enviando para webhook...', { webhookUrl: form?.webhook_url });
 
-      // Enviar email de confirmação para stepform leads
+      // Buscar template padrão e enviar email de confirmação para stepform leads
       try {
         console.log('📧 Enviando email de confirmação para stepform lead...');
         
         if (extractedData.email) {
+          // Buscar template padrão
+          const { data: templates, error: templateError } = await supabase
+            .from('email_templates')
+            .select('*')
+            .eq('is_active', true)
+            .order('is_default', { ascending: false })
+            .limit(1);
+
+          if (templateError) {
+            console.error('❌ Erro ao buscar template:', templateError);
+          }
+
+          const defaultTemplate = templates?.[0];
+          
           const emailResponse = await supabase.functions.invoke('send-smtp-email', {
             body: {
               to: extractedData.email,
+              subject: defaultTemplate?.subject?.replace('{name}', extractedData.name || 'Cliente') || `Obrigado pelo contato, ${extractedData.name || 'Cliente'}! 📧`,
               name: extractedData.name || 'Cliente',
               service: form?.name || 'Consultoria Jurídica',
-              message: JSON.stringify(mappedResponses, null, 2),
+              customTitle: defaultTemplate?.title,
+              customContent: defaultTemplate?.content,
+              logoUrl: defaultTemplate?.logo_url || 'https://stadv.com.br/logo-email.png',
+              backgroundColor: defaultTemplate?.background_color,
+              textColor: defaultTemplate?.text_color,
+              buttonColor: defaultTemplate?.button_color,
+              customHtml: defaultTemplate?.custom_html,
+              buttonText: defaultTemplate?.button_text,
+              buttonUrl: defaultTemplate?.button_url,
+              secondaryButtonText: defaultTemplate?.secondary_button_text,
+              secondaryButtonUrl: defaultTemplate?.secondary_button_url,
+              showSecondaryButton: defaultTemplate?.show_secondary_button,
               source: 'stepform'
             }
           });

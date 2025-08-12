@@ -147,10 +147,10 @@ export const useLeadsData = (): LeadsData => {
         const mappedLeadData = {
           ...leadData,
           // Garantir que nome, email e telefone estejam no formato correto
-          name: leadData.name || leadData.nome || leadData.Nome || 'Nome não informado',
-          email: leadData.email || leadData.Email || 'Não informado',
-          phone: leadData.phone || leadData.telefone || leadData.whatsapp || leadData.Telefone || 'Não informado',
-          service: leadData.service || leadData.servico || leadData.Serviço || 'Não informado'
+          name: leadData.name || leadData.nome || leadData.Nome || 'N/A',
+          email: leadData.email || leadData.Email || 'N/A', 
+          phone: leadData.phone || leadData.telefone || leadData.whatsapp || leadData.Telefone || 'N/A',
+          service: leadData.service || leadData.servico || leadData.Serviço || lead.form_name || 'Não informado'
         };
 
         return {

@@ -84,14 +84,6 @@ const createWelcomeEmailHTML = (name: string, service: string, message: string, 
                     ${content}
                 </p>
 
-                ${message && message.trim() !== '' && !message.includes('Sua mensagem') ? `
-                <div style="background-color: #1a1a1a; padding: 20px; border-left: 4px solid #4CAF50; margin: 20px 0;">
-                    <p style="margin: 0; font-size: 14px; color: #cccccc;">
-                        <strong>Dados do contato:</strong><br>
-                        ${message}
-                    </p>
-                </div>
-                ` : ''}
 
                 <p style="font-size: 16px; line-height: 1.6; margin: 20px 0; color: #cccccc;">
                     Enquanto isso, fique à vontade para entrar em contato conosco através dos canais abaixo:
