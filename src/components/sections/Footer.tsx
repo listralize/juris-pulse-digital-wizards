@@ -106,7 +106,6 @@ const Footer: React.FC<FooterProps> = ({
 
   return (
     <>
-      <GlobalSocialProof />
       <footer
       className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}
       style={{

@@ -707,21 +707,10 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           <MiniMap className="bg-card" />
           <Background 
             variant={BackgroundVariant.Dots} 
-            gap={20} 
-            size={1.5}
-            color="rgba(156, 163, 175, 0.3)"
+            gap={25} 
+            size={3}
+            color="hsl(var(--border))"
           />
-          
-          {/* SVG para gradiente futurista cinza */}
-          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-            <defs>
-              <radialGradient id="futuristicGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.4)" />
-                <stop offset="50%" stopColor="rgba(156, 163, 175, 0.3)" />
-                <stop offset="100%" stopColor="rgba(229, 231, 235, 0.2)" />
-              </radialGradient>
-            </defs>
-          </svg>
         </ReactFlow>
 
         {/* Botões flutuantes para adicionar nós */}

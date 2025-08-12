@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail, FormInput, Award } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail, FormInput } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { useSupabasePageTexts } from '../hooks/useSupabasePageTexts';
@@ -20,7 +20,7 @@ import { MarketingManagement } from '../components/admin/MarketingManagement';
 import { LeadsManagement } from '../components/admin/LeadsManagement';
 import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
 import { StepFormBuilder } from '../components/admin/StepFormBuilder';
-import { AuthorityManager } from '../components/admin/AuthorityManager';
+
 
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
@@ -158,7 +158,7 @@ const Admin = () => {
             
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="hidden md:grid w-full grid-cols-8 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
+              <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -200,11 +200,6 @@ const Admin = () => {
                   <FormInput className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="hidden sm:inline">Formulários Step</span>
                   <span className="sm:hidden">Forms</span>
-                </TabsTrigger>
-                <TabsTrigger value="authority" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
-                  <Award className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Autoridade</span>
-                  <span className="sm:hidden">Autoridade</span>
                 </TabsTrigger>
                 <TabsTrigger value="marketing" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
                   <Briefcase className="w-3 h-3 md:w-4 md:h-4" />
@@ -262,12 +257,6 @@ const Admin = () => {
                         Formulários Step
                       </div>
                     </SelectItem>
-                    <SelectItem value="authority">
-                      <div className="flex items-center gap-2">
-                        <Award className="w-4 h-4" />
-                        Autoridade
-                      </div>
-                    </SelectItem>
                     <SelectItem value="marketing">
                       <div className="flex items-center gap-2">
                         <Briefcase className="w-4 h-4" />
@@ -304,10 +293,6 @@ const Admin = () => {
 
               <TabsContent value="step-forms">
                 <StepFormBuilder />
-              </TabsContent>
-
-              <TabsContent value="authority">
-                <AuthorityManager />
               </TabsContent>
 
               <TabsContent value="marketing">
