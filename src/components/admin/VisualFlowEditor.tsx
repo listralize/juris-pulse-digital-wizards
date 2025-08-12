@@ -87,7 +87,13 @@ interface StepFormNode {
     imageHeight?: string;
     videoUrl?: string;
     videoHeight?: string;
-    mediaType?: 'image' | 'video';
+    mediaType?: 'none' | 'image' | 'video' | 'carousel';
+    // Carousel configuration
+    carouselImages?: string[];
+    carouselAutoplay?: boolean;
+    carouselShowDots?: boolean;
+    carouselInterval?: number;
+
     width?: string;
     height?: string;
     backgroundColor?: string;
@@ -449,7 +455,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState(
     formData?.flowConfig?.edges || formData?.flow_config?.edges || initialEdges
   );
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node<StepFormNode['data']> | null>(null);
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
   const initialDataRef = useRef(false);
@@ -505,7 +511,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     if (selectedNode) {
       const updatedSelectedNode = nodes.find(node => node.id === selectedNode.id);
       if (updatedSelectedNode) {
-        setSelectedNode(updatedSelectedNode);
+        setSelectedNode(updatedSelectedNode as Node<StepFormNode['data']>);
       }
     }
   }, [nodes, selectedNode]);
@@ -583,7 +589,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   );
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
+    setSelectedNode(node as Node<StepFormNode['data']>);
   }, []);
 
   const addNode = (type: string) => {
