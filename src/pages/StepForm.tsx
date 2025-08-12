@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
+import StepFormSocialProof from '../components/StepFormSocialProof';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 
 interface StepFormData {
@@ -410,12 +411,39 @@ const StepForm: React.FC = () => {
       // Extrair campos específicos dos dados do formulário
       const formResponses = { ...answers, ...formData };
       
+      // Mapear respostas com títulos dos blocos em vez de IDs
+      const mappedResponses: Record<string, any> = {};
+      
+      // Mapear answers (respostas de perguntas)
+      Object.entries(answers).forEach(([stepId, value]) => {
+        const step = form?.steps.find(s => s.id === stepId);
+        const questionTitle = step?.title || stepId;
+        mappedResponses[questionTitle] = value;
+      });
+      
+      // Mapear formData (campos de formulário)
+      Object.entries(formData).forEach(([fieldName, value]) => {
+        mappedResponses[fieldName] = value;
+      });
+      
+      // Extrair nome, email e telefone para os campos principais
+      const extractedData = {
+        name: formData.name || formData.Nome || mappedResponses.Nome || mappedResponses.name || '',
+        email: formData.email || formData.Email || mappedResponses.Email || mappedResponses.email || '',
+        phone: formData.phone || formData.telefone || formData.whatsapp || 
+               mappedResponses.telefone || mappedResponses.phone || mappedResponses.whatsapp || '',
+      };
+      
       // Salvar no banco de dados
       const leadData = {
-        lead_data: allData,
+        lead_data: {
+          ...allData,
+          ...extractedData,
+          respostas_mapeadas: mappedResponses
+        },
         form_id: form?.slug || form?.id || 'stepform',
         form_name: form?.name || 'Step Form',
-        form_step_data: formResponses,
+        form_step_data: mappedResponses,
         completion_percentage: completionPercentage,
         referrer: document.referrer || '',
         utm_source: utmData.utm_source,
@@ -503,6 +531,31 @@ const StepForm: React.FC = () => {
 
       console.log('🔗 Enviando para webhook...', { webhookUrl: form?.webhook_url });
 
+      // Enviar email de confirmação para stepform leads
+      try {
+        console.log('📧 Enviando email de confirmação para stepform lead...');
+        
+        if (extractedData.email) {
+          const emailResponse = await supabase.functions.invoke('send-smtp-email', {
+            body: {
+              to: extractedData.email,
+              name: extractedData.name || 'Cliente',
+              service: form?.name || 'Consultoria Jurídica',
+              message: JSON.stringify(mappedResponses, null, 2),
+              source: 'stepform'
+            }
+          });
+          
+          if (emailResponse.error) {
+            console.error('❌ Erro ao enviar email stepform:', emailResponse.error);
+          } else {
+            console.log('✅ Email de confirmação enviado para stepform');
+          }
+        }
+      } catch (emailError) {
+        console.error('❌ Erro geral no envio de email stepform:', emailError);
+      }
+
       // Enviar para webhook se configurado
       if (form?.webhook_url && form.webhook_url.trim()) {
         try {
@@ -510,7 +563,8 @@ const StepForm: React.FC = () => {
             formId: form.id,
             formSlug: form.slug,
             formName: form.name,
-            responses: formResponses,
+            responses: mappedResponses,
+            extractedData: extractedData,
             allData: allData,
             submissionDate: new Date().toISOString(),
             sessionId: sessionId,

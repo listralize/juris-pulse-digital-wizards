@@ -16,8 +16,21 @@ interface SocialProofConfig {
   primaryColor: string;
 }
 
-const GlobalSocialProof: React.FC = () => {
+interface SocialProofOptions {
+  showOnHomepage?: boolean;
+  showOnStepForms?: boolean;
+  autoHide?: boolean;
+  hideAfterSeconds?: number;
+}
+
+const GlobalSocialProof: React.FC<SocialProofOptions> = ({ 
+  showOnHomepage = true, 
+  showOnStepForms = true, 
+  autoHide = false, 
+  hideAfterSeconds = 10 
+}) => {
   const [config, setConfig] = useState<SocialProofConfig | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const loadSocialProofConfig = async () => {
@@ -60,7 +73,18 @@ const GlobalSocialProof: React.FC = () => {
     };
   }, []);
 
-  if (!config || !config.enabled) {
+  // Auto-hide logic
+  useEffect(() => {
+    if (autoHide && hideAfterSeconds > 0) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, hideAfterSeconds * 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoHide, hideAfterSeconds]);
+
+  if (!config || !config.enabled || !isVisible) {
     return null;
   }
 
@@ -78,8 +102,17 @@ const GlobalSocialProof: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary/5 via-background to-primary/5 border-t border-border py-8">
+    <div className="bg-gradient-to-r from-primary/5 via-background to-primary/5 border-t border-border py-8 relative">
       <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-24">
+        {autoHide && (
+          <button
+            onClick={() => setIsVisible(false)}
+            className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Fechar prova social"
+          >
+            ✕
+          </button>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Stats Section */}
           {config.stats && config.stats.length > 0 && (

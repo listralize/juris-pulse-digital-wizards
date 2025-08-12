@@ -24,6 +24,7 @@ interface EmailRequest {
   secondaryButtonText?: string;
   secondaryButtonUrl?: string;
   showSecondaryButton?: boolean;
+  source?: string; // 'contact_form', 'stepform', 'webhook'
 }
 
 const createWelcomeEmailHTML = (name: string, service: string, message: string, customTitle?: string, customContent?: string, logoUrl?: string, backgroundColor?: string, textColor?: string, buttonColor?: string, customHtml?: string, buttonText?: string, buttonUrl?: string, secondaryButtonText?: string, secondaryButtonUrl?: string, showSecondaryButton?: boolean) => {
@@ -194,7 +195,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton }: EmailRequest = await req.json();
+    const { to, subject, name, service = "Consultoria Jurídica", message = "", customTitle, customContent, logoUrl, backgroundColor, textColor, buttonColor, customHtml, buttonText, buttonUrl, secondaryButtonText, secondaryButtonUrl, showSecondaryButton, source = "contact_form" }: EmailRequest = await req.json();
+    
+    console.log("📧 Recebido email request com source:", source);
 
     if (!to || !name) {
       throw new Error("Email e nome são obrigatórios");
