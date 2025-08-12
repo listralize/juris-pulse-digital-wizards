@@ -101,13 +101,27 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                 />
               </div>
               <div className="md:col-span-2">
-                <Label className="text-sm font-medium">URL da Foto</Label>
-                <Input
-                  value={member.image}
-                  onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
-                  placeholder="Ex: /lovable-uploads/foto.png"
-                  className={`mt-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                />
+                <Label className="text-sm font-medium">Foto do Membro</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={member.image}
+                    onChange={(e) => onUpdateTeamMember(member.id, 'image', e.target.value)}
+                    placeholder="URL da imagem ou selecione da galeria"
+                    className={`flex-1 ${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // TODO: Implementar abertura da galeria
+                      console.log('Abrir galeria para membro:', member.id);
+                    }}
+                    className="px-3"
+                  >
+                    📁
+                  </Button>
+                </div>
               </div>
               <div className="md:col-span-2">
                 <Label className="text-sm font-medium">Biografia</Label>

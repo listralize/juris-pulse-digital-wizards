@@ -15,6 +15,7 @@ import { LeadWebhookManager } from './LeadWebhookManager';
 import { LeadsKanban } from './LeadsKanban';
 import { LeadComments } from './LeadComments';
 import { LeadDetailDialog } from './LeadDetailDialog';
+import { ResponsiveLeadsTable } from './ResponsiveLeadsTable';
 
 
 
@@ -1008,143 +1009,41 @@ export const LeadsManagement: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2 w-12">
-                          <Checkbox
-                            checked={selectedLeads.size === filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).length && filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).length > 0}
-                            onCheckedChange={(checked) => {
-                              const paginatedLeads = filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage);
-                              if (checked) {
-                                setSelectedLeads(new Set([...selectedLeads, ...paginatedLeads.map(lead => lead.id)]));
-                              } else {
-                                const newSelected = new Set(selectedLeads);
-                                paginatedLeads.forEach(lead => newSelected.delete(lead.id));
-                                setSelectedLeads(newSelected);
-                              }
-                            }}
-                          />
-                        </th>
-                         <th className="text-left p-2">Nome</th>
-                         <th className="text-left p-2">Contato</th>
-                         <th className="text-left p-2">Serviço</th>
-                         <th className="text-left p-2">Localização</th>
-                         <th className="text-left p-2">Data</th>
-                         <th className="text-left p-2">Status</th>
-                         <th className="text-left p-2">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredLeads
-                        .slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage)
-                        .map((lead) => {
-                      const leadData = parseLeadData(lead.lead_data);
-                      const status = leadStatuses[lead.id] || 'novo';
-                      
-                      return (
-                        <tr key={lead.id} className="border-b hover:bg-muted/50">
-                          <td className="p-2">
-                            <Checkbox
-                              checked={selectedLeads.has(lead.id)}
-                              onCheckedChange={(checked) => {
-                                const newSelected = new Set(selectedLeads);
-                                if (checked) {
-                                  newSelected.add(lead.id);
-                                } else {
-                                  newSelected.delete(lead.id);
-                                }
-                                setSelectedLeads(newSelected);
-                              }}
-                            />
-                          </td>
-                           <td className="p-2 font-medium">{leadData.name || 'N/A'}</td>
-                           <td className="p-2">
-                             <div className="space-y-1">
-                               <div className="flex items-center gap-2">
-                                 <button
-                                   type="button"
-                                   onClick={() => {
-                                     if (leadData.email) {
-                                       navigator.clipboard.writeText(leadData.email);
-                                       toast.success('Email copiado!');
-                                     }
-                                   }}
-                                   className="text-muted-foreground hover:text-foreground transition-colors"
-                                   title={leadData.email || 'Copiar email'}
-                                 >
-                                   <Mail className="h-4 w-4" />
-                                 </button>
-                               </div>
-                               {(() => {
-                                 const raw = leadData.phone || leadData.telefone || leadData.tel || leadData.celular || '';
-                                 if (!raw) return null;
-                                 const digits = String(raw).replace(/\D/g, '');
-                                 const normalized = digits.startsWith('55') ? digits : (digits.length >= 10 ? `55${digits}` : digits);
-                                 const waUrl = `https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(`Olá ${leadData.name || ''}, vi que você entrou em contato conosco através do site. Como posso ajudar?`)}`;
-                                 return (
-                                   <a
-                                     href={waUrl}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-                                   >
-                                     <MessageSquare className="h-4 w-4" />
-                                     <span className="text-sm font-medium">WhatsApp</span>
-                                   </a>
-                                 );
-                               })()}
-                             </div>
-                           </td>
-                          <td className="p-2">
-                            <div className="max-w-[220px] truncate" title={(leadData.service || lead.form_name || 'N/A') as string}>
-                              {leadData.service || lead.form_name || 'N/A'}
-                            </div>
-                          </td>
-                          <td className="p-2 text-sm text-muted-foreground">
-                            {(lead as any).ddd_locations?.cities && `${(lead as any).ddd_locations.cities}`}
-                            {lead.state && ` - ${lead.state}`}
-                            {lead.region && ` (${lead.region})`}
-                            {lead.ddd && ` - DDD ${lead.ddd}`}
-                          </td>
-                          <td className="p-2">{new Date(lead.created_at).toLocaleDateString('pt-BR')}</td>
-                          <td className="p-2">
-                            <Select
-                              value={status}
-                              onValueChange={(value) => updateLeadStatus(lead.id, value)}
-                            >
-                              <SelectTrigger className="w-24">
-                                <SelectValue />
-                              </SelectTrigger>
-                               <SelectContent>
-                                 <SelectItem value="novo">Novo</SelectItem>
-                                 <SelectItem value="contato">Em Contato</SelectItem>
-                                 <SelectItem value="qualificado">Qualificado</SelectItem>
-                                 <SelectItem value="proposta">Proposta</SelectItem>
-                                 <SelectItem value="convertido">Convertido</SelectItem>
-                                 <SelectItem value="descartado">Descartado</SelectItem>
-                               </SelectContent>
-                            </Select>
-                          </td>
-                           <td className="p-2">
-                             <div className="flex gap-1">
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 onClick={() => openLeadDetails(lead)}
-                                 title="Ver detalhes"
-                               >
-                                 <Eye className="h-4 w-4" />
-                               </Button>
-                             </div>
-                           </td>
-                        </tr>
-                      );
-                    })}
-                    </tbody>
-                  </table>
-                </div>
+                <ResponsiveLeadsTable
+                  leads={filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage)}
+                  selectedLeads={selectedLeads}
+                  leadStatuses={leadStatuses}
+                  parseLeadData={parseLeadData}
+                  isAllSelected={selectedLeads.size === filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).length && filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).length > 0}
+                  toggleSelectAll={() => {
+                    const paginatedLeads = filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage);
+                    const allSelected = selectedLeads.size === paginatedLeads.length && paginatedLeads.length > 0;
+                    if (allSelected) {
+                      const newSelected = new Set(selectedLeads);
+                      paginatedLeads.forEach(lead => newSelected.delete(lead.id));
+                      setSelectedLeads(newSelected);
+                    } else {
+                      setSelectedLeads(new Set([...selectedLeads, ...paginatedLeads.map(lead => lead.id)]));
+                    }
+                  }}
+                  toggleSelectLead={(id: string) => {
+                    const newSelected = new Set(selectedLeads);
+                    if (newSelected.has(id)) {
+                      newSelected.delete(id);
+                    } else {
+                      newSelected.add(id);
+                    }
+                    setSelectedLeads(newSelected);
+                  }}
+                  updateLeadStatus={updateLeadStatus}
+                  viewLeadDetails={openLeadDetails}
+                  copyToClipboard={(text: string, type: string) => {
+                    navigator.clipboard.writeText(text);
+                    toast.success(`${type} copiado!`);
+                  }}
+                  handleEditLead={() => {}}
+                  handleDeleteLead={() => {}}
+                />
                 
                 {/* Paginação */}
                 {filteredLeads.length > leadsPerPage && (

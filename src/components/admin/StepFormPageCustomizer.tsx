@@ -6,7 +6,9 @@ import { Textarea } from '../ui/textarea';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
-import { Palette, Layout, Type, Image as ImageIcon } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Palette, Layout, Type, Image as ImageIcon, Star } from 'lucide-react';
+import { StepFormSocialProofManager } from './StepFormSocialProofManager';
 
 interface PageCustomizerProps {
   formData: any;
@@ -28,7 +30,15 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
   const styles = formData.styles || {};
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="layout" className="w-full">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="layout">Layout</TabsTrigger>
+        <TabsTrigger value="style">Estilos</TabsTrigger>
+        <TabsTrigger value="social-proof">Prova Social</TabsTrigger>
+        <TabsTrigger value="seo">SEO</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="layout" className="space-y-6 mt-6">
       {/* Configurações Gerais da Página */}
       <Card>
         <CardHeader>
@@ -398,6 +408,37 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="style" className="space-y-6 mt-6">
+        {/* Conteúdo dos estilos será movido para cá */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações de Estilo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Configurações de estilo serão implementadas aqui</p>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="social-proof" className="space-y-6 mt-6">
+        <StepFormSocialProofManager 
+          formData={formData}
+          onUpdate={onUpdate}
+        />
+      </TabsContent>
+
+      <TabsContent value="seo" className="space-y-6 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações de SEO</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Configurações de SEO serão implementadas aqui</p>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 };
