@@ -598,7 +598,13 @@ export const MarketingManagement: React.FC = () => {
         google_tag_manager_id: marketingScripts.googleTagManager.containerId,
         custom_head_scripts: marketingScripts.customScripts.head,
         custom_body_scripts: marketingScripts.customScripts.body,
-        form_tracking_config: JSON.stringify(conversionTracking),
+        form_tracking_config: JSON.stringify({
+          systemForms: conversionTracking.systemForms,
+          linkTreeForms: conversionTracking.linkTreeForms,
+          customForms: conversionTracking.customForms,
+          events: conversionTracking.events,
+          stepForms: [] // StepForms desativado aqui para evitar duplicidade (usar editor do StepForm)
+        }),
         event_tracking_config: {
           formSubmission: conversionTracking.events.formSubmission,
           buttonClick: conversionTracking.events.buttonClick,
@@ -1214,323 +1220,24 @@ fbq('track', '${form.facebookPixel.eventType === 'Custom'
             </CardContent>
           </Card>
 
-          {/* Step Forms */}
+          {/* Step Forms - desativado para evitar duplicidade de pixel */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 📋 Formulários StepForm
-                <Button variant="outline" size="sm" onClick={loadStepForms}>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Atualizar
-                </Button>
               </CardTitle>
               <CardDescription>
-                Formulários criados no módulo StepForm com rastreamento de conversão.
+                O rastreamento dos StepForms agora é controlado exclusivamente no Editor do StepForm (aba "Rastreamento").
+                Este módulo foi desativado aqui para evitar duplicidade de pixels e conflitos de configuração.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {conversionTracking.stepForms.length === 0 ? (
-                <div className="text-center p-8 text-muted-foreground">
-                  <p>Nenhum formulário StepForm encontrado.</p>
-                  <p className="text-sm">Crie formulários no módulo StepForm Builder.</p>
-                </div>
-              ) : (
-                conversionTracking.stepForms.map((form, index) => (
-                  <div key={form.id} className={`border rounded-lg p-4 space-y-3 ${form.enabled ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">StepForm</Badge>
-                        <span className="font-medium">{form.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          /form/{form.slug}
-                        </Badge>
-                        {form.enabled && (
-                          <Badge variant="default" className="text-xs">
-                            ✓ Rastreando
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          id={`stepform-enabled-${index}`} 
-                          checked={form.enabled} 
-                          onChange={(e) => {
-                            const updatedStepForms = [...conversionTracking.stepForms];
-                            updatedStepForms[index] = { ...form, enabled: e.target.checked };
-                            setConversionTracking(prev => ({
-                              ...prev,
-                              stepForms: updatedStepForms
-                            }));
-                          }}
-                          className="rounded" 
-                        />
-                        <Label htmlFor={`stepform-enabled-${index}`}>Ativar</Label>
-                      </div>
-                    </div>
-                    
-                     {form.enabled && (
-                       <>
-                         {/* Facebook Pixel Config */}
-                         <div className="border-t pt-4">
-                           <div className="flex items-center space-x-2 mb-3">
-                             <input 
-                               type="checkbox" 
-                               id={`stepform-fb-enabled-${index}`}
-                               checked={form.facebookPixel?.enabled || false}
-                               onChange={e => {
-                                 const updatedStepForms = [...conversionTracking.stepForms];
-                                 updatedStepForms[index] = { 
-                                   ...form, 
-                                   facebookPixel: {
-                                     ...form.facebookPixel,
-                                     enabled: e.target.checked
-                                   }
-                                 };
-                                 setConversionTracking(prev => ({
-                                   ...prev,
-                                   stepForms: updatedStepForms
-                                 }));
-                               }}
-                               className="rounded" 
-                             />
-                             <Label htmlFor={`stepform-fb-enabled-${index}`}>📘 Facebook Pixel</Label>
-                           </div>
-                           
-                           {form.facebookPixel?.enabled && (
-                             <div className="grid grid-cols-2 gap-4">
-                               <div>
-                                 <Label>Pixel ID</Label>
-                                 <Input 
-                                   value={form.facebookPixel?.pixelId || ''}
-                                   onChange={e => {
-                                     const updatedStepForms = [...conversionTracking.stepForms];
-                                     updatedStepForms[index] = { 
-                                       ...form, 
-                                       facebookPixel: {
-                                         ...form.facebookPixel,
-                                         pixelId: e.target.value
-                                       }
-                                     };
-                                     setConversionTracking(prev => ({
-                                       ...prev,
-                                       stepForms: updatedStepForms
-                                     }));
-                                   }}
-                                   placeholder="1234567890123456"
-                                 />
-                               </div>
-                               <div>
-                                 <Label>Tipo de Evento</Label>
-                                 <Select 
-                                   value={form.facebookPixel?.eventType || 'Lead'}
-                                   onValueChange={value => {
-                                     const updatedStepForms = [...conversionTracking.stepForms];
-                                     updatedStepForms[index] = { 
-                                       ...form, 
-                                       facebookPixel: {
-                                         ...form.facebookPixel,
-                                         eventType: value as any
-                                       }
-                                     };
-                                     setConversionTracking(prev => ({
-                                       ...prev,
-                                       stepForms: updatedStepForms
-                                     }));
-                                   }}
-                                 >
-                                   <SelectTrigger>
-                                     <SelectValue />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                     <SelectItem value="Lead">Lead</SelectItem>
-                                     <SelectItem value="Contact">Contact</SelectItem>
-                                     <SelectItem value="SubmitApplication">Submit Application</SelectItem>
-                                     <SelectItem value="CompleteRegistration">Complete Registration</SelectItem>
-                                     <SelectItem value="ViewContent">View Content</SelectItem>
-                                     <SelectItem value="Custom">Custom</SelectItem>
-                                   </SelectContent>
-                                 </Select>
-                               </div>
-                               {form.facebookPixel?.eventType === 'Custom' && (
-                                 <div className="col-span-2">
-                                   <Label>Nome do Evento Customizado</Label>
-                                   <Input 
-                                     value={form.facebookPixel?.customEventName || ''}
-                                     onChange={e => {
-                                       const updatedStepForms = [...conversionTracking.stepForms];
-                                       updatedStepForms[index] = { 
-                                         ...form, 
-                                         facebookPixel: {
-                                           ...form.facebookPixel,
-                                           customEventName: e.target.value
-                                         }
-                                       };
-                                       setConversionTracking(prev => ({
-                                         ...prev,
-                                         stepForms: updatedStepForms
-                                       }));
-                                     }}
-                                     placeholder="nome_evento_personalizado"
-                                   />
-                                 </div>
-                               )}
-                             </div>
-                           )}
-                         </div>
-
-                         {/* Google Analytics Config */}
-                         <div className="border-t pt-4">
-                           <div className="flex items-center space-x-2 mb-3">
-                             <input 
-                               type="checkbox" 
-                               id={`stepform-ga-enabled-${index}`}
-                               checked={form.googleAnalytics?.enabled || false}
-                               onChange={e => {
-                                 const updatedStepForms = [...conversionTracking.stepForms];
-                                 updatedStepForms[index] = { 
-                                   ...form, 
-                                   googleAnalytics: {
-                                     ...form.googleAnalytics,
-                                     enabled: e.target.checked
-                                   }
-                                 };
-                                 setConversionTracking(prev => ({
-                                   ...prev,
-                                   stepForms: updatedStepForms
-                                 }));
-                               }}
-                               className="rounded" 
-                             />
-                             <Label htmlFor={`stepform-ga-enabled-${index}`}>📊 Google Analytics</Label>
-                           </div>
-                           
-                           {form.googleAnalytics?.enabled && (
-                             <div className="grid grid-cols-2 gap-4">
-                               <div>
-                                 <Label>Measurement ID</Label>
-                                 <Input 
-                                   value={form.googleAnalytics?.measurementId || ''}
-                                   onChange={e => {
-                                     const updatedStepForms = [...conversionTracking.stepForms];
-                                     updatedStepForms[index] = { 
-                                       ...form, 
-                                       googleAnalytics: {
-                                         ...form.googleAnalytics,
-                                         measurementId: e.target.value
-                                       }
-                                     };
-                                     setConversionTracking(prev => ({
-                                       ...prev,
-                                       stepForms: updatedStepForms
-                                     }));
-                                   }}
-                                   placeholder="G-XXXXXXXXXX"
-                                 />
-                               </div>
-                               <div>
-                                 <Label>Nome do Evento</Label>
-                                 <Input 
-                                   value={form.googleAnalytics?.eventName || 'form_submit'}
-                                   onChange={e => {
-                                     const updatedStepForms = [...conversionTracking.stepForms];
-                                     updatedStepForms[index] = { 
-                                       ...form, 
-                                       googleAnalytics: {
-                                         ...form.googleAnalytics,
-                                         eventName: e.target.value
-                                       }
-                                     };
-                                     setConversionTracking(prev => ({
-                                       ...prev,
-                                       stepForms: updatedStepForms
-                                     }));
-                                   }}
-                                   placeholder="form_submit"
-                                 />
-                               </div>
-                             </div>
-                           )}
-                         </div>
-
-                         {/* Google Tag Manager Config */}
-                         <div className="border-t pt-4">
-                           <div className="flex items-center space-x-2 mb-3">
-                             <input 
-                               type="checkbox" 
-                               id={`stepform-gtm-enabled-${index}`}
-                               checked={form.googleTagManager?.enabled || false}
-                               onChange={e => {
-                                 const updatedStepForms = [...conversionTracking.stepForms];
-                                 updatedStepForms[index] = { 
-                                   ...form, 
-                                   googleTagManager: {
-                                     ...form.googleTagManager,
-                                     enabled: e.target.checked
-                                   }
-                                 };
-                                 setConversionTracking(prev => ({
-                                   ...prev,
-                                   stepForms: updatedStepForms
-                                 }));
-                               }}
-                               className="rounded" 
-                             />
-                             <Label htmlFor={`stepform-gtm-enabled-${index}`}>🏷️ Google Tag Manager</Label>
-                           </div>
-                           
-                           {form.googleTagManager?.enabled && (
-                             <div className="grid grid-cols-2 gap-4">
-                               <div>
-                                 <Label>Container ID</Label>
-                                 <Input 
-                                   value={form.googleTagManager?.containerId || ''}
-                                   onChange={e => {
-                                     const updatedStepForms = [...conversionTracking.stepForms];
-                                     updatedStepForms[index] = { 
-                                       ...form, 
-                                       googleTagManager: {
-                                         ...form.googleTagManager,
-                                         containerId: e.target.value
-                                       }
-                                     };
-                                     setConversionTracking(prev => ({
-                                       ...prev,
-                                       stepForms: updatedStepForms
-                                     }));
-                                   }}
-                                   placeholder="GTM-XXXXXXX"
-                                 />
-                               </div>
-                               <div>
-                                 <Label>Nome do Evento</Label>
-                                 <Input 
-                                   value={form.googleTagManager?.eventName || 'form_submit'}
-                                   onChange={e => {
-                                     const updatedStepForms = [...conversionTracking.stepForms];
-                                     updatedStepForms[index] = { 
-                                       ...form, 
-                                       googleTagManager: {
-                                         ...form.googleTagManager,
-                                         eventName: e.target.value
-                                       }
-                                     };
-                                     setConversionTracking(prev => ({
-                                       ...prev,
-                                       stepForms: updatedStepForms
-                                     }));
-                                   }}
-                                   placeholder="form_submit"
-                                 />
-                               </div>
-                             </div>
-                           )}
-                         </div>
-                       </>
-                     )}
-                  </div>
-                ))
-              )}
+            <CardContent>
+              <Alert>
+                <AlertDescription>
+                  Para configurar Pixel/GA/GTM de um StepForm, abra o StepForm Builder, edite o formulário desejado e use a aba "Rastreamento".
+                  As configurações de StepForm neste painel foram descontinuadas.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
 
