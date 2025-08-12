@@ -140,10 +140,25 @@ export const useLeadsData = (): LeadsData => {
         }
         
         return isValid;
-      }).map(lead => ({
-        ...lead,
-        status: 'new' // Status padrão para todos os leads
-      }));
+      }).map(lead => {
+        const leadData = lead.lead_data as any;
+        
+        // Mapear dados do stepform para formato padrão
+        const mappedLeadData = {
+          ...leadData,
+          // Garantir que nome, email e telefone estejam no formato correto
+          name: leadData.name || leadData.nome || leadData.Nome || 'Nome não informado',
+          email: leadData.email || leadData.Email || 'Não informado',
+          phone: leadData.phone || leadData.telefone || leadData.whatsapp || leadData.Telefone || 'Não informado',
+          service: leadData.service || leadData.servico || leadData.Serviço || 'Não informado'
+        };
+
+        return {
+          ...lead,
+          lead_data: mappedLeadData,
+          status: 'new' // Status padrão para todos os leads
+        };
+      });
 
       console.log('✅ Leads válidos após filtro:', validLeads.length);
       console.log('📋 Amostra dos leads:', validLeads.slice(0, 2));

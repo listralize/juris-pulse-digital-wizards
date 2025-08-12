@@ -16,6 +16,7 @@ import { ImageGallery } from './ImageGallery';
 import { StepFormPageCustomizer } from './StepFormPageCustomizer';
 import { VisualFlowEditor } from './VisualFlowEditor';
 import { SocialProofConfigEditor } from './StepFormConfigEditors';
+import { StepFormPageEditor } from './service-pages/StepFormPageEditor';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -367,7 +368,7 @@ export const StepFormBuilder: React.FC = () => {
         </div>
 
         <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="visual" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               Editor Visual
@@ -379,6 +380,10 @@ export const StepFormBuilder: React.FC = () => {
             <TabsTrigger value="page" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />
               Personalização
+            </TabsTrigger>
+            <TabsTrigger value="html" className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              Editor HTML
             </TabsTrigger>
             <TabsTrigger value="testimonials" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -844,6 +849,16 @@ export const StepFormBuilder: React.FC = () => {
               onUpdate={(field, value) => {
                 setSelectedForm({ ...selectedForm, [field]: value });
               }}
+            />
+          </TabsContent>
+
+          <TabsContent value="html" className="space-y-6">
+            <StepFormPageEditor
+              stepForm={selectedForm}
+              onUpdateStepForm={(id, updates) => {
+                setSelectedForm({ ...selectedForm, ...updates });
+              }}
+              onSave={saveForm}
             />
           </TabsContent>
 

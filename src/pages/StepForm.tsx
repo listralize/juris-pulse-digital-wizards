@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
-import StepFormSocialProof from '../components/StepFormSocialProof';
+import { StepFormSocialProof } from '../components/StepFormSocialProof';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 
 interface StepFormData {
