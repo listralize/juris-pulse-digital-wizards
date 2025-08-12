@@ -321,13 +321,24 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         console.log(`✅ StepForm ${slug} enviado com SUCESSO - rastreando com GTM`);
         
         if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({
+          const eventData = {
             event: googleTagManager.eventName || 'form_submit',
             form_id: slug,
             form_name: stepFormConfig.name || 'StepForm Submission',
-            user_data: event.detail?.userData || {}
-          });
-          console.log(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${slug}`);
+            form_slug: slug,
+            user_data: event.detail?.userData || {},
+            // Adicionar dados extras para melhor rastreamento
+            event_category: 'step_form',
+            event_action: 'form_submission',
+            event_label: stepFormConfig.name || slug,
+            timestamp: new Date().toISOString()
+          };
+          
+          (window as any).dataLayer.push(eventData);
+          console.log(`📊 Evento "${googleTagManager.eventName || 'form_submit'}" enviado para GTM:`, eventData);
+          console.log(`🏷️ DataLayer atual:`, (window as any).dataLayer);
+        } else {
+          console.error(`❌ dataLayer não encontrado para GTM no StepForm ${slug}`);
         }
       }
     };
