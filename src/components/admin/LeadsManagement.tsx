@@ -88,16 +88,37 @@ const parseLeadData = (leadData: any) => {
       leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone,
       leadData?.['Telefone/WhatsApp'], leadData?.whatsapp, leadData?.Whatsapp,
       leadData?.phoneNumber, leadData?.phone_number, leadData?.userPhone, 
-      leadData?.user_phone, leadData?.tel, leadData?.celular,
-      // Verificar em respostas mapeadas também
-      ...(leadData?.respostas_mapeadas ? Object.values(leadData.respostas_mapeadas).filter(val => 
-        typeof val === 'string' && /\d{8,}/.test(val.replace(/\D/g, ''))
-      ) : [])
+      leadData?.user_phone, leadData?.tel, leadData?.celular
     ];
     
-    extractedData.phone = phoneFields.find(field => 
+    // Primeiro, tentar campos diretos
+    let foundPhone = phoneFields.find(field => 
       field && typeof field === 'string' && field.trim() !== '' && field !== 'N/A'
-    ) || 'N/A';
+    );
+    
+    // Se não encontrou, verificar em respostas mapeadas
+    if (!foundPhone && leadData?.respostas_mapeadas) {
+      const mappedValues = Object.values(leadData.respostas_mapeadas);
+      foundPhone = mappedValues.find(val => 
+        typeof val === 'string' && 
+        val.trim() !== '' && 
+        /\d{8,}/.test(val.replace(/\D/g, '')) &&
+        val.replace(/\D/g, '').length >= 10
+      );
+    }
+    
+    // Se ainda não encontrou, verificar diretamente no leadData por padrões de telefone
+    if (!foundPhone) {
+      const allValues = Object.values(leadData || {});
+      foundPhone = allValues.find(val => 
+        typeof val === 'string' && 
+        val.trim() !== '' && 
+        /^\(?[\d\s\-\(\)]{10,}$/.test(val) &&
+        val.replace(/\D/g, '').length >= 10
+      );
+    }
+    
+    extractedData.phone = foundPhone || 'N/A';
 
     // Tentar extrair serviço
     extractedData.service = leadData?.service || leadData?.servico || leadData?.Service || 

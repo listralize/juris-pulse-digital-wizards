@@ -31,9 +31,8 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
 
   return (
     <Tabs defaultValue="layout" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-1">
         <TabsTrigger value="layout">Layout</TabsTrigger>
-        <TabsTrigger value="social-proof">Depoimentos</TabsTrigger>
       </TabsList>
 
       <TabsContent value="layout" className="space-y-6 mt-6">
@@ -408,12 +407,6 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
       </Card>
       </TabsContent>
 
-      <TabsContent value="social-proof" className="space-y-6 mt-6">
-        <StepFormSocialProofManager 
-          formData={formData}
-          onUpdate={onUpdate}
-        />
-      </TabsContent>
 
     </Tabs>
   );
