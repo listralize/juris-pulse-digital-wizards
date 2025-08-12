@@ -459,6 +459,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [imageGalleryField, setImageGalleryField] = useState<'imageUrl' | 'videoUrl'>('imageUrl');
   const initialDataRef = useRef(false);
+  const rfInstance = useRef<any>(null);
 
   // Sync nodes with formData changes and load edges
   useEffect(() => {
@@ -570,6 +571,15 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     [setEdges]
   );
 
+  const onEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      event.stopPropagation();
+      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+      toast.success('Ligação removida');
+    },
+    [setEdges]
+  );
+
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   }, []);
@@ -644,10 +654,16 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
+          connectOnClick
+          onInit={(instance) => {
+            rfInstance.current = instance;
+            try { instance.fitView({ padding: 0.2 }); } catch {}
+          }}
           className="w-full h-full"
           style={{ backgroundColor: "#1a1a1a" }}
         >
@@ -691,6 +707,13 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
             Oferta
           </Button>
           {/* Timer removido conforme solicitação - não é mais possível adicionar */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => rfInstance.current?.fitView({ padding: 0.2 })}
+          >
+            Ajustar visão
+          </Button>
         </div>
 
         {/* Botão de salvar */}
