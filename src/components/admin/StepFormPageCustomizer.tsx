@@ -31,9 +31,8 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
 
   return (
     <Tabs defaultValue="layout" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="layout">Layout</TabsTrigger>
-        <TabsTrigger value="style">Estilos</TabsTrigger>
         <TabsTrigger value="social-proof">Depoimentos</TabsTrigger>
       </TabsList>
 
@@ -407,18 +406,6 @@ export const StepFormPageCustomizer: React.FC<PageCustomizerProps> = ({
           </div>
         </CardContent>
       </Card>
-      </TabsContent>
-
-      <TabsContent value="style" className="space-y-6 mt-6">
-        {/* Conteúdo dos estilos será movido para cá */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Configurações de Estilo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Configurações de estilo serão implementadas aqui</p>
-          </CardContent>
-        </Card>
       </TabsContent>
 
       <TabsContent value="social-proof" className="space-y-6 mt-6">

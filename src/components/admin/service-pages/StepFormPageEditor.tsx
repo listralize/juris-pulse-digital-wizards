@@ -132,67 +132,6 @@ export const StepFormPageEditor: React.FC<StepFormPageEditorProps> = ({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Prova Social</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="social-proof-enabled"
-                  checked={stepForm?.social_proof_config?.enabled || false}
-                  onCheckedChange={(checked) => handleUpdate('social_proof_config', {
-                    ...stepForm.social_proof_config,
-                    enabled: checked
-                  })}
-                />
-                <Label htmlFor="social-proof-enabled">Ativar Prova Social</Label>
-              </div>
-              
-              {stepForm?.social_proof_config?.enabled && (
-                <div className="space-y-4 pl-6 border-l-2 border-primary/20">
-                  <div>
-                    <Label>Depoimentos (JSON)</Label>
-                    <Textarea
-                      placeholder='[{"name": "João", "text": "Excelente serviço!", "rating": 5}]'
-                      value={JSON.stringify(stepForm?.social_proof_config?.testimonials || [], null, 2)}
-                      onChange={(e) => {
-                        try {
-                          const testimonials = JSON.parse(e.target.value);
-                          handleUpdate('social_proof_config', {
-                            ...stepForm.social_proof_config,
-                            testimonials
-                          });
-                        } catch (error) {
-                          // Invalid JSON, ignore
-                        }
-                      }}
-                      rows={4}
-                    />
-                  </div>
-                  <div>
-                    <Label>Estatísticas (JSON)</Label>
-                    <Textarea
-                      placeholder='[{"number": "500+", "label": "Clientes Atendidos"}]'
-                      value={JSON.stringify(stepForm?.social_proof_config?.stats || [], null, 2)}
-                      onChange={(e) => {
-                        try {
-                          const stats = JSON.parse(e.target.value);
-                          handleUpdate('social_proof_config', {
-                            ...stepForm.social_proof_config,
-                            stats
-                          });
-                        } catch (error) {
-                          // Invalid JSON, ignore
-                        }
-                      }}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
@@ -423,14 +362,6 @@ export const StepFormPageEditor: React.FC<StepFormPageEditorProps> = ({
                   </div>
                 </div>
                 
-                {stepForm?.social_proof_config?.enabled && (
-                  <div className="mt-8 p-4 border rounded-lg bg-gray-50">
-                    <h3 className="font-medium mb-2">Prova Social</h3>
-                    <p className="text-sm opacity-70">
-                      Depoimentos e estatísticas aparecerão aqui quando configurados.
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

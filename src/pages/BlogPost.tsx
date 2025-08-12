@@ -63,11 +63,7 @@ const BlogPost = () => {
   }
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-neutral-950' : 'bg-white'}`}>
-      {/* Background gradients */}
-      <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
-      
+    <div className="min-h-screen bg-black">
       <Navbar />
       
       <article className="container mx-auto px-4 py-20">
@@ -143,16 +139,9 @@ const BlogPost = () => {
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
-          {/* Author Info */}
+          {/* Author Info sem imagem */}
           <div className={`mt-12 p-6 rounded-lg border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
             <div className="flex items-center gap-4">
-              {post.authorImage && (
-                <img
-                  src={post.authorImage}
-                  alt={post.author}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              )}
               <div>
                 <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-black'}`}>
                   {post.author}
