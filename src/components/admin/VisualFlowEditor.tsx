@@ -724,8 +724,8 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
 
       {/* Painel lateral de edição */}
       {selectedNode && (
-        <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
-          <Card className="bg-gray-900 border-gray-700">
+        <div className="w-full sm:w-96 bg-background border-l border-border p-4 overflow-y-auto">
+          <Card className="bg-card border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white">
@@ -746,7 +746,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                 <Input
                   value={String(selectedNode.data.title || '')}
                   onChange={(e) => updateNode(selectedNode.id, { title: e.target.value })}
-                  className="bg-gray-700 border-gray-600 text-white"
+                  className=""
                 />
               </div>
 
@@ -755,7 +755,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                 <Textarea
                   value={String(selectedNode.data.description || '')}
                   onChange={(e) => updateNode(selectedNode.id, { description: e.target.value })}
-                  className="bg-gray-700 border-gray-600 text-white"
+                  className=""
                 />
               </div>
 
@@ -784,6 +784,78 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {(selectedNode.data.mediaType === 'image' || selectedNode.data.mediaType === 'video') && (
+                    <div className="space-y-3">
+                      {selectedNode.data.mediaType === 'image' && (
+                        <div>
+                          <Label className="text-gray-300">URL da Imagem</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              value={String(selectedNode.data.imageUrl || '')}
+                              onChange={(e) => updateNode(selectedNode.id, { imageUrl: e.target.value })}
+                              placeholder="URL da imagem"
+                              className="flex-1"
+                            />
+                            <Button size="sm" variant="outline" onClick={() => openImageGallery('imageUrl')} className="whitespace-nowrap">
+                              <ImageIcon className="w-4 h-4 mr-1" />
+                              Galeria
+                            </Button>
+                          </div>
+                          <div className="mt-2">
+                            <Label className="text-gray-300">Altura da Imagem</Label>
+                            <Input
+                              value={String(selectedNode.data.imageHeight || '120px')}
+                              onChange={(e) => updateNode(selectedNode.id, { imageHeight: e.target.value })}
+                              placeholder="ex: 150px"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {selectedNode.data.mediaType === 'video' && (
+                        <div>
+                          <Label className="text-gray-300">URL do Vídeo</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              value={String(selectedNode.data.videoUrl || '')}
+                              onChange={(e) => updateNode(selectedNode.id, { videoUrl: e.target.value })}
+                              placeholder="URL do vídeo"
+                              className="flex-1"
+                            />
+                            <Button size="sm" variant="outline" onClick={() => openImageGallery('videoUrl')} className="whitespace-nowrap">
+                              <ImageIcon className="w-4 h-4 mr-1" />
+                              Galeria
+                            </Button>
+                          </div>
+                          <div className="mt-2">
+                            <Label className="text-gray-300">Altura do Vídeo</Label>
+                            <Input
+                              value={String(selectedNode.data.videoHeight || '120px')}
+                              onChange={(e) => updateNode(selectedNode.id, { videoHeight: e.target.value })}
+                              placeholder="ex: 150px"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-gray-300">Posição da mídia</Label>
+                        <Select
+                          value={String(selectedNode.data.imagePosition || 'top')}
+                          onValueChange={(value) => updateNode(selectedNode.id, { imagePosition: value as 'top' | 'left' | 'right' | 'bottom' })}
+                        >
+                          <SelectTrigger className="bg-gray-700 border-gray-600">
+                            <SelectValue placeholder="Posição" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="top">Topo</SelectItem>
+                            <SelectItem value="left">Esquerda</SelectItem>
+                            <SelectItem value="right">Direita</SelectItem>
+                            <SelectItem value="bottom">Base</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Cor global dos botões do formulário */}
                   <div>
