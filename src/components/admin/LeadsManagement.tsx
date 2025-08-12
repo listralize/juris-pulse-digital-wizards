@@ -329,25 +329,31 @@ export const LeadsManagement: React.FC = () => {
       const seenLeads = new Map<string, any>();
 
       for (const lead of processedLeads) {
-        const leadData = await parseLeadData(lead.lead_data);
-        const email = leadData.email?.toLowerCase() || '';
-        const phone = leadData.phone?.replace(/\D/g, '') || '';
-        const key = email || phone;
-        
-        if (key && seenLeads.has(key)) {
-          const existingLead = seenLeads.get(key);
-          const timeDiff = Math.abs(new Date(lead.created_at).getTime() - new Date(existingLead.created_at).getTime());
+        try {
+          const leadData = await parseLeadData(lead.lead_data);
+          const email = leadData.email?.toLowerCase() || '';
+          const phone = leadData.phone?.replace(/\D/g, '') || '';
+          const key = email || phone;
           
-          // Se diferença for <= 30 segundos (30000ms), considerar duplicata
-          if (timeDiff <= 30000) {
-            console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
-            continue; // Pular este lead duplicado
+          if (key && seenLeads.has(key)) {
+            const existingLead = seenLeads.get(key);
+            const timeDiff = Math.abs(new Date(lead.created_at).getTime() - new Date(existingLead.created_at).getTime());
+            
+            // Se diferença for <= 30 segundos (30000ms), considerar duplicata
+            if (timeDiff <= 30000) {
+              console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
+              continue; // Pular este lead duplicado
+            }
           }
-        }
-        
-        deduplicatedLeads.push(lead);
-        if (key) {
-          seenLeads.set(key, lead);
+          
+          deduplicatedLeads.push(lead);
+          if (key) {
+            seenLeads.set(key, lead);
+          }
+        } catch (error) {
+          console.error('Erro ao processar lead:', error);
+          // Em caso de erro, adiciona o lead mesmo assim
+          deduplicatedLeads.push(lead);
         }
       }
 
@@ -378,9 +384,13 @@ export const LeadsManagement: React.FC = () => {
       // Extrair serviços únicos dos leads
       const servicesSet = new Set<string>();
       for (const lead of deduplicatedLeads) {
-        const leadData = await parseLeadData(lead.lead_data);
-        if (leadData.service && leadData.service !== 'N/A') {
-          servicesSet.add(leadData.service);
+        try {
+          const leadData = await parseLeadData(lead.lead_data);
+          if (leadData.service && leadData.service !== 'N/A') {
+            servicesSet.add(leadData.service);
+          }
+        } catch (error) {
+          console.error('Erro ao extrair serviço do lead:', error);
         }
       }
       setAvailableServices(Array.from(servicesSet).sort());
