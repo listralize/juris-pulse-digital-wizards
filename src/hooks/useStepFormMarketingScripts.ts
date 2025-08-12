@@ -26,6 +26,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
   const loadStepFormConfig = async () => {
     try {
+      console.log(`🔍 Carregando config para StepForm slug: ${formSlug}`);
       // Buscar diretamente na tabela step_forms - otimizado para buscar apenas o necessário
       const { data: stepForm, error } = await supabase
         .from('step_forms')
@@ -39,10 +40,13 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         return;
       }
 
+      console.log(`📊 StepForm encontrado:`, stepForm);
+
       if (stepForm && stepForm.tracking_config) {
         
         // Criar config compatível com a estrutura esperada
         const trackingConfig = stepForm.tracking_config as any;
+        console.log(`🔧 Tracking config bruto:`, trackingConfig);
         
         // Verificar se há pixel_id no nível principal ou dentro de facebook_pixel
          const pixelId = trackingConfig?.pixel_id || trackingConfig?.facebook_pixel?.pixel_id || '';
@@ -75,8 +79,11 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         };
         
         console.log(`🎯 Config processada para StepForm ${formSlug}:`, stepFormConfig);
+        console.log(`🔍 Custom HEAD HTML:`, stepFormConfig.customHeadHtml);
+        console.log(`🔍 Custom BODY HTML:`, stepFormConfig.customBodyHtml);
         implementStepFormScripts(stepFormConfig);
       } else {
+        console.log(`⚠️ StepForm ${formSlug} não encontrado ou sem tracking_config`);
         // Remover scripts se não há configuração
         removeStepFormScripts(formSlug);
       }
@@ -352,46 +359,86 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
   const implementStepFormCustomHead = (stepFormConfig: any) => {
     const { slug, customHeadHtml } = stepFormConfig;
+    console.log(`🔧 Implementando HEAD custom para StepForm ${slug}:`, customHeadHtml);
+    
+    if (!customHeadHtml || customHeadHtml.trim() === '') {
+      console.log(`⚠️ Nenhum código HEAD encontrado para StepForm ${slug}`);
+      return;
+    }
+    
     try {
-      const scripts = extractScriptsFromHtml(String(customHeadHtml || ''));
-      if (scripts.length === 0 && customHeadHtml) {
-        // Não há <script>, criar um script com o conteúdo inteiro
-        const s = document.createElement('script');
-        s.setAttribute('data-stepform-marketing', slug);
-        s.text = String(customHeadHtml);
-        document.head.appendChild(s);
-        return;
+      // Verificar se já existe
+      const existing = document.querySelector(`[data-stepform-head="${slug}"]`);
+      if (existing) {
+        existing.remove();
+        console.log(`🗑️ Removido HEAD anterior para StepForm ${slug}`);
       }
-      scripts.forEach((scr) => {
-        const s = document.createElement('script');
-        s.setAttribute('data-stepform-marketing', slug);
-        if (scr.src) {
-          s.src = scr.src;
-          s.async = scr.async;
+      
+      // Criar um container div para o conteúdo
+      const container = document.createElement('div');
+      container.setAttribute('data-stepform-head', slug);
+      container.style.display = 'none'; // Invisível, apenas para scripts
+      container.innerHTML = customHeadHtml;
+      
+      // Executar scripts manualmente
+      const scripts = container.querySelectorAll('script');
+      scripts.forEach(script => {
+        const newScript = document.createElement('script');
+        newScript.setAttribute('data-stepform-marketing', slug);
+        
+        if (script.src) {
+          newScript.src = script.src;
+          newScript.async = script.async;
         } else {
-          s.text = scr.content;
-          s.async = scr.async;
+          newScript.textContent = script.textContent;
         }
-        document.head.appendChild(s);
+        
+        document.head.appendChild(newScript);
+        console.log(`📝 Script HEAD injetado para StepForm ${slug}`);
       });
-      console.log(`🧩 Head custom do StepForm ${slug} injetado`);
+      
+      console.log(`✅ HEAD custom do StepForm ${slug} implementado com sucesso`);
     } catch (e) {
-      console.warn('Falha ao injetar head custom do StepForm:', e);
+      console.error(`❌ Erro ao implementar HEAD custom do StepForm ${slug}:`, e);
     }
   };
 
   const implementStepFormCustomBody = (stepFormConfig: any) => {
     const { slug, customBodyHtml } = stepFormConfig;
+    console.log(`🔧 Implementando BODY custom para StepForm ${slug}:`, customBodyHtml);
+    
+    if (!customBodyHtml || customBodyHtml.trim() === '') {
+      console.log(`⚠️ Nenhum código BODY encontrado para StepForm ${slug}`);
+      return;
+    }
+    
     try {
-      const nsMatch = String(customBodyHtml || '').match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i);
-      const html = nsMatch ? nsMatch[1] : String(customBodyHtml || '');
-      const nos = document.createElement('noscript');
-      nos.setAttribute('data-stepform-marketing', slug);
-      nos.innerHTML = html;
-      document.body.appendChild(nos);
-      console.log(`🧩 Body custom do StepForm ${slug} injetado`);
+      // Verificar se já existe
+      const existing = document.querySelector(`[data-stepform-body="${slug}"]`);
+      if (existing) {
+        existing.remove();
+        console.log(`🗑️ Removido BODY anterior para StepForm ${slug}`);
+      }
+      
+      // Criar elemento noscript diretamente
+      const noscript = document.createElement('noscript');
+      noscript.setAttribute('data-stepform-body', slug);
+      noscript.setAttribute('data-stepform-marketing', slug);
+      
+      // Extrair conteúdo do noscript se existir, senão usar o HTML inteiro
+      const nsMatch = customBodyHtml.match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i);
+      if (nsMatch) {
+        noscript.innerHTML = nsMatch[1];
+        console.log(`📝 Conteúdo noscript extraído para StepForm ${slug}`);
+      } else {
+        noscript.innerHTML = customBodyHtml;
+        console.log(`📝 HTML completo usado como noscript para StepForm ${slug}`);
+      }
+      
+      document.body.appendChild(noscript);
+      console.log(`✅ BODY custom do StepForm ${slug} implementado com sucesso`);
     } catch (e) {
-      console.warn('Falha ao injetar body custom do StepForm:', e);
+      console.error(`❌ Erro ao implementar BODY custom do StepForm ${slug}:`, e);
     }
   };
 };
