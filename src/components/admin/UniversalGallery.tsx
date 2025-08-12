@@ -351,7 +351,9 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
                               className="w-full h-full object-cover rounded"
                             />
                           ) : (
-                            {getFileIcon(file.type)}
+                            <div className="text-4xl text-gray-400">
+                              {getFileIcon(file.type)}
+                            </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
