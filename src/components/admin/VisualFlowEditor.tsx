@@ -637,8 +637,8 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
       ...nodeToDuplicate,
       id: newId,
       position: {
-        x: nodeToDuplicate.position.x + 150,
-        y: nodeToDuplicate.position.y + 50,
+        x: nodeToDuplicate.position.x + 250,
+        y: nodeToDuplicate.position.y + 150,
       },
       data: {
         ...nodeToDuplicate.data,
