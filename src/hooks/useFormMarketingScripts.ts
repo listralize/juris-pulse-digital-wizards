@@ -161,38 +161,13 @@ export const useFormMarketingScripts = (formId: string) => {
       return;
     }
     
-    console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
+    console.log(`📘 Pixel configurado para formulário ${formId} (sem reinicializar base)`, pixelId);
 
-    // Verificar se este pixel específico já foi inicializado
-    const pixelKey = `fbq_pixel_${pixelId}`;
-    if (!(window as any)[pixelKey]) {
-      // Criar o script base do Facebook Pixel seguindo o modelo exato
-      const fbPixelScript = document.createElement('script');
-      fbPixelScript.setAttribute('data-form-marketing', formId);
-      fbPixelScript.innerHTML = `
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '${pixelId}');
-        fbq('set', 'autoConfig', 'false', '${pixelId}');
-        console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId} (autoConfig desativado)');
-      `;
-      document.head.appendChild(fbPixelScript);
-
-      // Não rastreamos PageView automaticamente em formulários; eventos são disparados apenas no sucesso do envio
-
-      // Marcar este pixel como inicializado
-      (window as any)[pixelKey] = true;
-    } else {
-      console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
+    // Não injetar/Inicializar Pixel aqui para evitar duplicidade
+    if (!(window as any).fbq) {
+      console.warn('⚠️ fbq não está disponível no momento do envio. Garanta que o carregamento global esteja ativo.');
     }
 
-    // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
         console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
