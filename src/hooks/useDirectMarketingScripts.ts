@@ -43,9 +43,8 @@ export const useDirectMarketingScripts = () => {
     console.log('📘 Carregando Facebook Pixel (programático):', pixelId);
 
     try {
+      // Definir fbq programaticamente
       const w: any = window;
-
-      // Garantir fbq existente (stub) e fbevents carregado
       if (!w.fbq) {
         const fbq: any = function (...args: any[]) {
           fbq.callMethod ? fbq.callMethod.apply(fbq, args) : fbq.queue.push(args);
@@ -57,7 +56,8 @@ export const useDirectMarketingScripts = () => {
         w._fbq = fbq;
       }
 
-      if (!document.querySelector('script[src*="connect.facebook.net"][src*="fbevents.js"]')) {
+      // Carregar fbevents.js se ainda não estiver presente
+      if (!document.querySelector('script[data-marketing="fb-pixel-src"]')) {
         const s = document.createElement('script');
         s.async = true;
         s.src = 'https://connect.facebook.net/en_US/fbevents.js';
@@ -65,18 +65,10 @@ export const useDirectMarketingScripts = () => {
         document.head.appendChild(s);
       }
 
-      // Evitar reinit duplicado no mesmo ciclo de vida
-      w.__fbqActivePixels = w.__fbqActivePixels || new Set<string>();
-      if (!w.__fbqActivePixels.has(pixelId)) {
-        w.fbq('init', pixelId);
-        w.__fbqActivePixels.add(pixelId);
-        console.log('✅ fbq init feito para', pixelId);
-      } else {
-        console.log('ℹ️ fbq já inicializado para', pixelId);
-      }
-
-      // PageView apenas para confirmação
+      // Inicializar e enviar PageView
+      w.fbq('init', pixelId);
       w.fbq('track', 'PageView');
+      console.log('✅ Facebook Pixel inicializado');
     } catch (e) {
       console.error('❌ Erro ao carregar Facebook Pixel:', e);
     }
@@ -158,36 +150,5 @@ export const useDirectMarketingScripts = () => {
     
     console.log('✅ Sistema de eventos configurado');
     console.log('💡 Para testar: window.testMarketingEvents()');
-  };
-
-  // Debug helper para inspecionar e identificar qualquer envio inesperado de "Lead"
-  const installFbqDebug = () => {
-    try {
-      const w: any = window;
-      const attach = () => {
-        if (!w.fbq) return;
-        if ((w as any).__fbqPatched) return;
-        const original = w.fbq;
-        const wrapper = function (...args: any[]) {
-          try {
-            if (args && args[0] === 'track') {
-              const evt = args[1];
-              if (evt === 'Lead') {
-                console.warn('🚨 fbq("track","Lead") detectado. Stack:', new Error().stack);
-              }
-              console.log('📌 fbq.track:', evt, args[2] || {});
-            }
-          } catch {}
-          return original.apply(this, args as any);
-        } as any;
-        w.fbq = wrapper;
-        (w as any).__fbqPatched = true;
-        console.log('🛡️ fbq debug wrapper instalado');
-      };
-      attach();
-      setTimeout(attach, 800);
-    } catch (e) {
-      console.warn('⚠️ Falha ao instalar fbq debug wrapper:', e);
-    }
   };
 };

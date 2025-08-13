@@ -20,27 +20,6 @@ interface StepFormMarketingConfig {
   };
 }
 
-const normalizePixelEventName = (eventType?: string) => {
-  if (!eventType) return 'Contact';
-  const map: Record<string, string> = {
-    Lead: 'Lead',
-    Purchase: 'Purchase',
-    Contact: 'Contact',
-    SubmitApplication: 'SubmitApplication',
-    'Submit Application': 'SubmitApplication',
-    CompleteRegistration: 'CompleteRegistration',
-    'Complete Registration': 'CompleteRegistration',
-    ViewContent: 'ViewContent',
-    'View Content': 'ViewContent',
-    AddToCart: 'AddToCart',
-    'Add To Cart': 'AddToCart',
-    InitiateCheckout: 'InitiateCheckout',
-    'Initiate Checkout': 'InitiateCheckout',
-  };
-  return map[eventType] || eventType.replace(/\s+/g, '');
-};
-
-
 export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
     if (!formSlug) return;
@@ -87,8 +66,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       if (config.facebookPixel?.pixelId || config.pixel_id) {
         const pixelId = config.facebookPixel?.pixelId || config.pixel_id;
         const eventType = config.facebookPixel?.eventType || config.event_type || 'Contact';
-        const customEventName = config.facebookPixel?.customEventName || config.custom_event_name;
-        implementFacebookPixel(pixelId, eventType, customEventName);
+        implementFacebookPixel(pixelId, eventType);
       } else {
         console.log('📘 Implementando Facebook Pixel fallback');
         implementFacebookPixel('1024100955860841', 'Contact'); // ID da imagem que o usuário mostrou
@@ -123,38 +101,23 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     implementGoogleAnalytics('G-FQVHCDRQLX');
   };
 
-  const implementFacebookPixel = (pixelId: string, eventType: string = 'Contact', customEventName?: string) => {
+  const implementFacebookPixel = (pixelId: string, eventType: string = 'Contact') => {
     console.log(`📘 Garantindo Facebook Pixel (somente listener): ${pixelId}`);
 
     // Apenas configurar listener; não injetar scripts aqui para evitar conflitos
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug === formSlug) {
-        const resolved = eventType === 'Custom' ? (customEventName || 'CustomEvent') : normalizePixelEventName(eventType);
-        console.log(`📊 StepForm ${formSlug} - disparando evento ${resolved}`);
+        console.log(`📊 StepForm ${formSlug} - disparando evento ${eventType}`);
         setTimeout(() => {
           if ((window as any).fbq) {
-            // Bloquear qualquer Lead inesperado por alguns segundos
-            const w: any = window;
-            const original = w.fbq;
-            w.fbq = function (...args: any[]) {
-              try {
-                if (args && args[0] === 'track' && args[1] === 'Lead') {
-                  console.warn('🚫 Lead bloqueado (stepform:', formSlug, ')');
-                  return;
-                }
-              } catch {}
-              return original.apply(this, args as any);
-            } as any;
-            setTimeout(() => { w.fbq = original; }, 3000);
-
-            (window as any).fbq('track', resolved, {
+            (window as any).fbq('track', eventType, {
               content_name: `StepForm ${formSlug}`,
               form_slug: formSlug,
               page_url: window.location.href,
               value: 1,
               currency: 'BRL'
             });
-            console.log(`✅ Evento ${resolved} enviado para Facebook Pixel`);
+            console.log(`✅ Evento ${eventType} enviado para Facebook Pixel`);
           } else {
             console.warn('❌ Facebook Pixel não disponível no momento do envio');
           }

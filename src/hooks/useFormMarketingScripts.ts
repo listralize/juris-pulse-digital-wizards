@@ -175,23 +175,10 @@ export const useFormMarketingScripts = (formId: string) => {
         if ((window as any).fbq) {
           const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
 
-          console.log(`🧭 Evento configurado no painel para ${formId}:`, {
-            rawEventType: facebookPixel.eventType,
-            customEventName: facebookPixel.customEventName,
-            resolvedEvent
-          });
-
           if (!resolvedEvent) {
             console.log(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
             return;
           }
-          // Log do evento resolvido a partir do painel
-          console.log('[Form Pixel] Evento resolvido:', {
-            formId,
-            rawEventType: facebookPixel.eventType,
-            customEventName: facebookPixel.customEventName,
-            resolvedEvent
-          });
 
           // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
           const sentMap = (window as any).__formEventSent || {};
@@ -206,22 +193,6 @@ export const useFormMarketingScripts = (formId: string) => {
             delete m[formId];
             (window as any).__formEventSent = m;
           }, 3000);
-          
-          // Bloquear qualquer 'Lead' inesperado por alguns segundos
-          const w: any = window;
-          const originalFbq = w.fbq;
-          if (originalFbq) {
-            w.fbq = function (...args: any[]) {
-              try {
-                if (args && args[0] === 'track' && args[1] === 'Lead') {
-                  console.warn('🚫 Lead bloqueado (form:', formId, ')');
-                  return;
-                }
-              } catch {}
-              return originalFbq.apply(this, args as any);
-            } as any;
-            setTimeout(() => { w.fbq = originalFbq; }, 3000);
-          }
           
           (window as any).fbq('track', resolvedEvent, {
             content_name: formConfig.campaignName || 'Form Submission',
