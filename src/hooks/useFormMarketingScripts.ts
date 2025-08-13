@@ -22,6 +22,7 @@ interface FormMarketingConfig {
 }
 
 export const useFormMarketingScripts = (formId: string) => {
+  const dlog = (...args: any[]) => { if ((window as any).__marketingDebug) console.log(...args); };
   useEffect(() => {
     if (!formId) return;
 
@@ -90,8 +91,8 @@ export const useFormMarketingScripts = (formId: string) => {
     // Remover scripts antigos específicos deste formulário
     removeFormScripts(formConfig.formId);
 
-    // Facebook Pixel - APENAS se estiver habilitado
-    if (formConfig.facebookPixel?.enabled === true && formConfig.facebookPixel?.pixelId) {
+    // Facebook Pixel - APENAS se estiver habilitado (não requer pixelId local)
+    if (formConfig.facebookPixel?.enabled === true) {
       console.log(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
       implementFormFacebookPixel(formConfig);
     } else {
@@ -154,14 +155,7 @@ export const useFormMarketingScripts = (formId: string) => {
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
     
-    // Validar se o pixelId é válido (apenas números)
-    const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
-    if (!pixelId || pixelId.length < 10) {
-      console.warn(`⚠️ Pixel ID inválido para formulário ${formId}:`, facebookPixel.pixelId);
-      return;
-    }
-    
-    console.log(`📘 Pixel configurado para formulário ${formId} (sem reinicializar base)`, pixelId);
+    dlog(`📘 Pixel preparado para formulário ${formId} (sem reinicializar base)`);
 
     // Não injetar/Inicializar Pixel aqui para evitar duplicidade
     if (!(window as any).fbq) {
@@ -170,20 +164,20 @@ export const useFormMarketingScripts = (formId: string) => {
 
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
+        dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
         if ((window as any).fbq) {
           const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
 
           if (!resolvedEvent) {
-            console.log(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
+            dlog(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
             return;
           }
 
           // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
           const sentMap = (window as any).__formEventSent || {};
           if (sentMap[formId]) {
-            console.log(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
+            dlog(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
             return;
           }
           sentMap[formId] = true;
@@ -198,11 +192,10 @@ export const useFormMarketingScripts = (formId: string) => {
             content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
             page_url: window.location.href,
-            pixel_id: pixelId,
             event_source_url: window.location.href,
             user_data: event.detail?.userData || {}
           });
-          console.log(`📊 Evento "${resolvedEvent}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
+          dlog(`📊 Evento "${resolvedEvent}" rastreado para formulário: ${formId}`);
         }
       }
     };
@@ -220,7 +213,7 @@ export const useFormMarketingScripts = (formId: string) => {
 
   const implementFormGoogleAnalytics = (formConfig: any) => {
     const { formId, googleAnalytics } = formConfig;
-    console.log(`📊 Implementando Google Analytics para formulário ${formId}:`, googleAnalytics.measurementId);
+    dlog(`📊 Implementando Google Analytics para formulário ${formId}: ${googleAnalytics.measurementId}`);
 
     // Verificar se o GA base já existe
     if (!(window as any).gtag) {
@@ -244,7 +237,7 @@ export const useFormMarketingScripts = (formId: string) => {
     // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Google Analytics`);
+        dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Google Analytics`);
         
         if ((window as any).gtag) {
           (window as any).gtag('event', googleAnalytics.eventName || 'form_submit', {
@@ -253,7 +246,7 @@ export const useFormMarketingScripts = (formId: string) => {
             form_id: formId,
             user_data: event.detail?.userData || {}
           });
-          console.log(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
+          dlog(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
         }
       }
     };
@@ -270,7 +263,7 @@ export const useFormMarketingScripts = (formId: string) => {
 
   const implementFormGoogleTagManager = (formConfig: any) => {
     const { formId, googleTagManager } = formConfig;
-    console.log(`🏷️ Implementando Google Tag Manager para formulário ${formId}:`, googleTagManager.containerId);
+    dlog(`🏷️ Implementando Google Tag Manager para formulário ${formId}: ${googleTagManager.containerId}`);
 
     // Verificar se o GTM base já existe
     if (!(window as any).dataLayer) {
@@ -294,7 +287,7 @@ export const useFormMarketingScripts = (formId: string) => {
     // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com GTM`);
+        dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com GTM`);
         
         if ((window as any).dataLayer) {
           (window as any).dataLayer.push({
@@ -303,7 +296,7 @@ export const useFormMarketingScripts = (formId: string) => {
             form_name: formConfig.campaignName || 'Form Submission',
             user_data: event.detail?.userData || {}
           });
-          console.log(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
+          dlog(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
         }
       }
     };
