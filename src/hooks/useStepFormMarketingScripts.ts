@@ -62,20 +62,19 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       const config = stepForm.tracking_config as any;
       console.log('📊 Configuração encontrada:', config);
 
-      // Facebook Pixel: usar evento exatamente como configurado; sem fallback
+      // Facebook Pixel: usar evento exatamente como configurado
       const pixelCfg = (config.facebook_pixel || {});
-      let eventName: string | null = null;
-      if (pixelCfg.enabled === true) {
+      if (pixelCfg.enabled === true && pixelCfg.event_type) {
+        let eventName: string;
         if (pixelCfg.event_type === 'Custom') {
-          eventName = (pixelCfg.custom_event_name || '').trim().replace(/\s+/g, '') || null;
+          eventName = (pixelCfg.custom_event_name || '').trim() || 'CompleteRegistration';
         } else {
-          eventName = normalizeEventName(pixelCfg.event_type);
+          eventName = pixelCfg.event_type; // Usar exatamente como configurado
         }
-      }
-      if (eventName) {
+        console.log(`🎯 Facebook Pixel configurado para evento: ${eventName}`);
         implementFacebookPixel(eventName);
       } else {
-        console.log('ℹ️ Pixel desativado ou sem evento configurado; nada será enviado.');
+        console.log('ℹ️ Facebook Pixel desativado ou sem evento configurado');
       }
 
       // GTM: apenas empurrar evento se nome estiver configurado (sem injeção de script)
