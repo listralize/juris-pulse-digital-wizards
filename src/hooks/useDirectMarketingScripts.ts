@@ -75,7 +75,7 @@ export const useDirectMarketingScripts = () => {
   };
 
   const loadGoogleTagManager = () => {
-    const gtmId = 'GTM-N7TDJGMR';
+    const gtmId = 'GTM-PL22PJ6V';
     console.log('🏷️ Carregando Google Tag Manager:', gtmId);
     
     // Inicializar dataLayer
@@ -140,12 +140,12 @@ export const useDirectMarketingScripts = () => {
       console.log('🎯 StepForm submit detectado:', d);
       setTimeout(() => {
         if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', {
-            content_name: 'StepForm Lead',
+          (window as any).fbq('track', 'Contact', {
+            content_name: 'StepForm Contact',
             form_slug: d.formSlug || 'stepform',
             page_url: window.location.href,
           });
-          console.log('✅ FB Pixel Lead enviado (StepForm)');
+          console.log('✅ FB Pixel Contact enviado (StepForm)');
         }
         if ((window as any).dataLayer) {
           (window as any).dataLayer.push({ event: 'stepform_conversion', form_slug: d.formSlug || 'stepform' });
@@ -165,8 +165,8 @@ export const useDirectMarketingScripts = () => {
       console.log('📝 HTML form submit detectado');
       setTimeout(() => {
         if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', { content_name: 'Contact Form Lead', page_url: window.location.href });
-          console.log('✅ FB Pixel Lead enviado (Contact)');
+          (window as any).fbq('track', 'SubmitApplication', { content_name: 'Contact Form Submit', page_url: window.location.href });
+          console.log('✅ FB Pixel SubmitApplication enviado (Contact)');
         }
         if ((window as any).dataLayer) {
           (window as any).dataLayer.push({ event: 'contact_conversion' });

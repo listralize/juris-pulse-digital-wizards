@@ -123,32 +123,22 @@ export const useContactForm = (externalFormConfig?: any) => {
       setTimeout(() => {
         console.log('📊 Disparando eventos diretos de marketing para formulário de contato');
         
-        // Facebook Pixel - Contact event
+        // Facebook Pixel - SubmitApplication para formulário principal
         if ((window as any).fbq) {
           try {
-            (window as any).fbq('track', 'Contact', {
-              content_name: 'Contact Form Lead',
+            (window as any).fbq('track', 'SubmitApplication', {
+              content_name: 'Contact Form Submit',
               form_type: 'contact',
               form_id: formConfig.id || 'default',
               page_url: window.location.href
             });
-            console.log('✅ Evento Contact enviado para Facebook Pixel (contato)');
-            
-            // Também enviar Lead event
-            (window as any).fbq('track', 'Lead', {
-              content_name: 'Contact Lead Generation',
-              form_type: 'contact',
-              form_id: formConfig.id || 'default',
-              page_url: window.location.href
-            });
-            console.log('✅ Evento Lead enviado para Facebook Pixel (contato)');
+            console.log('✅ Evento SubmitApplication enviado para Facebook Pixel (contato)');
           } catch (error) {
             console.error('❌ Erro no Facebook Pixel:', error);
           }
         } else {
           console.warn('❌ Facebook Pixel não disponível');
         }
-        
         // Google Tag Manager
         if ((window as any).dataLayer) {
           try {

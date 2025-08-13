@@ -77,7 +77,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         const containerId = config.googleTagManager?.containerId || config.gtm_id;
         implementGoogleTagManager(containerId);
       } else {
-        implementGoogleTagManager('GTM-N7TDJGMR');
+        implementGoogleTagManager('GTM-PL22PJ6V');
       }
 
       // Implementar Google Analytics
@@ -97,7 +97,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   const implementFallbackScripts = () => {
     console.log('🔄 Implementando scripts fallback para garantir funcionamento');
     implementFacebookPixel('1024100955860841', 'Contact'); // ID da configuração mostrada pelo usuário
-    implementGoogleTagManager('GTM-N7TDJGMR');
+    implementGoogleTagManager('GTM-PL22PJ6V');
     implementGoogleAnalytics('G-FQVHCDRQLX');
   };
 
