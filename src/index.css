@@ -641,7 +641,9 @@ body, html {
   background-pattern: none !important;
 }
 
-/* Remover qualquer overlay/vidro do container central do Hero */
+/* Remover qualquer overlay/vidro do Hero DEFINITIVAMENTE */
+#home,
+#home *,
 #home .w-full.max-w-6xl,
 #home .w-full.max-w-6xl::before,
 #home .w-full.max-w-6xl::after,
@@ -651,17 +653,18 @@ body, html {
   background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
   box-shadow: none !important;
-  content: none !important;
+  border: none !important;
+  opacity: 1 !important;
 }
 
-/* Remover qualquer overlay/vidro do container central do Hero */
-#home .w-full.max-w-6xl,
-#home .w-full.max-w-6xl::before,
-#home .w-full.max-w-6xl::after {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
+/* Garantir que nenhum elemento no Hero tenha overlay */
+#home .relative::before,
+#home .relative::after,
+#home .absolute::before,
+#home .absolute::after {
+  display: none !important;
   content: none !important;
 }
