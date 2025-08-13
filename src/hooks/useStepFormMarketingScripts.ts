@@ -63,16 +63,24 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       console.log('📊 Configuração encontrada:', config);
 
       // Facebook Pixel: usar evento exatamente como configurado; sem fallback
-      const rawEvent = config.facebookPixel?.eventType || config.event_type;
-      const eventName = normalizeEventName(rawEvent);
+      const pixelCfg = (config.facebook_pixel || {});
+      let eventName: string | null = null;
+      if (pixelCfg.enabled === true) {
+        if (pixelCfg.event_type === 'Custom') {
+          eventName = (pixelCfg.custom_event_name || '').trim().replace(/\s+/g, '') || null;
+        } else {
+          eventName = normalizeEventName(pixelCfg.event_type);
+        }
+      }
       if (eventName) {
         implementFacebookPixel(eventName);
       } else {
-        console.log('ℹ️ Nenhum evento de Pixel configurado para este StepForm; nada será enviado.');
+        console.log('ℹ️ Pixel desativado ou sem evento configurado; nada será enviado.');
       }
 
       // GTM: apenas empurrar evento se nome estiver configurado (sem injeção de script)
-      const gtmEventName = config.googleTagManager?.eventName || (config as any).gtm_event_name;
+      const gtmCfg = (config.google_tag_manager || {});
+      const gtmEventName = gtmCfg.enabled === true ? (gtmCfg.event_name || '').trim() : '';
       if (gtmEventName) {
         implementGoogleTagManager(gtmEventName);
       } else {
@@ -80,7 +88,8 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       }
 
       // GA: apenas enviar evento se nome estiver configurado (sem injeção de script)
-      const gaEventName = config.googleAnalytics?.eventName || (config as any).ga_event_name;
+      const gaCfg = (config.google_analytics || {});
+      const gaEventName = gaCfg.enabled === true ? (gaCfg.event_name || '').trim() : '';
       if (gaEventName) {
         implementGoogleAnalytics(gaEventName);
       } else {
