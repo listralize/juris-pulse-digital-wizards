@@ -516,40 +516,35 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
                   className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
                   placeholder={pageTexts.aboutMediaType === 'video' ? 'https://www.youtube.com/watch?v=...' : 'URL da imagem'}
                 />
-                {pageTexts.aboutMediaType === 'video' && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Upload de Vídeo (Supabase Storage)</Label>
-                      <div className="mt-2">
-                        <Input
-                          type="file"
-                          accept="video/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleVideoUpload(file);
-                          }}
-                          disabled={uploadingVideo}
-                          className="mb-2"
-                        />
-                        {uploadingVideo && (
-                          <div className="text-sm text-muted-foreground">
-                            Enviando vídeo... Aguarde.
-                          </div>
-                        )}
-                        {pageTexts.aboutVideoStorageUrl && (
-                          <div className="text-sm text-green-600">
-                            ✅ Vídeo carregado com sucesso
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="text-sm text-muted-foreground border-l-4 border-blue-500 pl-4">
-                      <p><strong>Fallback YouTube:</strong></p>
-                      <p>Se não houver vídeo no storage, o sistema usará o URL do YouTube abaixo como alternativa.</p>
-                    </div>
-                  </div>
-                )}
+{pageTexts.aboutMediaType === 'video' && (
+  <div className="space-y-4">
+    <div>
+      <Label>Vídeo do Sobre Nós (Galeria)</Label>
+      <div className="mt-2">
+        <GalleryButton
+          onSelect={(url) => {
+            onUpdatePageTexts({
+              ...pageTexts,
+              aboutMediaType: 'video',
+              aboutVideoStorageUrl: url,
+            });
+          }}
+          size="sm"
+          variant="outline"
+          acceptedTypes={['video']}
+        />
+        {pageTexts.aboutVideoStorageUrl && (
+          <div className="text-sm text-green-600 mt-2">✅ Vídeo selecionado da galeria</div>
+        )}
+      </div>
+    </div>
+
+    <div className="text-sm text-muted-foreground border-l-4 border-blue-500 pl-4">
+      <p><strong>Fallback YouTube:</strong></p>
+      <p>Se não houver vídeo no storage, o sistema usará o URL do YouTube acima como alternativa.</p>
+    </div>
+  </div>
+)}
               </div>
             </div>
           </TabsContent>

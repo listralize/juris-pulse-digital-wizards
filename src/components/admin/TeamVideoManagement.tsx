@@ -253,83 +253,40 @@ export const TeamVideoManagement: React.FC = () => {
           />
         </div>
 
-        {/* Upload de vídeo */}
-        <div className="space-y-4">
-          <Label className={`text-base ${isDark ? 'text-white' : 'text-black'}`}>
-            Vídeo de Fundo
-          </Label>
-          
-          {/* Preview do vídeo atual */}
-          {videoUrl && (
-            <div className="relative">
-              <video
-                src={videoUrl}
-                className="w-full h-48 object-cover rounded-lg"
-                muted
-                loop
-                controls
-              />
-              <Button
-                onClick={removeVideo}
-                variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+{/* Upload/Seleção via Galeria */}
+<div className="space-y-4">
+  <Label className={`text-base ${isDark ? 'text-white' : 'text-black'}`}>
+    Selecionar vídeo da Galeria
+  </Label>
+  <div className="space-y-2">
+    <div className="flex items-center gap-2 flex-wrap">
+      <GalleryButton
+        onSelect={(url) => {
+          setVideoUrl(url);
+          toast.success('Vídeo selecionado da galeria');
+          saveSettings(url);
+        }}
+        size="sm"
+        variant="outline"
+        acceptedTypes={['video']}
+      />
+    </div>
+    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+      Formatos suportados: MP4, WebM. Tamanho recomendado: até 50MB.
+    </p>
+  </div>
 
-          {/* Upload */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoUpload}
-                disabled={uploading}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-              <GalleryButton
-                onSelect={(url) => {
-                  setVideoUrl(url);
-                  toast.success('Vídeo selecionado da galeria');
-                  saveSettings(url);
-                }}
-                size="sm"
-                variant="outline"
-                className="ml-0"
-              />
-            </div>
-            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-              Formatos suportados: MP4, WebM, AVI. Tamanho máximo: 50MB.
-            </p>
-          </div>
-
-          {/* URL manual */}
-          <div className="space-y-2">
-            <Label className={`text-sm ${isDark ? 'text-white' : 'text-black'}`}>
-              Ou insira uma URL de vídeo:
-            </Label>
-            <Input
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="https://exemplo.com/video.mp4"
-              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-            />
-          </div>
-
-          {uploading && (
-            <div className="flex items-center gap-2">
-              <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${
-                isDark ? 'border-white' : 'border-black'
-              }`}></div>
-              <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Enviando vídeo...
-              </span>
-            </div>
-          )}
-        </div>
+  {uploading && (
+    <div className="flex items-center gap-2">
+      <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${
+        isDark ? 'border-white' : 'border-black'
+      }`}></div>
+      <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        Enviando vídeo...
+      </span>
+    </div>
+  )}
+</div>
 
         {/* Dicas de uso */}
         <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-blue-50'} border ${isDark ? 'border-white/10' : 'border-blue-200'}`}>

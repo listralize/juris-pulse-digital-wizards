@@ -5,12 +5,14 @@ import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { Label } from '../../ui/label';
 import { ServicePage } from '../../../types/adminTypes';
-import { FileText, Gift, Users, HelpCircle, Workflow } from 'lucide-react';
+import { FileText, Gift, Users, HelpCircle, Workflow, Link as LinkIcon } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
 import { BenefitsEditor } from './BenefitsEditor';
 import { TestimonialsEditor } from './TestimonialsEditor';
 import { ProcessEditor } from './ProcessEditor';
 import { FAQEditor } from './FAQEditor';
+import { Switch } from '../../ui/switch';
+import { cn } from '../../../lib/utils';
 
 interface PageEditorProps {
   page: ServicePage;
@@ -52,38 +54,63 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page, onUpdatePage }) =>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="basic" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Título do Serviço</Label>
-              <Input
-                value={page.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                placeholder="Ex: Divórcio Consensual"
-              />
-            </div>
-            <div>
-              <Label>URL da Página (href)</Label>
-              <Input
-                value={page.href || ''}
-                onChange={(e) => handleInputChange('href', e.target.value)}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-                placeholder="Ex: divorcio-consensual"
-              />
-            </div>
-          </div>
-          <div>
-            <Label>Descrição</Label>
-            <Textarea
-              value={page.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              placeholder="Descrição detalhada do serviço..."
-              rows={4}
-            />
-          </div>
-        </TabsContent>
+<TabsContent value="basic" className="space-y-4">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <Label>Título do Serviço</Label>
+      <Input
+        value={page.title}
+        onChange={(e) => handleInputChange('title', e.target.value)}
+        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+        placeholder="Ex: Divórcio Consensual"
+      />
+    </div>
+    <div>
+      <Label>URL da Página (href)</Label>
+      <Input
+        value={page.href || ''}
+        onChange={(e) => handleInputChange('href', e.target.value)}
+        className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+        placeholder="Ex: divorcio-consensual"
+      />
+    </div>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="flex items-start justify-between gap-4 p-3 rounded border">
+      <div>
+        <Label className="flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Redirecionar esta página</Label>
+        <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Quando ativado, esta página não será exibida. O usuário será redirecionado para a URL abaixo.</p>
+      </div>
+      <Switch
+        checked={!!page.redirectEnabled}
+        onCheckedChange={(checked) => handleInputChange('redirectEnabled', checked as any)}
+      />
+    </div>
+    {page.redirectEnabled && (
+      <div>
+        <Label>URL de Redirecionamento</Label>
+        <Input
+          value={page.redirectUrl || ''}
+          onChange={(e) => handleInputChange('redirectUrl', e.target.value)}
+          className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+          placeholder="https://exemplo.com/servico-ou-/services/slug"
+        />
+      </div>
+    )}
+  </div>
+
+  <div>
+    <Label>Descrição</Label>
+    <Textarea
+      value={page.description}
+      onChange={(e) => handleInputChange('description', e.target.value)}
+      className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+      placeholder="Descrição detalhada do serviço..."
+      rows={4}
+    />
+  </div>
+</TabsContent>
 
         <TabsContent value="benefits">
           <BenefitsEditor page={page} onUpdatePage={onUpdatePage} />

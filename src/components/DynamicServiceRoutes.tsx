@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import DynamicServicePage from './DynamicServicePage';
 import NotFound from '../pages/NotFound';
@@ -122,43 +122,56 @@ const DynamicServiceRoutes = () => {
     return path;
   };
 
-  return (
-    <Routes>
-      {pagesToRender.map((page) => {
-        if (!page || !page.href || !page.id) {
-          console.warn('⚠️ Página inválida:', page);
-          return null;
-        }
-        
-        const normalizedPath = normalizePath(page.href);
-        
-        // Garantir que não está vazio
-        if (!normalizedPath) {
-          console.warn('⚠️ Path vazio após normalização para página:', page.title);
-          return null;
-        }
-        
-        console.log('🔗 Criando rota:', { 
-          title: page.title, 
-          originalHref: page.href,
-          normalizedPath: normalizedPath, 
-          fullPath: `/services/${normalizedPath}`,
-          category: page.category 
-        });
-        
+return (
+  <Routes>
+    {pagesToRender.map((page) => {
+      if (!page || !page.href || !page.id) {
+        console.warn('⚠️ Página inválida:', page);
+        return null;
+      }
+      const normalizedPath = normalizePath(page.href);
+      if (!normalizedPath) {
+        console.warn('⚠️ Path vazio após normalização para página:', page.title);
+        return null;
+      }
+
+      // Se redirect estiver habilitado
+      if (page.redirectEnabled && page.redirectUrl) {
+        const target = page.redirectUrl;
+        const isExternal = /^https?:\/\//i.test(target);
+        const RedirectElement = () => {
+          useEffect(() => {
+            if (isExternal) {
+              window.location.assign(target);
+            }
+          }, []);
+          return isExternal ? (
+            <div className="min-h-[40vh] flex items-center justify-center">Redirecionando...</div>
+          ) : (
+            <Navigate to={target.startsWith('/') ? target : `/${target}`} replace />
+          );
+        };
+
         return (
           <Route 
-            key={`${page.id}-${normalizedPath}`} 
+            key={`${page.id}-${normalizedPath}-redirect`} 
             path={normalizedPath} 
-            element={<DynamicServicePage pageData={page} categories={categories || []} />} 
+            element={<RedirectElement />} 
           />
         );
-      })}
-      
-      {/* Rota de fallback para URLs não encontradas dentro de /services */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
+      }
+
+      return (
+        <Route 
+          key={`${page.id}-${normalizedPath}`} 
+          path={normalizedPath} 
+          element={<DynamicServicePage pageData={page} categories={categories || []} />} 
+        />
+      );
+    })}
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
 };
 
 export default DynamicServiceRoutes;
