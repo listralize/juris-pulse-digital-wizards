@@ -27,6 +27,7 @@ export const useFormMarketingScripts = (formId: string) => {
       console.log(...args); 
     }
   };
+  
   useEffect(() => {
     if (!formId) return;
 
@@ -54,15 +55,22 @@ export const useFormMarketingScripts = (formId: string) => {
             trackingConfig = settings.form_tracking_config;
           }
           
+          console.log(`🔍 [DEBUG] Configuração completa:`, trackingConfig);
+          console.log(`🔍 [DEBUG] Procurando formId: "${formId}"`);
+          console.log(`🔍 [DEBUG] SystemForms disponíveis:`, trackingConfig.systemForms);
+          
           const formConfig = trackingConfig.systemForms?.find(
             (form: any) => form.formId === formId && form.enabled
           );
 
           if (formConfig) {
-            dlog(`✅ Configuração encontrada para formulário ${formId}:`, formConfig);
+            console.log(`✅ [DEBUG] Configuração encontrada para formulário ${formId}:`, formConfig);
+            console.log(`🎯 [DEBUG] Facebook Pixel config:`, formConfig.facebookPixel);
+            console.log(`🎯 [DEBUG] Evento configurado:`, formConfig.facebookPixel?.eventType);
             implementFormScripts(formConfig);
           } else {
-            dlog(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
+            console.log(`ℹ️ [DEBUG] Nenhuma configuração ativa encontrada para formulário: ${formId}`);
+            console.log(`🔍 [DEBUG] Formulários disponíveis:`, trackingConfig.systemForms?.map((f: any) => ({ id: f.formId, enabled: f.enabled })));
             // Garantir remoção de scripts e listeners se desativado
             removeFormScripts(formId);
           }
