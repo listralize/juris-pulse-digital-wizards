@@ -42,34 +42,83 @@ export const useGlobalMarketingScripts = () => {
     // Criar um bloqueio global que impede qualquer fbq automático
     const blockScript = document.createElement('script');
     blockScript.innerHTML = `
-      // BLOQUEAR FACEBOOK PIXEL AUTOMÁTICO COMPLETAMENTE
+      // BLOQUEAR FACEBOOK PIXEL AUTOMÁTICO COMPLETAMENTE - FUNCIONA EM TODOS OS AMBIENTES
       (function() {
-        console.log('🛡️ Bloqueando Facebook Pixel automático');
+        console.log('🛡️ [GLOBAL BLOCK] Iniciando bloqueio universal do Facebook Pixel automático');
         
-        // Bloquear tentativas de carregar fbevents.js
+        // 1. BLOQUEAR criação de scripts fbevents.js
         const originalCreateElement = document.createElement;
         document.createElement = function(tagName) {
           const element = originalCreateElement.call(this, tagName);
-          if (tagName.toLowerCase() === 'script' && element.src && element.src.includes('fbevents.js')) {
-            console.log('🚫 BLOQUEADO: Tentativa de carregar fbevents.js automático');
-            element.src = 'about:blank'; // Neutralizar
+          if (tagName.toLowerCase() === 'script') {
+            const originalSrcSetter = Object.getOwnPropertyDescriptor(element, 'src') || Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+            Object.defineProperty(element, 'src', {
+              set: function(value) {
+                if (value && value.includes('fbevents.js')) {
+                  console.log('🚫 [GLOBAL BLOCK] BLOQUEADO: Script fbevents.js automático neutralizado');
+                  originalSrcSetter.set.call(this, 'about:blank');
+                  return;
+                }
+                originalSrcSetter.set.call(this, value);
+              },
+              get: originalSrcSetter.get
+            });
           }
           return element;
         };
         
-        // Se fbq já existir, substituir por stub
+        // 2. INTERCEPTAR window.fbq se já existir
         if (window.fbq) {
-          console.log('🚫 BLOQUEADO: fbq existente substituído por stub');
-          window.fbq = function() {
-            console.log('🚫 BLOQUEADO: Chamada fbq automática ignorada:', arguments);
+          console.log('🚫 [GLOBAL BLOCK] fbq existente substituído por interceptador');
+          const originalFbq = window.fbq;
+          window.fbq = function(action, event, params) {
+            if (action === 'track' && event === 'Lead') {
+              console.log('🚫 [GLOBAL BLOCK] Evento Lead automático BLOQUEADO');
+              return;
+            }
+            console.log('✅ [GLOBAL BLOCK] Permitindo evento:', action, event);
+            return originalFbq.apply(this, arguments);
           };
+          // Preservar propriedades
+          Object.keys(originalFbq).forEach(key => {
+            if (typeof originalFbq[key] !== 'function') {
+              window.fbq[key] = originalFbq[key];
+            }
+          });
         }
         
-        console.log('✅ Bloqueio de Facebook Pixel automático ativado');
+        // 3. INTERCEPTAR futuras atribuições de window.fbq
+        let _fbq = window.fbq;
+        Object.defineProperty(window, 'fbq', {
+          get: function() {
+            return _fbq;
+          },
+          set: function(newFbq) {
+            console.log('🛡️ [GLOBAL BLOCK] Nova atribuição de fbq interceptada');
+            if (typeof newFbq === 'function') {
+              _fbq = function(action, event, params) {
+                if (action === 'track' && event === 'Lead') {
+                  console.log('🚫 [GLOBAL BLOCK] Evento Lead automático BLOQUEADO (nova atribuição)');
+                  return;
+                }
+                console.log('✅ [GLOBAL BLOCK] Permitindo evento (nova atribuição):', action, event);
+                return newFbq.apply(this, arguments);
+              };
+              // Preservar propriedades
+              Object.keys(newFbq).forEach(key => {
+                _fbq[key] = newFbq[key];
+              });
+            } else {
+              _fbq = newFbq;
+            }
+          }
+        });
+        
+        console.log('✅ [GLOBAL BLOCK] Bloqueio universal ativado - funciona em qualquer ambiente');
       })();
     `;
-    blockScript.setAttribute('data-marketing', 'fb-pixel-blocker');
-    document.head.appendChild(blockScript);
+    blockScript.setAttribute('data-marketing', 'fb-pixel-global-blocker');
+    document.head.insertBefore(blockScript, document.head.firstChild);
   };
 
   const loadMarketingScriptsFromDatabase = async () => {
