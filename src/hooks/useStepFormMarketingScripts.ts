@@ -146,7 +146,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
-          if ((window as any).fbq) {
+          if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', eventName, {
               content_name: `StepForm ${formSlug}`,
               form_slug: formSlug,
@@ -156,7 +156,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           } else {
             console.warn('❌ Facebook Pixel não disponível no momento do envio');
           }
-        }, 50);
+        }, 250); // Aguardar para o pixel estar pronto em produção
       }
     };
 
@@ -187,17 +187,19 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           (window as any).__stepFormEventSent = m;
         }, 3000);
 
-        if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: eventName,
-            form_slug: formSlug,
-            form_name: event.detail?.formName || `StepForm ${formSlug}`,
-            page_url: window.location.href,
-          });
-          console.log(`✅ Evento ${eventName} enviado para GTM`);
-        } else {
-          console.warn('❌ dataLayer não disponível no momento do envio');
-        }
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && (window as any).dataLayer) {
+            (window as any).dataLayer.push({
+              event: eventName,
+              form_slug: formSlug,
+              form_name: event.detail?.formName || `StepForm ${formSlug}`,
+              page_url: window.location.href,
+            });
+            console.log(`✅ Evento ${eventName} enviado para GTM`);
+          } else {
+            console.warn('❌ dataLayer não disponível no momento do envio');
+          }
+        }, 250); // Aguardar para o GTM estar pronto em produção
       }
     };
 
@@ -227,17 +229,19 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           (window as any).__stepFormEventSent = m;
         }, 3000);
 
-        if ((window as any).gtag) {
-          (window as any).gtag('event', eventName, {
-            event_category: 'engagement',
-            event_label: event.detail?.formName || `StepForm ${formSlug}`,
-            form_slug: formSlug,
-            page_url: window.location.href,
-          });
-          console.log(`✅ Evento ${eventName} enviado para GA`);
-        } else {
-          console.warn('❌ gtag não disponível no momento do envio');
-        }
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && (window as any).gtag) {
+            (window as any).gtag('event', eventName, {
+              event_category: 'engagement',
+              event_label: event.detail?.formName || `StepForm ${formSlug}`,
+              form_slug: formSlug,
+              page_url: window.location.href,
+            });
+            console.log(`✅ Evento ${eventName} enviado para GA`);
+          } else {
+            console.warn('❌ gtag não disponível no momento do envio');
+          }
+        }, 250); // Aguardar para o GA estar pronto em produção
       }
     };
 

@@ -22,7 +22,11 @@ interface FormMarketingConfig {
 }
 
 export const useFormMarketingScripts = (formId: string) => {
-  const dlog = (...args: any[]) => { if ((window as any).__marketingDebug) console.log(...args); };
+  const dlog = (...args: any[]) => { 
+    if (typeof window !== 'undefined' && (window as any).__marketingDebug) {
+      console.log(...args); 
+    }
+  };
   useEffect(() => {
     if (!formId) return;
 
@@ -158,15 +162,28 @@ export const useFormMarketingScripts = (formId: string) => {
     dlog(`📘 Pixel preparado para formulário ${formId} (sem reinicializar base)`);
 
     // Não injetar/Inicializar Pixel aqui para evitar duplicidade
-    if (!(window as any).fbq) {
-      console.warn('⚠️ fbq não está disponível no momento do envio. Garanta que o carregamento global esteja ativo.');
+    if (typeof window !== 'undefined' && !(window as any).fbq) {
+      console.warn('⚠️ fbq não está disponível no momento do envio. Verificando carregamento...');
+      // Aguardar até 3 segundos pelo Facebook Pixel carregar
+      let attempts = 0;
+      const checkPixel = setInterval(() => {
+        attempts++;
+        if ((window as any).fbq || attempts >= 30) {
+          clearInterval(checkPixel);
+          if (!(window as any).fbq) {
+            console.error('❌ Facebook Pixel não carregou após 3 segundos');
+          }
+        }
+      }, 100);
     }
 
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
         dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
-        if ((window as any).fbq) {
+        // Aguardar um momento para garantir que fbq está disponível
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && (window as any).fbq) {
           const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
 
           if (!resolvedEvent) {
@@ -194,9 +211,12 @@ export const useFormMarketingScripts = (formId: string) => {
             page_url: window.location.href,
             event_source_url: window.location.href,
             user_data: event.detail?.userData || {}
-          });
-          dlog(`📊 Evento "${resolvedEvent}" rastreado para formulário: ${formId}`);
-        }
+            });
+            dlog(`📊 Evento "${resolvedEvent}" rastreado para formulário: ${formId}`);
+          } else {
+            console.error('❌ Facebook Pixel não disponível após timeout');
+          }
+        }, 500); // Aguardar 500ms para o pixel estar pronto
       }
     };
 
@@ -239,15 +259,20 @@ export const useFormMarketingScripts = (formId: string) => {
       if (event.detail?.formId === formId) {
         dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Google Analytics`);
         
-        if ((window as any).gtag) {
+        // Aguardar um momento para garantir que gtag está disponível
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('event', googleAnalytics.eventName || 'form_submit', {
             event_category: 'engagement',
             event_label: formId,
             form_id: formId,
             user_data: event.detail?.userData || {}
-          });
-          dlog(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
-        }
+            });
+            dlog(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
+          } else {
+            console.error('❌ Google Analytics não disponível após timeout');
+          }
+        }, 500); // Aguardar 500ms para o GA estar pronto
       }
     };
 
@@ -295,15 +320,20 @@ const implementFormGoogleTagManager = (formConfig: any) => {
       if (event.detail?.formId === formId) {
         dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com GTM`);
         
-        if ((window as any).dataLayer) {
+        // Aguardar um momento para garantir que dataLayer está disponível
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && (window as any).dataLayer) {
           (window as any).dataLayer.push({
             event: googleTagManager.eventName || 'form_submit',
             form_id: formId,
             form_name: formConfig.campaignName || 'Form Submission',
             user_data: event.detail?.userData || {}
-          });
-          dlog(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
-        }
+            });
+            dlog(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
+          } else {
+            console.error('❌ GTM dataLayer não disponível após timeout');
+          }
+        }, 500); // Aguardar 500ms para o GTM estar pronto
       }
     };
 
