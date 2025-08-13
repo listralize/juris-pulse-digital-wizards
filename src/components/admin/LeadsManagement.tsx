@@ -209,17 +209,53 @@ export const LeadsManagement: React.FC = () => {
         return;
       }
 
-      // Buscar informações para os DDDs
-      const ddds = [...new Set(leadsData?.map(lead => lead.ddd).filter(Boolean))];
+      // Processar e parsear leads primeiro
+      const processedLeads = (leadsData || []).map((lead: any) => {
+        const leadData = lead.lead_data;
+        let parsedData = leadData;
+        if (typeof leadData === 'string') {
+          try { parsedData = JSON.parse(leadData); } catch (e) { console.error('Erro ao fazer parse do lead_data:', e); }
+        }
+        return { ...lead, lead_data: parsedData };
+      });
+
+      // Extrair DDD computado a partir do telefone quando não existir na coluna
+      const computeDddFromLead = (ld: any): number | null => {
+        try {
+          let phone = ld?.phone || ld?.telefone || ld?.Phone || ld?.Telefone || ld?.whatsapp || ld?.Whatsapp || '';
+          if (!phone && ld?.respostas_mapeadas) {
+            for (const [k, v] of Object.entries(ld.respostas_mapeadas)) {
+              if (typeof v === 'string' && v.trim() && (/telefone|phone|whatsapp|tel|celular/i).test(k)) { phone = v; break; }
+            }
+          }
+          const digits = (phone || '').toString().replace(/\D/g, '');
+          if (digits.length >= 10) {
+            const d = digits.startsWith('55') && digits.length >= 12 ? parseInt(digits.substring(2, 4)) : parseInt(digits.substring(0, 2));
+            return isNaN(d) ? null : d;
+          }
+        } catch {}
+        return null;
+      };
+
+      // Montar set de DDDs existentes + computados
+      const existingDdds = new Set<number>((leadsData || []).map((l: any) => l.ddd).filter(Boolean));
+      const computedDdds = new Set<number>();
+      processedLeads.forEach((l: any) => {
+        if (!l.ddd) {
+          const d = computeDddFromLead(l.lead_data);
+          if (d) computedDdds.add(d);
+        }
+      });
+      const allDdds = Array.from(new Set<number>([...Array.from(existingDdds), ...Array.from(computedDdds)]));
+
+      // Buscar informações para todos os DDDs
       type DDDInfo = { state_name: string; region: string; capital: string; cities?: string };
       const dddLocationsMap = new Map<number, DDDInfo>();
-      
-      if (ddds.length > 0) {
+      if (allDdds.length > 0) {
         const { data: dddData } = await supabase
           .from('ddd_locations')
           .select('ddd, state_name, region, capital, cities')
-          .in('ddd', ddds as number[]);
-        
+          .in('ddd', allDdds as number[]);
         if (dddData) {
           dddData.forEach((location: any) => {
             dddLocationsMap.set(location.ddd, {
@@ -232,32 +268,19 @@ export const LeadsManagement: React.FC = () => {
         }
       }
 
-      // Enriquecer os leads com informações de localização (fallback via DDD)
-      const enrichedLeads = (leadsData || []).map((lead: any) => {
-        const info = lead.ddd ? dddLocationsMap.get(lead.ddd) : undefined;
+      // Enriquecer com localização usando ddd da coluna ou ddd computado do telefone
+      const enrichedLeads = processedLeads.map((lead: any) => {
+        const computedDdd = !lead.ddd ? computeDddFromLead(lead.lead_data) : null;
+        const finalDdd = lead.ddd || computedDdd || null;
+        const info = finalDdd ? dddLocationsMap.get(finalDdd) : undefined;
         return {
           ...lead,
+          ddd: finalDdd,
           state: lead.state || info?.state_name || null,
           capital: lead.capital || info?.capital || null,
           region: lead.region || info?.region || null,
-          ddd_locations: lead.ddd && info ? { cities: info.cities } : null,
+          ddd_locations: finalDdd && info ? { cities: info.cities } : null,
         };
-      });
-
-      // Processar e enriquecer dados
-      const processedLeads = enrichedLeads.map(lead => {
-        const leadData = lead.lead_data;
-        let parsedData = leadData;
-        
-        if (typeof leadData === 'string') {
-          try {
-            parsedData = JSON.parse(leadData);
-          } catch (e) {
-            console.error('Erro ao fazer parse do lead_data:', e);
-          }
-        }
-        
-        return { ...lead, lead_data: parsedData };
       });
 
       // Remover duplicatas baseado em email/telefone apenas se intervalo <= 30 segundos

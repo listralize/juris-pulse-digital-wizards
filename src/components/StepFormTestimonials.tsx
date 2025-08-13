@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Users, CheckCircle, Award, X } from 'lucide-react';
+import { Star, Users, CheckCircle, Award, X, Shield, ThumbsUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -137,19 +137,24 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
     );
   };
 
-  const getIcon = (iconName?: string) => {
+  const getIcon = (iconName?: string, color?: string) => {
     const iconClass = "w-6 h-6";
-    const primaryColor = socialProofConfig.primaryColor || '#4CAF50';
-    
+    const finalColor = color || socialProofConfig?.primaryColor || '#4CAF50';
     switch (iconName) {
       case 'users':
-        return <Users className={iconClass} style={{ color: primaryColor }} />;
+        return <Users className={iconClass} style={{ color: finalColor }} />;
       case 'check':
-        return <CheckCircle className={`${iconClass} text-green-500`} />;
+        return <CheckCircle className={iconClass} style={{ color: finalColor }} />;
       case 'award':
-        return <Award className={`${iconClass} text-yellow-500`} />;
+        return <Award className={iconClass} style={{ color: finalColor }} />;
+      case 'star':
+        return <Star className={iconClass} style={{ color: finalColor }} />;
+      case 'shield':
+        return <Shield className={iconClass} style={{ color: finalColor }} />;
+      case 'thumbs-up':
+        return <ThumbsUp className={iconClass} style={{ color: finalColor }} />;
       default:
-        return <CheckCircle className={iconClass} style={{ color: primaryColor }} />;
+        return <CheckCircle className={iconClass} style={{ color: finalColor }} />;
     }
   };
 

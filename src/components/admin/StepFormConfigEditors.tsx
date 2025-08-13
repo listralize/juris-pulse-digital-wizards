@@ -286,7 +286,7 @@ export const SocialProofConfigEditor: React.FC<{
           </div>
           <div className="space-y-3">
             {(config.stats || []).map((stat: any, index: number) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-end">
                 <Input
                   value={stat.number}
                   onChange={(e) => {
@@ -295,7 +295,7 @@ export const SocialProofConfigEditor: React.FC<{
                     updateStats(stats);
                   }}
                   placeholder="1000+"
-                  className="w-32"
+                  className="w-full"
                 />
                 <Input
                   value={stat.label}
@@ -305,7 +305,33 @@ export const SocialProofConfigEditor: React.FC<{
                     updateStats(stats);
                   }}
                   placeholder="Clientes satisfeitos"
-                  className="flex-1"
+                  className="w-full"
+                />
+                <select
+                  className="w-full p-2 border border-input rounded-md bg-background"
+                  value={stat.icon || 'check'}
+                  onChange={(e) => {
+                    const stats = [...(config.stats || [])];
+                    stats[index] = { ...stat, icon: e.target.value };
+                    updateStats(stats);
+                  }}
+                >
+                  <option value="check">Check</option>
+                  <option value="users">Users</option>
+                  <option value="award">Award</option>
+                  <option value="star">Star</option>
+                  <option value="shield">Shield</option>
+                  <option value="thumbs-up">Thumbs Up</option>
+                </select>
+                <Input
+                  type="color"
+                  value={stat.color || '#4CAF50'}
+                  onChange={(e) => {
+                    const stats = [...(config.stats || [])];
+                    stats[index] = { ...stat, color: e.target.value };
+                    updateStats(stats);
+                  }}
+                  className="w-20 h-10"
                 />
                 <Button
                   variant="destructive"

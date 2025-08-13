@@ -25,6 +25,7 @@ interface StatData {
   label: string;
   value: string;
   icon: string;
+  color?: string;
 }
 
 interface SocialProofConfig {
@@ -183,7 +184,8 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
       id: Date.now().toString(),
       label: '',
       value: '',
-      icon: 'check'
+      icon: 'check',
+      color: '#4CAF50'
     };
     updateConfig('stats', [...config.stats, newStat]);
   };
@@ -311,7 +313,7 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
 
                 {config.stats.map((stat, index) => (
                   <Card key={stat.id} className="p-4">
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                       <div>
                         <Label>Número</Label>
                         <Input
@@ -326,6 +328,30 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
                           placeholder="Clientes Atendidos"
                           value={stat.label}
                           onChange={(e) => updateStat(index, 'label', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Ícone</Label>
+                        <select
+                          className="w-full p-2 border border-input rounded-md bg-background"
+                          value={stat.icon || 'check'}
+                          onChange={(e) => updateStat(index, 'icon', e.target.value)}
+                        >
+                          <option value="check">Check</option>
+                          <option value="users">Users</option>
+                          <option value="award">Award</option>
+                          <option value="star">Star</option>
+                          <option value="shield">Shield</option>
+                          <option value="thumbs-up">Thumbs Up</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Cor do Ícone</Label>
+                        <Input
+                          type="color"
+                          value={stat.color || config.primaryColor}
+                          onChange={(e) => updateStat(index, 'color', e.target.value)}
+                          className="w-20 h-10"
                         />
                       </div>
                       <div className="flex items-end">
