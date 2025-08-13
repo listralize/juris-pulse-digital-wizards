@@ -11,7 +11,6 @@ import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
 import { StepFormTestimonials } from '../components/StepFormTestimonials';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
-import { useGlobalPixelLoader } from '@/hooks/useGlobalPixelLoader';
 
 interface StepFormData {
   id: string;
@@ -151,8 +150,6 @@ const StepForm: React.FC = () => {
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
   
-  // FORÇA carregamento do pixel globalmente também no StepForm
-  useGlobalPixelLoader();
 
   useEffect(() => {
     if (slug) {
