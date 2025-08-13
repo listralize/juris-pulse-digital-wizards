@@ -116,8 +116,6 @@ export interface ServicePage {
   description: string;
   category: string;
   href?: string;
-  redirectEnabled?: boolean;
-  redirectUrl?: string;
   benefits?: Benefit[];
   process?: ProcessStep[];
   testimonials?: Testimonial[];

@@ -40,15 +40,6 @@ export const useContactForm = (externalFormConfig?: any) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Evitar que GTM/ouvintes globais capturem o submit nativo (que costuma disparar "Lead")
-    // Sem alterar o fluxo do app
-    try {
-      // @ts-ignore
-      e.stopPropagation?.();
-      // @ts-ignore
-      e.nativeEvent?.stopImmediatePropagation?.();
-    } catch {}
-    
     
     // Validar apenas campos obrigatórios que não estão desabilitados
     const requiredFields = formConfig.allFields?.filter(field => 
@@ -63,22 +54,8 @@ export const useContactForm = (externalFormConfig?: any) => {
       }
     }
 
-    // Validações adicionais
-    const emailVal = formData['email'];
-    if (emailVal) {
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(emailVal));
-      if (!emailOk) {
-        toast.error('Por favor, informe um e-mail válido.');
-        return;
-      }
-    }
-
-    const phoneVal = formData['phone'];
-    if (phoneVal && String(phoneVal).replace(/\D/g, '').length < 8) {
-      toast.error('Por favor, informe um telefone válido.');
-      return;
-    }
     setIsSubmitting(true);
+
     try {
       console.log('📤 Enviando formulário via edge function segura...');
 
@@ -141,9 +118,6 @@ export const useContactForm = (externalFormConfig?: any) => {
       });
       document.dispatchEvent(successEvent);
       console.log('🎯 Evento formSubmitSuccess disparado para marketing scripts');
-      
-      // Eventos diretos desativados: seguir apenas a configuração do Painel via useFormMarketingScripts
-
       
       toast.success(formConfig.formTexts.successMessage);
       setIsSubmitted(true);

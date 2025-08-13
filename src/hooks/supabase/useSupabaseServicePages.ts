@@ -96,18 +96,16 @@ export const useSupabaseServicePages = () => {
     return pages
       .filter(page => page && typeof page === 'object')
       .map((page: any, idx) => ({
-id: page.id || `no-id-${idx}`,
-title: page.title || '',
-description: page.description || '',
-category: page.category || '',
-href: page.href || '',
-redirectEnabled: !!page.redirectEnabled || !!page.redirect_enabled,
-redirectUrl: page.redirectUrl || page.redirect_url || '',
-benefits: Array.isArray(page.benefits) ? page.benefits : [],
-process: Array.isArray(page.process) ? page.process : [],
-faq: Array.isArray(page.faq) ? page.faq : [],
-testimonials: Array.isArray(page.testimonials) ? page.testimonials : [],
-...page
+        id: page.id || `no-id-${idx}`,
+        title: page.title || '',
+        description: page.description || '',
+        category: page.category || '',
+        href: page.href || '',
+        benefits: Array.isArray(page.benefits) ? page.benefits : [],
+        process: Array.isArray(page.process) ? page.process : [],
+        faq: Array.isArray(page.faq) ? page.faq : [],
+        testimonials: Array.isArray(page.testimonials) ? page.testimonials : [],
+        ...page
       }));
   };
 
@@ -234,9 +232,7 @@ testimonials: Array.isArray(page.testimonials) ? page.testimonials : [],
             category_id: page.category || '',
             href: page.href || '',
             is_active: true,
-display_order: pageIndex,
-redirect_enabled: page.redirectEnabled || false,
-redirect_url: page.redirectUrl || ''
+            display_order: pageIndex
           };
 
           const { error: pageError } = await supabase

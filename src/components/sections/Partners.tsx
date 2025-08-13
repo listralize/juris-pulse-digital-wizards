@@ -22,7 +22,6 @@ const Partners = () => {
   } = useSupabaseDataNew();
   const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [autoPlayActive, setAutoPlayActive] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -150,13 +149,11 @@ const Partners = () => {
   const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
   const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
   const nextSlide = () => {
-    const newSlide = (currentSlide + 1) % totalSlides;
-    handleSlideChange(newSlide);
+    setCurrentSlide(prev => (prev + 1) % totalSlides);
   };
   
   const prevSlide = () => {
-    const newSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-    handleSlideChange(newSlide);
+    setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
   };
 
   // Abrir perfil do membro
@@ -194,27 +191,6 @@ const Partners = () => {
       tl.kill();
     };
   }, [teamMembers, isLoading]);
-
-  // Autoplay no mobile - rolar automaticamente
-  useEffect(() => {
-    if (!isMobile || totalSlides <= 1 || !autoPlayActive) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % totalSlides);
-    }, 4000); // Trocar slide a cada 4 segundos
-
-    return () => clearInterval(interval);
-  }, [isMobile, totalSlides, autoPlayActive]);
-
-  // Pausar autoplay quando usuário interagir
-  const handleSlideChange = (slideIndex: number) => {
-    setCurrentSlide(slideIndex);
-    if (isMobile) {
-      setAutoPlayActive(false);
-      // Reativar após 10 segundos
-      setTimeout(() => setAutoPlayActive(true), 10000);
-    }
-  };
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">
@@ -344,9 +320,9 @@ const Partners = () => {
               </>
             )}
 
-            {/* Dots Indicator - OCULTO NO MOBILE, VISÍVEL APENAS EM DESKTOP */}
+            {/* Dots Indicator - Responsivo */}
             {totalSlides > 1 && (
-              <div className="justify-center mt-6 space-x-2 hidden md:flex">
+              <div className="flex justify-center mt-6 space-x-2">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
                     key={index}

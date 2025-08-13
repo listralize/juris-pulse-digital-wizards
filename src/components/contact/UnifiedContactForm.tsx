@@ -5,7 +5,6 @@ import { useFormConfig } from "../../hooks/useFormConfig";
 import { useFormMarketingScripts } from "../../hooks/useFormMarketingScripts";
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
-import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedContactFormProps {
   preselectedService?: string;
@@ -91,63 +90,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
   // Implementar marketing scripts usando o ID real do formulário
   const activeFormId = (formId || formConfig?.id || 'default');
-  console.log('🚨 [UNIFIED DEBUG] FormId para marketing:', activeFormId);
-  console.log('🚨 [UNIFIED DEBUG] FormConfig:', formConfig);
-  
-  // Hook para scripts de marketing - sempre usar 'default' para formulário principal
-  useFormMarketingScripts('default');
-  
-  // FORÇA o carregamento do pixel se for o formulário padrão
-  React.useEffect(() => {
-    if (activeFormId === 'default') {
-      console.log('🚨 [FORCE PIXEL] Forçando carregamento do pixel para formulário padrão');
-      const loadPixelForDefault = async () => {
-        try {
-          const { data: settings, error } = await supabase
-            .from('marketing_settings')
-            .select('*')
-            .maybeSingle();
-          
-          if (error) {
-            console.error('❌ [FORCE PIXEL] Erro ao buscar configurações:', error);
-            return;
-          }
-          
-          if (settings) {
-            const trackingConfig = JSON.parse(String(settings.form_tracking_config || '{}'));
-            const formConfig = trackingConfig.systemForms?.find((f: any) => f.formId === 'default');
-            
-            if (formConfig?.facebookPixel?.enabled && formConfig.facebookPixel.pixelId) {
-              console.log('🚨 [FORCE PIXEL] Carregando pixel:', formConfig.facebookPixel.pixelId);
-              
-              if (!(window as any).fbq) {
-                const script = document.createElement('script');
-                script.innerHTML = `
-                  !function(f,b,e,v,n,t,s)
-                  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                  n.queue=[];t=b.createElement(e);t.async=!0;
-                  t.src=v;s=b.getElementsByTagName(e)[0];
-                  s.parentNode.insertBefore(t,s)}(window, document,'script',
-                  'https://connect.facebook.net/en_US/fbevents.js');
-                  fbq('init', '${formConfig.facebookPixel.pixelId}');
-                  fbq('track', 'PageView');
-                  console.log('✅ [FORCE PIXEL] Pixel carregado:', '${formConfig.facebookPixel.pixelId}');
-                `;
-                document.head.appendChild(script);
-              }
-            }
-          }
-        } catch (error) {
-          console.error('❌ [FORCE PIXEL] Erro:', error);
-        }
-      };
-      
-      loadPixelForDefault();
-    }
-  }, [activeFormId]);
-  
   useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido

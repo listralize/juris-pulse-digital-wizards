@@ -5,7 +5,7 @@ interface FormMarketingConfig {
   facebookPixel?: {
     enabled: boolean;
     pixelId: string;
-    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication' | 'CompleteRegistration' | 'ViewContent' | 'AddToCart' | 'InitiateCheckout' | 'Custom';
+    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication';
     customCode?: string;
   };
   googleAnalytics?: {
@@ -22,23 +22,12 @@ interface FormMarketingConfig {
 }
 
 export const useFormMarketingScripts = (formId: string) => {
-  const dlog = (...args: any[]) => { 
-    if (typeof window !== 'undefined' && (window as any).__marketingDebug) {
-      console.log(...args); 
-    }
-  };
-  
   useEffect(() => {
-    console.log(`🔥 [FORM MARKETING] Hook executado para formId: "${formId}"`);
-    console.log(`🔥 [FORM MARKETING] window.fbq status:`, typeof (window as any).fbq);
-    if (!formId) {
-      console.log(`❌ [FORM MARKETING] FormId inválido - abortando`);
-      return;
-    }
+    if (!formId) return;
 
     const loadFormConfig = async () => {
       try {
-        dlog(`📋 Carregando configuração de marketing para formulário: ${formId}`);
+        console.log(`📋 Carregando configuração de marketing para formulário: ${formId}`);
         
         const { data: settings, error } = await supabase
           .from('marketing_settings')
@@ -60,22 +49,15 @@ export const useFormMarketingScripts = (formId: string) => {
             trackingConfig = settings.form_tracking_config;
           }
           
-          console.log(`🔍 [DEBUG] Configuração completa:`, trackingConfig);
-          console.log(`🔍 [DEBUG] Procurando formId: "${formId}"`);
-          console.log(`🔍 [DEBUG] SystemForms disponíveis:`, trackingConfig.systemForms);
-          
           const formConfig = trackingConfig.systemForms?.find(
             (form: any) => form.formId === formId && form.enabled
           );
 
           if (formConfig) {
-            console.log(`✅ [DEBUG] Configuração encontrada para formulário ${formId}:`, formConfig);
-            console.log(`🎯 [DEBUG] Facebook Pixel config:`, formConfig.facebookPixel);
-            console.log(`🎯 [DEBUG] Evento configurado:`, formConfig.facebookPixel?.eventType);
+            console.log(`✅ Configuração encontrada para formulário ${formId}:`, formConfig);
             implementFormScripts(formConfig);
           } else {
-            console.log(`ℹ️ [DEBUG] Nenhuma configuração ativa encontrada para formulário: ${formId}`);
-            console.log(`🔍 [DEBUG] Formulários disponíveis:`, trackingConfig.systemForms?.map((f: any) => ({ id: f.formId, enabled: f.enabled })));
+            console.log(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
             // Garantir remoção de scripts e listeners se desativado
             removeFormScripts(formId);
           }
@@ -89,7 +71,7 @@ export const useFormMarketingScripts = (formId: string) => {
 
     // Escutar atualizações de configuração
     const handleSettingsUpdate = () => {
-      dlog(`🔄 Recarregando configuração para formulário: ${formId}`);
+      console.log(`🔄 Recarregando configuração para formulário: ${formId}`);
       loadFormConfig();
     };
 
@@ -102,56 +84,34 @@ export const useFormMarketingScripts = (formId: string) => {
     };
   }, [formId]);
 
-  const loadFacebookPixelDirect = (pixelId: string) => {
-    console.log(`🚨 [PIXEL LOAD] Carregando pixel diretamente: ${pixelId}`);
-    const script = document.createElement('script');
-    script.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '${pixelId}', {}, { autoConfig: false });
-      fbq('set', 'autoConfig', false, '${pixelId}');
-      fbq('track', 'PageView');
-      console.log('✅ [PIXEL LOAD] Facebook Pixel carregado diretamente:', '${pixelId}');
-      console.log('✅ [PIXEL LOAD] fbq disponível:', typeof window.fbq);
-    `;
-    script.setAttribute('data-form-pixel', pixelId);
-    document.head.appendChild(script);
-  };
-
   const implementFormScripts = (formConfig: any) => {
-    dlog(`🚀 Implementando scripts para formulário ${formConfig.formId}:`, formConfig);
+    console.log(`🚀 Implementando scripts para formulário ${formConfig.formId}:`, formConfig);
 
     // Remover scripts antigos específicos deste formulário
     removeFormScripts(formConfig.formId);
 
-    // Facebook Pixel - APENAS se estiver habilitado (não requer pixelId local)
-    if (formConfig.facebookPixel?.enabled === true) {
-      dlog(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
+    // Facebook Pixel - APENAS se estiver habilitado
+    if (formConfig.facebookPixel?.enabled === true && formConfig.facebookPixel?.pixelId) {
+      console.log(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
       implementFormFacebookPixel(formConfig);
     } else {
-      dlog(`❌ Facebook Pixel DESABILITADO para formulário ${formConfig.formId}`);
+      console.log(`❌ Facebook Pixel DESABILITADO para formulário ${formConfig.formId}`);
     }
 
     // Google Analytics - APENAS se estiver habilitado
     if (formConfig.googleAnalytics?.enabled === true && formConfig.googleAnalytics?.measurementId) {
-      dlog(`✅ Google Analytics HABILITADO para formulário ${formConfig.formId}`);
+      console.log(`✅ Google Analytics HABILITADO para formulário ${formConfig.formId}`);
       implementFormGoogleAnalytics(formConfig);
     } else {
-      dlog(`❌ Google Analytics DESABILITADO para formulário ${formConfig.formId}`);
+      console.log(`❌ Google Analytics DESABILITADO para formulário ${formConfig.formId}`);
     }
 
     // Google Tag Manager - APENAS se estiver habilitado
     if (formConfig.googleTagManager?.enabled === true && formConfig.googleTagManager?.containerId) {
-      dlog(`✅ Google Tag Manager HABILITADO para formulário ${formConfig.formId}`);
+      console.log(`✅ Google Tag Manager HABILITADO para formulário ${formConfig.formId}`);
       implementFormGoogleTagManager(formConfig);
     } else {
-      dlog(`❌ Google Tag Manager DESABILITADO para formulário ${formConfig.formId}`);
+      console.log(`❌ Google Tag Manager DESABILITADO para formulário ${formConfig.formId}`);
     }
   };
 
@@ -170,145 +130,81 @@ export const useFormMarketingScripts = (formId: string) => {
     (window as any).__formMarketingHandlers = handlersMap;
   };
 
-  const normalizePixelEventName = (eventType?: string, custom?: string) => {
-    console.log(`🚨 [NORMALIZE DEBUG] Input eventType:`, eventType);
-    console.log(`🚨 [NORMALIZE DEBUG] Input custom:`, custom);
-    
-    if (!eventType) {
-      console.log(`🚨 [NORMALIZE DEBUG] Sem eventType - retornando null`);
-      return null;
-    }
-    
-    if (eventType === 'Custom') {
-      const result = (custom || '').trim() || null;
-      console.log(`🚨 [NORMALIZE DEBUG] Custom event resultado:`, result);
-      return result;
-    }
-    
-    const map: Record<string, string> = {
-      Lead: 'Lead',
-      Purchase: 'Purchase',
-      Contact: 'Contact',
-      SubmitApplication: 'SubmitApplication',
-      'Submit Application': 'SubmitApplication',
-      CompleteRegistration: 'CompleteRegistration',
-      'Complete Registration': 'CompleteRegistration',
-      ViewContent: 'ViewContent',
-      'View Content': 'ViewContent',
-      AddToCart: 'AddToCart',
-      'Add To Cart': 'AddToCart',
-      InitiateCheckout: 'InitiateCheckout',
-      'Initiate Checkout': 'InitiateCheckout',
-    };
-    
-    const result = map[eventType] || eventType.replace(/\s+/g, '');
-    console.log(`🚨 [NORMALIZE DEBUG] Mapeamento encontrado:`, {
-      input: eventType,
-      mapped: result,
-      mapUsed: !!map[eventType]
-    });
-    
-    return result;
-  };
-
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
     
-    console.log(`🚨 [IMPLEMENT PIXEL] Iniciando implementação para formId: ${formId}`);
-    console.log(`🚨 [IMPLEMENT PIXEL] Config recebida:`, facebookPixel);
-    console.log(`🚨 [IMPLEMENT PIXEL] PixelId:`, facebookPixel?.pixelId);
+    // Validar se o pixelId é válido (apenas números)
+    const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
+    if (!pixelId || pixelId.length < 10) {
+      console.warn(`⚠️ Pixel ID inválido para formulário ${formId}:`, facebookPixel.pixelId);
+      return;
+    }
     
-    dlog(`📘 Pixel preparado para formulário ${formId} (sem reinicializar base)`);
+    console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
 
-    // Carregamento direto do pixel se não estiver disponível
-    if (typeof window !== 'undefined' && !(window as any).fbq) {
-      console.log('📘 Carregando Facebook Pixel diretamente para formulário');
-      console.log(`🚨 [PIXEL LOAD] PixelId sendo usado:`, facebookPixel?.pixelId);
-      
-      if (facebookPixel?.pixelId) {
-        loadFacebookPixelDirect(facebookPixel.pixelId);
-      } else {
-        console.error('❌ PixelId não encontrado na configuração');
-      }
+    // Verificar se este pixel específico já foi inicializado
+    const pixelKey = `fbq_pixel_${pixelId}`;
+    if (!(window as any)[pixelKey]) {
+      // Criar o script base do Facebook Pixel seguindo o modelo exato
+      const fbPixelScript = document.createElement('script');
+      fbPixelScript.setAttribute('data-form-marketing', formId);
+      fbPixelScript.innerHTML = `
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${pixelId}');
+        fbq('set', 'autoConfig', 'false', '${pixelId}');
+        console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId} (autoConfig desativado)');
+      `;
+      document.head.appendChild(fbPixelScript);
+
+      // Não rastreamos PageView automaticamente em formulários; eventos são disparados apenas no sucesso do envio
+
+      // Marcar este pixel como inicializado
+      (window as any)[pixelKey] = true;
     } else {
-      console.log('🚨 [PIXEL STATUS] Facebook Pixel já disponível, tipo:', typeof (window as any).fbq);
+      console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
     }
 
+    // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        // Log para debug em produção  
-        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
+        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
-        console.log(`🚨 [CRITICAL DEBUG] Formulário ${formId} enviado - iniciando processo Facebook Pixel`);
-        console.log(`🚨 [CRITICAL DEBUG] Configuração FB:`, facebookPixel);
-        console.log(`🚨 [CRITICAL DEBUG] EventType raw:`, facebookPixel.eventType);
-        console.log(`🚨 [CRITICAL DEBUG] CustomEventName:`, facebookPixel.customEventName);
-        
-        // Aguardar um momento para garantir que fbq está disponível
-        setTimeout(() => {
-          if (typeof window !== 'undefined' && (window as any).fbq) {
-            const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
-            
-            console.log(`🚨 [CRITICAL DEBUG] Evento resolvido final:`, resolvedEvent);
-            console.log(`🚨 [CRITICAL DEBUG] Função normalizePixelEventName resultado:`, {
-              input: facebookPixel.eventType,
-              custom: facebookPixel.customEventName,
-              output: resolvedEvent
-            });
-
-            if (!resolvedEvent) {
-              console.log(`🚨 [CRITICAL DEBUG] NENHUM EVENTO - saindo da função`);
-              dlog(`ℹ️ Nenhum evento configurado para ${formId}`);
-              return;
-            }
-
-            // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
-            const sentMap = (window as any).__formEventSent || {};
-            if (sentMap[formId] && (Date.now() - sentMap[formId]) < 5000) {
-              console.log(`🚨 [CRITICAL DEBUG] EVENTO DUPLICADO - ignorando`);
-              dlog(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
-              return;
-            }
-            sentMap[formId] = Date.now();
-            (window as any).__formEventSent = sentMap;
-            
-            // Limpar duplicados antigos
-            setTimeout(() => {
-              const m = (window as any).__formEventSent || {};
-              Object.keys(m).forEach(key => {
-                if (Date.now() - m[key] > 10000) {
-                  delete m[key];
-                }
-              });
-              (window as any).__formEventSent = m;
-            }, 10000);
-            
-            try {
-              console.log(`🚨 [CRITICAL DEBUG] ENVIANDO EVENTO PARA FACEBOOK:`, resolvedEvent);
-              console.log(`🚨 [CRITICAL DEBUG] fbq função disponível:`, typeof (window as any).fbq);
-              
-              (window as any).fbq('track', resolvedEvent, {
-                content_name: formConfig.campaignName || 'Form Submission',
-                form_id: formId,
-                page_url: window.location.href,
-                event_source_url: window.location.href,
-                user_data: event.detail?.userData || {}
-              });
-              
-              console.log(`🚨 [CRITICAL DEBUG] EVENTO ENVIADO COM SUCESSO:`, resolvedEvent);
-              dlog(`📊 Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
-            } catch (error) {
-              console.error('❌ Erro ao enviar evento do Facebook Pixel:', error);
-            }
-          } else {
-            console.error('❌ Facebook Pixel não disponível após timeout');
-            // Log adicional para debug
-            console.log('🔍 Debug: window.fbq existe?', typeof (window as any).fbq);
-            console.log('🔍 Debug: window objeto:', typeof window);
+        if ((window as any).fbq) {
+          const eventType = facebookPixel.eventType === 'Custom' 
+            ? (facebookPixel.customEventName || 'CustomEvent')
+            : (facebookPixel.eventType || 'Lead');
+          
+          // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
+          const sentMap = (window as any).__formEventSent || {};
+          if (sentMap[formId]) {
+            console.log(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
+            return;
           }
-        }, 500); // Aumentar timeout para produção
-      } else {
-        console.log(`🚨 [CRITICAL DEBUG] Evento ignorado - formId não confere. Esperado: ${formId}, Recebido: ${event.detail?.formId}`);
+          sentMap[formId] = true;
+          (window as any).__formEventSent = sentMap;
+          setTimeout(() => {
+            const m = (window as any).__formEventSent || {};
+            delete m[formId];
+            (window as any).__formEventSent = m;
+          }, 3000);
+          
+          (window as any).fbq('track', eventType, {
+            content_name: formConfig.campaignName || 'Form Submission',
+            form_id: formId,
+            page_url: window.location.href,
+            pixel_id: pixelId,
+            event_source_url: window.location.href,
+            user_data: event.detail?.userData || {}
+          });
+          console.log(`📊 Evento "${eventType}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
+        }
       }
     };
 
@@ -325,7 +221,7 @@ export const useFormMarketingScripts = (formId: string) => {
 
   const implementFormGoogleAnalytics = (formConfig: any) => {
     const { formId, googleAnalytics } = formConfig;
-    dlog(`📊 Implementando Google Analytics para formulário ${formId}: ${googleAnalytics.measurementId}`);
+    console.log(`📊 Implementando Google Analytics para formulário ${formId}:`, googleAnalytics.measurementId);
 
     // Verificar se o GA base já existe
     if (!(window as any).gtag) {
@@ -349,22 +245,17 @@ export const useFormMarketingScripts = (formId: string) => {
     // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Google Analytics`);
+        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Google Analytics`);
         
-        // Aguardar um momento para garantir que gtag está disponível
-        setTimeout(() => {
-          if (typeof window !== 'undefined' && (window as any).gtag) {
+        if ((window as any).gtag) {
           (window as any).gtag('event', googleAnalytics.eventName || 'form_submit', {
             event_category: 'engagement',
             event_label: formId,
             form_id: formId,
             user_data: event.detail?.userData || {}
-            });
-            dlog(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
-          } else {
-            console.error('❌ Google Analytics não disponível após timeout');
-          }
-        }, 500); // Aguardar 500ms para o GA estar pronto
+          });
+          console.log(`📊 Evento "${googleAnalytics.eventName}" rastreado para formulário: ${formId}`);
+        }
       }
     };
 
@@ -378,17 +269,11 @@ export const useFormMarketingScripts = (formId: string) => {
     (window as any).__formMarketingHandlers = handlersMap;
   };
 
-const implementFormGoogleTagManager = (formConfig: any) => {
-  const { formId, googleTagManager } = formConfig;
-  dlog(`🏷️ Implementando Google Tag Manager para formulário ${formId}: ${googleTagManager.containerId}`);
+  const implementFormGoogleTagManager = (formConfig: any) => {
+    const { formId, googleTagManager } = formConfig;
+    console.log(`🏷️ Implementando Google Tag Manager para formulário ${formId}:`, googleTagManager.containerId);
 
-  // Respeitar flag global para evitar overlays/erros do Tag Assistant
-  if ((window as any).__enableGTM !== true) {
-    dlog('⏸️ GTM desativado globalmente (__enableGTM != true). Não injetando.');
-    return;
-  }
-
-  // Verificar se o GTM base já existe
+    // Verificar se o GTM base já existe
     if (!(window as any).dataLayer) {
       const gtmScript = document.createElement('script');
       gtmScript.setAttribute('data-form-marketing', formId);
@@ -410,22 +295,17 @@ const implementFormGoogleTagManager = (formConfig: any) => {
     // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com GTM`);
+        console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com GTM`);
         
-        // Aguardar um momento para garantir que dataLayer está disponível
-        setTimeout(() => {
-          if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        if ((window as any).dataLayer) {
           (window as any).dataLayer.push({
             event: googleTagManager.eventName || 'form_submit',
             form_id: formId,
             form_name: formConfig.campaignName || 'Form Submission',
             user_data: event.detail?.userData || {}
-            });
-            dlog(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
-          } else {
-            console.error('❌ GTM dataLayer não disponível após timeout');
-          }
-        }, 500); // Aguardar 500ms para o GTM estar pronto
+          });
+          console.log(`📊 Evento "${googleTagManager.eventName}" enviado para GTM: ${formId}`);
+        }
       }
     };
 

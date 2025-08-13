@@ -20,7 +20,6 @@ interface GalleryButtonProps {
   variant?: 'outline' | 'default' | 'ghost';
   size?: 'sm' | 'default' | 'lg';
   className?: string;
-  acceptedTypes?: ('image' | 'video' | 'file')[];
 }
 
 export const GalleryButton: React.FC<GalleryButtonProps> = ({
@@ -28,8 +27,7 @@ export const GalleryButton: React.FC<GalleryButtonProps> = ({
   disabled = false,
   variant = 'outline',
   size = 'sm',
-  className = '',
-  acceptedTypes,
+  className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -57,7 +55,7 @@ export const GalleryButton: React.FC<GalleryButtonProps> = ({
             <DialogTitle>Galeria de Imagens</DialogTitle>
           </DialogHeader>
           <div className="h-full overflow-y-auto p-4">
-            <UniversalGallery onSelect={handleImageSelect} embedded acceptedTypes={acceptedTypes || ['image','video','file']} />
+            <UniversalGallery onSelect={handleImageSelect} embedded />
           </div>
         </DialogContent>
       </Dialog>
