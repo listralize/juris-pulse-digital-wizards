@@ -333,23 +333,6 @@ const StepForm: React.FC = () => {
     e?.preventDefault?.();
     console.log('🚀 Iniciando envio do formulário...');
     
-    // Disparar evento GTM imediatamente na submissão
-    console.log('🎯 Disparando evento GTM para submissão...');
-    if ((window as any).dataLayer) {
-      (window as any).dataLayer.push({
-        event: 'submit',
-        form_submit: true,
-        form_id: slug,
-        form_name: form?.name || 'StepForm',
-        gtm: {
-          formId: slug,
-          formName: form?.name || 'StepForm Submission',
-          formType: 'step_form'
-        }
-      });
-      console.log('📊 Evento submit enviado para GTM dataLayer');
-    }
-    
     setLoading(true);
     
     // Verificar se o form está carregado

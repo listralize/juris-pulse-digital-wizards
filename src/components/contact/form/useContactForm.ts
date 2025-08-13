@@ -54,8 +54,22 @@ export const useContactForm = (externalFormConfig?: any) => {
       }
     }
 
-    setIsSubmitting(true);
+    // Validações adicionais
+    const emailVal = formData['email'];
+    if (emailVal) {
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(emailVal));
+      if (!emailOk) {
+        toast.error('Por favor, informe um e-mail válido.');
+        return;
+      }
+    }
 
+    const phoneVal = formData['phone'];
+    if (phoneVal && String(phoneVal).replace(/\D/g, '').length < 8) {
+      toast.error('Por favor, informe um telefone válido.');
+      return;
+    }
+    setIsSubmitting(true);
     try {
       console.log('📤 Enviando formulário via edge function segura...');
 
