@@ -68,22 +68,40 @@ export const useGlobalMarketingScripts = () => {
     const pixelId = '1024100955860841';
     console.log('📘 Carregando Facebook Pixel:', pixelId);
     
-    // Código inline simples que funciona
+    // Verificar se já existe
+    if ((window as any).fbq) {
+      console.log('ℹ️ Facebook Pixel já carregado');
+      return;
+    }
+    
+    // Carregar script externo do Facebook Pixel
+    const fbScript = document.createElement('script');
+    fbScript.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    fbScript.async = true;
+    fbScript.setAttribute('data-marketing', 'fb-pixel-lib');
+    document.head.appendChild(fbScript);
+    
+    // Configuração inline
     const script = document.createElement('script');
     script.innerHTML = `
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};
       if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window,document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
+      n.queue=[]}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
       
-      fbq('init', '${pixelId}');
+      // Configurar Pixel com autoConfig desabilitado
+      fbq('init', '${pixelId}', {}, { autoConfig: false });
+      fbq('set', 'autoConfig', false, '${pixelId}');
+      fbq('set', 'agent', 'pllovable', '${pixelId}');
+      
+      // Apenas PageView inicial
       fbq('track', 'PageView');
       
-      console.log('✅ Facebook Pixel ativo:', typeof window.fbq);
+      // Flag para debug em produção
+      if (window.location.hostname !== 'localhost' && window.location.hostname.includes('lovableproject.com')) {
+        console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
+      }
     `;
     script.setAttribute('data-marketing', 'fb-pixel');
     document.head.appendChild(script);

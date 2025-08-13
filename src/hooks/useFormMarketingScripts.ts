@@ -179,44 +179,66 @@ export const useFormMarketingScripts = (formId: string) => {
 
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        dlog(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
+        // Log para debug em produção
+        const isProduction = window.location.hostname !== 'localhost';
+        if (isProduction) {
+          console.log(`✅ [PROD] Formulário ${formId} enviado - rastreando com Facebook Pixel`);
+        }
         
         // Aguardar um momento para garantir que fbq está disponível
         setTimeout(() => {
           if (typeof window !== 'undefined' && (window as any).fbq) {
-          const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
+            const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
 
-          if (!resolvedEvent) {
-            dlog(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
-            return;
-          }
+            if (!resolvedEvent) {
+              if (isProduction) {
+                console.log(`ℹ️ [PROD] Nenhum evento configurado para ${formId}`);
+              }
+              return;
+            }
 
-          // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
-          const sentMap = (window as any).__formEventSent || {};
-          if (sentMap[formId]) {
-            dlog(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
-            return;
-          }
-          sentMap[formId] = true;
-          (window as any).__formEventSent = sentMap;
-          setTimeout(() => {
-            const m = (window as any).__formEventSent || {};
-            delete m[formId];
-            (window as any).__formEventSent = m;
-          }, 3000);
-          
-          (window as any).fbq('track', resolvedEvent, {
-            content_name: formConfig.campaignName || 'Form Submission',
-            form_id: formId,
-            page_url: window.location.href,
-            event_source_url: window.location.href,
-            user_data: event.detail?.userData || {}
-            });
-            dlog(`📊 Evento "${resolvedEvent}" rastreado para formulário: ${formId}`);
+            // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
+            const sentMap = (window as any).__formEventSent || {};
+            const eventKey = `${formId}_${Date.now()}`;
+            if (sentMap[formId] && (Date.now() - sentMap[formId]) < 5000) {
+              if (isProduction) {
+                console.log(`⏭️ [PROD] Evento ignorado (duplicado) para formulário: ${formId}`);
+              }
+              return;
+            }
+            sentMap[formId] = Date.now();
+            (window as any).__formEventSent = sentMap;
+            
+            // Limpar duplicados antigos
+            setTimeout(() => {
+              const m = (window as any).__formEventSent || {};
+              Object.keys(m).forEach(key => {
+                if (Date.now() - m[key] > 10000) {
+                  delete m[key];
+                }
+              });
+              (window as any).__formEventSent = m;
+            }, 10000);
+            
+            try {
+              (window as any).fbq('track', resolvedEvent, {
+                content_name: formConfig.campaignName || 'Form Submission',
+                form_id: formId,
+                page_url: window.location.href,
+                event_source_url: window.location.href,
+                user_data: event.detail?.userData || {}
+              });
+              
+              if (isProduction) {
+                console.log(`📊 [PROD] Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
+              }
+            } catch (error) {
+              console.error('❌ Erro ao enviar evento do Facebook Pixel:', error);
+            }
           } else {
             console.error('❌ Facebook Pixel não disponível após timeout');
           }
-        }, 500); // Aguardar 500ms para o pixel estar pronto
+        }, 250); // Reduzir timeout para produção
       }
     };
 
