@@ -10,6 +10,7 @@ import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageGallery } from './ImageGallery';
+import { IconSelector } from './IconSelector';
 
 interface TestimonialData {
   id: string;
