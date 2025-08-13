@@ -362,8 +362,8 @@ export const LeadsManagement: React.FC = () => {
       }
       setAvailableServices(Array.from(servicesSet).sort());
 
-      setLeads(deduplicatedLeads);
-      setFilteredLeads(deduplicatedLeads);
+      setLeads(enrichedLeads);
+      setFilteredLeads(enrichedLeads);
       setLeadStatuses(statusMap);
       setLeadStatusDates(statusDatesMap);
     } catch (error) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Users, CheckCircle, Award, X, Shield, ThumbsUp } from 'lucide-react';
+import { Star, Users, CheckCircle, Award, X, Shield, ThumbsUp, icons as lucideIcons } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -99,7 +99,9 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
         testimonials: stepFormConfig.testimonials || [],
         stats: (stepFormConfig.stats || []).map((s: any) => ({
           ...s,
-          number: s.number ?? s.value
+          number: s.number ?? s.value,
+          color: s.color || stepFormConfig.primaryColor || '#4CAF50',
+          icon: s.icon || 'check'
         })),
         autoRotate: stepFormConfig.autoRotate ?? true,
         rotationInterval: stepFormConfig.rotationInterval ?? 8000,
@@ -140,22 +142,15 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
   const getIcon = (iconName?: string, color?: string) => {
     const iconClass = "w-6 h-6";
     const finalColor = color || socialProofConfig?.primaryColor || '#4CAF50';
-    switch (iconName) {
-      case 'users':
-        return <Users className={iconClass} style={{ color: finalColor }} />;
-      case 'check':
-        return <CheckCircle className={iconClass} style={{ color: finalColor }} />;
-      case 'award':
-        return <Award className={iconClass} style={{ color: finalColor }} />;
-      case 'star':
-        return <Star className={iconClass} style={{ color: finalColor }} />;
-      case 'shield':
-        return <Shield className={iconClass} style={{ color: finalColor }} />;
-      case 'thumbs-up':
-        return <ThumbsUp className={iconClass} style={{ color: finalColor }} />;
-      default:
-        return <CheckCircle className={iconClass} style={{ color: finalColor }} />;
+    try {
+      if (iconName && (lucideIcons as any)[iconName]) {
+        const IconComp = (lucideIcons as any)[iconName];
+        return <IconComp className={iconClass} style={{ color: finalColor }} />;
+      }
+    } catch (e) {
+      // fallback abaixo
     }
+    return <CheckCircle className={iconClass} style={{ color: finalColor }} />;
   };
 
   return (
@@ -171,7 +166,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
             >
               {/* Estatísticas */}
               {socialProofConfig.stats?.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                   {socialProofConfig.stats.map((stat, index) => (
                     <motion.div
                       key={index}
@@ -181,11 +176,11 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
                       className="text-center"
                     >
                       <div className="flex justify-center mb-2">
-                        {getIcon(stat.icon)}
+                        {getIcon(stat.icon, (stat as any).color)}
                       </div>
                       <div 
                         className="text-xl font-bold"
-                        style={{ color: socialProofConfig.primaryColor || '#4CAF50' }}
+                        style={{ color: (stat as any).color || socialProofConfig.primaryColor || '#4CAF50' }}
                       >
                         {stat.number || (stat as any).value}
                       </div>
@@ -197,7 +192,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
 
               {/* Depoimentos */}
               {socialProofConfig.testimonials?.length > 0 && (
-                <div className="space-y-4">
+                <div className="mt-8 space-y-4">
                   <h3 className="text-base font-semibold text-center">
                     O que nossos clientes dizem
                   </h3>

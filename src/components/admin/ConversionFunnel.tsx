@@ -535,7 +535,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         <Card className="h-fit">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">
-              {selectedFormData?.name || 'Todos os Formulários'}
+              Funil gerado
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -543,11 +543,11 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
             <div className="space-y-3 mb-4">
               {/* Nível 1: Envios */}
               <div className="relative">
-                <div className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-between px-4 text-primary-foreground">
+                <div className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-between px-4 text-white">
                   <span className="font-medium text-sm">
                     {manualLeads.toLocaleString()} Leads
                   </span>
-                  <span className="text-primary-foreground/90 text-sm">100%</span>
+                  <span className="text-white/90 text-sm">100%</span>
                 </div>
               </div>
               

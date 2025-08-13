@@ -219,13 +219,48 @@ interface IconSelectorProps {
 export function IconSelector({ value, onChange, label = "Ícone" }: IconSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [category, setCategory] = useState<string>('Todos');
+
+  const categories = [
+    'Todos','Sociais','Interface','Mídia','Negócios','E-commerce','Educação','Saúde','Comida','Tecnologia','Localização','Transporte','Ferramentas','Natureza','Animais','Moda','Arquivos','Ações','Comunicação','Outros'
+  ];
+
+  const categorySets: Record<string, Set<string>> = {
+    'Sociais': new Set(['link','phone','mail','instagram','facebook','twitter','youtube','message-circle','share']),
+    'Interface': new Set(['home','user','users','heart','star','settings','search','plus','menu','eye','info','help-circle','crown','circle']),
+    'Mídia': new Set(['camera','music','headphones','mic','radio','tv','monitor','gamepad-2','image','video','play','pause']),
+    'Negócios': new Set(['briefcase','building','store','credit-card','wallet','coins','dollar-sign','percent','calculator','bar-chart-3','trending-up','target','award']),
+    'E-commerce': new Set(['shopping-cart','gift','truck','package']),
+    'Educação': new Set(['book','graduation-cap','pen-tool','newspaper']),
+    'Saúde': new Set(['stethoscope','dumbbell','heart']),
+    'Comida': new Set(['coffee','utensils','pizza','cake','wine','ice-cream','cookie','candy','apple','banana','cherry','grape','citrus']),
+    'Tecnologia': new Set(['smartphone','laptop','tablet','wifi','bluetooth','battery','database','server','cloud']),
+    'Localização': new Set(['map-pin','calendar','clock','bell','globe']),
+    'Transporte': new Set(['car','plane','ship','bike','train-front','bus']),
+    'Ferramentas': new Set(['wrench','hammer','scissors','ruler','compass','key','lock','shield-check','flashlight','lightbulb']),
+    'Natureza': new Set(['tree-pine','flower-2','leaf','sprout','sun','moon','snowflake','umbrella','flame']),
+    'Animais': new Set(['cat','dog','bird','fish','bug']),
+    'Moda': new Set(['shirt','glasses','watch','gem','diamond']),
+    'Arquivos': new Set(['file','folder','download','upload','printer','file-text']),
+    'Ações': new Set(['edit','trash-2','check','x','arrow-right','arrow-left','chevron-right']),
+    'Comunicação': new Set(['megaphone','volume-2','zap','magnet']),
+    'Outros': new Set(['baby','palette','factory'])
+  };
 
   const selectedIcon = iconOptions.find(icon => icon.name === value);
   const SelectedIconComponent = selectedIcon?.icon || Link;
 
+  const matchesCategory = (name: string) => {
+    if (category === 'Todos') return true;
+    const set = categorySets[category];
+    return set ? set.has(name) : true;
+  };
+
   const filteredIcons = iconOptions.filter(icon =>
-    icon.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    icon.name.toLowerCase().includes(searchTerm.toLowerCase())
+    matchesCategory(icon.name) && (
+      icon.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      icon.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const handleIconSelect = (iconName: string) => {
@@ -244,11 +279,24 @@ export function IconSelector({ value, onChange, label = "Ícone" }: IconSelector
             <span>{selectedIcon?.label || 'Selecionar ícone'}</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogContent className="max-w-3xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle>Selecionar Ícone</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={category === cat ? 'default' : 'secondary'}
+                  size="sm"
+                  onClick={() => setCategory(cat)}
+                  className="h-8 px-3"
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
             <Input
               placeholder="Buscar ícones..."
               value={searchTerm}
@@ -260,11 +308,10 @@ export function IconSelector({ value, onChange, label = "Ícone" }: IconSelector
                 {filteredIcons.map((iconOption) => {
                   const IconComponent = iconOption.icon;
                   const isSelected = value === iconOption.name;
-                  
                   return (
                     <Button
                       key={iconOption.name}
-                      variant={isSelected ? "default" : "ghost"}
+                      variant={isSelected ? 'default' : 'ghost'}
                       className="flex flex-col items-center gap-1 p-3 h-auto aspect-square"
                       onClick={() => handleIconSelect(iconOption.name)}
                       title={iconOption.label}

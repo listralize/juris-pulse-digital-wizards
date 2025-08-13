@@ -734,7 +734,7 @@ const StepForm: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen py-8 px-4"
+      className="min-h-screen py-8 px-4 overflow-x-hidden pb-24"
       style={{ 
         backgroundColor: form.styles.background_color || '#ffffff',
         color: form.styles.text_color || '#000000'
@@ -843,7 +843,7 @@ const StepForm: React.FC = () => {
                         <Button
                            key={index}
                            variant="outline"
-                           className="w-full justify-start p-4 h-auto text-left"
+                           className="w-full justify-start p-4 h-auto min-h-[44px] text-left"
                            style={{
                              borderColor: form.styles.primary_color || '#4CAF50',
                              color: form.styles.primary_color || '#4CAF50',
@@ -897,7 +897,7 @@ const StepForm: React.FC = () => {
                   )}
                   
                   <Button
-                    className="px-8 py-3"
+                    className="px-8 h-12"
                     style={{
                       backgroundColor: form.styles.primary_color || '#4CAF50',
                       borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
@@ -927,6 +927,7 @@ const StepForm: React.FC = () => {
                             ...prev, 
                             [field.name]: e.target.value 
                           }))}
+                          className="min-h-[120px]"
                         />
                       ) : (
                         <Input
@@ -939,6 +940,7 @@ const StepForm: React.FC = () => {
                             ...prev, 
                             [field.name]: e.target.value 
                           }))}
+                          className="h-12"
                         />
                       )}
                     </div>
@@ -947,7 +949,7 @@ const StepForm: React.FC = () => {
                    <Button 
                      type="button"
                      onClick={() => handleFormSubmit()}
-                     className="w-full"
+                     className="w-full h-12"
                      disabled={loading}
                      style={{
                        backgroundColor: form.styles.primary_color || '#4CAF50',

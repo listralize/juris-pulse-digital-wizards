@@ -332,18 +332,10 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
                       </div>
                       <div>
                         <Label>Ícone</Label>
-                        <select
-                          className="w-full p-2 border border-input rounded-md bg-background"
+                        <IconSelector
                           value={stat.icon || 'check'}
-                          onChange={(e) => updateStat(index, 'icon', e.target.value)}
-                        >
-                          <option value="check">Check</option>
-                          <option value="users">Users</option>
-                          <option value="award">Award</option>
-                          <option value="star">Star</option>
-                          <option value="shield">Shield</option>
-                          <option value="thumbs-up">Thumbs Up</option>
-                        </select>
+                          onChange={(val) => updateStat(index, 'icon', val)}
+                        />
                       </div>
                       <div>
                         <Label>Cor do Ícone</Label>
