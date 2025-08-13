@@ -333,87 +333,11 @@ export const useGlobalMarketingScripts = () => {
   const setupTracking = () => {
     console.log('📝 Configurando rastreamento de eventos');
     
-    // Aguardar scripts carregarem
-    setTimeout(() => {
-      // TODOS OS EVENTOS AUTOMÁTICOS DESABILITADOS - configurações específicas gerenciam os eventos
-      /*
-      // StepForm events - DESABILITADO
-      const handleStepForm = (event: CustomEvent) => {
-        console.log('🎯 StepForm submit:', event.detail);
-        
-        setTimeout(() => {
-          // Facebook Pixel
-          if ((window as any).fbq) {
-            (window as any).fbq('track', 'Contact', {
-              content_name: 'StepForm Lead',
-              form_slug: event.detail?.formSlug || 'stepform'
-            });
-            console.log('✅ FB Pixel: Contact enviado');
-          }
-          
-          // GTM
-          if ((window as any).dataLayer) {
-            (window as any).dataLayer.push({
-              event: 'stepform_conversion',
-              form_slug: event.detail?.formSlug || 'stepform'
-            });
-            console.log('✅ GTM: conversion enviado');
-          }
-          
-          // GA
-          if ((window as any).gtag) {
-            (window as any).gtag('event', 'conversion', {
-              event_category: 'Lead Generation',
-              event_label: 'StepForm'
-            });
-            console.log('✅ GA: conversion enviado');
-          }
-        }, 200);
-      };
-      
-      // Contact form events - DESABILITADOS para evitar conflitos com configurações específicas
-      const handleContactForm = (event: Event) => {
-        const form = event.target as HTMLFormElement;
-        if (form?.tagName === 'FORM') {
-          console.log('📝 Contact form submit');
-          
-          setTimeout(() => {
-            // Facebook Pixel
-            if ((window as any).fbq) {
-              (window as any).fbq('track', 'Contact', {
-                content_name: 'Contact Form Lead'
-              });
-              console.log('✅ FB Pixel: Contact enviado (form)');
-            }
-            
-            // GTM
-            if ((window as any).dataLayer) {
-              (window as any).dataLayer.push({
-                event: 'contact_conversion'
-              });
-              console.log('✅ GTM: conversion enviado (form)');
-            }
-            
-            // GA
-            if ((window as any).gtag) {
-              (window as any).gtag('event', 'conversion', {
-                event_category: 'Lead Generation',
-                event_label: 'Contact Form'
-              });
-              console.log('✅ GA: conversion enviado (form)');
-            }
-          }, 200);
-        }
-      };
-      
-      // Adicionar listeners apenas para StepForm - eventos de Contact Form são gerenciados individualmente
-      window.addEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
-      */
-      
-      console.log('ℹ️ Tracking automático COMPLETAMENTE DESABILITADO - apenas configurações específicas de formulários individuais ativas');
-      
-      console.log('✅ Rastreamento configurado');
-    }, 1000);
+    // TODOS OS EVENTOS AUTOMÁTICOS COMPLETAMENTE DESABILITADOS
+    // Apenas os hooks específicos (useFormMarketingScripts e useStepFormMarketingScripts) devem gerenciar eventos
+    
+    console.log('ℹ️ Tracking automático COMPLETAMENTE DESABILITADO - apenas configurações específicas de formulários individuais ativas');
+    console.log('✅ Rastreamento configurado sem eventos automáticos');
   };
 
   const removeExistingScripts = () => {
@@ -555,60 +479,8 @@ export const useGlobalMarketingScripts = () => {
   };
 
   const trackFormSubmissions = (pixelId: string) => {
-    // Tracking automático de formulários desabilitado para evitar conflitos
-    // com configurações específicas de formulários individuais
-    console.log('ℹ️ Tracking automático de formulários desabilitado globalmente');
-    
-    // ORIGINAL CODE COMMENTED OUT TO PREVENT AUTOMATIC 'Lead' EVENTS:
-    /*
-    // Adicionar listener global para submissões de formulário
-    const handleFormSubmit = (event: Event) => {
-      const form = event.target as HTMLFormElement;
-      if (form.tagName === 'FORM') {
-        console.log('📝 Formulário enviado - rastreando com Facebook Pixel');
-        
-        // Buscar configuração personalizada do botão/form
-        const formId = form.id || 'unknown';
-        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-        const buttonId = submitButton?.id || '';
-        
-        if ((window as any).fbq) {
-          // Evento personalizado baseado no ID do botão/form
-          if (buttonId.includes('lead') || formId.includes('lead')) {
-            (window as any).fbq('track', 'Lead', {
-              content_name: 'Lead Generation',
-              form_id: formId,
-              button_id: buttonId,
-              page_url: window.location.href
-            });
-            console.log('📊 Evento "Lead" rastreado para:', { formId, buttonId });
-          } else if (buttonId.includes('conversion') || formId.includes('conversion')) {
-            (window as any).fbq('track', 'Purchase', {
-              content_name: 'Conversion',
-              form_id: formId,
-              button_id: buttonId,
-              page_url: window.location.href
-            });
-            console.log('📊 Evento "Purchase" rastreado para:', { formId, buttonId });
-          } else {
-            // Evento padrão apenas se não houver configuração específica
-            (window as any).fbq('track', 'SubmitApplication', {
-              content_name: 'Form Submission',
-              form_id: formId,
-              button_id: buttonId,
-              page_url: window.location.href
-            });
-            console.log('📊 Evento "SubmitApplication" rastreado para:', { formId, buttonId });
-          }
-        }
-      }
-    };
-
-    // Remover listener anterior se existir
-    document.removeEventListener('submit', handleFormSubmit);
-    
-    // Adicionar novo listener
-    document.addEventListener('submit', handleFormSubmit, true);
-    */
+    // Tracking automático de formulários COMPLETAMENTE DESABILITADO
+    console.log('ℹ️ Tracking automático de formulários COMPLETAMENTE desabilitado globalmente');
+    console.log('ℹ️ Apenas hooks específicos (useFormMarketingScripts, useStepFormMarketingScripts) devem gerenciar eventos');
   };
 };
