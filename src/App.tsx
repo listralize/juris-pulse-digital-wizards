@@ -5,7 +5,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useDirectMarketingScripts } from './hooks/useDirectMarketingScripts';
+import { useGlobalMarketingScripts } from './hooks/useGlobalMarketingScripts';
 
 // Pages
 import Index from './pages/Index';
@@ -40,7 +40,7 @@ const queryClient = new QueryClient();
 
 function App() {
   // Carregar scripts de marketing globalmente
-  useDirectMarketingScripts();
+  useGlobalMarketingScripts();
   
   // Adicionar verificação de scripts carregados
   useEffect(() => {
