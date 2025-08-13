@@ -68,12 +68,15 @@ export const useDirectMarketingScripts = () => {
         document.head.appendChild(s);
       }
 
-      // Inicializar e enviar PageView
-      w.fbq('init', pixelId);
+      // Inicializar com autoConfig completamente desabilitado para evitar eventos automáticos
+      w.fbq('init', pixelId, {}, { autoConfig: false });
       // Desabilitar eventos automáticos do Pixel para evitar 'Lead' automático
-      try { w.fbq('set', 'autoConfig', 'false', pixelId); } catch {}
+      try { 
+        w.fbq('set', 'autoConfig', false, pixelId);
+        w.fbq('set', 'agent', 'pllovable', pixelId);
+      } catch {}
       w.fbq('track', 'PageView');
-      console.log('✅ Facebook Pixel inicializado');
+      console.log('✅ Facebook Pixel inicializado com autoConfig desabilitado');
     } catch (e) {
       console.error('❌ Erro ao carregar Facebook Pixel:', e);
     }

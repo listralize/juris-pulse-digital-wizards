@@ -298,9 +298,12 @@ export const useGlobalMarketingScripts = () => {
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '${config.pixelId}');
+      fbq('init', '${config.pixelId}', {}, { autoConfig: false });
+      try { 
+        fbq('set', 'autoConfig', false, '${config.pixelId}');
+        fbq('set', 'agent', 'pllovable', '${config.pixelId}');
+      } catch {}
       fbq('track', 'PageView');
-      try { fbq('set', 'autoConfig', false, '${config.pixelId}'); } catch {}
     `;
     document.head.appendChild(fbPixelScript);
 
