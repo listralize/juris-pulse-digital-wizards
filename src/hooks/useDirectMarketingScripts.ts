@@ -75,8 +75,9 @@ export const useDirectMarketingScripts = () => {
         w.fbq('set', 'autoConfig', false, pixelId);
         w.fbq('set', 'agent', 'pllovable', pixelId);
       } catch {}
-      // NÃO enviar PageView automático - apenas configurar o pixel
-      console.log('✅ Facebook Pixel inicializado com autoConfig desabilitado - SEM PageView automático');
+      // Enviar apenas um PageView para ativar o pixel (necessário para funcionamento)
+      w.fbq('track', 'PageView');
+      console.log('✅ Facebook Pixel inicializado com autoConfig desabilitado');
     } catch (e) {
       console.error('❌ Erro ao carregar Facebook Pixel:', e);
     }
