@@ -205,7 +205,7 @@ const Hero = () => {
       </div>
       
       {/* Overlay gradient */}
-      <div className=""></div>
+      
       
       {/* conteúdo centralizado */}
       <div className="relative z-50 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">

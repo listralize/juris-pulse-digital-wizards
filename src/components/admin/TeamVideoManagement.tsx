@@ -258,6 +258,28 @@ export const TeamVideoManagement: React.FC = () => {
   <Label className={`text-base ${isDark ? 'text-white' : 'text-black'}`}>
     Selecionar vídeo da Galeria
   </Label>
+
+  {/* Preview do vídeo atual */}
+  {videoUrl && (
+    <div className="relative">
+      <video
+        src={videoUrl}
+        className="w-full h-48 object-cover rounded-lg"
+        muted
+        loop
+        controls
+      />
+      <Button
+        onClick={removeVideo}
+        variant="destructive"
+        size="sm"
+        className="absolute top-2 right-2"
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  )}
+
   <div className="space-y-2">
     <div className="flex items-center gap-2 flex-wrap">
       <GalleryButton
