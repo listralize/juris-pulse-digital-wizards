@@ -177,10 +177,16 @@ export const useFormMarketingScripts = (formId: string) => {
         console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
         if ((window as any).fbq) {
-          const eventType = facebookPixel.eventType === 'Custom' 
-            ? (facebookPixel.customEventName || 'CustomEvent')
-            : (facebookPixel.eventType || 'Lead');
-          
+          const configured = facebookPixel.eventType;
+          const resolvedEvent = configured === 'Custom'
+            ? (facebookPixel.customEventName || null)
+            : configured || null;
+
+          if (!resolvedEvent) {
+            console.log(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
+            return;
+          }
+
           // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
           const sentMap = (window as any).__formEventSent || {};
           if (sentMap[formId]) {
@@ -195,7 +201,7 @@ export const useFormMarketingScripts = (formId: string) => {
             (window as any).__formEventSent = m;
           }, 3000);
           
-          (window as any).fbq('track', eventType, {
+          (window as any).fbq('track', resolvedEvent, {
             content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
             page_url: window.location.href,
@@ -203,7 +209,7 @@ export const useFormMarketingScripts = (formId: string) => {
             event_source_url: window.location.href,
             user_data: event.detail?.userData || {}
           });
-          console.log(`📊 Evento "${eventType}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
+          console.log(`📊 Evento "${resolvedEvent}" rastreado para formulário: ${formId} com pixel: ${pixelId}`);
         }
       }
     };

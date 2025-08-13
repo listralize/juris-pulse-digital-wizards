@@ -653,3 +653,9 @@ body, html {
   background-image: none !important;
   box-shadow: none !important;
 }
+
+/* Ocultar sobreposição do Google Tag Assistant (quando a extensão estiver ativa) */
+[id*="tag-assistant"], [class*="tag-assistant"], [data-tag-assistant],
+#gtm-debug, [class*="gtm-debug"], [id*="gtm-debug"] {
+  display: none !important;
+}
