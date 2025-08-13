@@ -28,8 +28,11 @@ export const useDirectMarketingScripts = () => {
     // Carregar Facebook Pixel
     loadFacebookPixel();
     
-    // Carregar Google Tag Manager
-    loadGoogleTagManager();
+    // Carregar Google Tag Manager — desativado para evitar eventos não configurados e overlay
+    // Para reativar, defina window.__enableGTM = true antes do App iniciar
+    if ((window as any).__enableGTM === true) {
+      loadGoogleTagManager();
+    }
     
     // Carregar Google Analytics
     loadGoogleAnalytics();
@@ -147,6 +150,30 @@ export const useDirectMarketingScripts = () => {
       if ((window as any).dataLayer) (window as any).dataLayer.push({ event: 'test_conversion' });
       if ((window as any).gtag) (window as any).gtag('event', 'conversion', { event_category: 'Test', event_label: 'Manual' });
     };
+
+    // Remover/ocultar overlay do Tag Assistant (quando extensão do navegador injeta elementos)
+    const removeTagAssistantOverlay = () => {
+      const candidates = Array.from(document.querySelectorAll('*')) as HTMLElement[];
+      candidates.forEach((el) => {
+        const id = (el.id || '').toLowerCase();
+        const cls = (el.className || '').toString().toLowerCase();
+        const txt = (el.innerText || '').toLowerCase();
+        if (
+          id.includes('tag-assistant') ||
+          id.includes('gtm-debug') ||
+          cls.includes('tag-assistant') ||
+          cls.includes('gtm-debug') ||
+          txt.includes('tag assistant not connected') ||
+          txt.startsWith('drag_indicator tag assistant')
+        ) {
+          el.remove();
+        }
+      });
+    };
+    removeTagAssistantOverlay();
+    const taObs = new MutationObserver(() => removeTagAssistantOverlay());
+    taObs.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => taObs.disconnect(), 15000);
     
     console.log('✅ Sistema de eventos configurado');
     console.log('💡 Para testar: window.testMarketingEvents()');
