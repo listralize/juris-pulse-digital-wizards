@@ -381,13 +381,17 @@ export const LeadsManagement: React.FC = () => {
 
       console.log('📊 Status carregados:', statusDatesMap);
 
-      // Extrair serviços únicos dos leads
+      // Extrair serviços únicos dos leads - versão síncrona
       const servicesSet = new Set<string>();
       for (const lead of deduplicatedLeads) {
         try {
-          const leadData = await parseLeadData(lead.lead_data);
-          if (leadData.service && leadData.service !== 'N/A') {
-            servicesSet.add(leadData.service);
+          let leadData = lead.lead_data;
+          if (typeof leadData === 'string') {
+            leadData = JSON.parse(leadData);
+          }
+          const service = leadData?.service || leadData?.servico || leadData?.Service || 'N/A';
+          if (service && service !== 'N/A') {
+            servicesSet.add(service);
           }
         } catch (error) {
           console.error('Erro ao extrair serviço do lead:', error);

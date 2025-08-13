@@ -237,7 +237,17 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
             </div>
             <Switch
               checked={config.enabled}
-              onCheckedChange={(checked) => updateConfig('enabled', checked)}
+              onCheckedChange={async (checked) => {
+                updateConfig('enabled', checked);
+                // Auto-save when toggling enabled state
+                try {
+                  const updatedConfig = { ...config, enabled: checked };
+                  setConfig(updatedConfig);
+                  await saveConfig();
+                } catch (error) {
+                  console.error('Erro ao salvar estado:', error);
+                }
+              }}
             />
           </div>
 
