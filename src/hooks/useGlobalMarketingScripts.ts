@@ -27,6 +27,9 @@ export const useGlobalMarketingScripts = () => {
   useEffect(() => {
     console.log('🌐 Carregando scripts globais de marketing...');
     
+    // BLOQUEAR QUALQUER FACEBOOK PIXEL AUTOMÁTICO PRIMEIRO
+    blockAutoFacebookPixel();
+    
     // Aguardar o DOM estar pronto
     const timer = setTimeout(() => {
       loadMarketingScriptsFromDatabase();
@@ -34,6 +37,40 @@ export const useGlobalMarketingScripts = () => {
     
     return () => clearTimeout(timer);
   }, []);
+
+  const blockAutoFacebookPixel = () => {
+    // Criar um bloqueio global que impede qualquer fbq automático
+    const blockScript = document.createElement('script');
+    blockScript.innerHTML = `
+      // BLOQUEAR FACEBOOK PIXEL AUTOMÁTICO COMPLETAMENTE
+      (function() {
+        console.log('🛡️ Bloqueando Facebook Pixel automático');
+        
+        // Bloquear tentativas de carregar fbevents.js
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+          const element = originalCreateElement.call(this, tagName);
+          if (tagName.toLowerCase() === 'script' && element.src && element.src.includes('fbevents.js')) {
+            console.log('🚫 BLOQUEADO: Tentativa de carregar fbevents.js automático');
+            element.src = 'about:blank'; // Neutralizar
+          }
+          return element;
+        };
+        
+        // Se fbq já existir, substituir por stub
+        if (window.fbq) {
+          console.log('🚫 BLOQUEADO: fbq existente substituído por stub');
+          window.fbq = function() {
+            console.log('🚫 BLOQUEADO: Chamada fbq automática ignorada:', arguments);
+          };
+        }
+        
+        console.log('✅ Bloqueio de Facebook Pixel automático ativado');
+      })();
+    `;
+    blockScript.setAttribute('data-marketing', 'fb-pixel-blocker');
+    document.head.appendChild(blockScript);
+  };
 
   const loadMarketingScriptsFromDatabase = async () => {
     try {
