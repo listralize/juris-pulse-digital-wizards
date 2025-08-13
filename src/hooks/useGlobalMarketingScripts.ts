@@ -37,208 +37,179 @@ export const useGlobalMarketingScripts = () => {
   const implementGlobalTracking = () => {
     console.log('🚀 Implementando tracking global com IDs padrão');
     
-    // Remover scripts existentes antes de implementar novos
-    removeExistingScripts();
-    
-    // Implementar Facebook Pixel global
-    implementGlobalFacebookPixel();
-    
-    // Implementar Google Tag Manager global  
-    implementGlobalGoogleTagManager();
-    
-    // Implementar Google Analytics global
-    implementGlobalGoogleAnalytics();
-  };
-
-  const implementGlobalFacebookPixel = () => {
-    console.log('📘 Implementando Facebook Pixel GLOBAL');
-    
-    // Usar o pixel ID da imagem que o usuário mostrou
-    const pixelId = '1024100955860841';
-    
-    // Limpar instâncias anteriores
+    // Limpar qualquer implementação anterior
     if ((window as any).fbq) {
       delete (window as any).fbq;
       delete (window as any)._fbq;
     }
+    if ((window as any).gtag) {
+      delete (window as any).gtag;
+    }
     
-    // Criar script do Facebook Pixel
-    const fbPixelScript = document.createElement('script');
-    fbPixelScript.setAttribute('data-marketing', 'facebook-pixel-global');
-    fbPixelScript.async = true;
-    fbPixelScript.src = 'https://connect.facebook.net/en_US/fbevents.js';
-    document.head.appendChild(fbPixelScript);
+    // Remover scripts existentes
+    document.querySelectorAll('[data-marketing]').forEach(el => el.remove());
     
-    // Criar script de inicialização
-    const initScript = document.createElement('script');
-    initScript.setAttribute('data-marketing', 'facebook-pixel-init');
-    initScript.innerHTML = `
+    // Implementar Facebook Pixel com inicialização imediata
+    implementFacebookPixelDirect();
+    
+    // Implementar Google Tag Manager
+    implementGoogleTagManagerDirect();
+    
+    // Implementar Google Analytics
+    implementGoogleAnalyticsDirect();
+  };
+
+  const implementFacebookPixelDirect = () => {
+    const pixelId = '1024100955860841';
+    console.log('📘 Implementando Facebook Pixel:', pixelId);
+    
+    // Criar e inserir o código do pixel diretamente
+    const script = document.createElement('script');
+    script.innerHTML = `
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};
       if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];}(window, document,'script',
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       
       fbq('init', '${pixelId}');
       fbq('track', 'PageView');
       
-      console.log('📘 Facebook Pixel Global inicializado:', '${pixelId}');
+      console.log('✅ Facebook Pixel carregado:', '${pixelId}');
+      console.log('✅ fbq disponível:', typeof window.fbq);
     `;
-    document.head.appendChild(initScript);
+    script.setAttribute('data-marketing', 'facebook-pixel');
+    document.head.appendChild(script);
     
-    // Implementar rastreamento de eventos de formulário
-    trackGlobalFormSubmissions();
+    // Configurar rastreamento de formulários
+    setupFormTracking();
   };
 
-  const implementGlobalGoogleTagManager = () => {
-    console.log('🏷️ Implementando Google Tag Manager GLOBAL');
-    
+  const implementGoogleTagManagerDirect = () => {
     const containerId = 'GTM-N7TDJGMR';
+    console.log('🏷️ Implementando Google Tag Manager:', containerId);
     
     // Inicializar dataLayer
-    if (!(window as any).dataLayer) {
-      (window as any).dataLayer = [];
-    }
+    (window as any).dataLayer = (window as any).dataLayer || [];
     
-    const gtmScript = document.createElement('script');
-    gtmScript.setAttribute('data-marketing', 'gtm-global');
-    gtmScript.innerHTML = `
+    const script = document.createElement('script');
+    script.innerHTML = `
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
       j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
       })(window,document,'script','dataLayer','${containerId}');
       
-      console.log('🏷️ Google Tag Manager Global carregado:', '${containerId}');
+      console.log('✅ GTM carregado:', '${containerId}');
     `;
-    document.head.appendChild(gtmScript);
+    script.setAttribute('data-marketing', 'gtm');
+    document.head.appendChild(script);
 
-    // Adicionar noscript no body
+    // Adicionar noscript
     const noscript = document.createElement('noscript');
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
-    noscript.setAttribute('data-marketing', 'gtm-noscript');
     document.body.appendChild(noscript);
   };
 
-  const implementGlobalGoogleAnalytics = () => {
-    console.log('📊 Implementando Google Analytics GLOBAL');
-    
+  const implementGoogleAnalyticsDirect = () => {
     const measurementId = 'G-FQVHCDRQLX';
+    console.log('📊 Implementando Google Analytics:', measurementId);
 
+    // Carregar script do gtag
     const gtagScript = document.createElement('script');
     gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     gtagScript.async = true;
-    gtagScript.setAttribute('data-marketing', 'ga-global');
+    gtagScript.setAttribute('data-marketing', 'ga');
     document.head.appendChild(gtagScript);
 
+    // Configurar gtag
     const configScript = document.createElement('script');
-    configScript.setAttribute('data-marketing', 'ga-config');
     configScript.innerHTML = `
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', '${measurementId}');
       
-      console.log('📊 Google Analytics Global carregado:', '${measurementId}');
+      console.log('✅ Google Analytics carregado:', '${measurementId}');
     `;
+    configScript.setAttribute('data-marketing', 'ga-config');
     document.head.appendChild(configScript);
   };
 
-  const trackGlobalFormSubmissions = () => {
-    console.log('📝 Configurando rastreamento global de formulários');
+  const setupFormTracking = () => {
+    console.log('📝 Configurando rastreamento de formulários');
     
     // Listener para eventos personalizados de StepForm
-    const handleStepFormSuccess = (event: CustomEvent) => {
-      console.log('🎯 Evento StepForm capturado globalmente:', event.detail);
+    const handleStepFormEvent = (event: CustomEvent) => {
+      console.log('🎯 StepForm evento capturado:', event.detail);
       
-      // Facebook Pixel
-      if ((window as any).fbq) {
-        (window as any).fbq('track', 'Lead', {
-          content_name: 'StepForm Lead Generation',
-          form_slug: event.detail?.formSlug || 'unknown',
-          value: event.detail?.value || 1,
-          currency: 'BRL',
-          page_url: window.location.href,
-          ...event.detail
-        });
-        console.log('📊 Evento Lead enviado para Facebook Pixel');
-      }
-      
-      // Google Tag Manager
-      if ((window as any).dataLayer) {
-        (window as any).dataLayer.push({
-          event: 'stepform_lead_generation',
-          form_slug: event.detail?.formSlug || 'unknown',
-          value: event.detail?.value || 1,
-          currency: 'BRL',
-          event_category: 'Lead Generation',
-          event_action: 'StepForm Submit',
-          page_url: window.location.href,
-          ...event.detail
-        });
-        console.log('📊 Evento enviado para GTM dataLayer');
-      }
-      
-      // Google Analytics
-      if ((window as any).gtag) {
-        (window as any).gtag('event', 'form_submit', {
-          event_category: 'Lead Generation',
-          event_label: 'StepForm Submit',
-          form_slug: event.detail?.formSlug || 'unknown',
-          value: event.detail?.value || 1,
-          ...event.detail
-        });
-        console.log('📊 Evento enviado para Google Analytics');
-      }
-    };
-    
-    // Adicionar listener para eventos de StepForm
-    window.addEventListener('stepFormSubmitSuccess', handleStepFormSuccess as EventListener);
-    
-    // Listener para formulários HTML normais
-    const handleFormSubmit = (event: Event) => {
-      const form = event.target as HTMLFormElement;
-      if (form.tagName === 'FORM') {
-        console.log('📝 Formulário HTML enviado - rastreando globalmente');
-        
-        const formId = form.id || 'contact_form';
-        
-        // Facebook Pixel
+      setTimeout(() => {
         if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', {
-            content_name: 'Contact Form',
-            form_id: formId,
+          (window as any).fbq('track', 'Contact', {
+            content_name: 'StepForm Submission',
+            form_slug: event.detail?.formSlug || window.location.pathname,
             page_url: window.location.href
           });
-          console.log('📊 Evento Lead enviado para Facebook Pixel (formulário HTML)');
+          console.log('✅ Facebook Pixel Contact event enviado');
         }
         
-        // Google Tag Manager
         if ((window as any).dataLayer) {
           (window as any).dataLayer.push({
-            event: 'form_submission',
-            form_id: formId,
-            event_category: 'Lead Generation',
-            event_action: 'Form Submit',
-            page_url: window.location.href
+            event: 'stepform_submission',
+            form_slug: event.detail?.formSlug || window.location.pathname
           });
-          console.log('📊 Evento enviado para GTM dataLayer (formulário HTML)');
+          console.log('✅ GTM event enviado');
         }
         
-        // Google Analytics
         if ((window as any).gtag) {
           (window as any).gtag('event', 'form_submit', {
             event_category: 'Lead Generation',
-            event_label: 'Contact Form',
-            form_id: formId
+            event_label: 'StepForm'
           });
-          console.log('📊 Evento enviado para Google Analytics (formulário HTML)');
+          console.log('✅ GA event enviado');
         }
+      }, 100);
+    };
+    
+    // Remover listeners existentes
+    window.removeEventListener('stepFormSubmitSuccess', handleStepFormEvent as EventListener);
+    window.addEventListener('stepFormSubmitSuccess', handleStepFormEvent as EventListener);
+    
+    // Listener para formulários normais
+    const handleFormSubmit = (event: Event) => {
+      const form = event.target as HTMLFormElement;
+      if (form?.tagName === 'FORM') {
+        console.log('📝 Form submission detectado');
+        
+        setTimeout(() => {
+          if ((window as any).fbq) {
+            (window as any).fbq('track', 'Contact', {
+              content_name: 'Contact Form'
+            });
+            console.log('✅ Facebook Pixel Contact event enviado (form)');
+          }
+          
+          if ((window as any).dataLayer) {
+            (window as any).dataLayer.push({
+              event: 'form_submission'
+            });
+            console.log('✅ GTM event enviado (form)');
+          }
+          
+          if ((window as any).gtag) {
+            (window as any).gtag('event', 'form_submit', {
+              event_category: 'Lead Generation'
+            });
+            console.log('✅ GA event enviado (form)');
+          }
+        }, 100);
       }
     };
     
-    // Adicionar listener para todos os formulários
+    document.removeEventListener('submit', handleFormSubmit, true);
     document.addEventListener('submit', handleFormSubmit, true);
   };
 

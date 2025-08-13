@@ -555,45 +555,6 @@ const StepForm: React.FC = () => {
         console.log('✅ Evento stepFormSubmitSuccess disparado após timeout (fallback)');
       }, 100);
       
-      // Disparar eventos diretos também para garantir que funcionem
-      setTimeout(() => {
-        // Facebook Pixel direto com evento Contact
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'Contact', {
-            content_name: 'StepForm Contact',
-            form_slug: slug,
-            value: 1,
-            currency: 'BRL',
-            page_url: window.location.href
-          });
-          console.log('📊 Evento Contact enviado DIRETAMENTE para Facebook Pixel');
-        }
-        
-        // GTM direto
-        if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: 'stepform_lead_generation',
-            form_slug: slug,
-            value: 1,
-            currency: 'BRL',
-            event_category: 'Lead Generation',
-            event_action: 'StepForm Submit',
-            page_url: window.location.href
-          });
-          console.log('📊 Evento enviado DIRETAMENTE para GTM dataLayer');
-        }
-        
-        // GA direto
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'form_submit', {
-            event_category: 'Lead Generation',
-            event_label: 'StepForm Submit',
-            form_slug: slug,
-            value: 1
-          });
-          console.log('📊 Evento enviado DIRETAMENTE para Google Analytics');
-        }
-      }, 200);
 
       // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.
       // O hook useStepFormMarketingScripts ouvirá 'stepFormSubmitSuccess' e enviará o evento configurado.
