@@ -97,8 +97,21 @@ export const useGlobalMarketingScripts = () => {
 
   const loadFallbackScripts = () => {
     console.log('🔄 Carregando scripts de fallback...');
-    // Não carregar nada no fallback para evitar pixels não configurados
-    console.log('ℹ️ Fallback: sem scripts automáticos para evitar pixels não configurados');
+    
+    // Limpar scripts existentes
+    clearExistingScripts();
+    
+    // Carregar Facebook Pixel padrão
+    loadFacebookPixel();
+    
+    // Carregar Google Tag Manager padrão
+    loadGoogleTagManager();
+    
+    // Carregar Google Analytics padrão
+    loadGoogleAnalytics();
+    
+    // Configurar rastreamento
+    setupTracking();
   };
 
   const loadFacebookPixelFromConfig = (pixelId: string, customCode?: string) => {
@@ -255,10 +268,7 @@ export const useGlobalMarketingScripts = () => {
       // Apenas PageView inicial
       fbq('track', 'PageView');
       
-      // Flag para debug em produção
-      if (window.location.hostname !== 'localhost' && window.location.hostname.includes('lovableproject.com')) {
-        console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
-      }
+      console.log('✅ Facebook Pixel carregado e ativo:', typeof window.fbq);
     `;
     script.setAttribute('data-marketing', 'fb-pixel');
     document.head.appendChild(script);
