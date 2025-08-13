@@ -24,12 +24,13 @@ interface MarketingScripts {
 }
 
 export const useGlobalMarketingScripts = () => {
-  // Hook implementa scripts globais SEMPRE para garantir funcionamento
   useEffect(() => {
     console.log('🌐 Implementando scripts globais de marketing...');
     
-    // Implementar scripts básicos imediatamente
-    implementGlobalTracking();
+    // Aguardar um pouco para garantir que o DOM está pronto
+    setTimeout(() => {
+      implementGlobalTracking();
+    }, 100);
     
   }, []);
 
@@ -52,18 +53,31 @@ export const useGlobalMarketingScripts = () => {
   const implementGlobalFacebookPixel = () => {
     console.log('📘 Implementando Facebook Pixel GLOBAL');
     
-    const pixelId = '1588678535149985';
+    // Usar o pixel ID da imagem que o usuário mostrou
+    const pixelId = '1024100955860841';
     
+    // Limpar instâncias anteriores
+    if ((window as any).fbq) {
+      delete (window as any).fbq;
+      delete (window as any)._fbq;
+    }
+    
+    // Criar script do Facebook Pixel
     const fbPixelScript = document.createElement('script');
     fbPixelScript.setAttribute('data-marketing', 'facebook-pixel-global');
-    fbPixelScript.innerHTML = `
+    fbPixelScript.async = true;
+    fbPixelScript.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(fbPixelScript);
+    
+    // Criar script de inicialização
+    const initScript = document.createElement('script');
+    initScript.setAttribute('data-marketing', 'facebook-pixel-init');
+    initScript.innerHTML = `
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};
       if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      n.queue=[];}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       
       fbq('init', '${pixelId}');
@@ -71,7 +85,7 @@ export const useGlobalMarketingScripts = () => {
       
       console.log('📘 Facebook Pixel Global inicializado:', '${pixelId}');
     `;
-    document.head.appendChild(fbPixelScript);
+    document.head.appendChild(initScript);
     
     // Implementar rastreamento de eventos de formulário
     trackGlobalFormSubmissions();
@@ -230,11 +244,23 @@ export const useGlobalMarketingScripts = () => {
 
   const removeExistingScripts = () => {
     console.log('🧹 Removendo scripts de marketing existentes');
+    
+    // Remover scripts com data-marketing
     const existingScripts = document.querySelectorAll('[data-marketing]');
     existingScripts.forEach(script => {
       script.remove();
       console.log('🗑️ Script removido:', script.getAttribute('data-marketing'));
     });
+    
+    // Limpar objetos globais
+    if ((window as any).fbq) {
+      delete (window as any).fbq;
+      delete (window as any)._fbq;
+    }
+    
+    if ((window as any).gtag) {
+      delete (window as any).gtag;
+    }
   };
 
   const implementMarketingScripts = (scripts: MarketingScripts) => {

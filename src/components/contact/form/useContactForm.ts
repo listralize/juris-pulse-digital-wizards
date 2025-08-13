@@ -119,6 +119,57 @@ export const useContactForm = (externalFormConfig?: any) => {
       document.dispatchEvent(successEvent);
       console.log('🎯 Evento formSubmitSuccess disparado para marketing scripts');
       
+      // Disparar também eventos diretos para cada plataforma
+      setTimeout(() => {
+        console.log('📊 Disparando eventos diretos de marketing para formulário de contato');
+        
+        const eventData = {
+          content_name: 'Contact Form Lead',
+          form_type: 'contact',
+          form_id: formConfig.id || 'default',
+          value: 1,
+          currency: 'BRL',
+          page_url: window.location.href,
+          user_data: {
+            email: submitData.email,
+            name: submitData.name
+          }
+        };
+        
+        // Facebook Pixel
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'Lead', eventData);
+          console.log('✅ Evento Lead enviado para Facebook Pixel (contato)');
+        } else {
+          console.warn('❌ Facebook Pixel não disponível');
+        }
+        
+        // Google Tag Manager
+        if ((window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: 'contact_form_submission',
+            event_category: 'Lead Generation',
+            event_action: 'Contact Form Submit',
+            ...eventData
+          });
+          console.log('✅ Evento enviado para GTM (contato)');
+        } else {
+          console.warn('❌ GTM dataLayer não disponível');
+        }
+        
+        // Google Analytics
+        if ((window as any).gtag) {
+          (window as any).gtag('event', 'form_submit', {
+            event_category: 'Lead Generation',
+            event_label: 'Contact Form',
+            ...eventData
+          });
+          console.log('✅ Evento enviado para GA (contato)');
+        } else {
+          console.warn('❌ Google Analytics não disponível');
+        }
+      }, 300);
+      
       toast.success(formConfig.formTexts.successMessage);
       setIsSubmitted(true);
       
