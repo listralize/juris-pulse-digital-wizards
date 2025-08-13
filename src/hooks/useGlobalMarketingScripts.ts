@@ -107,98 +107,59 @@ export const useGlobalMarketingScripts = () => {
     // Verificar se já existe
     if ((window as any).fbq) {
       console.log('ℹ️ Facebook Pixel já carregado, reconfigurando...');
-      // Reconfigura com novo pixelId se necessário
-      try {
-        (window as any).fbq('init', pixelId, {}, { autoConfig: false });
-        (window as any).fbq('set', 'autoConfig', false, pixelId);
-        (window as any).fbq('set', 'agent', 'pllovable', pixelId);
-        (window as any).fbq('track', 'PageView');
-        console.log('✅ Facebook Pixel reconfigurado');
-      } catch (error) {
-        console.error('❌ Erro ao reconfigurar pixel:', error);
-      }
       return;
     }
     
-    // Configuração inline
+    // Carregar script normal do Facebook Pixel
+    const fbScript = document.createElement('script');
+    fbScript.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    fbScript.async = true;
+    fbScript.setAttribute('data-marketing', 'fb-pixel-lib');
+    document.head.appendChild(fbScript);
+    
+    // Configuração inline com interceptação de eventos Lead
     const script = document.createElement('script');
     script.innerHTML = `
-      // CONFIGURAÇÃO MANUAL COMPLETA DO FACEBOOK PIXEL SEM AUTOCONFIG
-      (function() {
-        // Não usar o método padrão fbevents.js que tem tracking automático
-        if (window.fbq) return;
-        
-        var f = window, b = document, e = 'script', v = 'https://connect.facebook.net/en_US/fbevents.js';
-        var n = f.fbq = function() {
-          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-        };
-        if (!f._fbq) f._fbq = n;
-        n.push = n;
-        n.loaded = true;
-        n.version = '2.0';
-        n.queue = [];
-        
-        // IMPORTANTE: NÃO carregar o script fbevents.js para evitar tracking automático
-        console.log('📘 [CUSTOM PIXEL] Facebook Pixel carregado MANUALMENTE sem tracking automático');
-        
-        // Configuração básica apenas com PageView controlado
-        var pixelId = '${pixelId}';
-        
-        // Simular init sem carregar o script completo
-        n.callMethod = function(method, event, parameters, options) {
-          if (method === 'init') {
-            console.log('✅ [CUSTOM PIXEL] Pixel inicializado:', pixelId);
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[]}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      
+      // Configurar Pixel com máxima proteção contra tracking automático
+      fbq('init', '${pixelId}', {
+        autoConfig: false,
+        debug: false,
+        automaticMatching: false
+      });
+      
+      // Interceptar e filtrar eventos Lead
+      const originalFbq = window.fbq;
+      window.fbq = function(action, event, params) {
+        if (action === 'track' && event === 'Lead') {
+          // Verificar se é do useFormMarketingScripts (autorizado)
+          const stack = new Error().stack || '';
+          const isFromForm = stack.includes('handleFormSuccess') || stack.includes('useFormMarketingScripts');
+          
+          if (!isFromForm) {
+            console.log('🚫 [BLOQUEIO] Evento Lead automático bloqueado');
             return;
           }
-          
-          if (method === 'track') {
-            // Enviar apenas eventos autorizados
-            if (event === 'PageView' || event === 'CompleteRegistration') {
-              console.log('✅ [CUSTOM PIXEL] Evento autorizado enviado:', event);
-              
-              // Enviar via API de conversões do Facebook (simulado)
-              fetch('https://graph.facebook.com/v18.0/' + pixelId + '/events', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  data: [{
-                    event_name: event,
-                    event_time: Math.floor(Date.now() / 1000),
-                    action_source: 'website',
-                    event_source_url: window.location.href,
-                    custom_data: parameters || {}
-                  }],
-                  access_token: 'mock_token' // Placeholder
-                })
-              }).catch(e => {
-                console.log('ℹ️ [CUSTOM PIXEL] Simulação de envio para:', event);
-              });
-            } else {
-              console.log('🚫 [CUSTOM PIXEL] Evento bloqueado:', event);
-            }
-          }
-        };
-        
-        // Substituir queue processing
-        while (n.queue.length > 0) {
-          var args = n.queue.shift();
-          n.callMethod.apply(n, args);
         }
         
-        // Enviar PageView inicial
-        n('track', 'PageView');
-        
-      })();
+        // Permitir todos os outros eventos
+        return originalFbq.apply(this, arguments);
+      };
       
-      // Flag para debug - funciona em qualquer domínio que não seja localhost
-      const isProduction = window.location.hostname !== 'localhost';
-      if (isProduction) {
-        console.log('✅ [PROD] Facebook Pixel CUSTOMIZADO ativo:', typeof window.fbq);
-        console.log('✅ [PROD] Pixel ID configurado:', '${pixelId}');
-        console.log('✅ [PROD] Hostname:', window.location.hostname);
-      }
+      // Preservar propriedades originais
+      Object.keys(originalFbq).forEach(key => {
+        window.fbq[key] = originalFbq[key];
+      });
+      
+      // Apenas PageView inicial
+      fbq('track', 'PageView');
+      
+      console.log('✅ Facebook Pixel carregado com interceptação de Lead');
     `;
     script.setAttribute('data-marketing', 'fb-pixel-config');
     document.head.appendChild(script);
