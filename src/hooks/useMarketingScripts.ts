@@ -17,14 +17,26 @@ export const useMarketingScripts = () => {
   });
 
   const checkScriptStatus = () => {
+    const fbqExists = typeof (window as any).fbq !== 'undefined';
+    const gtagExists = typeof (window as any).gtag !== 'undefined';
+    const dataLayerExists = typeof (window as any).dataLayer !== 'undefined';
+    const customScriptsCount = document.querySelectorAll('script[data-marketing="custom"]').length;
+    
     const status: ScriptStatus = {
-      facebookPixel: typeof (window as any).fbq !== 'undefined',
-      googleAnalytics: typeof (window as any).gtag !== 'undefined',
-      googleTagManager: typeof (window as any).dataLayer !== 'undefined',
-      customScripts: document.querySelectorAll('script[data-marketing="custom"]').length > 0
+      facebookPixel: fbqExists,
+      googleAnalytics: gtagExists,
+      googleTagManager: dataLayerExists,
+      customScripts: customScriptsCount > 0
     };
 
-    console.log('📊 Status dos scripts:', status);
+    console.log('📊 Status dos scripts:', {
+      fbq: typeof (window as any).fbq,
+      gtag: typeof (window as any).gtag,
+      dataLayer: typeof (window as any).dataLayer,
+      fbqExists,
+      gtagExists,
+      dataLayerExists
+    });
     setScriptStatus(status);
   };
 

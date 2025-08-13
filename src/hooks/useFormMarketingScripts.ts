@@ -217,12 +217,24 @@ export const useFormMarketingScripts = (formId: string) => {
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
     
+    console.log(`🚨 [IMPLEMENT PIXEL] Iniciando implementação para formId: ${formId}`);
+    console.log(`🚨 [IMPLEMENT PIXEL] Config recebida:`, facebookPixel);
+    console.log(`🚨 [IMPLEMENT PIXEL] PixelId:`, facebookPixel?.pixelId);
+    
     dlog(`📘 Pixel preparado para formulário ${formId} (sem reinicializar base)`);
 
     // Carregamento direto do pixel se não estiver disponível
     if (typeof window !== 'undefined' && !(window as any).fbq) {
       console.log('📘 Carregando Facebook Pixel diretamente para formulário');
-      loadFacebookPixelDirect(facebookPixel.pixelId);
+      console.log(`🚨 [PIXEL LOAD] PixelId sendo usado:`, facebookPixel?.pixelId);
+      
+      if (facebookPixel?.pixelId) {
+        loadFacebookPixelDirect(facebookPixel.pixelId);
+      } else {
+        console.error('❌ PixelId não encontrado na configuração');
+      }
+    } else {
+      console.log('🚨 [PIXEL STATUS] Facebook Pixel já disponível, tipo:', typeof (window as any).fbq);
     }
 
     const handleFormSuccess = (event: CustomEvent) => {
