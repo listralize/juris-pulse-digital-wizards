@@ -13,7 +13,8 @@ interface TestimonialData {
 }
 
 interface StatData {
-  number: string;
+  number?: string;
+  value?: string;
   label: string;
   icon?: string;
 }
@@ -80,9 +81,32 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
       const stepFormConfig = data?.global_social_proof as any;
       console.log('Config de prova social:', stepFormConfig);
       
-      if (stepFormConfig && (stepFormConfig?.testimonials?.length > 0 || stepFormConfig?.stats?.length > 0)) {
-        setSocialProofConfig(stepFormConfig as SocialProofConfig);
-        console.log('Prova social ativada:', stepFormConfig);
+      if (!stepFormConfig) {
+        setSocialProofConfig(null);
+        return;
+      }
+
+      const enabled = stepFormConfig.enabled ?? true;
+      if (!enabled) {
+        setSocialProofConfig(null);
+        return;
+      }
+
+      const normalizedConfig: SocialProofConfig = {
+        enabled: enabled,
+        testimonials: stepFormConfig.testimonials || [],
+        stats: (stepFormConfig.stats || []).map((s: any) => ({
+          ...s,
+          number: s.number ?? s.value
+        })),
+        autoRotate: stepFormConfig.autoRotate ?? true,
+        rotationInterval: stepFormConfig.rotationInterval ?? 5000,
+        primaryColor: stepFormConfig.primaryColor || '#4CAF50'
+      };
+
+      if (normalizedConfig.testimonials.length > 0 || normalizedConfig.stats.length > 0) {
+        setSocialProofConfig(normalizedConfig);
+        console.log('Prova social ativada:', normalizedConfig);
       } else {
         console.log('Prova social não está ativada ou não tem conteúdo');
         setSocialProofConfig(null);
@@ -156,7 +180,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
                         className="text-2xl font-bold"
                         style={{ color: socialProofConfig.primaryColor || '#4CAF50' }}
                       >
-                        {stat.number}
+                        {stat.number || (stat as any).value}
                       </div>
                       <div className="text-sm text-muted-foreground">{stat.label}</div>
                     </motion.div>

@@ -330,19 +330,24 @@ export const LeadsManagement: React.FC = () => {
 
       for (const lead of processedLeads) {
         try {
-          const leadData = await parseLeadData(lead.lead_data);
-          const email = leadData.email?.toLowerCase() || '';
-          const phone = leadData.phone?.replace(/\D/g, '') || '';
-          const key = email || phone;
+          // Extrair email/telefone de forma síncrona, sem chamadas externas
+          let ld: any = lead.lead_data;
+          if (typeof ld === 'string') {
+            try { ld = JSON.parse(ld); } catch {}
+          }
+
+          const email = (ld?.email || ld?.Email || '').toLowerCase();
+          let phone = (ld?.phone || ld?.telefone || ld?.Phone || ld?.Telefone || '').toString();
+          // Normalizar telefone
+          const phoneClean = phone ? phone.replace(/\D/g, '') : '';
+          const key = email || phoneClean;
           
           if (key && seenLeads.has(key)) {
             const existingLead = seenLeads.get(key);
             const timeDiff = Math.abs(new Date(lead.created_at).getTime() - new Date(existingLead.created_at).getTime());
-            
-            // Se diferença for <= 30 segundos (30000ms), considerar duplicata
             if (timeDiff <= 30000) {
               console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
-              continue; // Pular este lead duplicado
+              continue;
             }
           }
           
@@ -352,7 +357,6 @@ export const LeadsManagement: React.FC = () => {
           }
         } catch (error) {
           console.error('Erro ao processar lead:', error);
-          // Em caso de erro, adiciona o lead mesmo assim
           deduplicatedLeads.push(lead);
         }
       }
@@ -723,27 +727,33 @@ export const LeadsManagement: React.FC = () => {
 
   // Filtrar leads
   useEffect(() => {
-    const filterLeads = async () => {
+    const filterLeads = () => {
       let filtered = [...leads];
 
-      // Filtro de busca
+      // Filtro de busca (síncrono, sem chamadas ao banco)
       if (searchQuery) {
-        const filteredPromises = await Promise.all(filtered.map(async (lead) => {
-          const leadData = await parseLeadData(lead.lead_data);
-          const searchLower = searchQuery.toLowerCase();
-          const matches = (
-            leadData.name?.toLowerCase().includes(searchLower) ||
-            leadData.email?.toLowerCase().includes(searchLower) ||
-            leadData.phone?.includes(searchQuery) ||
-            leadData.service?.toLowerCase().includes(searchLower)
-          );
-          return matches ? lead : null;
-        }));
-        
-        filtered = filteredPromises.filter(lead => lead !== null) as Lead[];
+        const searchLower = searchQuery.toLowerCase();
+        filtered = filtered.filter((lead) => {
+          try {
+            let ld: any = lead.lead_data;
+            if (typeof ld === 'string') ld = JSON.parse(ld);
+            const name = (ld?.name || ld?.nome || ld?.Name || '').toLowerCase();
+            const email = (ld?.email || ld?.Email || '').toLowerCase();
+            const phone = (ld?.phone || ld?.telefone || '').toString();
+            const service = (ld?.service || ld?.servico || ld?.Service || '').toLowerCase();
+            return (
+              name.includes(searchLower) ||
+              email.includes(searchLower) ||
+              phone.includes(searchQuery) ||
+              service.includes(searchLower)
+            );
+          } catch {
+            return false;
+          }
+        });
       }
 
-      // Filtro de data - corrigindo para timezone local
+      // Filtro de data - timezone local
       if (dateFilter !== 'all') {
         const now = new Date();
         let startDate: Date;
@@ -751,41 +761,27 @@ export const LeadsManagement: React.FC = () => {
 
         switch (dateFilter) {
           case 'today':
-            // Usar exatamente o dia atual no timezone local
             startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
             endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
             break;
-          case 'week':
-            // Últimos 7 dias
+          case 'week': {
             const weekStart = new Date(now);
-            weekStart.setDate(now.getDate() - 6); // Últimos 7 dias incluindo hoje
+            weekStart.setDate(now.getDate() - 6);
             weekStart.setHours(0, 0, 0, 0);
             startDate = weekStart;
             endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
             break;
+          }
           case 'month':
-            // Mês atual
             startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
             endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
             break;
           case 'custom':
             if (customDateStart && customDateEnd) {
-              // Parseamento manual para evitar problemas de timezone
               const startParts = customDateStart.split('-');
               const endParts = customDateEnd.split('-');
-              
-              startDate = new Date(
-                parseInt(startParts[0]), 
-                parseInt(startParts[1]) - 1, 
-                parseInt(startParts[2]), 
-                0, 0, 0, 0
-              );
-              endDate = new Date(
-                parseInt(endParts[0]), 
-                parseInt(endParts[1]) - 1, 
-                parseInt(endParts[2]), 
-                23, 59, 59, 999
-              );
+              startDate = new Date(+startParts[0], +startParts[1] - 1, +startParts[2], 0, 0, 0, 0);
+              endDate = new Date(+endParts[0], +endParts[1] - 1, +endParts[2], 23, 59, 59, 999);
             } else {
               startDate = new Date(0);
             }
@@ -794,29 +790,29 @@ export const LeadsManagement: React.FC = () => {
             startDate = new Date(0);
         }
 
-        filtered = filtered.filter(lead => {
+        filtered = filtered.filter((lead) => {
           const leadDate = new Date(lead.created_at);
-          const inRange = endDate ? 
-            (leadDate >= startDate && leadDate <= endDate) : 
-            (leadDate >= startDate);
-          
-          return inRange;
+          return endDate ? leadDate >= startDate && leadDate <= endDate : leadDate >= startDate;
         });
       }
 
-      // Filtro por serviço
+      // Filtro por serviço (síncrono)
       if (serviceFilter !== 'all') {
-        const serviceFilteredPromises = await Promise.all(filtered.map(async (lead) => {
-          const leadData = await parseLeadData(lead.lead_data);
-          return leadData.service === serviceFilter ? lead : null;
-        }));
-        
-        filtered = serviceFilteredPromises.filter(lead => lead !== null) as Lead[];
+        filtered = filtered.filter((lead) => {
+          try {
+            let ld: any = lead.lead_data;
+            if (typeof ld === 'string') ld = JSON.parse(ld);
+            const service = ld?.service || ld?.servico || ld?.Service || 'N/A';
+            return service === serviceFilter;
+          } catch {
+            return false;
+          }
+        });
       }
 
       setFilteredLeads(filtered);
-      setCurrentPage(1); // Reset para primeira página quando filtros mudam
-      setKanbanCurrentPage(1); // Reset página do kanban
+      setCurrentPage(1);
+      setKanbanCurrentPage(1);
     };
 
     filterLeads();
