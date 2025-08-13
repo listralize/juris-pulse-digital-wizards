@@ -58,7 +58,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
         setCurrentTestimonialIndex((prev) => 
           (prev + 1) % socialProofConfig.testimonials.length
         );
-      }, socialProofConfig.rotationInterval || 5000);
+      }, socialProofConfig.rotationInterval || 8000);
 
       return () => clearInterval(interval);
     }
@@ -102,7 +102,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
           number: s.number ?? s.value
         })),
         autoRotate: stepFormConfig.autoRotate ?? true,
-        rotationInterval: stepFormConfig.rotationInterval ?? 5000,
+        rotationInterval: stepFormConfig.rotationInterval ?? 8000,
         primaryColor: stepFormConfig.primaryColor || '#4CAF50'
       };
 
@@ -155,7 +155,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-3">
         <AnimatePresence>
           {isVisible && (
             <motion.div
@@ -166,7 +166,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
             >
               {/* Estatísticas */}
               {socialProofConfig.stats?.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                   {socialProofConfig.stats.map((stat, index) => (
                     <motion.div
                       key={index}
@@ -179,7 +179,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
                         {getIcon(stat.icon)}
                       </div>
                       <div 
-                        className="text-2xl font-bold"
+                        className="text-xl font-bold"
                         style={{ color: socialProofConfig.primaryColor || '#4CAF50' }}
                       >
                         {stat.number || (stat as any).value}
@@ -193,7 +193,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
               {/* Depoimentos */}
               {socialProofConfig.testimonials?.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-center">
+                  <h3 className="text-base font-semibold text-center">
                     O que nossos clientes dizem
                   </h3>
                   
@@ -252,8 +252,8 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
 
               {/* Botão para ocultar */}
               <button
-                onClick={() => setIsVisible(false)}
-                className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+                onClick={(e) => e.preventDefault()}
+                className="hidden"
                 aria-label="Fechar depoimentos"
               >
                 <X className="w-4 h-4" />

@@ -550,34 +550,53 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
     if (!onUpdate) return;
     
     try {
-      const flowData = nodes.map(node => ({
-        id: node.id,
-        type: node.data.type || node.type,
-        title: node.data.title,
-        description: node.data.description,
-        options: node.data.options,
-        formFields: node.data.formFields,
-        offerConfig: node.data.offerConfig,
-        timerConfig: node.data.timerConfig,
-        socialProofConfig: node.data.socialProofConfig,
-        mediaType: node.data.mediaType,
-        imageUrl: node.data.imageUrl,
-        videoUrl: node.data.videoUrl,
-        imagePosition: node.data.imagePosition,
-        imageHeight: node.data.imageHeight,
-        videoHeight: node.data.videoHeight,
-        backgroundColor: node.data.backgroundColor,
-        textColor: node.data.textColor,
-        borderColor: node.data.borderColor,
-        width: node.data.width,
-        height: node.data.height,
-        carouselImages: node.data.carouselImages,
-        carouselAutoplay: node.data.carouselAutoplay,
-        carouselShowDots: node.data.carouselShowDots,
-        carouselInterval: node.data.carouselInterval,
-        config: node.data.config,
-        position: node.position // Salvar posição do nó
-      }));
+      // Mapear conexões para cada opção (sourceHandle = option-<index>)
+      const optionTargetMap = new Map<string, Record<number, string>>();
+      edges.forEach((e) => {
+        if (e.sourceHandle && e.sourceHandle.startsWith('option-')) {
+          const idx = parseInt(e.sourceHandle.replace('option-', ''));
+          const map = optionTargetMap.get(e.source) || {};
+          map[idx] = e.target;
+          optionTargetMap.set(e.source, map);
+        }
+      });
+
+      const flowData = nodes.map(node => {
+        // Atualizar nextStep das opções de perguntas com base nas conexões
+        let options = node.data.options;
+        if ((node.data.type === 'question' || node.type === 'question') && Array.isArray(options)) {
+          const map = optionTargetMap.get(node.id) || {};
+          options = options.map((opt: any, idx: number) => ({ ...opt, nextStep: map[idx] ?? opt?.nextStep }));
+        }
+        return {
+          id: node.id,
+          type: node.data.type || node.type,
+          title: node.data.title,
+          description: node.data.description,
+          options,
+          formFields: node.data.formFields,
+          offerConfig: node.data.offerConfig,
+          timerConfig: node.data.timerConfig,
+          socialProofConfig: node.data.socialProofConfig,
+          mediaType: node.data.mediaType,
+          imageUrl: node.data.imageUrl,
+          videoUrl: node.data.videoUrl,
+          imagePosition: node.data.imagePosition,
+          imageHeight: node.data.imageHeight,
+          videoHeight: node.data.videoHeight,
+          backgroundColor: node.data.backgroundColor,
+          textColor: node.data.textColor,
+          borderColor: node.data.borderColor,
+          width: node.data.width,
+          height: node.data.height,
+          carouselImages: node.data.carouselImages,
+          carouselAutoplay: node.data.carouselAutoplay,
+          carouselShowDots: node.data.carouselShowDots,
+          carouselInterval: node.data.carouselInterval,
+          config: node.data.config,
+          position: node.position // Salvar posição do nó
+        };
+      });
       
       // Incluir as conexões no salvamento
       const flowConfig = {
