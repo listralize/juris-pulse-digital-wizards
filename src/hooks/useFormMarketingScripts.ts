@@ -130,6 +130,27 @@ export const useFormMarketingScripts = (formId: string) => {
     (window as any).__formMarketingHandlers = handlersMap;
   };
 
+  const normalizePixelEventName = (eventType?: string, custom?: string) => {
+    if (!eventType) return null;
+    if (eventType === 'Custom') return (custom || '').trim() || null;
+    const map: Record<string, string> = {
+      Lead: 'Lead',
+      Purchase: 'Purchase',
+      Contact: 'Contact',
+      SubmitApplication: 'SubmitApplication',
+      'Submit Application': 'SubmitApplication',
+      CompleteRegistration: 'CompleteRegistration',
+      'Complete Registration': 'CompleteRegistration',
+      ViewContent: 'ViewContent',
+      'View Content': 'ViewContent',
+      AddToCart: 'AddToCart',
+      'Add To Cart': 'AddToCart',
+      InitiateCheckout: 'InitiateCheckout',
+      'Initiate Checkout': 'InitiateCheckout',
+    };
+    return map[eventType] || eventType.replace(/\s+/g, '');
+  };
+
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
     
@@ -177,10 +198,7 @@ export const useFormMarketingScripts = (formId: string) => {
         console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
         if ((window as any).fbq) {
-          const configured = facebookPixel.eventType;
-          const resolvedEvent = configured === 'Custom'
-            ? (facebookPixel.customEventName || null)
-            : configured || null;
+          const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
 
           if (!resolvedEvent) {
             console.log(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
