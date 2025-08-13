@@ -161,17 +161,19 @@ export const useFormMarketingScripts = (formId: string) => {
     
     dlog(`📘 Pixel preparado para formulário ${formId} (sem reinicializar base)`);
 
-    // Não injetar/Inicializar Pixel aqui para evitar duplicidade
+    // Verificar se o pixel está carregado e forçar carregamento se necessário
     if (typeof window !== 'undefined' && !(window as any).fbq) {
-      console.warn('⚠️ fbq não está disponível no momento do envio. Verificando carregamento...');
-      // Aguardar até 3 segundos pelo Facebook Pixel carregar
+      console.warn('⚠️ fbq não está disponível - aguardando carregamento global...');
+      // Aguardar até 5 segundos pelo Facebook Pixel carregar
       let attempts = 0;
       const checkPixel = setInterval(() => {
         attempts++;
-        if ((window as any).fbq || attempts >= 30) {
+        if ((window as any).fbq || attempts >= 50) {
           clearInterval(checkPixel);
           if (!(window as any).fbq) {
-            console.error('❌ Facebook Pixel não carregou após 3 segundos');
+            console.error('❌ Facebook Pixel não carregou após 5 segundos');
+          } else {
+            console.log('✅ Facebook Pixel carregado via espera');
           }
         }
       }, 100);
@@ -179,8 +181,8 @@ export const useFormMarketingScripts = (formId: string) => {
 
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
-        // Log para debug em produção
-        const isProduction = window.location.hostname !== 'localhost';
+        // Log para debug em produção  
+        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
         if (isProduction) {
           console.log(`✅ [PROD] Formulário ${formId} enviado - rastreando com Facebook Pixel`);
         }
@@ -194,16 +196,17 @@ export const useFormMarketingScripts = (formId: string) => {
               if (isProduction) {
                 console.log(`ℹ️ [PROD] Nenhum evento configurado para ${formId}`);
               }
+              dlog(`ℹ️ Nenhum evento configurado para ${formId}`);
               return;
             }
 
             // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
             const sentMap = (window as any).__formEventSent || {};
-            const eventKey = `${formId}_${Date.now()}`;
             if (sentMap[formId] && (Date.now() - sentMap[formId]) < 5000) {
               if (isProduction) {
                 console.log(`⏭️ [PROD] Evento ignorado (duplicado) para formulário: ${formId}`);
               }
+              dlog(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
               return;
             }
             sentMap[formId] = Date.now();
@@ -232,13 +235,17 @@ export const useFormMarketingScripts = (formId: string) => {
               if (isProduction) {
                 console.log(`📊 [PROD] Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
               }
+              dlog(`📊 Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
             } catch (error) {
               console.error('❌ Erro ao enviar evento do Facebook Pixel:', error);
             }
           } else {
             console.error('❌ Facebook Pixel não disponível após timeout');
+            // Log adicional para debug
+            console.log('🔍 Debug: window.fbq existe?', typeof (window as any).fbq);
+            console.log('🔍 Debug: window objeto:', typeof window);
           }
-        }, 250); // Reduzir timeout para produção
+        }, 500); // Aumentar timeout para produção
       }
     };
 
