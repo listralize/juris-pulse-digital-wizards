@@ -147,7 +147,9 @@ export const useGlobalMarketingScripts = () => {
     
     // Aguardar scripts carregarem
     setTimeout(() => {
-      // StepForm events
+      // TODOS OS EVENTOS AUTOMÁTICOS DESABILITADOS - configurações específicas gerenciam os eventos
+      /*
+      // StepForm events - DESABILITADO
       const handleStepForm = (event: CustomEvent) => {
         console.log('🎯 StepForm submit:', event.detail);
         
@@ -181,7 +183,7 @@ export const useGlobalMarketingScripts = () => {
         }, 200);
       };
       
-      // Contact form events
+      // Contact form events - DESABILITADOS para evitar conflitos com configurações específicas
       const handleContactForm = (event: Event) => {
         const form = event.target as HTMLFormElement;
         if (form?.tagName === 'FORM') {
@@ -216,9 +218,11 @@ export const useGlobalMarketingScripts = () => {
         }
       };
       
-      // Adicionar listeners
+      // Adicionar listeners apenas para StepForm - eventos de Contact Form são gerenciados individualmente
       window.addEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
-      document.addEventListener('submit', handleContactForm, true);
+      */
+      
+      console.log('ℹ️ Tracking automático COMPLETAMENTE DESABILITADO - apenas configurações específicas de formulários individuais ativas');
       
       console.log('✅ Rastreamento configurado');
     }, 1000);
@@ -295,7 +299,8 @@ export const useGlobalMarketingScripts = () => {
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '${config.pixelId}');
-      fbq('set', 'autoConfig', 'false', '${config.pixelId}');
+      fbq('track', 'PageView');
+      try { fbq('set', 'autoConfig', false, '${config.pixelId}'); } catch {}
     `;
     document.head.appendChild(fbPixelScript);
 
@@ -359,6 +364,12 @@ export const useGlobalMarketingScripts = () => {
   };
 
   const trackFormSubmissions = (pixelId: string) => {
+    // Tracking automático de formulários desabilitado para evitar conflitos
+    // com configurações específicas de formulários individuais
+    console.log('ℹ️ Tracking automático de formulários desabilitado globalmente');
+    
+    // ORIGINAL CODE COMMENTED OUT TO PREVENT AUTOMATIC 'Lead' EVENTS:
+    /*
     // Adicionar listener global para submissões de formulário
     const handleFormSubmit = (event: Event) => {
       const form = event.target as HTMLFormElement;
@@ -407,5 +418,6 @@ export const useGlobalMarketingScripts = () => {
     
     // Adicionar novo listener
     document.addEventListener('submit', handleFormSubmit, true);
+    */
   };
 };
