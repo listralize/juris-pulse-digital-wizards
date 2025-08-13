@@ -13,10 +13,10 @@ export const useDirectMarketingScripts = () => {
   useEffect(() => {
     console.log('🚀 Carregando scripts de marketing diretamente...');
     
-    // Aguardar DOM estar pronto
+    // Aguardar DOM estar pronto - timeout maior para produção
     const timer = setTimeout(() => {
       loadAllScripts();
-    }, 100);
+    }, 1000);
     
     return () => clearTimeout(timer);
   }, []);

@@ -5,7 +5,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useFormOnlyPixel } from './hooks/useFormOnlyPixel';
+import { useDirectMarketingScripts } from './hooks/useDirectMarketingScripts';
 
 // Pages
 import Index from './pages/Index';
@@ -39,8 +39,8 @@ import Administrativo from './pages/areas/Administrativo';
 const queryClient = new QueryClient();
 
 function App() {
-  // Carregar apenas o Facebook Pixel base para formulários
-  useFormOnlyPixel();
+  // Carregar scripts de marketing globalmente
+  useDirectMarketingScripts();
   
   // Adicionar verificação de scripts carregados
   useEffect(() => {
@@ -60,7 +60,9 @@ function App() {
       // Testar Facebook Pixel
       if ((window as any).fbq) {
         console.log('✅ Facebook Pixel detectado e funcionando');
-        console.log('📊 Pixel pronto para receber eventos de formulários');
+        // Disparar evento de teste
+        (window as any).fbq('track', 'PageView');
+        console.log('📊 Evento PageView teste enviado para Facebook Pixel');
       } else {
         console.warn('⚠️ Facebook Pixel não detectado');
       }
