@@ -93,6 +93,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   console.log('🚨 [UNIFIED DEBUG] FormId para marketing:', activeFormId);
   console.log('🚨 [UNIFIED DEBUG] FormConfig:', formConfig);
   console.log('🚨 [UNIFIED DEBUG] Chamando useFormMarketingScripts com:', activeFormId);
+  console.log('🚨 [UNIFIED DEBUG] Hook vai executar agora...');
   useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
