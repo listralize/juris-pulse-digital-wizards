@@ -71,10 +71,8 @@ export const useGlobalMarketingScripts = () => {
     // Limpar scripts existentes
     clearExistingScripts();
     
-    // Carregar Facebook Pixel se habilitado
-    if (settings.facebook_pixel_enabled && settings.facebook_pixel_id) {
-      loadFacebookPixelFromConfig(settings.facebook_pixel_id, settings.facebook_custom_code);
-    }
+    // Pixel global desabilitado - apenas pixels específicos dos formulários funcionam
+    console.log('ℹ️ Pixel global desabilitado - apenas formulários específicos ativarão pixels');
     
     // Carregar Google Tag Manager se habilitado
     if (settings.google_tag_manager_enabled && settings.google_tag_manager_id) {

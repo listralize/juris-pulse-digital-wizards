@@ -104,6 +104,26 @@ export const useFormMarketingScripts = (formId: string) => {
     };
   }, [formId]);
 
+  const loadFacebookPixelDirect = (pixelId: string) => {
+    const script = document.createElement('script');
+    script.innerHTML = `
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '${pixelId}', {}, { autoConfig: false });
+      fbq('set', 'autoConfig', false, '${pixelId}');
+      fbq('track', 'PageView');
+      console.log('✅ Facebook Pixel carregado diretamente:', '${pixelId}');
+    `;
+    script.setAttribute('data-form-pixel', pixelId);
+    document.head.appendChild(script);
+  };
+
   const implementFormScripts = (formConfig: any) => {
     dlog(`🚀 Implementando scripts para formulário ${formConfig.formId}:`, formConfig);
 
@@ -196,22 +216,10 @@ export const useFormMarketingScripts = (formId: string) => {
     
     dlog(`📘 Pixel preparado para formulário ${formId} (sem reinicializar base)`);
 
-    // Verificar se o pixel está carregado e forçar carregamento se necessário
+    // Carregamento direto do pixel se não estiver disponível
     if (typeof window !== 'undefined' && !(window as any).fbq) {
-      console.warn('⚠️ fbq não está disponível - aguardando carregamento global...');
-      // Aguardar até 5 segundos pelo Facebook Pixel carregar
-      let attempts = 0;
-      const checkPixel = setInterval(() => {
-        attempts++;
-        if ((window as any).fbq || attempts >= 50) {
-          clearInterval(checkPixel);
-          if (!(window as any).fbq) {
-            console.error('❌ Facebook Pixel não carregou após 5 segundos');
-          } else {
-            console.log('✅ Facebook Pixel carregado via espera');
-          }
-        }
-      }, 100);
+      console.log('📘 Carregando Facebook Pixel diretamente para formulário');
+      loadFacebookPixelDirect(facebookPixel.pixelId);
     }
 
     const handleFormSuccess = (event: CustomEvent) => {
