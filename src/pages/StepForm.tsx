@@ -247,12 +247,21 @@ const StepForm: React.FC = () => {
       return null;
     }
 
-    // Procurar por uma edge que conecta o step atual
-    const edge = form.flow_config.edges.find(edge => 
-      edge.source === currentStepId
-    );
+    // Tentar mapear pela opção selecionada usando sourceHandle = option-<index>
+    const currentStep = form.steps.find(s => s.id === currentStepId);
+    if (currentStep?.options && selectedOption) {
+      const optIndex = currentStep.options.findIndex(o => o.text === selectedOption);
+      if (optIndex >= 0) {
+        const specific = form.flow_config.edges.find(e => e.source === currentStepId && e.sourceHandle === `option-${optIndex}`);
+        console.log('🔗 Buscando conexão específica por opção', { selectedOption, optIndex, specific });
+        if (specific) return specific.target;
+      }
+    }
 
-    console.log('🔗 Procurando próximo step:', {
+    // Fallback: primeira conexão a partir do step atual
+    const edge = form.flow_config.edges.find(e => e.source === currentStepId);
+
+    console.log('🔗 Fallback conexão por step', {
       currentStepId,
       edges: form.flow_config.edges,
       foundEdge: edge,
@@ -968,6 +977,9 @@ const StepForm: React.FC = () => {
           </Card>
         )}
 
+        {/* Depoimentos fixos acima do rodapé */}
+        <StepFormTestimonials formId={form.slug} />
+
         {/* Custom Footer */}
         {form.footer_config?.enabled && (
           <div 
@@ -984,8 +996,6 @@ const StepForm: React.FC = () => {
         )}
       </div>
 
-      {/* Depoimentos fixos acima do rodapé */}
-      <StepFormTestimonials formId={form.slug} />
     </div>
   );
 };
