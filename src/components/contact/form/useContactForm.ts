@@ -119,52 +119,66 @@ export const useContactForm = (externalFormConfig?: any) => {
       document.dispatchEvent(successEvent);
       console.log('🎯 Evento formSubmitSuccess disparado para marketing scripts');
       
-      // Disparar também eventos diretos para cada plataforma
+      // Disparar eventos diretos para garantir captura
       setTimeout(() => {
         console.log('📊 Disparando eventos diretos de marketing para formulário de contato');
         
-        const eventData = {
-          content_name: 'Contact Form Lead',
-          form_type: 'contact',
-          form_id: formConfig.id || 'default',
-          value: 1,
-          currency: 'BRL',
-          page_url: window.location.href,
-          user_data: {
-            email: submitData.email,
-            name: submitData.name
-          }
-        };
-        
-        // Facebook Pixel
+        // Facebook Pixel - Contact event
         if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', eventData);
-          console.log('✅ Evento Lead enviado para Facebook Pixel (contato)');
+          try {
+            (window as any).fbq('track', 'Contact', {
+              content_name: 'Contact Form Lead',
+              form_type: 'contact',
+              form_id: formConfig.id || 'default',
+              page_url: window.location.href
+            });
+            console.log('✅ Evento Contact enviado para Facebook Pixel (contato)');
+            
+            // Também enviar Lead event
+            (window as any).fbq('track', 'Lead', {
+              content_name: 'Contact Lead Generation',
+              form_type: 'contact',
+              form_id: formConfig.id || 'default',
+              page_url: window.location.href
+            });
+            console.log('✅ Evento Lead enviado para Facebook Pixel (contato)');
+          } catch (error) {
+            console.error('❌ Erro no Facebook Pixel:', error);
+          }
         } else {
           console.warn('❌ Facebook Pixel não disponível');
         }
         
         // Google Tag Manager
         if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: 'contact_form_submission',
-            event_category: 'Lead Generation',
-            event_action: 'Contact Form Submit',
-            ...eventData
-          });
-          console.log('✅ Evento enviado para GTM (contato)');
+          try {
+            (window as any).dataLayer.push({
+              event: 'contact_form_conversion',
+              event_category: 'Lead Generation',
+              event_action: 'Contact Form Submit',
+              form_id: formConfig.id || 'default',
+              page_url: window.location.href
+            });
+            console.log('✅ Evento enviado para GTM (contato)');
+          } catch (error) {
+            console.error('❌ Erro no GTM:', error);
+          }
         } else {
           console.warn('❌ GTM dataLayer não disponível');
         }
         
         // Google Analytics
         if ((window as any).gtag) {
-          (window as any).gtag('event', 'form_submit', {
-            event_category: 'Lead Generation',
-            event_label: 'Contact Form',
-            ...eventData
-          });
-          console.log('✅ Evento enviado para GA (contato)');
+          try {
+            (window as any).gtag('event', 'conversion', {
+              event_category: 'Lead Generation',
+              event_label: 'Contact Form',
+              form_id: formConfig.id || 'default'
+            });
+            console.log('✅ Evento enviado para GA (contato)');
+          } catch (error) {
+            console.error('❌ Erro no GA:', error);
+          }
         } else {
           console.warn('❌ Google Analytics não disponível');
         }

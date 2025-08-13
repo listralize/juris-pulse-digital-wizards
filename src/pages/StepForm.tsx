@@ -535,7 +535,7 @@ const StepForm: React.FC = () => {
 
       console.log('🎯 Disparando eventos de marketing...', { formSlug: slug });
 
-      // Dispatch marketing success event
+      // Disparar evento customizado para scripts de marketing
       const eventDetail = { 
         formSlug: slug,
         formId: form?.id,
@@ -543,17 +543,15 @@ const StepForm: React.FC = () => {
         userData: formResponses 
       };
       
-      console.log('📢 Evento de sucesso sendo disparado:', eventDetail);
-      
       // Disparar evento imediatamente
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
-      console.log('✅ Evento stepFormSubmitSuccess disparado imediatamente');
+      console.log('✅ Evento stepFormSubmitSuccess disparado');
       
-      // Aguardar um tick adicional para garantir que scripts lentos capturem o evento
+      // Aguardar um pouco e disparar novamente para garantir captura
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
-        console.log('✅ Evento stepFormSubmitSuccess disparado após timeout (fallback)');
-      }, 100);
+        console.log('✅ Evento stepFormSubmitSuccess re-disparado (backup)');
+      }, 500);
       
 
       // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.
