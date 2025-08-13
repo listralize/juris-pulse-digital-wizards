@@ -22,12 +22,9 @@ interface StepFormMarketingConfig {
 
 export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
-    if (!formSlug) {
-      console.log(`🚨 [STEP FORM DEBUG] FormSlug vazio ou inválido:`, formSlug);
-      return;
-    }
+    if (!formSlug) return;
 
-    console.log(`🚨 [STEP FORM DEBUG] Inicializando scripts de marketing para StepForm: ${formSlug}`);
+    console.log(`🚀 Inicializando scripts de marketing para StepForm: ${formSlug}`);
     
     // Carregar e implementar scripts imediatamente
     loadAndImplementScripts();
@@ -63,29 +60,22 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       }
 
       const config = stepForm.tracking_config as any;
-      console.log(`🚨 [STEP FORM DEBUG] Configuração completa encontrada:`, JSON.stringify(config));
+      console.log('📊 Configuração encontrada:', config);
 
       // Facebook Pixel: usar evento exatamente como configurado; sem fallback
       const pixelCfg = (config.facebook_pixel || {});
-      console.log(`🚨 [STEP FORM DEBUG] Facebook Pixel config:`, JSON.stringify(pixelCfg));
       let eventName: string | null = null;
       if (pixelCfg.enabled === true) {
-        console.log(`🚨 [STEP FORM DEBUG] Pixel HABILITADO. Event type: ${pixelCfg.event_type}`);
         if (pixelCfg.event_type === 'Custom') {
           eventName = (pixelCfg.custom_event_name || '').trim().replace(/\s+/g, '') || null;
-          console.log(`🚨 [STEP FORM DEBUG] Evento customizado: ${eventName}`);
         } else {
           eventName = normalizeEventName(pixelCfg.event_type);
-          console.log(`🚨 [STEP FORM DEBUG] Evento padrão normalizado: ${eventName}`);
         }
-      } else {
-        console.log(`🚨 [STEP FORM DEBUG] Pixel DESABILITADO ou enabled !== true`);
       }
       if (eventName) {
-        console.log(`🚨 [STEP FORM DEBUG] Implementando Facebook Pixel com evento: ${eventName}`);
         implementFacebookPixel(eventName);
       } else {
-        console.log(`🚨 [STEP FORM DEBUG] NENHUM EVENTO configurado - pixel não será ativo`);
+        console.log('ℹ️ Pixel desativado ou sem evento configurado; nada será enviado.');
       }
 
       // GTM: apenas empurrar evento se nome estiver configurado (sem injeção de script)
@@ -137,10 +127,9 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const implementFacebookPixel = (eventName: string) => {
-    console.log(`🚨 [STEP FORM DEBUG] Configurando Facebook Pixel para evento: ${eventName} no formSlug: ${formSlug}`);
+    console.log(`📘 Garantindo Facebook Pixel (listener apenas) para evento: ${eventName}`);
 
     const handleSuccess = (event: CustomEvent) => {
-      console.log(`🚨 [STEP FORM DEBUG] Evento stepFormSubmitSuccess recebido. FormSlug evento: ${event.detail?.formSlug}, FormSlug esperado: ${formSlug}`);
       if (event.detail?.formSlug === formSlug) {
         // De-dup simples por formSlug
         const sentMap = (window as any).__stepFormEventSent || {};
@@ -157,17 +146,15 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
-          console.log(`🚨 [STEP FORM DEBUG] Tentando enviar evento. fbq disponível:`, typeof (window as any).fbq);
           if (typeof window !== 'undefined' && (window as any).fbq) {
-            console.log(`🚨 [STEP FORM DEBUG] ENVIANDO EVENTO PARA FACEBOOK: ${eventName}`);
             (window as any).fbq('track', eventName, {
               content_name: `StepForm ${formSlug}`,
               form_slug: formSlug,
               page_url: window.location.href,
             });
-            console.log(`🚨 [STEP FORM DEBUG] ✅ Evento ${eventName} ENVIADO COM SUCESSO para Facebook Pixel`);
+            console.log(`✅ Evento ${eventName} enviado para Facebook Pixel`);
           } else {
-            console.error(`🚨 [STEP FORM DEBUG] ❌ Facebook Pixel NÃO DISPONÍVEL. fbq type:`, typeof (window as any).fbq);
+            console.warn('❌ Facebook Pixel não disponível no momento do envio');
           }
         }, 250); // Aguardar para o pixel estar pronto em produção
       }

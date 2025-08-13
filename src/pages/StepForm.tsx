@@ -147,12 +147,7 @@ const StepForm: React.FC = () => {
 
 
   // Load marketing scripts for this step form - usando memo para evitar recarregamentos
-  const marketingSlug = useMemo(() => {
-    console.log(`🚨 [CRITICAL] StepForm slug recebido: "${slug}"`);
-    return slug || '';
-  }, [slug]);
-  
-  console.log(`🚨 [CRITICAL] Inicializando useStepFormMarketingScripts com slug: "${marketingSlug}"`);
+  const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
 
   useEffect(() => {
