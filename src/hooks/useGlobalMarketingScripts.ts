@@ -140,6 +140,36 @@ export const useGlobalMarketingScripts = () => {
       // FORÇAR desabilitar eventos automáticos
       fbq('set', 'automaticMatching', false, '${pixelId}');
       
+      // INTERCEPTAR e bloquear eventos automáticos "Lead"
+      const originalFbq = window.fbq;
+      window.fbq = function() {
+        const args = Array.from(arguments);
+        
+        // Bloquear eventos "Lead" automáticos (não os do nosso hook)
+        if (args[0] === 'track' && args[1] === 'Lead') {
+          // Verificar se foi disparado pelo nosso hook específico
+          const stack = new Error().stack || '';
+          const isFromOurHook = stack.includes('useFormMarketingScripts') || 
+                                stack.includes('handleFormSuccess') ||
+                                stack.includes('implementFormFacebookPixel');
+          
+          if (!isFromOurHook) {
+            console.log('🚫 [BLOQUEIO] Evento Lead automático bloqueado');
+            return; // Bloquear o evento automático
+          }
+        }
+        
+        // Permitir todos os outros eventos
+        return originalFbq.apply(this, args);
+      };
+      
+      // Copiar propriedades do fbq original
+      Object.keys(originalFbq).forEach(key => {
+        if (typeof originalFbq[key] === 'function') {
+          window.fbq[key] = originalFbq[key];
+        }
+      });
+      
       // Apenas PageView inicial controlado
       fbq('track', 'PageView');
       
