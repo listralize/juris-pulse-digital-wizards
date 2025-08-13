@@ -132,21 +132,25 @@ export const useGlobalMarketingScripts = () => {
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       
-      // Configurar Pixel com autoConfig desabilitado
-      fbq('init', '${pixelId}', {}, { autoConfig: false });
+      // Configurar Pixel com autoConfig COMPLETAMENTE desabilitado
+      fbq('init', '${pixelId}', {}, { autoConfig: false, debug: false });
       fbq('set', 'autoConfig', false, '${pixelId}');
       fbq('set', 'agent', 'pllovable', '${pixelId}');
       
-      // Apenas PageView inicial
+      // FORÇAR desabilitar eventos automáticos
+      fbq('set', 'automaticMatching', false, '${pixelId}');
+      
+      // Apenas PageView inicial controlado
       fbq('track', 'PageView');
       
       ${customCode || ''}
       
-      // Flag para debug em produção
-      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
-      if (isProduction || window.location.hostname.includes('lovableproject.com')) {
+      // Flag para debug - funciona em qualquer domínio que não seja localhost
+      const isProduction = window.location.hostname !== 'localhost';
+      if (isProduction) {
         console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
         console.log('✅ [PROD] Pixel ID configurado:', '${pixelId}');
+        console.log('✅ [PROD] Hostname:', window.location.hostname);
       }
     `;
     script.setAttribute('data-marketing', 'fb-pixel-config');
