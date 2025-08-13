@@ -260,6 +260,14 @@ export const SocialProofConfigEditor: React.FC<{
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Toggle */}
+        <div className="flex items-center justify-between mb-2">
+          <Label className="text-base font-semibold">Ativar Prova Social</Label>
+          <Switch
+            checked={!!(config.enabled ?? false)}
+            onCheckedChange={(checked) => updateSocialProofConfig('enabled', checked)}
+          />
+        </div>
         {/* Statistics Section */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -378,15 +386,20 @@ export const SocialProofConfigEditor: React.FC<{
                   <div className="flex gap-3">
                     <div className="flex-1">
                       <Label>URL da Foto</Label>
-                      <Input
-                        value={testimonial.image}
-                        onChange={(e) => {
-                          const testimonials = [...(config.testimonials || [])];
-                          testimonials[index] = { ...testimonial, image: e.target.value };
-                          updateTestimonials(testimonials);
-                        }}
-                        placeholder="https://exemplo.com/foto.jpg"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={testimonial.image}
+                          onChange={(e) => {
+                            const testimonials = [...(config.testimonials || [])];
+                            testimonials[index] = { ...testimonial, image: e.target.value };
+                            updateTestimonials(testimonials);
+                          }}
+                          placeholder="https://exemplo.com/foto.jpg"
+                        />
+                        <Button variant="outline" size="sm" onClick={() => setGalleryIndex(index)}>
+                          Abrir Galeria
+                        </Button>
+                      </div>
                     </div>
                     <Button
                       variant="destructive"
@@ -406,6 +419,18 @@ export const SocialProofConfigEditor: React.FC<{
           </div>
         </div>
       </CardContent>
+      <ImageGallery
+        isOpen={galleryIndex !== null}
+        onClose={() => setGalleryIndex(null)}
+        selectedImage={galleryIndex !== null ? (config.testimonials || [])[galleryIndex]?.image : undefined}
+        onSelectImage={(url) => {
+          if (galleryIndex === null) return;
+          const testimonials = [...(config.testimonials || [])];
+          testimonials[galleryIndex] = { ...(testimonials[galleryIndex] || {}), image: url };
+          updateTestimonials(testimonials);
+          setGalleryIndex(null);
+        }}
+      />
     </Card>
   );
 };

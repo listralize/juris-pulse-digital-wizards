@@ -210,7 +210,7 @@ const QuestionNode = React.memo(({ data, id }: { data: StepFormNode['data']; id:
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-accent" />
+      {/* Removido handle genérico para forçar conexões por opção */}
     </div>
   );
 });
@@ -623,8 +623,17 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
   // Removed auto-save to prevent loops
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, type: 'smoothstep' }, eds)),
-    [setEdges]
+    (params: Connection) => {
+      // Se a origem é uma pergunta, exigir conexão a partir de uma opção específica
+      const sourceNode = nodes.find((n) => n.id === params.source);
+      const isQuestion = sourceNode && (sourceNode.type === 'question' || (sourceNode.data as any)?.options);
+      if (isQuestion && (!params.sourceHandle || !String(params.sourceHandle).startsWith('option-'))) {
+        toast.error('Conecte a partir da bolinha da opção (option-<n>) para mapear corretamente.');
+        return;
+      }
+      setEdges((eds) => addEdge({ ...params, type: 'smoothstep' }, eds));
+    },
+    [setEdges, nodes]
   );
 
   const onEdgeClick = useCallback(

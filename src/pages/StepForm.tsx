@@ -959,7 +959,8 @@ const StepForm: React.FC = () => {
                 </form>
               )}
               {/* Prova Social (Depoimentos/Estatísticas) */}
-              {currentStep.socialProofConfig && (currentStep.socialProofConfig.testimonials?.length > 0 || currentStep.socialProofConfig.stats?.length > 0) && (
+              {currentStep.socialProofConfig && ((currentStep.socialProofConfig as any).enabled ?? true) &&
+                (currentStep.socialProofConfig.testimonials?.length > 0 || currentStep.socialProofConfig.stats?.length > 0) && (
                 <div className="mt-6">
                   <SocialProofElement
                     config={currentStep.socialProofConfig}
