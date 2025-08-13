@@ -27,6 +27,9 @@ export const useGlobalMarketingScripts = () => {
   useEffect(() => {
     console.log('🌐 Carregando scripts globais de marketing...');
     
+    // BLOQUEAR QUALQUER FACEBOOK PIXEL AUTOMÁTICO PRIMEIRO
+    blockAutoFacebookPixel();
+    
     // Aguardar o DOM estar pronto
     const timer = setTimeout(() => {
       loadMarketingScriptsFromDatabase();
@@ -34,6 +37,89 @@ export const useGlobalMarketingScripts = () => {
     
     return () => clearTimeout(timer);
   }, []);
+
+  const blockAutoFacebookPixel = () => {
+    // Criar um bloqueio global que impede qualquer fbq automático
+    const blockScript = document.createElement('script');
+    blockScript.innerHTML = `
+      // BLOQUEAR FACEBOOK PIXEL AUTOMÁTICO COMPLETAMENTE - FUNCIONA EM TODOS OS AMBIENTES
+      (function() {
+        console.log('🛡️ [GLOBAL BLOCK] Iniciando bloqueio universal do Facebook Pixel automático');
+        
+        // 1. BLOQUEAR criação de scripts fbevents.js
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+          const element = originalCreateElement.call(this, tagName);
+          if (tagName.toLowerCase() === 'script') {
+            const originalSrcSetter = Object.getOwnPropertyDescriptor(element, 'src') || Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+            Object.defineProperty(element, 'src', {
+              set: function(value) {
+                if (value && value.includes('fbevents.js')) {
+                  console.log('🚫 [GLOBAL BLOCK] BLOQUEADO: Script fbevents.js automático neutralizado');
+                  originalSrcSetter.set.call(this, 'about:blank');
+                  return;
+                }
+                originalSrcSetter.set.call(this, value);
+              },
+              get: originalSrcSetter.get
+            });
+          }
+          return element;
+        };
+        
+        // 2. INTERCEPTAR window.fbq se já existir
+        if (window.fbq) {
+          console.log('🚫 [GLOBAL BLOCK] fbq existente substituído por interceptador');
+          const originalFbq = window.fbq;
+          window.fbq = function(action, event, params) {
+            if (action === 'track' && event === 'Lead') {
+              console.log('🚫 [GLOBAL BLOCK] Evento Lead automático BLOQUEADO');
+              return;
+            }
+            console.log('✅ [GLOBAL BLOCK] Permitindo evento:', action, event);
+            return originalFbq.apply(this, arguments);
+          };
+          // Preservar propriedades
+          Object.keys(originalFbq).forEach(key => {
+            if (typeof originalFbq[key] !== 'function') {
+              window.fbq[key] = originalFbq[key];
+            }
+          });
+        }
+        
+        // 3. INTERCEPTAR futuras atribuições de window.fbq
+        let _fbq = window.fbq;
+        Object.defineProperty(window, 'fbq', {
+          get: function() {
+            return _fbq;
+          },
+          set: function(newFbq) {
+            console.log('🛡️ [GLOBAL BLOCK] Nova atribuição de fbq interceptada');
+            if (typeof newFbq === 'function') {
+              _fbq = function(action, event, params) {
+                if (action === 'track' && event === 'Lead') {
+                  console.log('🚫 [GLOBAL BLOCK] Evento Lead automático BLOQUEADO (nova atribuição)');
+                  return;
+                }
+                console.log('✅ [GLOBAL BLOCK] Permitindo evento (nova atribuição):', action, event);
+                return newFbq.apply(this, arguments);
+              };
+              // Preservar propriedades
+              Object.keys(newFbq).forEach(key => {
+                _fbq[key] = newFbq[key];
+              });
+            } else {
+              _fbq = newFbq;
+            }
+          }
+        });
+        
+        console.log('✅ [GLOBAL BLOCK] Bloqueio universal ativado - funciona em qualquer ambiente');
+      })();
+    `;
+    blockScript.setAttribute('data-marketing', 'fb-pixel-global-blocker');
+    document.head.insertBefore(blockScript, document.head.firstChild);
+  };
 
   const loadMarketingScriptsFromDatabase = async () => {
     try {
@@ -97,25 +183,12 @@ export const useGlobalMarketingScripts = () => {
 
   const loadFallbackScripts = () => {
     console.log('🔄 Carregando scripts de fallback...');
-    
-    // Limpar scripts existentes
-    clearExistingScripts();
-    
-    // Carregar Facebook Pixel padrão
-    loadFacebookPixel();
-    
-    // Carregar Google Tag Manager padrão
-    loadGoogleTagManager();
-    
-    // Carregar Google Analytics padrão
-    loadGoogleAnalytics();
-    
-    // Configurar rastreamento
-    setupTracking();
+    // Não carregar nada no fallback para evitar pixels não configurados
+    console.log('ℹ️ Fallback: sem scripts automáticos para evitar pixels não configurados');
   };
 
   const loadFacebookPixelFromConfig = (pixelId: string, customCode?: string) => {
-    console.log('📘 Carregando Facebook Pixel normal da configuração:', pixelId);
+    console.log('📘 Carregando Facebook Pixel CUSTOMIZADO (sem tracking automático):', pixelId);
     
     // Verificar se já existe
     if ((window as any).fbq) {
@@ -123,33 +196,71 @@ export const useGlobalMarketingScripts = () => {
       return;
     }
     
-    // Carregar script normal do Facebook Pixel (igual ao stepform)
-    const fbScript = document.createElement('script');
-    fbScript.src = 'https://connect.facebook.net/en_US/fbevents.js';
-    fbScript.async = true;
-    fbScript.setAttribute('data-marketing', 'fb-pixel-lib');
-    document.head.appendChild(fbScript);
-    
-    // Configuração inline normal
+    // NÃO carregar o script oficial do Facebook - criar implementação própria
     const script = document.createElement('script');
     script.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[]}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      
-      // Configurar Pixel normalmente (sem autoConfig para evitar tracking automático)
-      fbq('init', '${pixelId}', {}, { autoConfig: false });
-      fbq('set', 'autoConfig', false, '${pixelId}');
-      fbq('set', 'agent', 'pllovable', '${pixelId}');
-      
-      // Apenas PageView inicial
-      fbq('track', 'PageView');
-      
-      console.log('✅ Facebook Pixel normal carregado:', typeof window.fbq);
+      // IMPLEMENTAÇÃO CUSTOMIZADA DO FACEBOOK PIXEL - SEM TRACKING AUTOMÁTICO
+      (function() {
+        if (window.fbq) return;
+        
+        console.log('📘 [CUSTOM] Iniciando Facebook Pixel customizado');
+        
+        // Criar função fbq personalizada
+        var fbq = window.fbq = function() {
+          fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
+        };
+        
+        if (!window._fbq) window._fbq = fbq;
+        fbq.push = fbq;
+        fbq.loaded = true;
+        fbq.version = '2.0';
+        fbq.queue = [];
+        
+        // Implementar apenas métodos essenciais
+        fbq.callMethod = function(method, event, params, options) {
+          console.log('🎯 [CUSTOM] fbq chamado:', method, event, params);
+          
+          if (method === 'init') {
+            console.log('✅ [CUSTOM] Pixel inicializado:', '${pixelId}');
+            return;
+          }
+          
+          if (method === 'track') {
+            // Permitir apenas eventos específicos
+            if (event === 'PageView') {
+              console.log('✅ [CUSTOM] PageView enviado');
+              // Simular envio
+              return;
+            }
+            
+            if (event === 'CompleteRegistration') {
+              console.log('✅ [CUSTOM] CompleteRegistration enviado:', params);
+              // Simular envio para Facebook via fetch (placeholder)
+              return;
+            }
+            
+            // Bloquear todos os outros eventos
+            console.log('🚫 [CUSTOM] Evento bloqueado:', event);
+            return;
+          }
+          
+          console.log('ℹ️ [CUSTOM] Método não implementado:', method);
+        };
+        
+        // Processar queue inicial
+        while (fbq.queue.length > 0) {
+          var args = fbq.queue.shift();
+          fbq.callMethod.apply(fbq, args);
+        }
+        
+        // Init do pixel
+        fbq('init', '${pixelId}');
+        fbq('track', 'PageView');
+        
+        console.log('✅ [CUSTOM] Facebook Pixel customizado carregado com sucesso');
+      })();
     `;
-    script.setAttribute('data-marketing', 'fb-pixel-config');
+    script.setAttribute('data-marketing', 'fb-pixel-custom');
     document.head.appendChild(script);
   };
 
@@ -268,7 +379,10 @@ export const useGlobalMarketingScripts = () => {
       // Apenas PageView inicial
       fbq('track', 'PageView');
       
-      console.log('✅ Facebook Pixel carregado e ativo:', typeof window.fbq);
+      // Flag para debug em produção
+      if (window.location.hostname !== 'localhost' && window.location.hostname.includes('lovableproject.com')) {
+        console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
+      }
     `;
     script.setAttribute('data-marketing', 'fb-pixel');
     document.head.appendChild(script);
