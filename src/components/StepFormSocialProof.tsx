@@ -66,8 +66,10 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
     try {
       const { data, error } = await supabase
         .from('admin_settings')
-        .select('global_social_proof')
-        .single();
+        .select('global_social_proof, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
 

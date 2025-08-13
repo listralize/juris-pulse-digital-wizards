@@ -68,7 +68,9 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
     try {
       const { data, error } = await supabase
         .from('admin_settings')
-        .select('global_social_proof')
+        .select('global_social_proof, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {

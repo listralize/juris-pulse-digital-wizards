@@ -68,7 +68,9 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
       setLoading(true);
       const { data, error } = await supabase
         .from('admin_settings')
-        .select('global_social_proof')
+        .select('id, global_social_proof, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
@@ -99,6 +101,8 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
       const { data: existingData, error: fetchError } = await supabase
         .from('admin_settings')
         .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (fetchError && fetchError.code !== 'PGRST116') {

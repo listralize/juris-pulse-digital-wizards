@@ -105,17 +105,16 @@ export const LeadsManagement: React.FC = () => {
     }
   };
 
-  // Helper para parsear dados do lead (assíncrono)
-  const parseLeadData = async (leadData: any) => {
+  // Helper para parsear dados do lead (SINCRONO)
+  const parseLeadData = (leadData: any) => {
     try {
       if (typeof leadData === 'string') {
-        leadData = JSON.parse(leadData);
+        try { leadData = JSON.parse(leadData); } catch {}
       }
-      
-      // Extrair dados de diferentes estruturas
-      let extractedData = {
+
+      const result = {
         name: 'Nome não informado',
-        email: 'Email não informado', 
+        email: 'Email não informado',
         phone: 'N/A',
         service: 'N/A',
         message: '',
@@ -123,132 +122,57 @@ export const LeadsManagement: React.FC = () => {
         ddd: null as number | null,
         state: null as string | null,
         capital: null as string | null,
-        region: null as string | null
+        region: null as string | null,
       };
 
-      // Tentar extrair nome
-      extractedData.name = leadData?.name || leadData?.nome || leadData?.Name || 
-                          leadData?.userName || leadData?.user_name || 
-                          leadData?.fullName || leadData?.full_name || 'Nome não informado';
-
-      // Tentar extrair email
-      extractedData.email = leadData?.email || leadData?.Email || 
-                           leadData?.userEmail || leadData?.user_email || 'Email não informado';
-
-      // Tentar extrair telefone - parsing mais abrangente para stepform
-      const phoneFields = [
-        leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone,
-        leadData?.['Telefone/WhatsApp'], leadData?.whatsapp, leadData?.Whatsapp,
-        leadData?.phoneNumber, leadData?.phone_number, leadData?.userPhone, 
-        leadData?.user_phone, leadData?.tel, leadData?.celular
-      ];
-      
-      // Primeiro tentar campos diretos
-      let foundPhone = phoneFields.find(field => 
-        field && typeof field === 'string' && field.trim() !== '' && field !== 'N/A'
-      );
-
-      if (!foundPhone && typeof leadData === 'object') {
-        // Primeiro verificar em respostas_mapeadas para stepform
-        if (leadData?.respostas_mapeadas) {
-          const mappedEntries = Object.entries(leadData.respostas_mapeadas);
-          for (const [key, value] of mappedEntries) {
-            if (typeof value === 'string' && value.trim() !== '') {
-              // Verificar se é um campo que pode conter telefone
-              if (key.toLowerCase().includes('telefone') || 
-                  key.toLowerCase().includes('phone') ||
-                  key.toLowerCase().includes('whatsapp') ||
-                  key.toLowerCase().includes('tel') ||
-                  key.toLowerCase().includes('celular') ||
-                  /^\(?[\d\s\-\(\)+]{10,}$/.test(value)) {
-                const cleanPhone = value.replace(/\D/g, '');
-                if (cleanPhone.length >= 10) {
-                  foundPhone = value;
-                  break;
-                }
-              }
-            }
-          }
+      // Nome
+      result.name = leadData?.name || leadData?.nome || leadData?.Name || leadData?.full_name || leadData?.fullName || result.name;
+      // Procurar em respostas_mapeadas caso não tenha
+      if ((!result.name || result.name === 'Nome não informado') && leadData?.respostas_mapeadas) {
+        for (const [k, v] of Object.entries(leadData.respostas_mapeadas)) {
+          if (typeof v === 'string' && (/nome|name/i).test(k) && v.trim()) { result.name = v; break; }
         }
-        
-        // Se ainda não encontrou, verificar nos campos diretos
-        if (!foundPhone) {
-          const stepFormFields = Object.entries(leadData || {});
-          for (const [key, value] of stepFormFields) {
-            if (typeof value === 'string' && value.trim() !== '') {
-              // Verificar se é um campo que pode conter telefone
-              if (key.toLowerCase().includes('telefone') || 
-                  key.toLowerCase().includes('phone') ||
-                  key.toLowerCase().includes('whatsapp') ||
-                  key.toLowerCase().includes('tel') ||
-                  key.toLowerCase().includes('celular') ||
-                  /^\(?[\d\s\-\(\)+]{10,}$/.test(value)) {
-                const cleanPhone = value.replace(/\D/g, '');
-                if (cleanPhone.length >= 10) {
-                  foundPhone = value;
-                  break;
-                }
-              }
+      }
+
+      // Email
+      result.email = leadData?.email || leadData?.Email || result.email;
+      if ((result.email === 'Email não informado' || !result.email) && leadData?.respostas_mapeadas) {
+        for (const [k, v] of Object.entries(leadData.respostas_mapeadas)) {
+          if (typeof v === 'string' && (/email/i).test(k) && v.trim()) { result.email = v; break; }
+        }
+      }
+
+      // Telefone (varias chaves + fallback em respostas_mapeadas)
+      const directPhones = [leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone, leadData?.whatsapp, leadData?.Whatsapp, leadData?.phoneNumber, leadData?.phone_number, leadData?.tel, leadData?.celular].filter(Boolean) as string[];
+      let foundPhone = directPhones.find(p => typeof p === 'string' && p.trim() !== '') || '';
+      if (!foundPhone && leadData && typeof leadData === 'object') {
+        const entries = Object.entries(leadData.respostas_mapeadas || leadData);
+        for (const [k, v] of entries) {
+          if (typeof v === 'string' && v.trim()) {
+            if (/telefone|phone|whatsapp|tel|celular/i.test(k) || /\d{10,}/.test(v.replace(/\D/g, ''))) {
+              foundPhone = v; break;
             }
           }
         }
       }
-      
-      extractedData.phone = foundPhone || 'N/A';
+      result.phone = foundPhone || 'N/A';
 
-      // Extrair DDD e localização se temos telefone
-      if (foundPhone && foundPhone !== 'N/A') {
-        const phoneNumbers = foundPhone.replace(/\D/g, '');
-        let ddd = null;
-        
-        // Extrair DDD baseado no tamanho do número
-        if (phoneNumbers.length >= 10) {
-          if (phoneNumbers.startsWith('55') && phoneNumbers.length >= 12) {
-            // Número com código do país (55)
-            ddd = parseInt(phoneNumbers.substring(2, 4));
-          } else {
-            // Número sem código do país
-            ddd = parseInt(phoneNumbers.substring(0, 2));
-          }
-          
-          // Validar se é um DDD válido (11-99)
-          if (ddd >= 11 && ddd <= 99) {
-            extractedData.ddd = ddd;
-            
-            // Buscar localização no banco de dados
-            try {
-              const { data: locationData } = await supabase
-                .from('ddd_locations')
-                .select('state_name, capital, region')
-                .eq('ddd', ddd)
-                .maybeSingle();
-              
-              if (locationData) {
-                extractedData.state = locationData.state_name;
-                extractedData.capital = locationData.capital;
-                extractedData.region = locationData.region;
-              }
-            } catch (error) {
-              console.error('Erro ao buscar localização:', error);
-            }
-          }
+      // DDD local (sem chamadas externas)
+      if (result.phone && result.phone !== 'N/A') {
+        const digits = result.phone.replace(/\D/g, '');
+        let ddd: number | null = null;
+        if (digits.length >= 10) {
+          ddd = digits.startsWith('55') && digits.length >= 12 ? parseInt(digits.substring(2, 4)) : parseInt(digits.substring(0, 2));
+          if (!isNaN(ddd) && ddd >= 11 && ddd <= 99) result.ddd = ddd;
         }
       }
 
-      // Tentar extrair serviço
-      extractedData.service = leadData?.service || leadData?.servico || leadData?.Service || 
-                             leadData?.serviceType || leadData?.service_type || 
-                             leadData?.category || leadData?.categoria || 'N/A';
+      // Serviço, mensagem e urgência
+      result.service = leadData?.service || leadData?.servico || leadData?.Service || leadData?.category || leadData?.categoria || 'N/A';
+      result.message = leadData?.message || leadData?.mensagem || leadData?.Message || leadData?.descricao || leadData?.description || '';
+      result.urgent = Boolean(leadData?.urgent || leadData?.urgente);
 
-      // Tentar extrair mensagem
-      extractedData.message = leadData?.message || leadData?.mensagem || leadData?.Message || 
-                             leadData?.description || leadData?.descricao || 
-                             leadData?.comment || leadData?.comentario || '';
-
-      // Tentar extrair urgência
-      extractedData.urgent = leadData?.urgent || leadData?.urgente || false;
-
-      return extractedData;
+      return result;
     } catch (error) {
       console.error('Erro ao parsear lead_data:', error);
       return {
@@ -261,7 +185,7 @@ export const LeadsManagement: React.FC = () => {
         ddd: null,
         state: null,
         capital: null,
-        region: null
+        region: null,
       };
     }
   };
@@ -285,28 +209,40 @@ export const LeadsManagement: React.FC = () => {
         return;
       }
 
-      // Buscar informações de cidades para os DDDs
+      // Buscar informações para os DDDs
       const ddds = [...new Set(leadsData?.map(lead => lead.ddd).filter(Boolean))];
-      let dddLocationsMap = new Map();
+      type DDDInfo = { state_name: string; region: string; capital: string; cities?: string };
+      const dddLocationsMap = new Map<number, DDDInfo>();
       
       if (ddds.length > 0) {
         const { data: dddData } = await supabase
           .from('ddd_locations')
-          .select('ddd, cities')
-          .in('ddd', ddds);
+          .select('ddd, state_name, region, capital, cities')
+          .in('ddd', ddds as number[]);
         
         if (dddData) {
-          dddData.forEach(location => {
-            dddLocationsMap.set(location.ddd, location.cities);
+          dddData.forEach((location: any) => {
+            dddLocationsMap.set(location.ddd, {
+              state_name: location.state_name,
+              region: location.region,
+              capital: location.capital,
+              cities: location.cities,
+            });
           });
         }
       }
 
-      // Enriquecer os leads com informações de cidade
-      const enrichedLeads = leadsData?.map(lead => ({
-        ...lead,
-        ddd_locations: lead.ddd ? { cities: dddLocationsMap.get(lead.ddd) } : null
-      })) || [];
+      // Enriquecer os leads com informações de localização (fallback via DDD)
+      const enrichedLeads = (leadsData || []).map((lead: any) => {
+        const info = lead.ddd ? dddLocationsMap.get(lead.ddd) : undefined;
+        return {
+          ...lead,
+          state: lead.state || info?.state_name || null,
+          capital: lead.capital || info?.capital || null,
+          region: lead.region || info?.region || null,
+          ddd_locations: lead.ddd && info ? { cities: info.cities } : null,
+        };
+      });
 
       // Processar e enriquecer dados
       const processedLeads = enrichedLeads.map(lead => {
