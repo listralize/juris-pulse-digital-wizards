@@ -142,6 +142,9 @@ const StepForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{[key: string]: number}>({});
+  // Histórico de navegação para o botão Voltar funcionar de forma previsível
+  const [history, setHistory] = useState<string[]>([]);
+
 
   // Load marketing scripts for this step form - usando memo para evitar recarregamentos
   const marketingSlug = useMemo(() => slug || '', [slug]);
@@ -158,6 +161,7 @@ const StepForm: React.FC = () => {
       // Determinar o primeiro step baseado no flow_config - só uma vez
       const firstStepId = getFirstStepFromFlow() || form.steps[0].id;
       setCurrentStepId(firstStepId);
+      setHistory([]); // Reinicia o histórico quando definimos o primeiro passo
     }
   }, [form, currentStepId]);
 
@@ -302,6 +306,8 @@ const StepForm: React.FC = () => {
       const targetStep = form?.steps.find(step => step.id === targetStepId);
       if (targetStep) {
         console.log('✅ Navegando para step:', targetStepId);
+        // Empilha o step atual para permitir Voltar corretamente
+        setHistory((prev) => [...prev, currentStepId]);
         setCurrentStepId(targetStepId);
       } else {
         toast({
@@ -698,10 +704,9 @@ const StepForm: React.FC = () => {
     return step;
   };
 
-  const getBackStep = (currentStep: StepFormStep) => {
-    const currentIndex = form?.steps.findIndex(step => step.id === currentStep.id) || 0;
-    if (currentIndex > 0) {
-      return form?.steps[currentIndex - 1].id;
+  const getBackStep = (_currentStep: StepFormStep) => {
+    if (history.length > 0) {
+      return history[history.length - 1];
     }
     return null;
   };
@@ -774,7 +779,13 @@ const StepForm: React.FC = () => {
               {getBackStep(currentStep) && (
                 <Button
                   variant="ghost"
-                  onClick={() => setCurrentStepId(getBackStep(currentStep)!)}
+                  onClick={() => {
+                    const prevId = getBackStep(currentStep);
+                    if (prevId) {
+                      setHistory((prev) => prev.slice(0, -1));
+                      setCurrentStepId(prevId);
+                    }
+                  }}
                   className="mb-4 p-0 h-auto"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -978,7 +989,10 @@ const StepForm: React.FC = () => {
         )}
 
         {/* Depoimentos fixos acima do rodapé */}
-        <StepFormTestimonials formId={form.slug} />
+        <StepFormTestimonials 
+          formId={form.slug} 
+          config={(form.seo_config as any)?.social_proof?.enabled ? (form.seo_config as any)?.social_proof : undefined}
+        />
 
         {/* Custom Footer */}
         {form.footer_config?.enabled && (

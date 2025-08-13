@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Badge } from '../ui/badge';
 import { Plus, Trash2, Star, Timer, Gift } from 'lucide-react';
+import { ImageGallery } from './ImageGallery';
 
 interface StepFormStep {
   offerConfig?: any;
@@ -235,6 +236,8 @@ export const SocialProofConfigEditor: React.FC<{
   updateStep: (field: string, value: any) => void;
 }> = ({ step, updateStep }) => {
   const config = step.socialProofConfig || {};
+
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
 
   const updateSocialProofConfig = (field: string, value: any) => {
     updateStep('socialProofConfig', { ...config, [field]: value });
