@@ -134,62 +134,16 @@ export const useDirectMarketingScripts = () => {
   const setupEvents = () => {
     console.log('📝 Configurando eventos de conversão');
     
-    // StepForm
-    const handleStepForm = (event: CustomEvent) => {
-      const d = event.detail || {};
-      console.log('🎯 StepForm submit detectado:', d);
-      setTimeout(() => {
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'Contact', {
-            content_name: 'StepForm Contact',
-            form_slug: d.formSlug || 'stepform',
-            page_url: window.location.href,
-          });
-          console.log('✅ FB Pixel Contact enviado (StepForm)');
-        }
-        if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({ event: 'stepform_conversion', form_slug: d.formSlug || 'stepform' });
-          console.log('✅ GTM stepform_conversion enviado');
-        }
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'conversion', { event_category: 'Lead Generation', event_label: 'StepForm' });
-          console.log('✅ GA conversion enviado (StepForm)');
-        }
-      }, 150);
-    };
+    // StepForm: gestão de eventos movida para useStepFormMarketingScripts
 
-    // Forms HTML
-    const handleFormSubmit = (e: Event) => {
-      const form = e.target as HTMLFormElement;
-      if (form?.tagName !== 'FORM') return;
-      console.log('📝 HTML form submit detectado');
-      setTimeout(() => {
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'SubmitApplication', { content_name: 'Contact Form Submit', page_url: window.location.href });
-          console.log('✅ FB Pixel SubmitApplication enviado (Contact)');
-        }
-        if ((window as any).dataLayer) {
-          (window as any).dataLayer.push({ event: 'contact_conversion' });
-          console.log('✅ GTM contact_conversion enviado');
-        }
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'conversion', { event_category: 'Lead Generation', event_label: 'Contact Form' });
-          console.log('✅ GA conversion enviado (Contact)');
-        }
-      }, 150);
-    };
 
-    // Clean up then add
-    window.removeEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
-    document.removeEventListener('submit', handleFormSubmit, true);
+    // Eventos de formulário serão tratados pelos hooks dedicados (useStepFormMarketingScripts e useFormMarketingScripts)
 
-    window.addEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
-    document.addEventListener('submit', handleFormSubmit, true);
 
     // Função de teste
     (window as any).testMarketingEvents = () => {
       console.log('🧪 Disparando eventos de teste...');
-      if ((window as any).fbq) (window as any).fbq('track', 'Lead', { content_name: 'Test Event' });
+      if ((window as any).fbq) (window as any).fbq('track', 'Contact', { content_name: 'Test Event' });
       if ((window as any).dataLayer) (window as any).dataLayer.push({ event: 'test_conversion' });
       if ((window as any).gtag) (window as any).gtag('event', 'conversion', { event_category: 'Test', event_label: 'Manual' });
     };
