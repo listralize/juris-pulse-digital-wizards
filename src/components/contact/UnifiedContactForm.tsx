@@ -93,9 +93,9 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   const activeFormId = (formId || formConfig?.id || 'default');
   console.log('🚨 [UNIFIED DEBUG] FormId para marketing:', activeFormId);
   console.log('🚨 [UNIFIED DEBUG] FormConfig:', formConfig);
-  console.log('🚨 [UNIFIED DEBUG] Chamando useFormMarketingScripts com:', activeFormId);
-  console.log('🚨 [UNIFIED DEBUG] Hook vai executar agora...');
-  console.log('🚨 [UNIFIED DEBUG] Component montado, executando hook...');
+  
+  // Hook para scripts de marketing - sempre usar 'default' para formulário principal
+  useFormMarketingScripts('default');
   
   // FORÇA o carregamento do pixel se for o formulário padrão
   React.useEffect(() => {

@@ -29,13 +29,10 @@ export const useFormMarketingScripts = (formId: string) => {
   };
   
   useEffect(() => {
-    console.log(`🚨 [FORM MARKETING DEBUG] useEffect executado com formId: "${formId}"`);
-    console.log(`🚨 [FORM MARKETING DEBUG] formId tipo:`, typeof formId);
-    console.log(`🚨 [FORM MARKETING DEBUG] formId é válido:`, !!formId);
-    console.log(`🚨 [FORM MARKETING DEBUG] window.fbq disponível:`, typeof (window as any).fbq);
-    
+    console.log(`🔥 [FORM MARKETING] Hook executado para formId: "${formId}"`);
+    console.log(`🔥 [FORM MARKETING] window.fbq status:`, typeof (window as any).fbq);
     if (!formId) {
-      console.log(`🚨 [FORM MARKETING DEBUG] FormId inválido - saindo`);
+      console.log(`❌ [FORM MARKETING] FormId inválido - abortando`);
       return;
     }
 
