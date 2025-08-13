@@ -144,8 +144,20 @@ export const useFormMarketingScripts = (formId: string) => {
   };
 
   const normalizePixelEventName = (eventType?: string, custom?: string) => {
-    if (!eventType) return null;
-    if (eventType === 'Custom') return (custom || '').trim() || null;
+    console.log(`🚨 [NORMALIZE DEBUG] Input eventType:`, eventType);
+    console.log(`🚨 [NORMALIZE DEBUG] Input custom:`, custom);
+    
+    if (!eventType) {
+      console.log(`🚨 [NORMALIZE DEBUG] Sem eventType - retornando null`);
+      return null;
+    }
+    
+    if (eventType === 'Custom') {
+      const result = (custom || '').trim() || null;
+      console.log(`🚨 [NORMALIZE DEBUG] Custom event resultado:`, result);
+      return result;
+    }
+    
     const map: Record<string, string> = {
       Lead: 'Lead',
       Purchase: 'Purchase',
@@ -161,7 +173,15 @@ export const useFormMarketingScripts = (formId: string) => {
       InitiateCheckout: 'InitiateCheckout',
       'Initiate Checkout': 'InitiateCheckout',
     };
-    return map[eventType] || eventType.replace(/\s+/g, '');
+    
+    const result = map[eventType] || eventType.replace(/\s+/g, '');
+    console.log(`🚨 [NORMALIZE DEBUG] Mapeamento encontrado:`, {
+      input: eventType,
+      mapped: result,
+      mapUsed: !!map[eventType]
+    });
+    
+    return result;
   };
 
   const implementFormFacebookPixel = (formConfig: any) => {
@@ -191,19 +211,26 @@ export const useFormMarketingScripts = (formId: string) => {
       if (event.detail?.formId === formId) {
         // Log para debug em produção  
         const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
-        if (isProduction) {
-          console.log(`✅ [PROD] Formulário ${formId} enviado - rastreando com Facebook Pixel`);
-        }
+        
+        console.log(`🚨 [CRITICAL DEBUG] Formulário ${formId} enviado - iniciando processo Facebook Pixel`);
+        console.log(`🚨 [CRITICAL DEBUG] Configuração FB:`, facebookPixel);
+        console.log(`🚨 [CRITICAL DEBUG] EventType raw:`, facebookPixel.eventType);
+        console.log(`🚨 [CRITICAL DEBUG] CustomEventName:`, facebookPixel.customEventName);
         
         // Aguardar um momento para garantir que fbq está disponível
         setTimeout(() => {
           if (typeof window !== 'undefined' && (window as any).fbq) {
             const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
+            
+            console.log(`🚨 [CRITICAL DEBUG] Evento resolvido final:`, resolvedEvent);
+            console.log(`🚨 [CRITICAL DEBUG] Função normalizePixelEventName resultado:`, {
+              input: facebookPixel.eventType,
+              custom: facebookPixel.customEventName,
+              output: resolvedEvent
+            });
 
             if (!resolvedEvent) {
-              if (isProduction) {
-                console.log(`ℹ️ [PROD] Nenhum evento configurado para ${formId}`);
-              }
+              console.log(`🚨 [CRITICAL DEBUG] NENHUM EVENTO - saindo da função`);
               dlog(`ℹ️ Nenhum evento configurado para ${formId}`);
               return;
             }
@@ -211,9 +238,7 @@ export const useFormMarketingScripts = (formId: string) => {
             // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
             const sentMap = (window as any).__formEventSent || {};
             if (sentMap[formId] && (Date.now() - sentMap[formId]) < 5000) {
-              if (isProduction) {
-                console.log(`⏭️ [PROD] Evento ignorado (duplicado) para formulário: ${formId}`);
-              }
+              console.log(`🚨 [CRITICAL DEBUG] EVENTO DUPLICADO - ignorando`);
               dlog(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
               return;
             }
@@ -232,6 +257,9 @@ export const useFormMarketingScripts = (formId: string) => {
             }, 10000);
             
             try {
+              console.log(`🚨 [CRITICAL DEBUG] ENVIANDO EVENTO PARA FACEBOOK:`, resolvedEvent);
+              console.log(`🚨 [CRITICAL DEBUG] fbq função disponível:`, typeof (window as any).fbq);
+              
               (window as any).fbq('track', resolvedEvent, {
                 content_name: formConfig.campaignName || 'Form Submission',
                 form_id: formId,
@@ -240,9 +268,7 @@ export const useFormMarketingScripts = (formId: string) => {
                 user_data: event.detail?.userData || {}
               });
               
-              if (isProduction) {
-                console.log(`📊 [PROD] Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
-              }
+              console.log(`🚨 [CRITICAL DEBUG] EVENTO ENVIADO COM SUCESSO:`, resolvedEvent);
               dlog(`📊 Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
             } catch (error) {
               console.error('❌ Erro ao enviar evento do Facebook Pixel:', error);
@@ -254,6 +280,8 @@ export const useFormMarketingScripts = (formId: string) => {
             console.log('🔍 Debug: window objeto:', typeof window);
           }
         }, 500); // Aumentar timeout para produção
+      } else {
+        console.log(`🚨 [CRITICAL DEBUG] Evento ignorado - formId não confere. Esperado: ${formId}, Recebido: ${event.detail?.formId}`);
       }
     };
 
