@@ -545,11 +545,55 @@ const StepForm: React.FC = () => {
       
       console.log('📢 Evento de sucesso sendo disparado:', eventDetail);
       
-      // Aguardar um tick para garantir que os scripts estão carregados
+      // Disparar evento imediatamente
+      window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
+      console.log('✅ Evento stepFormSubmitSuccess disparado imediatamente');
+      
+      // Aguardar um tick adicional para garantir que scripts lentos capturem o evento
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
-        console.log('✅ Evento stepFormSubmitSuccess disparado após timeout');
+        console.log('✅ Evento stepFormSubmitSuccess disparado após timeout (fallback)');
       }, 100);
+      
+      // Disparar eventos diretos também para garantir que funcionem
+      setTimeout(() => {
+        // Facebook Pixel direto
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'Lead', {
+            content_name: 'StepForm Lead Generation',
+            form_slug: slug,
+            value: 1,
+            currency: 'BRL',
+            page_url: window.location.href
+          });
+          console.log('📊 Evento Lead enviado DIRETAMENTE para Facebook Pixel');
+        }
+        
+        // GTM direto
+        if ((window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: 'stepform_lead_generation',
+            form_slug: slug,
+            value: 1,
+            currency: 'BRL',
+            event_category: 'Lead Generation',
+            event_action: 'StepForm Submit',
+            page_url: window.location.href
+          });
+          console.log('📊 Evento enviado DIRETAMENTE para GTM dataLayer');
+        }
+        
+        // GA direto
+        if ((window as any).gtag) {
+          (window as any).gtag('event', 'form_submit', {
+            event_category: 'Lead Generation',
+            event_label: 'StepForm Submit',
+            form_slug: slug,
+            value: 1
+          });
+          console.log('📊 Evento enviado DIRETAMENTE para Google Analytics');
+        }
+      }, 200);
 
       // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.
       // O hook useStepFormMarketingScripts ouvirá 'stepFormSubmitSuccess' e enviará o evento configurado.
