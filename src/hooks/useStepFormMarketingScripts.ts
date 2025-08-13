@@ -84,8 +84,8 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         implementStepFormScripts(stepFormConfig);
       } else {
         console.log(`⚠️ StepForm ${formSlug} não encontrado ou sem tracking_config`);
-        // Remover scripts se não há configuração
-        removeStepFormScripts(formSlug);
+        // Implementar fallback para rastreamento básico quando configuração estiver desabilitada
+        implementFallbackTracking(formSlug);
       }
     } catch (error) {
       console.error('❌ Erro ao carregar configuração do StepForm:', error);
@@ -137,6 +137,49 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     if (stepFormConfig.customBodyHtml) {
       implementStepFormCustomBody(stepFormConfig);
     }
+  };
+
+  const implementFallbackTracking = (formSlug: string) => {
+    console.log(`🔧 Implementando fallback para ${formSlug}`);
+    
+    // Remover listeners antigos
+    removeStepFormScripts(formSlug);
+    
+    // Adicionar listener básico para debug
+    const handleFallbackSuccess = (event: CustomEvent) => {
+      if (event.detail?.formSlug === formSlug) {
+        console.log(`✅ StepForm ${formSlug} - Evento capturado (fallback)`, event.detail);
+        
+        // Tentar disparar eventos básicos se os scripts estiverem disponíveis
+        if ((window as any).fbq) {
+          try {
+            (window as any).fbq('track', 'Lead', { form_id: formSlug });
+            console.log(`📘 Fallback: Facebook Pixel Lead enviado para ${formSlug}`);
+          } catch(e) { console.log('📘 Fallback: Erro no Facebook Pixel:', e); }
+        }
+        
+        if ((window as any).gtag) {
+          try {
+            (window as any).gtag('event', 'form_submit', { form_id: formSlug });
+            console.log(`📊 Fallback: Google Analytics enviado para ${formSlug}`);
+          } catch(e) { console.log('📊 Fallback: Erro no Google Analytics:', e); }
+        }
+        
+        if ((window as any).dataLayer) {
+          try {
+            (window as any).dataLayer.push({ event: 'submit', form_id: formSlug });
+            console.log(`🏷️ Fallback: GTM enviado para ${formSlug}`);
+          } catch(e) { console.log('🏷️ Fallback: Erro no GTM:', e); }
+        }
+      }
+    };
+    
+    // Registrar listener
+    const handlersMap = (window as any).__stepFormMarketingHandlers || {};
+    handlersMap[formSlug] = { fallback: handleFallbackSuccess };
+    (window as any).__stepFormMarketingHandlers = handlersMap;
+    
+    window.addEventListener('stepFormSubmitSuccess', handleFallbackSuccess as EventListener);
   };
 
   const removeStepFormScripts = (formSlug: string) => {

@@ -137,16 +137,23 @@ return (
 
       // Se redirect estiver habilitado
       if (page.redirectEnabled && page.redirectUrl) {
-        const target = page.redirectUrl;
+        const target = page.redirectUrl.trim();
         const isExternal = /^https?:\/\//i.test(target);
         const RedirectElement = () => {
           useEffect(() => {
+            console.log(`🔗 Redirecionando de ${normalizedPath} para ${target}`);
             if (isExternal) {
-              window.location.assign(target);
+              // Redirecionar imediatamente para URL externa
+              window.location.replace(target);
             }
           }, []);
           return isExternal ? (
-            <div className="min-h-[40vh] flex items-center justify-center">Redirecionando...</div>
+            <div className="min-h-[40vh] flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                Redirecionando...
+              </div>
+            </div>
           ) : (
             <Navigate to={target.startsWith('/') ? target : `/${target}`} replace />
           );

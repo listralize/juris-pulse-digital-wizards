@@ -28,6 +28,13 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page, onUpdatePage }) =>
     onUpdatePage(page.id, field, value);
   };
 
+  const handleRedirectUrlBlur = (value: string) => {
+    if (page.redirectEnabled && value !== page.redirectUrl) {
+      console.log('🔗 Salvando URL de redirecionamento:', value);
+      onUpdatePage(page.id, 'redirectUrl', value);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="basic" className="w-full">
@@ -93,6 +100,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page, onUpdatePage }) =>
         <Input
           value={page.redirectUrl || ''}
           onChange={(e) => handleInputChange('redirectUrl', e.target.value)}
+          onBlur={(e) => handleRedirectUrlBlur(e.target.value)}
           className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
           placeholder="https://exemplo.com/servico-ou-/services/slug"
         />
