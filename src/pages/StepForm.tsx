@@ -557,16 +557,16 @@ const StepForm: React.FC = () => {
       
       // Disparar eventos diretos também para garantir que funcionem
       setTimeout(() => {
-        // Facebook Pixel direto
+        // Facebook Pixel direto com evento Contact
         if ((window as any).fbq) {
-          (window as any).fbq('track', 'Lead', {
-            content_name: 'StepForm Lead Generation',
+          (window as any).fbq('track', 'Contact', {
+            content_name: 'StepForm Contact',
             form_slug: slug,
             value: 1,
             currency: 'BRL',
             page_url: window.location.href
           });
-          console.log('📊 Evento Lead enviado DIRETAMENTE para Facebook Pixel');
+          console.log('📊 Evento Contact enviado DIRETAMENTE para Facebook Pixel');
         }
         
         // GTM direto
