@@ -17,9 +17,9 @@ import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
 // MarketingManagement removido - usando sistema simplificado
-import { LeadsManagement } from '../components/admin/LeadsManagement';
+import { SimplePixelManager } from '../components/admin/SimplePixelManager';
 import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
-import { StepFormBuilder } from '../components/admin/StepFormBuilder';
+// StepFormBuilder removido - sistema simplificado
 
 
 import { defaultPageTexts } from '../data/defaultPageTexts';
@@ -284,7 +284,9 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="leads">
-                <LeadsManagement />
+                <div className="text-center py-8">
+                  <p>Gerenciamento de leads via banco de dados</p>
+                </div>
               </TabsContent>
 
               <TabsContent value="email-templates">
@@ -292,13 +294,13 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="step-forms">
-                <StepFormBuilder />
+                <div className="text-center py-8">
+                  <p>Gerenciamento de StepForms simplificado - via banco de dados</p>
+                </div>
               </TabsContent>
 
               <TabsContent value="marketing">
-                <div className="text-center py-8">
-                  <p>Sistema de marketing simplificado - configuração via banco de dados</p>
-                </div>
+                <SimplePixelManager />
               </TabsContent>
             </Tabs>
           </div>

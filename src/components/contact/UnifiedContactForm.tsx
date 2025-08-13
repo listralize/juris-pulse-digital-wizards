@@ -2,7 +2,7 @@
 import React from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
-import { useFormPixelTracking } from "../../hooks/useFormPixelTracking";
+import { useFormPixel } from "../../hooks/useFormPixel";
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
 
@@ -88,9 +88,9 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
   const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
 
-  // Implementar pixel tracking usando o ID real do formulário
+  // Implementar pixel usando o ID real do formulário
   const activeFormId = (formId || formConfig?.id || 'default');
-  useFormPixelTracking(activeFormId);
+  useFormPixel(activeFormId);
 
   // Pre-selecionar serviço se fornecido
   React.useEffect(() => {
