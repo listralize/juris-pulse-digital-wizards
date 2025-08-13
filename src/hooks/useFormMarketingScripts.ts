@@ -32,6 +32,7 @@ export const useFormMarketingScripts = (formId: string) => {
     console.log(`🚨 [FORM MARKETING DEBUG] useEffect executado com formId: "${formId}"`);
     console.log(`🚨 [FORM MARKETING DEBUG] formId tipo:`, typeof formId);
     console.log(`🚨 [FORM MARKETING DEBUG] formId é válido:`, !!formId);
+    console.log(`🚨 [FORM MARKETING DEBUG] window.fbq disponível:`, typeof (window as any).fbq);
     
     if (!formId) {
       console.log(`🚨 [FORM MARKETING DEBUG] FormId inválido - saindo`);
@@ -105,6 +106,7 @@ export const useFormMarketingScripts = (formId: string) => {
   }, [formId]);
 
   const loadFacebookPixelDirect = (pixelId: string) => {
+    console.log(`🚨 [PIXEL LOAD] Carregando pixel diretamente: ${pixelId}`);
     const script = document.createElement('script');
     script.innerHTML = `
       !function(f,b,e,v,n,t,s)
@@ -118,7 +120,8 @@ export const useFormMarketingScripts = (formId: string) => {
       fbq('init', '${pixelId}', {}, { autoConfig: false });
       fbq('set', 'autoConfig', false, '${pixelId}');
       fbq('track', 'PageView');
-      console.log('✅ Facebook Pixel carregado diretamente:', '${pixelId}');
+      console.log('✅ [PIXEL LOAD] Facebook Pixel carregado diretamente:', '${pixelId}');
+      console.log('✅ [PIXEL LOAD] fbq disponível:', typeof window.fbq);
     `;
     script.setAttribute('data-form-pixel', pixelId);
     document.head.appendChild(script);
