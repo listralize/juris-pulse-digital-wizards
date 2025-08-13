@@ -62,19 +62,14 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       const config = stepForm.tracking_config as any;
       console.log('📊 Configuração encontrada:', config);
 
-      // Facebook Pixel: usar evento exatamente como configurado
+      // Facebook Pixel: usar evento EXATAMENTE como configurado no painel
       const pixelCfg = (config.facebook_pixel || {});
       if (pixelCfg.enabled === true && pixelCfg.event_type) {
-        let eventName: string;
-        if (pixelCfg.event_type === 'Custom') {
-          eventName = (pixelCfg.custom_event_name || '').trim() || 'CompleteRegistration';
-        } else {
-          eventName = pixelCfg.event_type; // Usar exatamente como configurado
-        }
-        console.log(`🎯 Facebook Pixel configurado para evento: ${eventName}`);
+        const eventName = pixelCfg.event_type; // Usar EXATAMENTE como configurado
+        console.log(`🎯 StepForm ${formSlug} configurado para evento: ${eventName}`);
         implementFacebookPixel(eventName);
       } else {
-        console.log('ℹ️ Facebook Pixel desativado ou sem evento configurado');
+        console.log(`ℹ️ StepForm ${formSlug} - Facebook Pixel desativado`);
       }
 
       // GTM: apenas empurrar evento se nome estiver configurado (sem injeção de script)
