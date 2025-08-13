@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
 import { StepFormTestimonials } from '../components/StepFormTestimonials';
-import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
+import { useStepFormPixelTracking } from '@/hooks/useStepFormPixelTracking';
 
 interface StepFormData {
   id: string;
@@ -148,7 +148,7 @@ const StepForm: React.FC = () => {
 
   // Load marketing scripts for this step form - usando memo para evitar recarregamentos
   const marketingSlug = useMemo(() => slug || '', [slug]);
-  useStepFormMarketingScripts(marketingSlug);
+  useStepFormPixelTracking(marketingSlug);
 
   useEffect(() => {
     if (slug) {

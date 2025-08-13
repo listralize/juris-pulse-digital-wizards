@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { useGlobalMarketingScripts } from '../hooks/useGlobalMarketingScripts';
+// Marketing scripts removidos - agora usando sistema simplificado
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';

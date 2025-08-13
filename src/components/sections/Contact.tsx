@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useGlobalMarketingScripts } from '../../hooks/useGlobalMarketingScripts';
+// Marketing scripts removidos - agora usando sistema simplificado
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
@@ -14,8 +14,7 @@ import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
-  // Garantir que os scripts de marketing sejam carregados nesta seção
-  useGlobalMarketingScripts();
+  // Scripts de marketing removidos - usando sistema simplificado
   
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);

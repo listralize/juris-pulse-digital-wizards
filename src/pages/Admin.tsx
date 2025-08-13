@@ -16,7 +16,7 @@ import { BlogManagement } from '../components/admin/BlogManagement';
 import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
-import { MarketingManagement } from '../components/admin/MarketingManagement';
+// MarketingManagement removido - usando sistema simplificado
 import { LeadsManagement } from '../components/admin/LeadsManagement';
 import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
 import { StepFormBuilder } from '../components/admin/StepFormBuilder';
@@ -296,7 +296,9 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="marketing">
-                <MarketingManagement />
+                <div className="text-center py-8">
+                  <p>Sistema de marketing simplificado - configuração via banco de dados</p>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
