@@ -55,7 +55,7 @@ export const GalleryButton: React.FC<GalleryButtonProps> = ({
             <DialogTitle>Galeria de Imagens</DialogTitle>
           </DialogHeader>
           <div className="h-full overflow-y-auto p-4">
-            <UniversalGallery onSelect={handleImageSelect} />
+            <UniversalGallery onSelect={handleImageSelect} embedded />
           </div>
         </DialogContent>
       </Dialog>
