@@ -219,8 +219,20 @@ export const useFormMarketingScripts = (formId: string) => {
         // Log para debug em produção  
         const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
         
+        // FORÇAR LOGS EM PRODUÇÃO TEMPORARIAMENTE
+        const originalConsoleLog = console.log;
+        if (isProduction) {
+          console.log = (...args) => {
+            // Usar alert temporariamente para ver logs em produção
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('🚨 [CRITICAL DEBUG]')) {
+              alert(args.join(' '));
+            }
+            originalConsoleLog(...args);
+          };
+        }
+        
         console.log(`🚨 [CRITICAL DEBUG] Formulário ${formId} enviado - iniciando processo Facebook Pixel`);
-        console.log(`🚨 [CRITICAL DEBUG] Configuração FB:`, facebookPixel);
+        console.log(`🚨 [CRITICAL DEBUG] Configuração FB:`, JSON.stringify(facebookPixel));
         console.log(`🚨 [CRITICAL DEBUG] EventType raw:`, facebookPixel.eventType);
         console.log(`🚨 [CRITICAL DEBUG] CustomEventName:`, facebookPixel.customEventName);
         
@@ -277,8 +289,17 @@ export const useFormMarketingScripts = (formId: string) => {
               
               console.log(`🚨 [CRITICAL DEBUG] EVENTO ENVIADO COM SUCESSO:`, resolvedEvent);
               dlog(`📊 Evento "${resolvedEvent}" enviado para formulário: ${formId}`);
+              
+              // Restaurar console.log
+              if (isProduction) {
+                console.log = originalConsoleLog;
+              }
             } catch (error) {
               console.error('❌ Erro ao enviar evento do Facebook Pixel:', error);
+              // Restaurar console.log
+              if (isProduction) {
+                console.log = originalConsoleLog;
+              }
             }
           } else {
             console.error('❌ Facebook Pixel não disponível após timeout');
