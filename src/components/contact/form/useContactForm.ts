@@ -40,6 +40,15 @@ export const useContactForm = (externalFormConfig?: any) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Evitar que GTM/ouvintes globais capturem o submit nativo (que costuma disparar "Lead")
+    // Sem alterar o fluxo do app
+    try {
+      // @ts-ignore
+      e.stopPropagation?.();
+      // @ts-ignore
+      e.nativeEvent?.stopImmediatePropagation?.();
+    } catch {}
+    
     
     // Validar apenas campos obrigatórios que não estão desabilitados
     const requiredFields = formConfig.allFields?.filter(field => 
