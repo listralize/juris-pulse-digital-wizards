@@ -8,6 +8,7 @@ import { Video, Upload, Save, Trash2 } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { GalleryButton } from './GalleryButton';
 
 interface TeamVideoSettings {
   team_video_enabled: boolean;
@@ -279,13 +280,24 @@ export const TeamVideoManagement: React.FC = () => {
 
           {/* Upload */}
           <div className="space-y-2">
-            <Input
-              type="file"
-              accept="video/*"
-              onChange={handleVideoUpload}
-              disabled={uploading}
-              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-            />
+            <div className="flex items-center gap-2 flex-wrap">
+              <Input
+                type="file"
+                accept="video/*"
+                onChange={handleVideoUpload}
+                disabled={uploading}
+                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+              />
+              <GalleryButton
+                onSelect={(url) => {
+                  setVideoUrl(url);
+                  toast.success('Vídeo selecionado da galeria');
+                }}
+                size="sm"
+                variant="outline"
+                className="ml-0"
+              />
+            </div>
             <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
               Formatos suportados: MP4, WebM, AVI. Tamanho máximo: 50MB.
             </p>

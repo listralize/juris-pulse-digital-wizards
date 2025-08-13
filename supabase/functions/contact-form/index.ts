@@ -25,8 +25,15 @@ serve(async (req) => {
   }
 
   try {
-    const formData: ContactFormData = await req.json()
+    const formData: ContactFormData & { antiBot?: { hp?: string; elapsedMs?: number }, website?: string } = await req.json()
     const { name, email, phone, message, service, isUrgent, customFields, formConfig } = formData
+
+    // Anti-bot: honeypot e time-trap
+    const hp = formData.website || formData.antiBot?.hp || ''
+    const elapsed = formData.antiBot?.elapsedMs || 9999
+    if ((hp && hp.trim() !== '') || elapsed < 1500) {
+      return new Response(JSON.stringify({ success: true, message: 'OK' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
 
     // Validação de entrada
     if (!name || !email || !message) {
@@ -55,6 +62,37 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Rate limiting simples por IP (5 req/5min)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    const endpoint = 'contact-form'
+    const now = Date.now()
+    const windowMs = 5 * 60 * 1000
+    const windowStart = new Date(Math.floor(now / windowMs) * windowMs).toISOString()
+
+    // Verifica/atualiza contador
+    const { data: rateRow } = await supabase
+      .from('edge_rate_limits')
+      .select('*')
+      .eq('ip', ip)
+      .eq('endpoint', endpoint)
+      .eq('window_start', windowStart)
+      .maybeSingle()
+
+    if (rateRow && rateRow.count >= 5) {
+      return new Response(JSON.stringify({ error: 'Too Many Requests' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    if (rateRow) {
+      await supabase
+        .from('edge_rate_limits')
+        .update({ count: rateRow.count + 1 })
+        .eq('id', rateRow.id)
+    } else {
+      await supabase
+        .from('edge_rate_limits')
+        .insert({ ip, endpoint, window_start: windowStart, count: 1 })
+    }
 
     // Headers da requisição para analytics
     const headers = Object.fromEntries(req.headers.entries())

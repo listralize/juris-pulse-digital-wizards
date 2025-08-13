@@ -129,6 +129,9 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
       </div>
       
       <form id="contact-form-main" onSubmit={handleSubmit} className="space-y-4">
+        {/* Honeypot e time-trap */}
+        <input type="text" id="hp_field" name="website" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ display: 'none' }} />
+        <input type="hidden" id="ts_field" name="ts" value={String(Date.now())} />
         <DynamicFormRenderer
           formFields={formConfig.allFields || []}
           serviceOptions={formConfig.serviceOptions}

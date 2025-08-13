@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../../../integrations/supabase/client';
 import { useFormConfig } from '../../../hooks/useFormConfig';
@@ -30,6 +29,7 @@ export const useContactForm = (externalFormConfig?: any) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const loadTsRef = useRef<number>(Date.now());
 
   const updateField = (field: keyof ContactFormData | string, value: string | boolean) => {
     setFormData(prev => ({
@@ -75,6 +75,10 @@ export const useContactForm = (externalFormConfig?: any) => {
           name: formConfig.name,
           redirectUrl: formConfig.redirectUrl,
           webhookUrl: formConfig.webhookUrl
+        },
+        antiBot: {
+          hp: (document.getElementById('hp_field') as HTMLInputElement)?.value || '',
+          elapsedMs: Date.now() - loadTsRef.current
         }
       };
 

@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
+import { supabase } from '@/integrations/supabase/client';
 gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const logoRef = useRef<HTMLDivElement>(null);
@@ -24,20 +25,21 @@ const Hero = () => {
   const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
+  // Vídeo de fundo (admin)
+  const [heroVideoEnabled, setHeroVideoEnabled] = useState<boolean>(false);
+  const [heroVideoUrl, setHeroVideoUrl] = useState<string>('');
 
   // Carregar dados do Supabase e event listeners
   useEffect(() => {
     const loadHeroData = async () => {
       try {
         console.log('🦸 Hero: Carregando dados iniciais...');
-        const {
-          supabase
-        } = await import('../../integrations/supabase/client');
-        const {
-          data: settings
-        } = await supabase.from('site_settings').select('*').order('updated_at', {
-          ascending: false
-        }).limit(1).maybeSingle();
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
         if (settings) {
           console.log('🦸 Hero: Dados carregados do Supabase:', settings);
           if (settings.hero_title) setHeroTitle(settings.hero_title);
@@ -46,6 +48,9 @@ const Hero = () => {
           if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
           if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
           if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
+          // Vídeo de fundo
+          if (typeof settings.team_video_enabled === 'boolean') setHeroVideoEnabled(settings.team_video_enabled);
+          if (settings.team_background_video) setHeroVideoUrl(settings.team_background_video);
         }
       } catch (error) {
         console.error('❌ Hero: Erro ao carregar dados:', error);
@@ -80,9 +85,16 @@ const Hero = () => {
         setSecondaryButtonLink(data.heroSecondaryButtonLink);
       }
     };
+    const handleHeroVideoUpdate = (event: CustomEvent) => {
+      console.log('🎥 Hero: Atualização de vídeo recebida:', event.detail);
+      setHeroVideoEnabled(Boolean(event.detail?.team_video_enabled));
+      setHeroVideoUrl(event.detail?.team_background_video || '');
+    };
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    window.addEventListener('heroVideoSettingsUpdated', handleHeroVideoUpdate as EventListener);
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+      window.removeEventListener('heroVideoSettingsUpdated', handleHeroVideoUpdate as EventListener);
     };
   }, []);
 
@@ -175,9 +187,21 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
-      {/* Neural Background */}
+      {/* Background Layer */}
       <div className="absolute inset-0 z-0 w-full h-full">
-        <NeuralBackground />
+        {heroVideoEnabled && heroVideoUrl ? (
+          <video
+            key={heroVideoUrl}
+            src={heroVideoUrl}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <NeuralBackground />
+        )}
       </div>
       
       {/* Overlay gradient */}
