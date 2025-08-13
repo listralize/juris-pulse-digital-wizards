@@ -90,6 +90,9 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
   // Implementar marketing scripts usando o ID real do formulário
   const activeFormId = (formId || formConfig?.id || 'default');
+  console.log('🚨 [UNIFIED DEBUG] FormId para marketing:', activeFormId);
+  console.log('🚨 [UNIFIED DEBUG] FormConfig:', formConfig);
+  console.log('🚨 [UNIFIED DEBUG] Chamando useFormMarketingScripts com:', activeFormId);
   useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido

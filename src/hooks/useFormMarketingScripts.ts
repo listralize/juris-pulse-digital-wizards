@@ -29,7 +29,14 @@ export const useFormMarketingScripts = (formId: string) => {
   };
   
   useEffect(() => {
-    if (!formId) return;
+    console.log(`🚨 [FORM MARKETING DEBUG] useEffect executado com formId: "${formId}"`);
+    console.log(`🚨 [FORM MARKETING DEBUG] formId tipo:`, typeof formId);
+    console.log(`🚨 [FORM MARKETING DEBUG] formId é válido:`, !!formId);
+    
+    if (!formId) {
+      console.log(`🚨 [FORM MARKETING DEBUG] FormId inválido - saindo`);
+      return;
+    }
 
     const loadFormConfig = async () => {
       try {
