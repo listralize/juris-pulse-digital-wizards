@@ -588,11 +588,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
               />
             </div>
 
-            {/* Configurações de Vídeo de Fundo da Equipe */}
-            <div className={`p-4 rounded-lg border ${isDark ? 'border-white/20 bg-black/50' : 'border-gray-200 bg-gray-50'}`}>
-              <h4 className={`font-medium mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Vídeo de Fundo da Seção</h4>
-              <TeamVideoManagement />
-            </div>
+            {/* Removido: Bloco indevido de vídeo de fundo na aba Equipe */}
 
             <div className="space-y-4">
               {safeTeamMembers.map((member) => (

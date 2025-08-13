@@ -60,7 +60,7 @@ export const TeamVideoManagement: React.FC = () => {
   };
 
   // Salvar configurações
-  const saveSettings = async () => {
+  const saveSettings = async (urlOverride?: string) => {
     setIsSaving(true);
     try {
       // Verificar se existe um registro
@@ -75,11 +75,12 @@ export const TeamVideoManagement: React.FC = () => {
         throw selectError;
       }
 
+      const newUrl = urlOverride ?? videoUrl ?? null;
       const updateData = {
         team_video_enabled: settings.team_video_enabled,
-        team_background_video: videoUrl || null,
+        team_background_video: newUrl,
         updated_at: new Date().toISOString()
-      };
+      } as const;
 
       if (existingData) {
         // Atualizar registro existente
@@ -106,7 +107,7 @@ export const TeamVideoManagement: React.FC = () => {
 
       setSettings(prev => ({
         ...prev,
-        team_background_video: videoUrl || null
+        team_background_video: newUrl
       }));
 
       toast.success('Configurações de vídeo salvas com sucesso!');
@@ -115,7 +116,7 @@ export const TeamVideoManagement: React.FC = () => {
       window.dispatchEvent(new CustomEvent('heroVideoSettingsUpdated', {
         detail: {
           team_video_enabled: settings.team_video_enabled,
-          team_background_video: videoUrl || null
+          team_background_video: newUrl
         }
       }));
       
@@ -167,6 +168,7 @@ export const TeamVideoManagement: React.FC = () => {
 
       setVideoUrl(publicUrl);
       toast.success('Vídeo enviado com sucesso!');
+      await saveSettings(publicUrl);
       
     } catch (error) {
       console.error('Erro no upload:', error);
@@ -292,6 +294,7 @@ export const TeamVideoManagement: React.FC = () => {
                 onSelect={(url) => {
                   setVideoUrl(url);
                   toast.success('Vídeo selecionado da galeria');
+                  saveSettings(url);
                 }}
                 size="sm"
                 variant="outline"
@@ -345,7 +348,7 @@ export const TeamVideoManagement: React.FC = () => {
         {/* Botão salvar */}
         <div className="flex justify-end">
           <Button
-            onClick={saveSettings}
+            onClick={() => saveSettings()}
             disabled={isSaving}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
