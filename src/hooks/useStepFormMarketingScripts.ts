@@ -133,6 +133,20 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         console.log(`📊 StepForm ${formSlug} - disparando evento ${resolved}`);
         setTimeout(() => {
           if ((window as any).fbq) {
+            // Bloquear qualquer Lead inesperado por alguns segundos
+            const w: any = window;
+            const original = w.fbq;
+            w.fbq = function (...args: any[]) {
+              try {
+                if (args && args[0] === 'track' && args[1] === 'Lead') {
+                  console.warn('🚫 Lead bloqueado (stepform:', formSlug, ')');
+                  return;
+                }
+              } catch {}
+              return original.apply(this, args as any);
+            } as any;
+            setTimeout(() => { w.fbq = original; }, 3000);
+
             (window as any).fbq('track', resolved, {
               content_name: `StepForm ${formSlug}`,
               form_slug: formSlug,

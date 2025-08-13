@@ -36,8 +36,6 @@ export const useDirectMarketingScripts = () => {
     
     // Configurar eventos
     setupEvents();
-    // Debug: inspecionar chamadas de fbq e detectar "Lead"
-    installFbqDebug();
   };
 
   const loadFacebookPixel = () => {

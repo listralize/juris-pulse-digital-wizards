@@ -207,6 +207,22 @@ export const useFormMarketingScripts = (formId: string) => {
             (window as any).__formEventSent = m;
           }, 3000);
           
+          // Bloquear qualquer 'Lead' inesperado por alguns segundos
+          const w: any = window;
+          const originalFbq = w.fbq;
+          if (originalFbq) {
+            w.fbq = function (...args: any[]) {
+              try {
+                if (args && args[0] === 'track' && args[1] === 'Lead') {
+                  console.warn('🚫 Lead bloqueado (form:', formId, ')');
+                  return;
+                }
+              } catch {}
+              return originalFbq.apply(this, args as any);
+            } as any;
+            setTimeout(() => { w.fbq = originalFbq; }, 3000);
+          }
+          
           (window as any).fbq('track', resolvedEvent, {
             content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
