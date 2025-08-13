@@ -102,38 +102,12 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const implementFacebookPixel = (pixelId: string, eventType: string = 'Contact') => {
-    console.log(`📘 Garantindo Facebook Pixel: ${pixelId}`);
-    
-    // Se já existe fbq globalmente, só configura o evento
-    if ((window as any).fbq) {
-      console.log('📘 Facebook Pixel já existe - configurando eventos');
-    } else {
-      // Criar e inserir script se não existir
-      const script = document.createElement('script');
-      script.innerHTML = `
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        
-        fbq('init', '${pixelId}');
-        fbq('track', 'PageView');
-        
-        console.log('📘 Facebook Pixel ${pixelId} carregado para StepForm');
-      `;
-      document.head.appendChild(script);
-    }
+    console.log(`📘 Garantindo Facebook Pixel (somente listener): ${pixelId}`);
 
-    // Event listener para eventos de sucesso do formulário
+    // Apenas configurar listener; não injetar scripts aqui para evitar conflitos
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug === formSlug) {
         console.log(`📊 StepForm ${formSlug} - disparando evento ${eventType}`);
-        
-        // Aguardar um pouco para garantir que fbq esteja disponível
         setTimeout(() => {
           if ((window as any).fbq) {
             (window as any).fbq('track', eventType, {
@@ -145,19 +119,17 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             });
             console.log(`✅ Evento ${eventType} enviado para Facebook Pixel`);
           } else {
-            console.error('❌ Facebook Pixel não disponível');
+            console.warn('❌ Facebook Pixel não disponível no momento do envio');
           }
         }, 100);
       }
     };
 
-    // Remover listener anterior se existir
+    // Remover listener anterior se existir e registrar novo
     const existingHandler = (window as any)[`stepFormPixelHandler_${formSlug}`];
     if (existingHandler) {
       window.removeEventListener('stepFormSubmitSuccess', existingHandler);
     }
-
-    // Registrar novo listener
     window.addEventListener('stepFormSubmitSuccess', handleSuccess as EventListener);
     (window as any)[`stepFormPixelHandler_${formSlug}`] = handleSuccess;
   };

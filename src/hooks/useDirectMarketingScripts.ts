@@ -40,33 +40,38 @@ export const useDirectMarketingScripts = () => {
 
   const loadFacebookPixel = () => {
     const pixelId = '1024100955860841';
-    console.log('📘 Carregando Facebook Pixel:', pixelId);
-    
-    // Limpar instâncias anteriores
-    delete window.fbq;
-    delete window._fbq;
-    
-    // Implementar código do Facebook Pixel diretamente
-    const script = document.createElement('script');
-    script.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window,document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      
-      fbq('init', '${pixelId}');
-      fbq('track', 'PageView');
-      
-      console.log('✅ Facebook Pixel inicializado:', '${pixelId}');
-    `;
-    script.setAttribute('data-marketing', 'fb-pixel');
-    document.head.appendChild(script);
-    
-    console.log('✅ Facebook Pixel carregado via script inline');
+    console.log('📘 Carregando Facebook Pixel (programático):', pixelId);
+
+    try {
+      // Definir fbq programaticamente
+      const w: any = window;
+      if (!w.fbq) {
+        const fbq: any = function (...args: any[]) {
+          fbq.callMethod ? fbq.callMethod.apply(fbq, args) : fbq.queue.push(args);
+        };
+        fbq.queue = [];
+        fbq.loaded = true;
+        fbq.version = '2.0';
+        w.fbq = fbq;
+        w._fbq = fbq;
+      }
+
+      // Carregar fbevents.js se ainda não estiver presente
+      if (!document.querySelector('script[data-marketing="fb-pixel-src"]')) {
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        s.setAttribute('data-marketing', 'fb-pixel-src');
+        document.head.appendChild(s);
+      }
+
+      // Inicializar e enviar PageView
+      w.fbq('init', pixelId);
+      w.fbq('track', 'PageView');
+      console.log('✅ Facebook Pixel inicializado');
+    } catch (e) {
+      console.error('❌ Erro ao carregar Facebook Pixel:', e);
+    }
   };
 
   const loadGoogleTagManager = () => {
@@ -129,115 +134,67 @@ export const useDirectMarketingScripts = () => {
   const setupEvents = () => {
     console.log('📝 Configurando eventos de conversão');
     
-    // Aguardar scripts carregarem
-    setTimeout(() => {
-      // StepForm eventos
-      const handleStepForm = (event: CustomEvent) => {
-        console.log('🎯 StepForm conversão:', event.detail);
-        
-        // Facebook Pixel
-        if (window.fbq) {
-          window.fbq('track', 'Contact', {
+    // StepForm
+    const handleStepForm = (event: CustomEvent) => {
+      const d = event.detail || {};
+      console.log('🎯 StepForm submit detectado:', d);
+      setTimeout(() => {
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'Lead', {
             content_name: 'StepForm Lead',
-            form_slug: event.detail?.formSlug || 'stepform',
-            page_url: window.location.href
+            form_slug: d.formSlug || 'stepform',
+            page_url: window.location.href,
           });
-          console.log('✅ FB Pixel: Contact enviado');
+          console.log('✅ FB Pixel Lead enviado (StepForm)');
         }
-        
-        // GTM
-        if (window.dataLayer) {
-          window.dataLayer.push({
-            event: 'stepform_conversion',
-            form_slug: event.detail?.formSlug || 'stepform',
-            event_category: 'Lead Generation',
-            event_action: 'StepForm Submit'
-          });
-          console.log('✅ GTM: stepform_conversion enviado');
+        if ((window as any).dataLayer) {
+          (window as any).dataLayer.push({ event: 'stepform_conversion', form_slug: d.formSlug || 'stepform' });
+          console.log('✅ GTM stepform_conversion enviado');
         }
-        
-        // GA
-        if (window.gtag) {
-          window.gtag('event', 'conversion', {
-            event_category: 'Lead Generation',
-            event_label: 'StepForm Submit',
-            form_slug: event.detail?.formSlug || 'stepform'
-          });
-          console.log('✅ GA: conversion enviado');
+        if ((window as any).gtag) {
+          (window as any).gtag('event', 'conversion', { event_category: 'Lead Generation', event_label: 'StepForm' });
+          console.log('✅ GA conversion enviado (StepForm)');
         }
-      };
-      
-      // Contact form eventos
-      const handleContactForm = (event: Event) => {
-        const form = event.target as HTMLFormElement;
-        if (form?.tagName === 'FORM') {
-          console.log('📝 Contact form conversão');
-          
-          // Facebook Pixel
-          if (window.fbq) {
-            window.fbq('track', 'Contact', {
-              content_name: 'Contact Form Lead',
-              page_url: window.location.href
-            });
-            console.log('✅ FB Pixel: Contact enviado (form)');
-          }
-          
-          // GTM
-          if (window.dataLayer) {
-            window.dataLayer.push({
-              event: 'contact_conversion',
-              event_category: 'Lead Generation',
-              event_action: 'Contact Form Submit'
-            });
-            console.log('✅ GTM: contact_conversion enviado (form)');
-          }
-          
-          // GA
-          if (window.gtag) {
-            window.gtag('event', 'conversion', {
-              event_category: 'Lead Generation',
-              event_label: 'Contact Form Submit'
-            });
-            console.log('✅ GA: conversion enviado (form)');
-          }
+      }, 150);
+    };
+
+    // Forms HTML
+    const handleFormSubmit = (e: Event) => {
+      const form = e.target as HTMLFormElement;
+      if (form?.tagName !== 'FORM') return;
+      console.log('📝 HTML form submit detectado');
+      setTimeout(() => {
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'Lead', { content_name: 'Contact Form Lead', page_url: window.location.href });
+          console.log('✅ FB Pixel Lead enviado (Contact)');
         }
-      };
-      
-      // Adicionar listeners
-      window.addEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
-      document.addEventListener('submit', handleContactForm, true);
-      
-      // Função de teste global
-      (window as any).testMarketingEvents = () => {
-        console.log('🧪 Testando eventos de marketing...');
-        
-        if (window.fbq) {
-          window.fbq('track', 'Contact', {
-            content_name: 'Test Event',
-            test: true
-          });
-          console.log('✅ Test Contact event enviado para FB Pixel');
+        if ((window as any).dataLayer) {
+          (window as any).dataLayer.push({ event: 'contact_conversion' });
+          console.log('✅ GTM contact_conversion enviado');
         }
-        
-        if (window.dataLayer) {
-          window.dataLayer.push({
-            event: 'test_conversion',
-            test: true
-          });
-          console.log('✅ Test event enviado para GTM');
+        if ((window as any).gtag) {
+          (window as any).gtag('event', 'conversion', { event_category: 'Lead Generation', event_label: 'Contact Form' });
+          console.log('✅ GA conversion enviado (Contact)');
         }
-        
-        if (window.gtag) {
-          window.gtag('event', 'conversion', {
-            event_category: 'Test',
-            event_label: 'Manual Test'
-          });
-          console.log('✅ Test event enviado para GA');
-        }
-      };
-      
-      console.log('✅ Sistema de eventos configurado');
-      console.log('💡 Para testar: window.testMarketingEvents()');
-    }, 1500);
+      }, 150);
+    };
+
+    // Clean up then add
+    window.removeEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
+    document.removeEventListener('submit', handleFormSubmit, true);
+
+    window.addEventListener('stepFormSubmitSuccess', handleStepForm as EventListener);
+    document.addEventListener('submit', handleFormSubmit, true);
+
+    // Função de teste
+    (window as any).testMarketingEvents = () => {
+      console.log('🧪 Disparando eventos de teste...');
+      if ((window as any).fbq) (window as any).fbq('track', 'Lead', { content_name: 'Test Event' });
+      if ((window as any).dataLayer) (window as any).dataLayer.push({ event: 'test_conversion' });
+      if ((window as any).gtag) (window as any).gtag('event', 'conversion', { event_category: 'Test', event_label: 'Manual' });
+    };
+    
+    console.log('✅ Sistema de eventos configurado');
+    console.log('💡 Para testar: window.testMarketingEvents()');
   };
 };
