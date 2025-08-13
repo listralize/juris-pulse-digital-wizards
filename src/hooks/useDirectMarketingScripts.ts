@@ -36,6 +36,8 @@ export const useDirectMarketingScripts = () => {
     
     // Configurar eventos
     setupEvents();
+    // Debug: inspecionar chamadas de fbq e detectar "Lead"
+    installFbqDebug();
   };
 
   const loadFacebookPixel = () => {
@@ -154,5 +156,36 @@ export const useDirectMarketingScripts = () => {
     
     console.log('✅ Sistema de eventos configurado');
     console.log('💡 Para testar: window.testMarketingEvents()');
+  };
+
+  // Debug helper para inspecionar e identificar qualquer envio inesperado de "Lead"
+  const installFbqDebug = () => {
+    try {
+      const w: any = window;
+      const attach = () => {
+        if (!w.fbq) return;
+        if ((w as any).__fbqPatched) return;
+        const original = w.fbq;
+        const wrapper = function (...args: any[]) {
+          try {
+            if (args && args[0] === 'track') {
+              const evt = args[1];
+              if (evt === 'Lead') {
+                console.warn('🚨 fbq("track","Lead") detectado. Stack:', new Error().stack);
+              }
+              console.log('📌 fbq.track:', evt, args[2] || {});
+            }
+          } catch {}
+          return original.apply(this, args as any);
+        } as any;
+        w.fbq = wrapper;
+        (w as any).__fbqPatched = true;
+        console.log('🛡️ fbq debug wrapper instalado');
+      };
+      attach();
+      setTimeout(attach, 800);
+    } catch (e) {
+      console.warn('⚠️ Falha ao instalar fbq debug wrapper:', e);
+    }
   };
 };

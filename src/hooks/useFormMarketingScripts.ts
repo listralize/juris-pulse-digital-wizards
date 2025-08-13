@@ -185,6 +185,13 @@ export const useFormMarketingScripts = (formId: string) => {
             console.log(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
             return;
           }
+          // Log do evento resolvido a partir do painel
+          console.log('[Form Pixel] Evento resolvido:', {
+            formId,
+            rawEventType: facebookPixel.eventType,
+            customEventName: facebookPixel.customEventName,
+            resolvedEvent
+          });
 
           // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
           const sentMap = (window as any).__formEventSent || {};
