@@ -547,12 +547,6 @@ const StepForm: React.FC = () => {
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
       console.log('✅ Evento stepFormSubmitSuccess disparado');
       
-      // Aguardar um pouco e disparar novamente para garantir captura
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
-        console.log('✅ Evento stepFormSubmitSuccess re-disparado (backup)');
-      }, 500);
-      
 
       // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.
       // O hook useStepFormMarketingScripts ouvirá 'stepFormSubmitSuccess' e enviará o evento configurado.
