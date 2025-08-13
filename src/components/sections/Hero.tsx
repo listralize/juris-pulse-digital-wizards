@@ -188,12 +188,12 @@ const Hero = () => {
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
       {/* Background Layer */}
-      <div className="absolute inset-0 z-0 w-full h-full">
+      <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
         {heroVideoEnabled && heroVideoUrl ? (
           <video
             key={heroVideoUrl}
             src={heroVideoUrl}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none"
             autoPlay
             muted
             loop
