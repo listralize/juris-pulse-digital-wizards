@@ -9,6 +9,7 @@ import { Plus, Trash2, Star, TrendingUp, Save } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { ImageGallery } from './ImageGallery';
 
 interface TestimonialData {
   id: string;
