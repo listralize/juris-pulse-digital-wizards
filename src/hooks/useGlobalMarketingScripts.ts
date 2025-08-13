@@ -30,7 +30,7 @@ export const useGlobalMarketingScripts = () => {
     // Aguardar o DOM estar pronto
     const timer = setTimeout(() => {
       loadMarketingScriptsFromDatabase();
-    }, 500);
+    }, 1000); // Aumentar timeout para produção
     
     return () => clearTimeout(timer);
   }, []);
