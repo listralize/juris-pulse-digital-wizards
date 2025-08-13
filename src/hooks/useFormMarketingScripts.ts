@@ -5,7 +5,7 @@ interface FormMarketingConfig {
   facebookPixel?: {
     enabled: boolean;
     pixelId: string;
-    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication';
+    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication' | 'CompleteRegistration' | 'ViewContent' | 'AddToCart' | 'InitiateCheckout' | 'Custom';
     customCode?: string;
   };
   googleAnalytics?: {
@@ -261,11 +261,17 @@ export const useFormMarketingScripts = (formId: string) => {
     (window as any).__formMarketingHandlers = handlersMap;
   };
 
-  const implementFormGoogleTagManager = (formConfig: any) => {
-    const { formId, googleTagManager } = formConfig;
-    dlog(`🏷️ Implementando Google Tag Manager para formulário ${formId}: ${googleTagManager.containerId}`);
+const implementFormGoogleTagManager = (formConfig: any) => {
+  const { formId, googleTagManager } = formConfig;
+  dlog(`🏷️ Implementando Google Tag Manager para formulário ${formId}: ${googleTagManager.containerId}`);
 
-    // Verificar se o GTM base já existe
+  // Respeitar flag global para evitar overlays/erros do Tag Assistant
+  if ((window as any).__enableGTM !== true) {
+    dlog('⏸️ GTM desativado globalmente (__enableGTM != true). Não injetando.');
+    return;
+  }
+
+  // Verificar se o GTM base já existe
     if (!(window as any).dataLayer) {
       const gtmScript = document.createElement('script');
       gtmScript.setAttribute('data-form-marketing', formId);

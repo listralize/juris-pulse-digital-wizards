@@ -70,6 +70,8 @@ export const useDirectMarketingScripts = () => {
 
       // Inicializar e enviar PageView
       w.fbq('init', pixelId);
+      // Desabilitar eventos automáticos do Pixel para evitar 'Lead' automático
+      try { w.fbq('set', 'autoConfig', 'false', pixelId); } catch {}
       w.fbq('track', 'PageView');
       console.log('✅ Facebook Pixel inicializado');
     } catch (e) {
@@ -173,7 +175,7 @@ export const useDirectMarketingScripts = () => {
     removeTagAssistantOverlay();
     const taObs = new MutationObserver(() => removeTagAssistantOverlay());
     taObs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(() => taObs.disconnect(), 15000);
+    setTimeout(() => taObs.disconnect(), 300000);
     
     console.log('✅ Sistema de eventos configurado');
     console.log('💡 Para testar: window.testMarketingEvents()');
