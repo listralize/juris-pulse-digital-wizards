@@ -60,9 +60,8 @@ function App() {
       // Testar Facebook Pixel
       if ((window as any).fbq) {
         console.log('✅ Facebook Pixel detectado e funcionando');
-        // Disparar evento de teste
-        (window as any).fbq('track', 'PageView');
-        console.log('📊 Evento PageView teste enviado para Facebook Pixel');
+        // NÃO enviar PageView teste - deixar apenas para eventos configurados
+        console.log('📊 Facebook Pixel carregado - aguardando eventos configurados');
       } else {
         console.warn('⚠️ Facebook Pixel não detectado');
       }
