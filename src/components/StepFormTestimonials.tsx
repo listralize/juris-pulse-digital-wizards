@@ -154,7 +154,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
+    <div className="relative w-full bg-transparent">
       <div className="container mx-auto px-4 py-3">
         <AnimatePresence>
           {isVisible && (
@@ -217,11 +217,16 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
                           </blockquote>
                           
                           <div className="text-center">
-                            <div className="font-semibold">
-                              {socialProofConfig.testimonials[currentTestimonialIndex].name}
+                            <div className="flex items-center justify-center gap-2">
+                              {socialProofConfig.testimonials[currentTestimonialIndex].image && (
+                                <img src={socialProofConfig.testimonials[currentTestimonialIndex].image} alt={`Foto de ${socialProofConfig.testimonials[currentTestimonialIndex].name}`} className="w-8 h-8 rounded-full object-cover" loading="lazy" />
+                              )}
+                              <div className="font-semibold">
+                                {socialProofConfig.testimonials[currentTestimonialIndex].name}
+                              </div>
                             </div>
                             {socialProofConfig.testimonials[currentTestimonialIndex].role && (
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-xs text-muted-foreground">
                                 {socialProofConfig.testimonials[currentTestimonialIndex].role}
                               </div>
                             )}

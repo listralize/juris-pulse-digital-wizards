@@ -53,10 +53,11 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
     stats: [],
     primaryColor: '#4CAF50',
     autoRotate: true,
-    rotationInterval: 5000
+    rotationInterval: 8000
   });
 
   const [loading, setLoading] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
 
   // Load configuration from Supabase
   useEffect(() => {
@@ -389,6 +390,19 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
                             onChange={(e) => updateTestimonial(index, 'role', e.target.value)}
                           />
                         </div>
+                        <div>
+                          <Label>Foto (URL)</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="https://..."
+                              value={testimonial.image || ''}
+                              onChange={(e) => updateTestimonial(index, 'image', e.target.value)}
+                            />
+                            <Button variant="outline" size="sm" onClick={() => setGalleryIndex(index)}>
+                              Abrir Galeria
+                            </Button>
+                          </div>
+                        </div>
                         <div className="flex items-end">
                           <Button
                             variant="destructive"
@@ -472,6 +486,20 @@ export const StepFormSocialProofManager: React.FC<StepFormSocialProofManagerProp
           )}
         </CardContent>
       </Card>
+
+      {/* Galeria de Imagens para Testemunhos */}
+      <ImageGallery
+        isOpen={galleryIndex !== null}
+        onClose={() => setGalleryIndex(null)}
+        selectedImage={galleryIndex !== null ? config.testimonials[galleryIndex]?.image : undefined}
+        onSelectImage={(url) => {
+          if (galleryIndex === null) return;
+          const updated = [...config.testimonials];
+          updated[galleryIndex] = { ...updated[galleryIndex], image: url };
+          updateConfig('testimonials', updated);
+          setGalleryIndex(null);
+        }}
+      />
     </div>
   );
 };
