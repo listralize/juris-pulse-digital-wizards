@@ -43,32 +43,36 @@ export const useDirectMarketingScripts = () => {
     console.log('📘 Carregando Facebook Pixel (programático):', pixelId);
 
     try {
-      // Definir fbq programaticamente
       const w: any = window;
-      if (!w.fbq) {
-        const fbq: any = function (...args: any[]) {
-          fbq.callMethod ? fbq.callMethod.apply(fbq, args) : fbq.queue.push(args);
-        };
-        fbq.queue = [];
-        fbq.loaded = true;
-        fbq.version = '2.0';
-        w.fbq = fbq;
-        w._fbq = fbq;
+
+      // Se já existir fbq ou o script do fbevents injetado (via GTM, por exemplo), não reinicializar
+      const fbeventsPresent = !!document.querySelector('script[src*="connect.facebook.net"][src*="fbevents.js"]');
+      if (w.fbq || fbeventsPresent) {
+        console.log('ℹ️ Facebook Pixel já presente (via GTM ou outro). Evitando duplicidade.');
+        return; // não chamar init/track aqui para não duplicar
       }
 
-      // Carregar fbevents.js se ainda não estiver presente
-      if (!document.querySelector('script[data-marketing="fb-pixel-src"]')) {
-        const s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://connect.facebook.net/en_US/fbevents.js';
-        s.setAttribute('data-marketing', 'fb-pixel-src');
-        document.head.appendChild(s);
-      }
+      // Definir fbq programaticamente (stub)
+      const fbq: any = function (...args: any[]) {
+        fbq.callMethod ? fbq.callMethod.apply(fbq, args) : fbq.queue.push(args);
+      };
+      fbq.queue = [];
+      fbq.loaded = true;
+      fbq.version = '2.0';
+      w.fbq = fbq;
+      w._fbq = fbq;
 
-      // Inicializar e enviar PageView
+      // Carregar fbevents.js
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://connect.facebook.net/en_US/fbevents.js';
+      s.setAttribute('data-marketing', 'fb-pixel-src');
+      document.head.appendChild(s);
+
+      // Inicializar e enviar PageView (somente quando nós carregarmos o pixel)
       w.fbq('init', pixelId);
       w.fbq('track', 'PageView');
-      console.log('✅ Facebook Pixel inicializado');
+      console.log('✅ Facebook Pixel inicializado (loader próprio)');
     } catch (e) {
       console.error('❌ Erro ao carregar Facebook Pixel:', e);
     }

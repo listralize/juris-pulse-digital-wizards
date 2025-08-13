@@ -175,6 +175,12 @@ export const useFormMarketingScripts = (formId: string) => {
         if ((window as any).fbq) {
           const resolvedEvent = normalizePixelEventName(facebookPixel.eventType as any, facebookPixel.customEventName);
 
+          console.log(`🧭 Evento configurado no painel para ${formId}:`, {
+            rawEventType: facebookPixel.eventType,
+            customEventName: facebookPixel.customEventName,
+            resolvedEvent
+          });
+
           if (!resolvedEvent) {
             console.log(`ℹ️ Nenhum evento configurado para ${formId}; nenhum evento será enviado ao Pixel`);
             return;

@@ -289,10 +289,12 @@ export const MarketingManagement: React.FC = () => {
   const implementFacebookPixel = (config: any) => {
     console.log('📘 Implementando Facebook Pixel:', config.pixelId);
     
-    // Limpar instâncias anteriores do fbq
-    if ((window as any).fbq) {
-      delete (window as any).fbq;
-      delete (window as any)._fbq;
+    // Evitar duplicidade: se já existir fbq OU script do fbevents (ex.: via GTM ou loader global), não reinjetar
+    const hasFBQ = !!(window as any).fbq;
+    const fbeventsPresent = !!document.querySelector('script[src*="connect.facebook.net"][src*="fbevents.js"]');
+    if (hasFBQ || fbeventsPresent) {
+      console.log('ℹ️ Pixel já presente na página (GTM/loader). Não reinicializando pelo Admin.');
+      return;
     }
     
     const fbPixelScript = document.createElement('script');
