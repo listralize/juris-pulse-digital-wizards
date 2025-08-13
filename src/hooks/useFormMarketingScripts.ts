@@ -28,7 +28,7 @@ export const useFormMarketingScripts = (formId: string) => {
 
     const loadFormConfig = async () => {
       try {
-        console.log(`📋 Carregando configuração de marketing para formulário: ${formId}`);
+        dlog(`📋 Carregando configuração de marketing para formulário: ${formId}`);
         
         const { data: settings, error } = await supabase
           .from('marketing_settings')
@@ -55,10 +55,10 @@ export const useFormMarketingScripts = (formId: string) => {
           );
 
           if (formConfig) {
-            console.log(`✅ Configuração encontrada para formulário ${formId}:`, formConfig);
+            dlog(`✅ Configuração encontrada para formulário ${formId}:`, formConfig);
             implementFormScripts(formConfig);
           } else {
-            console.log(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
+            dlog(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
             // Garantir remoção de scripts e listeners se desativado
             removeFormScripts(formId);
           }
@@ -72,7 +72,7 @@ export const useFormMarketingScripts = (formId: string) => {
 
     // Escutar atualizações de configuração
     const handleSettingsUpdate = () => {
-      console.log(`🔄 Recarregando configuração para formulário: ${formId}`);
+      dlog(`🔄 Recarregando configuração para formulário: ${formId}`);
       loadFormConfig();
     };
 
@@ -86,33 +86,33 @@ export const useFormMarketingScripts = (formId: string) => {
   }, [formId]);
 
   const implementFormScripts = (formConfig: any) => {
-    console.log(`🚀 Implementando scripts para formulário ${formConfig.formId}:`, formConfig);
+    dlog(`🚀 Implementando scripts para formulário ${formConfig.formId}:`, formConfig);
 
     // Remover scripts antigos específicos deste formulário
     removeFormScripts(formConfig.formId);
 
     // Facebook Pixel - APENAS se estiver habilitado (não requer pixelId local)
     if (formConfig.facebookPixel?.enabled === true) {
-      console.log(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
+      dlog(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
       implementFormFacebookPixel(formConfig);
     } else {
-      console.log(`❌ Facebook Pixel DESABILITADO para formulário ${formConfig.formId}`);
+      dlog(`❌ Facebook Pixel DESABILITADO para formulário ${formConfig.formId}`);
     }
 
     // Google Analytics - APENAS se estiver habilitado
     if (formConfig.googleAnalytics?.enabled === true && formConfig.googleAnalytics?.measurementId) {
-      console.log(`✅ Google Analytics HABILITADO para formulário ${formConfig.formId}`);
+      dlog(`✅ Google Analytics HABILITADO para formulário ${formConfig.formId}`);
       implementFormGoogleAnalytics(formConfig);
     } else {
-      console.log(`❌ Google Analytics DESABILITADO para formulário ${formConfig.formId}`);
+      dlog(`❌ Google Analytics DESABILITADO para formulário ${formConfig.formId}`);
     }
 
     // Google Tag Manager - APENAS se estiver habilitado
     if (formConfig.googleTagManager?.enabled === true && formConfig.googleTagManager?.containerId) {
-      console.log(`✅ Google Tag Manager HABILITADO para formulário ${formConfig.formId}`);
+      dlog(`✅ Google Tag Manager HABILITADO para formulário ${formConfig.formId}`);
       implementFormGoogleTagManager(formConfig);
     } else {
-      console.log(`❌ Google Tag Manager DESABILITADO para formulário ${formConfig.formId}`);
+      dlog(`❌ Google Tag Manager DESABILITADO para formulário ${formConfig.formId}`);
     }
   };
 
