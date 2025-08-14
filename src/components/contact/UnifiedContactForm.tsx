@@ -93,67 +93,121 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     originalHandleSubmit(e);
     
-    // Rastrear conversão no Facebook após delay
+    // Disparar evento de conversão para Facebook Pixel baseado na configuração
     setTimeout(() => {
-      if ((window as any).fbq) {
-        console.error('✅ FORMULÁRIO ENVIADO - RASTREANDO CONVERSÃO');
-        (window as any).fbq('track', 'CompleteRegistration', {
+      if ((window as any).fbq && (window as any).currentPixelConfig?.enabled) {
+        const { eventType } = (window as any).currentPixelConfig;
+        console.error('✅ FORMULÁRIO ENVIADO - RASTREANDO CONVERSÃO:', eventType);
+        (window as any).fbq('track', eventType, {
           content_name: 'Contact Form Submission',
           value: 1,
           currency: 'BRL'
         });
+        console.error('🎯 EVENTO FACEBOOK PIXEL ENVIADO:', eventType);
       }
     }, 2000);
   };
 
-  // Implementar Facebook Pixel GLOBAL
+  // Implementar Facebook Pixel baseado nas configurações do SystemFormsManager
   useEffect(() => {
-    // PIXEL ID HARDCODED - substitua pelo seu ID real
-    const PIXEL_ID = '547859007710156'; // SEU PIXEL ID AQUI
-    
-    console.error('🔥 INICIANDO FACEBOOK PIXEL GLOBAL:', PIXEL_ID);
-    
-    // Remover scripts existentes para evitar duplicação
-    const existingScripts = document.querySelectorAll('script[src*="fbevents.js"]');
-    existingScripts.forEach(script => script.remove());
-    
-    // Limpar fbq existente
-    delete (window as any).fbq;
-    delete (window as any)._fbq;
-    
-    // Criar função fbq
-    (window as any).fbq = (window as any).fbq || function() {
-      ((window as any).fbq.q = (window as any).fbq.q || []).push(arguments);
+    const loadSystemFormPixel = async () => {
+      try {
+        console.error('🔍 CARREGANDO CONFIGURAÇÕES DO SISTEMA FORMS...');
+        
+        const { data: settings } = await supabase
+          .from('marketing_settings')
+          .select('form_tracking_config')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        console.error('📊 Configurações encontradas:', settings);
+
+        if (settings?.form_tracking_config) {
+          let trackingConfig;
+          if (typeof settings.form_tracking_config === 'string') {
+            trackingConfig = JSON.parse(settings.form_tracking_config);
+          } else {
+            trackingConfig = settings.form_tracking_config;
+          }
+
+          console.error('🎯 Tracking config processado:', trackingConfig);
+
+          // Buscar configuração para o formulário atual (default)
+          const formConfig = trackingConfig.systemForms?.find(
+            (form: any) => form.formId === 'default'
+          );
+
+          console.error('📝 Config do formulário encontrada:', formConfig);
+
+          if (formConfig?.enabled && formConfig?.facebookPixel?.enabled && formConfig?.facebookPixel?.pixelId) {
+            const pixelId = formConfig.facebookPixel.pixelId.replace(/[^0-9]/g, '');
+            const eventType = formConfig.facebookPixel.eventType === 'Custom' 
+              ? (formConfig.facebookPixel.customEventName || 'CustomEvent')
+              : formConfig.facebookPixel.eventType;
+
+            console.error('🚀 INICIALIZANDO PIXEL DO SISTEMA:', { pixelId, eventType });
+            
+            // Remover scripts existentes
+            const existingScripts = document.querySelectorAll('script[src*="fbevents.js"]');
+            existingScripts.forEach(script => script.remove());
+            
+            // Limpar fbq existente
+            delete (window as any).fbq;
+            delete (window as any)._fbq;
+            
+            // Criar função fbq
+            (window as any).fbq = (window as any).fbq || function() {
+              ((window as any).fbq.q = (window as any).fbq.q || []).push(arguments);
+            };
+            (window as any)._fbq = (window as any).fbq;
+            (window as any).fbq.push = (window as any).fbq;
+            (window as any).fbq.loaded = true;
+            (window as any).fbq.version = '2.0';
+            (window as any).fbq.queue = [];
+            
+            // Criar script
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+            
+            script.onload = () => {
+              console.error('✅ FACEBOOK PIXEL CARREGADO DO SISTEMA');
+              (window as any).fbq('init', pixelId);
+              (window as any).fbq('track', 'PageView');
+              console.error('✅ PIXEL INICIALIZADO:', pixelId);
+              
+              // Salvar configuração para uso no submit
+              (window as any).currentPixelConfig = {
+                pixelId,
+                eventType,
+                enabled: true
+              };
+            };
+            
+            script.onerror = () => {
+              console.error('❌ ERRO AO CARREGAR SCRIPT FACEBOOK PIXEL');
+            };
+            
+            document.head.appendChild(script);
+            
+            // Adicionar noscript tag
+            const noscript = document.createElement('noscript');
+            noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1" />`;
+            document.head.appendChild(noscript);
+            
+          } else {
+            console.error('❌ PIXEL DESABILITADO OU CONFIGURAÇÃO INVÁLIDA');
+          }
+        } else {
+          console.error('❌ NENHUMA CONFIGURAÇÃO DE TRACKING ENCONTRADA');
+        }
+      } catch (error) {
+        console.error('❌ ERRO AO CARREGAR CONFIGURAÇÕES:', error);
+      }
     };
-    (window as any)._fbq = (window as any).fbq;
-    (window as any).fbq.push = (window as any).fbq;
-    (window as any).fbq.loaded = true;
-    (window as any).fbq.version = '2.0';
-    (window as any).fbq.queue = [];
-    
-    // Criar script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-    
-    script.onload = () => {
-      console.error('✅ FACEBOOK PIXEL SCRIPT CARREGADO');
-      (window as any).fbq('init', PIXEL_ID);
-      (window as any).fbq('track', 'PageView');
-      console.error('✅ FACEBOOK PIXEL INICIALIZADO E PAGEVIEW ENVIADO');
-    };
-    
-    script.onerror = () => {
-      console.error('❌ ERRO AO CARREGAR SCRIPT FACEBOOK PIXEL');
-    };
-    
-    document.head.appendChild(script);
-    
-    // Adicionar noscript tag para fallback
-    const noscript = document.createElement('noscript');
-    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1" />`;
-    document.head.appendChild(noscript);
-    
+
+    loadSystemFormPixel();
   }, []);
 
 
