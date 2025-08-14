@@ -128,29 +128,26 @@ export const useContactForm = (externalFormConfig?: any) => {
         }
       );
 
-      // Disparar evento direto para dataLayer (sem depender de listeners)
-      console.log('🔍 Verificando dataLayer:', (window as any).dataLayer);
-      console.log('🔍 GTM presente?', !!(window as any).google_tag_manager);
-      console.log('🔍 window.gtag presente?', !!(window as any).gtag);
-      
-      if ((window as any).dataLayer) {
-        console.log('✅ dataLayer encontrado, enviando evento form_submit');
-        const eventData = {
-          event: 'form_submit',
-          form_id: formConfig.id || 'default',
-          form_name: formConfig.name || 'Formulário Principal',
-          page_url: window.location.href,
-          user_email: submitData.email,
-          user_name: submitData.name,
-          service: submitData.service,
-          timestamp: new Date().toISOString()
-        };
-        console.log('📤 Dados do evento:', eventData);
-        (window as any).dataLayer.push(eventData);
-        console.log('✅ Evento enviado para dataLayer');
-      } else {
-        console.log('❌ dataLayer não encontrado');
+      // Garantir que dataLayer existe e enviar evento GTM
+      if (!(window as any).dataLayer) {
+        (window as any).dataLayer = [];
       }
+      
+      const eventData = {
+        event: 'form_submit',
+        form_id: formConfig.id || 'default',
+        form_name: formConfig.name || 'Formulário Principal',
+        page_url: window.location.href,
+        user_email: submitData.email,
+        user_name: submitData.name,
+        service: submitData.service,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Enviar evento múltiplas vezes para garantir
+      (window as any).dataLayer.push(eventData);
+      setTimeout(() => (window as any).dataLayer.push(eventData), 100);
+      setTimeout(() => (window as any).dataLayer.push(eventData), 500);
 
       // Disparar evento customizado para scripts de marketing (backup)
       const successEvent = new CustomEvent('formSubmitSuccess', {
