@@ -139,30 +139,26 @@ const About = () => {
       if (aboutVideoStorageUrl) {
         console.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
         return (
-          <div className={`w-full rounded-lg overflow-hidden relative ${
-            isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
-          }`}>
+          <div className="about-video-container w-full rounded-lg overflow-hidden relative" style={{
+            aspectRatio: isMobile ? '9/16' : '16/9',
+            maxHeight: isMobile ? '24rem' : 'auto',
+            zIndex: 999999,
+            isolation: 'isolate'
+          }}>
             <video
               src={aboutVideoStorageUrl}
               title="About Us Video"
-              className="w-full h-full rounded-lg object-cover cursor-pointer touch-manipulation"
+              className="w-full h-full rounded-lg object-cover cursor-pointer"
               style={{ 
-                zIndex: 10,
+                zIndex: 999999,
                 position: 'relative',
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                isolation: 'isolate'
               }}
               controls
               preload="metadata"
               playsInline
               webkit-playsinline="true"
-              muted={false}
-              onClick={(e) => {
-                // Força o play no mobile/tablet
-                const video = e.currentTarget;
-                if (video.paused) {
-                  video.play();
-                }
-              }}
             />
           </div>
         );
