@@ -128,13 +128,12 @@ export const useContactForm = (externalFormConfig?: any) => {
         }
       );
 
-      // Garantir que dataLayer existe e enviar evento GTM
+      // Garantir que dataLayer existe e enviar eventos GTM
       if (!(window as any).dataLayer) {
         (window as any).dataLayer = [];
       }
       
-      const eventData = {
-        event: 'form_submit',
+      const baseEventData = {
         form_id: formConfig.id || 'default',
         form_name: formConfig.name || 'Formulário Principal',
         page_url: window.location.href,
@@ -144,10 +143,25 @@ export const useContactForm = (externalFormConfig?: any) => {
         timestamp: new Date().toISOString()
       };
       
-      // Enviar evento múltiplas vezes para garantir
-      (window as any).dataLayer.push(eventData);
-      setTimeout(() => (window as any).dataLayer.push(eventData), 100);
-      setTimeout(() => (window as any).dataLayer.push(eventData), 500);
+      // Enviar evento "submit" para Google Ads
+      (window as any).dataLayer.push({
+        event: 'submit',
+        ...baseEventData
+      });
+      
+      // Enviar evento "form_submit" para outras tags
+      (window as any).dataLayer.push({
+        event: 'form_submit',
+        ...baseEventData
+      });
+      
+      // Duplicar envios para garantir captura
+      setTimeout(() => {
+        (window as any).dataLayer.push({
+          event: 'submit',
+          ...baseEventData
+        });
+      }, 100);
 
       // Disparar evento customizado para scripts de marketing (backup)
       const successEvent = new CustomEvent('formSubmitSuccess', {
