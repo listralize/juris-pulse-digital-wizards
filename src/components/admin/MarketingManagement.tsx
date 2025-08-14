@@ -260,13 +260,31 @@ export const MarketingManagement: React.FC = () => {
 
     // Google Tag Manager
     if (scripts.googleTagManager.enabled && scripts.googleTagManager.containerId) {
-      implementGoogleTagManager(scripts.googleTagManager);
+      // Validar se o container ID tem o formato correto
+      if (scripts.googleTagManager.containerId.startsWith('GTM-')) {
+        implementGoogleTagManager(scripts.googleTagManager);
+        
+        // Verificar se foi carregado corretamente após um tempo
+        setTimeout(() => {
+          if (typeof (window as any).dataLayer !== 'undefined') {
+            console.log('✅ GTM carregado com sucesso!');
+            toast.success(`GTM ${scripts.googleTagManager.containerId} carregado com sucesso!`);
+          } else {
+            console.warn('⚠️ GTM pode não ter carregado corretamente');
+            toast.warning(`Verificar se o container ${scripts.googleTagManager.containerId} existe no Google Tag Manager`);
+          }
+        }, 2000);
+      } else {
+        console.error('❌ Container ID do GTM inválido:', scripts.googleTagManager.containerId);
+        toast.error('Container ID do GTM deve começar com "GTM-"');
+      }
     }
 
     // Scripts customizados
     if (scripts.customScripts.head || scripts.customScripts.body) {
       implementCustomScripts(scripts.customScripts);
     }
+    
     console.log('✅ Scripts implementados com sucesso!');
   };
   const removeExistingScripts = () => {
@@ -281,10 +299,16 @@ export const MarketingManagement: React.FC = () => {
     // Remover scripts existentes do GTM
     const existingGtmScripts = document.querySelectorAll('script[data-marketing="google-tag-manager"]');
     existingGtmScripts.forEach(script => script.remove());
+    
+    // Remover noscript do GTM
+    const existingGtmNoscripts = document.querySelectorAll('noscript[data-marketing="google-tag-manager"]');
+    existingGtmNoscripts.forEach(noscript => noscript.remove());
 
     // Remover scripts customizados
     const existingCustomScripts = document.querySelectorAll('script[data-marketing="custom"]');
     existingCustomScripts.forEach(script => script.remove());
+    
+    console.log('🧹 Scripts antigos removidos');
   };
   const implementFacebookPixel = (config: any) => {
     console.log('📘 Implementando Facebook Pixel:', config.pixelId);
@@ -339,7 +363,17 @@ export const MarketingManagement: React.FC = () => {
   const implementGoogleTagManager = (config: any) => {
     console.log('🏷️ Implementando Google Tag Manager:', config.containerId);
 
-    // Script principal do GTM
+    // Limpar instâncias anteriores do GTM
+    if ((window as any).google_tag_manager) {
+      delete (window as any).google_tag_manager;
+    }
+    if ((window as any).dataLayer) {
+      (window as any).dataLayer = [];
+    } else {
+      (window as any).dataLayer = [];
+    }
+
+    // Script principal do GTM no HEAD
     const gtmScript = document.createElement('script');
     gtmScript.setAttribute('data-marketing', 'google-tag-manager');
     gtmScript.innerHTML = `
@@ -351,10 +385,18 @@ export const MarketingManagement: React.FC = () => {
     `;
     document.head.appendChild(gtmScript);
 
-    // Noscript do GTM
+    // Noscript do GTM no BODY
+    let existingNoscript = document.querySelector('noscript[data-marketing="google-tag-manager"]');
+    if (existingNoscript) {
+      existingNoscript.remove();
+    }
+    
     const noscript = document.createElement('noscript');
+    noscript.setAttribute('data-marketing', 'google-tag-manager');
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${config.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
     document.body.appendChild(noscript);
+
+    console.log('✅ Google Tag Manager implementado com Container ID:', config.containerId);
   };
   const implementCustomScripts = (config: any) => {
     console.log('🔧 Implementando scripts customizados');
@@ -895,15 +937,57 @@ export const MarketingManagement: React.FC = () => {
               </div>
               
               <div>
-                <Label htmlFor="gtm-container-id">Container ID</Label>
-                <Input id="gtm-container-id" placeholder="GTM-XXXXXXX" value={marketingScripts.googleTagManager.containerId} onChange={e => setMarketingScripts(prev => ({
-                ...prev,
-                googleTagManager: {
-                  ...prev.googleTagManager,
-                  containerId: e.target.value
-                }
-              }))} />
+                <Label htmlFor="gtm-container-id" className="flex items-center gap-2">
+                  Container ID
+                  <Badge variant="outline" className="text-xs">Formato: GTM-XXXXXXX</Badge>
+                </Label>
+                <Input 
+                  id="gtm-container-id" 
+                  placeholder="GTM-PL22PJ6V" 
+                  value={marketingScripts.googleTagManager.containerId} 
+                  onChange={e => setMarketingScripts(prev => ({
+                    ...prev,
+                    googleTagManager: {
+                      ...prev.googleTagManager,
+                      containerId: e.target.value
+                    }
+                  }))} 
+                  className={marketingScripts.googleTagManager.containerId && !marketingScripts.googleTagManager.containerId.startsWith('GTM-') ? 'border-red-500' : ''}
+                />
+                {marketingScripts.googleTagManager.containerId && !marketingScripts.googleTagManager.containerId.startsWith('GTM-') && (
+                  <p className="text-xs text-red-500 mt-1">
+                    ⚠️ Container ID deve começar com "GTM-"
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Encontre seu Container ID em: <a href="https://tagmanager.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Tag Manager</a>
+                </p>
               </div>
+              
+              {marketingScripts.googleTagManager.enabled && marketingScripts.googleTagManager.containerId && (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">Testar GTM</p>
+                      <p className="text-xs text-blue-600">Verificar se o container está carregando corretamente</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => {
+                        if (typeof (window as any).dataLayer !== 'undefined') {
+                          toast.success('✅ GTM está funcionando! DataLayer encontrado.');
+                          console.log('GTM DataLayer:', (window as any).dataLayer);
+                        } else {
+                          toast.error('❌ GTM não está carregado. Verifique o Container ID.');
+                          console.error('GTM DataLayer não encontrado');
+                        }
+                      }}
+                    >
+                      Testar GTM
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
