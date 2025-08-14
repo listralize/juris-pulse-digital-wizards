@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
-import { useFormMarketingScripts } from "../../hooks/useFormMarketingScripts";
+
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,31 +124,37 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
           const pixelId = settings.facebook_pixel_id.replace(/[^0-9]/g, '');
           console.error('✅ PIXEL ID VÁLIDO:', pixelId);
           
-          // Criar fbq se não existir
-          if (!(window as any).fbq) {
+          // Verificar se o script já existe
+          const existingScript = document.querySelector('script[src*="fbevents.js"]');
+          
+          if (!existingScript && !(window as any).fbq) {
             console.error('📱 CRIANDO SCRIPT FACEBOOK PIXEL');
+            
+            // Criar e adicionar o script do Facebook Pixel
             const script = document.createElement('script');
-            script.innerHTML = `
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-              n.queue=[];t=b.createElement(e);t.async=!0;
-              t.src=v;s=b.getElementsByTagName(e)[0];
-              s.parentNode.insertBefore(t,s)}(window, document,'script',
-              'https://connect.facebook.net/en_US/fbevents.js');
-            `;
+            script.async = true;
+            script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+            
+            // Inicializar fbq antes do script carregar
+            (window as any).fbq = (window as any).fbq || function() {
+              ((window as any).fbq.q = (window as any).fbq.q || []).push(arguments);
+            };
+            (window as any)._fbq = (window as any).fbq;
+            (window as any).fbq.push = (window as any).fbq;
+            (window as any).fbq.loaded = true;
+            (window as any).fbq.version = '2.0';
+            (window as any).fbq.queue = [];
+            
             document.head.appendChild(script);
             
-            setTimeout(() => {
-              if ((window as any).fbq) {
-                console.error('🎯 INICIALIZANDO PIXEL:', pixelId);
-                (window as any).fbq('init', pixelId);
-                (window as any).fbq('track', 'PageView');
-                console.error('✅ FACEBOOK PIXEL ATIVO:', pixelId);
-              }
-            }, 500);
-          } else {
+            // Aguardar o script carregar
+            script.onload = () => {
+              console.error('🎯 INICIALIZANDO PIXEL:', pixelId);
+              (window as any).fbq('init', pixelId);
+              (window as any).fbq('track', 'PageView');
+              console.error('✅ FACEBOOK PIXEL ATIVO:', pixelId);
+            };
+          } else if ((window as any).fbq) {
             console.error('📱 FBQ JÁ EXISTE, INICIALIZANDO PIXEL:', pixelId);
             (window as any).fbq('init', pixelId);
             (window as any).fbq('track', 'PageView');
@@ -165,9 +171,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     loadPixel();
   }, []);
 
-  // Implementar marketing scripts usando o ID real do formulário
-  const activeFormId = (formId || formConfig?.id || 'default');
-  useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
   React.useEffect(() => {
