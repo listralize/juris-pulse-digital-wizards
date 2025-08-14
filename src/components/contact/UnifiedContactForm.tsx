@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
 import { supabase } from '@/integrations/supabase/client';
@@ -13,12 +13,24 @@ interface UnifiedContactFormProps {
   formId?: string;
 }
 
+// Global pixel tracking state
+declare global {
+  interface Window {
+    fbq: any;
+    _fbq: any;
+    __trackFormSubmission?: () => void;
+  }
+}
+
 const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({ 
   preselectedService,
   darkBackground = false,
   pageId,
   formId
 }) => {
+  const pixelLoadedRef = useRef(false);
+  const configLoadedRef = useRef(false);
+
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
     const pathname = window.location.pathname;
@@ -78,11 +90,13 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     resetForm
   } = useContactForm(formConfig);
 
-  // Implementar Facebook Pixel diretamente
+  // Carregar e implementar Facebook Pixel
   useEffect(() => {
-    const loadAndImplementPixel = async () => {
+    if (configLoadedRef.current || !formConfig.id || formConfig.id === 'loading') return;
+    
+    const initializePixel = async () => {
       try {
-        console.log('🔍 [UnifiedContactForm] Carregando configurações de marketing para formId:', formConfig.id);
+        console.log('🔍 [UnifiedContactForm] Carregando configurações de marketing...');
         
         const { data: marketingSettings, error } = await supabase
           .from('marketing_settings')
@@ -91,118 +105,157 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
           .single();
 
         if (error) {
-          console.error('❌ [UnifiedContactForm] Erro ao carregar marketing settings:', error);
+          console.error('❌ Erro ao carregar marketing settings:', error);
           return;
         }
-
-        console.log('📊 [UnifiedContactForm] Marketing settings carregadas:', marketingSettings);
 
         const formTrackingConfig = marketingSettings?.form_tracking_config as any;
         const systemForms = formTrackingConfig?.systemForms || [];
         
-        console.log('🔍 [UnifiedContactForm] System forms encontrados:', systemForms);
+        console.log('📊 System forms encontrados:', systemForms);
 
         // Buscar configuração para o formulário atual
         const currentFormConfig = systemForms.find((form: any) => form.formId === formConfig.id);
 
-        if (!currentFormConfig || !currentFormConfig.enabled) {
-          console.log(`⚠️ [UnifiedContactForm] Formulário ${formConfig.id} não encontrado ou desabilitado`);
+        if (!currentFormConfig?.enabled) {
+          console.log(`⚠️ Formulário ${formConfig.id} não configurado ou desabilitado`);
           return;
         }
 
-        console.log(`✅ [UnifiedContactForm] Configuração encontrada:`, currentFormConfig);
+        console.log('✅ Configuração encontrada:', currentFormConfig);
 
-        // Implementar Facebook Pixel se habilitado
+        // Implementar Facebook Pixel se configurado
         if (currentFormConfig.facebookPixel?.enabled && currentFormConfig.facebookPixel?.pixelId) {
-          await implementFacebookPixel(currentFormConfig.facebookPixel, currentFormConfig);
+          await loadFacebookPixel(currentFormConfig.facebookPixel);
         }
 
+        configLoadedRef.current = true;
       } catch (error) {
-        console.error('❌ [UnifiedContactForm] Erro geral:', error);
+        console.error('❌ Erro ao inicializar pixel:', error);
       }
     };
 
-    if (formConfig.id && formConfig.id !== 'loading') {
-      loadAndImplementPixel();
-    }
+    initializePixel();
   }, [formConfig.id]);
 
-  const implementFacebookPixel = async (pixelConfig: any, formConfigData: any) => {
-    const pixelId = pixelConfig.pixelId;
+  const loadFacebookPixel = async (pixelConfig: any) => {
+    if (pixelLoadedRef.current) return;
     
-    console.log(`📦 [UnifiedContactForm] Implementando Facebook Pixel: ${pixelId}`);
+    const pixelId = pixelConfig.pixelId;
+    console.log(`📦 Carregando Facebook Pixel: ${pixelId}`);
 
     try {
-      // Carregar script do Facebook Pixel
-      if (!document.querySelector('script[src*="fbevents.js"]')) {
-        console.log('📦 [UnifiedContactForm] Carregando script do Facebook Pixel...');
-        const script = document.createElement('script');
-        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-        script.async = true;
-        document.head.appendChild(script);
+      // Método 1: Script inline (mais confiável)
+      const pixelScript = `
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
         
-        // Aguardar carregamento
-        await new Promise((resolve) => {
-          script.onload = resolve;
-          setTimeout(resolve, 2000); // Fallback timeout
-        });
-      }
+        fbq('init', '${pixelId}');
+        fbq('track', 'PageView');
+        
+        console.log('✅ Facebook Pixel ${pixelId} carregado via script inline');
+      `;
 
-      // Inicializar fbq
-      if (typeof (window as any).fbq === 'undefined') {
-        console.log('🔧 [UnifiedContactForm] Inicializando fbq...');
-        (window as any).fbq = function(...args: any[]) {
-          ((window as any).fbq.callMethod) ? 
-            (window as any).fbq.callMethod.apply((window as any).fbq, args) : 
-            (window as any).fbq.queue.push(args);
+      // Executar script
+      const scriptElement = document.createElement('script');
+      scriptElement.innerHTML = pixelScript;
+      document.head.appendChild(scriptElement);
+
+      // Aguardar e verificar se fbq foi carregado
+      await new Promise((resolve) => {
+        let attempts = 0;
+        const checkFbq = () => {
+          attempts++;
+          if (typeof window.fbq !== 'undefined') {
+            console.log('✅ fbq carregado com sucesso');
+            resolve(true);
+          } else if (attempts < 50) { // 5 segundos máximo
+            setTimeout(checkFbq, 100);
+          } else {
+            console.error('❌ Timeout ao carregar fbq');
+            resolve(false);
+          }
         };
-        (window as any).fbq.push = (window as any).fbq;
-        (window as any).fbq.loaded = true;
-        (window as any).fbq.version = '2.0';
-        (window as any).fbq.queue = [];
-      }
+        checkFbq();
+      });
 
-      // Inicializar pixel
-      console.log(`🎯 [UnifiedContactForm] Inicializando pixel: ${pixelId}`);
-      (window as any).fbq('init', pixelId);
-      (window as any).fbq('track', 'PageView');
-      
-      console.log(`✅ [UnifiedContactForm] Facebook Pixel ${pixelId} inicializado`);
-
-      // Adicionar listener para rastrear submissões
-      const trackSubmission = () => {
+      // Configurar tracking para submit
+      if (typeof window.fbq !== 'undefined') {
         const eventType = pixelConfig.eventType;
         const customEventName = pixelConfig.customEventName;
         const eventName = eventType === 'Custom' && customEventName ? customEventName : eventType;
         
-        console.log(`🎯 [UnifiedContactForm] Rastreando evento: ${eventName}`);
-        (window as any).fbq('track', eventName, {
-          content_name: formConfigData.formName,
-          content_category: 'Lead Generation',
-          value: 100,
-          currency: 'BRL'
-        });
-      };
+        console.log(`🎯 Configurando tracking para evento: ${eventName}`);
+        
+        window.__trackFormSubmission = () => {
+          if (typeof window.fbq !== 'undefined') {
+            console.log(`📊 Disparando evento: ${eventName}`);
+            window.fbq('track', eventName, {
+              content_name: 'Contact Form Submission',
+              content_category: 'Lead Generation',
+              value: 100,
+              currency: 'BRL'
+            });
+          }
+        };
+      }
 
-      // Armazenar função globalmente para uso no submit
-      (window as any)._trackFormSubmission = trackSubmission;
+      // Método 2: Backup via createElement (caso o primeiro falhe)
+      if (typeof window.fbq === 'undefined') {
+        console.log('📦 Tentando método backup...');
+        const script = document.createElement('script');
+        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        script.async = true;
+        script.onload = () => {
+          if (typeof window.fbq === 'undefined') {
+            window.fbq = function(...args: any[]) {
+              (window.fbq.q = window.fbq.q || []).push(args);
+            };
+          }
+          window.fbq('init', pixelId);
+          window.fbq('track', 'PageView');
+          console.log('✅ Backup method: Facebook Pixel carregado');
+        };
+        document.head.appendChild(script);
+      }
+
+      pixelLoadedRef.current = true;
 
     } catch (error) {
-      console.error(`❌ [UnifiedContactForm] Erro ao implementar Facebook Pixel:`, error);
+      console.error('❌ Erro ao carregar Facebook Pixel:', error);
     }
   };
 
-  // Interceptar envio do formulário para adicionar rastreamento
+  // Interceptar envio do formulário
   const customHandleSubmit = async (e: React.FormEvent) => {
-    console.log('🚀 [UnifiedContactForm] Iniciando submissão...');
+    console.log('🚀 Iniciando submissão do formulário...');
     
-    // Executar submissão original
-    await handleSubmit(e);
-    
-    // Rastrear via Facebook Pixel se disponível
-    if (typeof (window as any)._trackFormSubmission === 'function') {
-      console.log('📊 [UnifiedContactForm] Executando rastreamento...');
-      (window as any)._trackFormSubmission();
+    try {
+      // Executar submissão original
+      await handleSubmit(e);
+      
+      // Tracking após sucesso
+      console.log('📊 Formulário enviado com sucesso, executando tracking...');
+      
+      if (typeof window.__trackFormSubmission === 'function') {
+        window.__trackFormSubmission();
+      } else if (typeof window.fbq !== 'undefined') {
+        // Fallback direto
+        window.fbq('track', 'Lead', {
+          content_name: 'Contact Form Submission',
+          content_category: 'Lead Generation'
+        });
+        console.log('📊 Fallback tracking executado');
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro na submissão:', error);
     }
   };
 
@@ -225,7 +278,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     );
   }
 
-  console.log('📋 [UnifiedContactForm] Usando formulário:', formConfig.name, 'para página:', currentPageId);
+  console.log('📋 Usando formulário:', formConfig.name, 'para página:', currentPageId);
 
   return (
     <ContactFormContainer darkBackground={darkBackground}>
