@@ -105,13 +105,13 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     const uploadedFiles = event.target.files;
     if (!uploadedFiles) return;
 
-    // Verificar tamanho dos arquivos - Supabase tem limite real de ~25MB
-    const maxSizeBytes = 25 * 1024 * 1024; // 25MB limite real do Supabase
+    // Verificar tamanho dos arquivos - Limite generoso para plano pago
+    const maxSizeBytes = 200 * 1024 * 1024; // 200MB limite para plano pago
     const oversizedFiles = Array.from(uploadedFiles).filter(file => file.size > maxSizeBytes);
     
     if (oversizedFiles.length > 0) {
       const filesizesMB = oversizedFiles.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(1)}MB`);
-      toast.error(`❌ Arquivos muito grandes (limite Supabase: 25MB):\n${filesizesMB.join('\n')}\n\n💡 Soluções:\n- Comprima o vídeo online (recomendado)\n- Use formato WebM ou MP4 otimizado\n- Reduza resolução/qualidade`);
+      toast.error(`❌ Arquivos muito grandes (limite: 200MB):\n${filesizesMB.join('\n')}`);
       event.target.value = '';
       return;
     }
