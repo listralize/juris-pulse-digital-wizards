@@ -139,38 +139,41 @@ const About = () => {
       if (aboutVideoStorageUrl) {
         console.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
         return (
-          <div className="about-video-container w-full rounded-lg overflow-hidden relative" style={{
-            aspectRatio: isMobile ? '9/16' : '16/9',
-            maxHeight: isMobile ? '24rem' : 'auto',
-            zIndex: 99999,
-            isolation: 'isolate',
-            position: 'relative'
-          }}>
+          <div 
+            className="about-video-container w-full rounded-lg overflow-hidden relative" 
+            style={{
+              aspectRatio: isMobile ? '9/16' : '16/9',
+              maxHeight: isMobile ? '24rem' : 'auto',
+              zIndex: 999999,
+              isolation: 'isolate',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <video
               src={aboutVideoStorageUrl}
               title="About Us Video"
               className="w-full h-full rounded-lg object-cover cursor-pointer"
               style={{ 
-                zIndex: 99999,
+                zIndex: 999999,
                 position: 'relative',
                 pointerEvents: 'auto',
                 isolation: 'isolate',
                 touchAction: 'manipulation',
                 WebkitTouchCallout: 'none',
-                WebkitUserSelect: 'none'
+                WebkitUserSelect: 'none',
+                userSelect: 'none'
               }}
               controls
+              controlsList="nodownload"
               preload="metadata"
               playsInline
               webkit-playsinline="true"
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
-                const video = e.target as HTMLVideoElement;
-                if (video.paused) {
-                  video.play();
-                } else {
-                  video.pause();
-                }
+                console.log('Video clicked on mobile');
               }}
             />
           </div>
