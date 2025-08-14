@@ -202,7 +202,7 @@ const Hero = () => {
               playsInline
             />
             {/* Overlay escuro APENAS com 50% de opacidade */}
-            <div className="absolute inset-0"></div>
+            <div className="absolute inset-0 bg-black/50"></div>
           </div>
         ) : (
           <NeuralBackground />
