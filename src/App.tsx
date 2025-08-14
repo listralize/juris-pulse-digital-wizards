@@ -141,20 +141,19 @@ function App() {
             <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -1 }}>
               <video
                 src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
-                className="w-full h-full object-cover opacity-50"
-                autoPlay
-                muted
-                loop
-                playsInline
-                webkit-playsinline="true"
-                preload="auto"
-                controls={false}
+                className="w-full h-full object-cover"
                 style={{ 
+                  opacity: 0.5,
                   minWidth: '100vw',
                   minHeight: '100vh',
                   objectFit: 'cover',
                   pointerEvents: 'none'
                 }}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
                 onLoadStart={() => console.log('🎥 Vídeo de fundo global iniciando')}
                 onCanPlay={() => console.log('✅ Vídeo de fundo global reproduzindo')}
                 onError={(e) => console.error('❌ Erro no vídeo de fundo global:', e)}
