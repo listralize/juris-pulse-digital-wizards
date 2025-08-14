@@ -61,7 +61,14 @@ function App() {
         if (settings) {
           setVideoEnabled(settings.team_video_enabled || false);
           setBackgroundVideoUrl(settings.team_background_video || '');
-          console.log('🎥 Vídeo de fundo global carregado:', settings);
+          console.log('🎥 Vídeo de fundo global carregado:', {
+            enabled: settings.team_video_enabled,
+            url: settings.team_background_video,
+            videoEnabled: settings.team_video_enabled || false,
+            backgroundVideoUrl: settings.team_background_video || ''
+          });
+        } else {
+          console.log('❌ Nenhuma configuração encontrada no Supabase');
         }
       } catch (error) {
         console.error('❌ Erro ao carregar vídeo de fundo:', error);
@@ -121,6 +128,9 @@ function App() {
       }
     }, 2000);
   }, []);
+  
+  // Log do estado atual antes de renderizar
+  console.log('🔍 Estado atual no render:', { videoEnabled, backgroundVideoUrl });
   
   return (
     <QueryClientProvider client={queryClient}>
