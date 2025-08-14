@@ -162,21 +162,70 @@ export const useFormMarketingScripts = (formId: string) => {
   };
 
   const implementGoogleTagManager = (eventName: string, formConfig: any) => {
-    console.log(`🏷️ Formulário GTM listener para evento: ${eventName}`);
+    console.log(`🏷️ Configurando GTM listener para evento: ${eventName}`);
 
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
+        console.log(`🏷️ Processando evento GTM para formulário: ${formId}`);
+        
+        // De-dup simples por formId
+        const sentMap = (window as any).__formEventSent || {};
+        if (sentMap[formId]?.gtm) {
+          console.log(`⏭️ GTM ignorado (duplicado) para ${formId}`);
+          return;
+        }
+        sentMap[formId] = { ...(sentMap[formId] || {}), gtm: true };
+        (window as any).__formEventSent = sentMap;
+        setTimeout(() => {
+          const m = (window as any).__formEventSent || {};
+          if (m[formId]) m[formId].gtm = false;
+          (window as any).__formEventSent = m;
+        }, 3000);
+
         setTimeout(() => {
           if (typeof window !== 'undefined' && (window as any).dataLayer) {
+            console.log(`🏷️ dataLayer disponível, enviando evento: ${eventName}`);
+            
+            const eventData = {
+              event: eventName,
+              form_id: formId,
+              form_name: formConfig.campaignName || `Form ${formId}`,
+              page_url: window.location.href,
+              timestamp: new Date().toISOString(),
+              user_data: event.detail?.userData || {}
+            };
+            
+            (window as any).dataLayer.push(eventData);
+            console.log(`✅ Evento ${eventName} enviado para GTM:`, eventData);
+            
+            // Também enviar evento padrão Lead se não for Lead
+            if (eventName !== 'Lead') {
+              (window as any).dataLayer.push({
+                event: 'Lead',
+                form_id: formId,
+                form_name: formConfig.campaignName || `Form ${formId}`,
+                page_url: window.location.href,
+                timestamp: new Date().toISOString(),
+                source_event: eventName
+              });
+              console.log(`✅ Evento Lead adicional enviado para GTM`);
+            }
+          } else {
+            console.warn('❌ dataLayer não disponível no momento do envio');
+            console.warn('📊 Window.dataLayer:', (window as any).dataLayer);
+            console.warn('📊 Tentando inicializar dataLayer...');
+            
+            // Tentar inicializar dataLayer se não existir
+            (window as any).dataLayer = (window as any).dataLayer || [];
             (window as any).dataLayer.push({
               event: eventName,
               form_id: formId,
               form_name: formConfig.campaignName || `Form ${formId}`,
               page_url: window.location.href,
+              timestamp: new Date().toISOString(),
+              initialization: 'fallback'
             });
-            console.log(`✅ Evento ${eventName} enviado para GTM`);
-          } else {
-            console.warn('❌ dataLayer não disponível no momento do envio');
+            console.log(`🆘 Evento ${eventName} enviado via fallback para GTM`);
           }
         }, 250);
       }
@@ -188,6 +237,8 @@ export const useFormMarketingScripts = (formId: string) => {
     }
     window.addEventListener('formSubmitSuccess', handleSuccess as EventListener);
     (window as any)[`formGTMHandler_${formId}`] = handleSuccess;
+    
+    console.log(`🏷️ GTM listener registrado para formId: ${formId}, evento: ${eventName}`);
   };
 
   const implementGoogleAnalytics = (eventName: string, formConfig: any) => {
