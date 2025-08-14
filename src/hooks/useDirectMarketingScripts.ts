@@ -28,11 +28,8 @@ export const useDirectMarketingScripts = () => {
     // Carregar Facebook Pixel
     loadFacebookPixel();
     
-    // Carregar Google Tag Manager — desativado para evitar eventos não configurados e overlay
-    // Para reativar, defina window.__enableGTM = true antes do App iniciar
-    if ((window as any).__enableGTM === true) {
-      loadGoogleTagManager();
-    }
+    // Carregar Google Tag Manager
+    loadGoogleTagManager();
     
     // Carregar Google Analytics
     loadGoogleAnalytics();

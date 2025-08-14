@@ -197,7 +197,16 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             });
             console.log(`✅ Evento ${eventName} enviado para GTM`);
           } else {
-            console.warn('❌ dataLayer não disponível no momento do envio');
+            console.warn('❌ dataLayer não disponível no momento do envio - GTM pode não estar carregado');
+            // Inicializar dataLayer se não existir
+            (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({
+              event: eventName,
+              form_slug: formSlug,
+              form_name: event.detail?.formName || `StepForm ${formSlug}`,
+              page_url: window.location.href,
+            });
+            console.log(`✅ Evento ${eventName} enviado para GTM (dataLayer inicializado)`);
           }
         }, 250); // Aguardar para o GTM estar pronto em produção
       }
