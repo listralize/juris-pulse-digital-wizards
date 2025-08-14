@@ -137,24 +137,28 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
-            {/* Vídeo de fundo global - FORÇADO A APARECER */}
+            {/* Vídeo de fundo global - ATRÁS DE TUDO */}
             <div 
               className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none" 
-              style={{ zIndex: -1 }}
+              style={{ zIndex: -2 }}
             >
               <video
                 autoPlay
                 muted
                 loop
                 playsInline
+                onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento...')}
+                onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
+                onError={(e) => console.error('❌ Erro no vídeo:', e)}
                 style={{ 
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  opacity: 0.5,
+                  opacity: 0.8,
                   position: 'absolute',
                   top: 0,
-                  left: 0
+                  left: 0,
+                  zIndex: -2
                 }}
               >
                 <source src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4" type="video/mp4" />

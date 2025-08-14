@@ -187,8 +187,8 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Background Layer - SEM OVERLAY BRANCO */}
-      <div className="absolute inset-0 z-0 w-full h-full">
+      {/* Background Layer - Neural sobre o vídeo */}
+      <div className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
         <NeuralBackground />
       </div>
       
@@ -214,10 +214,11 @@ const Hero = () => {
             href={primaryButtonLink} 
             target="_blank" 
             rel="noopener noreferrer" 
+            className="bg-white text-black border-2 border-white hover:bg-gray-100 transition-colors !bg-white !text-black !border-white"
             style={{ 
-              backgroundColor: '#FFFFFF',
-              color: '#000000',
-              border: '2px solid #FFFFFF',
+              backgroundColor: '#FFFFFF !important',
+              color: '#000000 !important',
+              border: '2px solid #FFFFFF !important',
               padding: '12px 32px',
               borderRadius: '8px',
               textDecoration: 'none',
@@ -225,7 +226,8 @@ const Hero = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              fontSize: '16px'
+              fontSize: '16px',
+              opacity: '1 !important'
             }}
           >
             {primaryButtonText}
@@ -234,10 +236,11 @@ const Hero = () => {
           
           <button 
             onClick={handleAreasClick}
+            className="bg-white text-black border-2 border-white hover:bg-gray-100 transition-colors !bg-white !text-black !border-white"
             style={{ 
-              backgroundColor: '#FFFFFF',
-              color: '#000000',
-              border: '2px solid #FFFFFF',
+              backgroundColor: '#FFFFFF !important',
+              color: '#000000 !important',
+              border: '2px solid #FFFFFF !important',
               padding: '12px 32px',
               borderRadius: '8px',
               fontWeight: '600',
@@ -245,7 +248,8 @@ const Hero = () => {
               alignItems: 'center',
               gap: '8px',
               fontSize: '16px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              opacity: '1 !important'
             }}
             tabIndex={0} 
             onKeyDown={e => {
