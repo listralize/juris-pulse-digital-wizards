@@ -45,10 +45,14 @@ export const useFormMarketingScripts = (formId: string) => {
       }
 
       console.log('📊 Configuração encontrada:', trackingConfig);
+      console.log('🔎 Procurando por formId:', formId);
+      console.log('📝 SystemForms disponíveis:', trackingConfig.systemForms);
 
       const formConfig = trackingConfig.systemForms?.find(
         (form: any) => form.formId === formId && form.enabled
       );
+
+      console.log('📋 FormConfig encontrado:', formConfig);
 
       if (!formConfig) {
         console.log('ℹ️ Formulário não configurado ou desabilitado');
@@ -57,14 +61,18 @@ export const useFormMarketingScripts = (formId: string) => {
 
       // Facebook Pixel: usar evento exatamente como configurado
       const pixelCfg = formConfig.facebookPixel || {};
+      console.log('📘 Configuração do Facebook Pixel:', pixelCfg);
       let eventName: string | null = null;
       if (pixelCfg.enabled === true) {
         if (pixelCfg.eventType === 'Custom') {
           eventName = (pixelCfg.customEventName || '').trim().replace(/\s+/g, '') || null;
+          console.log('📘 Evento customizado encontrado:', eventName);
         } else {
           eventName = normalizeEventName(pixelCfg.eventType);
+          console.log('📘 Evento padrão normalizado:', eventName);
         }
       }
+      console.log('📘 Nome do evento final:', eventName);
       if (eventName) {
         implementFacebookPixel(eventName, formConfig);
       } else {
