@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
-import { useFormMarketingConfig } from "../../hooks/useFormMarketingConfig";
+import { supabase } from '@/integrations/supabase/client';
 
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
@@ -69,9 +69,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   // Usar o hook de configuração de formulário
   const { formConfig, isLoading: configLoading } = useFormConfig(formId, currentPageId);
   
-  // Usar o hook de marketing específico para este formulário
-  const { trackFormSubmission } = useFormMarketingConfig(formConfig.id, currentPageId);
-  
   const {
     formData,
     isSubmitting,
@@ -81,18 +78,132 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     resetForm
   } = useContactForm(formConfig);
 
+  // Implementar Facebook Pixel diretamente
+  useEffect(() => {
+    const loadAndImplementPixel = async () => {
+      try {
+        console.log('🔍 [UnifiedContactForm] Carregando configurações de marketing para formId:', formConfig.id);
+        
+        const { data: marketingSettings, error } = await supabase
+          .from('marketing_settings')
+          .select('form_tracking_config')
+          .limit(1)
+          .single();
+
+        if (error) {
+          console.error('❌ [UnifiedContactForm] Erro ao carregar marketing settings:', error);
+          return;
+        }
+
+        console.log('📊 [UnifiedContactForm] Marketing settings carregadas:', marketingSettings);
+
+        const formTrackingConfig = marketingSettings?.form_tracking_config as any;
+        const systemForms = formTrackingConfig?.systemForms || [];
+        
+        console.log('🔍 [UnifiedContactForm] System forms encontrados:', systemForms);
+
+        // Buscar configuração para o formulário atual
+        const currentFormConfig = systemForms.find((form: any) => form.formId === formConfig.id);
+
+        if (!currentFormConfig || !currentFormConfig.enabled) {
+          console.log(`⚠️ [UnifiedContactForm] Formulário ${formConfig.id} não encontrado ou desabilitado`);
+          return;
+        }
+
+        console.log(`✅ [UnifiedContactForm] Configuração encontrada:`, currentFormConfig);
+
+        // Implementar Facebook Pixel se habilitado
+        if (currentFormConfig.facebookPixel?.enabled && currentFormConfig.facebookPixel?.pixelId) {
+          await implementFacebookPixel(currentFormConfig.facebookPixel, currentFormConfig);
+        }
+
+      } catch (error) {
+        console.error('❌ [UnifiedContactForm] Erro geral:', error);
+      }
+    };
+
+    if (formConfig.id && formConfig.id !== 'loading') {
+      loadAndImplementPixel();
+    }
+  }, [formConfig.id]);
+
+  const implementFacebookPixel = async (pixelConfig: any, formConfigData: any) => {
+    const pixelId = pixelConfig.pixelId;
+    
+    console.log(`📦 [UnifiedContactForm] Implementando Facebook Pixel: ${pixelId}`);
+
+    try {
+      // Carregar script do Facebook Pixel
+      if (!document.querySelector('script[src*="fbevents.js"]')) {
+        console.log('📦 [UnifiedContactForm] Carregando script do Facebook Pixel...');
+        const script = document.createElement('script');
+        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        script.async = true;
+        document.head.appendChild(script);
+        
+        // Aguardar carregamento
+        await new Promise((resolve) => {
+          script.onload = resolve;
+          setTimeout(resolve, 2000); // Fallback timeout
+        });
+      }
+
+      // Inicializar fbq
+      if (typeof (window as any).fbq === 'undefined') {
+        console.log('🔧 [UnifiedContactForm] Inicializando fbq...');
+        (window as any).fbq = function(...args: any[]) {
+          ((window as any).fbq.callMethod) ? 
+            (window as any).fbq.callMethod.apply((window as any).fbq, args) : 
+            (window as any).fbq.queue.push(args);
+        };
+        (window as any).fbq.push = (window as any).fbq;
+        (window as any).fbq.loaded = true;
+        (window as any).fbq.version = '2.0';
+        (window as any).fbq.queue = [];
+      }
+
+      // Inicializar pixel
+      console.log(`🎯 [UnifiedContactForm] Inicializando pixel: ${pixelId}`);
+      (window as any).fbq('init', pixelId);
+      (window as any).fbq('track', 'PageView');
+      
+      console.log(`✅ [UnifiedContactForm] Facebook Pixel ${pixelId} inicializado`);
+
+      // Adicionar listener para rastrear submissões
+      const trackSubmission = () => {
+        const eventType = pixelConfig.eventType;
+        const customEventName = pixelConfig.customEventName;
+        const eventName = eventType === 'Custom' && customEventName ? customEventName : eventType;
+        
+        console.log(`🎯 [UnifiedContactForm] Rastreando evento: ${eventName}`);
+        (window as any).fbq('track', eventName, {
+          content_name: formConfigData.formName,
+          content_category: 'Lead Generation',
+          value: 100,
+          currency: 'BRL'
+        });
+      };
+
+      // Armazenar função globalmente para uso no submit
+      (window as any)._trackFormSubmission = trackSubmission;
+
+    } catch (error) {
+      console.error(`❌ [UnifiedContactForm] Erro ao implementar Facebook Pixel:`, error);
+    }
+  };
+
   // Interceptar envio do formulário para adicionar rastreamento
   const customHandleSubmit = async (e: React.FormEvent) => {
+    console.log('🚀 [UnifiedContactForm] Iniciando submissão...');
+    
     // Executar submissão original
     await handleSubmit(e);
     
-    // Se chegou até aqui, foi sucesso, executar rastreamento
-    console.log('🎯 [UnifiedContactForm] Formulário enviado com sucesso, rastreando...');
-    trackFormSubmission({
-      form_data: formData,
-      page_url: window.location.href,
-      timestamp: new Date().toISOString()
-    });
+    // Rastrear via Facebook Pixel se disponível
+    if (typeof (window as any)._trackFormSubmission === 'function') {
+      console.log('📊 [UnifiedContactForm] Executando rastreamento...');
+      (window as any)._trackFormSubmission();
+    }
   };
 
   // Pre-selecionar serviço se fornecido
