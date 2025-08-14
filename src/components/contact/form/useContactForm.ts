@@ -140,14 +140,6 @@ export const useContactForm = (externalFormConfig?: any) => {
           service: submitData.service,
           timestamp: new Date().toISOString()
         });
-        
-        // Também disparar Lead padrão
-        (window as any).dataLayer.push({
-          event: 'Lead',
-          form_id: formConfig.id || 'default',
-          page_url: window.location.href,
-          lead_value: 100
-        });
       }
 
       // Disparar evento customizado para scripts de marketing (backup)
