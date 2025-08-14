@@ -114,7 +114,10 @@ export const useFormMarketingScripts = (formId: string) => {
     console.log(`📘 Configurando Facebook Pixel (listener apenas) para evento: ${eventName}`);
 
     const handleSuccess = (event: CustomEvent) => {
+      console.log(`🎯 [DEBUG] Evento formSubmitSuccess capturado. FormId evento: ${event.detail?.formId}, FormId esperado: ${formId}`);
       if (event.detail?.formId === formId) {
+        console.log(`🎯 [DEBUG] FormId match! Processando evento ${eventName} para FB Pixel`);
+        
         // De-dup simples por formId
         const sentMap = (window as any).__formEventSent || {};
         if (sentMap[formId]?.fb) {
@@ -131,16 +134,25 @@ export const useFormMarketingScripts = (formId: string) => {
 
         setTimeout(() => {
           if (typeof window !== 'undefined' && (window as any).fbq) {
+            console.log(`🚀 [DEBUG] Enviando evento FB Pixel: ${eventName}`);
             (window as any).fbq('track', eventName, {
               content_name: formConfig.campaignName || `Form ${formId}`,
               form_id: formId,
               page_url: window.location.href,
             });
             console.log(`✅ Evento ${eventName} enviado para Facebook Pixel`);
+            
+            // Log específico para produção
+            const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
+            if (isProduction) {
+              console.log(`🎯 [PROD] FB Pixel evento ${eventName} enviado com sucesso em produção`);
+            }
           } else {
             console.warn('❌ Facebook Pixel não disponível no momento do envio');
           }
         }, 250); // Aguardar para o pixel estar pronto em produção
+      } else {
+        console.log(`🚫 [DEBUG] FormId não match. Ignorando evento.`);
       }
     };
 
