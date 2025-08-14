@@ -140,41 +140,36 @@ const About = () => {
         console.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
         return (
           <div 
-            className="about-video-container w-full rounded-lg overflow-hidden relative" 
+            className="about-video-container w-full rounded-lg overflow-hidden" 
             style={{
               aspectRatio: isMobile ? '9/16' : '16/9',
               maxHeight: isMobile ? '24rem' : 'auto',
-              zIndex: 999999,
-              isolation: 'isolate',
-              position: 'relative'
+              position: 'relative',
+              zIndex: 9999999,
+              isolation: 'isolate'
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             <video
               src={aboutVideoStorageUrl}
               title="About Us Video"
-              className="w-full h-full rounded-lg object-cover cursor-pointer"
+              className="w-full h-full rounded-lg object-cover"
               style={{ 
-                zIndex: 999999,
                 position: 'relative',
+                zIndex: 9999999,
                 pointerEvents: 'auto',
-                isolation: 'isolate',
-                touchAction: 'manipulation',
-                WebkitTouchCallout: 'none',
-                WebkitUserSelect: 'none',
-                userSelect: 'none'
+                touchAction: 'auto',
+                isolation: 'isolate'
               }}
               controls
               controlsList="nodownload"
               preload="metadata"
               playsInline
               webkit-playsinline="true"
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log('Video clicked on mobile');
-              }}
+              onLoadedData={() => console.log('🎥 About: Video loaded and ready')}
+              onPlay={() => console.log('🎥 About: Video started playing')}
+              onPause={() => console.log('🎥 About: Video paused')}
+              onClick={() => console.log('🎥 About: Video clicked')}
+              onTouchStart={() => console.log('🎥 About: Video touch started')}
             />
           </div>
         );
@@ -188,16 +183,16 @@ const About = () => {
         return (
           <div className={`w-full rounded-lg overflow-hidden relative ${
             isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
-          }`}>
+          }`} style={{ zIndex: 9999999 }}>
             <iframe
               src={`${embedUrl}${isMobile ? '&playsinline=1' : ''}`}
               title="About Us Video"
-              className="w-full h-full rounded-lg cursor-pointer touch-manipulation"
+              className="w-full h-full rounded-lg"
               style={{ 
-                zIndex: 10000,
+                zIndex: 9999999,
                 position: 'relative',
                 pointerEvents: 'auto',
-                touchAction: 'manipulation'
+                touchAction: 'auto'
               }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
