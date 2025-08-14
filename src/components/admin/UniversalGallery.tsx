@@ -105,13 +105,14 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     const uploadedFiles = event.target.files;
     if (!uploadedFiles) return;
 
-    // Verificar tamanho dos arquivos antes do upload
-    const maxSizeBytes = 500 * 1024 * 1024; // 500MB limite prático
+    // Verificar tamanho dos arquivos - Supabase tem limite real de ~25MB
+    const maxSizeBytes = 25 * 1024 * 1024; // 25MB limite real do Supabase
     const oversizedFiles = Array.from(uploadedFiles).filter(file => file.size > maxSizeBytes);
     
     if (oversizedFiles.length > 0) {
       const filesizesMB = oversizedFiles.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(1)}MB`);
-      toast.error(`Arquivos muito grandes (limite: 500MB):\n${filesizesMB.join('\n')}`);
+      toast.error(`❌ Arquivos muito grandes (limite Supabase: 25MB):\n${filesizesMB.join('\n')}\n\n💡 Soluções:\n- Comprima o vídeo online (recomendado)\n- Use formato WebM ou MP4 otimizado\n- Reduza resolução/qualidade`);
+      event.target.value = '';
       return;
     }
 
@@ -119,7 +120,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     
     try {
       for (const file of Array.from(uploadedFiles)) {
-        // Upload um por vez para evitar sobrecarga
         const timestamp = Date.now();
         const randomId = Math.random().toString(36).substring(2, 15);
         const fileName = `${timestamp}-${randomId}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
@@ -135,17 +135,23 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
 
         if (uploadError) {
           console.error('❌ Upload error:', uploadError);
+          
+          // Mensagem específica para limite de tamanho
+          if (uploadError.message.includes('exceeded the maximum allowed size')) {
+            throw new Error(`🚫 ${file.name} é muito grande para o Supabase (>${(file.size / 1024 / 1024).toFixed(1)}MB)\n\n✅ Comprima o vídeo em:\n- https://www.media.io/video-compressor.html\n- https://www.freeconvert.com/video-compressor\n- https://clideo.com/compress-video`);
+          }
+          
           throw new Error(`Falha no upload de ${file.name}: ${uploadError.message}`);
         }
 
         console.log('✅ Upload success:', data);
       }
       
-      toast.success(`${uploadedFiles.length} arquivo(s) enviado(s) com sucesso!`);
+      toast.success(`🎉 ${uploadedFiles.length} arquivo(s) enviado(s) com sucesso!`);
       loadFiles();
     } catch (error: any) {
       console.error('💥 Upload failed:', error);
-      toast.error(`${error.message || 'Erro desconhecido no upload'}`);
+      toast.error(error.message || 'Erro desconhecido no upload');
     } finally {
       setUploading(false);
       event.target.value = '';
