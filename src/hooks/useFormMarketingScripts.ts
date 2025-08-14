@@ -85,10 +85,16 @@ export const useFormMarketingScripts = (formId: string) => {
       }
     };
 
-    loadFormConfig();
+    // Garantir que o script seja executado após o DOM estar pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadFormConfig);
+    } else {
+      loadFormConfig();
+    }
 
     return () => {
       removeFormScripts(formId);
+      document.removeEventListener('DOMContentLoaded', loadFormConfig);
     };
   }, [formId]);
 
@@ -132,10 +138,9 @@ export const useFormMarketingScripts = (formId: string) => {
     
     console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
 
-    // Verificar se este pixel específico já foi inicializado
-    const pixelKey = `fbq_pixel_${pixelId}`;
-    if (!(window as any)[pixelKey]) {
-      // Criar o script base do Facebook Pixel - MESMO CÓDIGO DO STEPFORM
+    // Verificar se fbq já existe globalmente, senão criar
+    if (!(window as any).fbq) {
+      // Criar o script base do Facebook Pixel
       const fbPixelScript = document.createElement('script');
       fbPixelScript.setAttribute('data-form-marketing', formId);
       fbPixelScript.innerHTML = `
@@ -147,18 +152,42 @@ export const useFormMarketingScripts = (formId: string) => {
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '${pixelId}');
-        fbq('set', 'autoConfig', 'false', '${pixelId}');
-        console.log('📘 Meta Pixel ${pixelId} inicializado para formulário ${formId} (autoConfig desativado)');
       `;
       document.head.appendChild(fbPixelScript);
+      console.log(`📘 Script base do Meta Pixel criado para formulário ${formId}`);
+    }
 
-      // Marcar este pixel como inicializado
-      (window as any)[pixelKey] = true;
-      try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (init)`); } catch(e) {}
+    // Verificar se este pixel específico já foi inicializado
+    const pixelKey = `fbq_pixel_${pixelId}`;
+    if (!(window as any)[pixelKey]) {
+      // Aguardar fbq estar disponível e inicializar o pixel
+      const initPixel = () => {
+        if ((window as any).fbq) {
+          (window as any).fbq('init', pixelId);
+          (window as any).fbq('set', 'autoConfig', 'false', pixelId);
+          (window as any)[pixelKey] = true;
+          console.log(`📘 Meta Pixel ${pixelId} inicializado para formulário ${formId} (autoConfig desativado)`);
+          
+          // Enviar PageView automaticamente
+          try { 
+            (window as any).fbq('track','PageView'); 
+            console.log(`👀 PageView enviado para Pixel ${pixelId} (init)`); 
+          } catch(e) {
+            console.error('Erro ao enviar PageView:', e);
+          }
+        } else {
+          setTimeout(initPixel, 100);
+        }
+      };
+      initPixel();
     } else {
       console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
-      try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (reuse)`); } catch(e) {}
+      try { 
+        (window as any).fbq && (window as any).fbq('track','PageView'); 
+        console.log(`👀 PageView enviado para Pixel ${pixelId} (reuse)`); 
+      } catch(e) {
+        console.error('Erro ao enviar PageView:', e);
+      }
     }
 
     // Adicionar listener específico para submissão bem-sucedida
