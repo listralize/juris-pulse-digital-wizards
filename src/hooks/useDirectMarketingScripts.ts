@@ -149,8 +149,31 @@ export const useDirectMarketingScripts = () => {
     (window as any).testMarketingEvents = () => {
       console.log('🧪 Disparando eventos de teste...');
       if ((window as any).fbq) (window as any).fbq('track', 'Contact', { content_name: 'Test Event' });
-      if ((window as any).dataLayer) (window as any).dataLayer.push({ event: 'test_conversion' });
+      if ((window as any).dataLayer) {
+        console.log('📤 Testando GTM com evento test_conversion...');
+        (window as any).dataLayer.push({ event: 'test_conversion', test_data: 'manual_test' });
+        console.log('✅ Evento test_conversion enviado para GTM');
+      }
       if ((window as any).gtag) (window as any).gtag('event', 'conversion', { event_category: 'Test', event_label: 'Manual' });
+    };
+
+    // Função para testar especificamente o StepForm
+    (window as any).testStepFormEvent = (eventName = 'test_stepform_event') => {
+      console.log(`🧪 Disparando evento de teste para StepForm: ${eventName}`);
+      if ((window as any).dataLayer) {
+        const testData = {
+          event: eventName,
+          form_slug: 'test-form',
+          form_name: 'Test StepForm',
+          page_url: window.location.href,
+          test: true
+        };
+        console.log('📤 Enviando dados de teste para GTM:', testData);
+        (window as any).dataLayer.push(testData);
+        console.log('✅ Evento de teste enviado!');
+      } else {
+        console.error('❌ dataLayer não encontrado');
+      }
     };
 
     // Remover/ocultar overlay do Tag Assistant (quando extensão do navegador injeta elementos)

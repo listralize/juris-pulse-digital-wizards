@@ -61,6 +61,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
       const config = stepForm.tracking_config as any;
       console.log('📊 Configuração encontrada:', config);
+      console.log('🏷️ Configuração GTM específica:', config.google_tag_manager);
 
       // Facebook Pixel: usar evento exatamente como configurado; sem fallback
       const pixelCfg = (config.facebook_pixel || {});
@@ -81,10 +82,13 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       // GTM: apenas empurrar evento se nome estiver configurado (sem injeção de script)
       const gtmCfg = (config.google_tag_manager || {});
       const gtmEventName = gtmCfg.enabled === true ? (gtmCfg.event_name || '').trim() : '';
+      console.log('🔍 GTM Config:', { gtmCfg, gtmEventName, enabled: gtmCfg.enabled });
       if (gtmEventName) {
+        console.log(`✅ GTM habilitado com evento: "${gtmEventName}"`);
         implementGoogleTagManager(gtmEventName);
       } else {
-        console.log('ℹ️ Nenhum evento do GTM configurado para este StepForm; nada será enviado.');
+        console.log('❌ GTM desabilitado ou sem nome de evento configurado');
+        console.log('ℹ️ Para habilitar: configure google_tag_manager.enabled = true e google_tag_manager.event_name no banco');
       }
 
       // GA: apenas enviar evento se nome estiver configurado (sem injeção de script)
