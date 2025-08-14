@@ -105,43 +105,49 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     const uploadedFiles = event.target.files;
     if (!uploadedFiles) return;
 
+    // Verificar tamanho dos arquivos antes do upload
+    const maxSizeBytes = 500 * 1024 * 1024; // 500MB limite prático
+    const oversizedFiles = Array.from(uploadedFiles).filter(file => file.size > maxSizeBytes);
+    
+    if (oversizedFiles.length > 0) {
+      const filesizesMB = oversizedFiles.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(1)}MB`);
+      toast.error(`Arquivos muito grandes (limite: 500MB):\n${filesizesMB.join('\n')}`);
+      return;
+    }
+
     setUploading(true);
     
     try {
-      const uploadPromises = Array.from(uploadedFiles).map(async (file) => {
-        // Gerar nome único mais seguro
+      for (const file of Array.from(uploadedFiles)) {
+        // Upload um por vez para evitar sobrecarga
         const timestamp = Date.now();
         const randomId = Math.random().toString(36).substring(2, 15);
-        const fileName = `${timestamp}-${randomId}-${file.name}`;
+        const fileName = `${timestamp}-${randomId}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
-        console.log(`📤 Uploading: ${fileName}, Size: ${file.size} bytes`);
+        console.log(`📤 Uploading: ${fileName}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         
         const { data, error: uploadError } = await supabase.storage
           .from('website-gallery')
           .upload(fileName, file, {
             cacheControl: '3600',
-            upsert: true  // Permitir substituição
+            upsert: true
           });
 
         if (uploadError) {
           console.error('❌ Upload error:', uploadError);
-          throw uploadError;
+          throw new Error(`Falha no upload de ${file.name}: ${uploadError.message}`);
         }
 
         console.log('✅ Upload success:', data);
-        return fileName;
-      });
-
-      const results = await Promise.all(uploadPromises);
-      console.log('📁 All uploads completed:', results);
+      }
+      
       toast.success(`${uploadedFiles.length} arquivo(s) enviado(s) com sucesso!`);
       loadFiles();
     } catch (error: any) {
       console.error('💥 Upload failed:', error);
-      toast.error(`Erro ao fazer upload: ${error.message || 'Erro desconhecido'}`);
+      toast.error(`${error.message || 'Erro desconhecido no upload'}`);
     } finally {
       setUploading(false);
-      // Reset input para permitir upload do mesmo arquivo novamente
       event.target.value = '';
     }
   };
