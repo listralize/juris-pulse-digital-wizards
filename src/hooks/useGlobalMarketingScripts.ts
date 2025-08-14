@@ -556,43 +556,83 @@ export const useGlobalMarketingScripts = () => {
 
   const implementGoogleTagManager = (config: any) => {
     console.log('🏷️ Implementando Google Tag Manager globalmente:', config.containerId);
-    
+
+    // Remover GTM existente primeiro
+    const existingGtmScript = document.querySelector('script[data-marketing="google-tag-manager"]');
+    const existingNoscript = document.querySelector('noscript[data-marketing="gtm-noscript"]');
+    if (existingGtmScript) existingGtmScript.remove();
+    if (existingNoscript) existingNoscript.remove();
+
     // Inicializar dataLayer primeiro
     (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
-
+    
+    // Implementar GTM usando o método tradicional e mais confiável
     const gtmScript = document.createElement('script');
-    gtmScript.src = `https://www.googletagmanager.com/gtm.js?id=${config.containerId}`;
-    gtmScript.async = true;
     gtmScript.setAttribute('data-marketing', 'google-tag-manager');
-    
-    gtmScript.onload = () => {
-      console.log('✅ GTM carregado com sucesso!');
-      
-      // Remover Tag Assistant Badge se existir
-      setTimeout(() => {
-        const tagBadge = document.querySelector('.__TAG_ASSISTANT_BADGE') || 
-                        document.querySelector('[id*="tag-assistant"]') ||
-                        document.querySelector('[class*="tag-assistant"]');
-        if (tagBadge) {
-          tagBadge.remove();
-          console.log('🗑️ Tag Assistant Badge removido');
-        }
-      }, 2000);
-    };
-    
-    gtmScript.onerror = () => {
-      console.error('❌ Erro ao carregar GTM:', config.containerId);
-    };
-    
+    gtmScript.innerHTML = `
+      (function(w,d,s,l,i){
+        w[l]=w[l]||[];
+        w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+        var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+        j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+        f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','${config.containerId}');
+    `;
     document.head.appendChild(gtmScript);
 
+    // Adicionar noscript
     const noscript = document.createElement('noscript');
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${config.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
     noscript.setAttribute('data-marketing', 'gtm-noscript');
     document.body.appendChild(noscript);
+
+    // Função mais agressiva para remover Tag Assistant Badge
+    const removeBadgeAggressively = () => {
+      const selectors = [
+        '.__TAG_ASSISTANT_BADGE',
+        '[id*="tag-assistant"]',
+        '[class*="tag-assistant"]',
+        '[class*="TAG_ASSISTANT"]',
+        'div[style*="position: fixed"][style*="z-index"]',
+        'iframe[src*="tagassistant"]'
+      ];
+      
+      selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          console.log('🗑️ Removendo elemento:', el);
+          el.remove();
+        });
+      });
+      
+      // Procurar por elementos que contenham texto relacionado ao Tag Assistant
+      const allDivs = document.querySelectorAll('div');
+      allDivs.forEach(div => {
+        const text = div.textContent || '';
+        if (text.includes('Tag Assistant') || text.includes('drag_indicator')) {
+          console.log('🗑️ Removendo div com texto Tag Assistant:', div);
+          div.remove();
+        }
+      });
+    };
+
+    // Executar remoção do badge em intervalos
+    setTimeout(removeBadgeAggressively, 1000);
+    setTimeout(removeBadgeAggressively, 3000);
+    setTimeout(removeBadgeAggressively, 5000);
     
-    console.log('📋 GTM configurado:', config.containerId);
+    // Observer para remover badge quando aparecer
+    const observer = new MutationObserver(() => {
+      removeBadgeAggressively();
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    console.log('📋 GTM configurado com método tradicional:', config.containerId);
   };
 
   const implementCustomScripts = (config: any) => {
