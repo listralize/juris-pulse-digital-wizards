@@ -74,70 +74,6 @@ const Partners = () => {
     };
   }, []);
 
-  // Carregar vídeo de fundo da página completa
-  useEffect(() => {
-    const loadVideo = async () => {
-      try {
-        const { supabase } = await import('../../integrations/supabase/client');
-        
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('team_video_enabled, team_background_video')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        console.log('🎥 Carregando vídeo de fundo:', settings);
-
-        if (settings?.team_background_video) {
-          setTimeout(() => {
-            const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
-            
-            if (videoElement) {
-              videoElement.src = settings.team_background_video;
-              if (settings.team_video_enabled) {
-                videoElement.style.display = 'block';
-                videoElement.play().then(() => {
-                  console.log('✅ Vídeo de fundo carregado e reproduzindo');
-                }).catch(err => {
-                  console.error('❌ Erro ao reproduzir vídeo:', err);
-                });
-              }
-            } else {
-              console.error('❌ Elemento de vídeo não encontrado!');
-            }
-          }, 100);
-        }
-      } catch (error) {
-        console.error('❌ Erro ao carregar vídeo:', error);
-      }
-    };
-
-    loadVideo();
-  }, []);
-
-  // Escutar configurações de vídeo de fundo  
-  useEffect(() => {
-    const handleVideoSettings = (event: CustomEvent) => {
-      const { team_video_enabled, team_background_video } = event.detail;
-      const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
-      
-      if (videoElement && team_background_video) {
-        videoElement.src = team_background_video;
-        if (team_video_enabled) {
-          videoElement.style.display = 'block';
-          videoElement.play().catch(console.error);
-        } else {
-          videoElement.style.display = 'none';
-        }
-      }
-    };
-
-    window.addEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
-    return () => {
-      window.removeEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
-    };
-  }, []);
   const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
   const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
   const nextSlide = () => {
@@ -228,33 +164,6 @@ const Partners = () => {
     >
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
-      
-      {/* Vídeo de fundo da página TODA */}
-      <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
-        zIndex: -1
-      }}>
-        <video
-          id="team-background-video"
-          src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
-          className="w-full h-full object-cover opacity-50"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          webkit-playsinline="true"
-          controls={false}
-          style={{ 
-            minWidth: '100vw',
-            minHeight: '100vh',
-            objectFit: 'cover',
-            pointerEvents: 'none'
-          }}
-          onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
-          onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
-          onError={(e) => console.error('❌ Erro no vídeo:', e)}
-        />
-      </div>
       
       
       <div className="team-responsive-container w-full relative z-10" style={{
