@@ -3,9 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useFormMarketingScripts = (formId: string) => {
   useEffect(() => {
-    if (!formId) return;
+    if (!formId) {
+      console.log(`❌ [DEBUG] useFormMarketingScripts - FormId vazio`);
+      return;
+    }
 
-    console.log(`🚀 Inicializando scripts de marketing para formulário: ${formId}`);
+    console.log(`🚀 [DEBUG] Inicializando scripts de marketing para formulário: ${formId}`);
     
     // Carregar e implementar scripts imediatamente
     loadAndImplementScripts();
@@ -50,8 +53,11 @@ export const useFormMarketingScripts = (formId: string) => {
         (form: any) => form.formId === formId && form.enabled
       );
 
+      console.log(`🔍 [DEBUG] FormConfig encontrado para ${formId}:`, formConfig);
+      console.log(`🔍 [DEBUG] Todos os formulários disponíveis:`, trackingConfig.systemForms);
+
       if (!formConfig) {
-        console.log('ℹ️ Formulário não configurado ou desabilitado');
+        console.log(`❌ [DEBUG] Formulário não configurado ou desabilitado para ${formId}`);
         return;
       }
 
