@@ -88,8 +88,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
 
   // Usar marketing scripts seguindo o mesmo padrão do StepForm que funciona
   const activeFormId = (formId || formConfig?.id || 'default');
-  console.log(`🔥 [DEBUG] UnifiedContactForm - FormId ativo:`, activeFormId);
-  console.log(`🔥 [DEBUG] UnifiedContactForm - FormConfig:`, formConfig);
   useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
