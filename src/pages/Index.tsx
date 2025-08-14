@@ -115,8 +115,8 @@ const Index = () => {
       
       <SectionsContainer />
       
-      {/* Seção de Depoimentos */}
-      <div className="relative z-10 py-20">
+      {/* Seção de Depoimentos - OCULTA NO MOBILE */}
+      <div className="relative z-10 py-20 hidden md:block">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">

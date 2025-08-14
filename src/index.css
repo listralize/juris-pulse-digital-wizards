@@ -640,3 +640,39 @@ body, html {
   background-image: none !important;
   background-pattern: none !important;
 }
+
+/* Esconder completamente o painel/overlay do Tag Assistant e GTM Preview (somente na visualização do site) */
+iframe[src*="tagassistant"],
+iframe[title*="Tag Assistant"],
+#googleTagManagerDebugConsole,
+#__GTMPreview,
+[id*="gtm-debug"],
+[class*="gtm-debug"],
+[id*="tag-assistant"],
+[class*="tag-assistant"],
+[data-tag-assistant],
+[id^="GTM-" i][class*="preview" i] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Remover APENAS overlay de fundo do Hero - preservar botões */
+#home .relative.z-50,
+#home .relative.z-50 .max-w-4xl,
+#home .relative.z-50::before,
+#home .relative.z-50::after {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Ocultar sobreposição do Google Tag Assistant (quando a extensão estiver ativa) */
+[id*="tag-assistant"], [class*="tag-assistant"], [data-tag-assistant],
+#gtm-debug, [class*="gtm-debug"], [id*="gtm-debug"] {
+  display: none !important;
+}

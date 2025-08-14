@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { SystemFormsManager } from './SystemFormsManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -944,8 +943,390 @@ export const MarketingManagement: React.FC = () => {
 
         {/* TRACKING TAB */}
         <TabsContent value="tracking" className="space-y-6">
-          {/* System Forms - Componente reestruturado e melhorado */}
-          <SystemFormsManager />
+          {/* System Forms */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                📝 Formulários do Sistema
+                <Button variant="outline" size="sm" onClick={() => {
+                loadSystemForms();
+                refreshConfig();
+              }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Atualizar
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Formulários configurados no sistema com opções de rastreamento personalizadas.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {conversionTracking.systemForms.length === 0 ? <div className="text-center p-8 text-muted-foreground">
+                  <p>Nenhum formulário encontrado.</p>
+                  <p className="text-sm">Clique em "Atualizar" para recarregar os formulários do sistema.</p>
+                </div> : conversionTracking.systemForms.map((form, index) => <div key={form.formId} className={`border rounded-lg p-4 space-y-3 cursor-pointer transition-all ${form.enabled ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'}`} onClick={() => updateSystemForm(index, 'enabled', !form.enabled)}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={form.enabled ? "default" : "outline"}>{form.formId}</Badge>
+                        <span className="font-medium">{form.formName}</span>
+                        {form.enabled && <Badge variant="secondary" className="text-xs">
+                            ✓ Rastreando
+                          </Badge>}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id={`form-enabled-${index}`} checked={form.enabled} onChange={e => {
+                    e.stopPropagation();
+                    updateSystemForm(index, 'enabled', e.target.checked);
+                  }} className="rounded" />
+                        <Label htmlFor={`form-enabled-${index}`}>Ativar</Label>
+                      </div>
+                    </div>
+                    
+                    {form.enabled && <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>ID do Botão de Submit</Label>
+                            <Input value={form.submitButtonId} onChange={e => {
+                      e.stopPropagation();
+                      updateSystemForm(index, 'submitButtonId', e.target.value);
+                    }} placeholder="submit-button-id" onClick={e => e.stopPropagation()} />
+                          </div>
+                          <div>
+                            <Label>Nome da Campanha</Label>
+                            <Input value={form.campaignName} onChange={e => {
+                      e.stopPropagation();
+                      updateSystemForm(index, 'campaignName', e.target.value);
+                    }} placeholder="Nome da campanha" onClick={e => e.stopPropagation()} />
+                          </div>
+                        </div>
+
+                        {/* Facebook Pixel Config */}
+                        <div className="border-t pt-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <input 
+                              type="checkbox" 
+                              id={`fb-enabled-${index}`}
+                              checked={form.facebookPixel?.enabled || false}
+                              onChange={e => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'facebookPixel', {
+                                  ...form.facebookPixel,
+                                  enabled: e.target.checked
+                                });
+                              }}
+                              className="rounded" 
+                            />
+                            <Label htmlFor={`fb-enabled-${index}`}>📘 Facebook Pixel</Label>
+                          </div>
+                          
+                          {form.facebookPixel?.enabled && (
+                            <div className="space-y-3">
+                              <div>
+                                <Label className="text-sm font-medium">Pixel ID</Label>
+                                <Input 
+                                  value={form.facebookPixel?.pixelId || ''}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    // Validar se é apenas números (limpar qualquer código extra)
+                                    const pixelId = e.target.value.replace(/[^0-9]/g, '');
+                                    updateSystemForm(index, 'facebookPixel', {
+                                      ...form.facebookPixel,
+                                      pixelId: pixelId
+                                    });
+                                  }}
+                                  placeholder="1024100955860841"
+                                  onClick={e => e.stopPropagation()}
+                                  className="font-mono text-sm"
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Apenas números. Ex: 1024100955860841
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-sm font-medium">Tipo de Evento</Label>
+                                 <select 
+                                  value={form.facebookPixel?.eventType || 'Lead'}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'facebookPixel', {
+                                      ...form.facebookPixel,
+                                      eventType: e.target.value
+                                    });
+                                  }}
+                                  className="w-full p-2 border rounded"
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  <option value="Lead">Lead</option>
+                                  <option value="Purchase">Purchase</option>
+                                  <option value="Contact">Contact</option>
+                                  <option value="SubmitApplication">Submit Application</option>
+                                  <option value="CompleteRegistration">Complete Registration</option>
+                                  <option value="ViewContent">View Content</option>
+                                  <option value="AddToCart">Add to Cart</option>
+                                  <option value="InitiateCheckout">Initiate Checkout</option>
+                                  <option value="Custom">Evento Personalizado</option>
+                                </select>
+                                
+                                {form.facebookPixel?.eventType === 'Custom' && (
+                                  <div className="mt-2">
+                                    <Label className="text-sm font-medium">Nome do Evento Personalizado</Label>
+                                    <input
+                                      type="text"
+                                      placeholder="ex: custom_form_submit"
+                                      value={form.facebookPixel?.customEventName || ''}
+                                      onChange={e => {
+                                        e.stopPropagation();
+                                        updateSystemForm(index, 'facebookPixel', {
+                                          ...form.facebookPixel,
+                                          customEventName: e.target.value
+                                        });
+                                      }}
+                                      className="w-full p-2 border rounded mt-1"
+                                      onClick={e => e.stopPropagation()}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Preview do código gerado */}
+                              {form.facebookPixel?.pixelId && (
+                                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                  <Label className="text-xs font-semibold text-blue-700">
+                                    ✅ Código que será gerado para este formulário:
+                                  </Label>
+                                   <div className="bg-white p-2 rounded border text-xs font-mono mt-2 overflow-x-auto">
+                                     <code className="text-blue-600">
+{`fbq('init', '${form.facebookPixel.pixelId}');
+fbq('track', '${form.facebookPixel.eventType === 'Custom' 
+  ? (form.facebookPixel.customEventName || 'CustomEvent') 
+  : (form.facebookPixel.eventType || 'Lead')}');`}
+                                     </code>
+                                   </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Google Analytics Config */}
+                        <div className="border-t pt-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <input 
+                              type="checkbox" 
+                              id={`ga-enabled-${index}`}
+                              checked={form.googleAnalytics?.enabled || false}
+                              onChange={e => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'googleAnalytics', {
+                                  ...form.googleAnalytics,
+                                  enabled: e.target.checked
+                                });
+                              }}
+                              className="rounded" 
+                            />
+                            <Label htmlFor={`ga-enabled-${index}`}>📊 Google Analytics</Label>
+                          </div>
+                          
+                          {form.googleAnalytics?.enabled && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Measurement ID</Label>
+                                <Input 
+                                  value={form.googleAnalytics?.measurementId || ''}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleAnalytics', {
+                                      ...form.googleAnalytics,
+                                      measurementId: e.target.value
+                                    });
+                                  }}
+                                  placeholder="G-XXXXXXXXXX"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                              <div>
+                                <Label>Nome do Evento</Label>
+                                <Input 
+                                  value={form.googleAnalytics?.eventName || 'form_submit'}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleAnalytics', {
+                                      ...form.googleAnalytics,
+                                      eventName: e.target.value
+                                    });
+                                  }}
+                                  placeholder="form_submit"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Scripts Personalizados */}
+                        <div className="border-t pt-4">
+                          <Label className="text-sm font-medium mb-3 block">🔧 Scripts Personalizados</Label>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground">Scripts no HEAD</Label>
+                              <Textarea 
+                                value={form.customHeadScripts || ''} 
+                                onChange={e => {
+                                  e.stopPropagation();
+                                  updateSystemForm(index, 'customHeadScripts', e.target.value);
+                                }} 
+                                placeholder="<script>/* Código personalizado para HEAD */</script>" 
+                                onClick={e => e.stopPropagation()}
+                                rows={3}
+                                className="text-xs font-mono"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground">Scripts no BODY</Label>
+                              <Textarea 
+                                value={form.customBodyScripts || ''} 
+                                onChange={e => {
+                                  e.stopPropagation();
+                                  updateSystemForm(index, 'customBodyScripts', e.target.value);
+                                }} 
+                                placeholder="<script>/* Código personalizado para BODY */</script>" 
+                                onClick={e => e.stopPropagation()}
+                                rows={3}
+                                className="text-xs font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </>}
+                  </div>)}
+            </CardContent>
+          </Card>
+
+          {/* Step Forms - desativado para evitar duplicidade de pixel */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                📋 Formulários StepForm
+              </CardTitle>
+              <CardDescription>
+                O rastreamento dos StepForms agora é controlado exclusivamente no Editor do StepForm (aba "Rastreamento").
+                Este módulo foi desativado aqui para evitar duplicidade de pixels e conflitos de configuração.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Alert>
+                <AlertDescription>
+                  Para configurar Pixel/GA/GTM de um StepForm, abra o StepForm Builder, edite o formulário desejado e use a aba "Rastreamento".
+                  As configurações de StepForm neste painel foram descontinuadas.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+
+          {/* Scripts Gerados Automaticamente */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Scripts de Conversão Gerados
+              </CardTitle>
+              <CardDescription>
+                Scripts automáticos para formulários ativos. Cole estes códigos nos seus formulários ou use eventos de JavaScript.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {conversionTracking.systemForms.length === 0 ? <div className="text-center p-8 text-muted-foreground">
+                  <p>Nenhum formulário encontrado.</p>
+                  <p className="text-sm">Clique em "Atualizar" na aba de Rastreamento para carregar os formulários.</p>
+                </div> : <div className="space-y-4">
+                  {conversionTracking.systemForms.map((form, index) => <div key={form.formId} className="border rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="default">{form.formId}</Badge>
+                        <span className="font-medium">{form.formName}</span>
+                      </div>
+                      
+                       <div className="space-y-3">
+                         {/* Facebook Pixel Script - sempre mostra */}
+                         <div className="space-y-2">
+                           <Label className="text-sm font-semibold text-blue-600">
+                             Facebook Pixel - Evento de Lead:
+                             {!marketingScripts.facebookPixel.enabled && <Badge variant="outline" className="ml-2 text-xs">Pixel desabilitado</Badge>}
+                           </Label>
+                           <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                             <code>{`// Adicione este código no evento de submit do formulário
+document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'Lead', {
+      content_name: '${form.formId}',
+      campaign_name: '${form.campaign || form.formName}',
+      form_id: '${form.formId}',
+      source: 'website'
+    });
+  }
+});`}</code>
+                           </div>
+                         </div>
+                         
+                         {/* Google Analytics Script - sempre mostra */}
+                         <div className="space-y-2">
+                           <Label className="text-sm font-semibold text-green-600">
+                             Google Analytics - Evento de Conversão:
+                             {!marketingScripts.googleAnalytics.enabled && <Badge variant="outline" className="ml-2 text-xs">GA desabilitado</Badge>}
+                           </Label>
+                           <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                             <code>{`// Adicione este código no evento de submit do formulário
+document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'conversion', {
+      event_category: 'lead_generation',
+      event_label: '${form.formId}',
+      campaign_name: '${form.campaign || form.formName}',
+      form_id: '${form.formId}',
+      value: 1
+    });
+  }
+});`}</code>
+                           </div>
+                         </div>
+                         
+                         {/* Google Tag Manager Script - sempre mostra */}
+                         <div className="space-y-2">
+                           <Label className="text-sm font-semibold text-purple-600">
+                             Google Tag Manager - DataLayer Push:
+                             {!marketingScripts.googleTagManager.enabled && <Badge variant="outline" className="ml-2 text-xs">GTM desabilitado</Badge>}
+                           </Label>
+                           <div className="bg-slate-50 p-3 rounded border text-xs font-mono overflow-x-auto">
+                             <code>{`// Adicione este código no evento de submit do formulário
+document.getElementById('${form.submitButtonId}').addEventListener('click', function() {
+  if (typeof dataLayer !== 'undefined') {
+    dataLayer.push({
+      'event': 'form_submission',
+      'form_id': '${form.formId}',
+      'form_name': '${form.formName}',
+      'campaign_name': '${form.campaign || form.formName}',
+      'conversion_value': 1
+    });
+  }
+});`}</code>
+                           </div>
+                         </div>
+                      </div>
+                    </div>)}
+                  
+                  {/* Instrução de Implementação */}
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Como implementar:</strong> Copie os scripts acima e adicione-os no final da sua página, 
+                      antes do fechamento da tag &lt;/body&gt;. Certifique-se de que os IDs dos botões de submit 
+                      correspondem aos configurados acima.
+                    </AlertDescription>
+                  </Alert>
+                </div>}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* RELATÓRIOS TAB */}

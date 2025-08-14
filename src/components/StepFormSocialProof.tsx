@@ -44,7 +44,7 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
 
   useEffect(() => {
     if (config) {
-      setSocialProofConfig(config);
+      setSocialProofConfig({ ...config, autoRotate: true });
     } else {
       loadGlobalSocialProof();
     }
@@ -75,7 +75,7 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
 
       const globalConfig = data?.global_social_proof as any;
       if (globalConfig?.enabled) {
-        setSocialProofConfig(globalConfig as SocialProofConfig);
+        setSocialProofConfig({ ...(globalConfig as SocialProofConfig), autoRotate: true });
       }
     } catch (error) {
       console.error('Erro ao carregar prova social global:', error);
@@ -197,22 +197,7 @@ export const StepFormSocialProof: React.FC<StepFormSocialProofProps> = ({
                 </motion.div>
               </AnimatePresence>
 
-              {/* Indicadores de navegação */}
-              {socialProofConfig.testimonials.length > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
-                  {socialProofConfig.testimonials.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentTestimonialIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        index === currentTestimonialIndex
-                          ? 'bg-primary'
-                          : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
+              
             </div>
           )}
 

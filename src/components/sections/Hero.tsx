@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
+import { supabase } from '@/integrations/supabase/client';
 gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const logoRef = useRef<HTMLDivElement>(null);
@@ -24,20 +25,21 @@ const Hero = () => {
   const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
   const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
   const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
+  // Vídeo de fundo (admin)
+  const [heroVideoEnabled, setHeroVideoEnabled] = useState<boolean>(false);
+  const [heroVideoUrl, setHeroVideoUrl] = useState<string>('');
 
   // Carregar dados do Supabase e event listeners
   useEffect(() => {
     const loadHeroData = async () => {
       try {
         console.log('🦸 Hero: Carregando dados iniciais...');
-        const {
-          supabase
-        } = await import('../../integrations/supabase/client');
-        const {
-          data: settings
-        } = await supabase.from('site_settings').select('*').order('updated_at', {
-          ascending: false
-        }).limit(1).maybeSingle();
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
         if (settings) {
           console.log('🦸 Hero: Dados carregados do Supabase:', settings);
           if (settings.hero_title) setHeroTitle(settings.hero_title);
@@ -46,6 +48,9 @@ const Hero = () => {
           if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
           if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
           if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
+          // Vídeo de fundo
+          if (typeof settings.team_video_enabled === 'boolean') setHeroVideoEnabled(settings.team_video_enabled);
+          if (settings.team_background_video) setHeroVideoUrl(settings.team_background_video);
         }
       } catch (error) {
         console.error('❌ Hero: Erro ao carregar dados:', error);
@@ -80,9 +85,16 @@ const Hero = () => {
         setSecondaryButtonLink(data.heroSecondaryButtonLink);
       }
     };
+    const handleHeroVideoUpdate = (event: CustomEvent) => {
+      console.log('🎥 Hero: Atualização de vídeo recebida:', event.detail);
+      setHeroVideoEnabled(Boolean(event.detail?.team_video_enabled));
+      setHeroVideoUrl(event.detail?.team_background_video || '');
+    };
     window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+    window.addEventListener('heroVideoSettingsUpdated', handleHeroVideoUpdate as EventListener);
     return () => {
       window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
+      window.removeEventListener('heroVideoSettingsUpdated', handleHeroVideoUpdate as EventListener);
     };
   }, []);
 
@@ -175,13 +187,23 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden bg-black">
-      {/* Neural Background */}
-      <div className="absolute inset-0 z-0 w-full h-full">
-        <NeuralBackground />
+      {/* Background Layer */}
+      <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
+        {heroVideoEnabled && heroVideoUrl ? (
+          <video
+            key={heroVideoUrl}
+            src={heroVideoUrl}
+            className="w-full h-full object-cover pointer-events-none"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <NeuralBackground />
+        )}
       </div>
       
-      {/* Overlay gradient */}
-      <div className=""></div>
       
       {/* conteúdo centralizado */}
       <div className="relative z-50 text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12">
@@ -200,12 +222,12 @@ const Hero = () => {
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
-          <a href={primaryButtonLink} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 hover:text-black border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <a href={primaryButtonLink} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-glow text-white hover:from-primary-glow hover:to-primary border border-primary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg">
             {primaryButtonText}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
-          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/30" tabIndex={0} onKeyDown={e => {
+          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent text-white border-2 border-secondary hover:from-accent hover:to-secondary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 shadow-lg" tabIndex={0} onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             handleAreasClick(e as any);

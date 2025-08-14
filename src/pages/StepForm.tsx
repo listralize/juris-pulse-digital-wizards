@@ -333,23 +333,6 @@ const StepForm: React.FC = () => {
     e?.preventDefault?.();
     console.log('🚀 Iniciando envio do formulário...');
     
-    // Disparar evento GTM imediatamente na submissão
-    console.log('🎯 Disparando evento GTM para submissão...');
-    if ((window as any).dataLayer) {
-      (window as any).dataLayer.push({
-        event: 'submit',
-        form_submit: true,
-        form_id: slug,
-        form_name: form?.name || 'StepForm',
-        gtm: {
-          formId: slug,
-          formName: form?.name || 'StepForm Submission',
-          formType: 'step_form'
-        }
-      });
-      console.log('📊 Evento submit enviado para GTM dataLayer');
-    }
-    
     setLoading(true);
     
     // Verificar se o form está carregado
@@ -535,7 +518,7 @@ const StepForm: React.FC = () => {
 
       console.log('🎯 Disparando eventos de marketing...', { formSlug: slug });
 
-      // Dispatch marketing success event
+      // Disparar evento customizado para scripts de marketing
       const eventDetail = { 
         formSlug: slug,
         formId: form?.id,
@@ -543,8 +526,10 @@ const StepForm: React.FC = () => {
         userData: formResponses 
       };
       
-      console.log('📢 Evento de sucesso sendo disparado:', eventDetail);
+      // Disparar evento imediatamente
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
+      console.log('✅ Evento stepFormSubmitSuccess disparado');
+      
 
       // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.
       // O hook useStepFormMarketingScripts ouvirá 'stepFormSubmitSuccess' e enviará o evento configurado.

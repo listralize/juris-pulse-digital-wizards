@@ -8,6 +8,7 @@ import { Video, Upload, Save, Trash2 } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { GalleryButton } from './GalleryButton';
 
 interface TeamVideoSettings {
   team_video_enabled: boolean;
@@ -59,7 +60,7 @@ export const TeamVideoManagement: React.FC = () => {
   };
 
   // Salvar configurações
-  const saveSettings = async () => {
+  const saveSettings = async (urlOverride?: string) => {
     setIsSaving(true);
     try {
       // Verificar se existe um registro
@@ -74,11 +75,12 @@ export const TeamVideoManagement: React.FC = () => {
         throw selectError;
       }
 
+      const newUrl = urlOverride ?? videoUrl ?? null;
       const updateData = {
         team_video_enabled: settings.team_video_enabled,
-        team_background_video: videoUrl || null,
+        team_background_video: newUrl,
         updated_at: new Date().toISOString()
-      };
+      } as const;
 
       if (existingData) {
         // Atualizar registro existente
@@ -105,7 +107,7 @@ export const TeamVideoManagement: React.FC = () => {
 
       setSettings(prev => ({
         ...prev,
-        team_background_video: videoUrl || null
+        team_background_video: newUrl
       }));
 
       toast.success('Configurações de vídeo salvas com sucesso!');
@@ -114,7 +116,7 @@ export const TeamVideoManagement: React.FC = () => {
       window.dispatchEvent(new CustomEvent('heroVideoSettingsUpdated', {
         detail: {
           team_video_enabled: settings.team_video_enabled,
-          team_background_video: videoUrl || null
+          team_background_video: newUrl
         }
       }));
       
@@ -166,6 +168,7 @@ export const TeamVideoManagement: React.FC = () => {
 
       setVideoUrl(publicUrl);
       toast.success('Vídeo enviado com sucesso!');
+      await saveSettings(publicUrl);
       
     } catch (error) {
       console.error('Erro no upload:', error);
@@ -250,71 +253,62 @@ export const TeamVideoManagement: React.FC = () => {
           />
         </div>
 
-        {/* Upload de vídeo */}
-        <div className="space-y-4">
-          <Label className={`text-base ${isDark ? 'text-white' : 'text-black'}`}>
-            Vídeo de Fundo
-          </Label>
-          
-          {/* Preview do vídeo atual */}
-          {videoUrl && (
-            <div className="relative">
-              <video
-                src={videoUrl}
-                className="w-full h-48 object-cover rounded-lg"
-                muted
-                loop
-                controls
-              />
-              <Button
-                onClick={removeVideo}
-                variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+{/* Upload/Seleção via Galeria */}
+<div className="space-y-4">
+  <Label className={`text-base ${isDark ? 'text-white' : 'text-black'}`}>
+    Selecionar vídeo da Galeria
+  </Label>
 
-          {/* Upload */}
-          <div className="space-y-2">
-            <Input
-              type="file"
-              accept="video/*"
-              onChange={handleVideoUpload}
-              disabled={uploading}
-              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-            />
-            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-              Formatos suportados: MP4, WebM, AVI. Tamanho máximo: 50MB.
-            </p>
-          </div>
+  {/* Preview do vídeo atual */}
+  {videoUrl && (
+    <div className="relative">
+      <video
+        src={videoUrl}
+        className="w-full h-48 object-cover rounded-lg"
+        muted
+        loop
+        controls
+      />
+      <Button
+        onClick={removeVideo}
+        variant="destructive"
+        size="sm"
+        className="absolute top-2 right-2"
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  )}
 
-          {/* URL manual */}
-          <div className="space-y-2">
-            <Label className={`text-sm ${isDark ? 'text-white' : 'text-black'}`}>
-              Ou insira uma URL de vídeo:
-            </Label>
-            <Input
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="https://exemplo.com/video.mp4"
-              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-            />
-          </div>
+  <div className="space-y-2">
+    <div className="flex items-center gap-2 flex-wrap">
+      <GalleryButton
+        onSelect={(url) => {
+          setVideoUrl(url);
+          toast.success('Vídeo selecionado da galeria');
+          saveSettings(url);
+        }}
+        size="sm"
+        variant="outline"
+        acceptedTypes={['video']}
+      />
+    </div>
+    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+      Formatos suportados: MP4, WebM. Tamanho recomendado: até 50MB.
+    </p>
+  </div>
 
-          {uploading && (
-            <div className="flex items-center gap-2">
-              <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${
-                isDark ? 'border-white' : 'border-black'
-              }`}></div>
-              <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Enviando vídeo...
-              </span>
-            </div>
-          )}
-        </div>
+  {uploading && (
+    <div className="flex items-center gap-2">
+      <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${
+        isDark ? 'border-white' : 'border-black'
+      }`}></div>
+      <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        Enviando vídeo...
+      </span>
+    </div>
+  )}
+</div>
 
         {/* Dicas de uso */}
         <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-blue-50'} border ${isDark ? 'border-white/10' : 'border-blue-200'}`}>
@@ -333,7 +327,7 @@ export const TeamVideoManagement: React.FC = () => {
         {/* Botão salvar */}
         <div className="flex justify-end">
           <Button
-            onClick={saveSettings}
+            onClick={() => saveSettings()}
             disabled={isSaving}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >

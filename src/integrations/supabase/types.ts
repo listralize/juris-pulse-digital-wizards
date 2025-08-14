@@ -383,6 +383,36 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_rate_limits: {
+        Row: {
+          count: number
+          created_at: string
+          endpoint: string
+          id: string
+          ip: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip: string
+          updated_at?: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           background_color: string | null
@@ -1090,6 +1120,8 @@ export type Database = {
           href: string | null
           id: string
           is_active: boolean | null
+          redirect_enabled: boolean | null
+          redirect_url: string | null
           title: string
           updated_at: string | null
         }
@@ -1101,6 +1133,8 @@ export type Database = {
           href?: string | null
           id?: string
           is_active?: boolean | null
+          redirect_enabled?: boolean | null
+          redirect_url?: string | null
           title: string
           updated_at?: string | null
         }
@@ -1112,6 +1146,8 @@ export type Database = {
           href?: string | null
           id?: string
           is_active?: boolean | null
+          redirect_enabled?: boolean | null
+          redirect_url?: string | null
           title?: string
           updated_at?: string | null
         }
