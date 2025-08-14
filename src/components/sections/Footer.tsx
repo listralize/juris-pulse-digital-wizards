@@ -110,8 +110,11 @@ const Footer: React.FC<FooterProps> = ({
       className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}
       style={{
         margin: '0',
-        padding: '3rem 1.5rem 2rem 1.5rem', // Aumentando o padding superior para mais espaço
-        marginBottom: '0' // ZERO margin-bottom
+        padding: '3rem 1.5rem 2rem 1.5rem',
+        marginBottom: '0',
+        position: 'relative',
+        zIndex: 10000,
+        pointerEvents: 'auto'
       }}
     >
       <div className="max-w-7xl mx-auto">

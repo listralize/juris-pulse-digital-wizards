@@ -239,7 +239,7 @@ const Hero = () => {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
-          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent text-white border-2 border-secondary hover:from-accent hover:to-secondary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 shadow-lg" tabIndex={0} onKeyDown={e => {
+          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent text-white border-2 border-white hover:from-accent hover:to-secondary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 shadow-lg" tabIndex={0} onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             handleAreasClick(e as any);

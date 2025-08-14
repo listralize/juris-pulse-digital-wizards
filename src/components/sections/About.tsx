@@ -142,8 +142,9 @@ const About = () => {
           <div className="about-video-container w-full rounded-lg overflow-hidden relative" style={{
             aspectRatio: isMobile ? '9/16' : '16/9',
             maxHeight: isMobile ? '24rem' : 'auto',
-            zIndex: 999999,
-            isolation: 'isolate'
+            zIndex: 50000,
+            isolation: 'isolate',
+            position: 'relative'
           }}>
             <video
               src={aboutVideoStorageUrl}
