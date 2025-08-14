@@ -56,7 +56,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
       setLoading(true);
       
       const { data: storageFiles, error: storageError } = await supabase.storage
-        .from('website-gallery')
+        .from('videos')  // Usar bucket videos em vez de website-gallery
         .list('', {
           limit: 100,
           sortBy: { column: 'created_at', order: 'desc' }
@@ -67,7 +67,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
       const filesWithUrls = await Promise.all(
         storageFiles.map(async (file) => {
           const { data: { publicUrl } } = supabase.storage
-            .from('website-gallery')
+            .from('videos')  // Usar bucket videos
             .getPublicUrl(file.name);
 
           const extension = file.name.split('.').pop()?.toLowerCase() || '';
@@ -116,7 +116,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
         console.log(`📤 Uploading: ${fileName}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         
         const { data, error: uploadError } = await supabase.storage
-          .from('website-gallery')
+          .from('videos')  // Usar bucket videos
           .upload(fileName, file, {
             cacheControl: '3600',
             upsert: true
@@ -167,7 +167,7 @@ const handleFileSelect = (file: MediaFile) => {
 
     try {
       const { error } = await supabase.storage
-        .from('website-gallery')
+        .from('videos')  // Usar bucket videos
         .remove([file.name]);
 
       if (error) throw error;
