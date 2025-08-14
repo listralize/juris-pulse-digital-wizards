@@ -24,18 +24,18 @@ interface FormMarketingConfig {
 export const useFormMarketingScripts = (formId: string) => {
   useEffect(() => {
     if (!formId) {
-      console.log('❌ [useFormMarketingScripts] FormId não fornecido');
+      console.error('❌ [useFormMarketingScripts] FormId não fornecido');
       return;
     }
 
-    console.log(`🚀 [useFormMarketingScripts] Iniciando para formId: ${formId}`);
-    console.log(`🌐 [useFormMarketingScripts] URL atual: ${window.location.href}`);
-    console.log(`📍 [useFormMarketingScripts] Hostname: ${window.location.hostname}`);
+    console.error(`🚀 [useFormMarketingScripts] INICIANDO PARA: ${formId}`);
+    console.error(`🌐 [useFormMarketingScripts] URL: ${window.location.href}`);
+    console.error(`📍 [useFormMarketingScripts] Hostname: ${window.location.hostname}`);
 
     const loadFormConfig = async () => {
       try {
-        console.log(`📋 [useFormMarketingScripts] Carregando configuração para: ${formId}`);
-        
+        console.error(`📋 [useFormMarketingScripts] CARREGANDO CONFIG PARA: ${formId}`);
+        console.error(`🔗 [useFormMarketingScripts] Supabase client disponível:`, !!supabase);
         const { data: settings, error } = await supabase
           .from('marketing_settings')
           .select('*')
