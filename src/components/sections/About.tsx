@@ -139,16 +139,22 @@ const About = () => {
       if (aboutVideoStorageUrl) {
         console.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
         return (
-          <div className={`w-full rounded-lg overflow-hidden ${
+          <div className={`w-full rounded-lg overflow-hidden relative ${
             isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
           }`}>
             <video
               src={aboutVideoStorageUrl}
               title="About Us Video"
-              className="w-full h-full rounded-lg object-cover"
+              className="w-full h-full rounded-lg object-cover cursor-pointer touch-manipulation"
+              style={{ 
+                zIndex: 10,
+                position: 'relative',
+                pointerEvents: 'auto'
+              }}
               controls
               preload="metadata"
               playsInline={isMobile}
+              webkit-playsinline={isMobile}
             />
           </div>
         );
@@ -160,13 +166,18 @@ const About = () => {
         console.log('🎥 About: Renderizando vídeo do YouTube:', { originalUrl: aboutImage, embedUrl });
         
         return (
-          <div className={`w-full rounded-lg overflow-hidden ${
+          <div className={`w-full rounded-lg overflow-hidden relative ${
             isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
           }`}>
             <iframe
               src={`${embedUrl}${isMobile ? '&playsinline=1' : ''}`}
               title="About Us Video"
-              className="w-full h-full rounded-lg"
+              className="w-full h-full rounded-lg cursor-pointer touch-manipulation"
+              style={{ 
+                zIndex: 10,
+                position: 'relative',
+                pointerEvents: 'auto'
+              }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
