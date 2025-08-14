@@ -516,7 +516,7 @@ const StepForm: React.FC = () => {
         console.warn('⚠️ Erro ao processar evento de conversão:', conversionError);
       }
 
-      console.log('🎯 Disparando eventos de marketing...', { formSlug: slug });
+      console.log('🎯 Preparando para disparar eventos de marketing...', { formSlug: slug, formId: form?.id });
 
       // Disparar evento customizado para scripts de marketing
       const eventDetail = { 
@@ -526,9 +526,26 @@ const StepForm: React.FC = () => {
         userData: formResponses 
       };
       
+      console.log('📤 Disparando evento stepFormSubmitSuccess com detalhes:', eventDetail);
+      
       // Disparar evento imediatamente
-      window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail }));
+      const customEvent = new CustomEvent('stepFormSubmitSuccess', { detail: eventDetail });
+      window.dispatchEvent(customEvent);
+      
       console.log('✅ Evento stepFormSubmitSuccess disparado');
+      console.log('🔍 Verificando se há listeners registrados...');
+      
+      // Verificar se há handlers registrados
+      const gtmHandler = (window as any)[`stepFormGTMHandler_${slug}`];
+      const pixelHandler = (window as any)[`stepFormPixelHandler_${slug}`];
+      const gaHandler = (window as any)[`stepFormGAHandler_${slug}`];
+      
+      console.log('👂 Handlers registrados:', {
+        gtm: !!gtmHandler,
+        pixel: !!pixelHandler,
+        ga: !!gaHandler,
+        slug: slug
+      });
       
 
       // Eventos diretos de Facebook Pixel removidos para evitar duplicidade.

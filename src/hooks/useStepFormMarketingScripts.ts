@@ -22,39 +22,42 @@ interface StepFormMarketingConfig {
 
 export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
-    if (!formSlug) return;
+    if (!formSlug) {
+      console.log('❌ useStepFormMarketingScripts: formSlug vazio');
+      return;
+    }
 
-    console.log(`🚀 Inicializando scripts de marketing para StepForm: ${formSlug}`);
+    console.log(`🚀 [${formSlug}] Inicializando scripts de marketing para StepForm`);
     
     // Carregar e implementar scripts imediatamente
     loadAndImplementScripts();
 
     return () => {
-      console.log(`🧹 Limpando scripts do StepForm: ${formSlug}`);
+      console.log(`🧹 [${formSlug}] Limpando scripts do StepForm`);
       removeStepFormScripts(formSlug);
     };
   }, [formSlug]);
 
   const loadAndImplementScripts = async () => {
     try {
-      console.log(`🔍 Buscando configuração para StepForm: ${formSlug}`);
+      console.log(`🔍 [${formSlug}] Buscando configuração para StepForm`);
       
       // Buscar configuração diretamente da tabela step_forms
       const { data: stepForm, error } = await supabase
         .from('step_forms')
-        .select('tracking_config, name, id')
+        .select('tracking_config, name, id, slug')
         .eq('slug', formSlug)
         .eq('is_active', true)
         .single();
 
       if (error) {
-        console.error('❌ Erro ao buscar StepForm:', error);
+        console.error(`❌ [${formSlug}] Erro ao buscar StepForm:`, error);
         implementFallbackScripts();
         return;
       }
 
       if (!stepForm?.tracking_config) {
-        console.log('⚠️ Sem configuração de tracking - usando fallback');
+        console.log(`⚠️ [${formSlug}] Sem configuração de tracking - usando fallback`);
         implementFallbackScripts();
         return;
       }
