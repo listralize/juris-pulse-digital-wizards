@@ -141,7 +141,7 @@ function App() {
             {videoEnabled && backgroundVideoUrl && (
               <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
                 <video
-                  src={backgroundVideoUrl}
+                  src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
                   className="w-full h-full object-cover opacity-50"
                   autoPlay
                   muted
@@ -163,7 +163,7 @@ function App() {
               </div>
             )}
             
-            <div className="App relative z-0">
+            <div className="App relative z-0" style={{ backgroundColor: 'black' }}>
               <Routes>
                 {/* Main pages */}
                 <Route path="/" element={<Index />} />
