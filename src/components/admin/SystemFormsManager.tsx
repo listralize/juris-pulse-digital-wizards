@@ -48,12 +48,12 @@ export const SystemFormsManager: React.FC = () => {
     loadTrackingConfig();
   }, []);
 
-  // Sincronizar com formulários disponíveis quando eles mudarem
+  // Sincronizar com formulários disponíveis quando eles mudarem (só na primeira vez)
   useEffect(() => {
-    if (multipleFormsConfig?.forms) {
+    if (multipleFormsConfig?.forms && tracking.systemForms.length === 0) {
       syncWithAvailableForms();
     }
-  }, [multipleFormsConfig]);
+  }, [multipleFormsConfig, tracking.systemForms.length]);
 
   const loadTrackingConfig = async () => {
     try {
