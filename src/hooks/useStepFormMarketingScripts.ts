@@ -170,9 +170,12 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const implementGoogleTagManager = (eventName: string) => {
-    console.log(`🏷️ StepForm GTM listener para evento: ${eventName}`);
+    console.log(`🏷️ StepForm GTM listener configurado para evento: "${eventName}" no formulário: "${formSlug}"`);
+    console.log(`🔍 DataLayer atual:`, (window as any).dataLayer);
 
     const handleSuccess = (event: CustomEvent) => {
+      console.log(`🎯 Evento stepFormSubmitSuccess recebido:`, event.detail);
+      console.log(`🔍 Verificando se é do formulário correto: ${event.detail?.formSlug} === ${formSlug}`);
       if (event.detail?.formSlug === formSlug) {
         const sentMap = (window as any).__stepFormEventSent || {};
         if (sentMap[formSlug]?.gtm) {
@@ -188,25 +191,31 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
+          console.log(`🚀 Tentando enviar evento "${eventName}" para GTM...`);
           if (typeof window !== 'undefined' && (window as any).dataLayer) {
-            (window as any).dataLayer.push({
+            const eventData = {
               event: eventName,
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
               page_url: window.location.href,
-            });
-            console.log(`✅ Evento ${eventName} enviado para GTM`);
+            };
+            console.log(`📤 Enviando dados para GTM:`, eventData);
+            (window as any).dataLayer.push(eventData);
+            console.log(`✅ Evento "${eventName}" enviado para GTM com sucesso!`);
           } else {
             console.warn('❌ dataLayer não disponível no momento do envio - GTM pode não estar carregado');
+            console.log('🔧 Inicializando dataLayer...');
             // Inicializar dataLayer se não existir
             (window as any).dataLayer = (window as any).dataLayer || [];
-            (window as any).dataLayer.push({
+            const eventData = {
               event: eventName,
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
               page_url: window.location.href,
-            });
-            console.log(`✅ Evento ${eventName} enviado para GTM (dataLayer inicializado)`);
+            };
+            console.log(`📤 Enviando dados para GTM (com dataLayer inicializado):`, eventData);
+            (window as any).dataLayer.push(eventData);
+            console.log(`✅ Evento "${eventName}" enviado para GTM (dataLayer inicializado)`);
           }
         }, 250); // Aguardar para o GTM estar pronto em produção
       }
