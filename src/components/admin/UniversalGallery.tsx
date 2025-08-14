@@ -109,28 +109,40 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     
     try {
       const uploadPromises = Array.from(uploadedFiles).map(async (file) => {
-        const fileName = `${Date.now()}-${file.name}`;
+        // Gerar nome único mais seguro
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 15);
+        const fileName = `${timestamp}-${randomId}-${file.name}`;
         
-        const { error: uploadError } = await supabase.storage
+        console.log(`📤 Uploading: ${fileName}, Size: ${file.size} bytes`);
+        
+        const { data, error: uploadError } = await supabase.storage
           .from('website-gallery')
           .upload(fileName, file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: true  // Permitir substituição
           });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('❌ Upload error:', uploadError);
+          throw uploadError;
+        }
 
+        console.log('✅ Upload success:', data);
         return fileName;
       });
 
-      await Promise.all(uploadPromises);
+      const results = await Promise.all(uploadPromises);
+      console.log('📁 All uploads completed:', results);
       toast.success(`${uploadedFiles.length} arquivo(s) enviado(s) com sucesso!`);
       loadFiles();
     } catch (error: any) {
-      console.error('Erro no upload:', error);
-      toast.error('Erro ao fazer upload dos arquivos');
+      console.error('💥 Upload failed:', error);
+      toast.error(`Erro ao fazer upload: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setUploading(false);
+      // Reset input para permitir upload do mesmo arquivo novamente
+      event.target.value = '';
     }
   };
 
