@@ -205,9 +205,7 @@ const Hero = () => {
             <div className="absolute inset-0 bg-black/50"></div>
           </div>
         ) : (
-          <div className="w-full h-full bg-black">
-            <NeuralBackground />
-          </div>
+          <NeuralBackground />
         )}
       </div>
       
