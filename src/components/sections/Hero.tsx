@@ -210,12 +210,12 @@ const Hero = () => {
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
-          <a href={primaryButtonLink} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-glow text-white hover:from-primary-glow hover:to-primary border border-primary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg">
+          <a href={primaryButtonLink} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg font-semibold">
             {primaryButtonText}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
-          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent text-white border-2 border-secondary hover:from-accent hover:to-secondary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 shadow-lg" tabIndex={0} onKeyDown={e => {
+          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-100 border border-white text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg font-semibold" tabIndex={0} onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             handleAreasClick(e as any);

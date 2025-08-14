@@ -241,11 +241,14 @@ const Partners = () => {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          webkit-playsinline="true"
+          controls={false}
           style={{ 
             minWidth: '100vw',
             minHeight: '100vh',
-            objectFit: 'cover'
+            objectFit: 'cover',
+            pointerEvents: 'none'
           }}
           onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
           onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
