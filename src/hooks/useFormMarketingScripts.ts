@@ -60,9 +60,21 @@ export const useFormMarketingScripts = (formId: string) => {
           
           console.log(`🔍 [useFormMarketingScripts] TrackingConfig encontrado:`, trackingConfig);
           console.log(`📝 [useFormMarketingScripts] SystemForms disponíveis:`, trackingConfig.systemForms);
+          console.log(`🎯 [useFormMarketingScripts] Procurando por formId: "${formId}"`);
+          
+          // Debug cada formulário disponível
+          trackingConfig.systemForms?.forEach((form: any, index: number) => {
+            console.log(`📋 [useFormMarketingScripts] Form ${index}:`, {
+              formId: form.formId,
+              enabled: form.enabled,
+              matches: form.formId === formId,
+              type: typeof form.formId,
+              length: form.formId?.length
+            });
+          });
           
           const formConfig = trackingConfig.systemForms?.find(
-            (form: any) => form.formId === formId && form.enabled
+            (form: any) => form.formId === formId && form.enabled === true
           );
 
           if (formConfig) {
