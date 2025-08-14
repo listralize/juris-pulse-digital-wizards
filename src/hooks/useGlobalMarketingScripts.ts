@@ -556,21 +556,43 @@ export const useGlobalMarketingScripts = () => {
 
   const implementGoogleTagManager = (config: any) => {
     console.log('🏷️ Implementando Google Tag Manager globalmente:', config.containerId);
+    
+    // Inicializar dataLayer primeiro
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
 
     const gtmScript = document.createElement('script');
+    gtmScript.src = `https://www.googletagmanager.com/gtm.js?id=${config.containerId}`;
+    gtmScript.async = true;
     gtmScript.setAttribute('data-marketing', 'google-tag-manager');
-    gtmScript.innerHTML = `
-      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer','${config.containerId}');
-    `;
+    
+    gtmScript.onload = () => {
+      console.log('✅ GTM carregado com sucesso!');
+      
+      // Remover Tag Assistant Badge se existir
+      setTimeout(() => {
+        const tagBadge = document.querySelector('.__TAG_ASSISTANT_BADGE') || 
+                        document.querySelector('[id*="tag-assistant"]') ||
+                        document.querySelector('[class*="tag-assistant"]');
+        if (tagBadge) {
+          tagBadge.remove();
+          console.log('🗑️ Tag Assistant Badge removido');
+        }
+      }, 2000);
+    };
+    
+    gtmScript.onerror = () => {
+      console.error('❌ Erro ao carregar GTM:', config.containerId);
+    };
+    
     document.head.appendChild(gtmScript);
 
     const noscript = document.createElement('noscript');
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${config.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+    noscript.setAttribute('data-marketing', 'gtm-noscript');
     document.body.appendChild(noscript);
+    
+    console.log('📋 GTM configurado:', config.containerId);
   };
 
   const implementCustomScripts = (config: any) => {
