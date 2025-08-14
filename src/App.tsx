@@ -1,11 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useDirectMarketingScripts } from './hooks/useDirectMarketingScripts';
+import { supabase } from '@/integrations/supabase/client';
 
 // Pages
 import Index from './pages/Index';
@@ -41,6 +42,34 @@ const queryClient = new QueryClient();
 function App() {
   // Carregar scripts de marketing globalmente
   useDirectMarketingScripts();
+  
+  // Estados para vídeo de fundo global
+  const [backgroundVideoUrl, setBackgroundVideoUrl] = useState<string>('');
+  const [videoEnabled, setVideoEnabled] = useState<boolean>(false);
+  
+  // Carregar configurações de vídeo de fundo
+  useEffect(() => {
+    const loadBackgroundVideo = async () => {
+      try {
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('team_video_enabled, team_background_video')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (settings) {
+          setVideoEnabled(settings.team_video_enabled || false);
+          setBackgroundVideoUrl(settings.team_background_video || '');
+          console.log('🎥 Vídeo de fundo global carregado:', settings);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar vídeo de fundo:', error);
+      }
+    };
+
+    loadBackgroundVideo();
+  }, []);
   
   // Adicionar verificação de scripts carregados
   useEffect(() => {
@@ -98,7 +127,33 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
-            <div className="App">
+            {/* Vídeo de fundo global para TODA a aplicação */}
+            {videoEnabled && backgroundVideoUrl && (
+              <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
+                <video
+                  src={backgroundVideoUrl}
+                  className="w-full h-full object-cover opacity-50"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  webkit-playsinline="true"
+                  preload="metadata"
+                  controls={false}
+                  style={{ 
+                    minWidth: '100vw',
+                    minHeight: '100vh',
+                    objectFit: 'cover',
+                    pointerEvents: 'none'
+                  }}
+                  onLoadStart={() => console.log('🎥 Vídeo de fundo global iniciando')}
+                  onCanPlay={() => console.log('✅ Vídeo de fundo global reproduzindo')}
+                  onError={(e) => console.error('❌ Erro no vídeo de fundo global:', e)}
+                />
+              </div>
+            )}
+            
+            <div className="App relative z-0">
               <Routes>
                 {/* Main pages */}
                 <Route path="/" element={<Index />} />
