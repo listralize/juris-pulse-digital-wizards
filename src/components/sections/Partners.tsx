@@ -235,6 +235,7 @@ const Partners = () => {
       }}>
         <video
           id="team-background-video"
+          src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
           className="w-full h-full object-cover opacity-50"
           autoPlay
           muted
@@ -246,6 +247,9 @@ const Partners = () => {
             minHeight: '100vh',
             objectFit: 'cover'
           }}
+          onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
+          onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
+          onError={(e) => console.error('❌ Erro no vídeo:', e)}
         />
       </div>
       
