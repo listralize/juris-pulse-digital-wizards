@@ -79,16 +79,26 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         console.log('ℹ️ Pixel desativado ou sem evento configurado; nada será enviado.');
       }
 
-      // GTM: apenas empurrar evento se nome estiver configurado (sem injeção de script)
-      const gtmCfg = (config.google_tag_manager || {});
-      const gtmEventName = gtmCfg.enabled === true ? (gtmCfg.event_name || '').trim() : '';
-      console.log('🔍 GTM Config:', { gtmCfg, gtmEventName, enabled: gtmCfg.enabled });
-      if (gtmEventName) {
-        console.log(`✅ GTM habilitado com evento: "${gtmEventName}"`);
+      // GTM: ler configuração do formato aninhado corretamente
+      const gtmCfg = config.google_tag_manager || {};
+      const gtmEnabled = gtmCfg.enabled === true;
+      const gtmEventName = gtmEnabled ? (gtmCfg.event_name || '').trim() : '';
+      const gtmContainerId = gtmCfg.container_id || '';
+      
+      console.log('🔍 GTM Config detalhado:', { 
+        gtmCfg, 
+        gtmEnabled, 
+        gtmEventName, 
+        gtmContainerId,
+        configCompleta: config 
+      });
+      
+      if (gtmEnabled && gtmEventName) {
+        console.log(`✅ GTM habilitado com evento: "${gtmEventName}" e container: "${gtmContainerId}"`);
         implementGoogleTagManager(gtmEventName);
       } else {
-        console.log('❌ GTM desabilitado ou sem nome de evento configurado');
-        console.log('ℹ️ Para habilitar: configure google_tag_manager.enabled = true e google_tag_manager.event_name no banco');
+        console.log('❌ GTM desabilitado ou configuração incompleta');
+        console.log('ℹ️ Configuração necessária: google_tag_manager.enabled = true, google_tag_manager.event_name preenchido');
       }
 
       // GA: apenas enviar evento se nome estiver configurado (sem injeção de script)
