@@ -1,0 +1,1009 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Badge } from '../ui/badge';
+import { Switch } from '../ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { supabase } from '../../integrations/supabase/client';
+import { toast } from 'sonner';
+import { ImageGallery } from './ImageGallery';
+import { StepFormPageCustomizer } from './StepFormPageCustomizer';
+import { VisualFlowEditor } from './VisualFlowEditor';
+import { SocialProofConfigEditor } from './StepFormConfigEditors';
+import { StepFormPageEditor } from './service-pages/StepFormPageEditor';
+
+// Tipos baseados na estrutura da tabela step_forms
+type StepFormData = {
+  id?: string;
+  name: string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  logo_url?: string;
+  webhook_url: string;
+  redirect_url?: string;
+  steps: any; // JSONB
+  styles: any; // JSONB
+  seo: any; // JSONB
+  footer_config?: any; // JSONB
+  seo_config?: any; // JSONB
+  tracking_config?: any; // JSONB
+  flowConfig?: any; // JSONB para salvar posições e conexões do fluxo visual
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export const StepFormBuilder: React.FC = () => {
+  const [forms, setForms] = useState<StepFormData[]>([]);
+  const [selectedForm, setSelectedForm] = useState<StepFormData | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [showImageGallery, setShowImageGallery] = useState(false);
+  const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
+  const [trackingConfig, setTrackingConfig] = useState({
+    facebook_pixel: false,
+    google_analytics: false,
+    google_tag_manager: false,
+    pixel_id: '',
+    event_type: 'Lead',
+    custom_event_name: '',
+    ga_id: '',
+    ga_event_name: 'form_submit',
+    gtm_id: '',
+    gtm_event_name: 'form_submit',
+    // Códigos customizados
+    custom_head_html: '',
+    custom_body_html: ''
+  });
+
+  useEffect(() => {
+    loadForms();
+  }, []);
+
+  useEffect(() => {
+    if (selectedForm?.id) {
+      loadTrackingConfig(selectedForm.id);
+    }
+  }, [selectedForm?.id]);
+
+  const loadTrackingConfig = async (formId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('step_forms')
+        .select('tracking_config')
+        .eq('id', formId)
+        .single();
+
+      if (error) throw error;
+      
+      const cfg = (data?.tracking_config || {}) as any;
+      const normalized = {
+        facebook_pixel: cfg?.facebook_pixel?.enabled ?? cfg?.facebook_pixel ?? false,
+        google_analytics: cfg?.google_analytics?.enabled ?? cfg?.google_analytics ?? false,
+        google_tag_manager: cfg?.google_tag_manager?.enabled ?? cfg?.google_tag_manager ?? false,
+        pixel_id: cfg?.pixel_id ?? cfg?.facebook_pixel?.pixel_id ?? '',
+        event_type: cfg?.event_type ?? cfg?.facebook_pixel?.event_type ?? 'Lead',
+        custom_event_name: cfg?.custom_event_name ?? cfg?.facebook_pixel?.custom_event_name ?? '',
+        ga_id: cfg?.ga_id ?? cfg?.google_analytics?.tracking_id ?? '',
+        ga_event_name: cfg?.ga_event_name ?? cfg?.google_analytics?.event_name ?? 'form_submit',
+        gtm_id: cfg?.gtm_id ?? cfg?.google_tag_manager?.container_id ?? '',
+        gtm_event_name: cfg?.gtm_event_name ?? cfg?.google_tag_manager?.event_name ?? 'form_submit',
+        custom_head_html: cfg?.custom_head_html ?? cfg?.head_html ?? '',
+        custom_body_html: cfg?.custom_body_html ?? cfg?.body_html ?? ''
+      };
+      setTrackingConfig(normalized);
+    } catch (error) {
+      console.error('Erro ao carregar configurações de tracking:', error);
+    }
+  };
+
+  const saveTrackingConfig = async () => {
+    if (!selectedForm?.id) return;
+
+    try {
+      const nested = {
+        facebook_pixel: {
+          enabled: trackingConfig.facebook_pixel,
+          pixel_id: trackingConfig.pixel_id,
+          event_type: trackingConfig.event_type || 'Lead',
+          custom_event_name: trackingConfig.event_type === 'Custom' ? (trackingConfig.custom_event_name || 'CustomEvent') : undefined,
+        },
+        google_analytics: {
+          enabled: trackingConfig.google_analytics,
+          tracking_id: trackingConfig.ga_id,
+          event_name: trackingConfig.ga_event_name || 'form_submit',
+        },
+        google_tag_manager: {
+          enabled: trackingConfig.google_tag_manager,
+          container_id: trackingConfig.gtm_id,
+          event_name: trackingConfig.gtm_event_name || 'form_submit',
+        },
+        custom_head_html: trackingConfig.custom_head_html,
+        custom_body_html: trackingConfig.custom_body_html,
+      };
+
+      const { error } = await supabase
+        .from('step_forms')
+        .update({ tracking_config: nested })
+        .eq('id', selectedForm.id);
+
+      if (error) throw error;
+      
+      toast.success('Configurações de rastreamento salvas!');
+    } catch (error) {
+      console.error('Erro ao salvar tracking:', error);
+      toast.error('Erro ao salvar configurações de rastreamento');
+    }
+  };
+
+  const loadForms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('step_forms')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Mapear flow_config para flowConfig
+      const formsWithFlowConfig = (data || []).map(form => ({
+        ...form,
+        flowConfig: form.flow_config
+      }));
+      
+      setForms(formsWithFlowConfig);
+    } catch (error) {
+      console.error('Erro ao carregar formulários:', error);
+      toast.error('Erro ao carregar formulários');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createNewForm = () => {
+    const newForm: StepFormData = {
+      name: 'Novo Formulário',
+      slug: 'novo-formulario',
+      title: 'Formulário Interativo',
+      subtitle: 'Complete as etapas para prosseguir',
+      webhook_url: '',
+      redirect_url: '/obrigado',
+      steps: [{
+        id: 'inicio',
+        title: 'Bem-vindo',
+        type: 'question',
+        options: [
+          { text: 'Começar', value: 'comecar', nextStep: 'step2', actionType: 'next_step' }
+        ]
+      }],
+      styles: {
+        primary_color: '#4CAF50',
+        background_color: '#ffffff',
+        text_color: '#000000',
+        button_style: 'rounded'
+      },
+      seo: {
+        meta_title: 'Formulário Interativo',
+        meta_description: 'Complete nosso formulário interativo'
+      },
+      footer_config: {
+        enabled: false,
+        text: 'Atendemos todo o Brasil ✅',
+        background_color: '#1a1a1a',
+        text_color: '#ffffff',
+        font_size: 'text-sm'
+      },
+      seo_config: {
+        meta_title: 'Formulário Interativo',
+        meta_description: 'Complete nosso formulário interativo',
+        meta_keywords: ''
+      },
+      tracking_config: {
+        facebook_pixel: false,
+        google_analytics: false,
+        google_tag_manager: false,
+        pixel_id: '',
+        ga_id: '',
+        gtm_id: ''
+      },
+      is_active: true
+    };
+    
+    setSelectedForm(newForm);
+    setIsCreating(true);
+  };
+
+  const saveForm = async () => {
+    if (!selectedForm) return;
+
+    try {
+      // Garantir que todas as configurações estão incluídas
+      const formData = {
+        name: selectedForm.name,
+        slug: selectedForm.slug,
+        title: selectedForm.title,
+        subtitle: selectedForm.subtitle,
+        logo_url: selectedForm.logo_url,
+        webhook_url: selectedForm.webhook_url,
+        redirect_url: selectedForm.redirect_url,
+        steps: selectedForm.steps,
+        styles: selectedForm.styles,
+        seo: selectedForm.seo,
+        footer_config: selectedForm.footer_config || {
+          enabled: false,
+          text: 'Atendemos todo o Brasil ✅',
+          background_color: '#1a1a1a',
+          text_color: '#ffffff',
+          font_size: 'text-sm'
+        },
+        seo_config: selectedForm.seo_config || {
+          meta_title: selectedForm.title,
+          meta_description: selectedForm.subtitle || '',
+          meta_keywords: ''
+        },
+        tracking_config: {
+          facebook_pixel: {
+            enabled: trackingConfig.facebook_pixel,
+            pixel_id: trackingConfig.pixel_id,
+            event_type: trackingConfig.event_type || 'Lead',
+            custom_event_name: trackingConfig.event_type === 'Custom' ? (trackingConfig.custom_event_name || 'CustomEvent') : undefined,
+          },
+          google_analytics: {
+            enabled: trackingConfig.google_analytics,
+            tracking_id: trackingConfig.ga_id,
+            event_name: trackingConfig.ga_event_name || 'form_submit',
+          },
+          google_tag_manager: {
+            enabled: trackingConfig.google_tag_manager,
+            container_id: trackingConfig.gtm_id,
+            event_name: trackingConfig.gtm_event_name || 'form_submit',
+          },
+          custom_head_html: trackingConfig.custom_head_html,
+          custom_body_html: trackingConfig.custom_body_html,
+        },
+        flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
+        is_active: selectedForm.is_active
+      };
+
+      let error;
+      if (selectedForm.id) {
+        const { error: updateError } = await supabase
+          .from('step_forms')
+          .update(formData)
+          .eq('id', selectedForm.id);
+        error = updateError;
+      } else {
+        const { data: insertData, error: insertError } = await supabase
+          .from('step_forms')
+          .insert([formData])
+          .select()
+          .single();
+        error = insertError;
+        
+        if (!error && insertData) {
+          setSelectedForm({ ...selectedForm, id: insertData.id });
+        }
+      }
+
+      if (error) throw error;
+
+      toast.success('Formulário salvo com sucesso!');
+      loadForms();
+    } catch (error) {
+      console.error('Erro ao salvar formulário:', error);
+      toast.error('Erro ao salvar formulário');
+    }
+  };
+
+  const deleteForm = async (formId: string) => {
+    try {
+      const { error } = await supabase
+        .from('step_forms')
+        .delete()
+        .eq('id', formId);
+
+      if (error) throw error;
+
+      toast.success('Formulário excluído com sucesso!');
+      loadForms();
+    } catch (error) {
+      console.error('Erro ao excluir formulário:', error);
+      toast.error('Erro ao excluir formulário');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (selectedForm) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSelectedForm(null);
+              setIsCreating(false);
+            }}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPreviewMode(!previewMode)}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {previewMode ? 'Editar' : 'Visualizar'}
+            </Button>
+            <Button onClick={saveForm}>
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Formulário
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedForm(null);
+                setIsCreating(false);
+              }}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Cancelar
+            </Button>
+          </div>
+        </div>
+
+        <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="visual" className="flex items-center gap-2">
+              <Edit3 className="w-4 h-4" />
+              Editor Visual
+            </TabsTrigger>
+            <TabsTrigger value="code" className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              Editor de Código
+            </TabsTrigger>
+            <TabsTrigger value="page" className="flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              Personalização
+            </TabsTrigger>
+            <TabsTrigger value="html" className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              Editor HTML
+            </TabsTrigger>
+            <TabsTrigger value="testimonials" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Depoimentos
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="visual" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Editor Visual de Fluxo
+                  {selectedForm.id && (
+                    <Badge variant="outline" className="text-xs">
+                      URL: /form/{selectedForm.slug}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <VisualFlowEditor
+                  formData={selectedForm}
+                  onUpdate={async (field, value) => {
+                    if (selectedForm?.id) {
+                      try {
+                        // Mapear flowConfig para flow_config
+                        const dbField = field === 'flowConfig' ? 'flow_config' : field;
+                        console.log('Salvando campo:', field, '-> DB campo:', dbField, 'valor:', value);
+                        const { error } = await supabase
+                          .from('step_forms')
+                          .update({ [dbField]: value })
+                          .eq('id', selectedForm.id);
+                        if (error) throw error;
+                        // Recarregar dados atualizados do banco
+                        const { data: updatedData, error: fetchError } = await supabase
+                          .from('step_forms')
+                          .select('*')
+                          .eq('id', selectedForm.id)
+                          .single();
+                        if (fetchError) throw fetchError;
+                        // Mapear flow_config de volta para flowConfig
+                        if ((updatedData as any).flow_config) {
+                          (updatedData as any).flowConfig = (updatedData as any).flow_config;
+                        }
+                        setSelectedForm(updatedData);
+                        // Atualizar também a lista de forms
+                        setForms(prevForms => 
+                          prevForms.map(form => 
+                            form.id === selectedForm.id ? updatedData : form
+                          )
+                        );
+                      } catch (error) {
+                        console.error('Erro ao salvar:', error);
+                        toast.error('Erro ao salvar alterações');
+                      }
+                    } else {
+                      // Se não tem ID ainda, apenas atualiza localmente
+                      setSelectedForm({ ...selectedForm, [field]: value });
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="code" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Configurações Gerais
+                  {selectedForm.id && (
+                    <Badge variant="outline" className="text-xs">
+                      URL: /form/{selectedForm.slug}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Nome do Formulário</Label>
+                    <Input
+                      id="name"
+                      value={selectedForm.name}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="slug">Slug (URL)</Label>
+                    <Input
+                      id="slug"
+                      value={selectedForm.slug}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, slug: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="title">Título</Label>
+                    <Input
+                      id="title"
+                      value={selectedForm.title}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, title: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subtitle">Subtítulo</Label>
+                    <Input
+                      id="subtitle"
+                      value={selectedForm.subtitle || ''}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, subtitle: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="logo_url">Logo do Formulário</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="logo_url"
+                        value={selectedForm.logo_url || ''}
+                        onChange={(e) => setSelectedForm({ ...selectedForm, logo_url: e.target.value })}
+                        placeholder="URL da imagem ou selecione da galeria"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowImageGallery(true)}
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Galeria
+                      </Button>
+                    </div>
+                    {selectedForm.logo_url && (
+                      <div className="mt-2">
+                        <img 
+                          src={selectedForm.logo_url} 
+                          alt="Preview do logo" 
+                          className="max-w-xs h-16 object-contain border rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="webhook_url">URL do Webhook</Label>
+                    <Input
+                      id="webhook_url"
+                      value={selectedForm.webhook_url}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, webhook_url: e.target.value })}
+                      placeholder="https://exemplo.com/webhook"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="redirect_url">URL de Redirecionamento</Label>
+                    <Input
+                      id="redirect_url"
+                      value={selectedForm.redirect_url || '/obrigado'}
+                      onChange={(e) => setSelectedForm({ ...selectedForm, redirect_url: e.target.value })}
+                      placeholder="/obrigado ou https://seusite.com/sucesso"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      URL para onde o usuário será redirecionado após enviar o formulário
+                    </p>
+                  </div>
+                </div>
+
+                {/* Seção de Configurações de Rastreamento */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Códigos de Rastreamento</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="facebook_pixel"
+                            checked={trackingConfig.facebook_pixel}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, facebook_pixel: checked }))
+                            }
+                          />
+                          <Label htmlFor="facebook_pixel">Facebook Pixel</Label>
+                        </div>
+                        {trackingConfig.facebook_pixel && (
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="ID do Pixel"
+                              value={trackingConfig.pixel_id}
+                              onChange={(e) => 
+                                setTrackingConfig(prev => ({ ...prev, pixel_id: e.target.value }))
+                              }
+                            />
+                            <div>
+                              <Label>Tipo de Evento</Label>
+                              <Select
+                                value={trackingConfig.event_type}
+                                onValueChange={(value) => setTrackingConfig(prev => ({ ...prev, event_type: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Lead">Lead</SelectItem>
+                                  <SelectItem value="Contact">Contact</SelectItem>
+                                  <SelectItem value="SubmitApplication">Submit Application</SelectItem>
+                                  <SelectItem value="CompleteRegistration">Complete Registration</SelectItem>
+                                  <SelectItem value="ViewContent">View Content</SelectItem>
+                                  <SelectItem value="AddToCart">Add To Cart</SelectItem>
+                                  <SelectItem value="InitiateCheckout">Initiate Checkout</SelectItem>
+                                  <SelectItem value="Purchase">Purchase</SelectItem>
+                                  <SelectItem value="Custom">Custom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {trackingConfig.event_type === 'Custom' && (
+                              <div>
+                                <Label>Nome do Evento Customizado</Label>
+                                <Input
+                                  placeholder="ex: LeadQualificado"
+                                  value={trackingConfig.custom_event_name}
+                                  onChange={(e) => setTrackingConfig(prev => ({ ...prev, custom_event_name: e.target.value }))}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="google_analytics"
+                            checked={trackingConfig.google_analytics}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, google_analytics: checked }))
+                            }
+                          />
+                          <Label htmlFor="google_analytics">Google Analytics</Label>
+                        </div>
+                        {trackingConfig.google_analytics && (
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="ID do GA"
+                              value={trackingConfig.ga_id}
+                              onChange={(e) => 
+                                setTrackingConfig(prev => ({ ...prev, ga_id: e.target.value }))
+                              }
+                            />
+                            <div>
+                              <Label>Nome do Evento</Label>
+                              <Input
+                                placeholder="form_submit"
+                                value={trackingConfig.ga_event_name}
+                                onChange={(e) => setTrackingConfig(prev => ({ ...prev, ga_event_name: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="google_tag_manager"
+                            checked={trackingConfig.google_tag_manager}
+                            onCheckedChange={(checked) => 
+                              setTrackingConfig(prev => ({ ...prev, google_tag_manager: checked }))
+                            }
+                          />
+                          <Label htmlFor="google_tag_manager">Google Tag Manager</Label>
+                        </div>
+                        {trackingConfig.google_tag_manager && (
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="ID do GTM"
+                              value={trackingConfig.gtm_id}
+                              onChange={(e) => 
+                                setTrackingConfig(prev => ({ ...prev, gtm_id: e.target.value }))
+                              }
+                            />
+                            <div>
+                              <Label>Nome do Evento</Label>
+                              <Input
+                                placeholder="form_submit"
+                                value={trackingConfig.gtm_event_name}
+                                onChange={(e) => setTrackingConfig(prev => ({ ...prev, gtm_event_name: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Códigos personalizados do Tag Manager */}
+                    <div className="space-y-3">
+                      <Label>Código HEAD (HTML completo)</Label>
+                      <Textarea
+                        placeholder="Cole aqui o snippet completo que vai no <head>"
+                        value={trackingConfig.custom_head_html}
+                        onChange={(e) => setTrackingConfig(prev => ({ ...prev, custom_head_html: e.target.value }))}
+                        rows={6}
+                      />
+                      <Label>Código BODY (noscript/HTML)</Label>
+                      <Textarea
+                        placeholder="Cole aqui o snippet <noscript> que vai no <body>"
+                        value={trackingConfig.custom_body_html}
+                        onChange={(e) => setTrackingConfig(prev => ({ ...prev, custom_body_html: e.target.value }))}
+                        rows={4}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Dica: você pode usar estes campos para colar o código completo do Google Tag Manager (HEAD e BODY) específico deste Step Form.
+                      </p>
+                    </div>
+
+                    <Button onClick={saveTrackingConfig} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Configurações de Rastreamento
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Configuração do Rodapé */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configuração do Rodapé</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="footer_enabled"
+                        checked={selectedForm.footer_config?.enabled || false}
+                        onCheckedChange={(checked) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            footer_config: { ...selectedForm.footer_config, enabled: checked }
+                          })
+                        }
+                      />
+                      <Label htmlFor="footer_enabled">Habilitar Rodapé</Label>
+                    </div>
+
+                    {selectedForm.footer_config?.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Texto do Rodapé</Label>
+                          <Input
+                            value={selectedForm.footer_config?.text || ''}
+                            onChange={(e) => 
+                              setSelectedForm({
+                                ...selectedForm,
+                                footer_config: { ...selectedForm.footer_config, text: e.target.value }
+                              })
+                            }
+                            placeholder="Atendemos todo o Brasil ✅"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Cor de Fundo</Label>
+                            <Input
+                              type="color"
+                              value={selectedForm.footer_config?.background_color || '#1a1a1a'}
+                              onChange={(e) => 
+                                setSelectedForm({
+                                  ...selectedForm,
+                                  footer_config: { ...selectedForm.footer_config, background_color: e.target.value }
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label>Cor do Texto</Label>
+                            <Input
+                              type="color"
+                              value={selectedForm.footer_config?.text_color || '#ffffff'}
+                              onChange={(e) => 
+                                setSelectedForm({
+                                  ...selectedForm,
+                                  footer_config: { ...selectedForm.footer_config, text_color: e.target.value }
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Tamanho da Fonte</Label>
+                          <Select
+                            value={selectedForm.footer_config?.font_size || 'text-sm'}
+                            onValueChange={(value) => 
+                              setSelectedForm({
+                                ...selectedForm,
+                                footer_config: { ...selectedForm.footer_config, font_size: value }
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text-xs">Pequeno</SelectItem>
+                              <SelectItem value="text-sm">Médio</SelectItem>
+                              <SelectItem value="text-base">Grande</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Configurações de SEO */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configurações de SEO</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Meta Título</Label>
+                      <Input
+                        value={selectedForm.seo_config?.meta_title || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_title: e.target.value }
+                          })
+                        }
+                        placeholder="Título da página"
+                      />
+                    </div>
+                    <div>
+                      <Label>Meta Descrição</Label>
+                      <Textarea
+                        value={selectedForm.seo_config?.meta_description || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_description: e.target.value }
+                          })
+                        }
+                        placeholder="Descrição da página"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label>Palavras-chave</Label>
+                      <Input
+                        value={selectedForm.seo_config?.meta_keywords || ''}
+                        onChange={(e) => 
+                          setSelectedForm({
+                            ...selectedForm,
+                            seo_config: { ...selectedForm.seo_config, meta_keywords: e.target.value }
+                          })
+                        }
+                        placeholder="palavra1, palavra2, palavra3"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="page" className="space-y-6">
+            <StepFormPageCustomizer
+              formData={selectedForm}
+              onUpdate={(field, value) => {
+                setSelectedForm({ ...selectedForm, [field]: value });
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="html" className="space-y-6">
+            <StepFormPageEditor
+              stepForm={selectedForm}
+              onUpdateStepForm={(id, updates) => {
+                setSelectedForm({ ...selectedForm, ...updates });
+              }}
+              onSave={saveForm}
+            />
+          </TabsContent>
+
+          <TabsContent value="testimonials" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Depoimentos do Formulário</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Configure depoimentos e estatísticas exibidos em etapas de Prova Social.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <SocialProofConfigEditor
+                  step={{ socialProofConfig: (selectedForm.seo_config as any)?.social_proof || {} }}
+                  updateStep={(_, value) => {
+                    setSelectedForm({
+                      ...selectedForm,
+                      seo_config: {
+                        ...(selectedForm.seo_config || {}),
+                        social_proof: value,
+                      },
+                    });
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Galeria de Imagens */}
+        <ImageGallery
+          isOpen={showImageGallery}
+          onClose={() => setShowImageGallery(false)}
+          onSelectImage={(url) => {
+            setSelectedForm({ ...selectedForm, logo_url: url });
+            setShowImageGallery(false);
+          }}
+          selectedImage={selectedForm.logo_url}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Construtor de Formulários Step</h2>
+          <p className="text-muted-foreground">
+            Crie formulários interativos com múltiplas etapas
+          </p>
+        </div>
+        <Button onClick={createNewForm}>
+          <Plus className="w-4 h-4 mr-2" />
+          Novo Formulário
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {forms.map((form) => (
+          <Card key={form.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">{form.name}</CardTitle>
+                <Badge variant={form.is_active ? 'default' : 'secondary'}>
+                  {form.is_active ? 'Ativo' : 'Inativo'}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">{form.title}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="p-3 bg-muted rounded-md">
+                  <p className="text-sm font-medium mb-1">URL do Formulário:</p>
+                  <p className="text-sm font-mono text-primary">
+                    {window.location.origin}/form/{form.slug}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Etapas:</span> {form.steps.length}
+                  </div>
+                  <div>
+                    <span className="font-medium">Webhook:</span>{' '}
+                    {form.webhook_url ? '✅ Configurado' : '❌ Não configurado'}
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`/form/${form.slug}`, '_blank')}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Visualizar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedForm(form)}
+                  >
+                    Editar
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        Excluir
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Confirmar Exclusão</DialogTitle>
+                      </DialogHeader>
+                      <p>Tem certeza que deseja excluir o formulário "{form.name}"?</p>
+                      <div className="flex gap-2 justify-end mt-4">
+                        <Button variant="outline">Cancelar</Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => form.id && deleteForm(form.id)}
+                        >
+                          Excluir
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {forms.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground mb-4">
+              Nenhum formulário criado ainda
+            </p>
+            <Button onClick={createNewForm}>
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Primeiro Formulário
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};

@@ -8,7 +8,6 @@ import { Video, Upload, Save, Trash2 } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
-import { GalleryButton } from './GalleryButton';
 
 interface TeamVideoSettings {
   team_video_enabled: boolean;
@@ -60,7 +59,7 @@ export const TeamVideoManagement: React.FC = () => {
   };
 
   // Salvar configurações
-  const saveSettings = async (urlOverride?: string) => {
+  const saveSettings = async () => {
     setIsSaving(true);
     try {
       // Verificar se existe um registro
@@ -75,12 +74,11 @@ export const TeamVideoManagement: React.FC = () => {
         throw selectError;
       }
 
-      const newUrl = urlOverride ?? videoUrl ?? null;
       const updateData = {
         team_video_enabled: settings.team_video_enabled,
-        team_background_video: newUrl,
+        team_background_video: videoUrl || null,
         updated_at: new Date().toISOString()
-      } as const;
+      };
 
       if (existingData) {
         // Atualizar registro existente
@@ -107,7 +105,7 @@ export const TeamVideoManagement: React.FC = () => {
 
       setSettings(prev => ({
         ...prev,
-        team_background_video: newUrl
+        team_background_video: videoUrl || null
       }));
 
       toast.success('Configurações de vídeo salvas com sucesso!');
@@ -116,7 +114,7 @@ export const TeamVideoManagement: React.FC = () => {
       window.dispatchEvent(new CustomEvent('heroVideoSettingsUpdated', {
         detail: {
           team_video_enabled: settings.team_video_enabled,
-          team_background_video: newUrl
+          team_background_video: videoUrl || null
         }
       }));
       
@@ -168,7 +166,6 @@ export const TeamVideoManagement: React.FC = () => {
 
       setVideoUrl(publicUrl);
       toast.success('Vídeo enviado com sucesso!');
-      await saveSettings(publicUrl);
       
     } catch (error) {
       console.error('Erro no upload:', error);
@@ -282,25 +279,13 @@ export const TeamVideoManagement: React.FC = () => {
 
           {/* Upload */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoUpload}
-                disabled={uploading}
-                className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
-              />
-              <GalleryButton
-                onSelect={(url) => {
-                  setVideoUrl(url);
-                  toast.success('Vídeo selecionado da galeria');
-                  saveSettings(url);
-                }}
-                size="sm"
-                variant="outline"
-                className="ml-0"
-              />
-            </div>
+            <Input
+              type="file"
+              accept="video/*"
+              onChange={handleVideoUpload}
+              disabled={uploading}
+              className={`${isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-gray-200 text-black'}`}
+            />
             <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
               Formatos suportados: MP4, WebM, AVI. Tamanho máximo: 50MB.
             </p>
@@ -348,7 +333,7 @@ export const TeamVideoManagement: React.FC = () => {
         {/* Botão salvar */}
         <div className="flex justify-end">
           <Button
-            onClick={() => saveSettings()}
+            onClick={saveSettings}
             disabled={isSaving}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >

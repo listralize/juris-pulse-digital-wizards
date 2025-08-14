@@ -28,15 +28,13 @@ interface UniversalGalleryProps {
   allowMultiple?: boolean;
   acceptedTypes?: ('image' | 'video' | 'file')[];
   className?: string;
-  embedded?: boolean;
 }
 
 export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
   onSelect,
   allowMultiple = false,
   acceptedTypes = ['image', 'video', 'file'],
-  className = '',
-  embedded = false
+  className = ''
 }) => {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,18 +132,18 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     }
   };
 
-const handleFileSelect = (file: MediaFile) => {
-  if (allowMultiple) {
-    if (selectedFiles.find(f => f.id === file.id)) {
-      setSelectedFiles(prev => prev.filter(f => f.id !== file.id));
+  const handleFileSelect = (file: MediaFile) => {
+    if (allowMultiple) {
+      if (selectedFiles.find(f => f.id === file.id)) {
+        setSelectedFiles(prev => prev.filter(f => f.id !== file.id));
+      } else {
+        setSelectedFiles(prev => [...prev, file]);
+      }
     } else {
-      setSelectedFiles(prev => [...prev, file]);
+      onSelect?.(file);
+      setIsDialogOpen(false);
     }
-  } else {
-    onSelect?.(file);
-    if (!embedded) setIsDialogOpen(false);
-  }
-};
+  };
 
   const handleConfirmSelection = () => {
     if (selectedFiles.length > 0 && onSelect) {
@@ -197,191 +195,7 @@ const handleFileSelect = (file: MediaFile) => {
     }
   };
 
-return (
-  embedded ? (
-    <div className={`flex flex-col ${className}`}>
-      <div className="flex flex-wrap gap-4 p-4 border-b">
-        <div className="relative">
-          <input
-            type="file"
-            multiple
-            onChange={handleFileUpload}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            accept="image/*,video/*,.pdf,.doc,.docx"
-          />
-          <Button disabled={uploading} className="gap-2">
-            <Upload className="w-4 h-4" />
-            {uploading ? 'Enviando...' : 'Upload'}
-          </Button>
-        </div>
-
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400" />
-          <Input
-            placeholder="Buscar arquivos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-
-        <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="image">Imagens</SelectItem>
-            <SelectItem value="video">Vídeos</SelectItem>
-            <SelectItem value="file">Arquivos</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <div className="flex gap-1 border rounded">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <Grid className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-auto p-4">
-        {loading ? (
-          <div className="flex items-center justify-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : filteredFiles.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            Nenhum arquivo encontrado
-          </div>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {filteredFiles.map((file) => (
-              <Card 
-                key={file.id} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedFiles.find(f => f.id === file.id) ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => handleFileSelect(file)}
-              >
-                <CardContent className="p-2">
-                  <div className="aspect-square mb-2 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                    {file.type === 'image' ? (
-                      <img 
-                        src={file.url} 
-                        alt={file.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-4xl text-gray-400">
-                        {getFileIcon(file.type)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium truncate" title={file.name}>
-                      {file.name}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs">
-                        {file.type}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteFile(file);
-                        }}
-                        className="p-1 h-auto hover:text-red-500"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredFiles.map((file) => (
-              <Card 
-                key={file.id}
-                className={`cursor-pointer transition-all hover:shadow-sm ${
-                  selectedFiles.find(f => f.id === file.id) ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => handleFileSelect(file)}
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
-                      {file.type === 'image' ? (
-                        <img 
-                          src={file.url} 
-                          alt={file.name}
-                          className="w-full h-full object-cover rounded"
-                        />
-                      ) : (
-                        getFileIcon(file.type)
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{file.name}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Badge variant="secondary">{file.type}</Badge>
-                        <span>{formatFileSize(file.size)}</span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteFile(file);
-                      }}
-                      className="hover:text-red-500"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {allowMultiple && selectedFiles.length > 0 && (
-        <div className="border-t p-4 flex items-center justify-between">
-          <span className="text-sm text-gray-600">
-            {selectedFiles.length} arquivo(s) selecionado(s)
-          </span>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setSelectedFiles([])}
-            >
-              Limpar
-            </Button>
-            <Button onClick={handleConfirmSelection}>
-              Confirmar Seleção
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  ) : (
+  return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
@@ -578,6 +392,5 @@ return (
         </div>
       </DialogContent>
     </Dialog>
-  )
-);
+  );
 };

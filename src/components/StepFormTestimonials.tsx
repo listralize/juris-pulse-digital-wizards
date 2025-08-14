@@ -46,7 +46,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
 
   useEffect(() => {
     if (config) {
-      setSocialProofConfig({ ...config, autoRotate: true });
+      setSocialProofConfig(config);
     } else {
       loadStepFormSocialProof();
     }
@@ -103,7 +103,7 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
           color: s.color || stepFormConfig.primaryColor || '#4CAF50',
           icon: s.icon || 'check'
         })),
-        autoRotate: true,
+        autoRotate: stepFormConfig.autoRotate ?? true,
         rotationInterval: stepFormConfig.rotationInterval ?? 8000,
         primaryColor: stepFormConfig.primaryColor || '#4CAF50'
       };
@@ -236,7 +236,22 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
                     </motion.div>
                   </AnimatePresence>
 
-                  
+                  {/* Indicadores de navegação */}
+                  {socialProofConfig.testimonials.length > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      {socialProofConfig.testimonials.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentTestimonialIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            index === currentTestimonialIndex
+                              ? 'bg-primary'
+                              : 'bg-muted hover:bg-muted-foreground'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

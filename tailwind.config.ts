@@ -145,14 +145,6 @@ export default {
 	safelist: [
 		{
 			pattern: /no-scrollbar/,
-		},
-		// Ensure funnel gradient and width classes are not purged
-		'bg-gradient-to-r',
-		'from-blue-500','to-blue-600',
-		'from-green-500','to-green-600',
-		'from-amber-500','to-amber-600',
-		'from-purple-500','to-purple-600',
-		'from-red-500','to-red-600',
-		'w-4/5','w-3/5','w-2/5'
+		}
 	],
 } satisfies Config;

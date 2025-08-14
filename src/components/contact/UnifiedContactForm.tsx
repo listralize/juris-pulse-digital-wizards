@@ -2,7 +2,7 @@
 import React from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
-import { useFormPixel } from "../../hooks/useFormPixel";
+import { useFormMarketingScripts } from "../../hooks/useFormMarketingScripts";
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
 
@@ -88,9 +88,9 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
   const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
 
-  // Implementar pixel usando o ID real do formulário
+  // Implementar marketing scripts usando o ID real do formulário
   const activeFormId = (formId || formConfig?.id || 'default');
-  useFormPixel(activeFormId);
+  useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
   React.useEffect(() => {
@@ -129,9 +129,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
       </div>
       
       <form id="contact-form-main" onSubmit={handleSubmit} className="space-y-4">
-        {/* Honeypot e time-trap */}
-        <input type="text" id="hp_field" name="website" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ display: 'none' }} />
-        <input type="hidden" id="ts_field" name="ts" value={String(Date.now())} />
         <DynamicFormRenderer
           formFields={formConfig.allFields || []}
           serviceOptions={formConfig.serviceOptions}
