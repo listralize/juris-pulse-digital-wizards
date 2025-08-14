@@ -1,17 +1,16 @@
-
 import React, { useEffect } from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
+import { useFormMarketingConfig } from "../../hooks/useFormMarketingConfig";
 
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
-import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedContactFormProps {
   preselectedService?: string;
   darkBackground?: boolean;
   pageId?: string;
-  formId?: string; // Adicionar propriedade para identificar o formulário específico
+  formId?: string;
 }
 
 const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({ 
@@ -20,8 +19,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   pageId,
   formId
 }) => {
-  // Implementar marketing scripts específicos para este formulário
-  
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
     const pathname = window.location.pathname;
@@ -33,9 +30,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     // Verificar páginas de áreas de direito primeiro
     if (pathname.startsWith('/areas/')) {
       let cleanPath = pathname.replace('/areas/', '');
-      // Remover múltiplas barras e normalizar
       cleanPath = cleanPath.replace(/\/+/g, '/').replace(/\/$/, '');
-      // Remover barra inicial se existir
       if (cleanPath.startsWith('/')) {
         cleanPath = cleanPath.substring(1);
       }
@@ -44,199 +39,61 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     }
     
     if (pathname.startsWith('/services/')) {
-      // Normalizar completamente o slug do serviço
       let cleanPath = pathname.replace('/services/', '');
-      
-      // Remover possível duplicação de prefixos
       if (cleanPath.startsWith('services/')) {
         cleanPath = cleanPath.replace('services/', '');
       }
-      
-      // Remover múltiplas barras e normalizar
       cleanPath = cleanPath.replace(/\/+/g, '/').replace(/\/$/, '');
-      
-      // Remover barra inicial se existir
       if (cleanPath.startsWith('/')) {
         cleanPath = cleanPath.substring(1);
       }
-      
       return cleanPath;
     }
+    
     if (pathname.startsWith('/servicos/')) {
-      // Normalizar completamente o slug do serviço
       let cleanPath = pathname.replace('/servicos/', '');
-      
-      // Remover possível duplicação de prefixos
       if (cleanPath.startsWith('servicos/')) {
         cleanPath = cleanPath.replace('servicos/', '');
       }
-      
-      // Remover múltiplas barras e normalizar
       cleanPath = cleanPath.replace(/\/+/g, '/').replace(/\/$/, '');
-      
-      // Remover barra inicial se existir
       if (cleanPath.startsWith('/')) {
         cleanPath = cleanPath.substring(1);
       }
-      
       return cleanPath;
     }
-    return 'home'; // fallback
+    return 'home';
   })();
 
   console.log('📍 [UnifiedContactForm] PageId determinado:', currentPageId);
 
-  const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
-  const { formData, isSubmitting, updateField, handleSubmit: originalHandleSubmit } = useContactForm(formConfig);
+  // Usar o hook de configuração de formulário
+  const { formConfig, isLoading: configLoading } = useFormConfig(formId, currentPageId);
+  
+  // Usar o hook de marketing específico para este formulário
+  const { trackFormSubmission } = useFormMarketingConfig(formConfig.id, currentPageId);
+  
+  const {
+    formData,
+    isSubmitting,
+    isSubmitted,
+    updateField,
+    handleSubmit,
+    resetForm
+  } = useContactForm(formConfig);
 
-  // Interceptar o submit para rastrear conversão
-  const handleSubmit = (e: React.FormEvent) => {
-    originalHandleSubmit(e);
+  // Interceptar envio do formulário para adicionar rastreamento
+  const customHandleSubmit = async (e: React.FormEvent) => {
+    // Executar submissão original
+    await handleSubmit(e);
     
-    // Disparar evento de conversão para Facebook Pixel baseado na configuração
-    setTimeout(() => {
-      if ((window as any).fbq && (window as any).currentPixelConfig?.enabled) {
-        const { eventType } = (window as any).currentPixelConfig;
-        console.error('✅ FORMULÁRIO ENVIADO - RASTREANDO CONVERSÃO:', eventType);
-        (window as any).fbq('track', eventType, {
-          content_name: 'Contact Form Submission',
-          value: 1,
-          currency: 'BRL'
-        });
-        console.error('🎯 EVENTO FACEBOOK PIXEL ENVIADO:', eventType);
-      }
-    }, 2000);
+    // Se chegou até aqui, foi sucesso, executar rastreamento
+    console.log('🎯 [UnifiedContactForm] Formulário enviado com sucesso, rastreando...');
+    trackFormSubmission({
+      form_data: formData,
+      page_url: window.location.href,
+      timestamp: new Date().toISOString()
+    });
   };
-
-  // Implementar Facebook Pixel baseado nas configurações do SystemFormsManager
-  useEffect(() => {
-    const loadSystemFormPixel = async () => {
-      try {
-        console.error('🔍 INICIANDO CARREGAMENTO DAS CONFIGURAÇÕES DO PIXEL...');
-        
-        const { data: settings, error } = await supabase
-          .from('marketing_settings')
-          .select('form_tracking_config')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        console.error('📊 Requisição feita para marketing_settings');
-        console.error('💾 Dados retornados:', settings);
-        console.error('🚨 Erro na requisição:', error);
-
-        if (error) {
-          console.error('❌ ERRO AO BUSCAR CONFIGURAÇÕES:', error);
-          return;
-        }
-
-        if (settings?.form_tracking_config) {
-          let trackingConfig;
-          if (typeof settings.form_tracking_config === 'string') {
-            trackingConfig = JSON.parse(settings.form_tracking_config);
-          } else {
-            trackingConfig = settings.form_tracking_config;
-          }
-
-          console.error('🎯 Tracking config processado:', trackingConfig);
-
-          // Buscar configuração para o formulário atual (default)
-          const formConfig = trackingConfig.systemForms?.find(
-            (form: any) => form.formId === 'default'
-          );
-
-          console.error('📝 Config do formulário default encontrada:', formConfig);
-
-          if (formConfig?.enabled && formConfig?.facebookPixel?.enabled && formConfig?.facebookPixel?.pixelId) {
-            const pixelId = formConfig.facebookPixel.pixelId.replace(/[^0-9]/g, '');
-            const eventType = formConfig.facebookPixel.eventType === 'Custom' 
-              ? (formConfig.facebookPixel.customEventName || 'CustomEvent')
-              : formConfig.facebookPixel.eventType;
-
-            console.error('🚀 PIXEL CONFIGURADO! INICIANDO:', { 
-              pixelId, 
-              eventType,
-              formId: formConfig.formId,
-              enabled: formConfig.enabled 
-            });
-            
-            // Remover scripts existentes
-            const existingScripts = document.querySelectorAll('script[src*="fbevents.js"]');
-            existingScripts.forEach(script => {
-              console.error('🗑️ Removendo script existente:', script);
-              script.remove();
-            });
-            
-            // Limpar fbq existente
-            delete (window as any).fbq;
-            delete (window as any)._fbq;
-            
-            // Criar função fbq
-            (window as any).fbq = (window as any).fbq || function() {
-              ((window as any).fbq.q = (window as any).fbq.q || []).push(arguments);
-            };
-            (window as any)._fbq = (window as any).fbq;
-            (window as any).fbq.push = (window as any).fbq;
-            (window as any).fbq.loaded = true;
-            (window as any).fbq.version = '2.0';
-            (window as any).fbq.queue = [];
-            
-            console.error('📡 Criando script do Facebook Pixel...');
-            
-            // Criar script
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-            
-            script.onload = () => {
-              console.error('✅ FACEBOOK PIXEL SCRIPT CARREGADO COM SUCESSO!');
-              (window as any).fbq('init', pixelId);
-              (window as any).fbq('track', 'PageView');
-              console.error('🎯 PIXEL INICIALIZADO E PAGEVIEW ENVIADO:', pixelId);
-              
-              // Salvar configuração para uso no submit
-              (window as any).currentPixelConfig = {
-                pixelId,
-                eventType,
-                enabled: true
-              };
-              console.error('💾 Configuração salva no window:', (window as any).currentPixelConfig);
-            };
-            
-            script.onerror = () => {
-              console.error('❌ ERRO AO CARREGAR SCRIPT FACEBOOK PIXEL');
-            };
-            
-            document.head.appendChild(script);
-            console.error('📎 Script adicionado ao head');
-            
-            // Adicionar noscript tag
-            const noscript = document.createElement('noscript');
-            noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1" />`;
-            document.head.appendChild(noscript);
-            console.error('🖼️ Noscript tag adicionada');
-            
-          } else {
-            console.error('❌ PIXEL DESABILITADO OU CONFIGURAÇÃO INVÁLIDA');
-            console.error('Detalhes:', {
-              formConfig: formConfig,
-              enabled: formConfig?.enabled,
-              pixelEnabled: formConfig?.facebookPixel?.enabled,
-              pixelId: formConfig?.facebookPixel?.pixelId
-            });
-          }
-        } else {
-          console.error('❌ NENHUMA CONFIGURAÇÃO DE TRACKING ENCONTRADA');
-        }
-      } catch (error) {
-        console.error('❌ ERRO CRÍTICO AO CARREGAR CONFIGURAÇÕES:', error);
-      }
-    };
-
-    console.error('🚀 INICIANDO USEEFFECT DO PIXEL');
-    loadSystemFormPixel();
-  }, []);
-
 
   // Pre-selecionar serviço se fornecido
   React.useEffect(() => {
@@ -245,7 +102,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     }
   }, [preselectedService, formData.service, updateField]);
 
-  if (isLoading) {
+  if (configLoading) {
     return (
       <ContactFormContainer darkBackground={darkBackground}>
         <div className="flex items-center justify-center py-8">
@@ -274,7 +131,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
         </p>
       </div>
       
-      <form id="contact-form-main" onSubmit={handleSubmit} className="space-y-4">
+      <form id="contact-form-main" onSubmit={customHandleSubmit} className="space-y-4">
         <DynamicFormRenderer
           formFields={formConfig.allFields || []}
           serviceOptions={formConfig.serviceOptions}
@@ -305,6 +162,12 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
             formConfig.formTexts.submitButton
           )}
         </button>
+        
+        {isSubmitted && (
+          <div className="p-4 rounded-md bg-green-100 text-green-800">
+            Formulário enviado com sucesso!
+          </div>
+        )}
       </form>
     </ContactFormContainer>
   );
