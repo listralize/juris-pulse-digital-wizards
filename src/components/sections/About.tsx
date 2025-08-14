@@ -150,10 +150,11 @@ const About = () => {
               title="About Us Video"
               className="w-full h-full rounded-lg object-cover cursor-pointer"
               style={{ 
-                zIndex: 999999,
+                zIndex: 10000,
                 position: 'relative',
                 pointerEvents: 'auto',
-                isolation: 'isolate'
+                isolation: 'isolate',
+                touchAction: 'manipulation'
               }}
               controls
               preload="metadata"
@@ -178,9 +179,10 @@ const About = () => {
               title="About Us Video"
               className="w-full h-full rounded-lg cursor-pointer touch-manipulation"
               style={{ 
-                zIndex: 10,
+                zIndex: 10000,
                 position: 'relative',
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                touchAction: 'manipulation'
               }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

@@ -187,7 +187,7 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Vídeo de fundo - Z-INDEX MUITO BAIXO */}
+      {/* Vídeo de fundo - Z-INDEX MUITO BAIXO e limitado à seção */}
       {heroVideoEnabled && heroVideoUrl && (
         <video
           autoPlay
@@ -196,8 +196,13 @@ const Hero = () => {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
           style={{ 
-            zIndex: -50,
-            pointerEvents: 'none'
+            zIndex: -100,
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
           }}
           onLoadStart={() => console.log('🎥 Hero: Vídeo iniciando carregamento')}
           onCanPlay={() => console.log('🎥 Hero: Vídeo pode reproduzir')}
