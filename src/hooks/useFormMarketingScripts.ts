@@ -142,10 +142,10 @@ export const useFormMarketingScripts = (formId: string) => {
     
     console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
 
-    // Verificar se este pixel específico já foi inicializado
+      // Verificar se este pixel específico já foi inicializado
     const pixelKey = `fbq_pixel_${pixelId}`;
     if (!(window as any)[pixelKey]) {
-      // Criar o script base do Facebook Pixel seguindo o modelo exato
+      // Criar o script base do Facebook Pixel seguindo o modelo exato do StepForm
       const fbPixelScript = document.createElement('script');
       fbPixelScript.setAttribute('data-form-marketing', formId);
       fbPixelScript.innerHTML = `
@@ -163,12 +163,12 @@ export const useFormMarketingScripts = (formId: string) => {
       `;
       document.head.appendChild(fbPixelScript);
 
-      // Não rastreamos PageView automaticamente em formulários; eventos são disparados apenas no sucesso do envio
-
       // Marcar este pixel como inicializado
       (window as any)[pixelKey] = true;
+      try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (init)`); } catch(e) {}
     } else {
       console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
+      try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (reuse)`); } catch(e) {}
     }
 
     // Adicionar listener específico para submissão bem-sucedida
