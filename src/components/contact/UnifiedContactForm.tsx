@@ -84,10 +84,17 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   console.log('📍 [UnifiedContactForm] PageId determinado:', currentPageId);
 
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
-  const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
-
-  // Usar marketing scripts seguindo o mesmo padrão do StepForm que funciona
+  
+  // Garantir que o formId seja consistente entre useContactForm e useFormMarketingScripts
   const activeFormId = (formId || formConfig?.id || 'default');
+  
+  // Passar o activeFormId para o formConfig para garantir consistência
+  const configWithCorrectId = {
+    ...formConfig,
+    id: activeFormId
+  };
+  
+  const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(configWithCorrectId);
   useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
