@@ -23,11 +23,18 @@ interface FormMarketingConfig {
 
 export const useFormMarketingScripts = (formId: string) => {
   useEffect(() => {
-    if (!formId) return;
+    if (!formId) {
+      console.log('❌ [useFormMarketingScripts] FormId não fornecido');
+      return;
+    }
+
+    console.log(`🚀 [useFormMarketingScripts] Iniciando para formId: ${formId}`);
+    console.log(`🌐 [useFormMarketingScripts] URL atual: ${window.location.href}`);
+    console.log(`📍 [useFormMarketingScripts] Hostname: ${window.location.hostname}`);
 
     const loadFormConfig = async () => {
       try {
-        console.log(`📋 Carregando configuração de marketing para formulário: ${formId}`);
+        console.log(`📋 [useFormMarketingScripts] Carregando configuração para: ${formId}`);
         
         const { data: settings, error } = await supabase
           .from('marketing_settings')
@@ -36,8 +43,10 @@ export const useFormMarketingScripts = (formId: string) => {
           .limit(1)
           .maybeSingle();
 
+        console.log(`📊 [useFormMarketingScripts] Resposta do Supabase:`, { settings, error });
+
         if (error) {
-          console.error('❌ Erro ao carregar configuração:', error);
+          console.error('❌ [useFormMarketingScripts] Erro ao carregar configuração:', error);
           return;
         }
 
@@ -49,15 +58,19 @@ export const useFormMarketingScripts = (formId: string) => {
             trackingConfig = settings.form_tracking_config;
           }
           
+          console.log(`🔍 [useFormMarketingScripts] TrackingConfig encontrado:`, trackingConfig);
+          console.log(`📝 [useFormMarketingScripts] SystemForms disponíveis:`, trackingConfig.systemForms);
+          
           const formConfig = trackingConfig.systemForms?.find(
             (form: any) => form.formId === formId && form.enabled
           );
 
           if (formConfig) {
-            console.log(`✅ Configuração encontrada para formulário ${formId}:`, formConfig);
+            console.log(`✅ [useFormMarketingScripts] Configuração encontrada para ${formId}:`, formConfig);
             implementFormScripts(formConfig);
           } else {
-            console.log(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
+            console.log(`ℹ️ [useFormMarketingScripts] Nenhuma configuração ativa para: ${formId}`);
+            console.log(`🔍 [useFormMarketingScripts] Formulários disponíveis:`, trackingConfig.systemForms?.map((f: any) => ({ id: f.formId, enabled: f.enabled })));
             removeFormScripts(formId);
           }
         } else {
@@ -72,16 +85,18 @@ export const useFormMarketingScripts = (formId: string) => {
             }
           };
           
+          console.log(`🔧 [useFormMarketingScripts] Usando config básica:`, basicPixelConfig);
+          
           if (basicPixelConfig.facebookPixel.enabled && basicPixelConfig.facebookPixel.pixelId) {
-            console.log(`✅ Usando configuração básica de pixel para formulário ${formId}:`, basicPixelConfig);
+            console.log(`✅ [useFormMarketingScripts] Pixel básico habilitado para ${formId}`);
             implementFormScripts(basicPixelConfig);
           } else {
-            console.log(`ℹ️ Pixel não configurado para formulário: ${formId}`);
+            console.log(`❌ [useFormMarketingScripts] Pixel básico não configurado para: ${formId}`);
             removeFormScripts(formId);
           }
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar configuração do formulário:', error);
+        console.error('❌ [useFormMarketingScripts] Erro crítico:', error);
       }
     };
 
@@ -99,17 +114,22 @@ export const useFormMarketingScripts = (formId: string) => {
   }, [formId]);
 
   const implementFormScripts = (formConfig: any) => {
-    console.log(`🚀 Implementando scripts para formulário ${formConfig.formId}:`, formConfig);
+    console.log(`🚀 [implementFormScripts] Implementando scripts para ${formConfig.formId}:`, formConfig);
+    console.log(`🌐 [implementFormScripts] Ambiente: ${window.location.hostname}`);
 
     // Remover scripts antigos específicos deste formulário
     removeFormScripts(formConfig.formId);
 
     // Facebook Pixel - APENAS se estiver habilitado
     if (formConfig.facebookPixel?.enabled === true && formConfig.facebookPixel?.pixelId) {
-      console.log(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
+      console.log(`✅ [implementFormScripts] Facebook Pixel HABILITADO para ${formConfig.formId}`);
       implementFormFacebookPixel(formConfig);
     } else {
-      console.log(`❌ Facebook Pixel DESABILITADO para formulário ${formConfig.formId}`);
+      console.log(`❌ [implementFormScripts] Facebook Pixel DESABILITADO para ${formConfig.formId}`);
+      console.log(`🔍 [implementFormScripts] Debug pixel:`, { 
+        enabled: formConfig.facebookPixel?.enabled, 
+        pixelId: formConfig.facebookPixel?.pixelId 
+      });
     }
   };
 
@@ -129,17 +149,21 @@ export const useFormMarketingScripts = (formId: string) => {
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
     
+    console.log(`🎯 [implementFormFacebookPixel] Iniciando para ${formId}:`, facebookPixel);
+    console.log(`🌐 [implementFormFacebookPixel] URL: ${window.location.href}`);
+    
     // Validar se o pixelId é válido (apenas números)
     const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
     if (!pixelId || pixelId.length < 10) {
-      console.warn(`⚠️ Pixel ID inválido para formulário ${formId}:`, facebookPixel.pixelId);
+      console.warn(`⚠️ [implementFormFacebookPixel] Pixel ID inválido para ${formId}:`, facebookPixel.pixelId);
       return;
     }
     
-    console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
+    console.log(`📘 [implementFormFacebookPixel] Pixel ID válido para ${formId}:`, pixelId);
 
     // Verificar se fbq já existe globalmente, senão criar
     if (!(window as any).fbq) {
+      console.log(`📱 [implementFormFacebookPixel] Criando script base fbq para ${formId}`);
       // Criar o script base do Facebook Pixel
       const fbPixelScript = document.createElement('script');
       fbPixelScript.setAttribute('data-form-marketing', formId);
@@ -154,7 +178,9 @@ export const useFormMarketingScripts = (formId: string) => {
         'https://connect.facebook.net/en_US/fbevents.js');
       `;
       document.head.appendChild(fbPixelScript);
-      console.log(`📘 Script base do Meta Pixel criado para formulário ${formId}`);
+      console.log(`📘 [implementFormFacebookPixel] Script base criado para ${formId}`);
+    } else {
+      console.log(`📘 [implementFormFacebookPixel] fbq já existe globalmente para ${formId}`);
     }
 
     // Verificar se este pixel específico já foi inicializado
@@ -162,31 +188,36 @@ export const useFormMarketingScripts = (formId: string) => {
     if (!(window as any)[pixelKey]) {
       // Aguardar fbq estar disponível e inicializar o pixel
       const initPixel = () => {
+        console.log(`🔄 [implementFormFacebookPixel] Tentando inicializar pixel ${pixelId} para ${formId}`);
+        console.log(`🔍 [implementFormFacebookPixel] fbq disponível:`, !!(window as any).fbq);
+        
         if ((window as any).fbq) {
+          console.log(`✅ [implementFormFacebookPixel] fbq encontrado, inicializando pixel ${pixelId}`);
           (window as any).fbq('init', pixelId);
           (window as any).fbq('set', 'autoConfig', 'false', pixelId);
           (window as any)[pixelKey] = true;
-          console.log(`📘 Meta Pixel ${pixelId} inicializado para formulário ${formId} (autoConfig desativado)`);
+          console.log(`📘 [implementFormFacebookPixel] Meta Pixel ${pixelId} inicializado para ${formId} (autoConfig desativado)`);
           
           // Enviar PageView automaticamente
           try { 
             (window as any).fbq('track','PageView'); 
-            console.log(`👀 PageView enviado para Pixel ${pixelId} (init)`); 
+            console.log(`👀 [implementFormFacebookPixel] PageView enviado para Pixel ${pixelId} (init)`); 
           } catch(e) {
-            console.error('Erro ao enviar PageView:', e);
+            console.error('❌ [implementFormFacebookPixel] Erro ao enviar PageView:', e);
           }
         } else {
+          console.log(`⏳ [implementFormFacebookPixel] fbq ainda não disponível, aguardando...`);
           setTimeout(initPixel, 100);
         }
       };
       initPixel();
     } else {
-      console.log(`📘 Meta Pixel ${pixelId} já estava inicializado para formulário ${formId}`);
+      console.log(`📘 [implementFormFacebookPixel] Meta Pixel ${pixelId} já inicializado para ${formId}`);
       try { 
         (window as any).fbq && (window as any).fbq('track','PageView'); 
-        console.log(`👀 PageView enviado para Pixel ${pixelId} (reuse)`); 
+        console.log(`👀 [implementFormFacebookPixel] PageView enviado para Pixel ${pixelId} (reuse)`); 
       } catch(e) {
-        console.error('Erro ao enviar PageView:', e);
+        console.error('❌ [implementFormFacebookPixel] Erro ao enviar PageView (reuse):', e);
       }
     }
 
