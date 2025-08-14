@@ -138,7 +138,7 @@ function App() {
         <AuthProvider>
           <Router>
             {/* Vídeo de fundo global para TODA a aplicação - SEMPRE ATIVO */}
-            <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: 1 }}>
+            <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -1 }}>
               <video
                 src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
                 className="w-full h-full object-cover opacity-50"
