@@ -105,17 +105,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
     const uploadedFiles = event.target.files;
     if (!uploadedFiles) return;
 
-    // Verificar tamanho dos arquivos - Limite generoso para plano pago
-    const maxSizeBytes = 200 * 1024 * 1024; // 200MB limite para plano pago
-    const oversizedFiles = Array.from(uploadedFiles).filter(file => file.size > maxSizeBytes);
-    
-    if (oversizedFiles.length > 0) {
-      const filesizesMB = oversizedFiles.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(1)}MB`);
-      toast.error(`❌ Arquivos muito grandes (limite: 200MB):\n${filesizesMB.join('\n')}`);
-      event.target.value = '';
-      return;
-    }
-
     setUploading(true);
     
     try {
@@ -135,12 +124,6 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
 
         if (uploadError) {
           console.error('❌ Upload error:', uploadError);
-          
-          // Mensagem específica para limite de tamanho
-          if (uploadError.message.includes('exceeded the maximum allowed size')) {
-            throw new Error(`🚫 ${file.name} é muito grande para o Supabase (>${(file.size / 1024 / 1024).toFixed(1)}MB)\n\n✅ Comprima o vídeo em:\n- https://www.media.io/video-compressor.html\n- https://www.freeconvert.com/video-compressor\n- https://clideo.com/compress-video`);
-          }
-          
           throw new Error(`Falha no upload de ${file.name}: ${uploadError.message}`);
         }
 
