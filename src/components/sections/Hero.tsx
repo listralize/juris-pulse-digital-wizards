@@ -189,24 +189,7 @@ const Hero = () => {
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Background Layer - SEM OVERLAY BRANCO */}
       <div className="absolute inset-0 z-0 w-full h-full">
-        {heroVideoEnabled && heroVideoUrl ? (
-          <div className="relative w-full h-full">
-            <video
-              key={heroVideoUrl}
-              src={heroVideoUrl}
-              className="w-full h-full object-cover border-0 outline-none"
-              style={{ margin: 0, padding: 0, border: 'none', outline: 'none' }}
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
-            {/* Overlay escuro APENAS com 50% de opacidade */}
-            <div className="absolute inset-0 bg-black/50"></div>
-          </div>
-        ) : (
-          <NeuralBackground />
-        )}
+        <NeuralBackground />
       </div>
       
       
