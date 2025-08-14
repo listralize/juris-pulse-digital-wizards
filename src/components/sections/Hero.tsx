@@ -186,7 +186,7 @@ const Hero = () => {
       detail: 'areas'
     }));
   };
-  return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden" style={{ pointerEvents: 'none' }}>
+  return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Vídeo de fundo - Z-INDEX MUITO BAIXO */}
       {heroVideoEnabled && heroVideoUrl && (
         <video
