@@ -555,8 +555,6 @@ export const useGlobalMarketingScripts = () => {
   };
 
   const implementGoogleTagManager = (config: any) => {
-    console.log('🏷️ Implementando Google Tag Manager globalmente:', config.containerId);
-
     // Remover GTM existente primeiro
     const existingGtmScript = document.querySelector('script[data-marketing="google-tag-manager"]');
     const existingNoscript = document.querySelector('noscript[data-marketing="gtm-noscript"]');
@@ -566,7 +564,7 @@ export const useGlobalMarketingScripts = () => {
     // Inicializar dataLayer primeiro
     (window as any).dataLayer = (window as any).dataLayer || [];
     
-    // Implementar GTM usando o método tradicional e mais confiável
+    // Implementar GTM usando o método tradicional
     const gtmScript = document.createElement('script');
     gtmScript.setAttribute('data-marketing', 'google-tag-manager');
     gtmScript.innerHTML = `
@@ -587,52 +585,128 @@ export const useGlobalMarketingScripts = () => {
     noscript.setAttribute('data-marketing', 'gtm-noscript');
     document.body.appendChild(noscript);
 
-    // Função mais agressiva para remover Tag Assistant Badge
-    const removeBadgeAggressively = () => {
+    // Função super agressiva para remover Tag Assistant
+    const destroyTagAssistant = () => {
+      // Selectors mais abrangentes
       const selectors = [
         '.__TAG_ASSISTANT_BADGE',
-        '[id*="tag-assistant"]',
-        '[class*="tag-assistant"]',
-        '[class*="TAG_ASSISTANT"]',
-        'div[style*="position: fixed"][style*="z-index"]',
-        'iframe[src*="tagassistant"]'
+        '[id*="tag-assistant" i]',
+        '[class*="tag-assistant" i]',
+        '[id*="TAG_ASSISTANT" i]',
+        '[class*="TAG_ASSISTANT" i]',
+        'div[style*="position: fixed"][style*="z-index: 2147483647"]',
+        'div[style*="position: fixed"][style*="z-index: 99999"]',
+        'iframe[src*="tagassistant" i]',
+        'div[style*="font-family: Roboto"]',
+        'div[style*="background: white"][style*="border-radius"]',
+        'div[style*="box-shadow"][style*="rgba(0, 0, 0, 0.2)"]'
       ];
       
       selectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(el => {
-          console.log('🗑️ Removendo elemento:', el);
-          el.remove();
-        });
+        try {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(el => {
+            if (el && el.parentNode) {
+              el.remove();
+            }
+          });
+        } catch (e) {}
       });
       
-      // Procurar por elementos que contenham texto relacionado ao Tag Assistant
-      const allDivs = document.querySelectorAll('div');
-      allDivs.forEach(div => {
-        const text = div.textContent || '';
-        if (text.includes('Tag Assistant') || text.includes('drag_indicator')) {
-          console.log('🗑️ Removendo div com texto Tag Assistant:', div);
-          div.remove();
-        }
+      // Remover por conteúdo de texto
+      const allDivs = document.querySelectorAll('div, iframe, span');
+      allDivs.forEach(el => {
+        try {
+          const text = el.textContent || el.innerHTML || '';
+          if (text.includes('Tag Assistant') || 
+              text.includes('drag_indicator') || 
+              text.includes('Connected') ||
+              text.includes('Debug information') ||
+              text.includes('collapse_all') ||
+              text.includes('check_circle')) {
+            el.remove();
+          }
+        } catch (e) {}
+      });
+
+      // Procurar por elementos com estilos suspeitos
+      const suspiciousElements = document.querySelectorAll('div');
+      suspiciousElements.forEach(el => {
+        try {
+          const style = el.getAttribute('style') || '';
+          if (style.includes('position: fixed') && 
+              style.includes('z-index') && 
+              (style.includes('2147483647') || style.includes('99999'))) {
+            el.remove();
+          }
+        } catch (e) {}
       });
     };
 
-    // Executar remoção do badge em intervalos
-    setTimeout(removeBadgeAggressively, 1000);
-    setTimeout(removeBadgeAggressively, 3000);
-    setTimeout(removeBadgeAggressively, 5000);
+    // Executar destruição imediata e contínua
+    destroyTagAssistant();
+    setTimeout(destroyTagAssistant, 100);
+    setTimeout(destroyTagAssistant, 500);
+    setTimeout(destroyTagAssistant, 1000);
+    setTimeout(destroyTagAssistant, 2000);
+    setTimeout(destroyTagAssistant, 5000);
     
-    // Observer para remover badge quando aparecer
-    const observer = new MutationObserver(() => {
-      removeBadgeAggressively();
+    // Observer mais agressivo
+    const observer = new MutationObserver((mutations) => {
+      let needsDestroy = false;
+      mutations.forEach(mutation => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) { // Element node
+              const el = node as Element;
+              const text = el.textContent || '';
+              const className = el.className || '';
+              const id = el.id || '';
+              
+              if (text.includes('Tag Assistant') || 
+                  className.includes('tag-assistant') ||
+                  className.includes('TAG_ASSISTANT') ||
+                  id.includes('tag-assistant') ||
+                  id.includes('TAG_ASSISTANT')) {
+                needsDestroy = true;
+              }
+            }
+          });
+        }
+      });
+      
+      if (needsDestroy) {
+        destroyTagAssistant();
+      }
     });
     
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class', 'id']
     });
 
-    console.log('📋 GTM configurado com método tradicional:', config.containerId);
+    // CSS para esconder qualquer coisa relacionada ao Tag Assistant
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .__TAG_ASSISTANT_BADGE,
+      [id*="tag-assistant" i],
+      [class*="tag-assistant" i],
+      [id*="TAG_ASSISTANT" i],
+      [class*="TAG_ASSISTANT" i] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        top: -9999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        z-index: -1 !important;
+      }
+    `;
+    document.head.appendChild(style);
   };
 
   const implementCustomScripts = (config: any) => {

@@ -128,7 +128,29 @@ export const useContactForm = (externalFormConfig?: any) => {
         }
       );
 
-      // Disparar evento customizado para scripts de marketing
+      // Disparar evento direto para dataLayer (sem depender de listeners)
+      if ((window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'form_submit',
+          form_id: formConfig.id || 'default',
+          form_name: formConfig.name || 'Formulário Principal',
+          page_url: window.location.href,
+          user_email: submitData.email,
+          user_name: submitData.name,
+          service: submitData.service,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Também disparar Lead padrão
+        (window as any).dataLayer.push({
+          event: 'Lead',
+          form_id: formConfig.id || 'default',
+          page_url: window.location.href,
+          lead_value: 100
+        });
+      }
+
+      // Disparar evento customizado para scripts de marketing (backup)
       const successEvent = new CustomEvent('formSubmitSuccess', {
         detail: {
           formId: formConfig.id || 'default',
@@ -140,17 +162,6 @@ export const useContactForm = (externalFormConfig?: any) => {
         }
       });
       document.dispatchEvent(successEvent);
-      
-      // Log específico para produção
-      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
-      if (isProduction) {
-        console.log(`🎯 [PROD] Evento formSubmitSuccess disparado para formId: ${formConfig.id || 'default'}`);
-        console.log(`🎯 [PROD] Facebook Pixel disponível:`, typeof (window as any).fbq);
-        console.log(`🎯 [PROD] URL atual:`, window.location.href);
-      }
-      console.log('🎯 Evento formSubmitSuccess disparado para marketing scripts');
-      
-      // Eventos diretos desativados: seguir apenas a configuração do Painel via useFormMarketingScripts
 
       
       toast.success(formConfig.formTexts.successMessage);
