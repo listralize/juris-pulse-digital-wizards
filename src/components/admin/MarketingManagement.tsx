@@ -1163,6 +1163,61 @@ fbq('track', '${form.facebookPixel.eventType === 'Custom'
                           )}
                         </div>
 
+                        {/* Google Tag Manager Config */}
+                        <div className="border-t pt-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <input 
+                              type="checkbox" 
+                              id={`gtm-enabled-${index}`}
+                              checked={form.googleTagManager?.enabled || false}
+                              onChange={e => {
+                                e.stopPropagation();
+                                updateSystemForm(index, 'googleTagManager', {
+                                  ...form.googleTagManager,
+                                  enabled: e.target.checked
+                                });
+                              }}
+                              className="rounded" 
+                            />
+                            <Label htmlFor={`gtm-enabled-${index}`}>🏷️ Google Tag Manager</Label>
+                          </div>
+                          
+                          {form.googleTagManager?.enabled && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Container ID</Label>
+                                <Input 
+                                  value={form.googleTagManager?.containerId || ''}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleTagManager', {
+                                      ...form.googleTagManager,
+                                      containerId: e.target.value
+                                    });
+                                  }}
+                                  placeholder="GTM-XXXXXXX"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                              <div>
+                                <Label>Nome do Evento</Label>
+                                <Input 
+                                  value={form.googleTagManager?.eventName || 'submit'}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    updateSystemForm(index, 'googleTagManager', {
+                                      ...form.googleTagManager,
+                                      eventName: e.target.value
+                                    });
+                                  }}
+                                  placeholder="submit"
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
                         {/* Scripts Personalizados */}
                         <div className="border-t pt-4">
                           <Label className="text-sm font-medium mb-3 block">🔧 Scripts Personalizados</Label>
