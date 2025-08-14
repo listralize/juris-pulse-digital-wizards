@@ -98,10 +98,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       
       if (gtmEnabled && gtmEventName) {
         console.log(`✅ GTM habilitado com evento: "${gtmEventName}" e container: "${gtmContainerId}"`);
-        // Usar um nome de evento mais específico se for o padrão
-        const eventName = gtmEventName === 'form_submit' ? 'stepform_conversion' : gtmEventName;
-        console.log(`🎯 Evento será enviado como: "${eventName}"`);
-        implementGoogleTagManager(eventName);
+        implementGoogleTagManager(gtmEventName);
       } else {
         console.log('❌ GTM desabilitado ou configuração incompleta');
         console.log('ℹ️ Configuração necessária: google_tag_manager.enabled = true, google_tag_manager.event_name preenchido');
