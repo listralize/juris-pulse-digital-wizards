@@ -1,12 +1,11 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useDirectMarketingScripts } from './hooks/useDirectMarketingScripts';
-import { supabase } from '@/integrations/supabase/client';
 
 // Pages
 import Index from './pages/Index';
@@ -42,41 +41,6 @@ const queryClient = new QueryClient();
 function App() {
   // Carregar scripts de marketing globalmente
   useDirectMarketingScripts();
-  
-  // Estados para vídeo de fundo global
-  const [backgroundVideoUrl, setBackgroundVideoUrl] = useState<string>('');
-  const [videoEnabled, setVideoEnabled] = useState<boolean>(false);
-  
-  // Carregar configurações de vídeo de fundo
-  useEffect(() => {
-    const loadBackgroundVideo = async () => {
-      try {
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('team_video_enabled, team_background_video')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (settings) {
-          setVideoEnabled(settings.team_video_enabled || false);
-          setBackgroundVideoUrl(settings.team_background_video || '');
-          console.log('🎥 Vídeo de fundo global carregado:', {
-            enabled: settings.team_video_enabled,
-            url: settings.team_background_video,
-            videoEnabled: settings.team_video_enabled || false,
-            backgroundVideoUrl: settings.team_background_video || ''
-          });
-        } else {
-          console.log('❌ Nenhuma configuração encontrada no Supabase');
-        }
-      } catch (error) {
-        console.error('❌ Erro ao carregar vídeo de fundo:', error);
-      }
-    };
-
-    loadBackgroundVideo();
-  }, []);
   
   // Adicionar verificação de scripts carregados
   useEffect(() => {
@@ -129,17 +93,12 @@ function App() {
     }, 2000);
   }, []);
   
-  // Log do estado atual antes de renderizar
-  console.log('🔍 Estado atual no render:', { videoEnabled, backgroundVideoUrl });
-  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
-            {/* Removido vídeo daqui - será colocado no Hero */}
-            
-            <div className="App relative z-0" style={{ backgroundColor: 'black' }}>
+            <div className="App">
               <Routes>
                 {/* Main pages */}
                 <Route path="/" element={<Index />} />

@@ -187,31 +187,8 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* VÍDEO DE FUNDO - ATRÁS DE TUDO */}
-      <div className="absolute inset-0 w-full h-full" style={{ zIndex: -10 }}>
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          onLoadStart={() => console.log('🎥 Hero: Vídeo iniciando carregamento...')}
-          onCanPlay={() => console.log('✅ Hero: Vídeo pronto para reproduzir')}
-          onError={(e) => console.error('❌ Hero: Erro no vídeo:', e)}
-          style={{ 
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            position: 'absolute',
-            top: 0,
-            left: 0
-          }}
-        >
-          <source src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4" type="video/mp4" />
-        </video>
-      </div>
-
-      {/* Background Layer - Neural sobre o vídeo */}
-      <div className="absolute inset-0 w-full h-full" style={{ zIndex: -1, opacity: 0.3 }}>
+      {/* Background Layer - SEM OVERLAY BRANCO */}
+      <div className="absolute inset-0 z-0 w-full h-full">
         <NeuralBackground />
       </div>
       
@@ -233,56 +210,19 @@ const Hero = () => {
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
-          <a 
-            href={primaryButtonLink} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            style={{ 
-              background: '#FFFFFF',
-              color: '#000000',
-              border: '2px solid #FFFFFF',
-              padding: '12px 32px',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '16px',
-              boxShadow: '0 4px 20px rgba(255,255,255,0.3)'
-            }}
-          >
+          <a href={primaryButtonLink} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-glow text-white hover:from-primary-glow hover:to-primary border border-primary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg">
             {primaryButtonText}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           
-          <button 
-            onClick={handleAreasClick}
-            style={{ 
-              background: '#FFFFFF',
-              color: '#000000',
-              border: '2px solid #FFFFFF',
-              padding: '12px 32px',
-              borderRadius: '8px',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(255,255,255,0.3)'
-            }}
-            tabIndex={0} 
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleAreasClick(e as any);
-              }
-            }} 
-            aria-label="Navegar para a seção de áreas de atuação"
-          >
+          <button onClick={handleAreasClick} className="group flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent text-white border-2 border-secondary hover:from-accent hover:to-secondary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 shadow-lg" tabIndex={0} onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleAreasClick(e as any);
+          }
+        }} aria-label="Navegar para a seção de áreas de atuação">
             {secondaryButtonText}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
