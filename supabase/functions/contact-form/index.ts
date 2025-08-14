@@ -148,37 +148,8 @@ serve(async (req) => {
       }
     }
 
-    // 1. Salvar evento de conversão no Supabase
-    console.log('💾 Salvando evento de conversão...')
-    const { error: conversionError } = await supabase
-      .from('conversion_events')
-      .insert({
-        session_id: sessionId,
-        visitor_id: visitorId,
-        event_type: 'form_submission',
-        event_action: 'submit',
-        event_label: 'contact_form',
-        form_id: formId,
-        form_name: 'Formulário de Contato',
-        page_url: headers.referer || 'unknown',
-        referrer: headers.referer || null,
-        user_agent: headers['user-agent'] || 'unknown',
-        lead_data: submissionData,
-        conversion_value: 1,
-        campaign_source: getUTMParam('utm_source'),
-        campaign_medium: getUTMParam('utm_medium'),
-        campaign_name: getUTMParam('utm_campaign'),
-        ddd: ddd,
-        state: locationInfo?.state_name,
-        capital: locationInfo?.capital,
-        region: locationInfo?.region
-      });
-
-    if (conversionError) {
-      console.error('❌ Erro ao salvar evento de conversão:', conversionError);
-    } else {
-      console.log('✅ Evento de conversão salvo com sucesso');
-    }
+    // Conversão é gerenciada pelo frontend via useAnalytics para evitar duplicação
+    console.log('✅ Dados processados - conversão será registrada pelo frontend');
 
     // 2. Enviar email automático de boas-vindas
     try {
