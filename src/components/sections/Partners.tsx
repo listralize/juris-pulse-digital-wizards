@@ -74,77 +74,6 @@ const Partners = () => {
     };
   }, []);
 
-  // Escutar configurações de vídeo de fundo
-  useEffect(() => {
-    const handleVideoSettings = (event: CustomEvent) => {
-      const { team_video_enabled, team_background_video } = event.detail;
-      const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
-      
-      if (videoElement) {
-        if (team_background_video && team_video_enabled) {
-          videoElement.src = team_background_video;
-          videoElement.style.display = 'block';
-          videoElement.play().catch(console.error);
-        } else {
-          videoElement.style.display = 'none';
-        }
-      }
-    };
-
-    window.addEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
-    return () => {
-      window.removeEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
-    };
-  }, []);
-
-  // Carregar vídeo de fundo FORÇADAMENTE
-  useEffect(() => {
-    const forceLoadVideo = async () => {
-      try {
-        const { supabase } = await import('../../integrations/supabase/client');
-        
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('team_video_enabled, team_background_video')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        console.log('🎥 FORÇANDO carregamento do vídeo:', settings);
-
-        if (settings?.team_background_video) {
-          // Usar timeout para garantir que o elemento existe
-          setTimeout(() => {
-            const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
-            
-            if (videoElement) {
-              videoElement.src = settings.team_background_video;
-              if (settings.team_video_enabled) {
-                videoElement.style.display = 'block';
-                videoElement.style.opacity = '0.3';
-                videoElement.play().then(() => {
-                  console.log('✅ VÍDEO REPRODUZINDO:', settings.team_background_video);
-                }).catch(err => {
-                  console.error('❌ Erro ao reproduzir:', err);
-                });
-              } else {
-                videoElement.style.display = 'none';
-                console.log('🚫 Vídeo desabilitado');
-              }
-            } else {
-              console.error('❌ Elemento video não encontrado!');
-            }
-          }, 500);
-        } else {
-          console.log('🚫 Sem URL de vídeo configurada');
-        }
-      } catch (error) {
-        console.error('❌ ERRO CRÍTICO ao carregar vídeo:', error);
-      }
-    };
-
-    forceLoadVideo();
-  }, []);
 
   // Cálculos de slides baseados no dispositivo
   const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
@@ -238,25 +167,6 @@ const Partners = () => {
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      {/* Video de fundo ocupando toda a tela */}
-      <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
-        zIndex: -1
-      }}>
-        <video
-          id="team-background-video"
-          className="w-full h-full object-cover opacity-30"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          style={{ 
-            minWidth: '100vw',
-            minHeight: '100vh',
-            objectFit: 'cover'
-          }}
-        />
-      </div>
       
       <div className="team-responsive-container w-full relative z-10" style={{
       marginTop: '-100px'
