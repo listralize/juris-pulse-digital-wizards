@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useContactForm } from "./form/useContactForm";
 import { useFormConfig } from "../../hooks/useFormConfig";
 import { useFormMarketingScripts } from "../../hooks/useFormMarketingScripts";
 import { DynamicFormRenderer } from './form/DynamicFormRenderer';
 import ContactFormContainer from './form/ContactFormContainer';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedContactFormProps {
   preselectedService?: string;
@@ -86,12 +87,86 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   console.log('📍 [UnifiedContactForm] PageId determinado:', currentPageId);
 
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
-  const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
+  const { formData, isSubmitting, updateField, handleSubmit: originalHandleSubmit } = useContactForm(formConfig);
+
+  // Interceptar o submit para rastrear conversão
+  const handleSubmit = (e: React.FormEvent) => {
+    originalHandleSubmit(e);
+    
+    // Rastrear conversão no Facebook após delay
+    setTimeout(() => {
+      if ((window as any).fbq) {
+        console.error('✅ FORMULÁRIO ENVIADO - RASTREANDO CONVERSÃO');
+        (window as any).fbq('track', 'CompleteRegistration', {
+          content_name: 'Contact Form Submission',
+          value: 1,
+          currency: 'BRL'
+        });
+      }
+    }, 2000);
+  };
+
+  // Implementar Facebook Pixel diretamente
+  useEffect(() => {
+    const loadPixel = async () => {
+      try {
+        console.error('🔥 CARREGANDO FACEBOOK PIXEL DIRETAMENTE');
+        const { data: settings } = await supabase
+          .from('marketing_settings')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        console.error('🔍 Settings encontradas:', settings);
+
+        if (settings?.facebook_pixel_enabled && settings?.facebook_pixel_id) {
+          const pixelId = settings.facebook_pixel_id.replace(/[^0-9]/g, '');
+          console.error('✅ PIXEL ID VÁLIDO:', pixelId);
+          
+          // Criar fbq se não existir
+          if (!(window as any).fbq) {
+            console.error('📱 CRIANDO SCRIPT FACEBOOK PIXEL');
+            const script = document.createElement('script');
+            script.innerHTML = `
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+            `;
+            document.head.appendChild(script);
+            
+            setTimeout(() => {
+              if ((window as any).fbq) {
+                console.error('🎯 INICIALIZANDO PIXEL:', pixelId);
+                (window as any).fbq('init', pixelId);
+                (window as any).fbq('track', 'PageView');
+                console.error('✅ FACEBOOK PIXEL ATIVO:', pixelId);
+              }
+            }, 500);
+          } else {
+            console.error('📱 FBQ JÁ EXISTE, INICIALIZANDO PIXEL:', pixelId);
+            (window as any).fbq('init', pixelId);
+            (window as any).fbq('track', 'PageView');
+            console.error('✅ FACEBOOK PIXEL ATIVO (REUSE):', pixelId);
+          }
+        } else {
+          console.error('❌ PIXEL DESABILITADO OU SEM ID');
+        }
+      } catch (error) {
+        console.error('❌ ERRO AO CARREGAR PIXEL:', error);
+      }
+    };
+
+    loadPixel();
+  }, []);
 
   // Implementar marketing scripts usando o ID real do formulário
   const activeFormId = (formId || formConfig?.id || 'default');
-  console.log('🚀 [UnifiedContactForm] Chamando useFormMarketingScripts com ID:', activeFormId);
-  console.log('🔍 [UnifiedContactForm] FormConfig completo:', formConfig);
   useFormMarketingScripts(activeFormId);
 
   // Pre-selecionar serviço se fornecido
