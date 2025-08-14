@@ -112,16 +112,23 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   useEffect(() => {
     const loadSystemFormPixel = async () => {
       try {
-        console.error('🔍 CARREGANDO CONFIGURAÇÕES DO SISTEMA FORMS...');
+        console.error('🔍 INICIANDO CARREGAMENTO DAS CONFIGURAÇÕES DO PIXEL...');
         
-        const { data: settings } = await supabase
+        const { data: settings, error } = await supabase
           .from('marketing_settings')
           .select('form_tracking_config')
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        console.error('📊 Configurações encontradas:', settings);
+        console.error('📊 Requisição feita para marketing_settings');
+        console.error('💾 Dados retornados:', settings);
+        console.error('🚨 Erro na requisição:', error);
+
+        if (error) {
+          console.error('❌ ERRO AO BUSCAR CONFIGURAÇÕES:', error);
+          return;
+        }
 
         if (settings?.form_tracking_config) {
           let trackingConfig;
@@ -138,7 +145,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
             (form: any) => form.formId === 'default'
           );
 
-          console.error('📝 Config do formulário encontrada:', formConfig);
+          console.error('📝 Config do formulário default encontrada:', formConfig);
 
           if (formConfig?.enabled && formConfig?.facebookPixel?.enabled && formConfig?.facebookPixel?.pixelId) {
             const pixelId = formConfig.facebookPixel.pixelId.replace(/[^0-9]/g, '');
@@ -146,11 +153,19 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
               ? (formConfig.facebookPixel.customEventName || 'CustomEvent')
               : formConfig.facebookPixel.eventType;
 
-            console.error('🚀 INICIALIZANDO PIXEL DO SISTEMA:', { pixelId, eventType });
+            console.error('🚀 PIXEL CONFIGURADO! INICIANDO:', { 
+              pixelId, 
+              eventType,
+              formId: formConfig.formId,
+              enabled: formConfig.enabled 
+            });
             
             // Remover scripts existentes
             const existingScripts = document.querySelectorAll('script[src*="fbevents.js"]');
-            existingScripts.forEach(script => script.remove());
+            existingScripts.forEach(script => {
+              console.error('🗑️ Removendo script existente:', script);
+              script.remove();
+            });
             
             // Limpar fbq existente
             delete (window as any).fbq;
@@ -166,16 +181,18 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
             (window as any).fbq.version = '2.0';
             (window as any).fbq.queue = [];
             
+            console.error('📡 Criando script do Facebook Pixel...');
+            
             // Criar script
             const script = document.createElement('script');
             script.async = true;
             script.src = 'https://connect.facebook.net/en_US/fbevents.js';
             
             script.onload = () => {
-              console.error('✅ FACEBOOK PIXEL CARREGADO DO SISTEMA');
+              console.error('✅ FACEBOOK PIXEL SCRIPT CARREGADO COM SUCESSO!');
               (window as any).fbq('init', pixelId);
               (window as any).fbq('track', 'PageView');
-              console.error('✅ PIXEL INICIALIZADO:', pixelId);
+              console.error('🎯 PIXEL INICIALIZADO E PAGEVIEW ENVIADO:', pixelId);
               
               // Salvar configuração para uso no submit
               (window as any).currentPixelConfig = {
@@ -183,6 +200,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
                 eventType,
                 enabled: true
               };
+              console.error('💾 Configuração salva no window:', (window as any).currentPixelConfig);
             };
             
             script.onerror = () => {
@@ -190,23 +208,32 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
             };
             
             document.head.appendChild(script);
+            console.error('📎 Script adicionado ao head');
             
             // Adicionar noscript tag
             const noscript = document.createElement('noscript');
             noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1" />`;
             document.head.appendChild(noscript);
+            console.error('🖼️ Noscript tag adicionada');
             
           } else {
             console.error('❌ PIXEL DESABILITADO OU CONFIGURAÇÃO INVÁLIDA');
+            console.error('Detalhes:', {
+              formConfig: formConfig,
+              enabled: formConfig?.enabled,
+              pixelEnabled: formConfig?.facebookPixel?.enabled,
+              pixelId: formConfig?.facebookPixel?.pixelId
+            });
           }
         } else {
           console.error('❌ NENHUMA CONFIGURAÇÃO DE TRACKING ENCONTRADA');
         }
       } catch (error) {
-        console.error('❌ ERRO AO CARREGAR CONFIGURAÇÕES:', error);
+        console.error('❌ ERRO CRÍTICO AO CARREGAR CONFIGURAÇÕES:', error);
       }
     };
 
+    console.error('🚀 INICIANDO USEEFFECT DO PIXEL');
     loadSystemFormPixel();
   }, []);
 
