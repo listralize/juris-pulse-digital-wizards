@@ -153,8 +153,16 @@ const About = () => {
               }}
               controls
               preload="metadata"
-              playsInline={isMobile}
-              webkit-playsinline={isMobile}
+              playsInline
+              webkit-playsinline="true"
+              muted={false}
+              onClick={(e) => {
+                // Força o play no mobile/tablet
+                const video = e.currentTarget;
+                if (video.paused) {
+                  video.play();
+                }
+              }}
             />
           </div>
         );
