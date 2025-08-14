@@ -221,9 +221,7 @@ const Hero = () => {
       <div className="relative text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12" style={{ zIndex: 100, pointerEvents: 'auto' }}>
         <div ref={logoRef} className="mb-6 md:mb-8 w-full max-w-sm md:max-w-lg mx-auto relative">
           <div className="logo-container relative">
-            <img src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" alt="Serafim & Trombela Advocacia Logo" className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300" style={{
-            filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.7))'
-          }} />
+            <img src="/lovable-uploads/a8cf659d-921d-41fb-a37f-3639b3f036d0.png" alt="Serafim & Trombela Advocacia Logo" className="w-full h-auto relative z-10 hover:scale-105 transition-transform duration-300" />
           </div>
         </div>
         
