@@ -156,19 +156,52 @@ export const useGlobalMarketingScripts = () => {
   const loadGoogleTagManagerFromConfig = (containerId: string) => {
     console.log('🏷️ Carregando Google Tag Manager da configuração:', containerId);
     
+    // Validar formato do container ID
+    if (!containerId || !containerId.startsWith('GTM-')) {
+      console.error('❌ GTM Container ID inválido:', containerId);
+      return;
+    }
+    
+    // Remover GTM existente
+    document.querySelectorAll('[data-marketing*="gtm"]').forEach(el => el.remove());
+    
     // Inicializar dataLayer
     (window as any).dataLayer = (window as any).dataLayer || [];
+    
+    console.log('🔧 Inicializando dataLayer para GTM:', containerId);
     
     // Código inline que funciona
     const script = document.createElement('script');
     script.innerHTML = `
-      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      console.log('🚀 Iniciando carregamento do GTM: ${containerId}');
+      
+      (function(w,d,s,l,i){
+        console.log('📡 Configurando GTM para container:', i);
+        w[l]=w[l]||[];
+        w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+        var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+        j.async=true;
+        j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+        
+        j.onload = function() {
+          console.log('✅ GTM script carregado com sucesso para:', i);
+          console.log('🔍 DataLayer status:', typeof window.dataLayer, window.dataLayer.length, 'items');
+        };
+        
+        j.onerror = function() {
+          console.error('❌ Erro ao carregar GTM script para:', i);
+        };
+        
+        f.parentNode.insertBefore(j,f);
       })(window,document,'script','dataLayer','${containerId}');
       
-      console.log('✅ GTM ativo:', typeof window.dataLayer);
+      // Verificação adicional após 3 segundos
+      setTimeout(function() {
+        console.log('🔍 Verificação GTM após 3s:');
+        console.log('- DataLayer:', typeof window.dataLayer, window.dataLayer ? window.dataLayer.length + ' items' : 'undefined');
+        console.log('- GTM Container ${containerId}:', window.google_tag_manager ? 'Encontrado' : 'Não encontrado');
+      }, 3000);
     `;
     script.setAttribute('data-marketing', 'gtm-config');
     document.head.appendChild(script);
@@ -178,6 +211,8 @@ export const useGlobalMarketingScripts = () => {
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
     noscript.setAttribute('data-marketing', 'gtm-ns-config');
     document.body.appendChild(noscript);
+    
+    console.log('📋 GTM configurado:', containerId);
   };
 
   const loadGoogleAnalyticsFromConfig = (measurementId: string, customCode?: string) => {
