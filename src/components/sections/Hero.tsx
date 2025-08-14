@@ -214,11 +214,10 @@ const Hero = () => {
             href={primaryButtonLink} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="bg-white text-black border-2 border-white hover:bg-gray-100 transition-colors !bg-white !text-black !border-white"
             style={{ 
-              backgroundColor: '#FFFFFF !important',
-              color: '#000000 !important',
-              border: '2px solid #FFFFFF !important',
+              background: '#FFFFFF',
+              color: '#000000',
+              border: '2px solid #FFFFFF',
               padding: '12px 32px',
               borderRadius: '8px',
               textDecoration: 'none',
@@ -227,7 +226,7 @@ const Hero = () => {
               alignItems: 'center',
               gap: '8px',
               fontSize: '16px',
-              opacity: '1 !important'
+              boxShadow: '0 4px 20px rgba(255,255,255,0.3)'
             }}
           >
             {primaryButtonText}
@@ -236,11 +235,10 @@ const Hero = () => {
           
           <button 
             onClick={handleAreasClick}
-            className="bg-white text-black border-2 border-white hover:bg-gray-100 transition-colors !bg-white !text-black !border-white"
             style={{ 
-              backgroundColor: '#FFFFFF !important',
-              color: '#000000 !important',
-              border: '2px solid #FFFFFF !important',
+              background: '#FFFFFF',
+              color: '#000000',
+              border: '2px solid #FFFFFF',
               padding: '12px 32px',
               borderRadius: '8px',
               fontWeight: '600',
@@ -249,7 +247,7 @@ const Hero = () => {
               gap: '8px',
               fontSize: '16px',
               cursor: 'pointer',
-              opacity: '1 !important'
+              boxShadow: '0 4px 20px rgba(255,255,255,0.3)'
             }}
             tabIndex={0} 
             onKeyDown={e => {
