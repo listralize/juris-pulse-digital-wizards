@@ -218,7 +218,8 @@ const About = () => {
       style={{ 
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        zIndex: 99999999
       }}
     >
       {/* Neural Background apenas no desktop e tema escuro */}
