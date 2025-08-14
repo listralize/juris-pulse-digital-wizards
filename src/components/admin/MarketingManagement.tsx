@@ -1020,9 +1020,12 @@ export const MarketingManagement: React.FC = () => {
                           </div>
                           
                           {form.facebookPixel?.enabled && (
-                            <div className="space-y-3">
+                            <div className="space-y-4 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
                               <div>
-                                <Label className="text-sm font-medium">Pixel ID</Label>
+                                <Label className="text-sm font-medium flex items-center gap-2">
+                                  <span>🆔 Pixel ID</span>
+                                  <Badge variant="outline" className="text-xs">Obrigatório</Badge>
+                                </Label>
                                 <Input 
                                   value={form.facebookPixel?.pixelId || ''}
                                   onChange={e => {
@@ -1042,37 +1045,46 @@ export const MarketingManagement: React.FC = () => {
                                   Apenas números. Ex: 1024100955860841
                                 </p>
                               </div>
+                              
                               <div>
-                                <Label className="text-sm font-medium">Tipo de Evento</Label>
-                                 <select 
+                                <Label className="text-sm font-medium flex items-center gap-2">
+                                  <span>🎯 Tipo de Evento</span>
+                                  <Badge variant="secondary" className="text-xs">Configurável</Badge>
+                                </Label>
+                                <Select 
                                   value={form.facebookPixel?.eventType || 'Lead'}
-                                  onChange={e => {
-                                    e.stopPropagation();
+                                  onValueChange={(value) => {
                                     updateSystemForm(index, 'facebookPixel', {
                                       ...form.facebookPixel,
-                                      eventType: e.target.value
+                                      eventType: value
                                     });
                                   }}
-                                  className="w-full p-2 border rounded"
-                                  onClick={e => e.stopPropagation()}
                                 >
-                                  <option value="Lead">Lead</option>
-                                  <option value="Purchase">Purchase</option>
-                                  <option value="Contact">Contact</option>
-                                  <option value="SubmitApplication">Submit Application</option>
-                                  <option value="CompleteRegistration">Complete Registration</option>
-                                  <option value="ViewContent">View Content</option>
-                                  <option value="AddToCart">Add to Cart</option>
-                                  <option value="InitiateCheckout">Initiate Checkout</option>
-                                  <option value="Custom">Evento Personalizado</option>
-                                </select>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Selecione o tipo de evento" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Lead">📋 Lead (padrão)</SelectItem>
+                                    <SelectItem value="Purchase">💰 Purchase</SelectItem>
+                                    <SelectItem value="Contact">📞 Contact</SelectItem>
+                                    <SelectItem value="SubmitApplication">📄 Submit Application</SelectItem>
+                                    <SelectItem value="CompleteRegistration">✅ Complete Registration</SelectItem>
+                                    <SelectItem value="ViewContent">👁️ View Content</SelectItem>
+                                    <SelectItem value="AddToCart">🛒 Add to Cart</SelectItem>
+                                    <SelectItem value="InitiateCheckout">💳 Initiate Checkout</SelectItem>
+                                    <SelectItem value="Custom">🔧 Evento Personalizado</SelectItem>
+                                  </SelectContent>
+                                </Select>
                                 
                                 {form.facebookPixel?.eventType === 'Custom' && (
-                                  <div className="mt-2">
-                                    <Label className="text-sm font-medium">Nome do Evento Personalizado</Label>
-                                    <input
+                                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                                    <Label className="text-sm font-medium flex items-center gap-2">
+                                      <span>✏️ Nome do Evento Personalizado</span>
+                                      <Badge variant="outline" className="text-xs">Obrigatório para evento personalizado</Badge>
+                                    </Label>
+                                    <Input
                                       type="text"
-                                      placeholder="ex: custom_form_submit"
+                                      placeholder="Ex: lead_form_submit, contact_form, etc."
                                       value={form.facebookPixel?.customEventName || ''}
                                       onChange={e => {
                                         e.stopPropagation();
@@ -1081,9 +1093,12 @@ export const MarketingManagement: React.FC = () => {
                                           customEventName: e.target.value
                                         });
                                       }}
-                                      className="w-full p-2 border rounded mt-1"
+                                      className="w-full mt-2 font-mono text-sm"
                                       onClick={e => e.stopPropagation()}
                                     />
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Use apenas letras, números e underscore. Ex: lead_form_submit
+                                    </p>
                                   </div>
                                 )}
                               </div>
