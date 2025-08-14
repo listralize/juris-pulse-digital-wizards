@@ -210,32 +210,54 @@ const Hero = () => {
         </p>
         
         <div ref={ctaRef} className="flex flex-col md:flex-row gap-3 justify-center">
-          <a href={primaryButtonLink} target="_blank" rel="noopener noreferrer" 
-             className="group flex items-center justify-center gap-2 text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg font-semibold"
-             style={{ 
-               backgroundColor: '#ffffff',
-               color: '#000000',
-               border: '2px solid #ffffff'
-             }}>
+          <a 
+            href={primaryButtonLink} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ 
+              backgroundColor: '#FFFFFF',
+              color: '#000000',
+              border: '2px solid #FFFFFF',
+              padding: '12px 32px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '16px'
+            }}
+          >
             {primaryButtonText}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4" />
           </a>
           
-          <button onClick={handleAreasClick} 
-                  className="group flex items-center justify-center gap-2 text-base md:text-lg px-6 md:px-8 py-3 md:py-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg font-semibold"
-                  style={{ 
-                    backgroundColor: '#ffffff',
-                    color: '#000000',
-                    border: '2px solid #ffffff'
-                  }}
-                  tabIndex={0} onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleAreasClick(e as any);
-          }
-        }} aria-label="Navegar para a seção de áreas de atuação">
+          <button 
+            onClick={handleAreasClick}
+            style={{ 
+              backgroundColor: '#FFFFFF',
+              color: '#000000',
+              border: '2px solid #FFFFFF',
+              padding: '12px 32px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '16px',
+              cursor: 'pointer'
+            }}
+            tabIndex={0} 
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAreasClick(e as any);
+              }
+            }} 
+            aria-label="Navegar para a seção de áreas de atuação"
+          >
             {secondaryButtonText}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -137,27 +137,28 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
-            {/* Vídeo de fundo global para TODA a aplicação - SEMPRE ATIVO */}
-            <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -1 }}>
+            {/* Vídeo de fundo global - FORÇADO A APARECER */}
+            <div 
+              className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none" 
+              style={{ zIndex: -1 }}
+            >
               <video
-                src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
-                className="w-full h-full object-cover"
-                style={{ 
-                  opacity: 0.5,
-                  minWidth: '100vw',
-                  minHeight: '100vh',
-                  objectFit: 'cover',
-                  pointerEvents: 'none'
-                }}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload="auto"
-                onLoadStart={() => console.log('🎥 Vídeo de fundo global iniciando')}
-                onCanPlay={() => console.log('✅ Vídeo de fundo global reproduzindo')}
-                onError={(e) => console.error('❌ Erro no vídeo de fundo global:', e)}
-              />
+                style={{ 
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  opacity: 0.5,
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
+              >
+                <source src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4" type="video/mp4" />
+              </video>
             </div>
             
             <div className="App relative z-0" style={{ backgroundColor: 'black' }}>
