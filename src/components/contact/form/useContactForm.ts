@@ -140,6 +140,14 @@ export const useContactForm = (externalFormConfig?: any) => {
         }
       });
       document.dispatchEvent(successEvent);
+      
+      // Log específico para produção
+      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
+      if (isProduction) {
+        console.log(`🎯 [PROD] Evento formSubmitSuccess disparado para formId: ${formConfig.id || 'default'}`);
+        console.log(`🎯 [PROD] Facebook Pixel disponível:`, typeof (window as any).fbq);
+        console.log(`🎯 [PROD] URL atual:`, window.location.href);
+      }
       console.log('🎯 Evento formSubmitSuccess disparado para marketing scripts');
       
       // Eventos diretos desativados: seguir apenas a configuração do Painel via useFormMarketingScripts

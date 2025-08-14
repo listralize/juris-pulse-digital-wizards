@@ -19,8 +19,6 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   pageId,
   formId
 }) => {
-  // Implementar marketing scripts específicos para este formulário
-  
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
     const pathname = window.location.pathname;
@@ -88,7 +86,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
   const { formData, isSubmitting, updateField, handleSubmit } = useContactForm(formConfig);
 
-  // Implementar marketing scripts usando o ID real do formulário
+  // Usar marketing scripts seguindo o mesmo padrão do StepForm que funciona
   const activeFormId = (formId || formConfig?.id || 'default');
   useFormMarketingScripts(activeFormId);
 
