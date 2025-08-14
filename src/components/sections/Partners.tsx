@@ -74,8 +74,70 @@ const Partners = () => {
     };
   }, []);
 
+  // Carregar vídeo de fundo da página completa
+  useEffect(() => {
+    const loadVideo = async () => {
+      try {
+        const { supabase } = await import('../../integrations/supabase/client');
+        
+        const { data: settings } = await supabase
+          .from('site_settings')
+          .select('team_video_enabled, team_background_video')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-  // Cálculos de slides baseados no dispositivo
+        console.log('🎥 Carregando vídeo de fundo:', settings);
+
+        if (settings?.team_background_video) {
+          setTimeout(() => {
+            const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
+            
+            if (videoElement) {
+              videoElement.src = settings.team_background_video;
+              if (settings.team_video_enabled) {
+                videoElement.style.display = 'block';
+                videoElement.play().then(() => {
+                  console.log('✅ Vídeo de fundo carregado e reproduzindo');
+                }).catch(err => {
+                  console.error('❌ Erro ao reproduzir vídeo:', err);
+                });
+              }
+            } else {
+              console.error('❌ Elemento de vídeo não encontrado!');
+            }
+          }, 100);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar vídeo:', error);
+      }
+    };
+
+    loadVideo();
+  }, []);
+
+  // Escutar configurações de vídeo de fundo  
+  useEffect(() => {
+    const handleVideoSettings = (event: CustomEvent) => {
+      const { team_video_enabled, team_background_video } = event.detail;
+      const videoElement = document.getElementById('team-background-video') as HTMLVideoElement;
+      
+      if (videoElement && team_background_video) {
+        videoElement.src = team_background_video;
+        if (team_video_enabled) {
+          videoElement.style.display = 'block';
+          videoElement.play().catch(console.error);
+        } else {
+          videoElement.style.display = 'none';
+        }
+      }
+    };
+
+    window.addEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
+    return () => {
+      window.removeEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
+    };
+  }, []);
   const itemsPerSlide = isMobile ? 1 : 3; // Mobile: 1 card, Desktop: 3 cards
   const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
   const nextSlide = () => {
