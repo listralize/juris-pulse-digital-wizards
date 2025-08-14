@@ -187,8 +187,31 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      {/* VÍDEO DE FUNDO - ATRÁS DE TUDO */}
+      <div className="absolute inset-0 w-full h-full" style={{ zIndex: -10 }}>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          onLoadStart={() => console.log('🎥 Hero: Vídeo iniciando carregamento...')}
+          onCanPlay={() => console.log('✅ Hero: Vídeo pronto para reproduzir')}
+          onError={(e) => console.error('❌ Hero: Erro no vídeo:', e)}
+          style={{ 
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+        >
+          <source src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4" type="video/mp4" />
+        </video>
+      </div>
+
       {/* Background Layer - Neural sobre o vídeo */}
-      <div className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
+      <div className="absolute inset-0 w-full h-full" style={{ zIndex: -1, opacity: 0.3 }}>
         <NeuralBackground />
       </div>
       
