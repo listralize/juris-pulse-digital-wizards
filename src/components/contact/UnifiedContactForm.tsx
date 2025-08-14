@@ -106,69 +106,54 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     }, 2000);
   };
 
-  // Implementar Facebook Pixel diretamente
+  // Implementar Facebook Pixel GLOBAL
   useEffect(() => {
-    const loadPixel = async () => {
-      try {
-        console.error('🔥 CARREGANDO FACEBOOK PIXEL DIRETAMENTE');
-        const { data: settings } = await supabase
-          .from('marketing_settings')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        console.error('🔍 Settings encontradas:', settings);
-
-        if (settings?.facebook_pixel_enabled && settings?.facebook_pixel_id) {
-          const pixelId = settings.facebook_pixel_id.replace(/[^0-9]/g, '');
-          console.error('✅ PIXEL ID VÁLIDO:', pixelId);
-          
-          // Verificar se o script já existe
-          const existingScript = document.querySelector('script[src*="fbevents.js"]');
-          
-          if (!existingScript && !(window as any).fbq) {
-            console.error('📱 CRIANDO SCRIPT FACEBOOK PIXEL');
-            
-            // Criar e adicionar o script do Facebook Pixel
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-            
-            // Inicializar fbq antes do script carregar
-            (window as any).fbq = (window as any).fbq || function() {
-              ((window as any).fbq.q = (window as any).fbq.q || []).push(arguments);
-            };
-            (window as any)._fbq = (window as any).fbq;
-            (window as any).fbq.push = (window as any).fbq;
-            (window as any).fbq.loaded = true;
-            (window as any).fbq.version = '2.0';
-            (window as any).fbq.queue = [];
-            
-            document.head.appendChild(script);
-            
-            // Aguardar o script carregar
-            script.onload = () => {
-              console.error('🎯 INICIALIZANDO PIXEL:', pixelId);
-              (window as any).fbq('init', pixelId);
-              (window as any).fbq('track', 'PageView');
-              console.error('✅ FACEBOOK PIXEL ATIVO:', pixelId);
-            };
-          } else if ((window as any).fbq) {
-            console.error('📱 FBQ JÁ EXISTE, INICIALIZANDO PIXEL:', pixelId);
-            (window as any).fbq('init', pixelId);
-            (window as any).fbq('track', 'PageView');
-            console.error('✅ FACEBOOK PIXEL ATIVO (REUSE):', pixelId);
-          }
-        } else {
-          console.error('❌ PIXEL DESABILITADO OU SEM ID');
-        }
-      } catch (error) {
-        console.error('❌ ERRO AO CARREGAR PIXEL:', error);
-      }
+    // PIXEL ID HARDCODED - substitua pelo seu ID real
+    const PIXEL_ID = '547859007710156'; // SEU PIXEL ID AQUI
+    
+    console.error('🔥 INICIANDO FACEBOOK PIXEL GLOBAL:', PIXEL_ID);
+    
+    // Remover scripts existentes para evitar duplicação
+    const existingScripts = document.querySelectorAll('script[src*="fbevents.js"]');
+    existingScripts.forEach(script => script.remove());
+    
+    // Limpar fbq existente
+    delete (window as any).fbq;
+    delete (window as any)._fbq;
+    
+    // Criar função fbq
+    (window as any).fbq = (window as any).fbq || function() {
+      ((window as any).fbq.q = (window as any).fbq.q || []).push(arguments);
     };
-
-    loadPixel();
+    (window as any)._fbq = (window as any).fbq;
+    (window as any).fbq.push = (window as any).fbq;
+    (window as any).fbq.loaded = true;
+    (window as any).fbq.version = '2.0';
+    (window as any).fbq.queue = [];
+    
+    // Criar script
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    
+    script.onload = () => {
+      console.error('✅ FACEBOOK PIXEL SCRIPT CARREGADO');
+      (window as any).fbq('init', PIXEL_ID);
+      (window as any).fbq('track', 'PageView');
+      console.error('✅ FACEBOOK PIXEL INICIALIZADO E PAGEVIEW ENVIADO');
+    };
+    
+    script.onerror = () => {
+      console.error('❌ ERRO AO CARREGAR SCRIPT FACEBOOK PIXEL');
+    };
+    
+    document.head.appendChild(script);
+    
+    // Adicionar noscript tag para fallback
+    const noscript = document.createElement('noscript');
+    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1" />`;
+    document.head.appendChild(noscript);
+    
   }, []);
 
 
