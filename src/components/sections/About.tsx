@@ -142,7 +142,7 @@ const About = () => {
           <div className="about-video-container w-full rounded-lg overflow-hidden relative" style={{
             aspectRatio: isMobile ? '9/16' : '16/9',
             maxHeight: isMobile ? '24rem' : 'auto',
-            zIndex: 50000,
+            zIndex: 99999,
             isolation: 'isolate',
             position: 'relative'
           }}>
@@ -151,16 +151,27 @@ const About = () => {
               title="About Us Video"
               className="w-full h-full rounded-lg object-cover cursor-pointer"
               style={{ 
-                zIndex: 10000,
+                zIndex: 99999,
                 position: 'relative',
                 pointerEvents: 'auto',
                 isolation: 'isolate',
-                touchAction: 'manipulation'
+                touchAction: 'manipulation',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none'
               }}
               controls
               preload="metadata"
               playsInline
               webkit-playsinline="true"
+              onClick={(e) => {
+                e.stopPropagation();
+                const video = e.target as HTMLVideoElement;
+                if (video.paused) {
+                  video.play();
+                } else {
+                  video.pause();
+                }
+              }}
             />
           </div>
         );

@@ -107,14 +107,15 @@ const Footer: React.FC<FooterProps> = ({
   return (
     <>
       <footer
-      className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 bg-black text-white' : 'border-gray-200 bg-white text-black'}`}
+      className={`py-8 px-6 md:px-16 lg:px-24 border-t ${isDark ? 'border-white/20 md:bg-black text-white' : 'border-gray-200 md:bg-white text-black'}`}
       style={{
         margin: '0',
         padding: '3rem 1.5rem 2rem 1.5rem',
         marginBottom: '0',
         position: 'relative',
         zIndex: 10000,
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        backgroundColor: 'transparent'
       }}
     >
       <div className="max-w-7xl mx-auto">
