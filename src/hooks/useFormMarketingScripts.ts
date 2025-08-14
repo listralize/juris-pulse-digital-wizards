@@ -1,6 +1,26 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface FormMarketingConfig {
+  facebookPixel?: {
+    enabled: boolean;
+    pixelId: string;
+    eventType: 'Lead' | 'Purchase' | 'Contact' | 'SubmitApplication' | 'CompleteRegistration';
+    customCode?: string;
+  };
+  googleAnalytics?: {
+    enabled: boolean;
+    measurementId: string;
+    eventName: string;
+    customCode?: string;
+  };
+  googleTagManager?: {
+    enabled: boolean;
+    containerId: string;
+    eventName: string;
+  };
+}
+
 export const useFormMarketingScripts = (formId: string) => {
   useEffect(() => {
     if (!formId) return;
@@ -9,7 +29,6 @@ export const useFormMarketingScripts = (formId: string) => {
       try {
         console.log(`📋 Carregando configuração de marketing para formulário: ${formId}`);
         
-        // Buscar configuração na tabela marketing_settings (mesma estrutura que StepForm usa)
         const { data: settings, error } = await supabase
           .from('marketing_settings')
           .select('*')
@@ -17,48 +36,49 @@ export const useFormMarketingScripts = (formId: string) => {
           .limit(1)
           .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('❌ Erro ao carregar configuração:', error);
           return;
         }
 
-        console.log(`📊 Marketing settings encontrado:`, settings);
+        if (settings && settings.form_tracking_config) {
+          let trackingConfig;
+          if (typeof settings.form_tracking_config === 'string') {
+            trackingConfig = JSON.parse(settings.form_tracking_config);
+          } else {
+            trackingConfig = settings.form_tracking_config;
+          }
+          
+          const formConfig = trackingConfig.systemForms?.find(
+            (form: any) => form.formId === formId && form.enabled
+          );
 
-        if (settings) {
-          // Usar EXATAMENTE a mesma estrutura do StepForm
-          const trackingConfig = {
-            pixel_id: settings.facebook_pixel_id,
-            facebook_pixel: {
-              enabled: settings.facebook_pixel_enabled,
-              pixel_id: settings.facebook_pixel_id,
-              event_type: 'CompleteRegistration' // Evento padrão para formulários do site
-            }
-          };
-          
-          console.log(`🔧 Tracking config criado para formulário:`, trackingConfig);
-          
-          // Verificar se há pixel_id no nível principal ou dentro de facebook_pixel (IGUAL AO STEPFORM)
-          const pixelId = trackingConfig?.pixel_id || trackingConfig?.facebook_pixel?.pixel_id || '';
-          const fbEnabled = (trackingConfig?.facebook_pixel?.enabled === true) || (pixelId && String(pixelId).length > 0);
-         
-          const formConfig = {
+          if (formConfig) {
+            console.log(`✅ Configuração encontrada para formulário ${formId}:`, formConfig);
+            implementFormScripts(formConfig);
+          } else {
+            console.log(`ℹ️ Nenhuma configuração ativa encontrada para formulário: ${formId}`);
+            removeFormScripts(formId);
+          }
+        } else {
+          // Se não há form_tracking_config, usar configuração básica do pixel
+          const basicPixelConfig = {
             formId: formId,
-            name: 'Form Submission',
-            id: formId,
             enabled: true,
             facebookPixel: {
-              enabled: fbEnabled,
-              pixel_id: pixelId,
-              eventType: trackingConfig?.facebook_pixel?.event_type || 'CompleteRegistration',
-              customEventName: ''
+              enabled: settings?.facebook_pixel_enabled || false,
+              pixelId: settings?.facebook_pixel_id || '',
+              eventType: 'CompleteRegistration'
             }
           };
           
-          console.log(`🎯 Config processada para formulário ${formId}:`, formConfig);
-          implementFormScripts(formConfig);
-        } else {
-          console.log(`⚠️ Formulário ${formId} não encontrado ou sem configuração`);
-          removeFormScripts(formId);
+          if (basicPixelConfig.facebookPixel.enabled && basicPixelConfig.facebookPixel.pixelId) {
+            console.log(`✅ Usando configuração básica de pixel para formulário ${formId}:`, basicPixelConfig);
+            implementFormScripts(basicPixelConfig);
+          } else {
+            console.log(`ℹ️ Pixel não configurado para formulário: ${formId}`);
+            removeFormScripts(formId);
+          }
         }
       } catch (error) {
         console.error('❌ Erro ao carregar configuração do formulário:', error);
@@ -78,8 +98,8 @@ export const useFormMarketingScripts = (formId: string) => {
     // Remover scripts antigos específicos deste formulário
     removeFormScripts(formConfig.formId);
 
-    // Facebook Pixel - APENAS se estiver habilitado (IGUAL AO STEPFORM)
-    if (formConfig.facebookPixel?.enabled === true && formConfig.facebookPixel?.pixel_id) {
+    // Facebook Pixel - APENAS se estiver habilitado
+    if (formConfig.facebookPixel?.enabled === true && formConfig.facebookPixel?.pixelId) {
       console.log(`✅ Facebook Pixel HABILITADO para formulário ${formConfig.formId}`);
       implementFormFacebookPixel(formConfig);
     } else {
@@ -95,7 +115,7 @@ export const useFormMarketingScripts = (formId: string) => {
     // Remover listeners registrados para este formulário
     const handlersMap = (window as any).__formMarketingHandlers || {};
     const handlers = handlersMap[formId];
-    if (handlers?.fb) document.removeEventListener('formSubmitSuccess', handlers.fb as EventListener);
+    if (handlers?.fb) document.removeEventListener('formSubmitSuccess', handlers.fb);
     delete handlersMap[formId];
     (window as any).__formMarketingHandlers = handlersMap;
   };
@@ -103,19 +123,19 @@ export const useFormMarketingScripts = (formId: string) => {
   const implementFormFacebookPixel = (formConfig: any) => {
     const { formId, facebookPixel } = formConfig;
     
-    // Validar se o pixelId é válido (apenas números) - IGUAL AO STEPFORM
-    const pixelId = facebookPixel.pixel_id?.replace(/[^0-9]/g, '');
+    // Validar se o pixelId é válido (apenas números)
+    const pixelId = facebookPixel.pixelId?.replace(/[^0-9]/g, '');
     if (!pixelId || pixelId.length < 10) {
-      console.warn(`⚠️ Pixel ID inválido para formulário ${formId}:`, facebookPixel.pixel_id);
+      console.warn(`⚠️ Pixel ID inválido para formulário ${formId}:`, facebookPixel.pixelId);
       return;
     }
     
     console.log(`📘 Implementando Facebook Pixel para formulário ${formId}:`, pixelId);
 
-    // Verificar se este pixel específico já foi inicializado - IGUAL AO STEPFORM
+    // Verificar se este pixel específico já foi inicializado
     const pixelKey = `fbq_pixel_${pixelId}`;
     if (!(window as any)[pixelKey]) {
-      // Criar o script base do Facebook Pixel - CÓDIGO IDÊNTICO AO STEPFORM
+      // Criar o script base do Facebook Pixel - MESMO CÓDIGO DO STEPFORM
       const fbPixelScript = document.createElement('script');
       fbPixelScript.setAttribute('data-form-marketing', formId);
       fbPixelScript.innerHTML = `
@@ -141,17 +161,15 @@ export const useFormMarketingScripts = (formId: string) => {
       try { (window as any).fbq && (window as any).fbq('track','PageView'); console.log(`👀 PageView enviado para Pixel ${pixelId} (reuse)`); } catch(e) {}
     }
 
-    // Adicionar listener específico para submissão bem-sucedida - IGUAL AO STEPFORM
+    // Adicionar listener específico para submissão bem-sucedida
     const handleFormSuccess = (event: CustomEvent) => {
       if (event.detail?.formId === formId) {
         console.log(`✅ Formulário ${formId} enviado com SUCESSO - rastreando com Facebook Pixel`);
         
         if ((window as any).fbq) {
-          const eventType = facebookPixel.eventType === 'Custom' 
-            ? (facebookPixel.customEventName || 'CustomEvent')
-            : (facebookPixel.eventType || 'CompleteRegistration');
+          const eventType = facebookPixel.eventType || 'CompleteRegistration';
           
-          // De-dup: evitar múltiplos eventos por submissão do mesmo formulário - IGUAL AO STEPFORM
+          // De-dup: evitar múltiplos eventos por submissão do mesmo formulário
           const sentMap = (window as any).__formEventSent || {};
           if (sentMap[formId]) {
             console.log(`⏭️ Evento ignorado (duplicado) para formulário: ${formId}`);
@@ -165,9 +183,8 @@ export const useFormMarketingScripts = (formId: string) => {
             (window as any).__formEventSent = m;
           }, 3000);
           
-          // ESTRUTURA IDÊNTICA AO STEPFORM
           (window as any).fbq('track', eventType, {
-            content_name: formConfig.name || 'Form Submission',
+            content_name: formConfig.campaignName || 'Form Submission',
             form_id: formId,
             page_url: window.location.href,
             pixel_id: pixelId,
@@ -179,10 +196,10 @@ export const useFormMarketingScripts = (formId: string) => {
       }
     };
 
-    // Registrar listener gerenciado - IGUAL AO STEPFORM
+    // Registrar listener gerenciado
     const handlersMap = (window as any).__formMarketingHandlers || {};
     if (handlersMap[formId]?.fb) {
-      document.removeEventListener('formSubmitSuccess', handlersMap[formId].fb as EventListener);
+      document.removeEventListener('formSubmitSuccess', handlersMap[formId].fb);
     }
     document.addEventListener('formSubmitSuccess', handleFormSuccess as EventListener);
     handlersMap[formId] = { ...(handlersMap[formId] || {}), fb: handleFormSuccess as EventListener };
