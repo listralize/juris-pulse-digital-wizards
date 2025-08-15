@@ -24,23 +24,43 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     minify: mode === 'production',
     target: 'esnext',
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       external: [],
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          supabase: ['@supabase/supabase-js'],
-          admin: [
-            '@tanstack/react-query',
-            '@dnd-kit/core',
-            '@dnd-kit/sortable',
-            'fabric',
-            'recharts'
-          ],
-          utils: ['clsx', 'class-variance-authority', 'tailwind-merge']
+        manualChunks: (id) => {
+          // Separar chunks de forma mais inteligente
+          if (id.includes('node_modules')) {
+            // Chunks de vendor menores
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('gsap') || id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+            if (id.includes('recharts') || id.includes('fabric')) {
+              return 'vendor-charts';
+            }
+            return 'vendor-utils';
+          }
+          
+          // Separar componentes admin em chunk separado
+          if (id.includes('/admin/')) {
+            return 'admin';
+          }
+          
+          // Separar páginas de serviços
+          if (id.includes('/services/') || id.includes('/areas/')) {
+            return 'pages';
+          }
+          
+          return undefined;
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return 'assets/[name]-[hash][extname]';

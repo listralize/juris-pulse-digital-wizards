@@ -11,22 +11,48 @@ declare global {
 
 export const useDirectMarketingScripts = () => {
   useEffect(() => {
-    try {
-      console.log('🚀 Carregando scripts de marketing diretamente...');
-      
-      // Aguardar DOM estar pronto
-      const timer = setTimeout(() => {
-        try {
-          loadAllScripts();
-        } catch (error) {
-          console.warn('⚠️ Erro ao carregar scripts de marketing:', error);
+    if (typeof window === 'undefined') return;
+    
+    let timeoutId: NodeJS.Timeout;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    const loadScriptsWithRetry = () => {
+      try {
+        console.log('📱 Carregando scripts de marketing...');
+        
+        // Verificar se o DOM está pronto
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', loadScriptsWithRetry);
+          return;
         }
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    } catch (error) {
-      console.warn('⚠️ Erro no hook de marketing scripts:', error);
-    }
+        
+        // Aguardar um pouco mais se estivermos em produção
+        const delay = process.env.NODE_ENV === 'production' ? 2000 : 500;
+        
+        timeoutId = setTimeout(() => {
+          try {
+            loadAllScripts();
+          } catch (error) {
+            console.warn(`⚠️ Tentativa ${retryCount + 1} falhou:`, error);
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(loadScriptsWithRetry, 1000 * retryCount);
+            }
+          }
+        }, delay);
+        
+      } catch (error) {
+        console.warn('⚠️ Erro crítico no hook de marketing:', error);
+      }
+    };
+
+    loadScriptsWithRetry();
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      document.removeEventListener('DOMContentLoaded', loadScriptsWithRetry);
+    };
   }, []);
 
   const loadAllScripts = () => {
