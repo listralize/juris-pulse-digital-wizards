@@ -27,6 +27,13 @@ if (fs.existsSync(indexPath)) {
   // Remove any remaining lovable references
   htmlContent = htmlContent.replace(/lovable/gi, 'listralize');
   
+  // Fix logo paths to use relative paths
+  htmlContent = htmlContent.replace(/href="\/assets\/logo\.png"/g, 'href="./logo-email.png"');
+  htmlContent = htmlContent.replace(/content="\/assets\/logo\.png"/g, 'content="./logo-email.png"');
+  
+  // Remove problematic inline scripts that violate CSP
+  htmlContent = htmlContent.replace(/<script>[\s\S]*?<\/script>/g, '');
+  
   fs.writeFileSync(indexPath, htmlContent, 'utf8');
   console.log('✅ index.html finalizado com proteções avançadas');
 }
