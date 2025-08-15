@@ -22,17 +22,45 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: false,
-    minify: 'terser',
-    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
-    cssTarget: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
-    chunkSizeWarningLimit: 1000,
+    minify: mode === 'production',
+    target: 'esnext',
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
+      external: [],
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          'vendor-utils': ['clsx', 'tailwind-merge'],
+        manualChunks: (id) => {
+          // Separar chunks de forma mais inteligente
+          if (id.includes('node_modules')) {
+            // Chunks de vendor menores
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('gsap') || id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+            if (id.includes('recharts') || id.includes('fabric')) {
+              return 'vendor-charts';
+            }
+            return 'vendor-utils';
+          }
+          
+          // Separar componentes admin em chunk separado
+          if (id.includes('/admin/')) {
+            return 'admin';
+          }
+          
+          // Separar páginas de serviços
+          if (id.includes('/services/') || id.includes('/areas/')) {
+            return 'pages';
+          }
+          
+          return undefined;
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
@@ -46,18 +74,9 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-      },
-    },
   },
   base: "./",
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
-  },
-  esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
 }));
