@@ -23,30 +23,33 @@ export default defineConfig(({ mode }) => ({
     assetsDir: "assets",
     sourcemap: false,
     minify: 'terser',
-    target: 'es2015',
+    target: 'es2020',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        format: 'es',
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          supabase: ['@supabase/supabase-js'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          charts: ['recharts'],
+          utils: ['clsx', 'class-variance-authority', 'tailwind-merge'],
         },
-        assetFileNames: 'assets/[name].[hash].[ext]',
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js',
-      },
-    },
-    terserOptions: {
-      compress: {
-        drop_console: false, // Keep console for debugging
-        drop_debugger: true,
-        passes: 2,
-      },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        safari10: true,
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) return `assets/[name].[hash][extname]`;
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name].[hash][extname]`;
+          }
+          if (/css/i.test(ext)) {
+            return `assets/css/[name].[hash][extname]`;
+          }
+          return `assets/[name].[hash][extname]`;
+        },
+        chunkFileNames: 'assets/js/[name].[hash].js',
+        entryFileNames: 'assets/js/[name].[hash].js',
       },
     },
   },
@@ -55,9 +58,6 @@ export default defineConfig(({ mode }) => ({
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   esbuild: {
-    target: 'es2015',
-    supported: {
-      'top-level-await': false,
-    },
+    target: 'es2020',
   },
 }));

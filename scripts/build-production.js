@@ -89,7 +89,16 @@ exec('node scripts/clean-production.js', (error, stdout, stderr) => {
       cleanDistFiles(distPath);
     }
     
-    // Execute finalize-build if it exists
+    // Fix MIME types and verify build
+    console.log('🔧 Verificando e corrigindo MIME types...');
+    exec('node scripts/fix-build.js', (fixError, fixStdout) => {
+      if (fixError) {
+        console.warn('⚠️ Fix script error:', fixError.message);
+      } else {
+        console.log(fixStdout);
+      }
+      
+      // Execute finalize-build if it exists
     exec('node scripts/finalize-build.js', (finalizeError, finalizeStdout) => {
       if (finalizeError) {
         console.warn('⚠️ Finalize script not found, skipping...');
@@ -97,11 +106,13 @@ exec('node scripts/clean-production.js', (error, stdout, stderr) => {
         console.log(finalizeStdout);
       }
       
-      console.log('🎉 Build de produção concluído com sucesso!');
-      console.log('📁 Arquivos prontos na pasta /dist');
-      console.log('🔒 Referências ao Lovable removidas'); 
-      console.log('🏷️ Assets organizados em /assets');
-      console.log('🚀 Pronto para upload na Hostinger!');
+        console.log('🎉 Build de produção concluído com sucesso!');
+        console.log('📁 Arquivos prontos na pasta /dist');
+        console.log('🔒 Referências ao Lovable removidas'); 
+        console.log('🏷️ Assets organizados em /assets');
+        console.log('🔧 MIME types configurados para Hostinger');
+        console.log('🚀 Pronto para upload na Hostinger!');
+      });
     });
   });
 });

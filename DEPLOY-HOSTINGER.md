@@ -1,27 +1,25 @@
-# 🚀 Deploy na Hostinger - Guia Completo
+# 🚀 SOLUÇÃO PARA TELA PRETA - Deploy Hostinger 
 
-## 📋 Pré-requisitos
+## ⚠️ PROBLEMA: MIME Type Incorreto
 
-1. Conta na Hostinger ativa
-2. Domínio configurado
-3. Node.js instalado localmente
+**Erro:** `Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "application/octet-stream"`
 
-## 🔨 Preparação do Build
+**Causa:** Servidor não reconhece arquivos .js como JavaScript
 
-### Opção 1: Build Completo (Recomendado)
+## ✅ SOLUÇÃO CORRIGIDA
+
+### 1. Build com Correções de MIME Type
+
 ```bash
-# Executar build de produção completo
-node scripts/build-production.js
+# Execute o build corrigido que resolve MIME types
+npm run build:prod
 ```
 
-### Opção 2: Build Manual
-```bash
-# 1. Copiar assets
-# 2. Limpar referências
-node scripts/clean-production.js
-
-# 3. Build do projeto
-npm run build
+O build agora inclui:
+- ✅ Configuração automática de MIME types
+- ✅ Arquivo .htaccess otimizado para Hostinger
+- ✅ Verificação de integridade dos arquivos
+- ✅ Organização correta de assets
 
 # 4. Preparar para deploy
 node scripts/production-deploy.js
@@ -48,29 +46,42 @@ node scripts/production-deploy.js
 2. Teste a navegação entre páginas
 3. Verifique se não há erros 404
 
-## 🔧 Solução de Problemas
+## 🔧 Solução Específica - MIME Types
 
-### Tela Preta/Site não carrega
-- Verifique se todos os arquivos foram carregados
-- Confirme que o arquivo `.htaccess` está presente
-- Verifique se não há erros no console do navegador
+### ✅ .htaccess Automático
 
-### Erro 404 nas rotas
-- Confirme que o arquivo `.htaccess` está na raiz do public_html
-- Verifique se o RewriteEngine está habilitado na Hostinger
+O arquivo `.htaccess` agora inclui:
 
-### Arquivos não encontrados
-- Confirme que a estrutura de pastas está correta:
-  ```
-  public_html/
-  ├── index.html
-  ├── .htaccess
-  ├── assets/
-  │   ├── js/
-  │   ├── css/
-  │   └── img/
-  └── ...outros arquivos
-  ```
+```apache
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType application/javascript .mjs
+    AddType text/css .css
+    AddType application/json .json
+</IfModule>
+```
+
+### 🚨 Se Tela Preta Persistir
+
+1. **Verifique Console do Navegador** (F12):
+   - Erros de MIME type?
+   - Arquivos .js carregando?
+
+2. **Verifique Arquivos no Servidor**:
+   ```
+   public_html/
+   ├── index.html ✅
+   ├── .htaccess ✅ (pode estar oculto)
+   └── assets/
+       ├── js/ ✅ (arquivos .js)
+       └── css/ ✅ (arquivos .css)
+   ```
+
+3. **Teste Local**:
+   ```bash
+   npx serve dist
+   # Se funcionar local, problema é no servidor
+   ```
 
 ## 📱 Teste Final
 
