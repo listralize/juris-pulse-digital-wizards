@@ -88,6 +88,8 @@ export function LinkTreePreview({
   };
 
   const handleItemClick = (item: LinkTreeItem) => {
+    console.log(`🎯 LinkTree: handleItemClick chamado para ${item.title}, tipo: ${item.item_type}, URL: ${item.url}`);
+    
     if (item.item_type === 'form') {
       const formConfig = multipleFormsConfig.forms.find(f => f.id === item.form_id);
       if (formConfig) {
@@ -117,51 +119,84 @@ export function LinkTreePreview({
     if (item.item_type === 'text' || item.item_type === 'info') {
       return;
     }
+    
     if (onItemClick) {
       onItemClick(item);
     } else if (item.url) {
-      window.open(item.url, '_blank');
+      console.log(`🔗 LinkTree: Abrindo URL ${item.url} para ${item.title}`);
+      // Para mobile, usar timeout pequeno para garantir que o touch foi processado
+      setTimeout(() => {
+        window.open(item.url, '_blank', 'noopener,noreferrer');
+      }, 100);
     }
   };
 
-  // Handler melhorado para mobile com link nativo  
-  const createMobileLink = (item: LinkTreeItem) => {
-    // Para formulários e vídeos, usar div com handler
+  // Handler melhorado para mobile com touch events específicos
+  const createMobileHandlers = (item: LinkTreeItem) => {
+    const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log(`🔥 LinkTree: Clique/Touch no item ${item.title}, tipo: ${item.item_type}`);
+      handleItemClick(item);
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+      e.stopPropagation();
+      console.log(`👆 LinkTree: TouchStart no item ${item.title}`);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log(`👆 LinkTree: TouchEnd no item ${item.title}, executando ação`);
+      handleItemClick(item);
+    };
+
+    const baseStyle: React.CSSProperties = {
+      cursor: 'pointer', 
+      WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+      touchAction: 'manipulation',
+      userSelect: 'none' as const
+    };
+
+    // Para formulários, vídeos e textos informativos
     if (item.item_type === 'form' || item.item_type === 'video' || item.item_type === 'text' || item.item_type === 'info') {
       return {
-        as: 'div',
-        onClick: (e: React.MouseEvent) => {
-          e.preventDefault();
-          handleItemClick(item);
-        },
-        role: "button",
+        onClick: handleClick,
+        onTouchStart: handleTouchStart,
+        onTouchEnd: handleTouchEnd,
+        role: "button" as const,
         tabIndex: 0,
-        style: { 
-          cursor: 'pointer', 
-          WebkitTapHighlightColor: 'rgba(0,0,0,0.1)',
-          touchAction: 'manipulation'
-        }
+        style: baseStyle
       };
     }
     
-    // Para links externos, usar elemento <a> nativo para melhor compatibilidade mobile
+    // Para links externos - usar href mas também handlers de touch
     return {
-      as: 'a',
       href: item.url || '#',
-      target: '_blank',
-      rel: 'noopener noreferrer',
+      target: '_blank' as const,
+      rel: 'noopener noreferrer' as const,
       onClick: (e: React.MouseEvent) => {
+        console.log(`🔗 LinkTree: Click no link ${item.title}`);
         if (onItemClick) {
           e.preventDefault();
           onItemClick(item);
         }
-        // Se não há onItemClick customizado, deixa o link nativo funcionar
+      },
+      onTouchStart: handleTouchStart,
+      onTouchEnd: (e: React.TouchEvent) => {
+        e.stopPropagation();
+        console.log(`🔗 LinkTree: TouchEnd no link ${item.title}`);
+        if (onItemClick) {
+          e.preventDefault();
+          onItemClick(item);
+        } else if (item.url) {
+          window.open(item.url, '_blank');
+        }
       },
       style: { 
-        cursor: 'pointer', 
-        WebkitTapHighlightColor: 'rgba(0,0,0,0.1)',
-        touchAction: 'manipulation',
-        textDecoration: 'none'
+        ...baseStyle,
+        textDecoration: 'none' as const
       }
     };
   };
@@ -476,17 +511,21 @@ export function LinkTreePreview({
     if (item.item_type === 'video' && item.url) {
       const thumbnail = getYouTubeThumbnail(item.url);
       if (thumbnail) {
+        const handlers = createMobileHandlers(item);
+        const isLink = !['form', 'video', 'text', 'info'].includes(item.item_type);
+        const ElementType = isLink ? 'a' : 'div' as const;
+        
         return (
-          <div 
+          <ElementType 
             key={item.id} 
-            {...createMobileLink(item)}
+            {...handlers}
             className={`${getButtonStyle(item)} cursor-pointer relative group min-h-[200px]`}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              ...createMobileLink(item).style
+              ...handlers.style
             }}
           >
             {/* Overlay escuro */}
@@ -505,7 +544,7 @@ export function LinkTreePreview({
                 {item.title}
               </span>
             </div>
-          </div>
+            </ElementType>
         );
       }
     }
@@ -513,7 +552,7 @@ export function LinkTreePreview({
     // Renderização padrão para outros tipos
     return <Button 
       key={item.id} 
-      {...createMobileLink(item)}
+            {...createMobileHandlers(item)}
       className={`${getButtonStyle(item)} border-0`} 
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
@@ -522,7 +561,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createMobileLink(item).style
+        ...createMobileHandlers(item).style
       }}>
         {getItemOverlay(item)}
         <div className="flex items-center gap-3 relative z-10">
@@ -581,13 +620,13 @@ export function LinkTreePreview({
           <Card 
             key={item.id} 
             className={`${getCardStyle(item)} min-h-[250px]`} 
-            {...createMobileLink(item)}
+            {...createMobileHandlers(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              ...createMobileLink(item).style
+              ...createMobileHandlers(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -615,7 +654,7 @@ export function LinkTreePreview({
     return <Card 
       key={item.id} 
       className={getCardStyle(item)} 
-      {...createMobileLink(item)}
+      {...createMobileHandlers(item)}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
@@ -624,7 +663,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createMobileLink(item).style
+        ...createMobileHandlers(item).style
       }}>
         {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10">
@@ -650,13 +689,13 @@ export function LinkTreePreview({
           <Card 
             key={item.id} 
             className={`${getCardStyle(item)} ${sizeClass}`}
-            {...createMobileLink(item)}
+            {...createMobileHandlers(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              ...createMobileLink(item).style
+              ...createMobileHandlers(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -684,7 +723,7 @@ export function LinkTreePreview({
     return <Card 
       key={item.id} 
       className={`${getCardStyle(item)} ${sizeClass}`} 
-      {...createMobileLink(item)}
+      {...createMobileHandlers(item)}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
@@ -693,7 +732,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createMobileLink(item).style
+        ...createMobileHandlers(item).style
       }}>
         {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
@@ -734,7 +773,7 @@ export function LinkTreePreview({
   const renderVideoItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={getCardStyle(item)} 
-    {...createMobileLink(item)}
+    {...createMobileHandlers(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -743,7 +782,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createMobileLink(item).style
+      ...createMobileHandlers(item).style
     }}>
       {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
@@ -762,7 +801,7 @@ export function LinkTreePreview({
   const renderMasonryItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={getCardStyle(item)} 
-    {...createMobileLink(item)}
+    {...createMobileHandlers(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -771,7 +810,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createMobileLink(item).style
+      ...createMobileHandlers(item).style
     }}>
       {getItemOverlay(item)}
       <CardContent className="p-4 relative z-10">
@@ -787,7 +826,7 @@ export function LinkTreePreview({
   const renderCarouselItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={`${getCardStyle(item)} flex-shrink-0 w-72 sm:w-80 snap-center break-inside-avoid mb-6`} 
-    {...createMobileLink(item)}
+    {...createMobileHandlers(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -796,7 +835,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createMobileLink(item).style
+      ...createMobileHandlers(item).style
     }}>
       {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
@@ -814,7 +853,7 @@ export function LinkTreePreview({
     return <Card 
       key={item.id} 
       className={`${getCardStyle(item)} ${isLarge ? 'lg:row-span-2' : ''}`} 
-      {...createMobileLink(item)}
+      {...createMobileHandlers(item)}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
@@ -823,7 +862,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createMobileLink(item).style
+        ...createMobileHandlers(item).style
       }}>
       {getItemOverlay(item)}
         <CardContent className="p-6 relative z-10">
@@ -840,7 +879,7 @@ export function LinkTreePreview({
   const renderPortfolioItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={`${getCardStyle(item)} group`} 
-    {...createMobileLink(item)}
+    {...createMobileHandlers(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -849,7 +888,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createMobileLink(item).style
+      ...createMobileHandlers(item).style
     }}>
       <CardContent className="p-0">
         <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
