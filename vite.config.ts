@@ -34,7 +34,8 @@ export default defineConfig(({ mode }) => ({
           supabase: ['@supabase/supabase-js'],
           admin: [
             '@tanstack/react-query',
-            'react-beautiful-dnd',
+            '@dnd-kit/core',
+            '@dnd-kit/sortable',
             'fabric',
             'recharts'
           ],
