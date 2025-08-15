@@ -43,8 +43,22 @@ const Administrativo = lazy(() => import('./pages/areas/Administrativo'));
 const queryClient = new QueryClient();
 
 function App() {
+  console.log('🏗️ App function iniciando...');
+  
   // Carregar scripts de marketing globalmente
   useDirectMarketingScripts();
+  
+  // Remover loading de emergência quando App carrega
+  useEffect(() => {
+    console.log('🗑️ Tentando remover loading de emergência...');
+    const emergencyLoading = document.getElementById('emergency-loading');
+    if (emergencyLoading) {
+      console.log('✅ Removendo loading de emergência');
+      emergencyLoading.remove();
+    } else {
+      console.log('ℹ️ Loading de emergência já foi removido');
+    }
+  }, []);
   
   // Adicionar verificação de scripts carregados
   useEffect(() => {
