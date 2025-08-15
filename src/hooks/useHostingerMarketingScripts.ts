@@ -15,12 +15,13 @@ export const useHostingerMarketingScripts = () => {
   const initializeMarketingScripts = () => {
     console.log('🔧 [HOSTINGER] Configurando scripts de marketing...');
     
-    // Detectar se é Hostinger - melhor detecção
+    // Detectar se é Hostinger ou stadv.com.br
     const hostname = window.location.hostname;
     const isHostinger = hostname.includes('.hostinger') || 
                        hostname.includes('.000.pe') ||
                        hostname.includes('.hostingersite.com') ||
                        hostname.includes('.hstgr.io') ||
+                       hostname.includes('stadv.com.br') ||
                        (!hostname.includes('localhost') && 
                         !hostname.includes('lovable.app') && 
                         !hostname.includes('127.0.0.1'));
@@ -32,8 +33,8 @@ export const useHostingerMarketingScripts = () => {
       userAgent: navigator.userAgent.substring(0, 100)
     });
 
-    // Configurar scripts sempre (tanto para Hostinger quanto para testes)
-    if (isHostinger || window.location.protocol === 'https:') {
+    // Configurar scripts sempre (tanto para Hostinger quanto para stadv.com.br)
+    if (isHostinger || window.location.protocol === 'https:' || hostname.includes('stadv.com.br')) {
       console.log('🚀 [HOSTINGER] Inicializando scripts de marketing...');
       setupHostingerFacebookPixel();
       setupHostingerGTM();

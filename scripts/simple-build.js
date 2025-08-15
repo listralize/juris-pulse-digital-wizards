@@ -52,34 +52,44 @@ try {
     
     const jsFiles = checkAssetsRecursively(assetsPath);
     console.log('📦 Arquivos JS encontrados:', jsFiles.length);
-    console.log('📦 Arquivos JS:', jsFiles);
+    console.log('📦 Arquivos JS:', jsFiles.map(f => path.basename(f)));
     
     // Verificar se index.html referencia os arquivos corretos
     const indexPath = path.join(distPath, 'index.html');
     if (fs.existsSync(indexPath)) {
       const indexContent = fs.readFileSync(indexPath, 'utf8');
-      const missingRefs = jsFiles.filter(file => !indexContent.includes(path.basename(file)));
-      if (missingRefs.length > 0) {
-        console.warn('⚠️ Possíveis referências perdidas:', missingRefs);
-        
-        // Try to fix missing references by updating paths
-        let updatedContent = indexContent;
-        for (const missingFile of missingRefs) {
-          const fileName = path.basename(missingFile);
-          const relativePath = `./${missingFile}`;
-          // Look for old reference patterns and replace
-          updatedContent = updatedContent.replace(
-            new RegExp(`assets/js/[^"']*\\.js`, 'g'),
-            relativePath
-          );
+      console.log('🔍 Verificando referências no index.html...');
+      
+      // Check which JS files are actually referenced
+      const referencedFiles = [];
+      const missingFiles = [];
+      
+      for (const jsFile of jsFiles) {
+        const fileName = path.basename(jsFile);
+        if (indexContent.includes(fileName)) {
+          referencedFiles.push(fileName);
+        } else {
+          missingFiles.push(fileName);
         }
+      }
+      
+      console.log('✅ Arquivos referenciados:', referencedFiles);
+      if (missingFiles.length > 0) {
+        console.warn('⚠️ Arquivos não referenciados:', missingFiles);
+      }
+      
+      // Verificar se há referências quebradas no HTML
+      const scriptMatches = indexContent.match(/src="[^"]*\.js"/g);
+      if (scriptMatches) {
+        console.log('🔗 Scripts no HTML:', scriptMatches);
         
-        if (updatedContent !== indexContent) {
-          fs.writeFileSync(indexPath, updatedContent);
-          console.log('🔧 Referências corrigidas no index.html');
+        for (const match of scriptMatches) {
+          const src = match.match(/src="([^"]*)"/)[1];
+          const fullPath = path.join(distPath, src.replace('./', ''));
+          if (!fs.existsSync(fullPath)) {
+            console.error('❌ Arquivo não encontrado:', src);
+          }
         }
-      } else {
-        console.log('✅ Todas as referências JS estão corretas');
       }
     }
     
@@ -88,15 +98,16 @@ try {
     if (!fs.existsSync(robotsPath)) {
       const robotsContent = `User-agent: *
 Allow: /
-Sitemap: https://your-domain.com/sitemap.xml`;
+Sitemap: https://stadv.com.br/sitemap.xml`;
       fs.writeFileSync(robotsPath, robotsContent);
-      console.log('✅ robots.txt criado');
+      console.log('✅ robots.txt criado para stadv.com.br');
     }
   }
 
   console.log('✅ Build completed successfully!');
   console.log('📁 Files ready for upload to Hostinger in dist/ folder');
-  console.log('🚀 Build otimizado para Hostinger com scripts de marketing integrados');
+  console.log('🚀 Build otimizado para stadv.com.br com scripts de marketing integrados');
+  console.log('📊 Pixel Facebook e Google Tag Manager configurados para produção');
   
 } catch (error) {
   console.error('❌ Build failed:', error.message);

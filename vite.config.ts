@@ -29,12 +29,8 @@ export default defineConfig(({ mode }) => ({
       output: {
         format: 'es',
         generatedCode: 'es2015',
-        // Simplify chunking to avoid circular dependencies and ensure stable builds
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-slot', 'lucide-react'],
-        },
+        // Remove manual chunks to avoid 404 errors
+        manualChunks: undefined,
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
           const info = assetInfo.name.split('.');
