@@ -22,38 +22,15 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: false,
-    minify: 'esbuild', // Changed from terser to esbuild to avoid hoisting issues
+    minify: false, // Disable minification to avoid hoisting issues
     target: 'es2020',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         format: 'es',
-        generatedCode: 'es2015', // Ensure proper code generation
-        manualChunks: (id) => {
-          // Better chunk splitting to avoid circular dependencies
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor-react';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'vendor-ui';
-            }
-            if (id.includes('@supabase')) {
-              return 'vendor-supabase';
-            }
-            return 'vendor';
-          }
-          // Keep related modules together
-          if (id.includes('/hooks/')) {
-            return 'hooks';
-          }
-          if (id.includes('/components/')) {
-            return 'components';
-          }
-          if (id.includes('/pages/')) {
-            return 'pages';
-          }
-        },
+        generatedCode: 'es2015',
+        // Simplify chunking to avoid circular dependencies
+        manualChunks: undefined,
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name].[hash][extname]`;
           const info = assetInfo.name.split('.');
@@ -77,5 +54,6 @@ export default defineConfig(({ mode }) => ({
   },
   esbuild: {
     target: 'es2020',
+    keepNames: true, // Preserve function and class names
   },
 }));
