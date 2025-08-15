@@ -22,16 +22,13 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: false,
-    minify: mode === 'production',
-    target: 'esnext',
+    minify: true,
+    target: 'es2015',
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
-      external: [],
       output: {
         manualChunks: (id) => {
-          // Separar chunks de forma mais inteligente
           if (id.includes('node_modules')) {
-            // Chunks de vendor menores
             if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor-react';
             }
@@ -41,21 +38,13 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
             }
-            if (id.includes('gsap') || id.includes('framer-motion')) {
-              return 'vendor-animation';
-            }
-            if (id.includes('recharts') || id.includes('fabric')) {
-              return 'vendor-charts';
-            }
             return 'vendor-utils';
           }
           
-          // Separar componentes admin em chunk separado
           if (id.includes('/admin/')) {
             return 'admin';
           }
           
-          // Separar páginas de serviços
           if (id.includes('/services/') || id.includes('/areas/')) {
             return 'pages';
           }
@@ -75,8 +64,9 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  base: "./",
+  base: "/",
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
+    'global': 'globalThis',
   },
 }));

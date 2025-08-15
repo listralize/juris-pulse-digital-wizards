@@ -113,11 +113,12 @@
     cursor: auto;
   }
 
-  /* Fallback colors for initial load - garantir visibilidade */
+  /* Fallback colors for initial load - garantir visibilidade SEMPRE */
   body:not(.light):not(.dark) {
     background-color: #0a0a0a !important;
     color: #f5f5f5 !important;
     font-family: 'Inter', system-ui, sans-serif !important;
+    min-height: 100vh !important;
   }
   
   /* Prevenção de tela branca/preta durante carregamento */
@@ -125,7 +126,14 @@
     background-color: var(--background, #0a0a0a) !important;
     color: var(--foreground, #f5f5f5) !important;
     font-family: 'Inter', system-ui, sans-serif !important;
+    min-height: 100vh !important;
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Garantir que sempre tenhamos uma cor visível */
+  html {
+    background-color: #0a0a0a !important;
+    color: #f5f5f5 !important;
   }
 
   /* Mobile/Tablet optimizations */

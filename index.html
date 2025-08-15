@@ -16,8 +16,8 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="./logo-email.png" />
 
-    <!-- Security: Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://api.fontshare.com https://fonts.gstatic.com data:; connect-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https:; media-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https: blob: data:; frame-src 'self' https://www.google.com https://www.googletagmanager.com; base-uri 'self'; form-action 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co; upgrade-insecure-requests">
+    <!-- Security: Content Security Policy (mais permissivo para produção) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' https: data:; connect-src 'self' https:; media-src 'self' https: blob: data:; frame-src 'self' https:; base-uri 'self'; form-action 'self' https:; upgrade-insecure-requests">
     <meta name="referrer" content="no-referrer" />
 
     <!-- Custom Fonts -->
@@ -31,6 +31,7 @@
 
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/production-check.js"></script>
     <script type="module" src="/src/main.tsx"></script>
     
     <!-- Basic Protection -->
