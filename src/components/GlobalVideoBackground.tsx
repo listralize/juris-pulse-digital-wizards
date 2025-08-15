@@ -4,10 +4,14 @@ const GlobalVideoBackground = () => {
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
 
+  console.log('🎬 GlobalVideoBackground: Componente montado');
+
   // Carregar configurações do vídeo de fundo
   useEffect(() => {
+    console.log('🎬 GlobalVideoBackground: useEffect executado para carregar vídeo');
     const loadVideo = async () => {
       try {
+        console.log('🎬 GlobalVideoBackground: Iniciando carregamento...');
         const { supabase } = await import('../integrations/supabase/client');
         
         const { data: settings } = await supabase
@@ -26,6 +30,8 @@ const GlobalVideoBackground = () => {
             url: settings.team_background_video,
             enabled: settings.team_video_enabled
           });
+        } else {
+          console.log('❌ Nenhuma configuração de vídeo encontrada');
         }
       } catch (error) {
         console.error('❌ Erro ao carregar vídeo:', error);
@@ -63,10 +69,19 @@ const GlobalVideoBackground = () => {
     shouldRender: videoUrl && videoEnabled
   });
 
-  // Renderizar se houver URL (remover condição de enabled para debug)
+  // Se não houver URL, não renderizar
   if (!videoUrl) {
+    console.log('🎬 GlobalVideoBackground: Não renderizando - sem URL');
     return null;
   }
+
+  // Se o vídeo não estiver habilitado, não renderizar
+  if (!videoEnabled) {
+    console.log('🎬 GlobalVideoBackground: Não renderizando - vídeo desabilitado');
+    return null;
+  }
+
+  console.log('🎬 GlobalVideoBackground: Renderizando vídeo!');
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none" style={{
