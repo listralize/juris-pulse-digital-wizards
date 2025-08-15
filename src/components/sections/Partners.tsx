@@ -241,7 +241,12 @@ const Partners = () => {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="true"
+          x5-video-orientation="portraint"
           style={{ 
             minWidth: '100vw',
             minHeight: '100vh',
@@ -250,6 +255,18 @@ const Partners = () => {
           onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
           onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
           onError={(e) => console.error('❌ Erro no vídeo:', e)}
+          onLoadedMetadata={(e) => {
+            const video = e.target as HTMLVideoElement;
+            // Force play on mobile
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                // Mobile might require user interaction first
+                console.log('🎥 Autoplay falhou, tentando reproduzir novamente');
+                setTimeout(() => video.play(), 1000);
+              });
+            }
+          }}
         />
       </div>
       
