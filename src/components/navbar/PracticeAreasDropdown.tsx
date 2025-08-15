@@ -84,7 +84,7 @@ const PracticeAreasDropdown = ({ isActive }: PracticeAreasDropdownProps) => {
       >
         Áreas de Atuação
       </button>
-      <div className={`absolute left-0 mt-2 w-60 ${isDark ? 'bg-black/95 border-white/10' : 'bg-white border-black/10'} border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300`} style={{ zIndex: 999999 }}
+      <div className={`absolute left-0 mt-2 w-60 ${isDark ? 'bg-black/95 border-white/10' : 'bg-white border-black/10'} border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300`} style={{ zIndex: 99999999 }}
         role="menu"
         aria-label="Áreas de Atuação"
       >
