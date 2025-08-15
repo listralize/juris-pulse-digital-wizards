@@ -123,6 +123,23 @@ export function LinkTreePreview({
       window.open(item.url, '_blank');
     }
   };
+
+  // Handler para eventos de toque e clique que funciona em mobile
+  const createClickHandler = (item: LinkTreeItem) => {
+    return {
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleItemClick(item);
+      },
+      onTouchEnd: (e: React.TouchEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleItemClick(item);
+      },
+      style: { cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }
+    };
+  };
   const getThemeColors = () => {
     const theme = linkTree.theme || 'modern';
     return legalThemes[theme as keyof typeof legalThemes] || legalThemes.corporate;
@@ -196,7 +213,13 @@ export function LinkTreePreview({
                 const container = document.getElementById('carousel-container');
                 if (container) container.scrollLeft -= 300;
               }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                const container = document.getElementById('carousel-container');
+                if (container) container.scrollLeft -= 300;
+              }}
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               ←
             </button>
@@ -205,7 +228,13 @@ export function LinkTreePreview({
                 const container = document.getElementById('carousel-container');
                 if (container) container.scrollLeft += 300;
               }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                const container = document.getElementById('carousel-container');
+                if (container) container.scrollLeft += 300;
+              }}
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               →
             </button>
@@ -425,13 +454,14 @@ export function LinkTreePreview({
         return (
           <div 
             key={item.id} 
-            onClick={() => handleItemClick(item)} 
+            {...createClickHandler(item)}
             className={`${getButtonStyle(item)} cursor-pointer relative group min-h-[200px]`}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
+              backgroundRepeat: 'no-repeat',
+              ...createClickHandler(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -456,14 +486,19 @@ export function LinkTreePreview({
     }
 
     // Renderização padrão para outros tipos
-    return <Button key={item.id} onClick={() => handleItemClick(item)} className={`${getButtonStyle(item)} border-0`} style={{
-      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-      color: item.text_color,
-      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
+    return <Button 
+      key={item.id} 
+      {...createClickHandler(item)}
+      className={`${getButtonStyle(item)} border-0`} 
+      style={{
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+        color: item.text_color,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        ...createClickHandler(item).style
+      }}>
         {getItemOverlay(item)}
         <div className="flex items-center gap-3 relative z-10">
           {getItemIcon(item)}
@@ -521,12 +556,13 @@ export function LinkTreePreview({
           <Card 
             key={item.id} 
             className={`${getCardStyle(item)} min-h-[250px]`} 
-            onClick={() => handleItemClick(item)}
+            {...createClickHandler(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
+              backgroundRepeat: 'no-repeat',
+              ...createClickHandler(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -551,15 +587,20 @@ export function LinkTreePreview({
     }
 
     // Renderização padrão para outros tipos
-    return <Card key={item.id} className={getCardStyle(item)} onClick={() => handleItemClick(item)} style={{
-      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-      color: item.text_color,
-      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
+    return <Card 
+      key={item.id} 
+      className={getCardStyle(item)} 
+      {...createClickHandler(item)}
+      style={{
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+        color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        ...createClickHandler(item).style
+      }}>
         {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10">
           <div className="mb-4 flex justify-center">
@@ -584,12 +625,13 @@ export function LinkTreePreview({
           <Card 
             key={item.id} 
             className={`${getCardStyle(item)} ${sizeClass}`}
-            onClick={() => handleItemClick(item)}
+            {...createClickHandler(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
+              backgroundRepeat: 'no-repeat',
+              ...createClickHandler(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -614,15 +656,20 @@ export function LinkTreePreview({
     }
 
     // Renderização padrão para outros tipos
-    return <Card key={item.id} className={`${getCardStyle(item)} ${sizeClass}`} onClick={() => handleItemClick(item)} style={{
-      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-      color: item.text_color,
-      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
+    return <Card 
+      key={item.id} 
+      className={`${getCardStyle(item)} ${sizeClass}`} 
+      {...createClickHandler(item)}
+      style={{
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+        color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        ...createClickHandler(item).style
+      }}>
         {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
           <div className="mb-4 flex justify-center">
@@ -659,15 +706,20 @@ export function LinkTreePreview({
         </div>
       </CardContent>
     </Card>;
-  const renderVideoItem = (item: LinkTreeItem) => <Card key={item.id} className={getCardStyle(item)} onClick={() => handleItemClick(item)} style={{
-    backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-    color: item.text_color,
-    borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-    backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
+  const renderVideoItem = (item: LinkTreeItem) => <Card 
+    key={item.id} 
+    className={getCardStyle(item)} 
+    {...createClickHandler(item)}
+    style={{
+      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+      color: item.text_color,
+      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      ...createClickHandler(item).style
+    }}>
       {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center relative">
@@ -682,15 +734,20 @@ export function LinkTreePreview({
         {item.card_content && <p className="text-sm opacity-80">{item.card_content}</p>}
       </CardContent>
     </Card>;
-  const renderMasonryItem = (item: LinkTreeItem) => <Card key={item.id} className={getCardStyle(item)} onClick={() => handleItemClick(item)} style={{
-    backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-    color: item.text_color,
-    borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-    backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
+  const renderMasonryItem = (item: LinkTreeItem) => <Card 
+    key={item.id} 
+    className={getCardStyle(item)} 
+    {...createClickHandler(item)}
+    style={{
+      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+      color: item.text_color,
+      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      ...createClickHandler(item).style
+    }}>
       {getItemOverlay(item)}
       <CardContent className="p-4 relative z-10">
         <div className="flex items-center gap-3 mb-3">
@@ -702,15 +759,20 @@ export function LinkTreePreview({
         {item.is_featured && <Badge className="bg-yellow-500 text-black">⭐ Destaque</Badge>}
       </CardContent>
     </Card>;
-  const renderCarouselItem = (item: LinkTreeItem) => <Card key={item.id} className={`${getCardStyle(item)} flex-shrink-0 w-72 sm:w-80 snap-center break-inside-avoid mb-6`} onClick={() => handleItemClick(item)} style={{
-    backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-    color: item.text_color,
-    borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-    backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
+  const renderCarouselItem = (item: LinkTreeItem) => <Card 
+    key={item.id} 
+    className={`${getCardStyle(item)} flex-shrink-0 w-72 sm:w-80 snap-center break-inside-avoid mb-6`} 
+    {...createClickHandler(item)}
+    style={{
+      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+      color: item.text_color,
+      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      ...createClickHandler(item).style
+    }}>
       {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
         <div className="mb-4 flex justify-center">
@@ -724,15 +786,20 @@ export function LinkTreePreview({
     </Card>;
   const renderMagazineItem = (item: LinkTreeItem, index: number) => {
     const isLarge = index % 3 === 0;
-    return <Card key={item.id} className={`${getCardStyle(item)} ${isLarge ? 'lg:row-span-2' : ''}`} onClick={() => handleItemClick(item)} style={{
-      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-      color: item.text_color,
-      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
+    return <Card 
+      key={item.id} 
+      className={`${getCardStyle(item)} ${isLarge ? 'lg:row-span-2' : ''}`} 
+      {...createClickHandler(item)}
+      style={{
+        backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+        color: item.text_color,
+        borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+        backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        ...createClickHandler(item).style
+      }}>
       {getItemOverlay(item)}
         <CardContent className="p-6 relative z-10">
           <div className="flex items-center gap-3 mb-3">
@@ -745,15 +812,20 @@ export function LinkTreePreview({
         </CardContent>
       </Card>;
   };
-  const renderPortfolioItem = (item: LinkTreeItem) => <Card key={item.id} className={`${getCardStyle(item)} group`} onClick={() => handleItemClick(item)} style={{
-    backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
-    color: item.text_color,
-    borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
-    backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
+  const renderPortfolioItem = (item: LinkTreeItem) => <Card 
+    key={item.id} 
+    className={`${getCardStyle(item)} group`} 
+    {...createClickHandler(item)}
+    style={{
+      backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
+      color: item.text_color,
+      borderColor: item.button_style === 'neon' ? 'currentColor' : undefined,
+      backgroundImage: item.card_image ? `url(${item.card_image})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      ...createClickHandler(item).style
+    }}>
       <CardContent className="p-0">
         <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
           <div className="text-center">
