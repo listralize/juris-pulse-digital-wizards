@@ -31,8 +31,8 @@ if (fs.existsSync(indexPath)) {
   htmlContent = htmlContent.replace(/href="\/assets\/logo\.png"/g, 'href="./logo-email.png"');
   htmlContent = htmlContent.replace(/content="\/assets\/logo\.png"/g, 'content="./logo-email.png"');
   
-  // Remove problematic inline scripts that violate CSP
-  htmlContent = htmlContent.replace(/<script>[\s\S]*?<\/script>/g, '');
+  // Keep only basic protection scripts, remove aggressive ones
+  htmlContent = htmlContent.replace(/<script>[\s\S]*?(devtools|debugger|F12)[\s\S]*?<\/script>/gi, '');
   
   fs.writeFileSync(indexPath, htmlContent, 'utf8');
   console.log('✅ index.html finalizado com proteções avançadas');

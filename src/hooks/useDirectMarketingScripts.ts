@@ -11,14 +11,22 @@ declare global {
 
 export const useDirectMarketingScripts = () => {
   useEffect(() => {
-    console.log('🚀 Carregando scripts de marketing diretamente...');
-    
-    // Aguardar DOM estar pronto
-    const timer = setTimeout(() => {
-      loadAllScripts();
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    try {
+      console.log('🚀 Carregando scripts de marketing diretamente...');
+      
+      // Aguardar DOM estar pronto
+      const timer = setTimeout(() => {
+        try {
+          loadAllScripts();
+        } catch (error) {
+          console.warn('⚠️ Erro ao carregar scripts de marketing:', error);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } catch (error) {
+      console.warn('⚠️ Erro no hook de marketing scripts:', error);
+    }
   }, []);
 
   const loadAllScripts = () => {
