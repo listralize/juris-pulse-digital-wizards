@@ -1,12 +1,16 @@
 # Enable Apache rewrite module
 RewriteEngine On
 
+# Ensure assets are served correctly
+RewriteCond %{REQUEST_URI} ^/assets/
+RewriteRule ^(.*)$ /$1 [L]
+
 # Handle client-side routing for React (exclude assets and static files)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/assets/
-RewriteCond %{REQUEST_URI} !\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
-RewriteRule . /index.html [L]
+RewriteCond %{REQUEST_URI} !\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|json|xml)$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
 
 # Set correct MIME types for JavaScript modules
 <IfModule mod_mime.c>
