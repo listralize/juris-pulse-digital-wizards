@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -17,7 +16,7 @@
     <meta name="twitter:image" content="./logo-email.png" />
 
     <!-- Security: Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://api.fontshare.com https://fonts.gstatic.com data:; connect-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https:; media-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https: blob: data:; frame-src 'self' https://www.google.com https://www.googletagmanager.com; base-uri 'self'; form-action 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://api.fontshare.com https://cdn.fontshare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://api.fontshare.com https://cdn.fontshare.com https://fonts.gstatic.com data:; connect-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https:; media-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https: blob: data:; frame-src 'self' https://www.google.com https://www.googletagmanager.com; base-uri 'self'; form-action 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co">
     <meta name="referrer" content="no-referrer" />
 
     <!-- Custom Fonts -->
@@ -74,35 +73,5 @@
     
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Debug para desenvolvimento - console liberado -->
-    <script>
-      console.log('🔍 Console liberado para debug');
-      console.log('📱 User Agent:', navigator.userAgent);
-      console.log('📍 URL atual:', window.location.href);
-      console.log('🎨 Document ready state:', document.readyState);
-      
-      // Monitorar mudanças no DOM
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.addedNodes.length > 0) {
-            console.log('➕ Nós adicionados:', mutation.addedNodes);
-          }
-        });
-      });
-      
-      if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true });
-      }
-      
-      // Log de erros JavaScript
-      window.addEventListener('error', (e) => {
-        console.error('🚨 Erro JavaScript:', e.error, e.message, e.filename, e.lineno);
-      });
-      
-      window.addEventListener('unhandledrejection', (e) => {
-        console.error('🚨 Promise rejeitada:', e.reason);
-      });
-    </script>
   </body>
 </html>
