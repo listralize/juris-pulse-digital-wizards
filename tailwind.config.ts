@@ -76,11 +76,11 @@ export default {
 				}
 			},
 			fontFamily: {
-				'editorial': ['Editorial New', 'serif'], 
-				'canela': ['Canela', 'serif'],
-				'satoshi': ['Satoshi', 'sans-serif'],
-				'inter': ['Inter', 'sans-serif'],
-				'space-grotesk': ['Space Grotesk', 'sans-serif'],
+				'editorial': ['Editorial New', 'Georgia', 'serif'], 
+				'canela': ['Canela', 'Georgia', 'serif'],
+				'satoshi': ['Satoshi', 'system-ui', 'sans-serif'],
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
+				'space-grotesk': ['Space Grotesk', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
