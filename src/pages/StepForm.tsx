@@ -914,9 +914,8 @@ const StepForm: React.FC = () => {
                       borderRadius: form.styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
                     }}
                      onClick={() => {
-                       if (currentStep.buttonAction) {
-                         goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
-                       }
+                       // Seguir o mesmo padrão dos botões de pergunta
+                       goToNextStep(currentStep.buttonAction, currentStep.buttonActionType);
                      }}
                   >
                     {currentStep.buttonText || 'Continuar'}
