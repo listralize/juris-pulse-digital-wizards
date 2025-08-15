@@ -162,7 +162,7 @@ const FloatingFooter: React.FC = () => {
     <>
       {/* Desktop Only Footer */}
       <footer 
-        className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 z-50 
+        className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 
           w-[95%] max-w-4xl mx-auto rounded-xl backdrop-blur-md
           ${isDark 
             ? 'bg-neutral-950/60 border border-neutral-800/60 text-white shadow-xl' 
@@ -171,7 +171,8 @@ const FloatingFooter: React.FC = () => {
           transition-all duration-300 hover:shadow-2xl`}
         style={{
           backdropFilter: 'blur(15px)',
-          WebkitBackdropFilter: 'blur(15px)'
+          WebkitBackdropFilter: 'blur(15px)',
+          zIndex: 999998
         }}
       >
         <div className="px-5 py-4">

@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: false, // Disable source maps for production
-    minify: 'terser',
+    minify: mode === 'production' ? 'terser' : false, // Only use terser in production
     rollupOptions: {
       output: {
         manualChunks: {
@@ -40,12 +40,12 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
-    terserOptions: {
+    terserOptions: mode === 'production' ? {
       compress: {
         drop_console: true, // Remove console.log from production
         drop_debugger: true,
       },
-    },
+    } : {},
   },
   base: "./",
   define: {

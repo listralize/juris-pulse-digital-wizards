@@ -64,7 +64,7 @@
     "sonner": "^2.0.4",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "terser": "^5.43.1",
+    "terser": "^5.35.0",
     "vaul": "^0.9.3",
     "xlsx": "^0.18.5",
     "zod": "^3.23.8"

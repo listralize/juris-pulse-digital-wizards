@@ -70,7 +70,7 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
 
   return (
     <>
-      <nav className={`md:hidden fixed top-0 left-0 right-0 z-[9999] ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} transition-colors duration-300`} style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'auto' }}>
+      <nav className={`md:hidden fixed top-0 left-0 right-0 ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'} transition-colors duration-300`} style={{ position: 'fixed', zIndex: 999999, pointerEvents: 'auto' }}>
         <div className="px-4 h-16 flex items-center justify-between">
           {/* Left side - Logo */}
           <div className="flex items-center">
@@ -131,7 +131,7 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className={`${isDark ? 'bg-black border-neutral-800' : 'bg-white border-neutral-200'} border-t`}>
+          <div className={`${isDark ? 'bg-black border-neutral-800' : 'bg-white border-neutral-200'} border-t`} style={{ zIndex: 999999, position: 'relative' }}>
             <div className="px-4 py-4 space-y-2">
               <button
                 onClick={() => handleNavigation('/')}
