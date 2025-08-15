@@ -284,16 +284,16 @@ export function LinkTreePreview({
               {linkTree.avatar_url && (
                 <div className="text-center">
                   <div 
-                    className="mx-auto overflow-hidden rounded-full border-4 border-white/20 backdrop-blur-sm"
+                    className="mx-auto overflow-hidden"
                     style={{
-                      width: `${linkTree.avatar_size || '128'}px`,
-                      height: `${linkTree.avatar_size || '128'}px`
+                      width: `${linkTree.avatar_size ? Number(linkTree.avatar_size) * 0.8 : 96}px`,
+                      height: `${linkTree.avatar_size ? Number(linkTree.avatar_size) * 0.8 : 96}px`
                     }}
                   >
                     <img 
                       src={linkTree.avatar_url} 
                       alt={linkTree.title || 'Avatar'} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -398,16 +398,16 @@ export function LinkTreePreview({
         {/* Header */}
         {linkTree.avatar_url && (
           <div 
-            className="mx-auto overflow-hidden rounded-full" 
+            className="mx-auto overflow-hidden" 
             style={{
-              width: `${linkTree.avatar_size || '128'}px`,
-              height: `${linkTree.avatar_size || '128'}px`
+              width: `${linkTree.avatar_size ? Number(linkTree.avatar_size) * 0.8 : 96}px`,
+              height: `${linkTree.avatar_size ? Number(linkTree.avatar_size) * 0.8 : 96}px`
             }}
           >
             <img 
               src={linkTree.avatar_url} 
               alt={linkTree.title || 'Avatar'} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
