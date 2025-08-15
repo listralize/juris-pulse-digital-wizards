@@ -12,6 +12,7 @@ import {
   useSensor,
   useSensors,
   closestCenter,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -19,6 +20,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {
+  useDroppable,
+} from '@dnd-kit/core';
 
 interface Lead {
   id: string;
@@ -107,6 +111,12 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
     const leadId = active.id as string;
     const newStatus = over.id as string;
 
+    // Verifica se foi solto em uma coluna válida
+    const validStatuses = ['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'];
+    if (!validStatuses.includes(newStatus)) {
+      return;
+    }
+
     // Encontrar o lead e atualizar o status
     const lead = filteredLeads.find(l => l.id === leadId);
     if (lead) {
@@ -170,6 +180,24 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
             <Badge variant="destructive" className="text-xs">Urgente</Badge>
           )}
         </div>
+      </div>
+    );
+  };
+
+  // Componente para coluna droppable
+  const DroppableColumn = ({ status, children }: { status: string; children: React.ReactNode }) => {
+    const { setNodeRef, isOver } = useDroppable({
+      id: status,
+    });
+
+    return (
+      <div
+        ref={setNodeRef}
+        className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4 ${
+          isOver ? 'bg-blue-50/50 border-blue-300' : ''
+        }`}
+      >
+        {children}
       </div>
     );
   };
@@ -239,7 +267,7 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
             const leadIds = statusLeads.map(lead => lead.id);
             
             return (
-              <div key={status} id={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
+              <DroppableColumn key={status} status={status}>
                 <h3 className={`font-semibold mb-3 capitalize ${isDark ? 'text-white' : 'text-black'}`}>
                   {status} ({allStatusLeads.length})
                 </h3>
@@ -250,7 +278,7 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
                     ))}
                   </div>
                 </SortableContext>
-              </div>
+              </DroppableColumn>
             );
           })}
         </div>
