@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useIsMobile } from '../hooks/use-mobile';
 
 const GlobalVideoBackground = () => {
-  const isMobile = useIsMobile();
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
 
@@ -23,7 +21,11 @@ const GlobalVideoBackground = () => {
 
         if (settings?.team_background_video) {
           setVideoUrl(settings.team_background_video);
-          setVideoEnabled(settings.team_video_enabled || false);
+          setVideoEnabled(settings.team_video_enabled !== false); // Default to true if not explicitly false
+          console.log('✅ Vídeo configurado:', {
+            url: settings.team_background_video,
+            enabled: settings.team_video_enabled
+          });
         }
       } catch (error) {
         console.error('❌ Erro ao carregar vídeo:', error);
@@ -40,7 +42,11 @@ const GlobalVideoBackground = () => {
       
       if (team_background_video) {
         setVideoUrl(team_background_video);
-        setVideoEnabled(team_video_enabled || false);
+        setVideoEnabled(team_video_enabled !== false);
+        console.log('🔄 Configurações de vídeo atualizadas:', {
+          url: team_background_video,
+          enabled: team_video_enabled
+        });
       }
     };
 
@@ -50,8 +56,15 @@ const GlobalVideoBackground = () => {
     };
   }, []);
 
-  // Só renderizar se o vídeo estiver habilitado e tiver uma URL
-  if (!videoEnabled || !videoUrl) {
+  // Debug: sempre mostrar se há URL
+  console.log('🎬 GlobalVideoBackground estado:', {
+    videoEnabled,
+    videoUrl,
+    shouldRender: videoUrl && videoEnabled
+  });
+
+  // Renderizar se houver URL (remover condição de enabled para debug)
+  if (!videoUrl) {
     return null;
   }
 
@@ -83,14 +96,17 @@ const GlobalVideoBackground = () => {
         onError={(e) => console.error('❌ Erro no vídeo global:', e)}
         onLoadedMetadata={(e) => {
           const video = e.target as HTMLVideoElement;
+          console.log('📹 Metadados do vídeo carregados');
           // Force play on mobile
           const playPromise = video.play();
           if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              // Mobile might require user interaction first
-              console.log('🎥 Autoplay falhou no mobile, tentando reproduzir novamente');
-              setTimeout(() => video.play(), 1000);
-            });
+            playPromise
+              .then(() => console.log('▶️ Vídeo reproduzindo com sucesso'))
+              .catch(() => {
+                // Mobile might require user interaction first
+                console.log('🎥 Autoplay falhou no mobile, tentando reproduzir novamente');
+                setTimeout(() => video.play(), 1000);
+              });
           }
         }}
       />
