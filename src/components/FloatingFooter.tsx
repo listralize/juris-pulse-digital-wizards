@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { Mail, MapPin, X } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
 
 const FloatingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -35,8 +36,6 @@ const FloatingFooter: React.FC = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const { supabase } = await import('../integrations/supabase/client');
-        
         // Carregar dados do footer_info
         const { data: footer } = await supabase
           .from('footer_info')

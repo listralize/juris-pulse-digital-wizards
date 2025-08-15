@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MessageSquare } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
 
 const WhatsAppButton = () => {
   const [whatsappNumber, setWhatsappNumber] = useState('5562994594496');
@@ -9,8 +10,6 @@ const WhatsAppButton = () => {
   useEffect(() => {
     const loadWhatsAppNumber = async () => {
       try {
-        const { supabase } = await import('../integrations/supabase/client');
-        
         // Buscar dados da contact_info
         const { data: contact } = await supabase
           .from('contact_info')

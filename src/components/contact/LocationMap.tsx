@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
+import { supabase } from '../../integrations/supabase/client';
 
 const LocationMap = () => {
   const { theme } = useTheme();
@@ -46,7 +47,6 @@ const LocationMap = () => {
     const loadMapConfig = async () => {
       try {
         console.log('🗺️ LocationMap: Carregando dados do mapa...');
-        const { supabase } = await import('../../integrations/supabase/client');
         
         // Buscar dados da contact_info que pode ter mapEmbedUrl
         const { data: contact } = await supabase

@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => ({
     target: 'esnext',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      external: [],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
