@@ -22,19 +22,37 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: false,
-    minify: 'terser',
+    minify: 'esbuild', // Changed from terser to esbuild to avoid hoisting issues
     target: 'es2020',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         format: 'es',
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          supabase: ['@supabase/supabase-js'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          charts: ['recharts'],
-          utils: ['clsx', 'class-variance-authority', 'tailwind-merge'],
+        generatedCode: 'es2015', // Ensure proper code generation
+        manualChunks: (id) => {
+          // Better chunk splitting to avoid circular dependencies
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            return 'vendor';
+          }
+          // Keep related modules together
+          if (id.includes('/hooks/')) {
+            return 'hooks';
+          }
+          if (id.includes('/components/')) {
+            return 'components';
+          }
+          if (id.includes('/pages/')) {
+            return 'pages';
+          }
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name].[hash][extname]`;

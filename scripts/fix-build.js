@@ -21,13 +21,49 @@ if (fs.existsSync(distPath)) {
   // Check if assets folder exists and has JS files
   const assetsPath = path.join(distPath, 'assets');
   if (fs.existsSync(assetsPath)) {
-    const files = fs.readdirSync(assetsPath);
-    const jsFiles = files.filter(file => file.endsWith('.js'));
+    const walkDir = (dir, callback) => {
+      const files = fs.readdirSync(dir);
+      files.forEach(file => {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+          walkDir(filePath, callback);
+        } else {
+          callback(filePath);
+        }
+      });
+    };
+    
+    let jsFiles = [];
+    let cssFiles = [];
+    
+    walkDir(assetsPath, (filePath) => {
+      if (filePath.endsWith('.js')) jsFiles.push(filePath);
+      if (filePath.endsWith('.css')) cssFiles.push(filePath);
+    });
+    
     console.log(`✅ Found ${jsFiles.length} JavaScript files in assets`);
+    console.log(`✅ Found ${cssFiles.length} CSS files in assets`);
     
     if (jsFiles.length === 0) {
       console.log('❌ No JavaScript files found in assets folder!');
       process.exit(1);
+    }
+    
+    // Check index.html references
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      const indexContent = fs.readFileSync(indexPath, 'utf8');
+      const hasJSReferences = jsFiles.some(jsFile => {
+        const relativePath = path.relative(distPath, jsFile).replace(/\\/g, '/');
+        return indexContent.includes(relativePath);
+      });
+      
+      if (hasJSReferences) {
+        console.log('✅ Index.html correctly references JavaScript files');
+      } else {
+        console.log('⚠️ Index.html may not reference JavaScript files correctly');
+      }
     }
   }
   

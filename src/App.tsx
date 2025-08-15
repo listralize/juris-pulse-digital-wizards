@@ -5,7 +5,9 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// Marketing hooks removed for production build
+
+// Debug logging for production build
+console.log('🔧 App component loading...');
 
 // Pages
 import Index from './pages/Index';
@@ -36,10 +38,22 @@ import Consumidor from './pages/areas/Consumidor';
 import Constitucional from './pages/areas/Constitucional';
 import Administrativo from './pages/areas/Administrativo';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function App() {
-  // Production-ready App component without marketing scripts for build stability
+  // Debug logging
+  console.log('📱 App component initialized');
+  
+  useEffect(() => {
+    console.log('🎯 App useEffect hook executed');
+  }, []);
   
   return (
     <QueryClientProvider client={queryClient}>
