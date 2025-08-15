@@ -19,8 +19,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist",
     assetsDir: "assets",
-    sourcemap: false, // Disable source maps for production
-    minify: mode === 'production' ? 'terser' : false, // Only use terser in production
+    sourcemap: false,
+    minify: 'terser',
+    target: 'es2015',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -28,27 +29,33 @@ export default defineConfig(({ mode }) => ({
           router: ['react-router-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
         },
-        assetFileNames: (assetInfo) => {
-          if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
-          let extType = assetInfo.name.split('.').at(1) || '';
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
-            extType = 'img';
-          }
-          return `assets/${extType}/[name]-[hash][extname]`;
-        },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js',
       },
     },
-    terserOptions: mode === 'production' ? {
+    terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log from production
+        drop_console: false, // Keep console for debugging
         drop_debugger: true,
+        passes: 2,
       },
-    } : {},
+      mangle: {
+        safari10: true,
+      },
+      format: {
+        safari10: true,
+      },
+    },
   },
   base: "./",
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
+  },
+  esbuild: {
+    target: 'es2015',
+    supported: {
+      'top-level-await': false,
+    },
   },
 }));

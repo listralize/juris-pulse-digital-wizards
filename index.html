@@ -16,9 +16,9 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="/assets/logo.png" />
 
-    <!-- Security: Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.gpteng.co https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://www.googleadservices.com 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://www.facebook.com https://www.google-analytics.com; font-src 'self' https://api.fontshare.com https://fonts.gstatic.com data:; connect-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https://cdn.gpteng.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://graph.facebook.com https://googleads.g.doubleclick.net https://www.googleadservices.com https:; media-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https: blob: data:; frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://*.youtube.com https://player.vimeo.com https://www.googletagmanager.com; child-src 'self' https://www.google.com https://www.googletagmanager.com; base-uri 'self'; form-action 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co; upgrade-insecure-requests">
-    <meta name="referrer" content="no-referrer" />
+    <!-- Security: Content Security Policy (Relaxed for production) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https:; media-src 'self' https: blob: data:; frame-src 'self' https:; child-src 'self' https:;">
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <!-- Custom Fonts -->
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
@@ -31,67 +31,21 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Dev Tools Protection -->
+    <!-- Production Ready Script -->
     <script>
-      // Disable right-click context menu
-      document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-      });
-
-      // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-      document.addEventListener('keydown', function(e) {
-        // F12
-        if (e.keyCode === 123) {
-          e.preventDefault();
-          return false;
-        }
-        // Ctrl+Shift+I
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-          e.preventDefault();
-          return false;
-        }
-        // Ctrl+Shift+J
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-          e.preventDefault();
-          return false;
-        }
-        // Ctrl+U
-        if (e.ctrlKey && e.keyCode === 85) {
-          e.preventDefault();
-          return false;
-        }
-        // Ctrl+Shift+C
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-          e.preventDefault();
-          return false;
-        }
-      });
-
-      // Detect DevTools
-      let devtools = {
-        open: false,
-        orientation: null
-      };
+      // Basic browser compatibility check
+      if (!window.Promise || !window.Map || !window.Set) {
+        document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;">Seu navegador não é compatível. Atualize para continuar.</div>';
+      }
       
-      setInterval(function() {
-        if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
-          if (!devtools.open) {
-            devtools.open = true;
-            console.clear();
-            console.log('%cAcesso não autorizado!', 'color: red; font-size: 30px; font-weight: bold;');
-            // Optional: redirect or take action
-            // window.location.href = 'about:blank';
-          }
-        } else {
-          devtools.open = false;
+      // Ensure root element exists
+      window.addEventListener('DOMContentLoaded', function() {
+        if (!document.getElementById('root')) {
+          const root = document.createElement('div');
+          root.id = 'root';
+          document.body.appendChild(root);
         }
-      }, 500);
-
-      // Clear console periodically
-      setInterval(function() {
-        console.clear();
-      }, 1000);
+      });
     </script>
   </body>
 </html>

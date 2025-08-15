@@ -42,9 +42,10 @@ exec('node scripts/clean-production.js', (error, stdout, stderr) => {
   
   // Step 3: Build
   console.log('🔨 Construindo projeto...');
-  exec('npm run build', (buildError, buildStdout, buildStderr) => {
+  exec('npm run build -- --mode production', (buildError, buildStdout, buildStderr) => {
     if (buildError) {
       console.error('❌ Erro no build:', buildError);
+      console.error('stderr:', buildStderr);
       return;
     }
     console.log(buildStdout);
@@ -88,10 +89,19 @@ exec('node scripts/clean-production.js', (error, stdout, stderr) => {
       cleanDistFiles(distPath);
     }
     
-    console.log('🎉 Build de produção concluído com sucesso!');
-    console.log('📁 Arquivos prontos na pasta /dist');
-    console.log('🛡️ Proteções contra F12 ativadas');
-    console.log('🔒 Referências ao Lovable removidas');
-    console.log('🏷️ Assets organizados em /assets');
+    // Execute finalize-build if it exists
+    exec('node scripts/finalize-build.js', (finalizeError, finalizeStdout) => {
+      if (finalizeError) {
+        console.warn('⚠️ Finalize script not found, skipping...');
+      } else {
+        console.log(finalizeStdout);
+      }
+      
+      console.log('🎉 Build de produção concluído com sucesso!');
+      console.log('📁 Arquivos prontos na pasta /dist');
+      console.log('🔒 Referências ao Lovable removidas'); 
+      console.log('🏷️ Assets organizados em /assets');
+      console.log('🚀 Pronto para upload na Hostinger!');
+    });
   });
 });
