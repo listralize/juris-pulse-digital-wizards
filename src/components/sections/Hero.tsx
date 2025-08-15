@@ -187,30 +187,7 @@ const Hero = () => {
     }));
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Vídeo de fundo - Z-INDEX MUITO BAIXO e limitado à seção */}
-      {heroVideoEnabled && heroVideoUrl && (
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ 
-            zIndex: -100,
-            pointerEvents: 'none',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0
-          }}
-          onLoadStart={() => console.log('🎥 Hero: Vídeo iniciando carregamento')}
-          onCanPlay={() => console.log('🎥 Hero: Vídeo pode reproduzir')}
-          onError={(e) => console.error('🎥 Hero: Erro no vídeo:', e)}
-        >
-          <source src={heroVideoUrl} type="video/mp4" />
-        </video>
-      )}
+      
       
       {/* Background Layer Neural */}
       <div className="absolute inset-0 w-full h-full" style={{ zIndex: -10, pointerEvents: 'none' }}>
