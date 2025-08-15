@@ -6,7 +6,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 import Navbar from '../components/navbar';
 import FloatingFooter from '../components/FloatingFooter';
-import LegalPopup from '../components/legal/LegalPopup';
+
 import SectionsContainer from '../components/SectionsContainer';
 import { TestimonialCarousel } from '../components/TestimonialCarousel';
 import { useTheme } from '../components/ThemeProvider';
@@ -18,7 +18,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 const Index = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [showLegalPopup, setShowLegalPopup] = useState(false);
+  
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   
@@ -71,19 +71,6 @@ const Index = () => {
     }
   }, [isMobile, isTablet]);
   
-  // Verificar se os termos já foram aceitos e mostrar popup se necessário
-  useEffect(() => {
-    const checkTermsAcceptance = () => {
-      const accepted = localStorage.getItem('legal-terms-accepted');
-      if (!accepted) {
-        setTimeout(() => {
-          setShowLegalPopup(true);
-        }, 3000);
-      }
-    };
-
-    checkTermsAcceptance();
-  }, []);
   
   return (
     <div 
@@ -130,11 +117,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Popup Legal discreto */}
-      <LegalPopup 
-        isOpen={showLegalPopup} 
-        onClose={() => setShowLegalPopup(false)} 
-      />
     </div>
   );
 };

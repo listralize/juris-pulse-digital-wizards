@@ -746,13 +746,13 @@ const StepForm: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen py-8 px-4 overflow-x-hidden pb-24"
-      style={{ 
+      className="min-h-screen py-8 px-4 overflow-hidden pb-24"
+      style={{
         backgroundColor: form.styles.background_color || '#ffffff',
         color: form.styles.text_color || '#000000'
       }}
     >
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto w-full">
         {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
           <div 
