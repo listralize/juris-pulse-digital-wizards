@@ -188,28 +188,6 @@ const Hero = () => {
   };
   return <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
       
-      {/* Vídeo de fundo APENAS PARA DESKTOP */}
-      {!isMobile && !isTablet && heroVideoEnabled && heroVideoUrl && (
-        <div className="absolute inset-0 w-full h-full overflow-hidden" style={{ zIndex: -2 }}>
-          <video
-            src={heroVideoUrl}
-            className="w-full h-full object-cover opacity-50"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            style={{ 
-              minWidth: '100%',
-              minHeight: '100%',
-              objectFit: 'cover'
-            }}
-            onLoadStart={() => console.log('🎥 Hero Desktop - Vídeo iniciando')}
-            onCanPlay={() => console.log('✅ Hero Desktop - Vídeo pronto')}
-            onError={(e) => console.error('❌ Hero Desktop - Erro no vídeo:', e)}
-          />
-        </div>
-      )}
       
       {/* Background Layer Neural */}
       <div className="absolute inset-0 w-full h-full" style={{ zIndex: -10, pointerEvents: 'none' }}>

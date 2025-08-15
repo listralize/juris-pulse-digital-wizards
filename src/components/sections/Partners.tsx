@@ -229,6 +229,49 @@ const Partners = () => {
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
+      {/* Vídeo de fundo da página TODA */}
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
+        zIndex: -1
+      }}>
+        <video
+          id="team-background-video"
+          src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
+          className="w-full h-full object-cover opacity-50"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="true"
+          x5-video-orientation="portraint"
+          style={{ 
+            minWidth: '100vw',
+            minHeight: '100vh',
+            objectFit: 'cover'
+          }}
+          onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
+          onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
+          onError={(e) => console.error('❌ Erro no vídeo:', e)}
+          onLoadedMetadata={(e) => {
+            const video = e.target as HTMLVideoElement;
+            // Force play on mobile
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                // Mobile might require user interaction first
+                console.log('🎥 Autoplay falhou, tentando reproduzir novamente');
+                setTimeout(() => video.play(), 1000);
+              });
+            }
+          }}
+        />
+      </div>
+      
+      
+      
       
       <div className="team-responsive-container w-full relative z-10" style={{
       marginTop: '-100px'

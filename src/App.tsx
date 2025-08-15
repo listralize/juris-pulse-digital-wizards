@@ -6,7 +6,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useDirectMarketingScripts } from './hooks/useDirectMarketingScripts';
-import MobileVideoBackground from './components/MobileVideoBackground';
 
 // Pages
 import Index from './pages/Index';
@@ -99,7 +98,6 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
-            <MobileVideoBackground />
             <div className="App">
               <Routes>
                 {/* Main pages */}
