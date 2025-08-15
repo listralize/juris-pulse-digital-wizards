@@ -310,7 +310,7 @@ export const useGlobalMarketingScripts = () => {
   };
 
   const loadGoogleTagManager = () => {
-    const gtmId = 'GTM-N7TDJGMR';
+    const gtmId = 'GTM-PL22PJ6V';
     console.log('🏷️ Carregando Google Tag Manager:', gtmId);
     
     // Inicializar dataLayer

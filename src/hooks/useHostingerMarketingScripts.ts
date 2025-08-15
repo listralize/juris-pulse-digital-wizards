@@ -43,8 +43,10 @@ export const useHostingerMarketingScripts = () => {
       console.log('🔧 [HOSTINGER] Ambiente de desenvolvimento detectado - scripts não carregados');
     }
     
-    // Sempre configurar debug para verificar carregamento
-    setupDebugLogging();
+    // Aguardar scripts carregarem antes do debug
+    setTimeout(() => {
+      setupDebugLogging();
+    }, 2000);
   };
 
   const setupHostingerFacebookPixel = () => {
@@ -98,7 +100,7 @@ export const useHostingerMarketingScripts = () => {
   };
 
   const setupHostingerGTM = () => {
-    const gtmId = 'GTM-N7TDJGMR';
+    const gtmId = 'GTM-PL22PJ6V';
     console.log('🏷️ [HOSTINGER] Configurando Google Tag Manager:', gtmId);
     
     // Inicializar dataLayer primeiro
