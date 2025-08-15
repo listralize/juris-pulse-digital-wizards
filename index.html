@@ -11,10 +11,10 @@
     <meta property="og:title" content="Serafim & Trombela Advocacia" />
     <meta property="og:description" content="Soluções Jurídicas Inovadoras. Suas questões nas mãos de quem entende." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" />
+    <meta property="og:image" content="/assets/logo.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" />
+    <meta name="twitter:image" content="/assets/logo.png" />
 
     <!-- Security: Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.gpteng.co https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://www.googleadservices.com 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://www.facebook.com https://www.google-analytics.com; font-src 'self' https://api.fontshare.com https://fonts.gstatic.com data:; connect-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https://cdn.gpteng.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://graph.facebook.com https://googleads.g.doubleclick.net https://www.googleadservices.com https:; media-src 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co https: blob: data:; frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://*.youtube.com https://player.vimeo.com https://www.googletagmanager.com; child-src 'self' https://www.google.com https://www.googletagmanager.com; base-uri 'self'; form-action 'self' https://hmfsvccbyxhdwmrgcyff.supabase.co; upgrade-insecure-requests">
@@ -24,13 +24,74 @@
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/lovable-uploads/2425f737-7a9b-4742-9ef6-655d495a7ea9.png" />
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
   </head>
 
   <body>
     <div id="root"></div>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Dev Tools Protection -->
+    <script>
+      // Disable right-click context menu
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      });
+
+      // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.keyCode === 123) {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl+U
+        if (e.ctrlKey && e.keyCode === 85) {
+          e.preventDefault();
+          return false;
+        }
+        // Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // Detect DevTools
+      let devtools = {
+        open: false,
+        orientation: null
+      };
+      
+      setInterval(function() {
+        if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+          if (!devtools.open) {
+            devtools.open = true;
+            console.clear();
+            console.log('%cAcesso não autorizado!', 'color: red; font-size: 30px; font-weight: bold;');
+            // Optional: redirect or take action
+            // window.location.href = 'about:blank';
+          }
+        } else {
+          devtools.open = false;
+        }
+      }, 500);
+
+      // Clear console periodically
+      setInterval(function() {
+        console.clear();
+      }, 1000);
+    </script>
   </body>
 </html>

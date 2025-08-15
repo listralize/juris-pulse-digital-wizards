@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { ServicePage } from '../types/adminTypes';
 import { defaultServicePages } from '../data/defaultServicePages';
 
-const STORAGE_KEY = 'lovable_service_pages';
+const STORAGE_KEY = 'listralize_service_pages';
 
 export const useServicePageData = (serviceId?: string) => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);

@@ -143,8 +143,8 @@ export const useGlobalMarketingScripts = () => {
       ${customCode || ''}
       
       // Flag para debug em produção
-      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com');
-      if (isProduction || window.location.hostname.includes('lovableproject.com')) {
+      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('listralize.com');
+      if (isProduction || window.location.hostname.includes('listralize.com')) {
         console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
         console.log('✅ [PROD] Pixel ID configurado:', '${pixelId}');
       }
@@ -304,7 +304,7 @@ export const useGlobalMarketingScripts = () => {
       fbq('track', 'PageView');
       
       // Flag para debug em produção
-      if (window.location.hostname !== 'localhost' && window.location.hostname.includes('lovableproject.com')) {
+      if (window.location.hostname !== 'localhost' && window.location.hostname.includes('listralize.com')) {
         console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
       }
     `;
