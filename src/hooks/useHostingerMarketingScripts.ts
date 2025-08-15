@@ -15,23 +15,31 @@ export const useHostingerMarketingScripts = () => {
   const initializeMarketingScripts = () => {
     console.log('🔧 [HOSTINGER] Configurando scripts de marketing...');
     
-    // Detectar se é Hostinger
-    const isHostinger = window.location.hostname.includes('.hostinger') || 
-                       window.location.hostname.includes('.000.pe') ||
-                       !window.location.hostname.includes('localhost') &&
-                       !window.location.hostname.includes('lovable.app');
+    // Detectar se é Hostinger - melhor detecção
+    const hostname = window.location.hostname;
+    const isHostinger = hostname.includes('.hostinger') || 
+                       hostname.includes('.000.pe') ||
+                       hostname.includes('.hostingersite.com') ||
+                       hostname.includes('.hstgr.io') ||
+                       (!hostname.includes('localhost') && 
+                        !hostname.includes('lovable.app') && 
+                        !hostname.includes('127.0.0.1'));
     
     console.log('🌍 [HOSTINGER] Detectado ambiente:', {
-      hostname: window.location.hostname,
+      hostname: hostname,
       isHostinger,
+      isProduction: window.location.protocol === 'https:',
       userAgent: navigator.userAgent.substring(0, 100)
     });
 
-    // Configurar scripts padrão para Hostinger
-    if (isHostinger) {
+    // Configurar scripts sempre (tanto para Hostinger quanto para testes)
+    if (isHostinger || window.location.protocol === 'https:') {
+      console.log('🚀 [HOSTINGER] Inicializando scripts de marketing...');
       setupHostingerFacebookPixel();
       setupHostingerGTM();
       setupHostingerGA();
+    } else {
+      console.log('🔧 [HOSTINGER] Ambiente de desenvolvimento detectado - scripts não carregados');
     }
     
     // Sempre configurar debug para verificar carregamento

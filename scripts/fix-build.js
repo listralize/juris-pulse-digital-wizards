@@ -1,74 +1,87 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-console.log('🔧 Fixing build configuration...');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Fix dist folder structure and MIME types
+console.log('🔧 Verificando e corrigindo build...');
+
+// Verificar se dist existe
 const distPath = path.join(process.cwd(), 'dist');
+if (!fs.existsSync(distPath)) {
+  console.error('❌ Pasta dist não encontrada!');
+  process.exit(1);
+}
 
-if (fs.existsSync(distPath)) {
-  // Copy .htaccess to dist if it exists
-  const htaccessSource = path.join(process.cwd(), 'public', '.htaccess');
-  const htaccessDest = path.join(distPath, '.htaccess');
+// Copiar .htaccess se não existir
+const htaccessSource = path.join(process.cwd(), 'public', '.htaccess');
+const htaccessDest = path.join(distPath, '.htaccess');
+
+if (fs.existsSync(htaccessSource) && !fs.existsSync(htaccessDest)) {
+  fs.copyFileSync(htaccessSource, htaccessDest);
+  console.log('✅ .htaccess copiado para dist');
+}
+
+// Função para andar recursivamente pelos diretórios
+function walkDir(dir, fileList = []) {
+  const files = fs.readdirSync(dir);
+  files.forEach(file => {
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      walkDir(filePath, fileList);
+    } else {
+      fileList.push(filePath);
+    }
+  });
+  return fileList;
+}
+
+// Verificar assets
+const assetsPath = path.join(distPath, 'assets');
+if (fs.existsSync(assetsPath)) {
+  const allFiles = walkDir(assetsPath);
+  const jsFiles = allFiles.filter(file => file.endsWith('.js'));
+  const cssFiles = allFiles.filter(file => file.endsWith('.css'));
   
-  if (fs.existsSync(htaccessSource)) {
-    fs.copyFileSync(htaccessSource, htaccessDest);
-    console.log('✅ .htaccess copied to dist folder');
+  console.log('📦 Assets encontrados:');
+  console.log(`  - ${jsFiles.length} arquivos JS`);
+  console.log(`  - ${cssFiles.length} arquivos CSS`);
+  
+  if (jsFiles.length === 0) {
+    console.error('❌ Nenhum arquivo JS encontrado em assets!');
+    process.exit(1);
   }
   
-  // Check if assets folder exists and has JS files
-  const assetsPath = path.join(distPath, 'assets');
-  if (fs.existsSync(assetsPath)) {
-    const walkDir = (dir, callback) => {
-      const files = fs.readdirSync(dir);
-      files.forEach(file => {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
-        if (stat.isDirectory()) {
-          walkDir(filePath, callback);
-        } else {
-          callback(filePath);
-        }
-      });
-    };
+  // Verificar index.html
+  const indexPath = path.join(distPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    const indexContent = fs.readFileSync(indexPath, 'utf8');
     
-    let jsFiles = [];
-    let cssFiles = [];
+    // Verificar se todos os JS estão referenciados
+    const jsFilenames = jsFiles.map(file => path.basename(file));
+    const referencedJs = jsFilenames.filter(filename => indexContent.includes(filename));
     
-    walkDir(assetsPath, (filePath) => {
-      if (filePath.endsWith('.js')) jsFiles.push(filePath);
-      if (filePath.endsWith('.css')) cssFiles.push(filePath);
-    });
+    console.log(`📄 index.html referencia ${referencedJs.length}/${jsFilenames.length} arquivos JS`);
     
-    console.log(`✅ Found ${jsFiles.length} JavaScript files in assets`);
-    console.log(`✅ Found ${cssFiles.length} CSS files in assets`);
-    
-    if (jsFiles.length === 0) {
-      console.log('❌ No JavaScript files found in assets folder!');
+    if (referencedJs.length === 0) {
+      console.error('❌ index.html não referencia nenhum arquivo JS!');
       process.exit(1);
     }
     
-    // Check index.html references
-    const indexPath = path.join(distPath, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      const indexContent = fs.readFileSync(indexPath, 'utf8');
-      const hasJSReferences = jsFiles.some(jsFile => {
-        const relativePath = path.relative(distPath, jsFile).replace(/\\/g, '/');
-        return indexContent.includes(relativePath);
-      });
-      
-      if (hasJSReferences) {
-        console.log('✅ Index.html correctly references JavaScript files');
-      } else {
-        console.log('⚠️ Index.html may not reference JavaScript files correctly');
-      }
+    const missingRefs = jsFilenames.filter(filename => !indexContent.includes(filename));
+    if (missingRefs.length > 0) {
+      console.warn('⚠️ Arquivos JS não referenciados:', missingRefs);
     }
+    
+  } else {
+    console.error('❌ index.html não encontrado!');
+    process.exit(1);
   }
-  
-  console.log('✅ Build verification complete');
 } else {
-  console.log('❌ Dist folder not found. Run build first.');
+  console.error('❌ Pasta assets não encontrada!');
   process.exit(1);
 }
+
+console.log('✅ Verificação do build concluída!');

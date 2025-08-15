@@ -728,6 +728,12 @@ const StepForm: React.FC = () => {
   }
 
   if (!form) {
+    console.error('🚨 Form não carregado. Debug:', {
+      slug,
+      hostname: window.location.hostname,
+      protocol: window.location.protocol,
+      pathname: window.location.pathname
+    });
     return (
       <StepFormLoader 
         title="Formulário não encontrado"
