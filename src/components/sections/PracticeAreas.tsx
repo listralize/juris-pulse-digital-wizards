@@ -21,11 +21,13 @@ const PracticeAreas = () => {
   const { categories: supabaseCategories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const isDark = theme === 'dark';
   const [isMobile, setIsMobile] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
 
-  // Detectar mobile
+  // Detectar mobile e touch
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
+      setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
     };
     
     checkMobile();
@@ -178,6 +180,9 @@ const PracticeAreas = () => {
       ref={sectionRef}
       className={`min-h-screen w-full py-8 md:py-16 relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{
+        // Z-index máximo para garantir clicabilidade no mobile
+        zIndex: isMobile ? 9999 : 10,
+        position: 'relative',
         // Permitir scroll vertical no mobile
         overflowY: isMobile ? 'auto' : 'hidden',
         maxHeight: isMobile ? 'none' : '100vh'
@@ -194,7 +199,7 @@ const PracticeAreas = () => {
         }}></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10 px-4 md:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto relative px-4 md:px-6 lg:px-8" style={{ zIndex: isMobile ? 9999 : 20 }}>
         {/* Container flexível para mobile e centralizado para desktop com ajuste de posição */}
         <div className={`${!isMobile ? 'h-screen flex flex-col justify-center' : 'py-8'}`} style={{ 
           marginTop: !isMobile ? '-100px' : '0' 
@@ -210,10 +215,14 @@ const PracticeAreas = () => {
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Grid Container - adaptativo para mobile */}
+          {/* Grid Container - adaptativo para mobile com z-index alto */}
           <div 
             ref={gridRef} 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full mx-auto"
+            style={{ 
+              zIndex: isMobile ? 9999 : 30,
+              position: 'relative'
+            }}
           >
             {practiceAreas.map((area, index) => {
               const IconComponent = area.icon;
@@ -224,9 +233,48 @@ const PracticeAreas = () => {
                   to={area.href}
                   className="group block focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current rounded-xl"
                   tabIndex={0}
+                  style={{
+                    // Z-index máximo para garantir clicabilidade no mobile
+                    zIndex: isMobile ? 99999 : 40,
+                    position: 'relative',
+                    // Melhorar área de toque no mobile
+                    minHeight: isMobile ? '44px' : 'auto',
+                    touchAction: 'manipulation'
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
+                      window.location.href = area.href;
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    // Melhorar responsividade no toque
+                    if (isMobile || isTouch) {
+                      e.currentTarget.style.transform = 'scale(0.98)';
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    // Restaurar escala após toque
+                    if (isMobile || isTouch) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }
+                  }}
+                  onClick={(e) => {
+                    // Garantir que o clique funcione no mobile
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (isMobile || isTouch) {
+                      // Feedback visual imediato
+                      const target = e.currentTarget;
+                      target.style.transform = 'scale(0.95)';
+                      
+                      // Navegar após pequeno delay para feedback
+                      setTimeout(() => {
+                        target.style.transform = 'scale(1)';
+                        window.location.href = area.href;
+                      }, 150);
+                    } else {
                       window.location.href = area.href;
                     }
                   }}
@@ -235,18 +283,24 @@ const PracticeAreas = () => {
                   <div className={`
                     relative h-32 lg:h-36 rounded-xl border transition-all duration-300 ease-out
                     hover:scale-[1.02] hover:-translate-y-1
+                    ${isMobile ? 'active:scale-[0.98] active:bg-opacity-80' : ''}
                     ${isDark 
                       ? 'bg-white/[0.15] border-white/[0.25] hover:bg-white/[0.20] hover:border-white/[0.35]' 
                       : 'bg-black/[0.15] border-black/[0.25] hover:bg-black/[0.20] hover:border-black/[0.35]'
                     }
                     backdrop-blur-sm overflow-hidden
-                  `}>
+                  `} style={{
+                    // Garantir que o card seja clicável
+                    pointerEvents: 'auto',
+                    cursor: 'pointer',
+                    zIndex: 1
+                  }}>
                     
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-black/[0.03] group-hover:to-black/[0.06] transition-all duration-300"></div>
                     
                     {/* Content */}
-                    <div className="relative z-10 p-4 lg:p-5 h-full flex flex-col">
+                    <div className="relative p-4 lg:p-5 h-full flex flex-col" style={{ zIndex: 2, pointerEvents: 'none' }}>
                       
                       {/* Top Row - Icon and Arrow */}
                       <div className="flex items-center justify-between mb-2">
