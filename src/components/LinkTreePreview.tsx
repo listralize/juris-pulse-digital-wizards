@@ -124,20 +124,45 @@ export function LinkTreePreview({
     }
   };
 
-  // Handler para eventos de toque e clique que funciona em mobile
-  const createClickHandler = (item: LinkTreeItem) => {
+  // Handler melhorado para mobile com link nativo  
+  const createMobileLink = (item: LinkTreeItem) => {
+    // Para formulários e vídeos, usar div com handler
+    if (item.item_type === 'form' || item.item_type === 'video' || item.item_type === 'text' || item.item_type === 'info') {
+      return {
+        as: 'div',
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          handleItemClick(item);
+        },
+        role: "button",
+        tabIndex: 0,
+        style: { 
+          cursor: 'pointer', 
+          WebkitTapHighlightColor: 'rgba(0,0,0,0.1)',
+          touchAction: 'manipulation'
+        }
+      };
+    }
+    
+    // Para links externos, usar elemento <a> nativo para melhor compatibilidade mobile
     return {
+      as: 'a',
+      href: item.url || '#',
+      target: '_blank',
+      rel: 'noopener noreferrer',
       onClick: (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        handleItemClick(item);
+        if (onItemClick) {
+          e.preventDefault();
+          onItemClick(item);
+        }
+        // Se não há onItemClick customizado, deixa o link nativo funcionar
       },
-      onTouchEnd: (e: React.TouchEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        handleItemClick(item);
-      },
-      style: { cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }
+      style: { 
+        cursor: 'pointer', 
+        WebkitTapHighlightColor: 'rgba(0,0,0,0.1)',
+        touchAction: 'manipulation',
+        textDecoration: 'none'
+      }
     };
   };
   const getThemeColors = () => {
@@ -454,14 +479,14 @@ export function LinkTreePreview({
         return (
           <div 
             key={item.id} 
-            {...createClickHandler(item)}
+            {...createMobileLink(item)}
             className={`${getButtonStyle(item)} cursor-pointer relative group min-h-[200px]`}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              ...createClickHandler(item).style
+              ...createMobileLink(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -488,7 +513,7 @@ export function LinkTreePreview({
     // Renderização padrão para outros tipos
     return <Button 
       key={item.id} 
-      {...createClickHandler(item)}
+      {...createMobileLink(item)}
       className={`${getButtonStyle(item)} border-0`} 
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
@@ -497,7 +522,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createClickHandler(item).style
+        ...createMobileLink(item).style
       }}>
         {getItemOverlay(item)}
         <div className="flex items-center gap-3 relative z-10">
@@ -556,13 +581,13 @@ export function LinkTreePreview({
           <Card 
             key={item.id} 
             className={`${getCardStyle(item)} min-h-[250px]`} 
-            {...createClickHandler(item)}
+            {...createMobileLink(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              ...createClickHandler(item).style
+              ...createMobileLink(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -590,7 +615,7 @@ export function LinkTreePreview({
     return <Card 
       key={item.id} 
       className={getCardStyle(item)} 
-      {...createClickHandler(item)}
+      {...createMobileLink(item)}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
@@ -599,7 +624,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createClickHandler(item).style
+        ...createMobileLink(item).style
       }}>
         {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10">
@@ -625,13 +650,13 @@ export function LinkTreePreview({
           <Card 
             key={item.id} 
             className={`${getCardStyle(item)} ${sizeClass}`}
-            {...createClickHandler(item)}
+            {...createMobileLink(item)}
             style={{
               backgroundImage: `url(${thumbnail})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              ...createClickHandler(item).style
+              ...createMobileLink(item).style
             }}
           >
             {/* Overlay escuro */}
@@ -659,7 +684,7 @@ export function LinkTreePreview({
     return <Card 
       key={item.id} 
       className={`${getCardStyle(item)} ${sizeClass}`} 
-      {...createClickHandler(item)}
+      {...createMobileLink(item)}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
@@ -668,7 +693,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createClickHandler(item).style
+        ...createMobileLink(item).style
       }}>
         {getItemOverlay(item)}
         <CardContent className="p-6 text-center relative z-10 h-full flex flex-col justify-center">
@@ -709,7 +734,7 @@ export function LinkTreePreview({
   const renderVideoItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={getCardStyle(item)} 
-    {...createClickHandler(item)}
+    {...createMobileLink(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -718,7 +743,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createClickHandler(item).style
+      ...createMobileLink(item).style
     }}>
       {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
@@ -737,7 +762,7 @@ export function LinkTreePreview({
   const renderMasonryItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={getCardStyle(item)} 
-    {...createClickHandler(item)}
+    {...createMobileLink(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -746,7 +771,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createClickHandler(item).style
+      ...createMobileLink(item).style
     }}>
       {getItemOverlay(item)}
       <CardContent className="p-4 relative z-10">
@@ -762,7 +787,7 @@ export function LinkTreePreview({
   const renderCarouselItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={`${getCardStyle(item)} flex-shrink-0 w-72 sm:w-80 snap-center break-inside-avoid mb-6`} 
-    {...createClickHandler(item)}
+    {...createMobileLink(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -771,7 +796,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createClickHandler(item).style
+      ...createMobileLink(item).style
     }}>
       {getItemOverlay(item)}
       <CardContent className="p-6 text-center relative z-10">
@@ -789,7 +814,7 @@ export function LinkTreePreview({
     return <Card 
       key={item.id} 
       className={`${getCardStyle(item)} ${isLarge ? 'lg:row-span-2' : ''}`} 
-      {...createClickHandler(item)}
+      {...createMobileLink(item)}
       style={{
         backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
         color: item.text_color,
@@ -798,7 +823,7 @@ export function LinkTreePreview({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        ...createClickHandler(item).style
+        ...createMobileLink(item).style
       }}>
       {getItemOverlay(item)}
         <CardContent className="p-6 relative z-10">
@@ -815,7 +840,7 @@ export function LinkTreePreview({
   const renderPortfolioItem = (item: LinkTreeItem) => <Card 
     key={item.id} 
     className={`${getCardStyle(item)} group`} 
-    {...createClickHandler(item)}
+    {...createMobileLink(item)}
     style={{
       backgroundColor: item.button_style === 'glassmorphism' ? 'rgba(255,255,255,0.1)' : item.background_color,
       color: item.text_color,
@@ -824,7 +849,7 @@ export function LinkTreePreview({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      ...createClickHandler(item).style
+      ...createMobileLink(item).style
     }}>
       <CardContent className="p-0">
         <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
