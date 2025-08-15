@@ -229,29 +229,8 @@ const Partners = () => {
       {/* Neural Background only in dark theme */}
       {isDark && <NeuralBackground />}
       
-      {/* Vídeo de fundo da página TODA */}
-      <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
-        zIndex: -1
-      }}>
-        <video
-          id="team-background-video"
-          src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
-          className="w-full h-full object-cover opacity-50"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          style={{ 
-            minWidth: '100vw',
-            minHeight: '100vh',
-            objectFit: 'cover'
-          }}
-          onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
-          onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
-          onError={(e) => console.error('❌ Erro no vídeo:', e)}
-        />
-      </div>
+      
+      
       
       
       <div className="team-responsive-container w-full relative z-10" style={{
