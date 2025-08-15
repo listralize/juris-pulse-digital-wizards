@@ -66,33 +66,9 @@ export class DevToolsProtection {
   }
   
   private static handleDevToolsDetected() {
-    // Clear page content or redirect
-    document.body.innerHTML = `
-      <div style="
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: Arial, sans-serif;
-        background: #000;
-        color: #fff;
-        text-align: center;
-      ">
-        <div>
-          <h1>Acesso Negado</h1>
-          <p>Ferramentas de desenvolvedor não são permitidas.</p>
-          <button onclick="window.location.reload()" style="
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-          ">Recarregar Página</button>
-        </div>
-      </div>
-    `;
+    // Just clear console instead of breaking the page
+    console.clear();
+    console.log('%cAcesso não autorizado!', 'color: red; font-size: 20px; font-weight: bold;');
   }
   
   private static disableKeyboardShortcuts() {
@@ -179,30 +155,29 @@ export class AntiDebug {
   private static detectDebugger() {
     setInterval(() => {
       const start = performance.now();
-      debugger; // This will pause if dev tools are open
+      try {
+        debugger; // This will pause if dev tools are open
+      } catch (e) {
+        // Ignore errors
+      }
       const end = performance.now();
       
       if (end - start > 100) {
-        // Debugger detected
-        window.location.href = 'about:blank';
+        // Just clear console instead of redirecting
+        console.clear();
       }
-    }, 1000);
+    }, 5000);
   }
   
   private static detectBreakpoints() {
-    const script = document.createElement('script');
-    script.textContent = `
-      (() => {
-        const originalLog = console.log;
-        console.log = function() {
-          const trace = new Error().stack;
-          if (trace && trace.includes('debugger')) {
-            window.location.href = 'about:blank';
-          }
-          return originalLog.apply(console, arguments);
-        };
-      })();
-    `;
-    document.head.appendChild(script);
+    // Simplified detection without breaking functionality
+    const originalLog = console.log;
+    console.log = function() {
+      const trace = new Error().stack;
+      if (trace && trace.includes('debugger')) {
+        console.clear();
+      }
+      return originalLog.apply(console, arguments);
+    };
   }
 }
