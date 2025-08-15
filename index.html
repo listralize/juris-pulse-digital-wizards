@@ -23,85 +23,28 @@
     <!-- Custom Fonts -->
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
     
-    
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="./logo-email.png" />
-    
-    <!-- Emergency CSS para prevenir tela preta -->
-    <link rel="stylesheet" href="./emergency-styles.css" />
-    
-    <!-- Inline critical CSS -->
-    <style>
-      /* Critical CSS inline para carregamento imediato */
-      html, body, #root {
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        background-color: #0a0a0a !important;
-        color: #f5f5f5 !important;
-      }
-      
-      .emergency-loading {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #0a0a0a;
-        color: #f5f5f5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-        z-index: 9999;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    </style>
   </head>
 
   <body>
-    <!-- Loading emergencial -->
-    <div id="emergency-loading" class="emergency-loading">
-      <div style="text-align: center;">
-        <div style="width: 32px; height: 32px; border: 2px solid #6366f1; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-        <p>Carregando...</p>
-      </div>
-    </div>
-    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Debug para desenvolvimento - console liberado -->
+    <!-- Basic Protection -->
     <script>
-      console.log('🔍 Console liberado para debug');
-      console.log('📱 User Agent:', navigator.userAgent);
-      console.log('📍 URL atual:', window.location.href);
-      console.log('🎨 Document ready state:', document.readyState);
-      
-      // Monitorar mudanças no DOM
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.addedNodes.length > 0) {
-            console.log('➕ Nós adicionados:', mutation.addedNodes);
-          }
-        });
+      // Basic protection without breaking functionality
+      document.addEventListener('contextmenu', function(e) {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+        }
       });
-      
-      if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true });
-      }
-      
-      // Log de erros JavaScript
-      window.addEventListener('error', (e) => {
-        console.error('🚨 Erro JavaScript:', e.error, e.message, e.filename, e.lineno);
-      });
-      
-      window.addEventListener('unhandledrejection', (e) => {
-        console.error('🚨 Promise rejeitada:', e.reason);
+
+      // Basic keyboard protection
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123) { // F12
+          e.preventDefault();
+        }
       });
     </script>
   </body>
