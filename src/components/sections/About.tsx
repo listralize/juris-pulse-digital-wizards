@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
 import { useIsMobile } from '../../hooks/use-mobile';
+import { supabase } from '../../integrations/supabase/client';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,7 +32,7 @@ const About = () => {
   useEffect(() => {
     const loadAboutData = async () => {
       try {
-        const { supabase } = await import('../../integrations/supabase/client');
+        
         
         const { data: settings } = await supabase
           .from('site_settings')
