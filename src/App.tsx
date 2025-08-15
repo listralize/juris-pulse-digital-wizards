@@ -44,7 +44,7 @@ function App() {
   
   // Adicionar verificação de scripts carregados
   useEffect(() => {
-    console.log('🚀 App iniciado - verificando scripts de marketing...');
+    console.log('🚀 App carregando...');
     
     // Verificar depois de um tempo se os scripts carregaram
     setTimeout(() => {
@@ -93,9 +93,11 @@ function App() {
     }, 2000);
   }, []);
   
+  console.log('✅ App renderizando...');
+  
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
             <div className="App">
