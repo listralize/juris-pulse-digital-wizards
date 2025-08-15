@@ -292,8 +292,12 @@ export function LinkTreePreview({
                   >
                     <img 
                       src={linkTree.avatar_url} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover" 
+                      alt={linkTree.title || 'Avatar'} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      crossOrigin="anonymous"
                     />
                   </div>
                 </div>
@@ -394,14 +398,21 @@ export function LinkTreePreview({
         {/* Header */}
         {linkTree.avatar_url && (
           <div 
-            className="mx-auto overflow-hidden" 
+            className="mx-auto overflow-hidden rounded-full" 
             style={{
               width: `${linkTree.avatar_size || '128'}px`,
-              height: `${linkTree.avatar_size || '128'}px`,
-              borderRadius: 0
+              height: `${linkTree.avatar_size || '128'}px`
             }}
           >
-            <img src={linkTree.avatar_url} alt="Avatar" className="w-full h-full object-contain" />
+            <img 
+              src={linkTree.avatar_url} 
+              alt={linkTree.title || 'Avatar'} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+              crossOrigin="anonymous"
+            />
           </div>
         )}
         
