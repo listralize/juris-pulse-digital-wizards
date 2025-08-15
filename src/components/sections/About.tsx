@@ -176,7 +176,7 @@ const About = () => {
       }
       
       // Fallback para YouTube se storage não disponível
-      if (aboutImage) {
+      if (aboutImage && aboutImage.includes('youtube')) {
         const embedUrl = getYouTubeEmbedUrl(aboutImage);
         console.log('🎥 About: Renderizando vídeo do YouTube:', { originalUrl: aboutImage, embedUrl });
         
@@ -202,6 +202,7 @@ const About = () => {
       }
     }
     
+    // Default para imagem quando não é vídeo ou quando aboutImage não é YouTube
     return (
       <img 
         src={aboutImage} 

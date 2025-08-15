@@ -22,15 +22,7 @@ export function ThemeProvider({
   defaultTheme = 'dark', // Mudou para dark como padrão
   storageKey = 'theme' 
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(storageKey);
-      if (saved === 'dark' || saved === 'light') {
-        return saved;
-      }
-    }
-    return defaultTheme;
-  });
+  const [theme, setTheme] = useState<Theme>('dark');
   
   const applyTheme = (themeToApply: Theme) => {
     if (typeof window === 'undefined') return;
@@ -48,20 +40,17 @@ export function ThemeProvider({
   };
 
   useEffect(() => {
-    applyTheme(theme);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(storageKey, theme);
-    }
-  }, [theme, storageKey]);
+    applyTheme('dark');
+  }, []);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    // Função vazia - tema fixo em dark
   };
 
   const contextValue: ThemeContextProps = {
-    theme,
+    theme: 'dark',
     toggleTheme,
-    setTheme
+    setTheme: () => {} // Função vazia - tema fixo
   };
 
   return (
