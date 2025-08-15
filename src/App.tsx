@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 console.log('🔧 App component loading...');
 
 // Pages
-import Index from './pages/Index';
+import Index from './pages/Index.tsx';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Blog from './pages/Blog';
