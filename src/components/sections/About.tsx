@@ -214,7 +214,7 @@ const About = () => {
   return (
     <div 
       ref={sectionRef}
-      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 relative overflow-hidden ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`w-full min-h-screen px-4 md:px-6 lg:px-8 relative overflow-hidden rounded-2xl ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
       style={{ 
         display: 'flex',
         flexDirection: 'column',
