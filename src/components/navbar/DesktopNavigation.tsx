@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavigationItem from './NavigationItem';
 import PracticeAreasDropdown from './PracticeAreasDropdown';
-
+import ThemeToggle from './ThemeToggle';
 
 interface DesktopNavigationProps {
   activeSection: string;
@@ -86,6 +86,10 @@ const DesktopNavigation = ({
             handleNavigation('contact', '/#contact');
           }} 
         />
+        
+        <div className="ml-4 pl-4 border-l border-white/20">
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   );

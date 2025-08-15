@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
 import { MapPin, Menu, X } from 'lucide-react';
-
+import ThemeToggle from './ThemeToggle';
 import { practiceAreas } from './practiceAreas';
 
 interface CompactMobileNavbarProps {
@@ -114,6 +114,8 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
               <MapPin className="w-4 h-4" />
             </button>
 
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Menu Button */}
             <button
