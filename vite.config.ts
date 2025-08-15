@@ -24,12 +24,21 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     minify: mode === 'production',
     target: 'esnext',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          supabase: ['@supabase/supabase-js'],
+          admin: [
+            '@tanstack/react-query',
+            'react-beautiful-dnd',
+            'fabric',
+            'recharts'
+          ],
+          utils: ['clsx', 'class-variance-authority', 'tailwind-merge']
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return 'assets/[name]-[hash][extname]';

@@ -143,9 +143,10 @@ export default {
 		preflight: true,
 	},
 	safelist: [
-		{
-			pattern: /no-scrollbar/,
-		},
+		// Removed no-scrollbar pattern that was causing warning
+		// {
+		// 	pattern: /no-scrollbar/,
+		// },
 		// Ensure funnel gradient and width classes are not purged
 		'bg-gradient-to-r',
 		'from-blue-500','to-blue-600',
