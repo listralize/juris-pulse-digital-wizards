@@ -29,23 +29,68 @@ try {
     console.log('✅ .htaccess copied to dist');
   }
 
-  // Verificar se há problemas com arquivos JS no build
+  // Verificar e corrigir problemas com arquivos JS no build
   const distPath = path.join(process.cwd(), 'dist');
   const assetsPath = path.join(distPath, 'assets');
   
   if (fs.existsSync(assetsPath)) {
-    const files = fs.readdirSync(assetsPath);
-    const jsFiles = files.filter(file => file.endsWith('.js'));
+    // Recursively check all asset folders
+    const checkAssetsRecursively = (dir) => {
+      const files = fs.readdirSync(dir, { withFileTypes: true });
+      let jsFiles = [];
+      
+      for (const file of files) {
+        const fullPath = path.join(dir, file.name);
+        if (file.isDirectory()) {
+          jsFiles = jsFiles.concat(checkAssetsRecursively(fullPath));
+        } else if (file.name.endsWith('.js')) {
+          jsFiles.push(path.relative(distPath, fullPath));
+        }
+      }
+      return jsFiles;
+    };
+    
+    const jsFiles = checkAssetsRecursively(assetsPath);
     console.log('📦 Arquivos JS encontrados:', jsFiles.length);
+    console.log('📦 Arquivos JS:', jsFiles);
     
     // Verificar se index.html referencia os arquivos corretos
     const indexPath = path.join(distPath, 'index.html');
     if (fs.existsSync(indexPath)) {
       const indexContent = fs.readFileSync(indexPath, 'utf8');
-      const missingRefs = jsFiles.filter(file => !indexContent.includes(file));
+      const missingRefs = jsFiles.filter(file => !indexContent.includes(path.basename(file)));
       if (missingRefs.length > 0) {
         console.warn('⚠️ Possíveis referências perdidas:', missingRefs);
+        
+        // Try to fix missing references by updating paths
+        let updatedContent = indexContent;
+        for (const missingFile of missingRefs) {
+          const fileName = path.basename(missingFile);
+          const relativePath = `./${missingFile}`;
+          // Look for old reference patterns and replace
+          updatedContent = updatedContent.replace(
+            new RegExp(`assets/js/[^"']*\\.js`, 'g'),
+            relativePath
+          );
+        }
+        
+        if (updatedContent !== indexContent) {
+          fs.writeFileSync(indexPath, updatedContent);
+          console.log('🔧 Referências corrigidas no index.html');
+        }
+      } else {
+        console.log('✅ Todas as referências JS estão corretas');
       }
+    }
+    
+    // Verificar se existe robots.txt
+    const robotsPath = path.join(distPath, 'robots.txt');
+    if (!fs.existsSync(robotsPath)) {
+      const robotsContent = `User-agent: *
+Allow: /
+Sitemap: https://your-domain.com/sitemap.xml`;
+      fs.writeFileSync(robotsPath, robotsContent);
+      console.log('✅ robots.txt criado');
     }
   }
 
