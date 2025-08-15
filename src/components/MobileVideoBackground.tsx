@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 
-const GlobalVideoBackground = () => {
-  const [videoEnabled, setVideoEnabled] = useState(false);
+const MobileVideoBackground = () => {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
   const [videoUrl, setVideoUrl] = useState('');
+  const [videoEnabled, setVideoEnabled] = useState(false);
 
-  console.log('🎬 GlobalVideoBackground: Componente montado');
+  // Só mostrar em mobile e tablet
+  const shouldShow = isMobile || isTablet;
+
+  console.log('📱 MobileVideoBackground:', { isMobile, isTablet, shouldShow });
 
   // Carregar configurações do vídeo de fundo
   useEffect(() => {
-    console.log('🎬 GlobalVideoBackground: useEffect executado para carregar vídeo');
+    if (!shouldShow) return;
+
     const loadVideo = async () => {
       try {
-        console.log('🎬 GlobalVideoBackground: Iniciando carregamento...');
         const { supabase } = await import('../integrations/supabase/client');
         
         const { data: settings } = await supabase
@@ -21,35 +27,35 @@ const GlobalVideoBackground = () => {
           .limit(1)
           .maybeSingle();
 
-        console.log('🎥 Carregando vídeo de fundo global:', settings);
+        console.log('🎥 Mobile/Tablet - Vídeo de fundo:', settings);
 
         if (settings?.team_background_video) {
           setVideoUrl(settings.team_background_video);
-          setVideoEnabled(settings.team_video_enabled !== false); // Default to true if not explicitly false
-          console.log('✅ Vídeo configurado:', {
+          setVideoEnabled(settings.team_video_enabled !== false);
+          console.log('✅ Mobile/Tablet - Vídeo configurado:', {
             url: settings.team_background_video,
             enabled: settings.team_video_enabled
           });
-        } else {
-          console.log('❌ Nenhuma configuração de vídeo encontrada');
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar vídeo:', error);
+        console.error('❌ Erro ao carregar vídeo mobile:', error);
       }
     };
 
     loadVideo();
-  }, []);
+  }, [shouldShow]);
 
   // Escutar configurações de vídeo de fundo  
   useEffect(() => {
+    if (!shouldShow) return;
+
     const handleVideoSettings = (event: CustomEvent) => {
       const { team_video_enabled, team_background_video } = event.detail;
       
       if (team_background_video) {
         setVideoUrl(team_background_video);
         setVideoEnabled(team_video_enabled !== false);
-        console.log('🔄 Configurações de vídeo atualizadas:', {
+        console.log('🔄 Mobile/Tablet - Configurações atualizadas:', {
           url: team_background_video,
           enabled: team_video_enabled
         });
@@ -60,35 +66,19 @@ const GlobalVideoBackground = () => {
     return () => {
       window.removeEventListener('teamVideoSettingsUpdated', handleVideoSettings as EventListener);
     };
-  }, []);
+  }, [shouldShow]);
 
-  // Debug: sempre mostrar se há URL
-  console.log('🎬 GlobalVideoBackground estado:', {
-    videoEnabled,
-    videoUrl,
-    shouldRender: videoUrl && videoEnabled
-  });
-
-  // Se não houver URL, não renderizar
-  if (!videoUrl) {
-    console.log('🎬 GlobalVideoBackground: Não renderizando - sem URL');
+  // Não renderizar se não for mobile/tablet ou se não houver configuração
+  if (!shouldShow || !videoUrl || !videoEnabled) {
     return null;
   }
-
-  // Se o vídeo não estiver habilitado, não renderizar
-  if (!videoEnabled) {
-    console.log('🎬 GlobalVideoBackground: Não renderizando - vídeo desabilitado');
-    return null;
-  }
-
-  console.log('🎬 GlobalVideoBackground: Renderizando vídeo!');
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none" style={{
       zIndex: -1
     }}>
       <video
-        id="global-background-video"
+        id="mobile-background-video"
         src={videoUrl}
         className="w-full h-full object-cover opacity-50"
         autoPlay
@@ -106,20 +96,18 @@ const GlobalVideoBackground = () => {
           minHeight: '100vh',
           objectFit: 'cover'
         }}
-        onLoadStart={() => console.log('🎥 Vídeo global iniciando carregamento')}
-        onCanPlay={() => console.log('✅ Vídeo global pronto para reproduzir')}
-        onError={(e) => console.error('❌ Erro no vídeo global:', e)}
+        onLoadStart={() => console.log('🎥 Mobile/Tablet - Vídeo iniciando carregamento')}
+        onCanPlay={() => console.log('✅ Mobile/Tablet - Vídeo pronto para reproduzir')}
+        onError={(e) => console.error('❌ Erro no vídeo mobile:', e)}
         onLoadedMetadata={(e) => {
           const video = e.target as HTMLVideoElement;
-          console.log('📹 Metadados do vídeo carregados');
-          // Force play on mobile
+          console.log('📹 Mobile/Tablet - Metadados carregados');
           const playPromise = video.play();
           if (playPromise !== undefined) {
             playPromise
-              .then(() => console.log('▶️ Vídeo reproduzindo com sucesso'))
+              .then(() => console.log('▶️ Mobile/Tablet - Vídeo reproduzindo'))
               .catch(() => {
-                // Mobile might require user interaction first
-                console.log('🎥 Autoplay falhou no mobile, tentando reproduzir novamente');
+                console.log('🎥 Mobile/Tablet - Autoplay falhou, tentando novamente');
                 setTimeout(() => video.play(), 1000);
               });
           }
@@ -129,4 +117,4 @@ const GlobalVideoBackground = () => {
   );
 };
 
-export default GlobalVideoBackground;
+export default MobileVideoBackground;
