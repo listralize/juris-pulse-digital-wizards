@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Upload, UserPlus, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx'; // Removido temporariamente por vulnerabilidade de segurança
 
 interface ContactImporterProps {
   isOpen: boolean;
@@ -80,8 +80,12 @@ export const ContactImporter: React.FC<ContactImporterProps> = ({
     }
   };
 
-  // Processar arquivo Excel
+  // Processar arquivo Excel (DESABILITADO - xlsx removido por segurança)
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    toast.error('Funcionalidade de importação Excel temporariamente desabilitada por segurança');
+    return;
+    
+    /* CÓDIGO COMENTADO - SERÁ REATIVADO APÓS RESOLUÇÃO DE VULNERABILIDADE
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -109,6 +113,7 @@ export const ContactImporter: React.FC<ContactImporterProps> = ({
       }
     };
     reader.readAsArrayBuffer(file);
+    */
   };
 
   // Importar contatos do Excel
@@ -154,8 +159,12 @@ export const ContactImporter: React.FC<ContactImporterProps> = ({
     }
   };
 
-  // Download template Excel
+  // Download template Excel (DESABILITADO - xlsx removido por segurança)
   const downloadTemplate = () => {
+    toast.error('Funcionalidade de template Excel temporariamente desabilitada por segurança');
+    return;
+    
+    /* CÓDIGO COMENTADO - SERÁ REATIVADO APÓS RESOLUÇÃO DE VULNERABILIDADE
     const templateData = [
       { nome: 'João Silva', email: 'joao@email.com', telefone: '(11) 99999-9999', servico: 'Direito Civil' },
       { nome: 'Maria Santos', email: 'maria@email.com', telefone: '(11) 88888-8888', servico: 'Direito Trabalhista' }
@@ -165,6 +174,7 @@ export const ContactImporter: React.FC<ContactImporterProps> = ({
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Contatos');
     XLSX.writeFile(wb, 'template_contatos.xlsx');
+    */
   };
 
   return (
