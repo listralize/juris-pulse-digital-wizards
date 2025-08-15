@@ -4,7 +4,21 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { ChevronLeft, ChevronRight, Mail, MessageSquare } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Lead {
   id: string;
@@ -75,34 +89,89 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
     setKanbanCurrentPage(prev => Math.max(prev - 1, 1));
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
-    if (!destination) {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
       return;
     }
 
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
+    const leadId = active.id as string;
+    const newStatus = over.id as string;
 
     // Encontrar o lead e atualizar o status
-    const lead = filteredLeads.find(l => l.id === draggableId);
+    const lead = filteredLeads.find(l => l.id === leadId);
     if (lead) {
       console.log('🎯 Movendo lead:', {
-        leadId: draggableId,
-        from: source.droppableId,
-        to: destination.droppableId,
+        leadId,
+        to: newStatus,
         leadName: parseLeadData(lead.lead_data).name
       });
       
-      updateLeadStatus(lead.id, destination.droppableId);
+      updateLeadStatus(lead.id, newStatus);
     } else {
-      console.error('❌ Lead não encontrado:', draggableId);
+      console.error('❌ Lead não encontrado:', leadId);
     }
+  };
+
+  // Componente para item arrastável
+  const DraggableLeadCard = ({ lead, index }: { lead: Lead; index: number }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: lead.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    const leadData = parseLeadData(lead.lead_data);
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className={`p-3 rounded border cursor-pointer hover:shadow-md transition-shadow ${
+          isDragging 
+            ? 'shadow-lg opacity-50' 
+            : isDark 
+              ? 'bg-white/5 border-white/10 hover:bg-white/10' 
+              : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+        }`}
+        onClick={() => !isDragging && onLeadClick(lead)}
+      >
+        <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+          {leadData.name || 'Nome não informado'}
+        </h4>
+        <p className="text-xs text-muted-foreground">{leadData.email}</p>
+        {leadData.service && (
+          <p className="text-xs text-blue-600 mt-1">{leadData.service}</p>
+        )}
+        <div className="flex justify-between items-center mt-2">
+          <span className="text-xs text-muted-foreground">
+            {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+          </span>
+          {leadData.urgent && (
+            <Badge variant="destructive" className="text-xs">Urgente</Badge>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -138,7 +207,11 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
       </div>
       
       {/* Board Kanban com Drag and Drop */}
-      <DragDropContext onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'].map(status => {
             // Mapear status da tabela para Kanban
@@ -163,68 +236,25 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
               return kanbanStatus === status || (status === 'novo' && !leadStatus);
             });
             const statusLeads = allStatusLeads.slice(kanbanIndexOfFirstLead, kanbanIndexOfLastLead);
+            const leadIds = statusLeads.map(lead => lead.id);
             
             return (
-              <div key={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
+              <div key={status} id={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
                 <h3 className={`font-semibold mb-3 capitalize ${isDark ? 'text-white' : 'text-black'}`}>
                   {status} ({allStatusLeads.length})
                 </h3>
-                <Droppable droppableId={status}>
-                  {(provided, snapshot) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className={`space-y-2 min-h-[200px] ${
-                        snapshot.isDraggingOver ? 'bg-blue-50/50' : ''
-                      }`}
-                    >
-                      {statusLeads.map((lead, index) => {
-                        const leadData = parseLeadData(lead.lead_data);
-                        return (
-                          <Draggable key={lead.id} draggableId={lead.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`p-3 rounded border cursor-pointer hover:shadow-md transition-shadow ${
-                                  snapshot.isDragging 
-                                    ? 'shadow-lg rotate-2' 
-                                    : isDark 
-                                      ? 'bg-white/5 border-white/10 hover:bg-white/10' 
-                                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                                }`}
-                                onClick={() => !snapshot.isDragging && onLeadClick(lead)}
-                              >
-                                <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-black'}`}>
-                                  {leadData.name || 'Nome não informado'}
-                                </h4>
-                                <p className="text-xs text-muted-foreground">{leadData.email}</p>
-                                {leadData.service && (
-                                  <p className="text-xs text-blue-600 mt-1">{leadData.service}</p>
-                                )}
-                                <div className="flex justify-between items-center mt-2">
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                                  </span>
-                                  {leadData.urgent && (
-                                    <Badge variant="destructive" className="text-xs">Urgente</Badge>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
+                <SortableContext items={leadIds} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2 min-h-[200px]">
+                    {statusLeads.map((lead, index) => (
+                      <DraggableLeadCard key={lead.id} lead={lead} index={index} />
+                    ))}
+                  </div>
+                </SortableContext>
               </div>
             );
           })}
         </div>
-      </DragDropContext>
+      </DndContext>
     </div>
   );
 };
