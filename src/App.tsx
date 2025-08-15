@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { useHostingerMarketingScripts } from './hooks/useHostingerMarketingScripts';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
@@ -50,6 +51,9 @@ const queryClient = new QueryClient({
 function App() {
   // Debug logging
   console.log('📱 App component initialized');
+  
+  // Configurar scripts otimizados para Hostinger
+  useHostingerMarketingScripts();
   
   useEffect(() => {
     console.log('🎯 App useEffect hook executed');

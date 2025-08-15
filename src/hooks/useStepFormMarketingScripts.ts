@@ -163,17 +163,25 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
+          console.log(`🔍 [${formSlug}] Verificando FB Pixel:`, {
+            fbqExists: typeof (window as any).fbq,
+            windowFbq: !!(window as any).fbq,
+            domain: window.location.hostname
+          });
+          
           if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', eventName, {
               content_name: `StepForm ${formSlug}`,
               form_slug: formSlug,
               page_url: window.location.href,
             });
-            console.log(`✅ Evento ${eventName} enviado para Facebook Pixel`);
+            console.log(`✅ [${formSlug}] Evento ${eventName} enviado para Facebook Pixel`);
           } else {
-            console.warn('❌ Facebook Pixel não disponível no momento do envio');
+            console.warn(`❌ [${formSlug}] Facebook Pixel não disponível no momento do envio`);
+            console.warn(`🔍 [${formSlug}] Window.fbq:`, (window as any).fbq);
+            console.warn(`🔍 [${formSlug}] Window._fbq:`, (window as any)._fbq);
           }
-        }, 250); // Aguardar para o pixel estar pronto em produção
+        }, 1000); // Aguardar mais tempo para o pixel estar pronto na Hostinger
       }
     };
 
@@ -208,19 +216,28 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
-          console.log(`🚀 Tentando enviar evento "${eventName}" para GTM...`);
+          console.log(`🚀 [${formSlug}] Tentando enviar evento "${eventName}" para GTM...`);
+          console.log(`🔍 [${formSlug}] Verificando GTM:`, {
+            dataLayerExists: typeof (window as any).dataLayer,
+            dataLayerArray: Array.isArray((window as any).dataLayer),
+            dataLayerLength: (window as any).dataLayer?.length,
+            domain: window.location.hostname
+          });
+          
           if (typeof window !== 'undefined' && (window as any).dataLayer) {
             const eventData = {
               event: eventName,
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
               page_url: window.location.href,
+              domain: window.location.hostname,
+              timestamp: new Date().toISOString()
             };
-            console.log(`📤 Enviando dados para GTM:`, eventData);
+            console.log(`📤 [${formSlug}] Enviando dados para GTM:`, eventData);
             (window as any).dataLayer.push(eventData);
-            console.log(`✅ Evento "${eventName}" enviado para GTM com sucesso!`);
+            console.log(`✅ [${formSlug}] Evento "${eventName}" enviado para GTM com sucesso!`);
           } else {
-            console.warn('❌ dataLayer não disponível no momento do envio - GTM pode não estar carregado');
+            console.warn(`❌ [${formSlug}] dataLayer não disponível no momento do envio - GTM pode não estar carregado`);
             console.log('🔧 Inicializando dataLayer...');
             // Inicializar dataLayer se não existir
             (window as any).dataLayer = (window as any).dataLayer || [];
@@ -229,12 +246,15 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
               page_url: window.location.href,
+              domain: window.location.hostname,
+              timestamp: new Date().toISOString(),
+              fallback: true
             };
-            console.log(`📤 Enviando dados para GTM (com dataLayer inicializado):`, eventData);
+            console.log(`📤 [${formSlug}] Enviando dados para GTM (com dataLayer inicializado):`, eventData);
             (window as any).dataLayer.push(eventData);
-            console.log(`✅ Evento "${eventName}" enviado para GTM (dataLayer inicializado)`);
+            console.log(`✅ [${formSlug}] Evento "${eventName}" enviado para GTM (dataLayer inicializado)`);
           }
-        }, 250); // Aguardar para o GTM estar pronto em produção
+        }, 1000); // Aguardar mais tempo para o GTM estar pronto na Hostinger
       }
     };
 

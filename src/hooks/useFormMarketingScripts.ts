@@ -138,17 +138,25 @@ export const useFormMarketingScripts = (formId: string) => {
         }, 3000);
 
         setTimeout(() => {
+          console.log(`🔍 [${formId}] Verificando FB Pixel:`, {
+            fbqExists: typeof (window as any).fbq,
+            windowFbq: !!(window as any).fbq,
+            domain: window.location.hostname
+          });
+          
           if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', eventName, {
               content_name: formConfig.campaignName || `Form ${formId}`,
               form_id: formId,
               page_url: window.location.href,
             });
-            console.log(`✅ Evento ${eventName} enviado para Facebook Pixel`);
+            console.log(`✅ [${formId}] Evento ${eventName} enviado para Facebook Pixel`);
           } else {
-            console.warn('❌ Facebook Pixel não disponível no momento do envio');
+            console.warn(`❌ [${formId}] Facebook Pixel não disponível no momento do envio`);
+            console.warn(`🔍 [${formId}] Window.fbq:`, (window as any).fbq);
+            console.warn(`🔍 [${formId}] Window._fbq:`, (window as any)._fbq);
           }
-        }, 250); // Aguardar para o pixel estar pronto em produção
+        }, 1000); // Aguardar mais tempo para o pixel estar pronto na Hostinger
       }
     };
 
@@ -183,8 +191,15 @@ export const useFormMarketingScripts = (formId: string) => {
         }, 3000);
 
         setTimeout(() => {
+          console.log(`🔍 [${formId}] Verificando GTM:`, {
+            dataLayerExists: typeof (window as any).dataLayer,
+            dataLayerArray: Array.isArray((window as any).dataLayer),
+            dataLayerLength: (window as any).dataLayer?.length,
+            domain: window.location.hostname
+          });
+          
           if (typeof window !== 'undefined' && (window as any).dataLayer) {
-            console.log(`🏷️ dataLayer disponível, enviando evento: ${eventName}`);
+            console.log(`🏷️ [${formId}] dataLayer disponível, enviando evento: ${eventName}`);
             
             const eventData = {
               event: eventName,
@@ -192,11 +207,12 @@ export const useFormMarketingScripts = (formId: string) => {
               form_name: formConfig.campaignName || `Form ${formId}`,
               page_url: window.location.href,
               timestamp: new Date().toISOString(),
+              domain: window.location.hostname,
               user_data: event.detail?.userData || {}
             };
             
             (window as any).dataLayer.push(eventData);
-            console.log(`✅ Evento ${eventName} enviado para GTM:`, eventData);
+            console.log(`✅ [${formId}] Evento ${eventName} enviado para GTM:`, eventData);
             
             // Também enviar evento padrão Lead se não for Lead
             if (eventName !== 'Lead') {
@@ -206,14 +222,15 @@ export const useFormMarketingScripts = (formId: string) => {
                 form_name: formConfig.campaignName || `Form ${formId}`,
                 page_url: window.location.href,
                 timestamp: new Date().toISOString(),
+                domain: window.location.hostname,
                 source_event: eventName
               });
-              console.log(`✅ Evento Lead adicional enviado para GTM`);
+              console.log(`✅ [${formId}] Evento Lead adicional enviado para GTM`);
             }
           } else {
-            console.warn('❌ dataLayer não disponível no momento do envio');
-            console.warn('📊 Window.dataLayer:', (window as any).dataLayer);
-            console.warn('📊 Tentando inicializar dataLayer...');
+            console.warn(`❌ [${formId}] dataLayer não disponível no momento do envio`);
+            console.warn(`📊 [${formId}] Window.dataLayer:`, (window as any).dataLayer);
+            console.warn(`📊 [${formId}] Tentando inicializar dataLayer...`);
             
             // Tentar inicializar dataLayer se não existir
             (window as any).dataLayer = (window as any).dataLayer || [];
@@ -223,11 +240,12 @@ export const useFormMarketingScripts = (formId: string) => {
               form_name: formConfig.campaignName || `Form ${formId}`,
               page_url: window.location.href,
               timestamp: new Date().toISOString(),
+              domain: window.location.hostname,
               initialization: 'fallback'
             });
-            console.log(`🆘 Evento ${eventName} enviado via fallback para GTM`);
+            console.log(`🆘 [${formId}] Evento ${eventName} enviado via fallback para GTM`);
           }
-        }, 250);
+        }, 1000); // Aguardar mais tempo para o GTM estar pronto na Hostinger
       }
     };
 

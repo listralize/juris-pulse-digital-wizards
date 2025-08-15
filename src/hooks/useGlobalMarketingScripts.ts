@@ -142,12 +142,10 @@ export const useGlobalMarketingScripts = () => {
       
       ${customCode || ''}
       
-      // Flag para debug em produção
-      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('listralize.com');
-      if (isProduction || window.location.hostname.includes('listralize.com')) {
-        console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
-        console.log('✅ [PROD] Pixel ID configurado:', '${pixelId}');
-      }
+      // Flag para debug em produção - sempre ativar
+      console.log('✅ [GLOBAL] Facebook Pixel ativo:', typeof window.fbq);
+      console.log('✅ [GLOBAL] Pixel ID configurado:', '${pixelId}');
+      console.log('✅ [GLOBAL] Domínio atual:', window.location.hostname);
     `;
     script.setAttribute('data-marketing', 'fb-pixel-config');
     document.head.appendChild(script);
@@ -303,10 +301,9 @@ export const useGlobalMarketingScripts = () => {
       // Apenas PageView inicial
       fbq('track', 'PageView');
       
-      // Flag para debug em produção
-      if (window.location.hostname !== 'localhost' && window.location.hostname.includes('listralize.com')) {
-        console.log('✅ [PROD] Facebook Pixel ativo:', typeof window.fbq);
-      }
+      // Flag para debug em produção - sempre ativar
+      console.log('✅ [FALLBACK] Facebook Pixel ativo:', typeof window.fbq);
+      console.log('✅ [FALLBACK] Domínio atual:', window.location.hostname);
     `;
     script.setAttribute('data-marketing', 'fb-pixel');
     document.head.appendChild(script);

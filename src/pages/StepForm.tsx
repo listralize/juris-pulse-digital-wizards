@@ -11,6 +11,8 @@ import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
 import { StepFormTestimonials } from '../components/StepFormTestimonials';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
+import { useHostingerMarketingScripts } from '@/hooks/useHostingerMarketingScripts';
+import { StepFormLoader } from '@/components/StepFormLoader';
 
 interface StepFormData {
   id: string;
@@ -149,6 +151,9 @@ const StepForm: React.FC = () => {
   // Load marketing scripts for this step form - usando memo para evitar recarregamentos
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
+  
+  // Load Hostinger-optimized marketing scripts
+  useHostingerMarketingScripts();
 
   useEffect(() => {
     if (slug) {
@@ -715,20 +720,19 @@ const StepForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <StepFormLoader 
+        title="Carregando seu formulário..."
+        message="Estamos preparando tudo para você. Aguarde alguns instantes..."
+      />
     );
   }
 
   if (!form) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Formulário não encontrado</h2>
-          <Button onClick={() => navigate('/')}>Voltar ao início</Button>
-        </div>
-      </div>
+      <StepFormLoader 
+        title="Formulário não encontrado"
+        message="Não foi possível carregar este formulário. Verifique o link ou tente novamente."
+      />
     );
   }
 
