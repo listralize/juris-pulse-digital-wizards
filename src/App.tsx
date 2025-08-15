@@ -1,46 +1,58 @@
 import React, { useEffect } from 'react';
 import { Toaster } from './components/ui/sonner';
+import { ThemeProvider } from './components/ThemeProvider';
+import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-// Componente simples para teste
-function SimpleIndex() {
-  return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
-      <h1 className="text-4xl font-bold mb-4">Site Funcionando!</h1>
-      <p className="text-lg">Aplicação carregou com sucesso.</p>
-    </div>
-  );
-}
+// Core pages - importação direta para evitar problemas de lazy loading
+import Index from './pages/Index';
+import NotFound from './pages/NotFound';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
-  console.log('🚀 App carregando...');
+  console.log('🏗️ App iniciando...');
   
   // Remover loading de emergência
   useEffect(() => {
-    console.log('🗑️ Removendo loading...');
     const timer = setTimeout(() => {
       const emergencyLoading = document.getElementById('emergency-loading');
       if (emergencyLoading) {
-        console.log('✅ Loading removido');
+        console.log('✅ Removendo loading de emergência');
         emergencyLoading.remove();
       }
-    }, 500);
+    }, 100);
     
     return () => clearTimeout(timer);
   }, []);
   
-  console.log('✅ App renderizando...');
-  
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<SimpleIndex />} />
-          <Route path="*" element={<div className="p-8 text-white bg-slate-900">Página não encontrada</div>} />
-        </Routes>
-        <Toaster />
-      </div>
-    </Router>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <AuthProvider>
+            <Router>
+              <div className="App min-h-screen bg-background text-foreground">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+              </div>
+            </Router>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
