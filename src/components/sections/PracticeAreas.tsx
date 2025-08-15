@@ -178,7 +178,13 @@ const PracticeAreas = () => {
     <section 
       id="areas"
       ref={sectionRef}
-      className={`min-h-screen w-full py-8 md:py-16 relative ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}
+      className={`min-h-screen w-full py-8 md:py-16 relative ${
+        isMobile 
+          ? 'bg-transparent text-white' 
+          : isDark 
+            ? 'bg-black text-white' 
+            : 'bg-white text-black'
+      }`}
       style={{
         // Z-index máximo para garantir clicabilidade no mobile
         zIndex: isMobile ? 9999 : 10,
