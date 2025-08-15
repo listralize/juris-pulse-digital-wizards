@@ -49,22 +49,16 @@ export const useSupabaseAuth = () => {
 
   const checkUserRole = async (user: User) => {
     try {
-      let userRole = 'user';
-      
-      // Tentar verificar role do usuário na tabela user_roles com timeout
-      try {
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single();
+      // Verificar role do usuário na tabela user_roles
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
 
-        if (!roleError && roleData) {
-          userRole = roleData.role;
-        }
-      } catch (roleError) {
-        console.log('Tabela user_roles não encontrada ou erro ao acessar (não crítico):', roleError);
-        // Continuar com role padrão 'user'
+      let userRole = 'user';
+      if (!roleError && roleData) {
+        userRole = roleData.role;
       }
 
       // Criar profile baseado nos dados do usuário
@@ -78,7 +72,7 @@ export const useSupabaseAuth = () => {
       setProfile(userProfile);
       console.log('👤 Profile do usuário criado:', userProfile);
     } catch (error) {
-      console.log('Erro ao verificar role do usuário (não crítico):', error);
+      console.error('❌ Erro ao verificar role do usuário:', error);
       // Em caso de erro, criar profile básico
       const basicProfile: Profile = {
         id: user.id,

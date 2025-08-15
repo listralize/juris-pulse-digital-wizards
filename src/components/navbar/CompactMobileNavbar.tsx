@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
 import { MapPin, Menu, X } from 'lucide-react';
-import { supabase } from '../../integrations/supabase/client';
 
 import { practiceAreas } from './practiceAreas';
 
@@ -23,7 +22,7 @@ const CompactMobileNavbar = ({ showLogo = true }: CompactMobileNavbarProps) => {
   useEffect(() => {
     const loadAdminData = async () => {
       try {
-        
+        const { supabase } = await import('../../integrations/supabase/client');
         const { data } = await supabase
           .from('site_settings')
           .select('*')

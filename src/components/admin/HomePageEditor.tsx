@@ -46,6 +46,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
     const loadCurrentData = async () => {
       try {
         console.log('🔄 HomePageEditor: Carregando dados atuais do Supabase...');
+        const { supabase } = await import('../../integrations/supabase/client');
         
         // Carregar dados de contato
         const { data: contact } = await supabase
@@ -181,6 +182,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const saveToSupabaseTables = async () => {
     try {
+      const { supabase } = await import('../../integrations/supabase/client');
       
       // Salvar dados de contato na tabela contact_info
       if (pageTexts.contactTexts) {

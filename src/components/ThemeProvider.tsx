@@ -27,48 +27,30 @@ export function ThemeProvider({
   const applyTheme = (themeToApply: Theme) => {
     if (typeof window === 'undefined') return;
     
-    console.log('🎨 ThemeProvider: Aplicando tema:', themeToApply);
     const root = document.documentElement;
-    const body = document.body;
     
     // Remove classes anteriores
     root.classList.remove('light', 'dark');
-    body.classList.remove('light', 'dark');
     
     // Adiciona a nova classe
     root.classList.add(themeToApply);
-    body.classList.add(themeToApply);
     
     // Define o color-scheme
     root.style.colorScheme = themeToApply;
-    console.log('✅ ThemeProvider: Tema aplicado com sucesso');
   };
 
   useEffect(() => {
-    const savedTheme = localStorage?.getItem(storageKey) as Theme;
-    const themeToApply = savedTheme || defaultTheme;
-    console.log('🎨 ThemeProvider: Inicializando tema:', { savedTheme, defaultTheme, themeToApply });
-    applyTheme(themeToApply);
-    setTheme(themeToApply);
-  }, [defaultTheme, storageKey]);
+    applyTheme('dark');
+  }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    applyTheme(newTheme);
-    localStorage?.setItem(storageKey, newTheme);
-  };
-
-  const handleSetTheme = (newTheme: Theme) => {
-    setTheme(newTheme);
-    applyTheme(newTheme);
-    localStorage?.setItem(storageKey, newTheme);
+    // Função vazia - tema fixo em dark
   };
 
   const contextValue: ThemeContextProps = {
-    theme,
+    theme: 'dark',
     toggleTheme,
-    setTheme: handleSetTheme
+    setTheme: () => {} // Função vazia - tema fixo
   };
 
   return (

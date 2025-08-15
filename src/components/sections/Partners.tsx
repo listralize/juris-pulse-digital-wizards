@@ -6,7 +6,6 @@ import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import NeuralBackground from '../NeuralBackground';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { supabase } from '../../integrations/supabase/client';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -79,7 +78,7 @@ const Partners = () => {
   useEffect(() => {
     const loadVideo = async () => {
       try {
-        
+        const { supabase } = await import('../../integrations/supabase/client');
         
         const { data: settings } = await supabase
           .from('site_settings')

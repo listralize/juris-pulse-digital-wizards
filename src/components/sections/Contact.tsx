@@ -10,7 +10,6 @@ import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 import NeuralBackground from '../NeuralBackground';
 import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
-import { supabase } from '../../integrations/supabase/client';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +32,7 @@ const Contact = () => {
     const loadInitialData = async () => {
       try {
         console.log('📞 Contact: Carregando dados iniciais...');
-        
+        const { supabase } = await import('../../integrations/supabase/client');
 
         // Buscar primeiro na tabela site_settings
         const { data: settings } = await supabase

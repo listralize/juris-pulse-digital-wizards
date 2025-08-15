@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
-import { supabase } from '../../integrations/supabase/client';
 
 const ContactInfo = () => {
   const { theme } = useTheme();
@@ -22,6 +21,7 @@ const ContactInfo = () => {
     const loadContactInfo = async () => {
       try {
         console.log('📞 ContactInfo: Carregando dados iniciais...');
+        const { supabase } = await import('../../integrations/supabase/client');
         
         // Buscar dados da contact_info
         const { data: contact } = await supabase

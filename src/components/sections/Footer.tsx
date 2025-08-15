@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
 import GlobalSocialProof from '../GlobalSocialProof';
-import { supabase } from '../../integrations/supabase/client';
 
 interface FooterProps {
   respectTheme?: boolean;
@@ -30,7 +29,7 @@ const Footer: React.FC<FooterProps> = ({
     const loadInitialData = async () => {
       try {
         console.log('🦶 Footer: Carregando dados iniciais...');
-        
+        const { supabase } = await import('../../integrations/supabase/client');
         
         // Carregar dados do footer_info
         const { data: footer } = await supabase
