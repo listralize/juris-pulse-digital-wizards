@@ -108,7 +108,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: auto !important;
-    cursor: none;
+    cursor: auto;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }

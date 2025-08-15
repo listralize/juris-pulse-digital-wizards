@@ -45,9 +45,9 @@ const Index = () => {
         body.style.margin = '0';
         body.style.padding = '0';
       } else {
-        // Desktop: configuração original
-        body.style.overflow = 'hidden';
-        html.style.overflow = 'hidden';
+        // Desktop: configuração sem overflow hidden para produção
+        body.style.overflow = 'auto';
+        html.style.overflow = 'auto';
         body.style.height = '100vh';
         html.style.height = '100vh';
         body.style.maxHeight = '100vh';

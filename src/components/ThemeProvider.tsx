@@ -40,17 +40,29 @@ export function ThemeProvider({
   };
 
   useEffect(() => {
-    applyTheme('dark');
-  }, []);
+    const savedTheme = (localStorage?.getItem(storageKey) as Theme) || defaultTheme;
+    const themeToApply = savedTheme || 'dark';
+    applyTheme(themeToApply);
+    setTheme(themeToApply);
+  }, [defaultTheme, storageKey]);
 
   const toggleTheme = () => {
-    // Função vazia - tema fixo em dark
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    localStorage?.setItem(storageKey, newTheme);
+  };
+
+  const handleSetTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    localStorage?.setItem(storageKey, newTheme);
   };
 
   const contextValue: ThemeContextProps = {
-    theme: 'dark',
+    theme,
     toggleTheme,
-    setTheme: () => {} // Função vazia - tema fixo
+    setTheme: handleSetTheme
   };
 
   return (
