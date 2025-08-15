@@ -1,11 +1,13 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useDirectMarketingScripts } from './hooks/useDirectMarketingScripts';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ProductionDebugger } from './components/ProductionDebugger';
 
 // Core pages (carregamento imediato)
 import Index from './pages/Index';
@@ -41,7 +43,67 @@ const Administrativo = lazy(() => import('./pages/areas/Administrativo'));
 const queryClient = new QueryClient();
 
 function App() {
-  console.log('✅ App iniciando...');
+  // Carregar scripts de marketing globalmente com proteção
+  useDirectMarketingScripts();
+  
+  // Adicionar verificação de scripts carregados com proteção
+  useEffect(() => {
+    console.log('🚀 App carregando...');
+    
+    // Verificar depois de um tempo se os scripts carregaram
+    const timeoutId = setTimeout(() => {
+      try {
+        console.log('📊 Status dos scripts:', {
+          fbq: typeof (window as any).fbq,
+          gtag: typeof (window as any).gtag,
+          dataLayer: typeof (window as any).dataLayer,
+          fbqExists: !!(window as any).fbq,
+          gtagExists: !!(window as any).gtag,
+          dataLayerExists: !!(window as any).dataLayer
+        });
+        
+        // Testar Facebook Pixel
+        if ((window as any).fbq) {
+          console.log('✅ Facebook Pixel detectado e funcionando');
+          // Disparar evento de teste
+          (window as any).fbq('track', 'PageView');
+          console.log('📊 Evento PageView teste enviado para Facebook Pixel');
+        } else {
+          console.warn('⚠️ Facebook Pixel não detectado');
+        }
+        
+        // Testar GTM
+        if ((window as any).dataLayer) {
+          console.log('✅ Google Tag Manager detectado e funcionando');
+          (window as any).dataLayer.push({
+            event: 'app_loaded',
+            page_location: window.location.href
+          });
+          console.log('📊 Evento app_loaded teste enviado para GTM');
+        } else {
+          console.warn('⚠️ Google Tag Manager não detectado');
+        }
+        
+        // Testar GA
+        if ((window as any).gtag) {
+          console.log('✅ Google Analytics detectado e funcionando');
+          (window as any).gtag('event', 'page_view', {
+            page_title: document.title,
+            page_location: window.location.href
+          });
+          console.log('📊 Evento page_view teste enviado para GA');
+        } else {
+          console.warn('⚠️ Google Analytics não detectado');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao verificar scripts:', error);
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timeoutId);
+  }, []);
+  
+  console.log('✅ App renderizando...');
   
   return (
     <ErrorBoundary>
@@ -51,10 +113,10 @@ function App() {
             <Router>
               <div className="App">
                 <Suspense fallback={
-                  <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+                  <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
                     <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                      <p>Carregando...</p>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Carregando...</p>
                     </div>
                   </div>
                 }>
@@ -96,6 +158,7 @@ function App() {
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
+                <ProductionDebugger />
                 <Toaster />
               </div>
             </Router>
