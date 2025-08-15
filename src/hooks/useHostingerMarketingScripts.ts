@@ -33,20 +33,27 @@ export const useHostingerMarketingScripts = () => {
       userAgent: navigator.userAgent.substring(0, 100)
     });
 
-    // Configurar scripts sempre (tanto para Hostinger quanto para stadv.com.br)
+    // Configurar scripts sempre para stadv.com.br e ambientes de produção
     if (isHostinger || window.location.protocol === 'https:' || hostname.includes('stadv.com.br')) {
-      console.log('🚀 [HOSTINGER] Inicializando scripts de marketing...');
-      setupHostingerFacebookPixel();
-      setupHostingerGTM();
-      setupHostingerGA();
+      console.log('🚀 [HOSTINGER] Inicializando scripts de marketing para:', hostname);
+      
+      // Limpar scripts conflitantes primeiro
+      clearConflictingScripts();
+      
+      // Aguardar um pouco para garantir limpeza
+      setTimeout(() => {
+        setupHostingerFacebookPixel();
+        setupHostingerGTM();
+        setupHostingerGA();
+        
+        // Aguardar scripts carregarem antes do debug
+        setTimeout(() => {
+          setupDebugLogging();
+        }, 3000);
+      }, 500);
     } else {
       console.log('🔧 [HOSTINGER] Ambiente de desenvolvimento detectado - scripts não carregados');
     }
-    
-    // Aguardar scripts carregarem antes do debug
-    setTimeout(() => {
-      setupDebugLogging();
-    }, 2000);
   };
 
   const setupHostingerFacebookPixel = () => {
@@ -194,5 +201,25 @@ export const useHostingerMarketingScripts = () => {
       clearInterval(checkInterval);
       console.log('🏁 [HOSTINGER] Debug finalizado');
     }, 120000);
+  };
+
+  const clearConflictingScripts = () => {
+    console.log('🧹 [HOSTINGER] Limpando scripts conflitantes...');
+    
+    // Remover scripts de marketing existentes
+    document.querySelectorAll('[data-marketing]').forEach(el => {
+      console.log('🗑️ Removendo script conflitante:', el.getAttribute('data-marketing'));
+      el.remove();
+    });
+    
+    // Limpar objetos globais que possam estar interferindo
+    if ((window as any).fbq) {
+      console.log('🔄 Limpando fbq global...');
+    }
+    
+    if ((window as any).dataLayer) {
+      console.log('🔄 Resetando dataLayer...');
+      (window as any).dataLayer = [];
+    }
   };
 };

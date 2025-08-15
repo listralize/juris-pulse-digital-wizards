@@ -152,8 +152,7 @@ const StepForm: React.FC = () => {
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
   
-  // Load Hostinger-optimized marketing scripts
-  useHostingerMarketingScripts();
+  // Scripts otimizados para Hostinger/stadv.com.br já carregados no App.tsx
 
   useEffect(() => {
     if (slug) {
