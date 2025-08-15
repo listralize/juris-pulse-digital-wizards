@@ -145,7 +145,7 @@ const About = () => {
               aspectRatio: isMobile ? '9/16' : '16/9',
               maxHeight: isMobile ? '24rem' : 'auto',
               position: 'relative',
-              zIndex: 50,
+              zIndex: isMobile ? 9999 : 20,
               isolation: 'isolate'
             }}
           >
@@ -155,7 +155,7 @@ const About = () => {
               className="w-full h-full rounded-lg object-cover"
               style={{ 
                 position: 'relative',
-                zIndex: 50,
+                zIndex: isMobile ? 9999 : 20,
                 pointerEvents: 'auto',
                 touchAction: 'auto',
                 isolation: 'isolate'
@@ -183,13 +183,13 @@ const About = () => {
         return (
           <div className={`w-full rounded-lg overflow-hidden relative ${
             isMobile ? 'aspect-[9/16] max-h-96' : 'aspect-video'
-          }`} style={{ zIndex: 50 }}>
+          }`} style={{ zIndex: isMobile ? 9999 : 20 }}>
             <iframe
               src={`${embedUrl}${isMobile ? '&playsinline=1' : ''}`}
               title="About Us Video"
               className="w-full h-full rounded-lg"
               style={{ 
-                zIndex: 50,
+                zIndex: isMobile ? 9999 : 20,
                 position: 'relative',
                 pointerEvents: 'auto',
                 touchAction: 'auto'
@@ -226,7 +226,7 @@ const About = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        zIndex: 10
+        zIndex: isMobile ? 9999 : 10
       }}
     >
       {/* Neural Background apenas no desktop e tema escuro */}
