@@ -74,14 +74,96 @@ export function LinkTreePreview({
     }
   };
 
+  const getItemIcon = (item: LinkTreeItem) => {
+    // Lista de ícones disponíveis
+    const iconMap: { [key: string]: any } = {
+      'star': Star,
+      'external-link': ExternalLink,
+      'trending-up': TrendingUp,
+      'play': Play,
+      'phone': Phone,
+      'mail': Mail,
+      'map-pin': MapPin,
+      'calendar': Calendar,
+      'download': Download,
+      'share': Share,
+      'heart': Heart,
+      'award': Award,
+      'shield': Shield,
+      'zap': Zap,
+      'briefcase': Briefcase,
+      'scale': Scale,
+      'file-text': FileText,
+      'users': Users,
+      'clock': Clock,
+      'check-circle': CheckCircle,
+      'arrow-right': ArrowRight,
+      'sparkles': Sparkles,
+      'crown': Crown,
+      'diamond': Diamond,
+      'globe': Globe,
+      'camera': Camera,
+      'video': Video,
+      'music': Music,
+      'image': Image,
+      'message-circle': MessageCircle,
+      'instagram': Instagram,
+      'youtube': Youtube,
+      'linkedin': Linkedin,
+      'twitter': Twitter,
+      'facebook': Facebook,
+      'chevron-right': ChevronRight,
+      'link': ExternalLink
+    };
+
+    // Se há um ícone personalizado, usar ele
+    if (item.icon && iconMap[item.icon]) {
+      const IconComponent = iconMap[item.icon];
+      return <IconComponent className="w-5 h-5" style={{ color: item.icon_color }} />;
+    }
+
+    // Fallback para ícones automáticos baseados no tipo
+    switch (item.item_type) {
+      case 'contact':
+        if (item.url?.includes('whatsapp') || item.url?.includes('wa.me')) {
+          return <MessageCircle className="w-5 h-5" />;
+        }
+        if (item.url?.includes('mailto') || item.url?.includes('@')) {
+          return <Mail className="w-5 h-5" />;
+        }
+        if (item.url?.includes('tel:')) {
+          return <Phone className="w-5 h-5" />;
+        }
+        return <Phone className="w-5 h-5" />;
+      case 'social':
+        if (item.url?.includes('instagram')) return <Instagram className="w-5 h-5" />;
+        if (item.url?.includes('youtube')) return <Youtube className="w-5 h-5" />;
+        if (item.url?.includes('linkedin')) return <Linkedin className="w-5 h-5" />;
+        if (item.url?.includes('twitter') || item.url?.includes('x.com')) return <Twitter className="w-5 h-5" />;
+        if (item.url?.includes('facebook')) return <Facebook className="w-5 h-5" />;
+        return <Globe className="w-5 h-5" />;
+      case 'video':
+        return <Video className="w-5 h-5" />;
+      case 'text':
+      case 'info':
+        return <FileText className="w-5 h-5" />;
+      case 'form':
+        return <Mail className="w-5 h-5" />;
+      case 'product':
+        return <Briefcase className="w-5 h-5" />;
+      case 'service':
+        return <Scale className="w-5 h-5" />;
+      default:
+        return <ExternalLink className="w-5 h-5" />;
+    }
+  };
+
   const renderItemContent = (item: LinkTreeItem) => (
     <CardContent className="p-4">
       <div className="flex items-center gap-4">
-        {item.icon && (
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white text-xl flex-shrink-0">
-            {item.icon}
-          </div>
-        )}
+        <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+          {getItemIcon(item)}
+        </div>
         <div className="flex-1 text-left">
           <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
           {item.card_content && (
