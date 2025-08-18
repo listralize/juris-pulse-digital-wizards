@@ -386,7 +386,19 @@ const StepForm: React.FC = () => {
       }
     }
     
-    // Validar campos obrigatórios do formulário
+    // Validar email obrigatório globalmente
+    if (!formData.email || !formData.email.trim()) {
+      console.error('❌ Email é obrigatório');
+      toast({
+        title: "Campo obrigatório",
+        description: "Email é obrigatório para enviar o formulário",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+    
+    // Validar campos obrigatórios do formulário atual
     const currentStep = getCurrentStep();
     console.log('⚡ Step atual:', currentStep);
     
