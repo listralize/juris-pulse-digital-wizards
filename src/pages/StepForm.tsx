@@ -386,8 +386,9 @@ const StepForm: React.FC = () => {
       }
     }
     
-    // Validar email obrigatório globalmente
-    if (!formData.email || !formData.email.trim()) {
+    // Validar email obrigatório globalmente (em formData ou answers)
+    const emailValue = formData.email || answers.email || formData.Email || answers.Email;
+    if (!emailValue || !emailValue.trim()) {
       console.error('❌ Email é obrigatório');
       toast({
         title: "Campo obrigatório",
