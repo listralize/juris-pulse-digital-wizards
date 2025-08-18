@@ -355,7 +355,28 @@ const StepForm: React.FC = () => {
     console.log('📊 Dados do formulário:', formData);
     console.log('💬 Respostas:', answers);
     
-    // Validar campos obrigatórios primeiro
+    // Validar se todas as perguntas obrigatórias foram respondidas
+    const allQuestions = form.steps.filter(step => step.type === 'question');
+    const answeredQuestions = Object.keys(answers);
+    
+    console.log('📊 Total de perguntas:', allQuestions.length);
+    console.log('📊 Perguntas respondidas:', answeredQuestions.length);
+    console.log('📊 Perguntas não respondidas:', allQuestions.filter(q => !answeredQuestions.includes(q.id)).map(q => q.title));
+    
+    if (answeredQuestions.length < allQuestions.length) {
+      const unansweredQuestions = allQuestions.filter(q => !answeredQuestions.includes(q.id));
+      const errorMsg = `Por favor, responda todas as perguntas antes de enviar. Perguntas não respondidas: ${unansweredQuestions.map(q => q.title).join(', ')}`;
+      console.error('❌ Nem todas as perguntas foram respondidas');
+      toast({
+        title: "Perguntas obrigatórias",
+        description: errorMsg,
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+    
+    // Validar campos obrigatórios do formulário
     const currentStep = getCurrentStep();
     console.log('⚡ Step atual:', currentStep);
     

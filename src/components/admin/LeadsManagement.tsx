@@ -145,6 +145,8 @@ export const LeadsManagement: React.FC = () => {
       // Telefone (varias chaves + fallback em respostas_mapeadas)
       const directPhones = [leadData?.phone, leadData?.telefone, leadData?.Phone, leadData?.Telefone, leadData?.whatsapp, leadData?.Whatsapp, leadData?.phoneNumber, leadData?.phone_number, leadData?.tel, leadData?.celular].filter(Boolean) as string[];
       let foundPhone = directPhones.find(p => typeof p === 'string' && p.trim() !== '') || '';
+      
+      // Buscar em respostas_mapeadas primeiro, depois nos dados diretos do stepform
       if (!foundPhone && leadData && typeof leadData === 'object') {
         const entries = Object.entries(leadData.respostas_mapeadas || leadData);
         for (const [k, v] of entries) {
@@ -155,6 +157,22 @@ export const LeadsManagement: React.FC = () => {
           }
         }
       }
+      
+      // Se ainda não achou, buscar em qualquer campo que contenha dígitos suficientes para ser telefone
+      if (!foundPhone && leadData && typeof leadData === 'object') {
+        const allKeys = Object.keys(leadData);
+        for (const key of allKeys) {
+          const value = leadData[key];
+          if (typeof value === 'string' && value.trim()) {
+            const digits = value.replace(/\D/g, '');
+            if (digits.length >= 10 && digits.length <= 15) {
+              foundPhone = value;
+              break;
+            }
+          }
+        }
+      }
+      
       result.phone = foundPhone || 'N/A';
 
       // DDD local (sem chamadas externas)
