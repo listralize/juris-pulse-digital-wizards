@@ -146,6 +146,8 @@ const StepForm: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<{[key: string]: number}>({});
   // Histórico de navegação para o botão Voltar funcionar de forma previsível
   const [history, setHistory] = useState<string[]>([]);
+  // Rastrear steps visitados para validação
+  const [visitedSteps, setVisitedSteps] = useState<string[]>([]);
 
 
   // Load marketing scripts for this step form - usando memo para evitar recarregamentos
@@ -166,6 +168,8 @@ const StepForm: React.FC = () => {
       const firstStepId = getFirstStepFromFlow() || form.steps[0].id;
       setCurrentStepId(firstStepId);
       setHistory([]); // Reinicia o histórico quando definimos o primeiro passo
+      // Adicionar primeiro step aos visitedSteps
+      setVisitedSteps([firstStepId]);
     }
   }, [form, currentStepId]);
 
@@ -312,6 +316,8 @@ const StepForm: React.FC = () => {
         console.log('✅ Navegando para step:', targetStepId);
         // Empilha o step atual para permitir Voltar corretamente
         setHistory((prev) => [...prev, currentStepId]);
+        // Adicionar step visitado para validação
+        setVisitedSteps((prev) => [...new Set([...prev, targetStepId])]);
         setCurrentStepId(targetStepId);
       } else {
         toast({
@@ -355,25 +361,29 @@ const StepForm: React.FC = () => {
     console.log('📊 Dados do formulário:', formData);
     console.log('💬 Respostas:', answers);
     
-    // Validar se todas as perguntas obrigatórias foram respondidas
-    const allQuestions = form.steps.filter(step => step.type === 'question');
+    // Validar se todas as perguntas visitadas e obrigatórias foram respondidas
+    const visitedQuestions = form.steps.filter(step => 
+      step.type === 'question' && 
+      visitedSteps.includes(step.id)
+    );
     const answeredQuestions = Object.keys(answers);
     
-    console.log('📊 Total de perguntas:', allQuestions.length);
+    console.log('📊 Perguntas visitadas:', visitedQuestions.length);
     console.log('📊 Perguntas respondidas:', answeredQuestions.length);
-    console.log('📊 Perguntas não respondidas:', allQuestions.filter(q => !answeredQuestions.includes(q.id)).map(q => q.title));
     
-    if (answeredQuestions.length < allQuestions.length) {
-      const unansweredQuestions = allQuestions.filter(q => !answeredQuestions.includes(q.id));
-      const errorMsg = `Por favor, responda todas as perguntas antes de enviar. Perguntas não respondidas: ${unansweredQuestions.map(q => q.title).join(', ')}`;
-      console.error('❌ Nem todas as perguntas foram respondidas');
-      toast({
-        title: "Perguntas obrigatórias",
-        description: errorMsg,
-        variant: "destructive"
-      });
-      setLoading(false);
-      return;
+    if (visitedQuestions.length > 0) {
+      const unansweredQuestions = visitedQuestions.filter(q => !answeredQuestions.includes(q.id));
+      if (unansweredQuestions.length > 0) {
+        const errorMsg = `Por favor, responda todas as perguntas visitadas antes de enviar. Perguntas não respondidas: ${unansweredQuestions.map(q => q.title).join(', ')}`;
+        console.error('❌ Perguntas visitadas não foram respondidas:', unansweredQuestions.map(q => q.title));
+        toast({
+          title: "Perguntas obrigatórias",
+          description: errorMsg,
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
     }
     
     // Validar campos obrigatórios do formulário
