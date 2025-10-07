@@ -238,18 +238,36 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
             const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
             
+            // Estrutura seguindo o padrão GTM de referência
             const eventData = {
               event: eventName,
+              page_location: window.location.href,
+              page_path: window.location.pathname,
+              page_title: document.title,
+              session_id: event.detail?.sessionId || sessionStorage.getItem('sessionId') || '',
+              timestamp: new Date().toISOString(),
+              user_agent: navigator.userAgent,
+              
+              // Dados do cliente (formato padrão GTM)
+              customer_email: email,
+              customer_phone: telefone,
+              customer_full_name: nome,
+              
+              // Dados do formulário
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
-              page_url: window.location.href,
+              form_id: formSlug,
+              
+              // Dados técnicos
               domain: window.location.hostname,
-              timestamp: new Date().toISOString(),
-              // Dados do usuário
-              user_email: email,
-              user_name: nome,
-              user_phone: telefone,
-              user_ip: ip
+              ip_address: ip,
+              
+              // UTM parameters (se disponível)
+              utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
+              utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
+              utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
+              utm_term: new URLSearchParams(window.location.search).get('utm_term') || undefined,
+              utm_content: new URLSearchParams(window.location.search).get('utm_content') || undefined,
             };
             console.log(`📤 [${formSlug}] Enviando dados para GTM:`, eventData);
             (window as any).dataLayer.push(eventData);
@@ -270,19 +288,37 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
             const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
             
+            // Estrutura seguindo o padrão GTM de referência
             const eventData = {
               event: eventName,
+              page_location: window.location.href,
+              page_path: window.location.pathname,
+              page_title: document.title,
+              session_id: event.detail?.sessionId || sessionStorage.getItem('sessionId') || '',
+              timestamp: new Date().toISOString(),
+              user_agent: navigator.userAgent,
+              
+              // Dados do cliente (formato padrão GTM)
+              customer_email: email,
+              customer_phone: telefone,
+              customer_full_name: nome,
+              
+              // Dados do formulário
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
-              page_url: window.location.href,
+              form_id: formSlug,
+              
+              // Dados técnicos
               domain: window.location.hostname,
-              timestamp: new Date().toISOString(),
+              ip_address: ip,
               fallback: true,
-              // Dados do usuário
-              user_email: email,
-              user_name: nome,
-              user_phone: telefone,
-              user_ip: ip
+              
+              // UTM parameters (se disponível)
+              utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
+              utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
+              utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
+              utm_term: new URLSearchParams(window.location.search).get('utm_term') || undefined,
+              utm_content: new URLSearchParams(window.location.search).get('utm_content') || undefined,
             };
             console.log(`📤 [${formSlug}] Enviando dados para GTM (com dataLayer inicializado):`, eventData);
             (window as any).dataLayer.push(eventData);
