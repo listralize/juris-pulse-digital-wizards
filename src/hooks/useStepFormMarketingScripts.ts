@@ -225,13 +225,28 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           });
           
           if (typeof window !== 'undefined' && (window as any).dataLayer) {
+            // Extrair dados do formulário do evento
+            const formData = event.detail?.formData || {};
+            const answers = event.detail?.answers || {};
+            
+            // Tentar obter os dados necessários (suporta diferentes formatos)
+            const email = formData.email || answers.email || formData.Email || answers.Email || '';
+            const nome = formData.nome || answers.nome || formData.name || answers.name || formData.Nome || answers.Nome || '';
+            const telefone = formData.telefone || answers.telefone || formData.phone || answers.phone || formData.Telefone || answers.Telefone || '';
+            const ip = formData.ip_address || answers.ip_address || '';
+            
             const eventData = {
               event: eventName,
               form_slug: formSlug,
               form_name: event.detail?.formName || `StepForm ${formSlug}`,
               page_url: window.location.href,
               domain: window.location.hostname,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              // Dados do usuário
+              user_email: email,
+              user_name: nome,
+              user_phone: telefone,
+              user_ip: ip
             };
             console.log(`📤 [${formSlug}] Enviando dados para GTM:`, eventData);
             (window as any).dataLayer.push(eventData);
@@ -241,6 +256,16 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             console.log('🔧 Inicializando dataLayer...');
             // Inicializar dataLayer se não existir
             (window as any).dataLayer = (window as any).dataLayer || [];
+            
+            // Extrair dados do formulário do evento
+            const formData = event.detail?.formData || {};
+            const answers = event.detail?.answers || {};
+            
+            const email = formData.email || answers.email || formData.Email || answers.Email || '';
+            const nome = formData.nome || answers.nome || formData.name || answers.name || formData.Nome || answers.Nome || '';
+            const telefone = formData.telefone || answers.telefone || formData.phone || answers.phone || formData.Telefone || answers.Telefone || '';
+            const ip = formData.ip_address || answers.ip_address || '';
+            
             const eventData = {
               event: eventName,
               form_slug: formSlug,
@@ -248,7 +273,12 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
               page_url: window.location.href,
               domain: window.location.hostname,
               timestamp: new Date().toISOString(),
-              fallback: true
+              fallback: true,
+              // Dados do usuário
+              user_email: email,
+              user_name: nome,
+              user_phone: telefone,
+              user_ip: ip
             };
             console.log(`📤 [${formSlug}] Enviando dados para GTM (com dataLayer inicializado):`, eventData);
             (window as any).dataLayer.push(eventData);
