@@ -226,14 +226,17 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           
           if (typeof window !== 'undefined' && (window as any).dataLayer) {
             // Extrair dados do formulário do evento
+            const userData = event.detail?.userData || {};
             const formData = event.detail?.formData || {};
             const answers = event.detail?.answers || {};
             
+            console.log(`🔍 [${formSlug}] Dados recebidos no evento:`, { userData, formData, answers });
+            
             // Tentar obter os dados necessários (suporta diferentes formatos)
-            const email = formData.email || answers.email || formData.Email || answers.Email || '';
-            const nome = formData.nome || answers.nome || formData.name || answers.name || formData.Nome || answers.Nome || '';
-            const telefone = formData.telefone || answers.telefone || formData.phone || answers.phone || formData.Telefone || answers.Telefone || '';
-            const ip = formData.ip_address || answers.ip_address || '';
+            const email = userData.email || formData.email || answers.email || userData.Email || formData.Email || answers.Email || '';
+            const nome = userData.nome || formData.nome || answers.nome || userData.name || formData.name || answers.name || userData.Nome || formData.Nome || answers.Nome || '';
+            const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
+            const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
             
             const eventData = {
               event: eventName,
@@ -258,13 +261,14 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             (window as any).dataLayer = (window as any).dataLayer || [];
             
             // Extrair dados do formulário do evento
+            const userData = event.detail?.userData || {};
             const formData = event.detail?.formData || {};
             const answers = event.detail?.answers || {};
             
-            const email = formData.email || answers.email || formData.Email || answers.Email || '';
-            const nome = formData.nome || answers.nome || formData.name || answers.name || formData.Nome || answers.Nome || '';
-            const telefone = formData.telefone || answers.telefone || formData.phone || answers.phone || formData.Telefone || answers.Telefone || '';
-            const ip = formData.ip_address || answers.ip_address || '';
+            const email = userData.email || formData.email || answers.email || userData.Email || formData.Email || answers.Email || '';
+            const nome = userData.nome || formData.nome || answers.nome || userData.name || formData.name || answers.name || userData.Nome || formData.Nome || answers.Nome || '';
+            const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
+            const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
             
             const eventData = {
               event: eventName,
