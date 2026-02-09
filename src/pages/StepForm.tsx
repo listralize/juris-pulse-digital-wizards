@@ -11,7 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 import { OfferElement, TimerElement, SocialProofElement, renderStepElement } from '../components/StepFormElements';
 import { StepFormTestimonials } from '../components/StepFormTestimonials';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
-import { useHostingerMarketingScripts } from '@/hooks/useHostingerMarketingScripts';
+
 import { StepFormLoader } from '@/components/StepFormLoader';
 
 interface StepFormData {
