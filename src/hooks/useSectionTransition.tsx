@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { logger } from '@/utils/logger';
 import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 interface Section {
@@ -20,31 +19,11 @@ export const useSectionTransition = (sections: Section[]) => {
   const lastScrollTime = useRef(0);
   const [isInitialized, setIsInitialized] = useState(false);
   const hasInitialized = useRef(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
-
-  logger.log('useSectionTransition - Estado atual:', { 
-    activeSection, activeSectionIndex, sectionsLength: sections.length,
-    sectionIds: sections.map(s => s.id), isInitialized, isMobile, isTablet
-  });
-
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 640);
-      setIsTablet(width >= 640 && width < 1024);
-    };
-    checkDeviceType();
-    window.addEventListener('resize', checkDeviceType);
-    return () => window.removeEventListener('resize', checkDeviceType);
-  }, []);
-
-  const sectionAllowsScroll = (sectionId: string) => false;
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   useEffect(() => {
     if (hasInitialized.current) return;
-    
-    logger.log('useSectionTransition - Inicializando ÚNICA VEZ...');
     
     const hash = location.hash.substring(1);
     let targetSection = 'home';
@@ -55,14 +34,11 @@ export const useSectionTransition = (sections: Section[]) => {
       targetIndex = sections.findIndex(s => s.id === hash);
     }
     
-    logger.log('useSectionTransition - Estado inicial:', { targetSection, targetIndex });
-    
     setActiveSection(targetSection);
     setActiveSectionIndex(targetIndex);
     
     if (containerRef.current) {
       if (isMobile || isTablet) {
-        // No GSAP on mobile - use native scroll
         containerRef.current.style.transform = 'none';
       } else {
         gsap.set(containerRef.current, { x: `-${targetIndex * 100}vw`, y: 0, force3D: true });
@@ -71,30 +47,15 @@ export const useSectionTransition = (sections: Section[]) => {
     
     hasInitialized.current = true;
     setIsInitialized(true);
-    logger.log('useSectionTransition - Inicialização completa');
   }, [isMobile, isTablet]);
 
   const transitionToSection = useCallback((sectionId: string) => {
-    logger.log('transitionToSection chamado:', { sectionId, activeSection, isTransitioning: isTransitioning.current, isMobile, isTablet });
-    
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
     
-    if (sectionIndex === -1) {
-      logger.warn('Seção não encontrada:', sectionId);
-      return;
-    }
-
-    if (activeSection === sectionId && activeSectionIndex === sectionIndex) {
-      logger.log('Já está na seção alvo:', sectionId);
-      return;
-    }
+    if (sectionIndex === -1) return;
+    if (activeSection === sectionId && activeSectionIndex === sectionIndex) return;
+    if (isTransitioning.current) return;
     
-    if (isTransitioning.current) {
-      logger.log('Já em transição, ignorando...');
-      return;
-    }
-    
-    logger.log('Iniciando transição para:', sectionId, 'Índice:', sectionIndex);
     isTransitioning.current = true;
     
     if (location.pathname === '/') {
@@ -114,10 +75,8 @@ export const useSectionTransition = (sections: Section[]) => {
           targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         isTransitioning.current = false;
-        logger.log('Transição mobile/tablet completada para:', sectionId);
       } else {
         const targetX = -sectionIndex * 100;
-        logger.log('Desktop - Animando para posição X:', targetX + 'vw');
         
         gsap.to(containerRef.current, {
           x: `${targetX}vw`,
@@ -127,11 +86,9 @@ export const useSectionTransition = (sections: Section[]) => {
           force3D: true,
           onComplete: () => {
             isTransitioning.current = false;
-            logger.log('Transição desktop completada para:', sectionId);
           },
           onInterrupt: () => {
             isTransitioning.current = false;
-            logger.log('Transição desktop interrompida para:', sectionId);
           }
         });
       }
@@ -145,7 +102,6 @@ export const useSectionTransition = (sections: Section[]) => {
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning.current) return;
-      if (sectionAllowsScroll(activeSection)) return;
       
       let newIndex = activeSectionIndex;
       
@@ -158,7 +114,6 @@ export const useSectionTransition = (sections: Section[]) => {
       }
       
       if (newIndex !== activeSectionIndex && sections[newIndex]) {
-        logger.log('Navegação por teclado para:', sections[newIndex].id);
         transitionToSection(sections[newIndex].id);
       }
     };
@@ -190,7 +145,6 @@ export const useSectionTransition = (sections: Section[]) => {
       }
       
       if (newIndex !== activeSectionIndex && sections[newIndex]) {
-        logger.log('Navegação desktop por scroll para:', sections[newIndex].id);
         transitionToSection(sections[newIndex].id);
       }
     };

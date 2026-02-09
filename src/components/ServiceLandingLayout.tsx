@@ -18,7 +18,7 @@ import {
 } from './ui/accordion';
 import UnifiedContactForm from './contact/UnifiedContactForm';
 import { useServicePageData } from '../hooks/useServicePageData';
-import NeuralBackground from './NeuralBackground';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -125,7 +125,10 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
     );
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
+      // Only kill tweens created by this component
+      if (titleRef.current) gsap.killTweensOf(titleRef.current);
+      if (descriptionRef.current) gsap.killTweensOf(descriptionRef.current);
+      if (ctaRef.current) gsap.killTweensOf(ctaRef.current);
     };
   }, []);
 
@@ -139,8 +142,8 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
-      {/* Neural Background only in dark theme */}
-      {isDark && <NeuralBackground />}
+      
+      <Navbar />
       
       <Navbar />
       

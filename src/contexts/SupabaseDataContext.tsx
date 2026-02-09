@@ -27,6 +27,11 @@ interface SiteSettings {
   hero_background_image: string;
 }
 
+interface FooterInfo {
+  companyName: string;
+  description: string;
+}
+
 interface ContactInfo {
   phone: string;
   email: string;
@@ -59,8 +64,10 @@ export interface SupabaseDataContextType {
   // Centralized data
   siteSettings: SiteSettings | null;
   contactInfo: ContactInfo | null;
+  footerInfo: FooterInfo | null;
   siteSettingsLoading: boolean;
   contactInfoLoading: boolean;
+  footerInfoLoading: boolean;
 }
 
 const defaultSiteSettings: SiteSettings = {
@@ -97,14 +104,21 @@ const defaultContactInfo: ContactInfo = {
   instagram_url: '',
 };
 
+const defaultFooterInfo: FooterInfo = {
+  companyName: 'Serafim & Trombela Advocacia',
+  description: 'A história do Serafim & Trombela Advocacia é moldada pelo compromisso com a excelência jurídica e o sucesso de nossos clientes.',
+};
+
 export const SupabaseDataContext = createContext<SupabaseDataContextType | null>(null);
 
 export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const supabaseData = useSupabaseDataNew();
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [footerInfo, setFooterInfo] = useState<FooterInfo | null>(null);
   const [siteSettingsLoading, setSiteSettingsLoading] = useState(true);
   const [contactInfoLoading, setContactInfoLoading] = useState(true);
+  const [footerInfoLoading, setFooterInfoLoading] = useState(true);
 
   // Load site_settings once
   useEffect(() => {
@@ -179,10 +193,39 @@ export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
           setContactInfo(defaultContactInfo);
         }
       } catch (error) {
-        logger.error('❌ Error loading contact_info:', error);
+        logger.error('Error loading contact_info:', error);
         setContactInfo(defaultContactInfo);
       } finally {
         setContactInfoLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  // Load footer_info once
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from('footer_info')
+          .select('company_name, description')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          setFooterInfo({
+            companyName: data.company_name || defaultFooterInfo.companyName,
+            description: data.description || defaultFooterInfo.description,
+          });
+        } else {
+          setFooterInfo(defaultFooterInfo);
+        }
+      } catch (error) {
+        logger.error('Error loading footer_info:', error);
+        setFooterInfo(defaultFooterInfo);
+      } finally {
+        setFooterInfoLoading(false);
       }
     };
     load();
@@ -220,8 +263,10 @@ export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
     ...supabaseData,
     siteSettings,
     contactInfo,
+    footerInfo,
     siteSettingsLoading,
     contactInfoLoading,
+    footerInfoLoading,
   };
 
   return (
