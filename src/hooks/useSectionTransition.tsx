@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { logger } from '@/utils/logger';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 interface Section {
   id: string;

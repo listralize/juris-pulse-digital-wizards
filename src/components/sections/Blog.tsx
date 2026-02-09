@@ -30,7 +30,9 @@ const Blog = () => {
     return () => clearInterval(interval);
   }, [totalSlides]);
 
-  logger.log('Blog section - Posts carregados do Supabase:', blogPosts.length);
+  useEffect(() => {
+    logger.log('Blog section - Posts carregados do Supabase:', blogPosts.length);
+  }, [blogPosts.length]);
 
   if (isLoading) {
     return (
@@ -46,9 +48,6 @@ const Blog = () => {
 
   return (
     <section className={`h-screen flex items-center justify-center overflow-hidden ${isDark ? 'bg-black' : 'bg-white'} relative ${isMobile ? 'pb-4' : ''}`}>
-      {/* NeuralBackground removed - using global instance */}
-
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,

@@ -157,7 +157,10 @@ const Admin = () => {
 
             
 
-            <Tabs defaultValue="content" className="space-y-6">
+            <Tabs defaultValue="content" className="space-y-6" onValueChange={(value) => {
+              // Tabs state is managed by Radix internally
+            }}>
+              {({ value: activeTab, onValueChange: setActiveTab }: any) => null}
               <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
@@ -208,9 +211,19 @@ const Admin = () => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Mobile/Tablet Dropdown Menu */}
-              <div className="md:hidden">
-                <Select defaultValue="content">
+              {/* Mobile/Tablet Dropdown Menu - hidden on desktop, uses TabsTriggers for actual navigation */}
+              <div className="md:hidden flex flex-wrap gap-2">
+                <TabsList className="w-full grid grid-cols-4 gap-1 backdrop-blur-md bg-white/10 border border-white/20 h-auto p-1">
+                  <TabsTrigger value="content" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Edit className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="service-pages" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Globe className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="blog" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><FileText className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="linktree" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Link className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="leads" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Users className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="email-templates" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Mail className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="step-forms" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><FormInput className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="marketing" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Briefcase className="w-3 h-3" /></TabsTrigger>
+                </TabsList>
+              </div>
                   <SelectTrigger className="w-full backdrop-blur-md bg-white/10 border border-white/20 text-white">
                     <SelectValue placeholder="Selecionar seção" />
                   </SelectTrigger>

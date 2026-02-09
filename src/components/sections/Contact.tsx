@@ -1,20 +1,16 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import UnifiedContactForm from '../contact/UnifiedContactForm';
 import ContactInfo from '../contact/ContactInfo';
 import LocationMap from '../contact/LocationMap';
 import Footer from './Footer';
 import { useTheme } from '../ThemeProvider';
 import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
-import { logger } from '@/utils/logger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 
 const Contact = () => {
-  
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -22,48 +18,10 @@ const Contact = () => {
   const isDark = theme === 'dark';
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
+  const { siteSettings } = useSupabaseData();
 
-  const [contactTitle, setContactTitle] = useState('Fale Conosco');
-  const [contactSubtitle, setContactSubtitle] = useState('Estamos prontos para ajudá-lo');
-
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        logger.log('📞 Contact: Carregando dados iniciais...');
-        const { supabase } = await import('../../integrations/supabase/client');
-
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('contact_title, contact_subtitle')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (settings) {
-          logger.log('📞 Contact: Dados carregados da site_settings:', settings);
-          if (settings.contact_title) setContactTitle(settings.contact_title);
-          if (settings.contact_subtitle) setContactSubtitle(settings.contact_subtitle);
-        }
-      } catch (error) {
-        logger.error('❌ Contact: Erro ao carregar dados:', error);
-      }
-    };
-    loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      logger.log('📞 Contact: Evento pageTextsUpdated recebido:', event.detail);
-      const data = event.detail;
-      if (data.contactTitle !== undefined) setContactTitle(data.contactTitle);
-      if (data.contactSubtitle !== undefined) setContactSubtitle(data.contactSubtitle);
-    };
-    
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    };
-  }, []);
+  const contactTitle = siteSettings?.contact_title || 'Fale Conosco';
+  const contactSubtitle = siteSettings?.contact_subtitle || 'Estamos prontos para ajudá-lo';
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -86,8 +44,6 @@ const Contact = () => {
         padding: 0
       }}
     >
-      {/* NeuralBackground removed - using global instance */}
-      
       <div 
         ref={sectionRef} 
         className="w-full relative z-10"

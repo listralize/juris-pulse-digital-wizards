@@ -4,6 +4,7 @@ import { useMarketingLoader } from './hooks/useMarketingLoader';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
+import { SupabaseDataProvider } from './contexts/SupabaseDataContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Loading from './components/Loading';
@@ -50,6 +51,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
+          <SupabaseDataProvider>
           <Router>
             <div className="App">
               <Suspense fallback={<Loading />}>
@@ -84,6 +86,7 @@ function App() {
               </Suspense>
             </div>
           </Router>
+          </SupabaseDataProvider>
           <Toaster />
         </AuthProvider>
       </ThemeProvider>
