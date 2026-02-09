@@ -134,7 +134,7 @@ const About = () => {
             <video
               src={aboutVideoStorageUrl}
               title="About Us Video"
-              className="w-full h-full rounded-lg object-cover"
+              className="w-full h-full rounded-lg object-cover blur-[1.5px]"
               style={{ 
                 position: 'relative',
                 zIndex: isMobile ? 9999 : 20,
