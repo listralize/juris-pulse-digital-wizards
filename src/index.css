@@ -1,7 +1,4 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,6 +86,7 @@
 
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   html {
@@ -108,7 +106,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: auto !important;
-    cursor: none;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
@@ -116,7 +113,6 @@
   /* Mobile/Tablet optimizations */
   @media (max-width: 767px) {
     body {
-      cursor: auto; /* Restaurar cursor normal no mobile */
       touch-action: pan-y; /* Permitir scroll vertical no mobile */
     }
     
@@ -553,12 +549,6 @@
   }
 }
 
-/* Força cursor padrão em todo o site */
-* {
-  cursor: auto !important;
-  box-sizing: border-box;
-}
-
 /* Tablet responsiveness */
 @media (min-width: 768px) and (max-width: 1024px) {
   .container {
@@ -631,17 +621,7 @@
   height: clamp(0.5rem, 1.5vw, 0.75rem);
 }
 
-/* Remove visual editor artifacts */
-* {
-  background-image: none !important;
-}
-
-body, html {
-  background-image: none !important;
-  background-pattern: none !important;
-}
-
-/* Esconder completamente o painel/overlay do Tag Assistant e GTM Preview (somente na visualização do site) */
+/* Esconder completamente o painel/overlay do Tag Assistant e GTM Preview */
 iframe[src*="tagassistant"],
 iframe[title*="Tag Assistant"],
 #googleTagManagerDebugConsole,
@@ -658,33 +638,6 @@ iframe[title*="Tag Assistant"],
   pointer-events: none !important;
 }
 
-/* ELIMINAR QUALQUER OVERLAY BRANCO NO HERO */
-#home,
-#home *,
-#home *::before,
-#home *::after {
-  background-color: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-/* Preservar apenas elementos essenciais */
-#home video,
-#home img,
-#home button,
-#home a {
-  background: unset !important;
-  backdrop-filter: unset !important;
-  -webkit-backdrop-filter: unset !important;
-}
-
-/* Garantir que overlay escuro funcione */
-#home .bg-black\/50 {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-}
-
 /* Vídeo da seção About com z-index máximo */
 .about-video-container {
   z-index: 999999 !important;
@@ -699,7 +652,7 @@ iframe[title*="Tag Assistant"],
   isolation: isolate !important;
 }
 
-/* Ocultar sobreposição do Google Tag Assistant (quando a extensão estiver ativa) */
+/* Ocultar sobreposição do Google Tag Assistant */
 [id*="tag-assistant"], [class*="tag-assistant"], [data-tag-assistant],
 #gtm-debug, [class*="gtm-debug"], [id*="gtm-debug"] {
   display: none !important;

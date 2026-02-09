@@ -16,15 +16,64 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="/assets/logo.png" />
 
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://serafimetrombela.com.br/" />
+
     <!-- Security: Content Security Policy (Relaxed for production) -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https:; media-src 'self' https: blob: data:; frame-src 'self' https:; child-src 'self' https:;">
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
-    <!-- Custom Fonts -->
-    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <!-- Performance: Preconnect to critical origins -->
+    <link rel="preconnect" href="https://hmfsvccbyxhdwmrgcyff.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://hmfsvccbyxhdwmrgcyff.supabase.co" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+
+    <!-- Fonts: Non-blocking with display=swap -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /></noscript>
+    
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" /></noscript>
+
+    <link rel="preload" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" /></noscript>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/assets/logo.png" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LegalService",
+      "name": "Serafim & Trombela Advocacia",
+      "description": "Escritório de advocacia especializado em Direito Empresarial, Família, Tributário e diversas outras áreas. Atendimento personalizado em Goiânia com atuação nacional.",
+      "url": "https://serafimetrombela.com.br",
+      "logo": "https://serafimetrombela.com.br/assets/logo.png",
+      "image": "https://serafimetrombela.com.br/assets/logo.png",
+      "telephone": "+55-62-99459-4496",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Goiânia",
+        "addressRegion": "GO",
+        "addressCountry": "BR"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Brasil"
+      },
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      "sameAs": []
+    }
+    </script>
   </head>
 
   <body>
@@ -41,7 +90,7 @@
       // Ensure root element exists
       window.addEventListener('DOMContentLoaded', function() {
         if (!document.getElementById('root')) {
-          const root = document.createElement('div');
+          var root = document.createElement('div');
           root.id = 'root';
           document.body.appendChild(root);
         }

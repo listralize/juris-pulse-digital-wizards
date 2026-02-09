@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import NeuralBackground from '../NeuralBackground';
 import { useIsMobile } from '../../hooks/use-mobile';
+import { logger } from '@/utils/logger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,7 +18,6 @@ const About = () => {
   const isDark = theme === 'dark';
   const isMobile = useIsMobile();
   
-  // Estados para os textos editáveis
   const [aboutTitle, setAboutTitle] = useState('Quem Somos');
   const [aboutDescription, setAboutDescription] = useState('Uma equipe dedicada à excelência jurídica');
   const [aboutImage, setAboutImage] = useState('/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
@@ -27,7 +26,6 @@ const About = () => {
   const [teamVideoEnabled, setTeamVideoEnabled] = useState(false);
   const [teamBackgroundVideo, setTeamBackgroundVideo] = useState('');
 
-  // Carregar dados do Supabase
   useEffect(() => {
     const loadAboutData = async () => {
       try {
@@ -41,7 +39,7 @@ const About = () => {
           .maybeSingle();
 
         if (settings) {
-          console.log('ℹ️ About: Dados carregados do Supabase:', settings);
+          logger.log('ℹ️ About: Dados carregados do Supabase:', settings);
           setAboutTitle(settings.about_title || 'Quem Somos');
           setAboutDescription(settings.about_description || 'Uma equipe dedicada à excelência jurídica');
           setAboutImage(settings.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
@@ -51,17 +49,16 @@ const About = () => {
           setTeamBackgroundVideo(settings.team_background_video || '');
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do About:', error);
+        logger.error('❌ Erro ao carregar dados do About:', error);
       }
     };
 
     loadAboutData();
   }, []);
 
-  // Escutar eventos de atualização
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('ℹ️ About: Recebendo atualização de textos:', event.detail);
+      logger.log('ℹ️ About: Recebendo atualização de textos:', event.detail);
       const { 
         aboutTitle: newTitle, 
         aboutDescription: newDescription,
@@ -69,28 +66,15 @@ const About = () => {
         aboutMediaType: newMediaType
       } = event.detail;
       
-      if (newTitle !== undefined) {
-        console.log('ℹ️ About: Atualizando título:', newTitle);
-        setAboutTitle(newTitle);
-      }
-      if (newDescription !== undefined) {
-        console.log('ℹ️ About: Atualizando descrição:', newDescription);
-        setAboutDescription(newDescription);
-      }
-      if (newImage !== undefined) {
-        console.log('ℹ️ About: Atualizando imagem:', newImage);
-        setAboutImage(newImage);
-      }
-      if (newMediaType !== undefined) {
-        console.log('ℹ️ About: Atualizando tipo de mídia:', newMediaType);
-        setMediaType(newMediaType);
-      }
+      if (newTitle !== undefined) setAboutTitle(newTitle);
+      if (newDescription !== undefined) setAboutDescription(newDescription);
+      if (newImage !== undefined) setAboutImage(newImage);
+      if (newMediaType !== undefined) setMediaType(newMediaType);
     };
 
     const handleTeamVideoUpdate = (event: CustomEvent) => {
-      console.log('ℹ️ About: Recebendo atualização de vídeo da equipe:', event.detail);
+      logger.log('ℹ️ About: Recebendo atualização de vídeo da equipe:', event.detail);
       const { team_video_enabled, team_background_video } = event.detail;
-      
       setTeamVideoEnabled(team_video_enabled || false);
       setTeamBackgroundVideo(team_background_video || '');
     };
@@ -104,7 +88,6 @@ const About = () => {
     };
   }, []);
 
-  // Função para converter URL do YouTube para embed
   const getYouTubeEmbedUrl = (url: string) => {
     const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
     const match = url.match(regex);
@@ -135,9 +118,8 @@ const About = () => {
 
   const renderMedia = () => {
     if (mediaType === 'video') {
-      // Priorizar vídeo do storage se disponível
       if (aboutVideoStorageUrl) {
-        console.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
+        logger.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
         return (
           <div 
             className="about-video-container w-full rounded-lg overflow-hidden" 
@@ -165,20 +147,14 @@ const About = () => {
               preload="metadata"
               playsInline
               webkit-playsinline="true"
-              onLoadedData={() => console.log('🎥 About: Video loaded and ready')}
-              onPlay={() => console.log('🎥 About: Video started playing')}
-              onPause={() => console.log('🎥 About: Video paused')}
-              onClick={() => console.log('🎥 About: Video clicked')}
-              onTouchStart={() => console.log('🎥 About: Video touch started')}
             />
           </div>
         );
       }
       
-      // Fallback para YouTube se storage não disponível
       if (aboutImage && aboutImage.includes('youtube')) {
         const embedUrl = getYouTubeEmbedUrl(aboutImage);
-        console.log('🎥 About: Renderizando vídeo do YouTube:', { originalUrl: aboutImage, embedUrl });
+        logger.log('🎥 About: Renderizando vídeo do YouTube:', { originalUrl: aboutImage, embedUrl });
         
         return (
           <div className={`w-full rounded-lg overflow-hidden relative ${
@@ -196,18 +172,22 @@ const About = () => {
               }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              loading="lazy"
             />
           </div>
         );
       }
     }
     
-    // Default para imagem quando não é vídeo ou quando aboutImage não é YouTube
     return (
       <img 
         src={aboutImage} 
         alt="Sobre nós" 
         className="w-full h-48 md:h-56 lg:h-64 object-cover rounded-lg"
+        loading="lazy"
+        decoding="async"
+        width="600"
+        height="256"
       />
     );
   };
@@ -229,17 +209,10 @@ const About = () => {
         zIndex: isMobile ? 9999 : 10
       }}
     >
-      {/* Neural Background apenas no desktop e tema escuro */}
-      {isDark && !isMobile && (
-        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-          <NeuralBackground />
-        </div>
-      )}
+      {/* NeuralBackground removed - using global instance from Index.tsx */}
       
       <div className="max-w-6xl mx-auto w-full relative z-10">
-        {/* Container centralizado com padrão uniforme */}
         <div className="flex flex-col items-center justify-center flex-1">
-          {/* Header padronizado - mesmo padrão de todas as outras seções */}
           <div className="text-center mb-8 md:mb-12">
             <h2 
               ref={titleRef}
@@ -250,7 +223,6 @@ const About = () => {
             <div className={`w-16 h-0.5 mx-auto ${isDark ? 'bg-white/50' : 'bg-black/50'}`}></div>
           </div>
           
-          {/* Content Grid - padronizado */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl w-full">
             <div ref={contentRef}>
               <p className={`text-base md:text-lg leading-relaxed font-satoshi ${isDark ? 'text-white/90' : 'text-black/80'}`}>

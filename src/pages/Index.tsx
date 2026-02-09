@@ -12,6 +12,7 @@ import { TestimonialCarousel } from '../components/TestimonialCarousel';
 import { useTheme } from '../components/ThemeProvider';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 import { useAnalytics } from '../hooks/useAnalytics';
+import NeuralBackground from '../components/NeuralBackground';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -107,6 +108,9 @@ const Index = () => {
       {/* Background gradients */}
       <div className="fixed inset-0 bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900 -z-10"></div>
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20 -z-10"></div>
+
+      {/* Global NeuralBackground - single instance for entire page */}
+      {isDark && <NeuralBackground />}
 
       
       <Navbar />

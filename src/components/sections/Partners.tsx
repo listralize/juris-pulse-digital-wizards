@@ -4,8 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronLeft, ChevronRight, X, Mail, User } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
-import NeuralBackground from '../NeuralBackground';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { logger } from '@/utils/logger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -87,7 +87,7 @@ const Partners = () => {
           .limit(1)
           .maybeSingle();
 
-        console.log('🎥 Carregando vídeo de fundo:', settings);
+        logger.log('🎥 Carregando vídeo de fundo:', settings);
 
         if (settings?.team_background_video) {
           setTimeout(() => {
@@ -98,18 +98,18 @@ const Partners = () => {
               if (settings.team_video_enabled) {
                 videoElement.style.display = 'block';
                 videoElement.play().then(() => {
-                  console.log('✅ Vídeo de fundo carregado e reproduzindo');
+                  logger.log('✅ Vídeo de fundo carregado e reproduzindo');
                 }).catch(err => {
-                  console.error('❌ Erro ao reproduzir vídeo:', err);
+                  logger.error('❌ Erro ao reproduzir vídeo:', err);
                 });
               }
             } else {
-              console.error('❌ Elemento de vídeo não encontrado!');
+              logger.error('❌ Elemento de vídeo não encontrado!');
             }
           }, 100);
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar vídeo:', error);
+        logger.error('❌ Erro ao carregar vídeo:', error);
       }
     };
 
@@ -126,7 +126,7 @@ const Partners = () => {
         videoElement.src = team_background_video;
         if (team_video_enabled) {
           videoElement.style.display = 'block';
-          videoElement.play().catch(console.error);
+          videoElement.play().catch(logger.error);
         } else {
           videoElement.style.display = 'none';
         }
@@ -226,8 +226,7 @@ const Partners = () => {
         justifyContent: 'center'
       }}
     >
-      {/* Neural Background only in dark theme */}
-      {isDark && <NeuralBackground />}
+      {/* NeuralBackground removed - using global instance */}
       
       {/* Vídeo de fundo da página TODA */}
       <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{
@@ -252,9 +251,9 @@ const Partners = () => {
             minHeight: '100vh',
             objectFit: 'cover'
           }}
-          onLoadStart={() => console.log('🎥 Vídeo iniciando carregamento')}
-          onCanPlay={() => console.log('✅ Vídeo pronto para reproduzir')}
-          onError={(e) => console.error('❌ Erro no vídeo:', e)}
+          onLoadStart={() => logger.log('🎥 Vídeo iniciando carregamento')}
+          onCanPlay={() => logger.log('✅ Vídeo pronto para reproduzir')}
+          onError={(e) => logger.error('❌ Erro no vídeo:', e)}
           onLoadedMetadata={(e) => {
             const video = e.target as HTMLVideoElement;
             // Force play on mobile
@@ -262,7 +261,7 @@ const Partners = () => {
             if (playPromise !== undefined) {
               playPromise.catch(() => {
                 // Mobile might require user interaction first
-                console.log('🎥 Autoplay falhou, tentando reproduzir novamente');
+                logger.log('🎥 Autoplay falhou, tentando reproduzir novamente');
                 setTimeout(() => video.play(), 1000);
               });
             }
