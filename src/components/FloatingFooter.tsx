@@ -1,24 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { Mail, MapPin, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FloatingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detectar mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Estados locais para dados editáveis do footer
   const [footerData, setFooterData] = useState({

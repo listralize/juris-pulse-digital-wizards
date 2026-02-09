@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../ThemeProvider';
-import GlobalSocialProof from '../GlobalSocialProof';
 
 interface FooterProps {
   respectTheme?: boolean;

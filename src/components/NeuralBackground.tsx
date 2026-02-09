@@ -247,24 +247,29 @@ const NeuralBackground: React.FC = () => {
       // Otimizar eventos para mobile
       const eventOptions = isMobile ? { passive: true } : false;
       
-      window.addEventListener("pointermove", (e) => {
+      const handlePointerMove = (e: PointerEvent) => {
         updateMousePosition(e.clientX, e.clientY);
-      }, eventOptions);
-      
-      window.addEventListener("touchmove", (e) => {
+      };
+      const handleTouchMove = (e: TouchEvent) => {
         if (e.touches.length > 0) {
           updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
         }
-      }, eventOptions);
-      
-      window.addEventListener("click", (e) => {
+      };
+      const handleClick = (e: MouseEvent) => {
         updateMousePosition(e.clientX, e.clientY);
-      }, eventOptions);
+      };
+
+      window.addEventListener("pointermove", handlePointerMove, eventOptions);
+      window.addEventListener("touchmove", handleTouchMove, eventOptions);
+      window.addEventListener("click", handleClick, eventOptions);
+
+      return { handlePointerMove, handleTouchMove, handleClick };
     };
 
     // Initialize everything
+    let eventHandlers: ReturnType<typeof setupEvents> | null = null;
     if (initShader()) {
-      setupEvents();
+      eventHandlers = setupEvents();
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
       animationId = requestAnimationFrame(render);
@@ -276,9 +281,11 @@ const NeuralBackground: React.FC = () => {
         cancelAnimationFrame(animationId);
       }
       window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("pointermove", () => {});
-      window.removeEventListener("touchmove", () => {});
-      window.removeEventListener("click", () => {});
+      if (eventHandlers) {
+        window.removeEventListener("pointermove", eventHandlers.handlePointerMove);
+        window.removeEventListener("touchmove", eventHandlers.handleTouchMove);
+        window.removeEventListener("click", eventHandlers.handleClick);
+      }
     };
   }, []);
 

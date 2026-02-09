@@ -5,6 +5,7 @@ import { ArrowRight, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,8 +17,8 @@ const Hero = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
   const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
   const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
   const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco');
@@ -92,16 +93,6 @@ const Hero = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 768);
-      setIsTablet(width >= 768 && width < 1024);
-    };
-    checkDeviceType();
-    window.addEventListener('resize', checkDeviceType);
-    return () => window.removeEventListener('resize', checkDeviceType);
-  }, []);
 
   useEffect(() => {
     if (isMobile || isTablet) return;
