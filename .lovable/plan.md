@@ -1,85 +1,66 @@
 
-# Fase 4 e 5: Continuacao da Refatoracao
+# Corrigir Limite de 1000 Leads no Supabase
 
-## O que sera feito
+## Problema Identificado
 
-### Fase 4: Refatorar StepForm (1074 linhas -> componentes menores)
+O Supabase retorna no maximo **1000 linhas** por query por padrao. Seu banco tem **1356 leads** na tabela `conversion_events`, mas a query carrega apenas 1000. Isso afeta dois arquivos:
 
-O arquivo `src/pages/StepForm.tsx` sera dividido em:
+1. `src/components/admin/LeadsManagement.tsx` (linha 217-221) -- query principal de leads
+2. `src/hooks/useLeadsData.ts` (linha 111-115) -- hook usado em outros componentes
+3. `lead_status` query (linha 344-346) tambem pode ser afetada futuramente
 
-1. **`src/hooks/useStepForm.ts`** - Hook com toda a logica de negocio:
-   - State management (form, currentStepId, answers, formData, history, visitedSteps, progress)
-   - `loadForm()` - carregamento do formulario
-   - `getFirstStepFromFlow()` / `getNextStepFromFlow()` - navegacao por flow
-   - `goToNextStep()` - navegacao entre steps
-   - `handleFormSubmit()` - envio do formulario (validacao, save no Supabase, webhook, email, marketing events)
-   - `saveAnswer()`, `getCurrentStep()`, `getBackStep()`
+## Solucao
 
-2. **`src/components/stepform/StepFormHeader.tsx`** - Barra de progresso + logo + titulo/subtitulo
+Implementar **fetch paginado** que busca todos os registros em lotes de 1000 ate nao haver mais dados. Isso e feito com `.range(from, to)` do Supabase.
 
-3. **`src/components/stepform/StepQuestion.tsx`** - Renderizacao de steps tipo `question` (media + opcoes)
+## Mudancas
 
-4. **`src/components/stepform/StepContent.tsx`** - Renderizacao de steps tipo `content` (media + botao continuar)
+### 1. `src/components/admin/LeadsManagement.tsx`
 
-5. **`src/components/stepform/StepFormFields.tsx`** - Renderizacao de steps tipo `form` (campos input/textarea + botao enviar)
+Substituir a query simples (linhas 217-221):
+```typescript
+// ANTES (limite de 1000)
+const { data: leadsData } = await supabase
+  .from('conversion_events')
+  .select('...')
+  .in('event_type', [...])
+  .order('created_at', { ascending: false });
+```
 
-6. **`src/components/stepform/StepOffer.tsx`** - Renderizacao de steps tipo `offer`
+Por uma funcao que busca em lotes:
+```typescript
+// DEPOIS (sem limite)
+const fetchAllRows = async (table, query) => {
+  const PAGE_SIZE = 1000;
+  let allData = [];
+  let from = 0;
+  let hasMore = true;
+  
+  while (hasMore) {
+    const { data, error } = await query.range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = [...allData, ...(data || [])];
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
+  return allData;
+};
+```
 
-7. **`src/components/stepform/StepFormFooter.tsx`** - Footer customizado
+Aplicar o mesmo padrao para a query de `lead_status` (linha 344-346).
 
-8. **`src/pages/StepForm.tsx`** - Componente principal simplificado (~50 linhas), apenas composicao dos sub-componentes
+### 2. `src/hooks/useLeadsData.ts`
 
-Os tipos `StepFormData` e `StepFormStep` serao extraidos para `src/types/stepFormTypes.ts`.
+Aplicar a mesma correcao de fetch paginado na query de `conversion_events` (linhas 111-115).
 
-### Fase 5: Limpeza Geral
+### 3. Substituir `console.log` por `logger`
 
-1. **Remover `useAdminData.ts`** - Nao e importado por nenhum componente, apenas re-exporta `useSupabaseDataNew`
-
-2. **Remover rotas estaticas de areas no `App.tsx`** - Os 9 arquivos em `src/pages/areas/` sao wrappers identicos de `CategoryAreaPage`. O `DynamicCategoryRoutes` ja cobre todas as rotas `/areas/*`. Remover as importacoes e rotas estaticas, e deletar os 9 arquivos.
-
-3. **Substituir `console.log` por `logger`** - No `StepForm.tsx` refatorado, usar o utilitario `logger` criado na fase anterior em vez de `console.log` direto. (Os demais 72 arquivos serao migrados gradualmente.)
-
-4. **Limpar DOM manipulation no `Index.tsx`** - Adicionar cleanup adequado no `useEffect` para resetar os estilos de `body` e `html` quando o componente desmonta, evitando side-effects em outras paginas.
-
-5. **Simplificar `ThemeProvider`** - Remover state/useState desnecessario, props nao usadas (`storageKey`), e a funcao `applyTheme` separada. Manter apenas o contexto fixo em dark.
-
----
+Ambos os arquivos ainda usam `console.log` direto. Migrar para o utilitario `logger` criado na refatoracao anterior.
 
 ## Detalhes Tecnicos
 
-### Estrutura de arquivos apos refatoracao
-
-```text
-src/
-  types/
-    stepFormTypes.ts          (NOVO - tipos extraidos)
-  hooks/
-    useStepForm.ts            (NOVO - logica do StepForm)
-    useAdminData.ts           (DELETAR)
-  components/
-    stepform/                 (NOVO - pasta)
-      StepFormHeader.tsx
-      StepQuestion.tsx
-      StepContent.tsx
-      StepFormFields.tsx
-      StepOffer.tsx
-      StepFormFooter.tsx
-  pages/
-    StepForm.tsx              (SIMPLIFICADO ~50 linhas)
-    areas/                    (DELETAR pasta inteira)
-      Administrativo.tsx
-      Civil.tsx
-      ...
-```
-
-### Mudancas no App.tsx
-
-- Remover 9 imports de `src/pages/areas/*`
-- Remover 9 rotas estaticas `/areas/familia`, `/areas/tributario`, etc.
-- A rota `"/areas/*"` com `DynamicCategoryRoutes` ja cobre tudo
-
-### Riscos mitigados
-
-- As rotas `/areas/familia` etc. continuarao funcionando via `DynamicCategoryRoutes` que le categorias do Supabase
-- O StepForm mantera exatamente a mesma funcionalidade, apenas reorganizado em arquivos menores
-- Nenhuma interface de usuario sera alterada
+- O `PAGE_SIZE` de 1000 e o maximo que o Supabase permite por request
+- O loop para quando um batch retorna menos de 1000 itens
+- Nenhuma mudanca na interface do usuario -- apenas mais dados serao carregados
+- A paginacao na tela (10 por pagina) continua funcionando normalmente, pois opera sobre os dados ja carregados em memoria
+- Risco zero: a funcionalidade existente nao muda, apenas remove o limite artificial
