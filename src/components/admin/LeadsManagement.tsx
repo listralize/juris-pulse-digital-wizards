@@ -214,11 +214,31 @@ export const LeadsManagement: React.FC = () => {
       setIsLoading(true);
       console.log('🔄 Carregando leads da tabela conversion_events...');
       
-      const { data: leadsData, error: leadsError } = await supabase
-        .from('conversion_events')
-        .select('id, event_type, event_action, session_id, visitor_id, form_id, form_name, page_url, referrer, created_at, lead_data, state, capital, region, ddd')
-        .in('event_type', ['form_submission', 'webhook_received'])
-        .order('created_at', { ascending: false });
+      // Fetch paginado para superar limite de 1000 linhas do Supabase
+      const PAGE_SIZE = 1000;
+      let allLeadsData: any[] = [];
+      let from = 0;
+      let hasMore = true;
+      let leadsError: any = null;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('conversion_events')
+          .select('id, event_type, event_action, session_id, visitor_id, form_id, form_name, page_url, referrer, created_at, lead_data, state, capital, region, ddd')
+          .in('event_type', ['form_submission', 'webhook_received'])
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (error) {
+          leadsError = error;
+          break;
+        }
+        allLeadsData = [...allLeadsData, ...(data || [])];
+        hasMore = (data?.length || 0) === PAGE_SIZE;
+        from += PAGE_SIZE;
+      }
+
+      const leadsData = allLeadsData;
 
       if (leadsError) {
         console.error('❌ Erro ao carregar leads:', leadsError);
@@ -341,9 +361,28 @@ export const LeadsManagement: React.FC = () => {
       console.log(`✅ Leads processados: ${enrichedLeads?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
       
       // Carregar status dos leads com suas datas de atualização
-      const { data: statusData, error: statusError } = await supabase
-        .from('lead_status')
-        .select('*');
+      // Fetch paginado para lead_status
+      let allStatusData: any[] = [];
+      let statusFrom = 0;
+      let statusHasMore = true;
+      let statusError: any = null;
+
+      while (statusHasMore) {
+        const { data, error } = await supabase
+          .from('lead_status')
+          .select('*')
+          .range(statusFrom, statusFrom + PAGE_SIZE - 1);
+
+        if (error) {
+          statusError = error;
+          break;
+        }
+        allStatusData = [...allStatusData, ...(data || [])];
+        statusHasMore = (data?.length || 0) === PAGE_SIZE;
+        statusFrom += PAGE_SIZE;
+      }
+
+      const statusData = allStatusData;
 
       if (statusError) {
         console.error('❌ Erro ao carregar status:', statusError);
