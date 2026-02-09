@@ -1,154 +1,68 @@
 
 
-# Preparacao para Deploy via Coolify (GitHub) - Maxima Eficiencia
+# Corrigir Scroll Mobile e Otimizar Performance
 
-## Visao Geral
+## Problemas Identificados
 
-O projeto precisa de um Dockerfile + nginx para rodar no Coolify, limpeza de dependencias nao utilizadas, e otimizacoes finais de build. O Coolify faz deploy via Docker a partir do GitHub.
+Apos analise completa, ha **5 problemas criticos** que impedem o scroll no mobile e causam lentidao:
 
----
+### 1. NeuralBackground WebGL roda no mobile
+Em `Index.tsx` linha 113: `{isDark && <NeuralBackground />}` -- nao ha verificacao de mobile. O shader WebGL roda a 30fps no celular, consumindo toda a GPU e travando o scroll.
 
-## 1. Criar Dockerfile multi-stage otimizado
+### 2. CSS com `!important` conflitantes bloqueiam scroll
+No `index.css`:
+- Linha 96: `html { overflow: auto !important; }` 
+- Linha 108: `body { overflow: auto !important; }`
+- Linha 128-129: `html, body { overflow: auto !important; height: auto !important; }`
 
-O Coolify precisa de um `Dockerfile` na raiz do projeto. Usar build multi-stage para manter a imagem final minima:
+Esses `!important` conflitam com os estilos inline que o `Index.tsx` tenta aplicar via JS (linhas 34-56). No desktop, o JS seta `overflow: hidden` mas o CSS sobrescreve com `overflow: auto !important`. No mobile, ambos tentam `auto` mas o conflito cria re-renders.
 
-```text
-Stage 1: Node 20 Alpine -> npm ci -> npm run build
-Stage 2: Nginx Alpine -> copiar /dist -> servir SPA
-```
+### 3. `* { scroll-behavior: smooth }` aplica a TODOS os elementos
+Linha 166-168 do CSS aplica `scroll-behavior: smooth` em cada elemento do DOM. Isso forca o browser a calcular smooth scroll para todos os 500+ elementos da pagina, destruindo a performance do scroll nativo.
 
-Imagem final tera ~25MB (apenas nginx + arquivos estaticos).
+### 4. GSAP carregado e registrado no mobile sem necessidade
+`Index.tsx` importa e registra `gsap`, `ScrollTrigger`, e `ScrollToPlugin` mesmo no mobile onde nao sao usados. O `useSectionTransition` tambem chama `gsap.set()` no mobile (linha 64).
 
-## 2. Criar configuracao nginx otimizada
-
-Arquivo `nginx.conf` na raiz com:
-- Compressao gzip para JS/CSS/HTML/JSON/SVG
-- Cache headers longos para assets com hash (1 ano)
-- Cache curto para HTML (sem cache)
-- SPA fallback: todas as rotas redirecionam para `index.html`
-- Security headers (X-Frame-Options, X-Content-Type, HSTS)
-- Brotli-ready (fallback gzip)
-
-## 3. Criar `.dockerignore`
-
-Excluir `node_modules`, `.git`, `scripts/`, etc. para build mais rapido.
-
-## 4. Limpeza de dependencias nao utilizadas
-
-Analise revelou pacotes instalados mas **nunca importados no codigo principal** (apenas em componentes UI boilerplate nao usados):
-
-**Remover do `package.json`:**
-- `fabric` (0 imports) -- biblioteca pesada de canvas (~300KB)
-- `embla-carousel-react` (0 imports fora do UI boilerplate `carousel.tsx` que ninguem usa)
-- `input-otp` (apenas em `ui/input-otp.tsx` que ninguem importa)
-- `react-resizable-panels` (apenas em `ui/resizable.tsx` que ninguem importa)
-- `@radix-ui/react-hover-card` (apenas em `ui/hover-card.tsx` nao utilizado)
-- `@radix-ui/react-context-menu` (apenas em `ui/context-menu.tsx` nao utilizado)
-- `@radix-ui/react-menubar` (apenas em `ui/menubar.tsx` nao utilizado)
-- `@radix-ui/react-navigation-menu` (apenas em `ui/navigation-menu.tsx` nao utilizado)
-- `@radix-ui/react-aspect-ratio` (apenas em `ui/aspect-ratio.tsx` nao utilizado)
-
-**Nota:** Os componentes UI correspondentes (`carousel.tsx`, `input-otp.tsx`, `resizable.tsx`, `hover-card.tsx`, `context-menu.tsx`, `menubar.tsx`, `navigation-menu.tsx`, `aspect-ratio.tsx`) tambem serao removidos pois nao sao importados em lugar nenhum do projeto.
-
-Isso reduz o bundle em ~400KB+ antes de minificacao.
-
-## 5. Otimizar `vite.config.ts` para producao
-
-- Remover `terser` da lista de dependencias (mover para devDependencies ja que so e usado no build)
-- Usar `esbuild` minifier em vez de `terser` (mais rapido, resultado similar)
-- Adicionar `manualChunks` inteligente para separar vendor (react, supabase, gsap, recharts) do app code
-- Remover `keepNames: true` do esbuild (aumenta bundle desnecessariamente)
-- Adicionar `cssMinify: true`
-
-## 6. Otimizar `vite.config.ts` - Code Splitting por vendor
-
-```typescript
-manualChunks: {
-  'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-  'vendor-supabase': ['@supabase/supabase-js'],
-  'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-select', ...],
-  'vendor-charts': ['recharts'],
-  'vendor-gsap': ['gsap'],
-}
-```
-
-Isso permite cache granular -- quando voce atualiza o app, o usuario so rebaixa o chunk do app, nao os vendors.
-
-## 7. Remover scripts de build legados
-
-Os 7 arquivos em `scripts/` (`build-production.js`, `finalize-build.js`, `clean-production.js`, `copy-assets.js`, `fix-build.js`, `production-deploy.js`, `simple-build.js`) sao scripts manuais para deploy na Hostinger que nao serao mais necessarios com Coolify. Tambem remover `BUILD-PRODUCTION.md` e `DEPLOY-HOSTINGER.md`.
-
-## 8. Remover `console.log` restantes (83 arquivos)
-
-Ainda existem **2638 instancias** de `console.log/error/warn` espalhadas em 83 arquivos. Em vez de migrar cada uma manualmente, configurar o Vite para **dropar automaticamente** todos os console.* em producao:
-
-```typescript
-// vite.config.ts
-esbuild: {
-  drop: mode === 'production' ? ['console', 'debugger'] : [],
-}
-```
-
-Isso remove TODOS os console.* do bundle final sem alterar nenhum arquivo de codigo.
-
-## 9. Limpar `index.html`
-
-- Remover o `<meta http-equiv="Content-Security-Policy">` inline que e muito permissivo (`unsafe-inline unsafe-eval`)
-- Configurar CSP via nginx headers no lugar (mais seguro, nao duplicado)
-- Remover script de compatibilidade `Promise/Map/Set` (desnecessario para es2020 target)
-
-## 10. Mover `terser` para devDependencies
-
-`terser` esta em `dependencies` mas so e usado durante build. Mover para `devDependencies` reduz o tamanho de install em producao.
+### 5. `will-change: transform` em elementos demais
+Multiplos componentes CSS (`premium-card`, `btn-primary`, `btn-secondary`) usam `will-change: transform`, criando compositor layers desnecessarios que consomem memoria no mobile.
 
 ---
 
-## Detalhes Tecnicos
+## Solucoes
 
-### Arquivos a CRIAR:
-- `Dockerfile` -- multi-stage build
-- `nginx.conf` -- configuracao de servidor otimizada
-- `.dockerignore` -- exclusoes para build Docker
+### 1. Nao renderizar NeuralBackground no mobile/tablet
+Adicionar verificacao `!(isMobile || isTablet)` antes de renderizar o componente WebGL.
 
-### Arquivos a MODIFICAR:
-- `package.json` -- remover dependencias nao usadas, mover terser para devDependencies
-- `vite.config.ts` -- otimizar build (esbuild minifier, code splitting, drop console)
-- `index.html` -- limpar CSP inline e script de compatibilidade desnecessario
+### 2. Limpar CSS conflitante
+- Remover os `overflow: auto !important` e `height: auto !important` globais das linhas 92-138
+- Manter apenas a configuracao basica sem `!important`
+- Deixar o JS do Index.tsx controlar overflow conforme dispositivo
 
-### Arquivos a DELETAR:
-- `scripts/build-production.js`
-- `scripts/finalize-build.js`
-- `scripts/clean-production.js`
-- `scripts/copy-assets.js`
-- `scripts/fix-build.js`
-- `scripts/production-deploy.js`
-- `scripts/simple-build.js`
-- `BUILD-PRODUCTION.md`
-- `DEPLOY-HOSTINGER.md`
-- `src/components/ui/carousel.tsx`
-- `src/components/ui/input-otp.tsx`
-- `src/components/ui/resizable.tsx`
-- `src/components/ui/hover-card.tsx`
-- `src/components/ui/context-menu.tsx`
-- `src/components/ui/menubar.tsx`
-- `src/components/ui/navigation-menu.tsx`
-- `src/components/ui/aspect-ratio.tsx`
-- `src/production-build.css`
-- `.env.production` (variaveis irao no Coolify diretamente)
+### 3. Corrigir scroll-behavior
+- Remover `* { scroll-behavior: smooth }` (linha 166-168)
+- Manter `scroll-behavior: smooth` apenas no `html` (ja existe na linha 97)
 
-### Configuracao no Coolify:
-Apos o deploy, voce precisara configurar no painel do Coolify:
-- Build Pack: Dockerfile
-- Branch: main (ou sua branch padrao)
-- Port: 80 (nginx)
+### 4. Lazy load GSAP no mobile
+- No Index.tsx, nao importar nem registrar GSAP no top-level
+- No useSectionTransition, pular `gsap.set()` no mobile
 
-Nenhuma variavel de ambiente e necessaria no Coolify pois o Supabase URL e anon key ja estao hardcoded no client.
+### 5. Remover will-change excessivo
+- Remover `will-change: transform` dos componentes CSS que nao precisam
+- Manter apenas em elementos que realmente animam (container de secoes no desktop)
 
-### Impacto Esperado:
-- Bundle ~30-40% menor (remocao de deps nao usadas + code splitting)
-- Build ~50% mais rapido (esbuild vs terser)
-- Imagem Docker ~25MB
-- Cache HTTP otimizado (assets com hash: 1 ano, HTML: sem cache)
-- Zero console.log em producao
-- gzip/brotli no nginx
+---
 
+## Arquivos Modificados
+
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/pages/Index.tsx` | Nao renderizar NeuralBackground no mobile; remover import estatico de GSAP |
+| `src/index.css` | Remover `!important` conflitantes; remover `* { scroll-behavior }` ; remover `will-change` excessivo |
+| `src/hooks/useSectionTransition.tsx` | Pular GSAP no mobile |
+| `src/components/Section.tsx` | Simplificar estilos mobile; remover console.log |
+
+## Impacto Esperado
+- Scroll mobile fluido e responsivo
+- Reducao de ~50% no uso de GPU no mobile (sem WebGL)
+- Sem conflitos CSS que bloqueiam scroll
+- Nenhuma mudanca visual ou funcional no desktop
