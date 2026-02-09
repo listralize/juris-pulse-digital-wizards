@@ -62,6 +62,20 @@ const Index = () => {
       }
       
       return () => {
+        // Reset styles on unmount to avoid side-effects on other pages
+        body.style.overflow = '';
+        body.style.height = '';
+        body.style.maxHeight = '';
+        body.style.minHeight = '';
+        body.style.overflowX = '';
+        body.style.margin = '';
+        body.style.padding = '';
+        body.style.cursor = '';
+        html.style.overflow = '';
+        html.style.height = '';
+        html.style.maxHeight = '';
+        html.style.minHeight = '';
+        html.style.overflowX = '';
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'auto';
         }
