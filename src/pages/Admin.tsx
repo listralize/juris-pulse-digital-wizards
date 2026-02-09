@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail, FormInput } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
-import { useSupabasePageTexts } from '../hooks/useSupabasePageTexts';
+import { useSupabasePageTexts } from '../hooks/supabase/useSupabasePageTexts';
 import { TeamMember, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { BlogPost } from '../types/blogTypes';
 import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';

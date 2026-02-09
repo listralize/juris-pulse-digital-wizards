@@ -1,14 +1,14 @@
 
 import React, { useEffect } from 'react';
-import { useHostingerMarketingScripts } from './hooks/useHostingerMarketingScripts';
+import { useMarketingLoader } from './hooks/useMarketingLoader';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Debug logging for production build
-console.log('🔧 App component loading...');
+
+
 
 // Pages
 import Index from './pages/Index.tsx';
@@ -49,15 +49,12 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  // Debug logging
-  console.log('📱 App component initialized');
   
-  // Configurar scripts otimizados para Hostinger
-  useHostingerMarketingScripts();
   
-  useEffect(() => {
-    console.log('🎯 App useEffect hook executed');
-  }, []);
+  // Load marketing scripts from Supabase config
+  useMarketingLoader();
+  
+  
   
   return (
     <QueryClientProvider client={queryClient}>

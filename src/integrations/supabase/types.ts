@@ -1600,10 +1600,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_old_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_old_analytics: { Args: never; Returns: undefined }
       extract_ddd_from_phone: {
         Args: { phone_number: string }
         Returns: number

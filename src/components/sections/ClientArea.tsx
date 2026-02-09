@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import { useAdminData } from '../../hooks/useAdminData';
+import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { Lock, ArrowRight, MessageSquare, Crown } from 'lucide-react';
 import NeuralBackground from '../NeuralBackground';
 import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
@@ -16,7 +16,7 @@ const ClientArea = () => {
   const button1Ref = useRef<HTMLAnchorElement>(null);
   const button2Ref = useRef<HTMLAnchorElement>(null);
   const { theme } = useTheme();
-  const { pageTexts, isLoading } = useAdminData();
+  const { pageTexts, isLoading } = useSupabaseDataNew();
   const isDark = theme === 'dark';
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
