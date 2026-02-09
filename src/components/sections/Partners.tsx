@@ -235,7 +235,7 @@ const Partners = () => {
         <video
           id="team-background-video"
           src="https://hmfsvccbyxhdwmrgcyff.supabase.co/storage/v1/object/public/videos/1755185975420-fisow0xrmc-0814_2_.mp4"
-          className="w-full h-full object-cover opacity-70"
+          className="w-full h-full object-cover opacity-70 blur-[2px]"
           autoPlay
           muted
           loop
