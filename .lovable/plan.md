@@ -1,158 +1,142 @@
 
 
-# Refatoracao Profunda - Codigo Ruim Restante
+# Refatoracao Final - Desempenho, Logica Robusta e Leveza
 
-## Foco: Queries Duplicadas, Anti-Patterns de Estado, Device Detection Duplicada, GSAP Cleanup Perigoso, e Event-Driven Anti-Patterns
-
----
-
-## 1. CRITICO: `useSupabaseDataNew` Chamado em 7 Componentes Independentes
-
-Cada componente que importa `useSupabaseDataNew()` cria uma **instancia independente** do hook, disparando queries **separadas** ao Supabase para `service_pages`, `categories`, `team_members`, e `page_texts`. No carregamento da home, isso significa:
-
-- `PracticeAreas.tsx` chama `useSupabaseDataNew()` -> 4 queries
-- `Partners.tsx` chama `useSupabaseDataNew()` -> 4 queries
-- `ClientArea.tsx` chama `useSupabaseDataNew()` -> 4 queries
-- `DynamicServiceRoutes.tsx` chama `useSupabaseDataNew()` -> 4 queries
-- `DynamicServicePage.tsx` chama `useSupabaseDataNew()` -> 4 queries
-
-**Total: ~20 queries duplicadas** ao Supabase no load da home.
-
-**Solucao:** Criar um `SupabaseDataProvider` (Context) no topo do app que chama `useSupabaseDataNew` uma unica vez e disponibiliza os dados via context para todos os componentes filhos. Componentes consumidores usarao `useSupabaseData()` (novo hook leve que le do context).
+## Foco: Eliminar queries duplicadas restantes, remover logs de producao, otimizar CSS, melhorar FloatingFooter e Footer, e polir responsividade
 
 ---
 
-## 2. CRITICO: Queries Supabase Avulsas em Componentes de Secao
+## 1. CRITICO: 3 Componentes Ainda Usam `useSupabaseDataNew` Diretamente
 
-Alem do `useSupabaseDataNew`, varios componentes fazem suas proprias queries Supabase diretamente:
+Apesar do Provider centralizado criado na fase anterior, 3 componentes ainda chamam `useSupabaseDataNew()` diretamente, criando instancias independentes com queries duplicadas:
 
-- `Hero.tsx` (linha 35): `site_settings` SELECT *
-- `About.tsx` (linha 34): `site_settings` SELECT 7 colunas
-- `Contact.tsx` (linha 35): `site_settings` SELECT 2 colunas
-- `Partners.tsx` (linha 82): `site_settings` SELECT 2 colunas
-- `WhatsAppButton.tsx` (linha 15): `contact_info` SELECT whatsapp
+| Componente | Impacto |
+|-----------|---------|
+| `DynamicServicePage.tsx` (linha 13) | 4 queries extras por pagina de servico |
+| `DynamicServiceRoutes.tsx` (linha 4) | 4 queries extras no load de rotas |
+| `CategoryAreaPage.tsx` (linha 23) | 4 queries extras por pagina de categoria |
 
-Todos esses dados ja poderiam vir do Provider centralizado (item 1).
-
-**Solucao:** Expandir o Provider para incluir `site_settings` e `contact_info`. Eliminar todas as queries inline.
+**Solucao:** Substituir por `useSupabaseData()` (context) em todos os 3.
 
 ---
 
-## 3. IMPORTANTE: `ScrollTrigger.getAll().forEach(kill)` Destroi GSAP de Outros Componentes
+## 2. CRITICO: `FloatingFooter.tsx` Faz Queries Supabase Independentes
 
-Em 4 arquivos (`Hero.tsx`, `PracticeAreas.tsx`, `ClientArea.tsx`, `ServiceLandingLayout.tsx`), o cleanup do `useEffect` chama `ScrollTrigger.getAll().forEach(trigger => trigger.kill())`. Isso mata **TODOS** os ScrollTriggers da pagina, nao apenas os criados pelo componente atual.
+O FloatingFooter (linhas 27-63) faz 2 queries proprias ao Supabase (`footer_info` e `contact_info`) em vez de usar os dados ja carregados no `SupabaseDataContext`. Alem disso, tem listeners de `CustomEvent` para dados que ja vem do context.
 
-Se `PracticeAreas` unmounts primeiro, ele mata os ScrollTriggers do `Hero`, `ClientArea`, e qualquer outro componente.
-
-**Solucao:** Cada componente deve matar apenas seus proprios triggers. Usar o retorno do `gsap.timeline()` com `tl.kill()` (que ja e feito em About e Contact, mas NAO em PracticeAreas e ClientArea).
+**Solucao:** Usar `useSupabaseData()` para `contactInfo` e criar uma query para `footer_info` no context (ou manter a query local mas usando o contactInfo do context para eliminar 1 das 2 queries).
 
 ---
 
-## 4. IMPORTANTE: Device Detection Duplicada em Partners e PracticeAreas
+## 3. CRITICO: `Footer.tsx` Faz 2 Queries Supabase Independentes
 
-- `Partners.tsx` (linha 49-56): `window.addEventListener('resize', checkMobile)` proprio
-- `PracticeAreas.tsx` (linha 25-34): `window.addEventListener('resize', checkMobile)` proprio
-- `useSectionTransition.tsx` (linha 30-39): mais um resize listener proprio
+Mesmo problema que o FloatingFooter. O Footer (linhas 27-75) carrega `footer_info` e `contact_info` de forma independente + tem listeners de CustomEvent desnecessarios.
 
-Todos detectam mobile/tablet mas usando thresholds DIFERENTES:
-- `Partners.tsx`: `< 768` para mobile
-- `PracticeAreas.tsx`: `< 768` para mobile
-- `useSectionTransition.tsx`: `< 640` para mobile, `< 1024` para tablet
-
-Existem os hooks `useIsMobile()` e `useIsTablet()` que ja fazem isso com um unico media query listener. Os componentes deveriam usa-los.
-
-**Solucao:** Substituir deteccao manual nos 3 componentes pelos hooks `useIsMobile`/`useIsTablet`.
+**Solucao:** Usar `useSupabaseData()` para contactInfo. Adicionar `footerInfo` ao context para centralizar completamente.
 
 ---
 
-## 5. IMPORTANTE: `Blog.tsx` - Logger no Render Body
+## 4. IMPORTANTE: `useSectionTransition.tsx` Ainda Tem Device Detection Duplicada
 
-Linha 33: `logger.log('Blog section - Posts carregados do Supabase:', blogPosts.length)` e chamado **fora de useEffect**, ou seja, em cada re-render do componente. Isso nao causa crash mas polui o console e e anti-pattern.
+Linhas 23-39: O hook mantem `const [isMobile, setIsMobile]` e `const [isTablet, setIsTablet]` com resize listener proprio, apesar de ja importar `useIsMobile`/`useIsTablet` no topo do arquivo na refatoracao anterior. Os estados locais duplicados devem ser removidos.
 
-**Solucao:** Mover para dentro de um `useEffect` ou remover.
-
----
-
-## 6. MODERADO: `PracticeAreas.tsx` Duplica Estado com `localPageTexts` e `localCategories`
-
-O componente cria estado local que e copia exata do estado do hook:
-- Linha 36: `const [localPageTexts, setLocalPageTexts] = useState(pageTexts)`
-- Linha 37: `const [localCategories, setLocalCategories] = useState(supabaseCategories)`
-
-Depois sincroniza via `useEffect` (linhas 39-45) E via `window.addEventListener('pageTextsUpdated')` (linhas 47-63). Isso cria 3 fontes de verdade para o mesmo dado.
-
-O mesmo padrao se repete em `Partners.tsx`, `ClientArea.tsx`, `About.tsx`, `Contact.tsx`, e `Hero.tsx` - todos criam estado local + listeners de `CustomEvent` para dados que ja vem do Supabase via hooks.
-
-**Solucao:** Com o Provider centralizado (item 1), os componentes lerao direto do context. Os custom events (`pageTextsUpdated`, `teamVideoSettingsUpdated`, etc.) sao necessarios apenas para atualizacao em tempo real do admin - mas como os componentes de secao NAO sao renderizados na pagina de admin, esses listeners sao **codigo morto** nas secoes publicas. Serao removidos.
+**Solucao:** Remover os estados locais `isMobile`/`isTablet` e o resize listener. Usar os hooks importados.
 
 ---
 
-## 7. MODERADO: `Partners.tsx` Manipula DOM Diretamente para Video
+## 5. IMPORTANTE: 864 `console.log/warn` em Producao
 
-Linhas 92-109: Busca elemento de video via `document.getElementById('team-background-video')` e manipula `.src`, `.style.display`, `.play()` manualmente. Isso e anti-pattern em React - o video deveria ser controlado via state.
+42 arquivos em `src/components` contem `console.log` ou `console.warn` em caminhos de execucao normais (nao apenas erros). Isso:
+- Polui o console do usuario final
+- Causa micro-overhead em cada render
+- Expoe informacao interna (nomes de funcoes, dados de debug)
 
-**Solucao:** Converter para state-driven: `const [videoUrl, setVideoUrl] = useState('')` e renderizar condicionalmente no JSX.
+**Solucao:** Substituir todos os `console.log` de debug em componentes publicos por `logger.log` (que ja existe e respeita ambiente). Remover logs completamente desnecessarios (ex: "MobileNavigation: Home clicked").
 
----
-
-## 8. MODERADO: `PracticeAreas.tsx` Usa `window.location.href` em Links
-
-Linhas 219: `window.location.href = area.href` forca uma navegacao full-page em vez de usar o `<Link>` do React Router que ja envolve o componente. Isso causa reload completo da SPA e perde todo o estado.
-
-O componente ja tem `<Link to={area.href}>` envolvendo o card, mas o `onClick` (linha 211) faz `e.preventDefault()` e depois `window.location.href`, anulando completamente o beneficio do React Router.
-
-**Solucao:** Remover o `onClick` handler e deixar o `<Link>` funcionar naturalmente. Tambem remover `onTouchStart`/`onTouchEnd` handlers que fazem micro-animacoes desnecessarias via JS inline.
-
----
-
-## 9. LEVE: `useLeadsData` Fetch Paginado Ineficiente
-
-Linha 131: `allData = [...allData, ...(batch || [])]` cria um novo array em cada iteracao do loop while. Para 5000 leads, isso significa 5 alocacoes de array crescentes.
-
-**Solucao:** Usar `allData.push(...(batch || []))` em vez de spread para evitar copia.
+Componentes prioritarios (mais impactantes no render path):
+- `SectionsContainer.tsx` - logger.log no corpo do render (linha 32) - mover para useEffect ou remover
+- `DynamicServiceRoutes.tsx` - 10+ console.logs
+- `DynamicServicePage.tsx` - 3 console.logs
+- `CategoryAreaPage.tsx` - console.log no corpo do render
+- `MobileNavigation.tsx` - 7 console.logs em handlers de click
+- `FloatingFooter.tsx` - console.error
+- `Footer.tsx` - console.log
 
 ---
 
-## 10. LEVE: `Admin.tsx` Mobile Dropdown Nao Funciona
+## 6. IMPORTANTE: CSS com `!important` Excessivo e Regras Conflitantes
 
-O dropdown mobile (linhas 212-268) usa `<Select>` do Radix mas NAO esta conectado ao `<Tabs>`. Selecionar um item no dropdown nao muda a tab ativa. E um componente puramente visual sem funcionalidade.
+O `index.css` tem problemas:
+- **Media query aninhada invalida** (linhas 541-556): `@media (max-width: 1440px)` DENTRO de `@media (max-width: 767px)` - a regra interna nunca sera aplicada corretamente porque ja esta dentro de max-width:767px
+- **`!important` excessivo** em regras mobile (linhas 506-538): 15 usos de `!important` que sobrescrevem tudo
+- **z-index: 999999** no CSS do video (linhas 649-660): z-index absurdo que pode causar conflitos de camada
+- **Regra `button, .btn, a { min-height: 44px }` no mobile** (linha 514): isso afeta TODOS os links e botoes, inclusive spans dentro de navbars, causando layouts inesperados
 
-**Solucao:** Conectar o Select ao estado do Tabs para que ambos estejam sincronizados.
+**Solucao:**
+- Corrigir a media query aninhada movendo-a para o escopo correto
+- Remover `!important` onde possivel, usando especificidade CSS adequada
+- Reduzir z-index do video para valores razoaveis
+- Limitar a regra de touch target a botoes interativos reais
+
+---
+
+## 7. MODERADO: `NeuralBackground` Roda em Todas as Paginas de Servico
+
+O `ServiceLandingLayout.tsx` (linha 21) importa e renderiza `NeuralBackground` em CADA pagina de servico. Isso significa que o shader WebGL pesado roda em paginas internas que ja tem seu proprio layout. Combinado com o NeuralBackground da home (se o usuario navegar da home), pode haver 2 instancias WebGL simultaneas.
+
+**Solucao:** Remover NeuralBackground das paginas de servico. Manter apenas na home onde ja e renderizado condicionalmente.
+
+---
+
+## 8. MODERADO: `SectionsContainer` Logger no Corpo do Render
+
+Linha 32: `logger.log('SectionsContainer render:', ...)` e chamado em CADA render. Como o SectionsContainer re-renderiza frequentemente (a cada transicao, resize, etc), isso e extremamente verboso.
+
+**Solucao:** Remover completamente (ja se sabe que funciona).
+
+---
+
+## 9. LEVE: Adicionar `font-display: swap` para Fontes Custom
+
+As fontes `Space Grotesk`, `Inter`, `Satoshi`, `Canela` sao carregadas mas sem `font-display: swap`. Isso pode causar FOIT (Flash of Invisible Text) no primeiro load.
+
+**Solucao:** Verificar se o Tailwind config ja tem font-display. Se nao, adicionar no CSS base.
+
+---
+
+## 10. LEVE: Adicionar `will-change: transform` Seletivamente
+
+O `SectionsContainer` desktop usa transicoes horizontais pesadas via GSAP mas o container nao tem `will-change: transform` no CSS (apenas inline style condicional). Adicionar para promover a camada de composicao do GPU.
+
+Ja existe em `willChange: (isMobile || isTablet) ? 'auto' : 'transform'` no estilo inline - confirmar que esta funcionando corretamente.
 
 ---
 
 ## Plano de Implementacao
 
-### Fase 1 - Provider Centralizado (Elimina ~20 queries duplicadas)
+### Arquivos a MODIFICAR:
 
-| Arquivo | Acao |
-|---------|------|
-| `src/contexts/SupabaseDataContext.tsx` | **CRIAR** - Provider que chama useSupabaseDataNew + site_settings + contact_info UMA vez |
-| `src/hooks/useSupabaseData.ts` | **CRIAR** - Hook leve que consome do context |
-| `src/App.tsx` | **MODIFICAR** - Envolver app com SupabaseDataProvider |
-| `src/components/sections/PracticeAreas.tsx` | **MODIFICAR** - Usar useSupabaseData() em vez de useSupabaseDataNew(); remover estado local duplicado; remover listeners de CustomEvent; remover resize listener; usar useIsMobile; corrigir ScrollTrigger cleanup; remover window.location.href |
-| `src/components/sections/Partners.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover estado local; remover resize listener; usar useIsMobile; converter video para state-driven |
-| `src/components/sections/ClientArea.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover estado local; corrigir ScrollTrigger cleanup |
-| `src/components/sections/Hero.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline; remover estado local duplicado |
-| `src/components/sections/About.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline |
-| `src/components/sections/Contact.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline |
-| `src/components/sections/Blog.tsx` | **MODIFICAR** - Mover logger para useEffect |
-| `src/components/WhatsAppButton.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline |
-
-### Fase 2 - Fixes Pontuais
-
-| Arquivo | Acao |
-|---------|------|
-| `src/hooks/useSectionTransition.tsx` | **MODIFICAR** - Usar useIsMobile/useIsTablet em vez de resize listener proprio |
-| `src/hooks/useLeadsData.ts` | **MODIFICAR** - Corrigir spread ineficiente no loop paginado |
-| `src/pages/Admin.tsx` | **MODIFICAR** - Conectar Select mobile ao Tabs state |
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/contexts/SupabaseDataContext.tsx` | Adicionar `footerInfo` ao context para centralizar |
+| `src/hooks/useSupabaseData.ts` | Expor `footerInfo` |
+| `src/components/DynamicServicePage.tsx` | Trocar `useSupabaseDataNew` por `useSupabaseData` |
+| `src/components/DynamicServiceRoutes.tsx` | Trocar `useSupabaseDataNew` por `useSupabaseData` |
+| `src/components/areas/CategoryAreaPage.tsx` | Trocar `useSupabaseDataNew` por `useSupabaseData` |
+| `src/components/FloatingFooter.tsx` | Usar context em vez de queries proprias; remover CustomEvent listeners |
+| `src/components/sections/Footer.tsx` | Usar context em vez de queries proprias; remover CustomEvent listeners |
+| `src/hooks/useSectionTransition.tsx` | Remover device detection duplicada; usar hooks importados |
+| `src/components/SectionsContainer.tsx` | Remover logger.log do corpo do render |
+| `src/components/navbar/MobileNavigation.tsx` | Remover console.logs de debug |
+| `src/components/ServiceLandingLayout.tsx` | Remover NeuralBackground |
+| `src/index.css` | Corrigir media query aninhada; reduzir !important; corrigir z-index do video; limitar touch targets |
 
 ### Impacto Esperado
 
-- De ~25+ queries Supabase no load para ~5 queries (reducao de 80%)
-- Eliminacao de ~10 resize listeners desnecessarios
-- Eliminacao de ~15 listeners de CustomEvent em componentes publicos
-- Zero risco de ScrollTrigger destruir animacoes de outros componentes
-- Navegacao entre areas sem full-page reload
-- Admin mobile dropdown funcional
-- Codigo mais limpo e manutenivel
+- Eliminacao de mais ~12 queries Supabase duplicadas por navegacao
+- Console limpo em producao (zero logs de debug)
+- CSS mais previsivel sem !important desnecessarios
+- GPU melhor utilizada (sem WebGL em paginas de servico)
+- Navegacao visivelmente mais leve entre paginas
+- Touch targets corrigidos para mobile (sem afetar layout)
+
