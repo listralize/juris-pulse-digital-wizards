@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
@@ -33,7 +32,6 @@ const MobileNavigation = ({
             : ''} font-medium text-sm transition-colors duration-200`}
           onClick={(e) => {
             e.preventDefault();
-            console.log('MobileNavigation: Home clicked');
             handleNavigation('home', '/');
             setIsMenuOpen(false);
           }}
@@ -53,7 +51,6 @@ const MobileNavigation = ({
                   ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
                   : ''} font-medium text-sm transition-colors duration-200`}
                 onClick={() => {
-                  console.log('MobileNavigation: Area clicked:', area.path);
                   setIsMenuOpen(false);
                   navigate(area.path);
                 }}
@@ -68,7 +65,6 @@ const MobileNavigation = ({
           href="/#about"
           onClick={(e) => {
             e.preventDefault();
-            console.log('MobileNavigation: About clicked');
             handleNavigation('about', '/#about');
             setIsMenuOpen(false);
           }}
@@ -81,7 +77,6 @@ const MobileNavigation = ({
           href="/#socios"
           onClick={(e) => {
             e.preventDefault();
-            console.log('MobileNavigation: Team clicked');
             handleNavigation('socios', '/#socios');
             setIsMenuOpen(false);
           }}
@@ -94,7 +89,6 @@ const MobileNavigation = ({
           href="/#cliente"
           onClick={(e) => {
             e.preventDefault();
-            console.log('MobileNavigation: Client Area clicked');
             handleNavigation('cliente', '/#cliente');
             setIsMenuOpen(false);
           }}
@@ -110,7 +104,6 @@ const MobileNavigation = ({
             ? (isDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') 
             : ''} font-medium text-sm transition-colors duration-200`}
           onClick={() => {
-            console.log('MobileNavigation: Blog clicked');
             setIsMenuOpen(false);
             navigate('/blog');
           }}
@@ -122,7 +115,6 @@ const MobileNavigation = ({
           href="/#contact"
           onClick={(e) => {
             e.preventDefault();
-            console.log('MobileNavigation: Contact clicked');
             handleNavigation('contact', '/#contact');
             setIsMenuOpen(false);
           }}

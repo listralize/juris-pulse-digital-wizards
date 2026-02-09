@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
-import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
+import { useSupabaseData } from '../../hooks/useSupabaseData';
 import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
 import { CategoryInfo, ServicePage } from '../../types/adminTypes';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import NotFound from '../../pages/NotFound';
 import Navbar from '../navbar';
 import PageBanner from '../PageBanner';
@@ -20,21 +19,17 @@ interface CategoryAreaPageProps {
 const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propCategorySlug }) => {
   const { '*': urlSlug } = useParams();
   const categorySlug = propCategorySlug || urlSlug;
-  const { servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
+  const { servicePages, isLoading: pagesLoading } = useSupabaseData();
   const { categories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const [category, setCategory] = useState<CategoryInfo | null>(null);
   const [categoryPages, setCategoryPages] = useState<ServicePage[]>([]);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  console.log('🔍 CategoryAreaPage: categoria slug:', categorySlug);
-  console.log('🔍 CategoryAreaPage: categorias disponíveis:', categories.map(c => ({ key: c.value, name: c.name })));
-
   useEffect(() => {
     if (!categoriesLoading && categories.length > 0 && categorySlug) {
       const foundCategory = categories.find(cat => cat.value === categorySlug);
       setCategory(foundCategory || null);
-      console.log('🔍 Categoria encontrada:', foundCategory);
     }
   }, [categories, categoriesLoading, categorySlug]);
 
@@ -42,11 +37,9 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
     if (!pagesLoading && servicePages.length > 0 && categorySlug) {
       const filteredPages = servicePages.filter(page => page.category === categorySlug);
       setCategoryPages(filteredPages);
-      console.log('📄 Páginas da categoria:', filteredPages.length);
     }
   }, [servicePages, pagesLoading, categorySlug]);
 
-  // Add scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -62,7 +55,6 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
   }
 
   if (!category) {
-    console.log('❌ Categoria não encontrada para slug:', categorySlug);
     return <NotFound />;
   }
 
@@ -78,7 +70,6 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
       
       <section className={`px-6 md:px-16 lg:px-24 py-16 ${isDark ? 'bg-black' : 'bg-[#f5f5f5]'}`}>
         <div className="max-w-6xl mx-auto">
-          {/* Conteúdo Principal */}
           <div className="mb-12">
             {category.fullContent ? (
               <div className="prose prose-lg max-w-none">
@@ -95,7 +86,6 @@ const CategoryAreaPage: React.FC<CategoryAreaPageProps> = ({ categorySlug: propC
             )}
           </div>
 
-          {/* Serviços Especializados */}
           {categoryPages.length > 0 && (
             <div>
               <div className="flex items-center gap-3 mb-8">
