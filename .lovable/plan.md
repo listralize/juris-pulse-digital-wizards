@@ -1,135 +1,158 @@
 
 
-# Analise Profunda - Criterios Nao Explorados Anteriormente
+# Refatoracao Profunda - Codigo Ruim Restante
 
-## Foco: Seguranca, Arquitetura, Memory Leaks, Runtime Errors, e Dead Code
-
----
-
-## 1. CRITICO: `devToolsProtection.ts` - Anti-Pattern Perigoso
-
-O arquivo `src/utils/devToolsProtection.ts` contem codigo extremamente problematico:
-- **`debugger` em loop infinito** (linha 183): `setInterval` com `debugger` a cada 1 segundo. Mesmo sem DevTools aberto, isso forca o engine a avaliar `debugger` 1x/s, criando micro-pausas
-- **Destroi `document.body.innerHTML`** (linha 70): se o browser tem zoom ou janela de acessibilidade aberta, o `outerHeight - innerHeight > 160` dispara e **apaga toda a pagina**
-- **Desabilita right-click e selecao de texto** (linhas 143-157): isso prejudica acessibilidade (WCAG violation) e irrita usuarios que querem copiar telefone/endereco
-- **Redirect para `about:blank`** (linha 186): se detectar qualquer delay > 100ms, redireciona para pagina em branco
-
-**O arquivo NAO e importado em lugar nenhum** (confirmado por busca). Ele e dead code perigoso que deve ser deletado.
+## Foco: Queries Duplicadas, Anti-Patterns de Estado, Device Detection Duplicada, GSAP Cleanup Perigoso, e Event-Driven Anti-Patterns
 
 ---
 
-## 2. CRITICO: `useAnalytics` - Erros de Runtime Silenciosos
+## 1. CRITICO: `useSupabaseDataNew` Chamado em 7 Componentes Independentes
 
-O hook `useAnalytics.ts` tem 3 problemas graves:
+Cada componente que importa `useSupabaseDataNew()` cria uma **instancia independente** do hook, disparando queries **separadas** ao Supabase para `service_pages`, `categories`, `team_members`, e `page_texts`. No carregamento da home, isso significa:
 
-- **Linha 25**: Faz fetch externo para `https://ipapi.co/json/` em CADA page view. Isso adiciona ~300-500ms de latencia ao primeiro load e pode falhar silenciosamente (CORS, rate limit)
-- **Linha 165**: `navigator.sendBeacon('/api/analytics/session-end', ...)` envia para `/api/analytics/session-end` que **NAO EXISTE** - nao ha backend nessa rota. Isso gera erro 404 no `beforeunload` de cada sessao
-- **Linha 155**: `document.body.scrollHeight - window.innerHeight` pode ser 0, causando `Infinity` no `scrollDepth`
+- `PracticeAreas.tsx` chama `useSupabaseDataNew()` -> 4 queries
+- `Partners.tsx` chama `useSupabaseDataNew()` -> 4 queries
+- `ClientArea.tsx` chama `useSupabaseDataNew()` -> 4 queries
+- `DynamicServiceRoutes.tsx` chama `useSupabaseDataNew()` -> 4 queries
+- `DynamicServicePage.tsx` chama `useSupabaseDataNew()` -> 4 queries
 
-**Solucao**: Remover o fetch para ipapi.co (dados de localizacao podem ser capturados via headers no Supabase). Remover o `sendBeacon` para rota inexistente. Proteger divisao por zero.
+**Total: ~20 queries duplicadas** ao Supabase no load da home.
 
----
-
-## 3. IMPORTANTE: `Loading.tsx` - Performance Drain
-
-O componente `Loading.tsx` cria **50 elementos DOM** (20 veins + 30 small veins) com `Math.random()` em cada render. Alem disso:
-- `setInterval` a cada 50ms (linha 24) para animar gradiente = 20 updates/segundo
-- `setInterval` a cada 150ms (linha 33) para progress bar = ~7 updates/segundo
-- Total: **~27 re-renders por segundo** durante o loading
-
-Como o Loading e usado como fallback do Suspense em TODAS as rotas lazy, ele e renderizado frequentemente.
-
-**Solucao**: Substituir por um loading simples com CSS animation puro (zero JS intervals, zero random DOM). Usar `@keyframes` no CSS.
+**Solucao:** Criar um `SupabaseDataProvider` (Context) no topo do app que chama `useSupabaseDataNew` uma unica vez e disponibiliza os dados via context para todos os componentes filhos. Componentes consumidores usarao `useSupabaseData()` (novo hook leve que le do context).
 
 ---
 
-## 4. IMPORTANTE: `main.tsx` - Auto-reload Perigoso
+## 2. CRITICO: Queries Supabase Avulsas em Componentes de Secao
 
-Linhas 63-69: se o `root.render()` falhar, o codigo faz `setTimeout(() => window.location.reload(), 3000)` - isso cria um **loop infinito de reloads** se houver um erro persistente (ex: Supabase offline, JS parse error).
+Alem do `useSupabaseDataNew`, varios componentes fazem suas proprias queries Supabase diretamente:
 
-**Solucao**: Remover o auto-reload. Manter apenas o fallback visual com botao manual.
+- `Hero.tsx` (linha 35): `site_settings` SELECT *
+- `About.tsx` (linha 34): `site_settings` SELECT 7 colunas
+- `Contact.tsx` (linha 35): `site_settings` SELECT 2 colunas
+- `Partners.tsx` (linha 82): `site_settings` SELECT 2 colunas
+- `WhatsAppButton.tsx` (linha 15): `contact_info` SELECT whatsapp
 
----
+Todos esses dados ja poderiam vir do Provider centralizado (item 1).
 
-## 5. IMPORTANTE: Queries Supabase Duplicadas no Load
-
-Multiplos componentes fazem a MESMA query de forma independente no mount:
-- `Hero.tsx`: `site_settings` (linha 35)
-- `FloatingFooter.tsx`: `footer_info` + `contact_info` (linhas 41-54)
-- `Footer.tsx`: `footer_info` + `contact_info` (linhas 35-48)
-- `WhatsAppButton.tsx`: `contact_info` (linhas 15-20)
-- `useAnalytics.ts`: `website_analytics` INSERT + `ipapi.co` fetch
-
-Total: **6-8 queries paralelas** ao Supabase no primeiro load da home. Cada uma cria conexao HTTP independente.
-
-**Solucao**: Nao sera alterado nesta fase (requer refatoracao maior com Context), mas documentado como divida tecnica.
+**Solucao:** Expandir o Provider para incluir `site_settings` e `contact_info`. Eliminar todas as queries inline.
 
 ---
 
-## 6. MODERADO: `next-themes` Instalado mas Nao Usado
+## 3. IMPORTANTE: `ScrollTrigger.getAll().forEach(kill)` Destroi GSAP de Outros Componentes
 
-O pacote `next-themes` (29KB) esta em `dependencies` mas so e importado em `sonner.tsx` (toaster). O proprio `ThemeProvider.tsx` do projeto e custom (retorna sempre `'dark'`). O `next-themes` esta sendo importado desnecessariamente pelo sonner.
+Em 4 arquivos (`Hero.tsx`, `PracticeAreas.tsx`, `ClientArea.tsx`, `ServiceLandingLayout.tsx`), o cleanup do `useEffect` chama `ScrollTrigger.getAll().forEach(trigger => trigger.kill())`. Isso mata **TODOS** os ScrollTriggers da pagina, nao apenas os criados pelo componente atual.
 
-**Solucao**: Remover `next-themes` de dependencies. Ajustar `sonner.tsx` para usar o ThemeProvider custom.
+Se `PracticeAreas` unmounts primeiro, ele mata os ScrollTriggers do `Hero`, `ClientArea`, e qualquer outro componente.
 
----
-
-## 7. MODERADO: `Hero.tsx` - Duplica Device Detection
-
-O Hero tem sua propria logica de deteccao mobile/tablet (linhas 95-104) com `window.addEventListener('resize')`, duplicando o que `useIsMobile`/`useIsTablet` ja fazem. Isso cria 2 listeners de resize extras desnecessarios.
-
-**Solucao**: Substituir pela importacao dos hooks existentes.
+**Solucao:** Cada componente deve matar apenas seus proprios triggers. Usar o retorno do `gsap.timeline()` com `tl.kill()` (que ja e feito em About e Contact, mas NAO em PracticeAreas e ClientArea).
 
 ---
 
-## 8. MODERADO: `FloatingFooter.tsx` - Duplica Device Detection
+## 4. IMPORTANTE: Device Detection Duplicada em Partners e PracticeAreas
 
-Mesmo problema: linhas 11-21 criam listener de resize proprio em vez de usar `useIsMobile()`.
+- `Partners.tsx` (linha 49-56): `window.addEventListener('resize', checkMobile)` proprio
+- `PracticeAreas.tsx` (linha 25-34): `window.addEventListener('resize', checkMobile)` proprio
+- `useSectionTransition.tsx` (linha 30-39): mais um resize listener proprio
 
-**Solucao**: Usar o hook existente.
+Todos detectam mobile/tablet mas usando thresholds DIFERENTES:
+- `Partners.tsx`: `< 768` para mobile
+- `PracticeAreas.tsx`: `< 768` para mobile
+- `useSectionTransition.tsx`: `< 640` para mobile, `< 1024` para tablet
+
+Existem os hooks `useIsMobile()` e `useIsTablet()` que ja fazem isso com um unico media query listener. Os componentes deveriam usa-los.
+
+**Solucao:** Substituir deteccao manual nos 3 componentes pelos hooks `useIsMobile`/`useIsTablet`.
 
 ---
 
-## 9. MODERADO: Memory Leak no `NeuralBackground.tsx`
+## 5. IMPORTANTE: `Blog.tsx` - Logger no Render Body
 
-Linhas 278-281: o cleanup dos event listeners usa arrow functions anonimas novas (`() => {}`) em vez das referencias originais. Isso significa que `removeEventListener` **NAO remove nada** - os listeners originais continuam ativos na memoria apos unmount.
+Linha 33: `logger.log('Blog section - Posts carregados do Supabase:', blogPosts.length)` e chamado **fora de useEffect**, ou seja, em cada re-render do componente. Isso nao causa crash mas polui o console e e anti-pattern.
 
-**Solucao**: Guardar referencias das funcoes em variaveis e usa-las no cleanup.
+**Solucao:** Mover para dentro de um `useEffect` ou remover.
 
 ---
 
-## 10. LEVE: `Footer.tsx` Importa `GlobalSocialProof` mas Nao Usa
+## 6. MODERADO: `PracticeAreas.tsx` Duplica Estado com `localPageTexts` e `localCategories`
 
-A importacao na linha 4 esta la mas o componente `<GlobalSocialProof />` nao aparece no JSX do Footer. Dead import.
+O componente cria estado local que e copia exata do estado do hook:
+- Linha 36: `const [localPageTexts, setLocalPageTexts] = useState(pageTexts)`
+- Linha 37: `const [localCategories, setLocalCategories] = useState(supabaseCategories)`
+
+Depois sincroniza via `useEffect` (linhas 39-45) E via `window.addEventListener('pageTextsUpdated')` (linhas 47-63). Isso cria 3 fontes de verdade para o mesmo dado.
+
+O mesmo padrao se repete em `Partners.tsx`, `ClientArea.tsx`, `About.tsx`, `Contact.tsx`, e `Hero.tsx` - todos criam estado local + listeners de `CustomEvent` para dados que ja vem do Supabase via hooks.
+
+**Solucao:** Com o Provider centralizado (item 1), os componentes lerao direto do context. Os custom events (`pageTextsUpdated`, `teamVideoSettingsUpdated`, etc.) sao necessarios apenas para atualizacao em tempo real do admin - mas como os componentes de secao NAO sao renderizados na pagina de admin, esses listeners sao **codigo morto** nas secoes publicas. Serao removidos.
+
+---
+
+## 7. MODERADO: `Partners.tsx` Manipula DOM Diretamente para Video
+
+Linhas 92-109: Busca elemento de video via `document.getElementById('team-background-video')` e manipula `.src`, `.style.display`, `.play()` manualmente. Isso e anti-pattern em React - o video deveria ser controlado via state.
+
+**Solucao:** Converter para state-driven: `const [videoUrl, setVideoUrl] = useState('')` e renderizar condicionalmente no JSX.
+
+---
+
+## 8. MODERADO: `PracticeAreas.tsx` Usa `window.location.href` em Links
+
+Linhas 219: `window.location.href = area.href` forca uma navegacao full-page em vez de usar o `<Link>` do React Router que ja envolve o componente. Isso causa reload completo da SPA e perde todo o estado.
+
+O componente ja tem `<Link to={area.href}>` envolvendo o card, mas o `onClick` (linha 211) faz `e.preventDefault()` e depois `window.location.href`, anulando completamente o beneficio do React Router.
+
+**Solucao:** Remover o `onClick` handler e deixar o `<Link>` funcionar naturalmente. Tambem remover `onTouchStart`/`onTouchEnd` handlers que fazem micro-animacoes desnecessarias via JS inline.
+
+---
+
+## 9. LEVE: `useLeadsData` Fetch Paginado Ineficiente
+
+Linha 131: `allData = [...allData, ...(batch || [])]` cria um novo array em cada iteracao do loop while. Para 5000 leads, isso significa 5 alocacoes de array crescentes.
+
+**Solucao:** Usar `allData.push(...(batch || []))` em vez de spread para evitar copia.
+
+---
+
+## 10. LEVE: `Admin.tsx` Mobile Dropdown Nao Funciona
+
+O dropdown mobile (linhas 212-268) usa `<Select>` do Radix mas NAO esta conectado ao `<Tabs>`. Selecionar um item no dropdown nao muda a tab ativa. E um componente puramente visual sem funcionalidade.
+
+**Solucao:** Conectar o Select ao estado do Tabs para que ambos estejam sincronizados.
 
 ---
 
 ## Plano de Implementacao
 
-### Arquivos a DELETAR:
-- `src/utils/devToolsProtection.ts` -- dead code perigoso
+### Fase 1 - Provider Centralizado (Elimina ~20 queries duplicadas)
 
-### Arquivos a MODIFICAR:
+| Arquivo | Acao |
+|---------|------|
+| `src/contexts/SupabaseDataContext.tsx` | **CRIAR** - Provider que chama useSupabaseDataNew + site_settings + contact_info UMA vez |
+| `src/hooks/useSupabaseData.ts` | **CRIAR** - Hook leve que consome do context |
+| `src/App.tsx` | **MODIFICAR** - Envolver app com SupabaseDataProvider |
+| `src/components/sections/PracticeAreas.tsx` | **MODIFICAR** - Usar useSupabaseData() em vez de useSupabaseDataNew(); remover estado local duplicado; remover listeners de CustomEvent; remover resize listener; usar useIsMobile; corrigir ScrollTrigger cleanup; remover window.location.href |
+| `src/components/sections/Partners.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover estado local; remover resize listener; usar useIsMobile; converter video para state-driven |
+| `src/components/sections/ClientArea.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover estado local; corrigir ScrollTrigger cleanup |
+| `src/components/sections/Hero.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline; remover estado local duplicado |
+| `src/components/sections/About.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline |
+| `src/components/sections/Contact.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline |
+| `src/components/sections/Blog.tsx` | **MODIFICAR** - Mover logger para useEffect |
+| `src/components/WhatsAppButton.tsx` | **MODIFICAR** - Usar useSupabaseData(); remover query inline |
 
-| Arquivo | Mudanca |
-|---------|---------|
-| `src/hooks/useAnalytics.ts` | Remover fetch ipapi.co; remover sendBeacon para rota inexistente; proteger divisao por zero |
-| `src/components/Loading.tsx` | Substituir por CSS animation puro, sem intervals/random |
-| `src/main.tsx` | Remover auto-reload loop; simplificar fallback |
-| `src/components/NeuralBackground.tsx` | Corrigir memory leak nos event listeners |
-| `src/components/sections/Hero.tsx` | Usar hooks `useIsMobile`/`useIsTablet` em vez de deteccao duplicada |
-| `src/components/FloatingFooter.tsx` | Usar hook `useIsMobile` em vez de deteccao duplicada |
-| `src/components/sections/Footer.tsx` | Remover import nao usado de `GlobalSocialProof` |
-| `src/components/ui/sonner.tsx` | Usar ThemeProvider custom em vez de `next-themes` |
-| `package.json` | Remover `next-themes` de dependencies |
+### Fase 2 - Fixes Pontuais
 
-### Impacto Esperado:
-- Eliminacao de 1 fetch externo desnecessario (ipapi.co) no load = -300ms
-- Eliminacao de 1 request 404 fantasma (sendBeacon) por sessao
-- Loading screen 95% mais leve (CSS puro vs 27 re-renders/s)
-- Zero memory leaks no WebGL background
-- Zero risco de loop infinito de reload
-- Eliminacao de dead code perigoso (devToolsProtection)
-- ~30KB a menos no bundle (next-themes)
-- 2 event listeners de resize a menos no desktop
+| Arquivo | Acao |
+|---------|------|
+| `src/hooks/useSectionTransition.tsx` | **MODIFICAR** - Usar useIsMobile/useIsTablet em vez de resize listener proprio |
+| `src/hooks/useLeadsData.ts` | **MODIFICAR** - Corrigir spread ineficiente no loop paginado |
+| `src/pages/Admin.tsx` | **MODIFICAR** - Conectar Select mobile ao Tabs state |
 
+### Impacto Esperado
+
+- De ~25+ queries Supabase no load para ~5 queries (reducao de 80%)
+- Eliminacao de ~10 resize listeners desnecessarios
+- Eliminacao de ~15 listeners de CustomEvent em componentes publicos
+- Zero risco de ScrollTrigger destruir animacoes de outros componentes
+- Navegacao entre areas sem full-page reload
+- Admin mobile dropdown funcional
+- Codigo mais limpo e manutenivel
