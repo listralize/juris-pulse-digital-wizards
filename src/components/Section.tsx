@@ -18,8 +18,6 @@ const Section = forwardRef<HTMLDivElement, SectionProps>(
     const isMobile = useIsMobile();
     const isTablet = useIsTablet();
     
-    console.log(`Section ${id} render:`, { isActive, isDark, allowScroll, isMobile, isTablet });
-    
     // A seção Hero sempre tem background preto, outras seguem o tema
     const getBackgroundClass = () => {
       if (id === 'home') {
