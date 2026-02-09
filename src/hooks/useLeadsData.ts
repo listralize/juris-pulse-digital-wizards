@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '../utils/logger';
 
 interface FormLead {
   id: string;
@@ -48,7 +49,7 @@ export const useLeadsData = (): LeadsData => {
   // Carregar configurações de formulários
   const loadFormConfigs = async () => {
     try {
-      console.log('🔄 Carregando configurações de formulários...');
+      logger.log('🔄 Carregando configurações de formulários...');
       const { data: adminSettings, error } = await supabase
         .from('admin_settings')
         .select('form_config')
@@ -56,16 +57,16 @@ export const useLeadsData = (): LeadsData => {
         .limit(1)
         .maybeSingle();
 
-      console.log('📋 Admin settings response:', { adminSettings, error });
+      logger.log('📋 Admin settings response:', { adminSettings, error });
 
       if (error) {
-        console.error('❌ Erro ao carregar configs de formulário:', error);
+        logger.error('❌ Erro ao carregar configs de formulário:', error);
         return;
       }
 
       if (adminSettings?.form_config) {
         const formConfig = adminSettings.form_config as any;
-        console.log('📋 Form config encontrado:', formConfig);
+        logger.log('📋 Form config encontrado:', formConfig);
         
         // Verificar se há formulários configurados
         if (formConfig.forms && Array.isArray(formConfig.forms)) {
@@ -75,7 +76,7 @@ export const useLeadsData = (): LeadsData => {
             form_id: form.id || 'default'
           }));
           
-          console.log('📋 Formulários configurados:', configs);
+          logger.log('📋 Formulários configurados:', configs);
           setFormConfigs(configs);
         } else {
           // Formato antigo - formulário único
@@ -84,7 +85,7 @@ export const useLeadsData = (): LeadsData => {
             name: 'Formulário Principal',
             form_id: 'default'
           }];
-          console.log('📋 Usando configuração padrão:', defaultConfig);
+          logger.log('📋 Usando configuração padrão:', defaultConfig);
           setFormConfigs(defaultConfig);
         }
       } else {
@@ -94,11 +95,11 @@ export const useLeadsData = (): LeadsData => {
           name: 'Formulário Principal',
           form_id: 'default'
         }];
-        console.log('📋 Sem config encontrada, usando padrão:', defaultConfig);
+        logger.log('📋 Sem config encontrada, usando padrão:', defaultConfig);
         setFormConfigs(defaultConfig);
       }
     } catch (error) {
-      console.error('❌ Erro geral ao carregar configurações:', error);
+      logger.error('❌ Erro geral ao carregar configurações:', error);
     }
   };
 
@@ -106,29 +107,49 @@ export const useLeadsData = (): LeadsData => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Iniciando carregamento de leads...');
+      logger.log('🔄 Iniciando carregamento de leads...');
       
-      const { data, error } = await supabase
-        .from('conversion_events')
-        .select('*')
-        .eq('event_type', 'form_submission')
-        .order('created_at', { ascending: false });
+      // Fetch paginado para superar limite de 1000 linhas do Supabase
+      const PAGE_SIZE = 1000;
+      let allData: any[] = [];
+      let from = 0;
+      let hasMore = true;
+      let error: any = null;
 
-      console.log('📊 Resposta da query conversion_events:', { data, error });
+      while (hasMore) {
+        const { data: batch, error: batchError } = await supabase
+          .from('conversion_events')
+          .select('*')
+          .eq('event_type', 'form_submission')
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (batchError) {
+          error = batchError;
+          break;
+        }
+        allData = [...allData, ...(batch || [])];
+        hasMore = (batch?.length || 0) === PAGE_SIZE;
+        from += PAGE_SIZE;
+      }
+
+      const data = allData;
+
+      logger.log('📊 Resposta da query conversion_events:', { totalRows: data.length, error });
 
       if (error) {
-        console.error('❌ Erro ao carregar leads:', error);
+        logger.error('❌ Erro ao carregar leads:', error);
         toast.error('Erro ao carregar leads');
         return;
       }
 
-      console.log('📈 Total de conversion_events encontrados:', data?.length || 0);
+      logger.log('📈 Total de conversion_events encontrados:', data?.length || 0);
 
       // Filtrar apenas leads válidos e adicionar status padrão
       const validLeads = (data || []).filter(lead => {
         // Verificar se tem dados válidos de lead
         if (!lead.lead_data || typeof lead.lead_data !== 'object') {
-          console.log('❌ Lead inválido - sem lead_data:', lead.id);
+          logger.log('❌ Lead inválido - sem lead_data:', lead.id);
           return false;
         }
         
@@ -136,7 +157,7 @@ export const useLeadsData = (): LeadsData => {
         const isValid = leadData?.name || leadData?.nome || leadData?.email;
         
         if (!isValid) {
-          console.log('❌ Lead inválido - sem nome/email:', lead.id, leadData);
+          logger.log('❌ Lead inválido - sem nome/email:', lead.id, leadData);
         }
         
         return isValid;
@@ -160,11 +181,11 @@ export const useLeadsData = (): LeadsData => {
         };
       });
 
-      console.log('✅ Leads válidos após filtro:', validLeads.length);
-      console.log('📋 Amostra dos leads:', validLeads.slice(0, 2));
+      logger.log('✅ Leads válidos após filtro:', validLeads.length);
+      logger.log('📋 Amostra dos leads:', validLeads.slice(0, 2));
       setLeads(validLeads);
     } catch (error) {
-      console.error('❌ Erro geral ao carregar leads:', error);
+      logger.error('❌ Erro geral ao carregar leads:', error);
       toast.error('Erro ao carregar leads');
     } finally {
       setIsLoading(false);
@@ -180,7 +201,7 @@ export const useLeadsData = (): LeadsData => {
         .in('id', leadIds);
 
       if (error) {
-        console.error('Erro ao deletar leads:', error);
+        logger.error('Erro ao deletar leads:', error);
         toast.error('Erro ao deletar leads');
         throw error;
       }
@@ -188,7 +209,7 @@ export const useLeadsData = (): LeadsData => {
       setLeads(prev => prev.filter(lead => !leadIds.includes(lead.id)));
       toast.success(`${leadIds.length} lead(s) deletado(s) com sucesso!`);
     } catch (error) {
-      console.error('Erro ao deletar leads:', error);
+      logger.error('Erro ao deletar leads:', error);
       throw error;
     }
   };
@@ -204,7 +225,7 @@ export const useLeadsData = (): LeadsData => {
       
       toast.success('Status atualizado com sucesso!');
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
+      logger.error('Erro ao atualizar status:', error);
       throw error;
     }
   };
@@ -229,7 +250,7 @@ export const useLeadsData = (): LeadsData => {
           table: 'conversion_events'
         },
         (payload) => {
-          console.log('📊 Lead atualizado em tempo real:', payload);
+          logger.log('📊 Lead atualizado em tempo real:', payload);
           refreshLeads();
         }
       )
