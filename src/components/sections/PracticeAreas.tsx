@@ -1,12 +1,13 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useSupabaseLawCategories } from '../../hooks/supabase/useSupabaseLawCategories';
 import { ArrowUpRight, Scale, Building2, Users, Shield, Briefcase, Gavel, Heart, Coins } from 'lucide-react';
+import { useIsMobile } from '../../hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,51 +17,10 @@ const PracticeAreas = () => {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const { theme } = useTheme();
-  const { pageTexts, servicePages, isLoading: pagesLoading } = useSupabaseDataNew();
+  const { pageTexts, servicePages, isLoading: pagesLoading, siteSettings } = useSupabaseData();
   const { categories: supabaseCategories, isLoading: categoriesLoading } = useSupabaseLawCategories();
   const isDark = theme === 'dark';
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
-  const [localCategories, setLocalCategories] = useState(supabaseCategories);
-
-  useEffect(() => {
-    setLocalPageTexts(pageTexts);
-  }, [pageTexts]);
-
-  useEffect(() => {
-    setLocalCategories(supabaseCategories);
-  }, [supabaseCategories]);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      setLocalPageTexts(event.detail);
-    };
-
-    const handleCategoriesUpdate = (event: CustomEvent) => {
-      setLocalCategories(event.detail);
-    };
-
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    window.addEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate as EventListener);
-    };
-  }, []);
+  const isMobile = useIsMobile();
 
   const iconMapping = {
     'administrativo': Building2,
@@ -75,7 +35,7 @@ const PracticeAreas = () => {
   };
 
   const practiceAreas = React.useMemo(() => {
-    if (!localCategories || localCategories.length === 0) {
+    if (!supabaseCategories || supabaseCategories.length === 0) {
       return [
         { id: 'familia-fallback', title: 'Direito de Família', href: '/areas/familia', services: 0, icon: Heart },
         { id: 'tributario-fallback', title: 'Direito Tributário', href: '/areas/tributario', services: 0, icon: Coins },
@@ -83,7 +43,7 @@ const PracticeAreas = () => {
       ];
     }
 
-    return localCategories.slice(0, 9).map(category => {
+    return supabaseCategories.slice(0, 9).map(category => {
       const categoryPages = servicePages?.filter(page => page.category === category.value) || [];
       const IconComponent = iconMapping[category.value as keyof typeof iconMapping] || Scale;
       return {
@@ -94,7 +54,7 @@ const PracticeAreas = () => {
         icon: IconComponent
       };
     });
-  }, [localCategories, servicePages]);
+  }, [supabaseCategories, servicePages]);
 
   const isLoading = categoriesLoading || pagesLoading;
 
@@ -118,7 +78,7 @@ const PracticeAreas = () => {
     );
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      tl.kill();
     };
   }, [isLoading, practiceAreas, isMobile]);
 
@@ -133,7 +93,7 @@ const PracticeAreas = () => {
     );
   }
 
-  const areasTitle = localPageTexts?.areasTitle || 'Áreas de Atuação';
+  const areasTitle = siteSettings?.areas_title || pageTexts?.areasTitle || 'Áreas de Atuação';
 
   return (
     <section 
@@ -153,9 +113,6 @@ const PracticeAreas = () => {
         maxHeight: isMobile ? 'none' : '100vh'
       }}
     >
-      {/* NeuralBackground removed - using global instance */}
-
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
@@ -177,7 +134,7 @@ const PracticeAreas = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full mx-auto"
             style={{ zIndex: isMobile ? 9999 : 30, position: 'relative' }}
           >
-            {practiceAreas.map((area, index) => {
+            {practiceAreas.map((area) => {
               const IconComponent = area.icon;
               
               return (
@@ -191,36 +148,6 @@ const PracticeAreas = () => {
                     position: 'relative',
                     minHeight: isMobile ? '44px' : 'auto',
                     touchAction: 'manipulation'
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      window.location.href = area.href;
-                    }
-                  }}
-                  onTouchStart={(e) => {
-                    if (isMobile || isTouch) {
-                      e.currentTarget.style.transform = 'scale(0.98)';
-                    }
-                  }}
-                  onTouchEnd={(e) => {
-                    if (isMobile || isTouch) {
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (isMobile || isTouch) {
-                      const target = e.currentTarget;
-                      target.style.transform = 'scale(0.95)';
-                      setTimeout(() => {
-                        target.style.transform = 'scale(1)';
-                        window.location.href = area.href;
-                      }, 150);
-                    } else {
-                      window.location.href = area.href;
-                    }
                   }}
                   aria-label={`${area.title} - ${area.services} serviço${area.services !== 1 ? 's' : ''}`}
                 >

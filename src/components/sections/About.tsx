@@ -1,12 +1,10 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
 import { useIsMobile } from '../../hooks/use-mobile';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { logger } from '@/utils/logger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -17,76 +15,13 @@ const About = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const isMobile = useIsMobile();
-  
-  const [aboutTitle, setAboutTitle] = useState('Quem Somos');
-  const [aboutDescription, setAboutDescription] = useState('Uma equipe dedicada à excelência jurídica');
-  const [aboutImage, setAboutImage] = useState('/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
-  const [aboutVideoStorageUrl, setAboutVideoStorageUrl] = useState('');
-  const [mediaType, setMediaType] = useState('image');
-  const [teamVideoEnabled, setTeamVideoEnabled] = useState(false);
-  const [teamBackgroundVideo, setTeamBackgroundVideo] = useState('');
+  const { siteSettings } = useSupabaseData();
 
-  useEffect(() => {
-    const loadAboutData = async () => {
-      try {
-        const { supabase } = await import('../../integrations/supabase/client');
-        
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('about_title, about_description, about_image, about_media_type, about_video_storage_url, team_video_enabled, team_background_video')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (settings) {
-          logger.log('ℹ️ About: Dados carregados do Supabase:', settings);
-          setAboutTitle(settings.about_title || 'Quem Somos');
-          setAboutDescription(settings.about_description || 'Uma equipe dedicada à excelência jurídica');
-          setAboutImage(settings.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png');
-          setAboutVideoStorageUrl(settings.about_video_storage_url || '');
-          setMediaType(settings.about_media_type || 'image');
-          setTeamVideoEnabled(settings.team_video_enabled || false);
-          setTeamBackgroundVideo(settings.team_background_video || '');
-        }
-      } catch (error) {
-        logger.error('❌ Erro ao carregar dados do About:', error);
-      }
-    };
-
-    loadAboutData();
-  }, []);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      logger.log('ℹ️ About: Recebendo atualização de textos:', event.detail);
-      const { 
-        aboutTitle: newTitle, 
-        aboutDescription: newDescription,
-        aboutImage: newImage,
-        aboutMediaType: newMediaType
-      } = event.detail;
-      
-      if (newTitle !== undefined) setAboutTitle(newTitle);
-      if (newDescription !== undefined) setAboutDescription(newDescription);
-      if (newImage !== undefined) setAboutImage(newImage);
-      if (newMediaType !== undefined) setMediaType(newMediaType);
-    };
-
-    const handleTeamVideoUpdate = (event: CustomEvent) => {
-      logger.log('ℹ️ About: Recebendo atualização de vídeo da equipe:', event.detail);
-      const { team_video_enabled, team_background_video } = event.detail;
-      setTeamVideoEnabled(team_video_enabled || false);
-      setTeamBackgroundVideo(team_background_video || '');
-    };
-
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    window.addEventListener('teamVideoSettingsUpdated', handleTeamVideoUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-      window.removeEventListener('teamVideoSettingsUpdated', handleTeamVideoUpdate as EventListener);
-    };
-  }, []);
+  const aboutTitle = siteSettings?.about_title || 'Quem Somos';
+  const aboutDescription = siteSettings?.about_description || 'Uma equipe dedicada à excelência jurídica';
+  const aboutImage = siteSettings?.about_image || '/lovable-uploads/a7d8123c-de9a-4ad4-986d-30c7232d4295.png';
+  const aboutVideoStorageUrl = siteSettings?.about_video_storage_url || '';
+  const mediaType = siteSettings?.about_media_type || 'image';
 
   const getYouTubeEmbedUrl = (url: string) => {
     const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
@@ -119,7 +54,6 @@ const About = () => {
   const renderMedia = () => {
     if (mediaType === 'video') {
       if (aboutVideoStorageUrl) {
-        logger.log('🎥 About: Renderizando vídeo do storage:', aboutVideoStorageUrl);
         return (
           <div 
             className="about-video-container w-full rounded-lg overflow-hidden" 
@@ -154,7 +88,6 @@ const About = () => {
       
       if (aboutImage && aboutImage.includes('youtube')) {
         const embedUrl = getYouTubeEmbedUrl(aboutImage);
-        logger.log('🎥 About: Renderizando vídeo do YouTube:', { originalUrl: aboutImage, embedUrl });
         
         return (
           <div className={`w-full rounded-lg overflow-hidden relative ${
@@ -209,8 +142,6 @@ const About = () => {
         zIndex: isMobile ? 9999 : 10
       }}
     >
-      {/* NeuralBackground removed - using global instance from Index.tsx */}
-      
       <div className="max-w-6xl mx-auto w-full relative z-10">
         <div className="flex flex-col items-center justify-center flex-1">
           <div className="text-center mb-8 md:mb-12">

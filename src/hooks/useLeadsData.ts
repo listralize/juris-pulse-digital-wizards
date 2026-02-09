@@ -128,7 +128,7 @@ export const useLeadsData = (): LeadsData => {
           error = batchError;
           break;
         }
-        allData = [...allData, ...(batch || [])];
+        allData.push(...(batch || []));
         hasMore = (batch?.length || 0) === PAGE_SIZE;
         from += PAGE_SIZE;
       }

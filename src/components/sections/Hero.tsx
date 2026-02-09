@@ -3,9 +3,9 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
+import { logger } from '@/utils/logger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,66 +19,14 @@ const Hero = () => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
-  const [heroTitle, setHeroTitle] = useState('Excelência em Advocacia');
-  const [heroSubtitle, setHeroSubtitle] = useState('Defendemos seus direitos com dedicação e expertise');
-  const [primaryButtonText, setPrimaryButtonText] = useState('Fale Conosco');
-  const [primaryButtonLink, setPrimaryButtonLink] = useState('https://api.whatsapp.com/send?phone=5562994594496');
-  const [secondaryButtonText, setSecondaryButtonText] = useState('Conheça Nossas Áreas de Atuação');
-  const [secondaryButtonLink, setSecondaryButtonLink] = useState('#areas');
-  const [heroVideoEnabled, setHeroVideoEnabled] = useState<boolean>(false);
-  const [heroVideoUrl, setHeroVideoUrl] = useState<string>('');
+  const { siteSettings } = useSupabaseData();
 
-  useEffect(() => {
-    const loadHeroData = async () => {
-      try {
-        logger.log('🦸 Hero: Carregando dados iniciais...');
-        const { data: settings } = await supabase
-          .from('site_settings')
-          .select('*')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (settings) {
-          logger.log('🦸 Hero: Dados carregados do Supabase:', settings);
-          if (settings.hero_title) setHeroTitle(settings.hero_title);
-          if (settings.hero_subtitle) setHeroSubtitle(settings.hero_subtitle);
-          if (settings.hero_primary_button_text) setPrimaryButtonText(settings.hero_primary_button_text);
-          if (settings.hero_primary_button_link) setPrimaryButtonLink(settings.hero_primary_button_link);
-          if (settings.hero_secondary_button_text) setSecondaryButtonText(settings.hero_secondary_button_text);
-          if (settings.hero_secondary_button_link) setSecondaryButtonLink(settings.hero_secondary_button_link);
-          if (typeof settings.team_video_enabled === 'boolean') setHeroVideoEnabled(settings.team_video_enabled);
-          if (settings.team_background_video) setHeroVideoUrl(settings.team_background_video);
-        }
-      } catch (error) {
-        logger.error('❌ Hero: Erro ao carregar dados:', error);
-      }
-    };
-    loadHeroData();
-  }, []);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      logger.log('🦸 Hero: Evento pageTextsUpdated recebido:', event.detail);
-      const data = event.detail;
-      if (data.heroTitle !== undefined) setHeroTitle(data.heroTitle);
-      if (data.heroSubtitle !== undefined) setHeroSubtitle(data.heroSubtitle);
-      if (data.heroPrimaryButtonText !== undefined) setPrimaryButtonText(data.heroPrimaryButtonText);
-      if (data.heroPrimaryButtonLink !== undefined) setPrimaryButtonLink(data.heroPrimaryButtonLink);
-      if (data.heroSecondaryButtonText !== undefined) setSecondaryButtonText(data.heroSecondaryButtonText);
-      if (data.heroSecondaryButtonLink !== undefined) setSecondaryButtonLink(data.heroSecondaryButtonLink);
-    };
-    const handleHeroVideoUpdate = (event: CustomEvent) => {
-      logger.log('🎥 Hero: Atualização de vídeo recebida:', event.detail);
-      setHeroVideoEnabled(Boolean(event.detail?.team_video_enabled));
-      setHeroVideoUrl(event.detail?.team_background_video || '');
-    };
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    window.addEventListener('heroVideoSettingsUpdated', handleHeroVideoUpdate as EventListener);
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-      window.removeEventListener('heroVideoSettingsUpdated', handleHeroVideoUpdate as EventListener);
-    };
-  }, []);
+  const heroTitle = siteSettings?.hero_title || 'Excelência em Advocacia';
+  const heroSubtitle = siteSettings?.hero_subtitle || 'Defendemos seus direitos com dedicação e expertise';
+  const primaryButtonText = siteSettings?.hero_primary_button_text || 'Fale Conosco';
+  const primaryButtonLink = siteSettings?.hero_primary_button_link || 'https://api.whatsapp.com/send?phone=5562994594496';
+  const secondaryButtonText = siteSettings?.hero_secondary_button_text || 'Conheça Nossas Áreas de Atuação';
+  const secondaryButtonLink = siteSettings?.hero_secondary_button_link || '#areas';
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -89,10 +37,8 @@ const Hero = () => {
       .fromTo(ctaRef.current, { opacity: 0, y: 25, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: 'power2.out' }, "-=0.4");
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
-
 
   useEffect(() => {
     if (isMobile || isTablet) return;
@@ -111,8 +57,6 @@ const Hero = () => {
 
   return (
     <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* NeuralBackground removed - using global instance from Index.tsx */}
-      
       <div className="relative text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12" style={{ zIndex: 100, pointerEvents: 'auto' }}>
         <div ref={logoRef} className="mb-6 md:mb-8 w-full max-w-sm md:max-w-lg mx-auto relative">
           <div className="logo-container relative">

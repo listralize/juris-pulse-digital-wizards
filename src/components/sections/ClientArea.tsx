@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '../ThemeProvider';
-import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { Lock, ArrowRight, MessageSquare, Crown } from 'lucide-react';
 import { useIsMobile, useIsTablet } from '../../hooks/use-mobile';
-import { logger } from '@/utils/logger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,60 +15,50 @@ const ClientArea = () => {
   const button1Ref = useRef<HTMLAnchorElement>(null);
   const button2Ref = useRef<HTMLAnchorElement>(null);
   const { theme } = useTheme();
-  const { pageTexts, isLoading } = useSupabaseDataNew();
+  const { pageTexts, isLoading, siteSettings, contactInfo } = useSupabaseData();
   const isDark = theme === 'dark';
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
-  
-  const [localPageTexts, setLocalPageTexts] = useState(pageTexts);
 
-  useEffect(() => {
-    setLocalPageTexts(pageTexts);
-  }, [pageTexts]);
-
-  useEffect(() => {
-    const handlePageTextsUpdate = (event: CustomEvent) => {
-      logger.log('📱 ClientArea: Recebendo atualização de textos:', event.detail);
-      setLocalPageTexts(event.detail);
-    };
-
-    window.addEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('pageTextsUpdated', handlePageTextsUpdate as EventListener);
-    };
-  }, []);
+  const tweensRef = useRef<gsap.core.Tween[]>([]);
   
   useEffect(() => {
     if (isLoading) return;
 
-    gsap.fromTo(imageRef.current, { opacity: 0, y: -20 }, {
+    const tweens: gsap.core.Tween[] = [];
+
+    tweens.push(gsap.fromTo(imageRef.current, { opacity: 0, y: -20 }, {
       opacity: 1, y: 0, duration: 0.8,
       scrollTrigger: { trigger: imageRef.current, start: 'top 80%', toggleActions: 'play none none reverse' }
-    });
+    }));
     
-    gsap.fromTo(titleRef.current, { opacity: 0, scaleY: 0.9 }, {
+    tweens.push(gsap.fromTo(titleRef.current, { opacity: 0, scaleY: 0.9 }, {
       opacity: 1, scaleY: 1, duration: 0.8,
       scrollTrigger: { trigger: titleRef.current, start: 'top 80%', toggleActions: 'play none none reverse' }
-    });
+    }));
     
-    gsap.fromTo(textRef.current, { opacity: 0, y: 20 }, {
+    tweens.push(gsap.fromTo(textRef.current, { opacity: 0, y: 20 }, {
       opacity: 1, y: 0, duration: 0.8,
       scrollTrigger: { trigger: textRef.current, start: 'top 80%', toggleActions: 'play none none reverse' }
-    });
+    }));
     
-    gsap.fromTo(button1Ref.current, { opacity: 0, y: 20 }, {
+    tweens.push(gsap.fromTo(button1Ref.current, { opacity: 0, y: 20 }, {
       opacity: 1, y: 0, duration: 0.8, delay: 0.2,
       scrollTrigger: { trigger: button1Ref.current, start: 'top 80%', toggleActions: 'play none none reverse' }
-    });
+    }));
     
-    gsap.fromTo(button2Ref.current, { opacity: 0, y: 20 }, {
+    tweens.push(gsap.fromTo(button2Ref.current, { opacity: 0, y: 20 }, {
       opacity: 1, y: 0, duration: 0.8, delay: 0.3,
       scrollTrigger: { trigger: button2Ref.current, start: 'top 80%', toggleActions: 'play none none reverse' }
-    });
+    }));
+
+    tweensRef.current = tweens;
     
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill(true));
+      tweens.forEach(tween => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      });
     };
   }, [isLoading]);
 
@@ -84,10 +73,10 @@ const ClientArea = () => {
     );
   }
 
-  const whatsappNumber = localPageTexts?.contactTexts?.whatsapp || '5562994594496';
-  const clientPortalLink = localPageTexts?.clientPortalLink || '#';
-  const clientAreaTitle = localPageTexts?.clientAreaTitle || 'Área do Cliente';
-  const clientAreaDescription = localPageTexts?.clientAreaDescription || 'Acesse sua área restrita para acompanhar seus processos';
+  const whatsappNumber = contactInfo?.whatsapp || pageTexts?.contactTexts?.whatsapp || '5562994594496';
+  const clientPortalLink = siteSettings?.client_portal_link || pageTexts?.clientPortalLink || '#';
+  const clientAreaTitle = siteSettings?.client_area_title || pageTexts?.clientAreaTitle || 'Área do Cliente';
+  const clientAreaDescription = siteSettings?.client_area_description || pageTexts?.clientAreaDescription || 'Acesse sua área restrita para acompanhar seus processos';
 
   return (
     <section 
@@ -100,9 +89,6 @@ const ClientArea = () => {
         padding: isMobile ? '2rem 1rem' : isTablet ? '4rem 2rem' : '4rem 2rem'
       }}
     >
-      {/* NeuralBackground removed - using global instance */}
-
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, ${isDark ? 'white' : 'black'} 1px, transparent 0)`,
