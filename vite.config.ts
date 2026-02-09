@@ -22,15 +22,28 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: false,
-    minify: 'terser', // Use terser for stable builds
     target: 'es2020',
+    cssMinify: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         format: 'es',
         generatedCode: 'es2015',
-        // Remove manual chunks to avoid 404 errors
-        manualChunks: undefined,
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-charts': ['recharts'],
+          'vendor-gsap': ['gsap'],
+          'vendor-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-dropdown-menu',
+          ],
+        },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
           const info = assetInfo.name.split('.');
@@ -49,11 +62,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   base: "/",
-  define: {
-    'process.env.NODE_ENV': JSON.stringify(mode),
-  },
   esbuild: {
     target: 'es2020',
-    keepNames: true, // Preserve function and class names
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
 }));
