@@ -212,7 +212,7 @@ export const LeadsManagement: React.FC = () => {
   const loadLeads = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 Carregando leads da tabela conversion_events...');
+      
       
       // Fetch paginado para superar limite de 1000 linhas do Supabase
       const PAGE_SIZE = 1000;
@@ -241,7 +241,7 @@ export const LeadsManagement: React.FC = () => {
       const leadsData = allLeadsData;
 
       if (leadsError) {
-        console.error('❌ Erro ao carregar leads:', leadsError);
+        console.error('Erro ao carregar leads:', leadsError);
         toast.error('Erro ao carregar leads');
         setLeads([]);
         return;
@@ -343,7 +343,7 @@ export const LeadsManagement: React.FC = () => {
             const existingLead = seenLeads.get(key);
             const timeDiff = Math.abs(new Date(lead.created_at).getTime() - new Date(existingLead.created_at).getTime());
             if (timeDiff <= 30000) {
-              console.log(`🔄 Duplicata removida: ${key} (diferença: ${timeDiff}ms)`);
+              // Duplicata removida
               continue;
             }
           }
@@ -358,7 +358,7 @@ export const LeadsManagement: React.FC = () => {
         }
       }
 
-      console.log(`✅ Leads processados: ${enrichedLeads?.length || 0} -> ${deduplicatedLeads.length} (após deduplicação)`);
+      
       
       // Carregar status dos leads com suas datas de atualização
       // Fetch paginado para lead_status
@@ -385,7 +385,7 @@ export const LeadsManagement: React.FC = () => {
       const statusData = allStatusData;
 
       if (statusError) {
-        console.error('❌ Erro ao carregar status:', statusError);
+        console.error('Erro ao carregar status:', statusError);
       }
 
       // Mapear status e suas datas de atualização
@@ -399,7 +399,7 @@ export const LeadsManagement: React.FC = () => {
         };
       });
 
-      console.log('📊 Status carregados:', statusDatesMap);
+      
 
       // Extrair serviços únicos dos leads - versão síncrona
       const servicesSet = new Set<string>();
@@ -424,7 +424,7 @@ export const LeadsManagement: React.FC = () => {
       setLeadStatuses(statusMap);
       setLeadStatusDates(statusDatesMap);
     } catch (error) {
-      console.error('❌ Erro geral:', error);
+      console.error('Erro geral:', error);
       toast.error('Erro ao carregar leads');
     } finally {
       setIsLoading(false);
@@ -494,7 +494,7 @@ export const LeadsManagement: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Erro ao carregar templates:', error);
+        console.error('Erro ao carregar templates:', error);
         return;
       }
 
@@ -504,14 +504,14 @@ export const LeadsManagement: React.FC = () => {
       const defaultTemplate = data?.find(t => t.is_default) || data?.[0];
       setSelectedTemplate(defaultTemplate);
     } catch (error) {
-      console.error('❌ Erro ao carregar templates:', error);
+      console.error('Erro ao carregar templates:', error);
     }
   };
 
   // Salvar status do lead no banco
   const updateLeadStatus = async (leadId: string, newStatus: string) => {
     try {
-      console.log(`🔄 Atualizando status do lead ${leadId} para ${newStatus}`);
+      
       
       // Verificar se já existe um status para este lead
       const { data: existingStatus, error: checkError } = await supabase
@@ -521,7 +521,7 @@ export const LeadsManagement: React.FC = () => {
         .maybeSingle();
 
       if (checkError && checkError.code !== 'PGRST116') {
-        console.error('❌ Erro ao verificar status existente:', checkError);
+        console.error('Erro ao verificar status existente:', checkError);
         toast.error('Erro ao verificar status do lead');
         return false;
       }
@@ -537,7 +537,7 @@ export const LeadsManagement: React.FC = () => {
           .eq('lead_id', leadId);
 
         if (error) {
-          console.error('❌ Erro ao atualizar status:', error);
+          console.error('Erro ao atualizar status:', error);
           toast.error('Erro ao atualizar status do lead');
           return false;
         }
@@ -552,7 +552,7 @@ export const LeadsManagement: React.FC = () => {
           });
 
         if (error) {
-          console.error('❌ Erro ao criar status:', error);
+          console.error('Erro ao criar status:', error);
           toast.error('Erro ao criar status do lead');
           return false;
         }
@@ -576,7 +576,7 @@ export const LeadsManagement: React.FC = () => {
       toast.success(`Status atualizado para: ${newStatus}!`);
       return true;
     } catch (error) {
-      console.error('❌ Erro ao atualizar status:', error);
+      console.error('Erro ao atualizar status:', error);
       toast.error('Erro ao atualizar status');
     }
   };
@@ -598,11 +598,7 @@ export const LeadsManagement: React.FC = () => {
         return;
       }
 
-      console.log('📧 Enviando email personalizado:', {
-        to: leadData.email,
-        template: template.name,
-        lead: leadData.name
-      });
+      
 
       // Gerar HTML completo do template
       const fullHtml = generateEmailHTML(template, leadData);
@@ -619,15 +615,15 @@ export const LeadsManagement: React.FC = () => {
       });
 
       if (error) {
-        console.error('❌ Erro ao enviar email:', error);
+        console.error('Erro ao enviar email:', error);
         toast.error(`Erro ao enviar email: ${error.message}`);
         return;
       }
 
-      console.log('✅ Email enviado:', data);
+      
       toast.success('Email enviado com sucesso!');
     } catch (error) {
-      console.error('❌ Erro ao enviar email:', error);
+      console.error('Erro ao enviar email:', error);
       toast.error('Erro ao enviar email');
     }
   };
@@ -660,7 +656,7 @@ export const LeadsManagement: React.FC = () => {
           successCount++;
           await new Promise(resolve => setTimeout(resolve, 1000)); // Delay entre emails
         } catch (error) {
-          console.error(`❌ Erro ao enviar email para lead ${leadId}:`, error);
+          console.error(`Erro ao enviar email para lead ${leadId}:`, error);
           errorCount++;
         }
       }
@@ -668,7 +664,7 @@ export const LeadsManagement: React.FC = () => {
       toast.success(`Emails enviados: ${successCount} sucessos, ${errorCount} erros`);
       setSelectedLeads(new Set());
     } catch (error) {
-      console.error('❌ Erro no envio em massa:', error);
+      console.error('Erro no envio em massa:', error);
       toast.error('Erro no envio em massa');
     }
   };
@@ -687,7 +683,7 @@ export const LeadsManagement: React.FC = () => {
         .in('id', Array.from(selectedLeads));
 
       if (error) {
-        console.error('❌ Erro ao excluir leads:', error);
+        console.error('Erro ao excluir leads:', error);
         toast.error('Erro ao excluir leads');
         return;
       }
@@ -696,7 +692,7 @@ export const LeadsManagement: React.FC = () => {
       setSelectedLeads(new Set());
       loadLeads();
     } catch (error) {
-      console.error('❌ Erro ao excluir leads:', error);
+      console.error('Erro ao excluir leads:', error);
       toast.error('Erro ao excluir leads');
     }
   };

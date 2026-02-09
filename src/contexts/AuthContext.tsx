@@ -27,18 +27,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   } = useSupabaseAuth();
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    console.log('🔐 Tentativa de login:', email);
-    
     try {
       const { data, error } = await signIn(email, password);
       if (!error && data.user) {
-        console.log('✅ Login do Supabase bem-sucedido');
         return true;
       }
-      console.log('❌ Falha no login do Supabase:', error);
       return false;
     } catch (error) {
-      console.error('❌ Erro no login do Supabase:', error);
+      console.error('Erro no login:', error);
       return false;
     }
   };

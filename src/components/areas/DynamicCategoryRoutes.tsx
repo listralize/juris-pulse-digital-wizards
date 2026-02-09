@@ -8,8 +8,6 @@ import NotFound from '../../pages/NotFound';
 const DynamicCategoryRoutes = () => {
   const { categories, isLoading } = useSupabaseLawCategories();
 
-  console.log('🗺️ DynamicCategoryRoutes: Criando rotas para categorias:', categories?.length || 0);
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -19,7 +17,6 @@ const DynamicCategoryRoutes = () => {
   }
 
   if (!categories || categories.length === 0) {
-    console.log('⚠️ DynamicCategoryRoutes: Nenhuma categoria encontrada');
     return (
       <Routes>
         <Route path="*" element={<NotFound />} />
@@ -31,15 +28,8 @@ const DynamicCategoryRoutes = () => {
     <Routes>
       {categories.map((category) => {
         if (!category || !category.value) {
-          console.warn('⚠️ Categoria inválida:', category);
           return null;
         }
-        
-        console.log('🔗 Criando rota para categoria:', { 
-          value: category.value, 
-          label: category.label,
-          path: `${category.value}`
-        });
         
         return (
           <Route 

@@ -3,35 +3,33 @@ import { useState, useEffect } from 'react';
 import { PageTexts } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
 import { defaultPageTexts } from '../../data/defaultPageTexts';
+import { logger } from '../../utils/logger';
 
 export const useSupabasePageTexts = () => {
   const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadPageTexts = async () => {
-    console.log('🔄 [useSupabasePageTexts] Carregando textos das páginas...');
+    logger.log('[useSupabasePageTexts] Carregando textos...');
     setIsLoading(true);
     
     try {
-      // Primeiro, vamos limpar registros duplicados e manter apenas o mais recente
       const { data: allSettings, error: fetchError } = await supabase
         .from('site_settings')
         .select('*')
         .order('updated_at', { ascending: false });
 
       if (fetchError) {
-        console.error('❌ Erro ao carregar configurações:', fetchError);
+        console.error('Erro ao carregar configurações:', fetchError);
         setPageTexts(defaultPageTexts);
         setIsLoading(false);
         return;
       }
 
-      // Se temos múltiplos registros, vamos manter apenas o mais recente
       if (allSettings && allSettings.length > 1) {
-        console.log(`🧹 Limpando ${allSettings.length - 1} registros duplicados...`);
+        logger.log(`Limpando ${allSettings.length - 1} registros duplicados...`);
         const [latestSetting, ...duplicates] = allSettings;
         
-        // Deletar os duplicados
         const duplicateIds = duplicates.map(d => d.id);
         if (duplicateIds.length > 0) {
           const { error: deleteError } = await supabase
@@ -40,13 +38,10 @@ export const useSupabasePageTexts = () => {
             .in('id', duplicateIds);
             
           if (deleteError) {
-            console.error('❌ Erro ao deletar duplicados:', deleteError);
-          } else {
-            console.log('✅ Registros duplicados removidos com sucesso');
+            console.error('Erro ao deletar duplicados:', deleteError);
           }
         }
         
-        // Usar o registro mais recente
         const settings = latestSetting;
         const loadedTexts: PageTexts = {
           heroTitle: settings.hero_title || defaultPageTexts.heroTitle,
@@ -63,7 +58,6 @@ export const useSupabasePageTexts = () => {
           contactTitle: settings.contact_title || defaultPageTexts.contactTitle,
           contactSubtitle: settings.contact_subtitle || defaultPageTexts.contactSubtitle,
           
-          // Usar defaults para textos específicos das áreas
           familiaTitle: defaultPageTexts.familiaTitle,
           familiaDescription: defaultPageTexts.familiaDescription,
           tributarioTitle: defaultPageTexts.tributarioTitle,
@@ -89,9 +83,7 @@ export const useSupabasePageTexts = () => {
         };
         
         setPageTexts(loadedTexts);
-        console.log('✅ [useSupabasePageTexts] Textos carregados após limpeza:', loadedTexts);
       } else if (allSettings && allSettings.length === 1) {
-        // Caso ideal: apenas um registro
         const settings = allSettings[0];
         const loadedTexts: PageTexts = {
           heroTitle: settings.hero_title || defaultPageTexts.heroTitle,
@@ -108,7 +100,6 @@ export const useSupabasePageTexts = () => {
           contactTitle: settings.contact_title || defaultPageTexts.contactTitle,
           contactSubtitle: settings.contact_subtitle || defaultPageTexts.contactSubtitle,
           
-          // Usar defaults para textos específicos das áreas
           familiaTitle: defaultPageTexts.familiaTitle,
           familiaDescription: defaultPageTexts.familiaDescription,
           tributarioTitle: defaultPageTexts.tributarioTitle,
@@ -134,13 +125,12 @@ export const useSupabasePageTexts = () => {
         };
         
         setPageTexts(loadedTexts);
-        console.log('✅ [useSupabasePageTexts] Textos carregados:', loadedTexts);
       } else {
-        console.log('ℹ️ [useSupabasePageTexts] Nenhuma configuração encontrada, usando defaults');
+        logger.log('[useSupabasePageTexts] Nenhuma configuração encontrada, usando defaults');
         setPageTexts(defaultPageTexts);
       }
     } catch (error) {
-      console.error('❌ Erro crítico ao carregar textos:', error);
+      console.error('Erro crítico ao carregar textos:', error);
       setPageTexts(defaultPageTexts);
     } finally {
       setIsLoading(false);
@@ -148,10 +138,9 @@ export const useSupabasePageTexts = () => {
   };
 
   const savePageTexts = async (texts: PageTexts) => {
-    console.log('💾 [useSupabasePageTexts] Salvando textos das páginas...', texts);
+    logger.log('[useSupabasePageTexts] Salvando textos...');
     
     try {
-      // Buscar o registro único (se existe)
       const { data: existing } = await supabase
         .from('site_settings')
         .select('id')
@@ -178,36 +167,30 @@ export const useSupabasePageTexts = () => {
 
       let result;
       if (existing) {
-        console.log('📝 Atualizando registro único existente:', existing.id);
         result = await supabase
           .from('site_settings')
           .update(dataToSave)
           .eq('id', existing.id);
       } else {
-        console.log('➕ Inserindo primeiro registro');
         result = await supabase
           .from('site_settings')
           .insert(dataToSave);
       }
 
       if (result.error) {
-        console.error('❌ Erro ao salvar textos:', result.error);
+        console.error('Erro ao salvar textos:', result.error);
         throw result.error;
       }
 
-      // Atualizar estado local imediatamente
       setPageTexts(texts);
-      console.log('✅ [useSupabasePageTexts] Textos salvos com sucesso!');
       
-      // Disparar evento customizado para atualizar as seções em tempo real
-      console.log('📡 Disparando evento pageTextsUpdated');
       const event = new CustomEvent('pageTextsUpdated', { 
         detail: texts 
       });
       window.dispatchEvent(event);
       
     } catch (error) {
-      console.error('❌ Erro crítico ao salvar textos:', error);
+      console.error('Erro crítico ao salvar textos:', error);
       throw error;
     }
   };

@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { CategoryInfo } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
+import { logger } from '../../utils/logger';
 
 export const useSupabaseLawCategories = () => {
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadCategories = async () => {
-    console.log('🔄 [useSupabaseLawCategories] Carregando categorias do Supabase...');
+    logger.log('[useSupabaseLawCategories] Carregando categorias...');
     setIsLoading(true);
     
     try {
@@ -19,7 +20,7 @@ export const useSupabaseLawCategories = () => {
         .order('display_order');
 
       if (error) {
-        console.error('❌ Erro ao carregar categorias:', error);
+        console.error('Erro ao carregar categorias:', error);
         setCategories([]);
         setIsLoading(false);
         return;
@@ -38,17 +39,15 @@ export const useSupabaseLawCategories = () => {
         fullContent: cat.full_content || ''
       }));
 
-      console.log('✅ [useSupabaseLawCategories] Categorias carregadas:', formattedCategories.length);
-      console.log('📋 [useSupabaseLawCategories] Categorias:', formattedCategories.map(c => ({ key: c.value, name: c.name, hasFullContent: !!c.fullContent })));
+      logger.log('[useSupabaseLawCategories] Categorias carregadas:', formattedCategories.length);
       setCategories(formattedCategories);
       
-      // Disparar evento para atualizar componentes
       window.dispatchEvent(new CustomEvent('categoriesUpdated', {
         detail: formattedCategories
       }));
       
     } catch (error) {
-      console.error('❌ Erro crítico ao carregar categorias:', error);
+      console.error('Erro crítico ao carregar categorias:', error);
       setCategories([]);
     } finally {
       setIsLoading(false);
@@ -56,7 +55,7 @@ export const useSupabaseLawCategories = () => {
   };
 
   const saveCategory = async (category: CategoryInfo) => {
-    console.log('💾 [useSupabaseLawCategories] Salvando categoria:', category);
+    logger.log('[useSupabaseLawCategories] Salvando categoria:', category.value);
     
     try {
       const categoryData = {
@@ -74,29 +73,27 @@ export const useSupabaseLawCategories = () => {
         display_order: 0
       };
 
-      console.log('💾 Dados que serão salvos:', categoryData);
-
       const { error } = await supabase
         .from('law_categories')
         .upsert(categoryData, { onConflict: 'category_key' });
 
       if (error) {
-        console.error('❌ Erro ao salvar categoria:', error);
+        console.error('Erro ao salvar categoria:', error);
         throw error;
       }
 
-      console.log('✅ Categoria salva com sucesso');
-      await loadCategories(); // Recarregar para atualizar a lista
+      logger.log('Categoria salva com sucesso');
+      await loadCategories();
       
       return category;
     } catch (error) {
-      console.error('❌ Erro crítico ao salvar categoria:', error);
+      console.error('Erro crítico ao salvar categoria:', error);
       throw error;
     }
   };
 
   const deleteCategory = async (categoryKey: string) => {
-    console.log('🗑️ [useSupabaseLawCategories] Removendo categoria:', categoryKey);
+    logger.log('[useSupabaseLawCategories] Removendo categoria:', categoryKey);
     
     try {
       const { error } = await supabase
@@ -105,15 +102,15 @@ export const useSupabaseLawCategories = () => {
         .eq('category_key', categoryKey);
 
       if (error) {
-        console.error('❌ Erro ao remover categoria:', error);
+        console.error('Erro ao remover categoria:', error);
         throw error;
       }
 
-      console.log('✅ Categoria removida com sucesso');
-      await loadCategories(); // Recarregar para atualizar a lista
+      logger.log('Categoria removida com sucesso');
+      await loadCategories();
       
     } catch (error) {
-      console.error('❌ Erro crítico ao remover categoria:', error);
+      console.error('Erro crítico ao remover categoria:', error);
       throw error;
     }
   };

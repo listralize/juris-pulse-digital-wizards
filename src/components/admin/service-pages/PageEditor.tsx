@@ -24,13 +24,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page, onUpdatePage }) =>
   const isDark = theme === 'dark';
 
   const handleInputChange = (field: keyof ServicePage, value: string) => {
-    console.log('📝 Alterando campo:', field, 'para:', value);
     onUpdatePage(page.id, field, value);
   };
 
   const handleRedirectUrlBlur = (value: string) => {
     if (page.redirectEnabled && value !== page.redirectUrl) {
-      console.log('🔗 Salvando URL de redirecionamento:', value);
       onUpdatePage(page.id, 'redirectUrl', value);
     }
   };

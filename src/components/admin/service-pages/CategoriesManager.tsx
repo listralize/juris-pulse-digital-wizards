@@ -45,7 +45,6 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   const addCategory = () => {
-    console.log('➕ Adicionando nova categoria');
     const randomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
     const randomIcon = iconOptions[Math.floor(Math.random() * iconOptions.length)];
     
@@ -61,11 +60,9 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
     
     const updatedCategories = [...localCategories, newCategory];
     setLocalCategories(updatedCategories);
-    console.log('📝 Categorias atualizadas:', updatedCategories);
   };
 
   const updateCategory = (index: number, field: keyof CategoryInfo, value: string) => {
-    console.log('✏️ Atualizando categoria:', index, field, value);
     const updated = [...localCategories];
     updated[index] = { ...updated[index], [field]: value };
     
@@ -89,7 +86,6 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
   };
 
   const removeCategory = (index: number) => {
-    console.log('🗑️ Removendo categoria:', index);
     const updated = localCategories.filter((_, i) => i !== index);
     setLocalCategories(updated);
   };
@@ -99,7 +95,6 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
     
     setIsSaving(true);
     try {
-      console.log('💾 Salvando categorias:', localCategories);
       await onSave(localCategories);
       toast.success('✅ Categorias salvas com sucesso!');
       
@@ -109,7 +104,6 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
       }));
       
     } catch (error) {
-      console.error('❌ Erro ao salvar categorias:', error);
       toast.error('Erro ao salvar categorias');
     } finally {
       setIsSaving(false);
