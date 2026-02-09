@@ -1,177 +1,154 @@
 
 
-# Plano de Otimizacao de Performance e SEO
+# Preparacao para Deploy via Coolify (GitHub) - Maxima Eficiencia
 
-## Diagnostico: Por que o PageSpeed esta em 7%
+## Visao Geral
 
-Apos analise completa, identifiquei **9 problemas criticos** que destroem a performance:
-
----
-
-## 1. CRITICO: NeuralBackground WebGL renderizado 10+ vezes simultaneamente
-
-O componente `NeuralBackground` cria um **canvas WebGL com shader de fragmento complexo** (12 iteracoes de loop por pixel) e roda em **60fps no desktop / 30fps no mobile**. Ele e renderizado simultaneamente em:
-- Hero, About, PracticeAreas, Partners, ClientArea, Contact, Blog, LinkTree, ServiceLandingLayout, PracticeAreaLayout, PageBanner
-
-Na pagina inicial, **pelo menos 6 instancias** rodam ao mesmo tempo (uma por secao visivel). Cada uma cria um contexto WebGL separado, consumindo GPU e memoria massivamente.
-
-**Solucao:** Renderizar apenas UMA instancia global no `Index.tsx` (ja existe o background fixo). Remover todas as instancias dentro das secoes. Para outras paginas (Blog, LinkTree, etc.), usar lazy loading com `React.lazy`.
+O projeto precisa de um Dockerfile + nginx para rodar no Coolify, limpeza de dependencias nao utilizadas, e otimizacoes finais de build. O Coolify faz deploy via Docker a partir do GitHub.
 
 ---
 
-## 2. CRITICO: Zero Code Splitting - Tudo carregado de uma vez
+## 1. Criar Dockerfile multi-stage otimizado
 
-No `App.tsx`, todas as 12 paginas sao importadas estaticamente. O Admin (painel complexo), Blog, StepForm, etc., sao carregados mesmo quando o usuario so visita a home.
+O Coolify precisa de um `Dockerfile` na raiz do projeto. Usar build multi-stage para manter a imagem final minima:
 
-**Solucao:** Usar `React.lazy()` + `Suspense` para todas as rotas exceto Index:
-```typescript
-const Admin = React.lazy(() => import('./pages/Admin'));
-const Blog = React.lazy(() => import('./pages/Blog'));
-// etc.
+```text
+Stage 1: Node 20 Alpine -> npm ci -> npm run build
+Stage 2: Nginx Alpine -> copiar /dist -> servir SPA
 ```
 
----
+Imagem final tera ~25MB (apenas nginx + arquivos estaticos).
 
-## 3. CRITICO: Duas fontes Google carregadas de forma bloqueante
+## 2. Criar configuracao nginx otimizada
 
-No `index.css`, duas fontes sao importadas com `@import url(...)` no topo do CSS -- isso e **render-blocking**:
-- Inter (5 pesos)
-- Space Grotesk (5 pesos)
+Arquivo `nginx.conf` na raiz com:
+- Compressao gzip para JS/CSS/HTML/JSON/SVG
+- Cache headers longos para assets com hash (1 ano)
+- Cache curto para HTML (sem cache)
+- SPA fallback: todas as rotas redirecionam para `index.html`
+- Security headers (X-Frame-Options, X-Content-Type, HSTS)
+- Brotli-ready (fallback gzip)
 
-Alem disso, no `index.html` ha uma terceira fonte (Satoshi via fontshare).
+## 3. Criar `.dockerignore`
 
-**Solucao:** 
-- Mover as fontes para `<link rel="preload">` no `index.html` com `display=swap`
-- Remover os `@import` do CSS
-- Usar `font-display: swap` para evitar FOIT (Flash of Invisible Text)
+Excluir `node_modules`, `.git`, `scripts/`, etc. para build mais rapido.
 
----
+## 4. Limpeza de dependencias nao utilizadas
 
-## 4. CRITICO: CSS Destrutivo - Regras que quebram tudo
+Analise revelou pacotes instalados mas **nunca importados no codigo principal** (apenas em componentes UI boilerplate nao usados):
 
-No `index.css` ha regras extremamente danosas:
-- Linha 557: `* { cursor: auto !important; }` -- aplica a TODOS os elementos
-- Linha 636: `* { background-image: none !important; }` -- **DESTROI todas as imagens de fundo de TODOS os componentes**
-- Linha 111: `body { cursor: none; }` -- esconde o cursor (depois sobrescrito)
-- Linhas 661-671: `#home *, #home *::before, #home *::after { background-color: transparent !important; backdrop-filter: none !important; background-image: none !important; box-shadow: none !important; }` -- nucleares, destroem estilos do Hero
+**Remover do `package.json`:**
+- `fabric` (0 imports) -- biblioteca pesada de canvas (~300KB)
+- `embla-carousel-react` (0 imports fora do UI boilerplate `carousel.tsx` que ninguem usa)
+- `input-otp` (apenas em `ui/input-otp.tsx` que ninguem importa)
+- `react-resizable-panels` (apenas em `ui/resizable.tsx` que ninguem importa)
+- `@radix-ui/react-hover-card` (apenas em `ui/hover-card.tsx` nao utilizado)
+- `@radix-ui/react-context-menu` (apenas em `ui/context-menu.tsx` nao utilizado)
+- `@radix-ui/react-menubar` (apenas em `ui/menubar.tsx` nao utilizado)
+- `@radix-ui/react-navigation-menu` (apenas em `ui/navigation-menu.tsx` nao utilizado)
+- `@radix-ui/react-aspect-ratio` (apenas em `ui/aspect-ratio.tsx` nao utilizado)
 
-**Solucao:** Remover todas essas regras destrutivas. Usar classes CSS especificas em vez de seletores universais.
+**Nota:** Os componentes UI correspondentes (`carousel.tsx`, `input-otp.tsx`, `resizable.tsx`, `hover-card.tsx`, `context-menu.tsx`, `menubar.tsx`, `navigation-menu.tsx`, `aspect-ratio.tsx`) tambem serao removidos pois nao sao importados em lugar nenhum do projeto.
 
----
+Isso reduz o bundle em ~400KB+ antes de minificacao.
 
-## 5. IMPORTANTE: Imagens sem otimizacao
+## 5. Otimizar `vite.config.ts` para producao
 
-- Logo no Hero: sem `width`/`height` (causa CLS - Cumulative Layout Shift)
-- Nenhuma imagem usa `loading="lazy"`
-- Sem `srcset` para diferentes tamanhos de tela
-- Imagens servidas sem dimensoes explicitas
+- Remover `terser` da lista de dependencias (mover para devDependencies ja que so e usado no build)
+- Usar `esbuild` minifier em vez de `terser` (mais rapido, resultado similar)
+- Adicionar `manualChunks` inteligente para separar vendor (react, supabase, gsap, recharts) do app code
+- Remover `keepNames: true` do esbuild (aumenta bundle desnecessariamente)
+- Adicionar `cssMinify: true`
 
-**Solucao:** Adicionar `width`, `height`, `loading="lazy"`, e `decoding="async"` em todas as imagens. Para o LCP (Largest Contentful Paint -- a logo do Hero), usar `fetchpriority="high"`.
+## 6. Otimizar `vite.config.ts` - Code Splitting por vendor
 
----
+```typescript
+manualChunks: {
+  'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+  'vendor-supabase': ['@supabase/supabase-js'],
+  'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-select', ...],
+  'vendor-charts': ['recharts'],
+  'vendor-gsap': ['gsap'],
+}
+```
 
-## 6. IMPORTANTE: Multiplas queries Supabase independentes no load
+Isso permite cache granular -- quando voce atualiza o app, o usuario so rebaixa o chunk do app, nao os vendors.
 
-Cada secao faz sua propria query ao Supabase no mount:
-- Hero: `site_settings`
-- About: `site_settings`
-- FloatingFooter: `footer_info` + `contact_info`
-- WhatsAppButton: `contact_info`
-- PracticeAreas: via `useSupabaseDataNew` + `useSupabaseLawCategories`
-- Contact: `contact_info`
+## 7. Remover scripts de build legados
 
-**Total: ~8-10 queries paralelas** ao Supabase no primeiro load.
+Os 7 arquivos em `scripts/` (`build-production.js`, `finalize-build.js`, `clean-production.js`, `copy-assets.js`, `fix-build.js`, `production-deploy.js`, `simple-build.js`) sao scripts manuais para deploy na Hostinger que nao serao mais necessarios com Coolify. Tambem remover `BUILD-PRODUCTION.md` e `DEPLOY-HOSTINGER.md`.
 
-**Solucao:** Consolidar num unico hook `useSiteData()` que faz UMA query e distribui os dados via React Context. As secoes consomem do context em vez de fazer queries individuais.
+## 8. Remover `console.log` restantes (83 arquivos)
 
----
+Ainda existem **2638 instancias** de `console.log/error/warn` espalhadas em 83 arquivos. Em vez de migrar cada uma manualmente, configurar o Vite para **dropar automaticamente** todos os console.* em producao:
 
-## 7. IMPORTANTE: GSAP importado globalmente
+```typescript
+// vite.config.ts
+esbuild: {
+  drop: mode === 'production' ? ['console', 'debugger'] : [],
+}
+```
 
-`gsap` + `ScrollTrigger` + `ScrollToPlugin` sao importados e registrados em multiplos arquivos (Index, Hero, About, PracticeAreas, SectionsContainer). GSAP e uma biblioteca pesada (~30KB gzipped).
+Isso remove TODOS os console.* do bundle final sem alterar nenhum arquivo de codigo.
 
-**Solucao:** Import dinamico de GSAP apenas quando necessario. No mobile, onde as animacoes sao minimas, nao carregar GSAP.
+## 9. Limpar `index.html`
 
----
+- Remover o `<meta http-equiv="Content-Security-Policy">` inline que e muito permissivo (`unsafe-inline unsafe-eval`)
+- Configurar CSP via nginx headers no lugar (mais seguro, nao duplicado)
+- Remover script de compatibilidade `Promise/Map/Set` (desnecessario para es2020 target)
 
-## 8. SEO: Meta tags insuficientes e sem dados estruturados
+## 10. Mover `terser` para devDependencies
 
-O `index.html` tem meta tags basicas mas falta:
-- Dados estruturados (JSON-LD) para escritorio de advocacia
-- `<link rel="canonical">`
-- Meta tags de idioma
-- Sitemap referencia
-- Performance hints (`dns-prefetch`, `preconnect`)
-
-**Solucao:** Adicionar JSON-LD schema para `LegalService` / `Attorney`, preconnect para Supabase e fontes, canonical URL.
-
----
-
-## 9. MODERADO: console.logs em producao (ainda restantes)
-
-Apesar da refatoracao anterior, multiplos arquivos ainda tem `console.log` diretos (SectionsContainer, useSectionTransition, Hero, About, Navbar, etc.).
-
-**Solucao:** Substituir todos por `logger` utility.
-
----
-
-## Plano de Implementacao
-
-### Fase 1: Impacto Maximo (Performance Core)
-
-1. **Code splitting com React.lazy** em `App.tsx` -- todas as rotas exceto Index
-2. **Remover NeuralBackground duplicado** -- manter apenas 1 instancia global no Index, lazy load em outras paginas
-3. **Remover CSS destrutivo** -- eliminar `* { background-image: none !important }`, `* { cursor: auto !important }`, regras nucleares do `#home`
-4. **Otimizar fontes** -- preload no HTML, remover @import do CSS, font-display: swap
-
-### Fase 2: Otimizacao de Recursos
-
-5. **Consolidar queries Supabase** -- criar `useSiteData` context com uma unica query para `site_settings` + `contact_info`
-6. **Otimizar imagens** -- width/height, loading="lazy", fetchpriority="high" para LCP
-7. **Lazy load GSAP** -- import dinamico, skip no mobile
-
-### Fase 3: SEO
-
-8. **Adicionar JSON-LD** schema para escritorio de advocacia
-9. **Preconnect/DNS-prefetch** para Supabase e CDNs de fontes
-10. **Canonical URL** e meta tags melhoradas
-11. **Remover console.logs restantes**
+`terser` esta em `dependencies` mas so e usado durante build. Mover para `devDependencies` reduz o tamanho de install em producao.
 
 ---
 
 ## Detalhes Tecnicos
 
-### Impacto Estimado por Mudanca
+### Arquivos a CRIAR:
+- `Dockerfile` -- multi-stage build
+- `nginx.conf` -- configuracao de servidor otimizada
+- `.dockerignore` -- exclusoes para build Docker
 
-| Mudanca | Impacto no PageSpeed |
-|---------|---------------------|
-| Code splitting | +15-20 pontos |
-| Remover NeuralBackground duplicado | +10-15 pontos |
-| Otimizar fontes (preload + swap) | +5-10 pontos |
-| Remover CSS destrutivo | +5 pontos |
-| Otimizar imagens (CLS) | +5-10 pontos |
-| Consolidar queries | +3-5 pontos |
-| JSON-LD / SEO | +5-10 pontos (SEO score) |
+### Arquivos a MODIFICAR:
+- `package.json` -- remover dependencias nao usadas, mover terser para devDependencies
+- `vite.config.ts` -- otimizar build (esbuild minifier, code splitting, drop console)
+- `index.html` -- limpar CSP inline e script de compatibilidade desnecessario
 
-### Riscos
+### Arquivos a DELETAR:
+- `scripts/build-production.js`
+- `scripts/finalize-build.js`
+- `scripts/clean-production.js`
+- `scripts/copy-assets.js`
+- `scripts/fix-build.js`
+- `scripts/production-deploy.js`
+- `scripts/simple-build.js`
+- `BUILD-PRODUCTION.md`
+- `DEPLOY-HOSTINGER.md`
+- `src/components/ui/carousel.tsx`
+- `src/components/ui/input-otp.tsx`
+- `src/components/ui/resizable.tsx`
+- `src/components/ui/hover-card.tsx`
+- `src/components/ui/context-menu.tsx`
+- `src/components/ui/menubar.tsx`
+- `src/components/ui/navigation-menu.tsx`
+- `src/components/ui/aspect-ratio.tsx`
+- `src/production-build.css`
+- `.env.production` (variaveis irao no Coolify diretamente)
 
-- O NeuralBackground global pode ter aparencia ligeiramente diferente vs individual por secao -- mas sera melhor pois nao tera multiplos shaders competindo
-- Code splitting adiciona um breve loading state nas rotas -- mitigado com Suspense fallback elegante
-- Remover CSS destrutivo pode revelar estilos que estavam "escondidos" -- sera necessario verificar visualmente
+### Configuracao no Coolify:
+Apos o deploy, voce precisara configurar no painel do Coolify:
+- Build Pack: Dockerfile
+- Branch: main (ou sua branch padrao)
+- Port: 80 (nginx)
 
-### Arquivos Modificados
+Nenhuma variavel de ambiente e necessaria no Coolify pois o Supabase URL e anon key ja estao hardcoded no client.
 
-- `src/App.tsx` -- code splitting
-- `src/index.css` -- remover regras destrutivas, remover @import de fontes
-- `index.html` -- preload fontes, preconnect, JSON-LD, meta tags
-- `src/pages/Index.tsx` -- NeuralBackground global unico
-- `src/components/sections/Hero.tsx` -- remover NeuralBackground, otimizar imagem
-- `src/components/sections/About.tsx` -- remover NeuralBackground
-- `src/components/sections/PracticeAreas.tsx` -- remover NeuralBackground
-- `src/components/sections/Partners.tsx` -- remover NeuralBackground
-- `src/components/sections/ClientArea.tsx` -- remover NeuralBackground
-- `src/components/sections/Contact.tsx` -- remover NeuralBackground
-- `src/components/SectionsContainer.tsx` -- remover console.logs
-- `src/hooks/useSectionTransition.tsx` -- remover console.logs
-- `src/components/navbar/index.tsx` -- remover console.logs
+### Impacto Esperado:
+- Bundle ~30-40% menor (remocao de deps nao usadas + code splitting)
+- Build ~50% mais rapido (esbuild vs terser)
+- Imagem Docker ~25MB
+- Cache HTTP otimizado (assets com hash: 1 ano, HTML: sem cache)
+- Zero console.log em producao
+- gzip/brotli no nginx
 
