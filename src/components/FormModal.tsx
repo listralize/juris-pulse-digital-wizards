@@ -63,7 +63,7 @@ export function FormModal({ isOpen, onClose, formConfig, title }: FormModalProps
           throw new Error('Erro na resposta do webhook');
         }
       } else {
-        console.log('Dados do formulário:', formData);
+        // Form submitted without webhook
         toast.success(formConfig.formTexts.successMessage || 'Mensagem enviada com sucesso!');
       }
       

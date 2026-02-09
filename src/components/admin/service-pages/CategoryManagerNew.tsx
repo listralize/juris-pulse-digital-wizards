@@ -46,7 +46,6 @@ export const CategoryManagerNew: React.FC = () => {
   };
 
   const addCategory = () => {
-    console.log('➕ Adicionando nova categoria');
     const randomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
     const randomIcon = iconOptions[Math.floor(Math.random() * iconOptions.length)];
     
@@ -67,7 +66,6 @@ export const CategoryManagerNew: React.FC = () => {
   };
 
   const updateCategory = (index: number, field: keyof CategoryInfo, value: string) => {
-    console.log('✏️ Atualizando categoria:', index, field, value);
     const updated = [...localCategories];
     updated[index] = { ...updated[index], [field]: value };
     
@@ -88,13 +86,13 @@ export const CategoryManagerNew: React.FC = () => {
 
   const removeCategory = async (index: number) => {
     const category = localCategories[index];
-    console.log('🗑️ Removendo categoria:', category);
+    
     
     try {
       await deleteCategory(category.value);
       toast.success('Categoria removida com sucesso!');
     } catch (error) {
-      console.error('❌ Erro ao remover categoria:', error);
+      console.error('Erro ao remover categoria:', error);
       toast.error('Erro ao remover categoria');
     }
   };
@@ -113,7 +111,7 @@ export const CategoryManagerNew: React.FC = () => {
       }));
       
     } catch (error) {
-      console.error('❌ Erro ao salvar categoria:', error);
+      console.error('Erro ao salvar categoria:', error);
       toast.error('Erro ao salvar categoria');
     } finally {
       setIsSaving(false);

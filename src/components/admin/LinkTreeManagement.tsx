@@ -386,7 +386,7 @@ export function LinkTreeManagement() {
           throw error;
         }
 
-        console.log('✅ Link Tree atualizado:', data);
+        // Link Tree atualizado
         // Atualizar estado local
         setLinkTree(data as any);
       } else {
@@ -594,7 +594,7 @@ export function LinkTreeManagement() {
   };
   const handleUpdateItem = async () => {
     if (!editingItem || !newItem.title) return;
-    console.log('🔄 Atualizando item:', editingItem.id, newItem);
+    
     try {
       const updateData = {
         title: newItem.title,
@@ -618,15 +618,15 @@ export function LinkTreeManagement() {
         form_fields: newItem.item_type === 'form' && formConfig ? JSON.stringify(formConfig) : null,
         updated_at: new Date().toISOString()
       };
-      console.log('📝 Dados a serem atualizados:', updateData);
+      
       const {
         error
       } = await supabase.from('link_tree_items').update(updateData).eq('id', editingItem.id);
       if (error) {
-        console.error('❌ Erro do Supabase:', error);
+        console.error('Erro do Supabase:', error);
         throw error;
       }
-      console.log('✅ Item atualizado no banco');
+      
 
       // Atualizar lista local imediatamente
       setItems(prev => prev.map(item => item.id === editingItem.id ? {
@@ -667,7 +667,7 @@ export function LinkTreeManagement() {
         loadLinkTree();
       }, 500);
     } catch (error) {
-      console.error('❌ Erro ao atualizar item:', error);
+      console.error('Erro ao atualizar item:', error);
       toast({
         title: "Erro ao atualizar item",
         description: "Ocorreu um erro ao atualizar o item.",

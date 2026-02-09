@@ -52,7 +52,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
   // Listen for category updates and refresh
   useEffect(() => {
     const handleCategoriesUpdated = () => {
-      console.log('🔄 Categorias atualizadas, recarregando...');
       refetchCategories();
     };
 
@@ -107,7 +106,6 @@ export const ServicePagesManager: React.FC<ServicePagesManagerProps> = ({
       toast.success('🎉 Páginas salvas com sucesso!');
       
     } catch (error) {
-      console.error('Erro ao salvar páginas:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error(`❌ Erro ao salvar: ${errorMessage}`);
     } finally {
