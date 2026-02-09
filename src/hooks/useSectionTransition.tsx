@@ -61,7 +61,8 @@ export const useSectionTransition = (sections: Section[]) => {
     
     if (containerRef.current) {
       if (isMobile || isTablet) {
-        gsap.set(containerRef.current, { x: 0, y: 0, clearProps: "all", force3D: false });
+        // No GSAP on mobile - use native scroll
+        containerRef.current.style.transform = 'none';
       } else {
         gsap.set(containerRef.current, { x: `-${targetIndex * 100}vw`, y: 0, force3D: true });
       }

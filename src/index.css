@@ -90,58 +90,41 @@
   }
 
   html {
-    height: 100%;
     font-feature-settings: "cv11", "ss01";
     font-variant-numeric: oldstyle-nums;
-    overflow: auto !important;
     scroll-behavior: smooth;
   }
 
   body {
-    height: 100%;
     margin: 0;
     padding: 0;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow: auto !important;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
 
   /* Mobile/Tablet optimizations */
-  @media (max-width: 767px) {
-    body {
-      touch-action: pan-y; /* Permitir scroll vertical no mobile */
+  @media (max-width: 1023px) {
+    html, body {
+      overflow: auto;
+      height: auto;
+      max-height: none;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
     
-    /* Melhorar scroll no mobile */
-    html, body {
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
+    body {
+      touch-action: pan-y;
     }
-  }
-
-  /* Permitir scroll em todas as telas */
-  html, body {
-    overflow: auto !important;
-    height: auto !important;
-    max-height: none !important;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  #root {
-    height: auto !important;
-    max-height: none !important;
-    overflow: auto !important;
-  }
-
-  /* Configuração específica para admin e páginas internas */
-  .admin-layout, .page-layout {
-    overflow-y: auto !important;
-    height: auto !important;
-    max-height: none !important;
+    
+    #root {
+      height: auto;
+      max-height: none;
+      overflow: visible;
+    }
   }
 
   body.light {
@@ -162,10 +145,7 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Scroll improvements */
-  * {
-    scroll-behavior: smooth;
-  }
+  /* Scroll improvements - smooth only on html, not all elements */
   
   /* Better scrollbar for webkit browsers */
   ::-webkit-scrollbar {
@@ -292,7 +272,6 @@
   /* Enhanced Cards */
   .premium-card {
     @apply transition-all duration-500 ease-out backdrop-blur-sm;
-    will-change: transform;
   }
   
   @media (hover: hover) {
@@ -358,7 +337,6 @@
   /* Premium Buttons */
   .btn-primary {
     @apply px-6 py-3 rounded-full font-medium transition-all duration-300 ease-out backdrop-blur-sm;
-    will-change: transform;
   }
   
   .light .btn-primary {
@@ -377,7 +355,6 @@
 
   .btn-secondary {
     @apply px-6 py-3 rounded-full font-medium border transition-all duration-300 ease-out backdrop-blur-sm;
-    will-change: transform;
   }
   
   .light .btn-secondary {
