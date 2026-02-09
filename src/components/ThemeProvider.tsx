@@ -1,7 +1,6 @@
+import React, { createContext, useContext } from 'react';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-type Theme = 'light' | 'dark';
+type Theme = 'dark';
 
 interface ThemeContextProps {
   theme: Theme;
@@ -9,50 +8,17 @@ interface ThemeContextProps {
   setTheme: (theme: Theme) => void;
 }
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
-}
-
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-export function ThemeProvider({ 
-  children, 
-  defaultTheme = 'dark', // Mudou para dark como padrão
-  storageKey = 'theme' 
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('dark');
-  
-  const applyTheme = (themeToApply: Theme) => {
-    if (typeof window === 'undefined') return;
-    
-    const root = document.documentElement;
-    
-    // Remove classes anteriores
-    root.classList.remove('light', 'dark');
-    
-    // Adiciona a nova classe
-    root.classList.add(themeToApply);
-    
-    // Define o color-scheme
-    root.style.colorScheme = themeToApply;
-  };
+const noop = () => {};
 
-  useEffect(() => {
-    applyTheme('dark');
-  }, []);
+const contextValue: ThemeContextProps = {
+  theme: 'dark',
+  toggleTheme: noop,
+  setTheme: noop,
+};
 
-  const toggleTheme = () => {
-    // Função vazia - tema fixo em dark
-  };
-
-  const contextValue: ThemeContextProps = {
-    theme: 'dark',
-    toggleTheme,
-    setTheme: () => {} // Função vazia - tema fixo
-  };
-
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ThemeContext.Provider value={contextValue}>
       {children}
@@ -63,7 +29,7 @@ export function ThemeProvider({
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
 }
