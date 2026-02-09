@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeProvider';
 import DesktopNavigation from './DesktopNavigation';
 import CompactMobileNavbar from './CompactMobileNavbar';
+import { logger } from '@/utils/logger';
 
 const Navbar = () => {
   const { theme } = useTheme();
@@ -12,10 +13,8 @@ const Navbar = () => {
   const isDark = theme === 'dark';
   const [activeSection, setActiveSection] = useState('home');
   
-  // Check if we're on home page and at the very top
   const isHomePage = location.pathname === '/';
   const [isAtTop, setIsAtTop] = useState(true);
-  // Sempre mostrar logo no mobile
   const showLogoOnMobile = true;
 
   useEffect(() => {
@@ -28,14 +27,12 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    // Set active section based on path and hash
     const path = location.pathname;
     const hash = location.hash.substring(1);
     
-    console.log('Navbar: Current path:', path, 'Hash:', hash);
+    logger.log('Navbar: Current path:', path, 'Hash:', hash);
     
     if (path === '/') {
-      // For home page, use hash to determine active section
       if (hash && ['home', 'about', 'areas', 'socios', 'cliente', 'blog', 'contact'].includes(hash)) {
         setActiveSection(hash);
       } else {
@@ -52,11 +49,10 @@ const Navbar = () => {
     }
   }, [location]);
 
-  // Listen for section changes from the transition hook
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
       const section = event.detail;
-      console.log('Navbar: Received section change event:', section);
+      logger.log('Navbar: Received section change event:', section);
       setActiveSection(section);
     };
 
@@ -64,29 +60,24 @@ const Navbar = () => {
     return () => window.removeEventListener('activeSectionChanged', handleSectionChange as EventListener);
   }, []);
   
-  // Improved navigation handling
   const handleNavigation = (sectionId: string, path: string) => {
-    console.log('Navbar: Handle navigation called:', sectionId, path);
+    logger.log('Navbar: Handle navigation called:', sectionId, path);
     
-    // Special handling for home navigation
     if (sectionId === 'home') {
       if (location.pathname !== '/') {
         navigate('/', { replace: true });
         setActiveSection('home');
       } else {
-        // Force navigation to home section
         setActiveSection(sectionId);
         window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
       }
       return;
     }
     
-    // For other sections, ensure we're on home page first
     if (location.pathname !== '/') {
-      console.log('Navbar: Not on home page, navigating to home first');
+      logger.log('Navbar: Not on home page, navigating to home first');
       navigate('/', { replace: true });
       
-      // Wait for navigation to complete, then change section
       setTimeout(() => {
         setActiveSection(sectionId);
         window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
@@ -94,8 +85,7 @@ const Navbar = () => {
       return;
     }
     
-    // If already on home page, change section directly
-    console.log('Navbar: Changing section to:', sectionId);
+    logger.log('Navbar: Changing section to:', sectionId);
     setActiveSection(sectionId);
     window.dispatchEvent(new CustomEvent('sectionChange', { detail: sectionId }));
   };

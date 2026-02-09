@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 import Section from './Section';
+import { logger } from '@/utils/logger';
 
 // Import Sections
 import Hero from './sections/Hero';
@@ -28,7 +29,7 @@ const SectionsContainer: React.FC = () => {
   const isTablet = useIsTablet();
   const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
 
-  console.log('SectionsContainer render:', { 
+  logger.log('SectionsContainer render:', { 
     activeSection, 
     activeSectionIndex, 
     sectionsLength: sections.length, 
@@ -40,13 +41,13 @@ const SectionsContainer: React.FC = () => {
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
       const targetSection = event.detail;
-      console.log('SectionsContainer: Evento de mudança de seção recebido:', targetSection);
+      logger.log('SectionsContainer: Evento de mudança de seção recebido:', targetSection);
       
       const sectionExists = sections.find(s => s.id === targetSection);
       if (sectionExists) {
         transitionToSection(targetSection);
       } else {
-        console.warn('SectionsContainer: Seção inválida solicitada:', targetSection);
+        logger.warn('SectionsContainer: Seção inválida solicitada:', targetSection);
       }
     };
 
