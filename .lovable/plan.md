@@ -1,91 +1,78 @@
 
 
-# Limpeza Geral - Remover Lovable, Eliminar Logs, Estrutura Robusta
+# Fix Build Error + Ariakit Migration Assessment
 
-## Escopo da Limpeza
+## Phase 1: Fix Build Error (IMMEDIATE)
 
-Analise completa revelou **~1400+ console.log/warn** em 53 arquivos e **308 mencoes a "lovable/Lovable"** em 23 arquivos. Alem de dead code CSS e arquivos desnecessarios.
+The build is broken because `vite.config.ts` still imports `lovable-tagger` which was removed from `package.json`.
 
----
-
-## 1. Remover Todas as Mencoes a "Lovable"
-
-### Arquivos a modificar:
-
-| Arquivo | Mudanca |
-|---------|---------|
-| `vite.config.ts` | Remover import e uso de `lovable-tagger` (plugin de dev) |
-| `package.json` | Remover `lovable-tagger` de devDependencies |
-| `src/utils/logger.ts` | Trocar `lovable.app` por dominio de producao no check isDev |
-| `src/hooks/useMarketingLoader.ts` | Remover check `lovable.app` (linha 18); trocar `pllovable` por `pllistralize` no Facebook Pixel agent (linha 80) |
-| `README.md` | Reescrever completamente: remover todas as referencias a Lovable, substituir por "Projeto Serafim & Trombela - Desenvolvido por Listralize" |
-
-**Nota**: Os paths `/lovable-uploads/` NAO serao alterados pois sao paths reais de arquivos estaticos que existem no disco. Altera-los quebraria todas as imagens do site.
+**File:** `vite.config.ts`
+- Remove line 4: `import { componentTagger } from "lovable-tagger"`
+- Remove line 14: `mode === 'development' && componentTagger(),`
 
 ---
 
-## 2. Eliminar TODOS os console.log/warn de Debug
+## Phase 2: Ariakit Migration - CRITICAL WARNING
 
-### Estrategia:
-- **Componentes publicos** (sections, navbar, contact, areas): remover todos os `console.log` e `console.warn` de debug
-- **Hooks Supabase** (useSupabaseServicePages, useSupabaseCategories, useSupabaseTeamMembers, useSupabasePageTexts): substituir `console.log` por `logger.log` e `console.warn` por `logger.warn` (mantendo `console.error` para erros criticos)
-- **Hooks de marketing** (useStepFormMarketingScripts, useFormMarketingScripts): substituir todos os `console.log` por `logger.log` e `console.warn` por `logger.warn`
-- **Componentes admin**: substituir `console.log` por `logger.log` (admin precisa de debug em dev)
-- **Hooks de dados** (useBlogData, useFormConfig, useLeadsData): substituir por `logger`
+Replacing all shadcn/Radix UI with Ariakit affects:
 
-### Arquivos com mais impacto (render path principal):
+- **27 UI component files** in `src/components/ui/`
+- **108+ imports** from `@radix-ui/*` packages
+- **Every single page and component** that uses buttons, dialogs, selects, tabs, accordions, dropdowns, checkboxes, etc.
+- Ariakit has a **completely different API** than Radix (different prop names, different composition patterns, different state management)
 
-| Arquivo | console.log count | Acao |
-|---------|-------------------|------|
-| `src/hooks/supabase/useSupabaseServicePages.ts` | ~30 | Substituir por logger |
-| `src/hooks/supabase/useSupabasePageTexts.ts` | ~15 | Substituir por logger |
-| `src/hooks/supabase/useSupabaseCategories.ts` | ~8 | Substituir por logger |
-| `src/hooks/supabase/useSupabaseTeamMembers.ts` | ~6 | Substituir por logger |
-| `src/hooks/useStepFormMarketingScripts.ts` | ~50 | Substituir por logger |
-| `src/hooks/useFormConfig.ts` | ~10 | Substituir por logger |
-| `src/hooks/useBlogData.ts` | ~6 | Substituir por logger |
-| `src/components/navbar/DesktopNavigation.tsx` | 6 | Remover completamente |
-| `src/components/contact/LocationMap.tsx` | ~6 | Substituir por logger |
-| `src/components/admin/LeadsManagement.tsx` | ~10 | Substituir por logger |
-| `src/components/admin/LinkTreeManagement.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/BlogManagement.tsx` | ~2 | Substituir por logger |
-| `src/components/admin/service-pages/*.tsx` | ~20 | Substituir por logger |
-| `src/components/admin/StepFormBuilder.tsx` | ~3 | Substituir por logger |
-| `src/main.tsx` | 2 | Remover startup logs |
+### Risk Assessment
+
+This migration would effectively rewrite the entire UI layer of the application. Given your custom instruction to "not alter any existing interface, functionality, or workflow that is not directly related to the problem", a full Ariakit migration **contradicts that principle** because:
+
+1. Every visual component would need re-testing
+2. Ariakit's styling approach differs from Radix (no `data-[state=open]` selectors, different animation patterns)
+3. Libraries like `cmdk` (Command palette) depend directly on Radix Dialog
+4. The `vaul` drawer component depends on Radix Dialog
+5. `react-day-picker` calendar integration depends on the current button variants
+
+### Recommended Approach
+
+Instead of a full replacement, I recommend:
+
+1. **Fix the build error now** (Phase 1)
+2. **Keep the current shadcn/Radix stack** - it is production-proven, accessible, and works correctly
+3. **Use Ariakit for NEW components only** going forward if desired
+4. If you still want full migration, it should be done as a separate, dedicated project with extensive testing
+
+### If You Still Want Full Migration
+
+It would require rewriting these 27 files (each with Ariakit equivalents):
+
+| shadcn Component | Ariakit Equivalent | Complexity |
+|-----------------|-------------------|------------|
+| Dialog | Dialog (store-based) | High - different API |
+| Select | Select (store-based) | High - very different |
+| DropdownMenu | Menu (store-based) | High |
+| Tabs | Tab (store-based) | Medium |
+| Accordion | Disclosure (store-based) | Medium |
+| Checkbox | Checkbox | Low |
+| Switch | Checkbox (role=switch) | Medium |
+| Tooltip | Tooltip (store-based) | Medium |
+| Popover | Popover (store-based) | Medium |
+| RadioGroup | Radio (store-based) | Medium |
+| AlertDialog | Dialog (store-based) | Medium |
+| Sheet | Dialog (store-based) | High |
+| Collapsible | Disclosure | Low |
+| ScrollArea | No direct equivalent | High - keep Radix |
+| Slider | No direct equivalent | High - keep Radix |
+| Progress | No direct equivalent | Keep native |
+| Toggle/ToggleGroup | No direct equivalent | Keep custom |
+| Command (cmdk) | Combobox | Very High |
+| Drawer (vaul) | Dialog | High |
+
+Plus updating the `manualChunks` in vite.config.ts to reference `@ariakit/react` instead of Radix packages.
 
 ---
 
-## 3. Remover Dead Code e Arquivos Desnecessarios
+## What Will Be Implemented Now
 
-| Arquivo | Acao |
-|---------|------|
-| `src/App.css` | **DELETAR** - Contem CSS do template Vite default (`.logo`, `.read-the-docs`, `logo-spin`) que nunca e usado. O unico util (`.no-scrollbar`) ja pode ir para `index.css` |
-| `src/tailwind.config.lov.json` | **NAO ALTERAR** - arquivo de configuracao do sistema de build, renomear pode quebrar |
-| `.lovable/plan.md` | Manter - arquivo de sistema |
+**Only Phase 1** - Fix the build error by removing the `lovable-tagger` import from `vite.config.ts`. This unblocks the build immediately.
 
----
-
-## 4. Mover `.no-scrollbar` para `index.css`
-
-O `App.css` sera deletado, entao as classes utilitarias `.no-scrollbar` precisam ser movidas para `index.css`.
-
----
-
-## 5. Remover Import de `App.css` no `App.tsx`
-
-Apos deletar `App.css`, remover a linha `import './App.css'` do `App.tsx`.
-
----
-
-## Resumo de Impacto
-
-- **~1400 console.log/warn** eliminados ou convertidos para logger (silenciosos em producao)
-- **Zero mencoes a "Lovable"** no codigo fonte (exceto paths de upload que sao fisicos)
-- **1 arquivo deletado** (App.css - dead code)
-- **Console de producao limpo** - zero logs de debug visiveis ao usuario final
-- **Estrutura mais profissional** - README reescrito, branding correto
-- O build de producao ja tem `drop: ['console', 'debugger']` no esbuild (vite.config.ts linha 67), mas o logger adiciona uma camada extra de seguranca para ambientes intermediarios
-
-### Arquivos totais a modificar: ~25+
-### Arquivos a deletar: 1 (App.css)
+The Ariakit migration requires explicit confirmation given its scope and risk.
 
