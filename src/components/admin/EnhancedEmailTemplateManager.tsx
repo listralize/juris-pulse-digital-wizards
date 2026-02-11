@@ -13,6 +13,7 @@ import { Separator } from '../ui/separator';
 import { Mail, Plus, Save, Trash2, Eye, Send, Copy, Palette, Type, Link, Image, Code } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 interface EmailTemplate {
   id: string;
@@ -77,7 +78,7 @@ export const EnhancedEmailTemplateManager: React.FC = () => {
     if (!selectedTemplate) return;
 
     try {
-      console.log('Salvando template:', selectedTemplate);
+      logger.log('Salvando template:', selectedTemplate);
       
       const templateData: any = {
         name: selectedTemplate.name,

@@ -16,6 +16,7 @@ import { Phone, Mail, Calendar, Globe, ExternalLink, MessageSquare, Database, Ed
 import { LeadComments } from './LeadComments';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface Lead {
   id: string;
@@ -121,8 +122,7 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
 
   const leadData = parseLeadData(lead.lead_data);
   
-  // Debug: log para verificar os dados de localização
-  console.log('Lead data:', { 
+  logger.log('Lead data:', { 
     id: lead.id, 
     state: lead.state, 
     capital: lead.capital, 

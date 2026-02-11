@@ -56,7 +56,7 @@ const Hero = () => {
   };
 
   return (
-    <section id="home" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <section id="home" role="banner" className="h-screen w-full flex flex-col items-center justify-center px-6 relative overflow-hidden">
       <div className="relative text-center max-w-4xl h-full flex flex-col justify-center items-center -mt-8 md:-mt-12" style={{ zIndex: 100, pointerEvents: 'auto' }}>
         <div ref={logoRef} className="mb-6 md:mb-8 w-full max-w-sm md:max-w-lg mx-auto relative">
           <div className="logo-container relative">
@@ -95,7 +95,7 @@ const Hero = () => {
       </div>
       
       {!isMobile && !isTablet && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50" aria-hidden="true">
           <div className="flex flex-col items-center gap-3">
             {showScrollIndicator ? (
               <div className="flex flex-col items-center gap-2 animate-bounce">

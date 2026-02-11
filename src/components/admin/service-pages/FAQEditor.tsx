@@ -7,6 +7,7 @@ import { Label } from '../../ui/label';
 import { ServicePage, FAQ } from '../../../types/adminTypes';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
+import { logger } from '@/utils/logger';
 
 interface FAQEditorProps {
   page: ServicePage;
@@ -20,24 +21,24 @@ export const FAQEditor: React.FC<FAQEditorProps> = ({ page, onUpdatePage }) => {
   const faq = Array.isArray(page.faq) ? page.faq : [];
 
   const addFAQ = () => {
-    console.log('➕ Adicionando nova FAQ');
+    logger.log('➕ Adicionando nova FAQ');
     const newFAQ: FAQ = { 
       question: 'Nova pergunta frequente?', 
       answer: 'Resposta à pergunta frequente.'
     };
     const updatedFAQ = [...faq, newFAQ];
-    console.log('📝 FAQ atualizada:', updatedFAQ);
+    logger.log('📝 FAQ atualizada:', updatedFAQ);
     onUpdatePage(page.id, 'faq', updatedFAQ);
   };
 
   const removeFAQ = (index: number) => {
-    console.log('🗑️ Removendo FAQ:', index);
+    logger.log('🗑️ Removendo FAQ:', index);
     const updatedFAQ = faq.filter((_, i) => i !== index);
     onUpdatePage(page.id, 'faq', updatedFAQ);
   };
 
   const updateFAQ = (index: number, field: keyof FAQ, value: string) => {
-    console.log('✏️ Atualizando FAQ:', index, field, value);
+    logger.log('✏️ Atualizando FAQ:', index, field, value);
     const updatedFAQ = faq.map((item, i) => 
       i === index ? { ...item, [field]: value } : item
     );

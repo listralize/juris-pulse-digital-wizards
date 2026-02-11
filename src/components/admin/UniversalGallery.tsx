@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 interface MediaFile {
   id: string;
@@ -113,7 +114,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
         const randomId = Math.random().toString(36).substring(2, 15);
         const fileName = `${timestamp}-${randomId}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
-        console.log(`📤 Uploading: ${fileName}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        logger.log(`📤 Uploading: ${fileName}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         
         const { data, error: uploadError } = await supabase.storage
           .from('videos')  // Usar bucket videos
@@ -127,7 +128,7 @@ export const UniversalGallery: React.FC<UniversalGalleryProps> = ({
           throw new Error(`Falha no upload de ${file.name}: ${uploadError.message}`);
         }
 
-        console.log('✅ Upload success:', data);
+        logger.log('✅ Upload success:', data);
       }
       
       toast.success(`🎉 ${uploadedFiles.length} arquivo(s) enviado(s) com sucesso!`);

@@ -3,6 +3,7 @@ import { Star, Users, CheckCircle, Award, X, Shield, ThumbsUp, icons as lucideIc
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { logger } from '@/utils/logger';
 
 interface TestimonialData {
   name: string;
@@ -74,14 +75,14 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao carregar prova social do step form:', error);
+        logger.error('Erro ao carregar prova social do step form:', error);
         return;
       }
 
-      console.log('Dados carregados da tabela admin_settings:', data);
+      logger.log('Dados carregados da tabela admin_settings:', data);
       
       const stepFormConfig = data?.global_social_proof as any;
-      console.log('Config de prova social:', stepFormConfig);
+      logger.log('Config de prova social:', stepFormConfig);
       
       if (!stepFormConfig) {
         setSocialProofConfig(null);
@@ -110,13 +111,13 @@ export const StepFormTestimonials: React.FC<StepFormTestimonialsProps> = ({
 
       if (normalizedConfig.testimonials.length > 0 || normalizedConfig.stats.length > 0) {
         setSocialProofConfig(normalizedConfig);
-        console.log('Prova social ativada:', normalizedConfig);
+        logger.log('Prova social ativada:', normalizedConfig);
       } else {
-        console.log('Prova social não está ativada ou não tem conteúdo');
+        logger.log('Prova social não está ativada ou não tem conteúdo');
         setSocialProofConfig(null);
       }
     } catch (error) {
-      console.error('Erro ao carregar prova social do step form:', error);
+      logger.error('Erro ao carregar prova social do step form:', error);
     }
   };
 
