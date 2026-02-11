@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface StepFormMarketingConfig {
   facebookPixel?: {
@@ -22,27 +23,19 @@ interface StepFormMarketingConfig {
 
 export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
-    if (!formSlug) {
-      console.log('❌ useStepFormMarketingScripts: formSlug vazio');
-      return;
-    }
+    if (!formSlug) return;
 
-    console.log(`🚀 [${formSlug}] Inicializando scripts de marketing para StepForm`);
-    
-    // Carregar e implementar scripts imediatamente
+    logger.log(`[${formSlug}] Inicializando scripts de marketing para StepForm`);
     loadAndImplementScripts();
 
     return () => {
-      console.log(`🧹 [${formSlug}] Limpando scripts do StepForm`);
+      logger.log(`[${formSlug}] Limpando scripts do StepForm`);
       removeStepFormScripts(formSlug);
     };
   }, [formSlug]);
 
   const loadAndImplementScripts = async () => {
     try {
-      console.log(`🔍 [${formSlug}] Buscando configuração para StepForm`);
-      
-      // Buscar configuração diretamente da tabela step_forms
       const { data: stepForm, error } = await supabase
         .from('step_forms')
         .select('tracking_config, name, id, slug')
@@ -51,22 +44,21 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         .single();
 
       if (error) {
-        console.error(`❌ [${formSlug}] Erro ao buscar StepForm:`, error);
+        console.error(`[${formSlug}] Erro ao buscar StepForm:`, error);
         implementFallbackScripts();
         return;
       }
 
       if (!stepForm?.tracking_config) {
-        console.log(`⚠️ [${formSlug}] Sem configuração de tracking - usando fallback`);
+        logger.log(`[${formSlug}] Sem configuração de tracking - usando fallback`);
         implementFallbackScripts();
         return;
       }
 
       const config = stepForm.tracking_config as any;
-      console.log('📊 Configuração encontrada:', config);
-      console.log('🏷️ Configuração GTM específica:', config.google_tag_manager);
+      logger.log('Configuração encontrada:', config);
 
-      // Facebook Pixel: usar evento exatamente como configurado; sem fallback
+      // Facebook Pixel
       const pixelCfg = (config.facebook_pixel || {});
       let eventName: string | null = null;
       if (pixelCfg.enabled === true) {
@@ -78,43 +70,26 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       }
       if (eventName) {
         implementFacebookPixel(eventName);
-      } else {
-        console.log('ℹ️ Pixel desativado ou sem evento configurado; nada será enviado.');
       }
 
-      // GTM: ler configuração do formato aninhado corretamente
+      // GTM
       const gtmCfg = config.google_tag_manager || {};
       const gtmEnabled = gtmCfg.enabled === true;
       const gtmEventName = gtmEnabled ? (gtmCfg.event_name || '').trim() : '';
-      const gtmContainerId = gtmCfg.container_id || '';
-      
-      console.log('🔍 GTM Config detalhado:', { 
-        gtmCfg, 
-        gtmEnabled, 
-        gtmEventName, 
-        gtmContainerId,
-        configCompleta: config 
-      });
       
       if (gtmEnabled && gtmEventName) {
-        console.log(`✅ GTM habilitado com evento: "${gtmEventName}" e container: "${gtmContainerId}"`);
         implementGoogleTagManager(gtmEventName);
-      } else {
-        console.log('❌ GTM desabilitado ou configuração incompleta');
-        console.log('ℹ️ Configuração necessária: google_tag_manager.enabled = true, google_tag_manager.event_name preenchido');
       }
 
-      // GA: apenas enviar evento se nome estiver configurado (sem injeção de script)
+      // GA
       const gaCfg = (config.google_analytics || {});
       const gaEventName = gaCfg.enabled === true ? (gaCfg.event_name || '').trim() : '';
       if (gaEventName) {
         implementGoogleAnalytics(gaEventName);
-      } else {
-        console.log('ℹ️ Nenhum evento do GA configurado para este StepForm; nada será enviado.');
       }
 
     } catch (error) {
-      console.error('❌ Erro ao carregar configuração:', error);
+      console.error('Erro ao carregar configuração:', error);
       implementFallbackScripts();
     }
   };
@@ -140,20 +115,14 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const implementFallbackScripts = () => {
-    console.log('ℹ️ Fallback desativado: sem injeção de GTM/GA/Pixel no StepForm.');
+    // Fallback desativado: sem injeção de GTM/GA/Pixel no StepForm
   };
 
   const implementFacebookPixel = (eventName: string) => {
-    console.log(`📘 Garantindo Facebook Pixel (listener apenas) para evento: ${eventName}`);
-
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug === formSlug) {
-        // De-dup simples por formSlug
         const sentMap = (window as any).__stepFormEventSent || {};
-        if (sentMap[formSlug]?.fb) {
-          console.log(`⏭️ FB Pixel ignorado (duplicado) para ${formSlug}`);
-          return;
-        }
+        if (sentMap[formSlug]?.fb) return;
         sentMap[formSlug] = { ...(sentMap[formSlug] || {}), fb: true };
         (window as any).__stepFormEventSent = sentMap;
         setTimeout(() => {
@@ -163,29 +132,20 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
-          console.log(`🔍 [${formSlug}] Verificando FB Pixel:`, {
-            fbqExists: typeof (window as any).fbq,
-            windowFbq: !!(window as any).fbq,
-            domain: window.location.hostname
-          });
-          
           if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', eventName, {
               content_name: `StepForm ${formSlug}`,
               form_slug: formSlug,
               page_url: window.location.href,
             });
-            console.log(`✅ [${formSlug}] Evento ${eventName} enviado para Facebook Pixel`);
+            logger.log(`[${formSlug}] Evento ${eventName} enviado para Facebook Pixel`);
           } else {
-            console.warn(`❌ [${formSlug}] Facebook Pixel não disponível no momento do envio`);
-            console.warn(`🔍 [${formSlug}] Window.fbq:`, (window as any).fbq);
-            console.warn(`🔍 [${formSlug}] Window._fbq:`, (window as any)._fbq);
+            logger.warn(`[${formSlug}] Facebook Pixel não disponível no momento do envio`);
           }
-        }, 1000); // Aguardar mais tempo para o pixel estar pronto na Hostinger
+        }, 1000);
       }
     };
 
-    // Remover listener anterior se existir e registrar novo
     const existingHandler = (window as any)[`stepFormPixelHandler_${formSlug}`];
     if (existingHandler) {
       window.removeEventListener('stepFormSubmitSuccess', existingHandler);
@@ -195,18 +155,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const implementGoogleTagManager = (eventName: string) => {
-    console.log(`🏷️ StepForm GTM listener configurado para evento: "${eventName}" no formulário: "${formSlug}"`);
-    console.log(`🔍 DataLayer atual:`, (window as any).dataLayer);
-
     const handleSuccess = (event: CustomEvent) => {
-      console.log(`🎯 Evento stepFormSubmitSuccess recebido:`, event.detail);
-      console.log(`🔍 Verificando se é do formulário correto: ${event.detail?.formSlug} === ${formSlug}`);
       if (event.detail?.formSlug === formSlug) {
         const sentMap = (window as any).__stepFormEventSent || {};
-        if (sentMap[formSlug]?.gtm) {
-          console.log(`⏭️ GTM ignorado (duplicado) para ${formSlug}`);
-          return;
-        }
+        if (sentMap[formSlug]?.gtm) return;
         sentMap[formSlug] = { ...(sentMap[formSlug] || {}), gtm: true };
         (window as any).__stepFormEventSent = sentMap;
         setTimeout(() => {
@@ -216,115 +168,42 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }, 3000);
 
         setTimeout(() => {
-          console.log(`🚀 [${formSlug}] Tentando enviar evento "${eventName}" para GTM...`);
-          console.log(`🔍 [${formSlug}] Verificando GTM:`, {
-            dataLayerExists: typeof (window as any).dataLayer,
-            dataLayerArray: Array.isArray((window as any).dataLayer),
-            dataLayerLength: (window as any).dataLayer?.length,
-            domain: window.location.hostname
-          });
+          const userData = event.detail?.userData || {};
+          const formData = event.detail?.formData || {};
+          const answers = event.detail?.answers || {};
           
-          if (typeof window !== 'undefined' && (window as any).dataLayer) {
-            // Extrair dados do formulário do evento
-            const userData = event.detail?.userData || {};
-            const formData = event.detail?.formData || {};
-            const answers = event.detail?.answers || {};
-            
-            console.log(`🔍 [${formSlug}] Dados recebidos no evento:`, { userData, formData, answers });
-            
-            // Tentar obter os dados necessários (suporta diferentes formatos)
-            const email = userData.email || formData.email || answers.email || userData.Email || formData.Email || answers.Email || '';
-            const nome = userData.nome || formData.nome || answers.nome || userData.name || formData.name || answers.name || userData.Nome || formData.Nome || answers.Nome || '';
-            const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
-            const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
-            
-            // Estrutura seguindo o padrão GTM de referência
-            const eventData = {
-              event: eventName,
-              page_location: window.location.href,
-              page_path: window.location.pathname,
-              page_title: document.title,
-              session_id: event.detail?.sessionId || sessionStorage.getItem('sessionId') || '',
-              timestamp: new Date().toISOString(),
-              user_agent: navigator.userAgent,
-              
-              // Dados do cliente (formato padrão GTM)
-              customer_email: email,
-              customer_phone: telefone,
-              customer_full_name: nome,
-              
-              // Dados do formulário
-              form_slug: formSlug,
-              form_name: event.detail?.formName || `StepForm ${formSlug}`,
-              form_id: formSlug,
-              
-              // Dados técnicos
-              domain: window.location.hostname,
-              ip_address: ip,
-              
-              // UTM parameters (se disponível)
-              utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
-              utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
-              utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
-              utm_term: new URLSearchParams(window.location.search).get('utm_term') || undefined,
-              utm_content: new URLSearchParams(window.location.search).get('utm_content') || undefined,
-            };
-            console.log(`📤 [${formSlug}] Enviando dados para GTM:`, eventData);
-            (window as any).dataLayer.push(eventData);
-            console.log(`✅ [${formSlug}] Evento "${eventName}" enviado para GTM com sucesso!`);
-          } else {
-            console.warn(`❌ [${formSlug}] dataLayer não disponível no momento do envio - GTM pode não estar carregado`);
-            console.log('🔧 Inicializando dataLayer...');
-            // Inicializar dataLayer se não existir
-            (window as any).dataLayer = (window as any).dataLayer || [];
-            
-            // Extrair dados do formulário do evento
-            const userData = event.detail?.userData || {};
-            const formData = event.detail?.formData || {};
-            const answers = event.detail?.answers || {};
-            
-            const email = userData.email || formData.email || answers.email || userData.Email || formData.Email || answers.Email || '';
-            const nome = userData.nome || formData.nome || answers.nome || userData.name || formData.name || answers.name || userData.Nome || formData.Nome || answers.Nome || '';
-            const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
-            const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
-            
-            // Estrutura seguindo o padrão GTM de referência
-            const eventData = {
-              event: eventName,
-              page_location: window.location.href,
-              page_path: window.location.pathname,
-              page_title: document.title,
-              session_id: event.detail?.sessionId || sessionStorage.getItem('sessionId') || '',
-              timestamp: new Date().toISOString(),
-              user_agent: navigator.userAgent,
-              
-              // Dados do cliente (formato padrão GTM)
-              customer_email: email,
-              customer_phone: telefone,
-              customer_full_name: nome,
-              
-              // Dados do formulário
-              form_slug: formSlug,
-              form_name: event.detail?.formName || `StepForm ${formSlug}`,
-              form_id: formSlug,
-              
-              // Dados técnicos
-              domain: window.location.hostname,
-              ip_address: ip,
-              fallback: true,
-              
-              // UTM parameters (se disponível)
-              utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
-              utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
-              utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
-              utm_term: new URLSearchParams(window.location.search).get('utm_term') || undefined,
-              utm_content: new URLSearchParams(window.location.search).get('utm_content') || undefined,
-            };
-            console.log(`📤 [${formSlug}] Enviando dados para GTM (com dataLayer inicializado):`, eventData);
-            (window as any).dataLayer.push(eventData);
-            console.log(`✅ [${formSlug}] Evento "${eventName}" enviado para GTM (dataLayer inicializado)`);
-          }
-        }, 1000); // Aguardar mais tempo para o GTM estar pronto na Hostinger
+          const email = userData.email || formData.email || answers.email || userData.Email || formData.Email || answers.Email || '';
+          const nome = userData.nome || formData.nome || answers.nome || userData.name || formData.name || answers.name || userData.Nome || formData.Nome || answers.Nome || '';
+          const telefone = userData.telefone || formData.telefone || answers.telefone || userData.phone || formData.phone || answers.phone || userData.Telefone || formData.Telefone || answers.Telefone || '';
+          const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
+
+          const eventData = {
+            event: eventName,
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            page_title: document.title,
+            session_id: event.detail?.sessionId || sessionStorage.getItem('sessionId') || '',
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+            customer_email: email,
+            customer_phone: telefone,
+            customer_full_name: nome,
+            form_slug: formSlug,
+            form_name: event.detail?.formName || `StepForm ${formSlug}`,
+            form_id: formSlug,
+            domain: window.location.hostname,
+            ip_address: ip,
+            utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
+            utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
+            utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
+            utm_term: new URLSearchParams(window.location.search).get('utm_term') || undefined,
+            utm_content: new URLSearchParams(window.location.search).get('utm_content') || undefined,
+          };
+
+          (window as any).dataLayer = (window as any).dataLayer || [];
+          (window as any).dataLayer.push(eventData);
+          logger.log(`[${formSlug}] Evento "${eventName}" enviado para GTM`);
+        }, 1000);
       }
     };
 
@@ -337,15 +216,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const implementGoogleAnalytics = (eventName: string) => {
-    console.log(`📊 StepForm GA listener para evento: ${eventName}`);
-
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug === formSlug) {
         const sentMap = (window as any).__stepFormEventSent || {};
-        if (sentMap[formSlug]?.ga) {
-          console.log(`⏭️ GA ignorado (duplicado) para ${formSlug}`);
-          return;
-        }
+        if (sentMap[formSlug]?.ga) return;
         sentMap[formSlug] = { ...(sentMap[formSlug] || {}), ga: true };
         (window as any).__stepFormEventSent = sentMap;
         setTimeout(() => {
@@ -362,11 +236,11 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
               form_slug: formSlug,
               page_url: window.location.href,
             });
-            console.log(`✅ Evento ${eventName} enviado para GA`);
+            logger.log(`Evento ${eventName} enviado para GA`);
           } else {
-            console.warn('❌ gtag não disponível no momento do envio');
+            logger.warn('gtag não disponível no momento do envio');
           }
-        }, 250); // Aguardar para o GA estar pronto em produção
+        }, 250);
       }
     };
 
@@ -379,9 +253,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const removeStepFormScripts = (formSlug: string) => {
-    console.log(`🧹 Removendo scripts do StepForm: ${formSlug}`);
-    
-    // Remover scripts
     const selectors = [
       `[data-stepform-fb="${formSlug}"]`,
       `[data-stepform-gtm="${formSlug}"]`,
@@ -394,7 +265,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       elements.forEach(el => el.remove());
     });
 
-    // Remover event listeners
     const pixelHandler = (window as any)[`stepFormPixelHandler_${formSlug}`];
     const gtmHandler = (window as any)[`stepFormGTMHandler_${formSlug}`];
     const gaHandler = (window as any)[`stepFormGAHandler_${formSlug}`];
@@ -412,7 +282,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       delete (window as any)[`stepFormGAHandler_${formSlug}`];
     }
 
-    // Limpar funções globais
     delete (window as any).trackStepFormPixel;
     delete (window as any).trackStepFormGTM;
     delete (window as any).trackStepFormGA;

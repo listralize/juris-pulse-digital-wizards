@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { BlogPost } from '../../types/blogTypes';
+import { logger } from '../../utils/logger';
 
 export const useSupabaseBlog = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -25,10 +26,8 @@ export const useSupabaseBlog = () => {
 
   const loadBlogPosts = async () => {
     try {
-      console.log('📝 CARREGANDO POSTS DO BLOG...');
       setIsLoading(true);
       
-      // Usar any para evitar erro de tipo até o Supabase atualizar os tipos
       const { data: blogData, error: blogError } = await (supabase as any)
         .from('blog_posts')
         .select('*')
@@ -36,7 +35,7 @@ export const useSupabaseBlog = () => {
         .order('created_at', { ascending: false });
 
       if (blogError) {
-        console.error('❌ Erro ao carregar blog posts:', blogError);
+        console.error('Erro ao carregar blog posts:', blogError);
         setBlogPosts([]);
         return;
       }
@@ -58,13 +57,11 @@ export const useSupabaseBlog = () => {
         }));
         
         setBlogPosts(formattedPosts);
-        console.log('✅ POSTS DO BLOG CARREGADOS:', formattedPosts.length);
       } else {
-        console.log('⚠️ NENHUM POST ENCONTRADO');
         setBlogPosts([]);
       }
     } catch (error) {
-      console.error('💥 ERRO AO CARREGAR BLOG POSTS:', error);
+      console.error('Erro ao carregar blog posts:', error);
       setBlogPosts([]);
     } finally {
       setIsLoading(false);
@@ -73,25 +70,20 @@ export const useSupabaseBlog = () => {
 
   const saveBlogPosts = async (posts: BlogPost[]) => {
     try {
-      console.log('💾 SALVANDO POSTS DO BLOG:', posts.length);
-      
       if (!posts || posts.length === 0) {
-        console.log('⚠️ Nenhum post para salvar');
         setBlogPosts([]);
         return;
       }
 
-      // Limpar posts existentes usando any para evitar erro de tipo
       const { error: deleteError } = await (supabase as any)
         .from('blog_posts')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (deleteError) {
-        console.error('❌ Erro ao limpar posts:', deleteError);
+        console.error('Erro ao limpar posts:', deleteError);
       }
 
-      // Inserir novos posts
       const postsToInsert = posts.map((post, index) => ({
         id: ensureValidUUID(post.id),
         title: post.title,
@@ -114,16 +106,14 @@ export const useSupabaseBlog = () => {
         .select();
 
       if (insertError) {
-        console.error('❌ Erro ao inserir posts:', insertError);
+        console.error('Erro ao inserir posts:', insertError);
         throw insertError;
       }
 
-      console.log('✅ POSTS SALVOS NO SUPABASE:', insertedPosts?.length || 0);
       setBlogPosts(posts);
-      
       return posts;
     } catch (error) {
-      console.error('💥 ERRO CRÍTICO AO SALVAR POSTS:', error);
+      console.error('Erro crítico ao salvar posts:', error);
       throw error;
     }
   };

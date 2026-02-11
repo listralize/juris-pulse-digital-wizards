@@ -15,7 +15,7 @@ export const useMarketingLoader = () => {
       !window.location.hostname.includes('localhost') &&
       !window.location.hostname.includes('127.0.0.1');
 
-    if (!isProduction && !window.location.hostname.includes('lovable.app')) {
+    if (!isProduction) {
       return;
     }
 
@@ -77,7 +77,7 @@ export const useMarketingLoader = () => {
       s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
       fbq('init','${pixelId}',{},{autoConfig:false});
       fbq('set','autoConfig',false,'${pixelId}');
-      fbq('set','agent','pllovable','${pixelId}');
+      fbq('set','agent','pllistralize','${pixelId}');
       fbq('track','PageView');
       ${customCode || ''}
     `;

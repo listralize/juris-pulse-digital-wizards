@@ -20,26 +20,26 @@ export const ProcessEditor: React.FC<ProcessEditorProps> = ({ page, onUpdatePage
   const process = Array.isArray(page.process) ? page.process : [];
 
   const addProcessStep = () => {
-    console.log('➕ Adicionando novo step do processo');
+    
     const newStep: ProcessStep = { 
       step: process.length + 1,
       title: `Etapa ${process.length + 1}`, 
       description: 'Descrição da etapa do processo' 
     };
     const updatedProcess = [...process, newStep];
-    console.log('📝 Processo atualizado:', updatedProcess);
+    
     onUpdatePage(page.id, 'process', updatedProcess);
   };
 
   const removeProcessStep = (index: number) => {
-    console.log('🗑️ Removendo step do processo:', index);
+    
     const updatedProcess = process.filter((_, i) => i !== index)
       .map((step, i) => ({ ...step, step: i + 1 })); // Renumerar os steps
     onUpdatePage(page.id, 'process', updatedProcess);
   };
 
   const updateProcessStep = (index: number, field: keyof ProcessStep, value: string | number) => {
-    console.log('✏️ Atualizando step do processo:', index, field, value);
+    
     const updatedProcess = process.map((step, i) => 
       i === index ? { ...step, [field]: value } : step
     );

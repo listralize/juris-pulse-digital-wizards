@@ -64,7 +64,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmitSuccess, isSubmitting
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formState);
+    
     
     // Animate form submission
     const tl = gsap.timeline();

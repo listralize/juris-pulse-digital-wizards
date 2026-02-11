@@ -78,12 +78,11 @@ const Admin = () => {
     }
   };
   const handleUpdatePageTexts = (texts: PageTexts) => {
-    console.log('🔄 Admin: Atualizando pageTexts:', texts);
     setPageTexts(texts);
   };
   const handleSavePageTexts = async () => {
     try {
-      console.log('💾 Admin: Salvando pageTexts:', pageTexts);
+      
       await savePageTexts(pageTexts);
       toast.success('Textos das páginas salvos com sucesso!');
     } catch (error) {
@@ -93,7 +92,7 @@ const Admin = () => {
   };
   const handleSaveTeamMembers = async () => {
     try {
-      console.log('💾 Admin: Salvando teamMembers:', teamMembers);
+      
       await saveTeamMembers(teamMembers);
       toast.success('Equipe salva com sucesso!');
 
@@ -118,12 +117,12 @@ const Admin = () => {
     };
     const updatedMembers = [...teamMembers, newMember];
     setTeamMembers(updatedMembers);
-    console.log('➕ Admin: Adicionando novo membro:', newMember);
+    
   };
   const handleRemoveTeamMember = (id: string) => {
     const updatedMembers = teamMembers.filter(member => member.id !== id);
     setTeamMembers(updatedMembers);
-    console.log('🗑️ Admin: Removendo membro:', id);
+    
   };
   const handleUpdateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
     const updatedMembers = teamMembers.map(member => member.id === id ? {
@@ -131,7 +130,7 @@ const Admin = () => {
       [field]: value
     } : member);
     setTeamMembers(updatedMembers);
-    console.log('✏️ Admin: Atualizando membro:', id, field, value);
+    
   };
   const handleSaveBlogPosts = async (posts: BlogPost[]) => {
     try {

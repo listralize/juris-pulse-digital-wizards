@@ -276,7 +276,7 @@ export const ContactFormManagement: React.FC = () => {
   const saveFormConfig = async () => {
     setIsSaving(true);
     try {
-      console.log('💾 Iniciando salvamento das configurações:', multipleFormsConfig);
+      
       
       const { data: existingData, error: selectError } = await supabase
         .from('admin_settings')
@@ -290,7 +290,7 @@ export const ContactFormManagement: React.FC = () => {
       }
 
       if (existingData) {
-        console.log('🔄 Atualizando primeiro registro com ID:', existingData.id);
+        
         
         const { error: updateError } = await supabase
           .from('admin_settings')
@@ -305,9 +305,9 @@ export const ContactFormManagement: React.FC = () => {
           throw updateError;
         }
         
-        console.log('✅ Registro atualizado com sucesso');
+        
       } else {
-        console.log('➕ Criando novo registro');
+        
         
         const { error: insertError } = await supabase
           .from('admin_settings')
@@ -321,11 +321,11 @@ export const ContactFormManagement: React.FC = () => {
           throw insertError;
         }
         
-        console.log('✅ Novo registro criado com sucesso');
+        
       }
 
       toast.success('Configurações dos formulários salvas com sucesso!');
-      console.log('🎉 Salvamento concluído com sucesso');
+      
       
     } catch (error) {
       console.error('💥 Erro ao salvar configurações:', error);

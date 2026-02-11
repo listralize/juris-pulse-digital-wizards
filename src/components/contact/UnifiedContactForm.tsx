@@ -22,7 +22,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
   // Determinar o pageId baseado na URL atual se não fornecido
   const currentPageId = pageId || (() => {
     const pathname = window.location.pathname;
-    console.log('🌐 [UnifiedContactForm] Pathname atual:', pathname);
+    
     
     if (pathname === '/' || pathname === '/home') return 'home';
     if (pathname === '/contato') return 'contato';
@@ -36,7 +36,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
       if (cleanPath.startsWith('/')) {
         cleanPath = cleanPath.substring(1);
       }
-      console.log('🏛️ [UnifiedContactForm] Área de direito detectada:', cleanPath);
+      
       return cleanPath;
     }
     
@@ -81,7 +81,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     return 'home'; // fallback
   })();
 
-  console.log('📍 [UnifiedContactForm] PageId determinado:', currentPageId);
+  
 
   const { formConfig, isLoading } = useFormConfig(formId, currentPageId);
   
@@ -116,7 +116,7 @@ const UnifiedContactForm: React.FC<UnifiedContactFormProps> = ({
     );
   }
 
-  console.log('📋 [UnifiedContactForm] Usando formulário:', formConfig.name, 'para página:', currentPageId);
+  
 
   return (
     <ContactFormContainer darkBackground={darkBackground}>

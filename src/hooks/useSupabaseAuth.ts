@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../integrations/supabase/client';
+import { logger } from '../utils/logger';
 
 interface Profile {
   id: string;
@@ -17,7 +18,6 @@ export const useSupabaseAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -28,10 +28,9 @@ export const useSupabaseAuth = () => {
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Estado de autenticação alterado:', event, session);
+        logger.log('Estado de autenticação alterado:', event);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -49,7 +48,6 @@ export const useSupabaseAuth = () => {
 
   const checkUserRole = async (user: User) => {
     try {
-      // Verificar role do usuário na tabela user_roles
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -61,7 +59,6 @@ export const useSupabaseAuth = () => {
         userRole = roleData.role;
       }
 
-      // Criar profile baseado nos dados do usuário
       const userProfile: Profile = {
         id: user.id,
         email: user.email || '',
@@ -70,10 +67,8 @@ export const useSupabaseAuth = () => {
       };
       
       setProfile(userProfile);
-      console.log('👤 Profile do usuário criado:', userProfile);
     } catch (error) {
-      console.error('❌ Erro ao verificar role do usuário:', error);
-      // Em caso de erro, criar profile básico
+      console.error('Erro ao verificar role do usuário:', error);
       const basicProfile: Profile = {
         id: user.id,
         email: user.email || '',
