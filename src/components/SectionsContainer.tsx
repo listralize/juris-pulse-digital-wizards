@@ -1,11 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSectionTransition } from '../hooks/useSectionTransition';
 import { useIsMobile, useIsTablet } from '../hooks/use-mobile';
 import Section from './Section';
 
-
-// Import Sections
 import Hero from './sections/Hero';
 import About from './sections/About';
 import PracticeAreas from './sections/PracticeAreas';
@@ -14,8 +12,18 @@ import ClientArea from './sections/ClientArea';
 import Blog from './sections/Blog';
 import Contact from './sections/Contact';
 
+const sectionLabels: Record<string, string> = {
+  home: 'Início',
+  about: 'Sobre nós',
+  areas: 'Áreas de atuação',
+  socios: 'Sócios',
+  cliente: 'Área do cliente',
+  blog: 'Blog',
+  contact: 'Contato'
+};
+
 const SectionsContainer: React.FC = () => {
-  const sections = [
+  const sections = useMemo(() => [
     { id: 'home', component: Hero },
     { id: 'about', component: About },
     { id: 'areas', component: PracticeAreas },
@@ -23,18 +31,16 @@ const SectionsContainer: React.FC = () => {
     { id: 'cliente', component: ClientArea },
     { id: 'blog', component: Blog },
     { id: 'contact', component: Contact }
-  ];
+  ], []);
   
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
+  const isTouch = isMobile || isTablet;
   const { activeSection, activeSectionIndex, transitionToSection, sectionsRef, containerRef, isInitialized } = useSectionTransition(sections);
-
-  // Debug logging removed for production performance
 
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
       const targetSection = event.detail;
-      
       const sectionExists = sections.find(s => s.id === targetSection);
       if (sectionExists) {
         transitionToSection(targetSection);
@@ -42,7 +48,6 @@ const SectionsContainer: React.FC = () => {
     };
 
     window.addEventListener('sectionChange', handleSectionChange as EventListener);
-    
     return () => {
       window.removeEventListener('sectionChange', handleSectionChange as EventListener);
     };
@@ -60,23 +65,31 @@ const SectionsContainer: React.FC = () => {
     <div 
       className="relative w-full" 
       style={{ 
-        minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
-        height: (isMobile || isTablet) ? 'auto' : '100vh',
-        maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
-        overflow: (isMobile || isTablet) ? 'visible' : 'hidden',
+        minHeight: isTouch ? 'auto' : '100vh',
+        height: isTouch ? 'auto' : '100vh',
+        maxHeight: isTouch ? 'none' : '100vh',
+        overflow: isTouch ? 'visible' : 'hidden',
         margin: 0,
         padding: 0
       }}
     >
+      {/* Skip navigation */}
+      <a 
+        href="#contact" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded"
+      >
+        Pular para o contato
+      </a>
+
       <div 
         ref={containerRef}
-        className={`${(isMobile || isTablet) ? 'block' : 'flex h-full'}`}
+        className={`${isTouch ? 'block' : 'flex h-full'}`}
         style={{ 
-          width: (isMobile || isTablet) ? '100%' : `${sections.length * 100}vw`,
-          height: (isMobile || isTablet) ? 'auto' : '100vh',
-          minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
-          maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
-          willChange: (isMobile || isTablet) ? 'auto' : 'transform',
+          width: isTouch ? '100%' : `${sections.length * 100}vw`,
+          height: isTouch ? 'auto' : '100vh',
+          minHeight: isTouch ? 'auto' : '100vh',
+          maxHeight: isTouch ? 'none' : '100vh',
+          willChange: isTouch ? 'auto' : 'transform',
           backgroundColor: 'transparent',
           margin: 0,
           padding: 0
@@ -90,15 +103,13 @@ const SectionsContainer: React.FC = () => {
           return (
             <div
               key={section.id}
-              className={`relative ${
-                (isMobile || isTablet) ? 'w-full block' : 'flex-shrink-0 w-screen h-full'
-              }`}
+              className={`relative ${isTouch ? 'w-full block' : 'flex-shrink-0 w-screen h-full'}`}
               style={{ 
-                width: (isMobile || isTablet) ? '100%' : '100vw',
-                height: (isMobile || isTablet) ? 'auto' : '100vh',
-                minWidth: (isMobile || isTablet) ? 'auto' : '100vw',
-                minHeight: (isMobile || isTablet) ? 'auto' : '100vh',
-                maxHeight: (isMobile || isTablet) ? 'none' : '100vh',
+                width: isTouch ? '100%' : '100vw',
+                height: isTouch ? 'auto' : '100vh',
+                minWidth: isTouch ? 'auto' : '100vw',
+                minHeight: isTouch ? 'auto' : '100vh',
+                maxHeight: isTouch ? 'none' : '100vh',
                 backgroundColor: 'transparent',
                 margin: 0,
                 padding: 0
@@ -113,7 +124,7 @@ const SectionsContainer: React.FC = () => {
                     sectionsRef.current[index] = el;
                   }
                 }}
-                className={(isMobile || isTablet) ? 'min-h-auto' : 'h-full'}
+                className={isTouch ? 'min-h-auto' : 'h-full'}
               >
                 <Component />
               </Section>

@@ -13,6 +13,7 @@ import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import { useFormConfig } from '@/hooks/useFormConfig';
 import { ConversionFunnel } from './ConversionFunnel';
 import { CampaignReports } from './CampaignReports';
@@ -166,7 +167,7 @@ export const MarketingManagement: React.FC = () => {
   // Forçar reload dos dados do banco
   const forceReloadFromDatabase = async () => {
     try {
-      console.log('🔄 Forçando reload dos dados do banco...');
+      logger.log('🔄 Forçando reload dos dados do banco...');
       const {
         data: settings,
         error
@@ -177,7 +178,7 @@ export const MarketingManagement: React.FC = () => {
         console.error('❌ Erro ao recarregar:', error);
         return;
       }
-      console.log('📋 Dados recarregados do banco:', settings);
+      logger.log('📋 Dados recarregados do banco:', settings);
       if (settings) {
         // Atualizar scripts com dados do banco
         const newScripts = {
@@ -201,7 +202,7 @@ export const MarketingManagement: React.FC = () => {
             body: settings.custom_body_scripts || ''
           }
         };
-        console.log('📝 Atualizando interface com:', newScripts);
+        logger.log('📝 Atualizando interface com:', newScripts);
         setMarketingScripts(newScripts);
 
         // Atualizar tracking
@@ -233,7 +234,7 @@ export const MarketingManagement: React.FC = () => {
         implementMarketingScripts(newScripts);
         toast.success('Dados sincronizados com o banco!');
       } else {
-        console.log('ℹ️ Nenhum dado encontrado no banco');
+        logger.log('ℹ️ Nenhum dado encontrado no banco');
       }
     } catch (error) {
       console.error('❌ Erro ao forçar reload:', error);
@@ -243,7 +244,7 @@ export const MarketingManagement: React.FC = () => {
 
   // Implementar scripts de marketing no site
   const implementMarketingScripts = (scripts: MarketingScripts) => {
-    console.log('🚀 Implementando scripts no site:', scripts);
+    logger.log('🚀 Implementando scripts no site:', scripts);
 
     // Remover scripts antigos
     removeExistingScripts();
@@ -267,10 +268,10 @@ export const MarketingManagement: React.FC = () => {
         // Verificar se foi carregado corretamente após um tempo
         setTimeout(() => {
           if (typeof (window as any).dataLayer !== 'undefined') {
-            console.log('✅ GTM carregado com sucesso!');
+            logger.log('✅ GTM carregado com sucesso!');
             toast.success(`GTM ${scripts.googleTagManager.containerId} carregado com sucesso!`);
           } else {
-            console.warn('⚠️ GTM pode não ter carregado corretamente');
+            logger.warn('⚠️ GTM pode não ter carregado corretamente');
             toast.warning(`Verificar se o container ${scripts.googleTagManager.containerId} existe no Google Tag Manager`);
           }
         }, 2000);
@@ -285,7 +286,7 @@ export const MarketingManagement: React.FC = () => {
       implementCustomScripts(scripts.customScripts);
     }
     
-    console.log('✅ Scripts implementados com sucesso!');
+    logger.log('✅ Scripts implementados com sucesso!');
   };
   const removeExistingScripts = () => {
     // Remover scripts existentes do Facebook Pixel
@@ -308,10 +309,10 @@ export const MarketingManagement: React.FC = () => {
     const existingCustomScripts = document.querySelectorAll('script[data-marketing="custom"]');
     existingCustomScripts.forEach(script => script.remove());
     
-    console.log('🧹 Scripts antigos removidos');
+    logger.log('🧹 Scripts antigos removidos');
   };
   const implementFacebookPixel = (config: any) => {
-    console.log('📘 Implementando Facebook Pixel:', config.pixelId);
+    logger.log('📘 Implementando Facebook Pixel:', config.pixelId);
     
     // Limpar instâncias anteriores do fbq
     if ((window as any).fbq) {
@@ -336,10 +337,10 @@ export const MarketingManagement: React.FC = () => {
 
     // Não enviamos PageView automaticamente; os eventos serão disparados conforme configuração do formulário
     
-    console.log('✅ Facebook Pixel implementado com ID:', config.pixelId);
+    logger.log('✅ Facebook Pixel implementado com ID:', config.pixelId);
   };
   const implementGoogleAnalytics = (config: any) => {
-    console.log('📊 Implementando Google Analytics:', config.measurementId);
+    logger.log('📊 Implementando Google Analytics:', config.measurementId);
 
     // Script do gtag
     const gtagScript = document.createElement('script');
@@ -361,7 +362,7 @@ export const MarketingManagement: React.FC = () => {
     document.head.appendChild(configScript);
   };
   const implementGoogleTagManager = (config: any) => {
-    console.log('🏷️ Implementando Google Tag Manager:', config.containerId);
+    logger.log('🏷️ Implementando Google Tag Manager:', config.containerId);
 
     // Limpar instâncias anteriores do GTM
     if ((window as any).google_tag_manager) {
@@ -396,10 +397,10 @@ export const MarketingManagement: React.FC = () => {
     noscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=${config.containerId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
     document.body.appendChild(noscript);
 
-    console.log('✅ Google Tag Manager implementado com Container ID:', config.containerId);
+    logger.log('✅ Google Tag Manager implementado com Container ID:', config.containerId);
   };
   const implementCustomScripts = (config: any) => {
-    console.log('🔧 Implementando scripts customizados');
+    logger.log('🔧 Implementando scripts customizados');
     if (config.head) {
       const headScript = document.createElement('div');
       headScript.setAttribute('data-marketing', 'custom');
@@ -493,7 +494,7 @@ export const MarketingManagement: React.FC = () => {
     }
   };
   const loadAnalyticsData = async () => {
-    console.log('🔄 Iniciando carregamento dos dados de analytics...');
+    logger.log('🔄 Iniciando carregamento dos dados de analytics...');
     setIsLoading(true);
     try {
       const today = new Date();
@@ -510,7 +511,7 @@ export const MarketingManagement: React.FC = () => {
         data: conversionsData
       } = await supabase.from('conversion_events').select('*').gte('timestamp', oneWeekAgo.toISOString());
       if (visitorsData && conversionsData) {
-        console.log('📊 Dados brutos carregados:', {
+        logger.log('📊 Dados brutos carregados:', {
           visitorsCount: visitorsData.length,
           conversionsCount: conversionsData.length
         });
@@ -616,7 +617,7 @@ export const MarketingManagement: React.FC = () => {
             conversions: actualConversions
           }
         };
-        console.log('📈 Analytics calculados:', newAnalyticsData);
+        logger.log('📈 Analytics calculados:', newAnalyticsData);
         setAnalyticsData(analyticsData);
       }
     } catch (error) {
@@ -629,7 +630,7 @@ export const MarketingManagement: React.FC = () => {
   const saveMarketingConfig = async () => {
     setIsLoading(true);
     try {
-      console.log('💾 Salvando configurações de marketing...');
+      logger.log('💾 Salvando configurações de marketing...');
       const configData = {
         facebook_pixel_enabled: marketingScripts.facebookPixel.enabled,
         facebook_pixel_id: marketingScripts.facebookPixel.pixelId,
@@ -658,7 +659,7 @@ export const MarketingManagement: React.FC = () => {
         },
         updated_at: new Date().toISOString()
       };
-      console.log('📤 Dados a serem salvos:', configData);
+      logger.log('📤 Dados a serem salvos:', configData);
 
       // Verificar configuração existente
       const {
@@ -668,10 +669,10 @@ export const MarketingManagement: React.FC = () => {
       }).limit(1).maybeSingle();
       let result;
       if (existingConfig) {
-        console.log('🔄 Atualizando configuração existente...');
+        logger.log('🔄 Atualizando configuração existente...');
         result = await supabase.from('marketing_settings').update(configData).eq('id', existingConfig.id).select();
       } else {
-        console.log('➕ Criando nova configuração...');
+        logger.log('➕ Criando nova configuração...');
         result = await supabase.from('marketing_settings').insert([configData]).select();
       }
       const {
@@ -682,7 +683,7 @@ export const MarketingManagement: React.FC = () => {
         console.error('❌ Erro ao salvar:', error);
         throw error;
       }
-      console.log('✅ Configurações salvas:', savedData);
+      logger.log('✅ Configurações salvas:', savedData);
       setLastSaved(new Date());
 
       // Implementar scripts imediatamente após salvar
@@ -707,7 +708,7 @@ export const MarketingManagement: React.FC = () => {
     }
   };
   const updateSystemForm = (index: number, field: keyof FormTrackingConfig, value: any) => {
-    console.log('✏️ Atualizando formulário:', index, field, value);
+    logger.log('✏️ Atualizando formulário:', index, field, value);
     setConversionTracking(prev => ({
       ...prev,
       systemForms: prev.systemForms.map((form, i) => i === index ? {

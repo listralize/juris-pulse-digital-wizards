@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useSupabaseServicePages } from './supabase/useSupabaseServicePages';
 import { useSupabaseCategories } from './supabase/useSupabaseCategories';
 import { useSupabaseTeamMembers } from './supabase/useSupabaseTeamMembers';
@@ -8,8 +8,6 @@ import { TeamMember, ServicePage, CategoryInfo, PageTexts } from '../types/admin
 import { defaultPageTexts } from '../data/defaultPageTexts';
 
 export const useSupabaseDataNew = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
   const { 
     servicePages: rawServicePages, 
     categories: rawCategories, 
@@ -44,52 +42,37 @@ export const useSupabaseDataNew = () => {
     refetch: refetchPageTexts
   } = useSupabasePageTexts();
 
-  const [servicePages, setServicePagesState] = useState<ServicePage[]>([]);
-  const [categories, setCategoriesState] = useState<CategoryInfo[]>([]);
-  const [teamMembers, setTeamMembersState] = useState<TeamMember[]>([]);
-  const [pageTexts, setPageTextsState] = useState<PageTexts>(defaultPageTexts);
+  // Derive data directly from hooks with fallbacks - no redundant state copies
+  const servicePages = useMemo<ServicePage[]>(
+    () => (rawServicePages && Array.isArray(rawServicePages) ? rawServicePages : []),
+    [rawServicePages]
+  );
 
-  useEffect(() => {
-    if (rawServicePages && Array.isArray(rawServicePages)) {
-      setServicePagesState([...rawServicePages]);
-    } else {
-      setServicePagesState([]);
-    }
-  }, [rawServicePages]);
+  const categories = useMemo<CategoryInfo[]>(
+    () => (rawCategories && Array.isArray(rawCategories) ? rawCategories : []),
+    [rawCategories]
+  );
 
-  useEffect(() => {
-    if (rawCategories && Array.isArray(rawCategories)) {
-      setCategoriesState([...rawCategories]);
-    } else {
-      setCategoriesState([]);
-    }
-  }, [rawCategories]);
+  const teamMembers = useMemo<TeamMember[]>(
+    () => (rawTeamMembers && Array.isArray(rawTeamMembers) ? rawTeamMembers : []),
+    [rawTeamMembers]
+  );
 
-  useEffect(() => {
-    if (rawTeamMembers && Array.isArray(rawTeamMembers)) {
-      setTeamMembersState([...rawTeamMembers]);
-    } else {
-      setTeamMembersState([]);
-    }
-  }, [rawTeamMembers]);
+  const pageTexts = useMemo<PageTexts>(
+    () => (rawPageTexts && typeof rawPageTexts === 'object' && Object.keys(rawPageTexts).length > 0 
+      ? rawPageTexts 
+      : defaultPageTexts),
+    [rawPageTexts]
+  );
 
-  useEffect(() => {
-    if (rawPageTexts && typeof rawPageTexts === 'object' && Object.keys(rawPageTexts).length > 0) {
-      setPageTextsState({ ...rawPageTexts });
-    } else {
-      setPageTextsState(defaultPageTexts);
-    }
-  }, [rawPageTexts]);
-
-  useEffect(() => {
-    const allLoaded = !servicePagesLoading && !categoriesLoading && !teamLoading && !pageTextsLoading;
-    setIsLoading(!allLoaded);
-  }, [servicePagesLoading, categoriesLoading, teamLoading, pageTextsLoading]);
+  const isLoading = useMemo(
+    () => servicePagesLoading || categoriesLoading || teamLoading || pageTextsLoading,
+    [servicePagesLoading, categoriesLoading, teamLoading, pageTextsLoading]
+  );
 
   const saveCategories = async (cats: CategoryInfo[]) => {
     try {
       await saveCategoriesOnly(cats);
-      setCategoriesState([...cats]);
     } catch (error) {
       console.error('Erro ao salvar categorias:', error);
       throw error;
@@ -99,7 +82,6 @@ export const useSupabaseDataNew = () => {
   const savePageTextsWrapper = async (texts: PageTexts) => {
     try {
       await savePageTexts(texts);
-      setPageTextsState({ ...texts });
       setPageTextsInHook(texts);
     } catch (error) {
       console.error('Erro ao salvar textos das páginas:', error);
@@ -108,12 +90,11 @@ export const useSupabaseDataNew = () => {
   };
 
   const setPageTexts = (texts: PageTexts) => {
-    setPageTextsState({ ...texts });
+    setPageTextsInHook(texts);
   };
 
   const refreshData = async () => {
     try {
-      setIsLoading(true);
       await Promise.all([
         refetchServicePages(),
         refetchCategories(),
@@ -122,8 +103,6 @@ export const useSupabaseDataNew = () => {
       ]);
     } catch (error) {
       console.error('Erro ao recarregar dados:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -138,7 +117,7 @@ export const useSupabaseDataNew = () => {
     saveTeamMembers,
     savePageTexts: savePageTextsWrapper,
     setServicePages,
-    setTeamMembers: setTeamMembersState,
+    setTeamMembers,
     setPageTexts,
     refreshData,
     refetchServicePages,

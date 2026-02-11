@@ -7,6 +7,7 @@ import { Badge } from '../ui/badge';
 import { Webhook, TestTube, Copy, Plus, CheckCircle, XCircle, Save } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 interface WebhookMapping {
   webhookField: string;
@@ -128,7 +129,7 @@ export const LeadWebhookManager: React.FC = () => {
     // Verificar se há dados recebidos recentemente
     const checkForRecentData = async () => {
       try {
-        console.log('🔍 Verificando dados recebidos...');
+        logger.log('🔍 Verificando dados recebidos...');
         const { data, error } = await supabase
           .from('conversion_events')
           .select('*')
@@ -137,7 +138,7 @@ export const LeadWebhookManager: React.FC = () => {
           .limit(1)
           .maybeSingle();
 
-        console.log('📥 Dados encontrados:', data);
+        logger.log('📥 Dados encontrados:', data);
 
         // Verificar se os dados são mais recentes que a última configuração
         const lastConfigTime = localStorage.getItem('webhook_last_config_time');
@@ -153,7 +154,7 @@ export const LeadWebhookManager: React.FC = () => {
             leadData = data.lead_data;
           }
           
-          console.log('🎯 Dados do lead:', leadData);
+          logger.log('🎯 Dados do lead:', leadData);
           
           setReceivedData(leadData);
           setIsListening(false);

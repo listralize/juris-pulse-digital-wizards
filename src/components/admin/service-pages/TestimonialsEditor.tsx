@@ -7,6 +7,7 @@ import { Label } from '../../ui/label';
 import { ServicePage, Testimonial } from '../../../types/adminTypes';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
+import { logger } from '@/utils/logger';
 
 interface TestimonialsEditorProps {
   page: ServicePage;
@@ -20,7 +21,7 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
   const testimonials = Array.isArray(page.testimonials) ? page.testimonials : [];
 
   const addTestimonial = () => {
-    console.log('➕ Adicionando novo depoimento');
+    logger.log('➕ Adicionando novo depoimento');
     const newTestimonial: Testimonial = { 
       name: 'Novo Cliente', 
       text: 'Excelente atendimento e resultados satisfatórios.', 
@@ -28,18 +29,18 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ page, on
       role: 'Cliente'
     };
     const updatedTestimonials = [...testimonials, newTestimonial];
-    console.log('📝 Depoimentos atualizados:', updatedTestimonials);
+    logger.log('📝 Depoimentos atualizados:', updatedTestimonials);
     onUpdatePage(page.id, 'testimonials', updatedTestimonials);
   };
 
   const removeTestimonial = (index: number) => {
-    console.log('🗑️ Removendo depoimento:', index);
+    logger.log('🗑️ Removendo depoimento:', index);
     const updatedTestimonials = testimonials.filter((_, i) => i !== index);
     onUpdatePage(page.id, 'testimonials', updatedTestimonials);
   };
 
   const updateTestimonial = (index: number, field: keyof Testimonial, value: string) => {
-    console.log('✏️ Atualizando depoimento:', index, field, value);
+    logger.log('✏️ Atualizando depoimento:', index, field, value);
     const updatedTestimonials = testimonials.map((testimonial, i) => 
       i === index ? { ...testimonial, [field]: value } : testimonial
     );

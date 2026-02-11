@@ -7,6 +7,7 @@ import { Label } from '../../ui/label';
 import { ServicePage, Benefit } from '../../../types/adminTypes';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTheme } from '../../ThemeProvider';
+import { logger } from '@/utils/logger';
 
 interface BenefitsEditorProps {
   page: ServicePage;
@@ -20,25 +21,25 @@ export const BenefitsEditor: React.FC<BenefitsEditorProps> = ({ page, onUpdatePa
   const benefits = Array.isArray(page.benefits) ? page.benefits : [];
 
   const addBenefit = () => {
-    console.log('➕ Adicionando novo benefício');
+    logger.log('➕ Adicionando novo benefício');
     const newBenefit: Benefit = { 
       title: 'Novo Benefício', 
       description: 'Descrição do benefício', 
       icon: '⚖️' 
     };
     const updatedBenefits = [...benefits, newBenefit];
-    console.log('📝 Benefícios atualizados:', updatedBenefits);
+    logger.log('📝 Benefícios atualizados:', updatedBenefits);
     onUpdatePage(page.id, 'benefits', updatedBenefits);
   };
 
   const removeBenefit = (index: number) => {
-    console.log('🗑️ Removendo benefício:', index);
+    logger.log('🗑️ Removendo benefício:', index);
     const updatedBenefits = benefits.filter((_, i) => i !== index);
     onUpdatePage(page.id, 'benefits', updatedBenefits);
   };
 
   const updateBenefit = (index: number, field: keyof Benefit, value: string) => {
-    console.log('✏️ Atualizando benefício:', index, field, value);
+    logger.log('✏️ Atualizando benefício:', index, field, value);
     const updatedBenefits = benefits.map((benefit, i) => 
       i === index ? { ...benefit, [field]: value } : benefit
     );

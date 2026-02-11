@@ -5,6 +5,7 @@ import { Database, CheckCircle } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { useSupabaseDataNew } from '../../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../../hooks/supabase/useSupabaseBlog';
+import { logger } from '@/utils/logger';
 
 export const SupabaseDataManager: React.FC = () => {
   const { theme } = useTheme();
@@ -19,7 +20,7 @@ export const SupabaseDataManager: React.FC = () => {
 
   const { blogPosts: supabaseBlogPosts } = useSupabaseBlog();
 
-  console.log('🔍 SUPABASE DATA STATUS:', {
+  logger.log('🔍 SUPABASE DATA STATUS:', {
     categories: supabaseCategories.length,
     servicePages: supabaseServicePages.length,
     teamMembers: supabaseTeamMembers.length,

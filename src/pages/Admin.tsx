@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -9,21 +9,29 @@ import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { useSupabasePageTexts } from '../hooks/supabase/useSupabasePageTexts';
 import { TeamMember, ServicePage, PageTexts, CategoryInfo } from '../types/adminTypes';
 import { BlogPost } from '../types/blogTypes';
-import { ServicePagesManager } from '../components/admin/service-pages/ServicePagesManager';
 import { AdminHeader } from '../components/admin/AdminHeader';
-import { ContentManagement } from '../components/admin/ContentManagement';
-import { BlogManagement } from '../components/admin/BlogManagement';
-import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
-import { LinkTreeManagement } from '../components/admin/LinkTreeManagement';
-import { MarketingManagement } from '../components/admin/MarketingManagement';
-import { LeadsManagement } from '../components/admin/LeadsManagement';
-import { EnhancedEmailTemplateManager } from '../components/admin/EnhancedEmailTemplateManager';
-import { StepFormBuilder } from '../components/admin/StepFormBuilder';
-
+import { SupabaseDataManager } from '../components/admin/SupabaseDataManager';
 
 import { defaultPageTexts } from '../data/defaultPageTexts';
 import { toast } from 'sonner';
+
+// Lazy-loaded admin tab components
+const ContentManagement = React.lazy(() => import('../components/admin/ContentManagement').then(m => ({ default: m.ContentManagement })));
+const ServicePagesManager = React.lazy(() => import('../components/admin/service-pages/ServicePagesManager').then(m => ({ default: m.ServicePagesManager })));
+const BlogManagement = React.lazy(() => import('../components/admin/BlogManagement').then(m => ({ default: m.BlogManagement })));
+const LinkTreeManagement = React.lazy(() => import('../components/admin/LinkTreeManagement').then(m => ({ default: m.LinkTreeManagement })));
+const LeadsManagement = React.lazy(() => import('../components/admin/LeadsManagement').then(m => ({ default: m.LeadsManagement })));
+const EnhancedEmailTemplateManager = React.lazy(() => import('../components/admin/EnhancedEmailTemplateManager').then(m => ({ default: m.EnhancedEmailTemplateManager })));
+const StepFormBuilder = React.lazy(() => import('../components/admin/StepFormBuilder').then(m => ({ default: m.StepFormBuilder })));
+const MarketingManagement = React.lazy(() => import('../components/admin/MarketingManagement').then(m => ({ default: m.MarketingManagement })));
+
+const TabFallback = () => (
+  <div className="flex items-center justify-center p-12">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
 const Admin = () => {
   const {
     logout
@@ -33,7 +41,6 @@ const Admin = () => {
   } = useTheme();
   const isDark = theme === 'dark';
 
-  // Usar o hook específico para page texts
   const {
     pageTexts,
     isLoading: pageTextsLoading,
@@ -82,7 +89,6 @@ const Admin = () => {
   };
   const handleSavePageTexts = async () => {
     try {
-      
       await savePageTexts(pageTexts);
       toast.success('Textos das páginas salvos com sucesso!');
     } catch (error) {
@@ -92,11 +98,8 @@ const Admin = () => {
   };
   const handleSaveTeamMembers = async () => {
     try {
-      
       await saveTeamMembers(teamMembers);
       toast.success('Equipe salva com sucesso!');
-
-      // Disparar evento para atualizar a seção Partners
       window.dispatchEvent(new CustomEvent('teamMembersUpdated', {
         detail: teamMembers
       }));
@@ -117,12 +120,10 @@ const Admin = () => {
     };
     const updatedMembers = [...teamMembers, newMember];
     setTeamMembers(updatedMembers);
-    
   };
   const handleRemoveTeamMember = (id: string) => {
     const updatedMembers = teamMembers.filter(member => member.id !== id);
     setTeamMembers(updatedMembers);
-    
   };
   const handleUpdateTeamMember = (id: string, field: keyof TeamMember, value: string) => {
     const updatedMembers = teamMembers.map(member => member.id === id ? {
@@ -130,7 +131,6 @@ const Admin = () => {
       [field]: value
     } : member);
     setTeamMembers(updatedMembers);
-    
   };
   const handleSaveBlogPosts = async (posts: BlogPost[]) => {
     try {
@@ -153,8 +153,6 @@ const Admin = () => {
     }}>
           <div className="max-w-7xl mx-auto">
             <AdminHeader onLogout={logout} />
-
-            
 
             <Tabs defaultValue="content" className="space-y-6">
               <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
@@ -207,7 +205,7 @@ const Admin = () => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Mobile/Tablet Dropdown Menu - hidden on desktop, uses TabsTriggers for actual navigation */}
+              {/* Mobile/Tablet Dropdown Menu */}
               <div className="md:hidden flex flex-wrap gap-2">
                 <TabsList className="w-full grid grid-cols-4 gap-1 backdrop-blur-md bg-white/10 border border-white/20 h-auto p-1">
                   <TabsTrigger value="content" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Edit className="w-3 h-3" /></TabsTrigger>
@@ -222,35 +220,51 @@ const Admin = () => {
               </div>
 
               <TabsContent value="content">
-                <ContentManagement teamMembers={validTeamMembers} pageTexts={validPageTexts} onAddTeamMember={handleAddTeamMember} onRemoveTeamMember={handleRemoveTeamMember} onUpdateTeamMember={handleUpdateTeamMember} onSaveTeamMembers={handleSaveTeamMembers} onUpdatePageTexts={handleUpdatePageTexts} onSavePageTexts={handleSavePageTexts} />
+                <Suspense fallback={<TabFallback />}>
+                  <ContentManagement teamMembers={validTeamMembers} pageTexts={validPageTexts} onAddTeamMember={handleAddTeamMember} onRemoveTeamMember={handleRemoveTeamMember} onUpdateTeamMember={handleUpdateTeamMember} onSaveTeamMembers={handleSaveTeamMembers} onUpdatePageTexts={handleUpdatePageTexts} onSavePageTexts={handleSavePageTexts} />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="service-pages">
-                <ServicePagesManager servicePages={servicePages || []} categories={categories || []} pageTexts={validPageTexts} onSave={handleSaveServicePages} onSaveCategories={handleSaveCategories} onSavePageTexts={handleSavePageTexts} onUpdatePageTexts={handleUpdatePageTexts} />
+                <Suspense fallback={<TabFallback />}>
+                  <ServicePagesManager servicePages={servicePages || []} categories={categories || []} pageTexts={validPageTexts} onSave={handleSaveServicePages} onSaveCategories={handleSaveCategories} onSavePageTexts={handleSavePageTexts} onUpdatePageTexts={handleUpdatePageTexts} />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="blog">
-                <BlogManagement blogPosts={validBlogPosts} onSave={handleSaveBlogPosts} />
+                <Suspense fallback={<TabFallback />}>
+                  <BlogManagement blogPosts={validBlogPosts} onSave={handleSaveBlogPosts} />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="linktree">
-                <LinkTreeManagement />
+                <Suspense fallback={<TabFallback />}>
+                  <LinkTreeManagement />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="leads">
-                <LeadsManagement />
+                <Suspense fallback={<TabFallback />}>
+                  <LeadsManagement />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="email-templates">
-                <EnhancedEmailTemplateManager />
+                <Suspense fallback={<TabFallback />}>
+                  <EnhancedEmailTemplateManager />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="step-forms">
-                <StepFormBuilder />
+                <Suspense fallback={<TabFallback />}>
+                  <StepFormBuilder />
+                </Suspense>
               </TabsContent>
 
               <TabsContent value="marketing">
-                <MarketingManagement />
+                <Suspense fallback={<TabFallback />}>
+                  <MarketingManagement />
+                </Suspense>
               </TabsContent>
             </Tabs>
           </div>

@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import { ImageGallery } from './ImageGallery';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 // Tipos de nós customizados
 interface QuestionOption {
@@ -609,7 +610,7 @@ export const VisualFlowEditor: React.FC<VisualFlowEditorProps> = ({
         }))
       };
       
-      console.log('Salvando flowConfig:', flowConfig);
+      logger.log('Salvando flowConfig:', flowConfig);
       
       onUpdate('steps', flowData);
       onUpdate('flowConfig', flowConfig);

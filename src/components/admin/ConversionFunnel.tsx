@@ -12,6 +12,7 @@ import { format, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMo
 import { ptBR } from 'date-fns/locale';
 import { cn } from '../../lib/utils';
 import { useFormConfig } from '@/hooks/useFormConfig';
+import { logger } from '@/utils/logger';
 
 interface ConversionFunnelProps {
   analyticsData?: any;
@@ -116,11 +117,11 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
 
   // Carregar todos os formulários configurados no sistema
   const loadAllAvailableForms = () => {
-    console.log('🔄 [ConversionFunnel] Carregando formulários do sistema...');
-    console.log('📋 [ConversionFunnel] multipleFormsConfig:', multipleFormsConfig);
+    logger.log('🔄 [ConversionFunnel] Carregando formulários do sistema...');
+    logger.log('📋 [ConversionFunnel] multipleFormsConfig:', multipleFormsConfig);
 
     if (!multipleFormsConfig || !multipleFormsConfig.forms || multipleFormsConfig.forms.length === 0) {
-      console.log('⚠️ [ConversionFunnel] Nenhum formulário configurado no sistema');
+      logger.log('⚠️ [ConversionFunnel] Nenhum formulário configurado no sistema');
       const fallbackForms = [
         { id: 'all', name: 'Todos os Formulários' },
         { id: 'default', name: 'Formulário Principal' }
@@ -142,18 +143,18 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
     ];
 
     setAvailableForms(allForms);
-    console.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
+    logger.log('✅ [ConversionFunnel] Formulários carregados:', allForms);
   };
 
   // Função unificada para buscar dados de form_leads - FONTE ÚNICA DE VERDADE
   const loadFormData = async () => {
     try {
-      console.log('📊 [ConversionFunnel] === CARREGANDO DADOS DOS FORMULÁRIOS (FORM_LEADS) ===');
-      console.log('📅 [ConversionFunnel] Período:', {
+      logger.log('📊 [ConversionFunnel] === CARREGANDO DADOS DOS FORMULÁRIOS (FORM_LEADS) ===');
+      logger.log('📅 [ConversionFunnel] Período:', {
         from: dateRange.from.toISOString(),
         to: dateRange.to.toISOString()
       });
-      console.log('🎯 [ConversionFunnel] Formulário selecionado:', selectedForm);
+      logger.log('🎯 [ConversionFunnel] Formulário selecionado:', selectedForm);
       
       // Buscar TODOS os dados de form_leads para o período
       const { data: leadsData, error } = await supabase
@@ -168,7 +169,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         return;
       }
 
-      console.log('📈 [ConversionFunnel] TODOS os leads encontrados no período:', leadsData);
+      logger.log('📈 [ConversionFunnel] TODOS os leads encontrados no período:', leadsData);
       
       // Calcular performance de todos os formulários usando os dados carregados
       const performanceMap = new Map<string, { formName: string; count: number }>();
@@ -210,7 +211,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         }
       });
 
-      console.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
+      logger.log('📊 [ConversionFunnel] Performance calculada:', performanceData);
       setFormPerformanceData(performanceData);
 
       // ===== USAR DADOS CALCULADOS DIRETAMENTE (NÃO O ESTADO) =====
@@ -218,21 +219,21 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       
       if (selectedForm === 'all') {
         submissionsForSelectedForm = leadsData?.length || 0;
-        console.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
+        logger.log('📊 [ConversionFunnel] Todos os formulários - total:', submissionsForSelectedForm);
       } else {
         // Usar os dados recém-calculados (performanceData) ao invés do estado (formPerformanceData)
         const performanceItem = performanceData.find(p => p.formId === selectedForm);
         submissionsForSelectedForm = performanceItem?.count || 0;
         
-        console.log('📊 [ConversionFunnel] ===== CORREÇÃO FINAL =====');
-        console.log('📊 [ConversionFunnel] Formulário selecionado:', selectedForm);
-        console.log('📊 [ConversionFunnel] Performance calculada:', performanceItem);
-        console.log('📊 [ConversionFunnel] Contagem final para funil:', submissionsForSelectedForm);
+        logger.log('📊 [ConversionFunnel] ===== CORREÇÃO FINAL =====');
+        logger.log('📊 [ConversionFunnel] Formulário selecionado:', selectedForm);
+        logger.log('📊 [ConversionFunnel] Performance calculada:', performanceItem);
+        logger.log('📊 [ConversionFunnel] Contagem final para funil:', submissionsForSelectedForm);
       }
 
       // Não atualizar automaticamente os leads, apenas armazenar para referência
-      console.log('✅ [ConversionFunnel] Performance calculada - dados disponíveis para referência');
-      console.log('✅ [ConversionFunnel] FUNIL ATUALIZADO - Envios:', submissionsForSelectedForm);
+      logger.log('✅ [ConversionFunnel] Performance calculada - dados disponíveis para referência');
+      logger.log('✅ [ConversionFunnel] FUNIL ATUALIZADO - Envios:', submissionsForSelectedForm);
 
     } catch (error) {
       console.error('❌ [ConversionFunnel] Erro crítico ao carregar dados:', error);
@@ -243,7 +244,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   const refreshAnalyticsData = async () => {
     setIsRefreshing(true);
     try {
-      console.log('🔄 [ConversionFunnel] === ATUALIZANDO DADOS ===');
+      logger.log('🔄 [ConversionFunnel] === ATUALIZANDO DADOS ===');
       await loadFormData();
       toast.success(`Dados atualizados para o período selecionado`);
     } catch (error) {
@@ -256,7 +257,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
 
   // Setup realtime listening para form_leads
   useEffect(() => {
-    console.log('🔄 [ConversionFunnel] Configurando realtime para form_leads...');
+    logger.log('🔄 [ConversionFunnel] Configurando realtime para form_leads...');
     
     const channel = supabase
       .channel('form_leads_changes')
@@ -268,7 +269,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
           table: 'form_leads'
         },
         (payload) => {
-          console.log('📡 [ConversionFunnel] Mudança detectada em form_leads:', payload);
+          logger.log('📡 [ConversionFunnel] Mudança detectada em form_leads:', payload);
           // Recarregar dados quando houver mudanças
           loadFormData();
         }
@@ -276,7 +277,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
       .subscribe();
 
     return () => {
-      console.log('🔄 [ConversionFunnel] Removendo listener realtime...');
+      logger.log('🔄 [ConversionFunnel] Removendo listener realtime...');
       supabase.removeChannel(channel);
     };
   }, [dateRange, availableForms, selectedForm]);
@@ -300,7 +301,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   // Carregar formulários quando multipleFormsConfig estiver disponível
   useEffect(() => {
     if (!configLoading && multipleFormsConfig) {
-      console.log('🔄 [ConversionFunnel] useEffect: Carregando formulários');
+      logger.log('🔄 [ConversionFunnel] useEffect: Carregando formulários');
       loadAllAvailableForms();
     }
   }, [configLoading, multipleFormsConfig]);
@@ -308,7 +309,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
   // Atualizar dados quando período mudar
   useEffect(() => {
     if (availableForms.length > 0) {
-      console.log('🔄 [ConversionFunnel] useEffect: Atualizando dados analytics');
+      logger.log('🔄 [ConversionFunnel] useEffect: Atualizando dados analytics');
       loadFormData();
     }
   }, [dateRange, availableForms, selectedForm]);
@@ -360,7 +361,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         period_end: format(dateRange.to, 'yyyy-MM-dd')
       };
 
-      console.log('💾 [ConversionFunnel] Salvando relatório:', reportData);
+      logger.log('💾 [ConversionFunnel] Salvando relatório:', reportData);
 
       const { data, error } = await supabase
         .from('campaign_reports')
@@ -372,7 +373,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({
         throw error;
       }
 
-      console.log('✅ [ConversionFunnel] Relatório salvo com sucesso:', data);
+      logger.log('✅ [ConversionFunnel] Relatório salvo com sucesso:', data);
       toast.success('Relatório de campanha salvo com sucesso!');
       setCampaignName('');
       
