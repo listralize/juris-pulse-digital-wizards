@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { CategoryInfo } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
+import { logger } from '../../utils/logger';
 
 const defaultCategories: CategoryInfo[] = [
   { 
@@ -104,7 +105,6 @@ export const useSupabaseCategories = () => {
   const [adminSettingsId, setAdminSettingsId] = useState<string | null>(null);
 
   const loadCategories = async () => {
-    console.log('🔄 [useSupabaseCategories] Carregando categorias do Supabase...');
     setIsLoading(true);
     
     try {
@@ -115,7 +115,7 @@ export const useSupabaseCategories = () => {
         .maybeSingle();
 
       if (error) {
-        console.warn('❌ Erro carregando categorias:', error);
+        logger.warn('Erro carregando categorias:', error);
       }
 
       let finalCategories = [...defaultCategories];
@@ -134,10 +134,8 @@ export const useSupabaseCategories = () => {
       setAdminSettingsId(recordId);
       setCategories([...finalCategories]);
       
-      console.log('✅ [useSupabaseCategories] Categorias carregadas:', finalCategories.length);
-      
     } catch (error) {
-      console.error('❌ Erro ao carregar categorias:', error);
+      console.error('Erro ao carregar categorias:', error);
       setCategories([...defaultCategories]);
     } finally {
       setIsLoading(false);
@@ -145,8 +143,6 @@ export const useSupabaseCategories = () => {
   };
 
   const saveCategories = async (cats: CategoryInfo[]) => {
-    console.log('💾 [useSupabaseCategories] Salvando categorias no Supabase...');
-    
     try {
       const upsertData: any = {
         categories: cats as any
@@ -165,12 +161,10 @@ export const useSupabaseCategories = () => {
         .single();
 
       if (error) {
-        console.error('❌ Erro ao salvar categorias no Supabase:', error);
+        console.error('Erro ao salvar categorias no Supabase:', error);
         throw error;
       }
 
-      console.log('✅ [useSupabaseCategories] Categorias salvas com sucesso!');
-      
       if (data?.id && !adminSettingsId) {
         setAdminSettingsId(data.id);
       }
@@ -179,7 +173,7 @@ export const useSupabaseCategories = () => {
       return cats;
 
     } catch (error) {
-      console.error('❌ Erro crítico ao salvar categorias:', error);
+      console.error('Erro crítico ao salvar categorias:', error);
       throw error;
     }
   };

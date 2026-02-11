@@ -20,7 +20,7 @@ const ContactInfo = () => {
   useEffect(() => {
     const loadContactInfo = async () => {
       try {
-        console.log('📞 ContactInfo: Carregando dados iniciais...');
+        
         const { supabase } = await import('../../integrations/supabase/client');
         
         // Buscar dados da contact_info
@@ -32,7 +32,7 @@ const ContactInfo = () => {
           .maybeSingle();
 
         if (contact) {
-          console.log('📞 ContactInfo: Dados de contato encontrados:', contact);
+          
           setContactData({
             phone: contact.phone || contactData.phone,
             email: contact.email || contactData.email,
@@ -52,13 +52,13 @@ const ContactInfo = () => {
   // Escutar eventos de atualização em tempo real
   useEffect(() => {
     const handlePageTextsUpdate = (event: CustomEvent) => {
-      console.log('📞 ContactInfo: Evento pageTextsUpdated recebido:', event.detail);
+      
       
       const data = event.detail;
       
       if (data.contactTexts) {
         const { phone, email, address, whatsapp, mapEmbedUrl, map_embed_url } = data.contactTexts;
-        console.log('📞 ContactInfo: Atualizando dados de contato:', data.contactTexts);
+        
         
         setContactData(prev => ({
           ...prev,

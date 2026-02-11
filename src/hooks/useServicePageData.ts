@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { ServicePage } from '../types/adminTypes';
 import { defaultServicePages } from '../data/defaultServicePages';
+import { logger } from '../utils/logger';
 
 const STORAGE_KEY = 'listralize_service_pages';
 
@@ -11,21 +12,16 @@ export const useServicePageData = (serviceId?: string) => {
 
   const loadServicePages = () => {
     try {
-      console.log('useServicePageData: Carregando dados para serviceId:', serviceId);
-      
-      // Carregar páginas salvas no localStorage
       const savedServicePages = localStorage.getItem(STORAGE_KEY);
       let finalPages = [...defaultServicePages];
       
       if (savedServicePages) {
         try {
           const parsedServicePages = JSON.parse(savedServicePages);
-          console.log('useServicePageData: Páginas encontradas no localStorage:', parsedServicePages.length);
           
           if (Array.isArray(parsedServicePages) && parsedServicePages.length > 0) {
             finalPages = [...parsedServicePages];
             
-            // Verificar se faltam páginas padrão
             const savedIds = new Set(parsedServicePages.map((page: ServicePage) => page.id));
             const missingDefaultPages = defaultServicePages.filter(defaultPage => !savedIds.has(defaultPage.id));
             
@@ -39,7 +35,6 @@ export const useServicePageData = (serviceId?: string) => {
         }
       }
       
-      console.log('useServicePageData: Total de páginas carregadas:', finalPages.length);
       setServicePages(finalPages);
     } catch (error) {
       console.error('useServicePageData: Erro ao carregar dados das páginas de serviço:', error);
@@ -52,9 +47,7 @@ export const useServicePageData = (serviceId?: string) => {
   useEffect(() => {
     loadServicePages();
 
-    // Escutar mudanças salvas no admin
     const handleServicePagesUpdate = (event: CustomEvent) => {
-      console.log('useServicePageData: Detectada atualização nas páginas de serviços');
       const updatedPages = event.detail?.pages;
       if (updatedPages && Array.isArray(updatedPages)) {
         setServicePages([...updatedPages]);
@@ -70,16 +63,13 @@ export const useServicePageData = (serviceId?: string) => {
     };
   }, [serviceId]);
 
-  // Se um serviceId específico foi fornecido, retornar apenas essa página
   if (serviceId) {
     const specificPage = servicePages.find(page => {
-      // Tentar várias formas de match
       if (page.id === serviceId) return true;
       if (page.href === serviceId) return true;
       if (page.href === `/servicos/${serviceId}`) return true;
       if (page.id === serviceId.replace('/servicos/', '')) return true;
       
-      // Tentar match por título normalizado
       const normalizedTitle = page.title?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
       const normalizedServiceId = serviceId.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
       if (normalizedTitle === normalizedServiceId) return true;
@@ -87,8 +77,6 @@ export const useServicePageData = (serviceId?: string) => {
       return false;
     });
     
-    console.log('useServicePageData: Página específica encontrada:', specificPage ? 'sim' : 'não', 'para ID:', serviceId);
-    console.log('useServicePageData: Dados da página encontrada:', specificPage);
     return { servicePage: specificPage, isLoading };
   }
 

@@ -25,9 +25,8 @@ const DesktopNavigation = ({
           isActive={activeSection === 'home'} 
           onClick={e => {
             e.preventDefault();
-            console.log('DesktopNavigation: Home clicked');
             handleNavigation('home', '/');
-          }} 
+          }}
         />
         
         <NavigationItem 
@@ -36,9 +35,8 @@ const DesktopNavigation = ({
           isActive={activeSection === 'about'} 
           onClick={e => {
             e.preventDefault();
-            console.log('DesktopNavigation: About clicked');
             handleNavigation('about', '/#about');
-          }} 
+          }}
         />
         
         <PracticeAreasDropdown isActive={activeSection === 'areas'} />
@@ -49,9 +47,8 @@ const DesktopNavigation = ({
           isActive={activeSection === 'socios'} 
           onClick={e => {
             e.preventDefault();
-            console.log('DesktopNavigation: Team clicked');
             handleNavigation('socios', '/#socios');
-          }} 
+          }}
         />
         
         <NavigationItem 
@@ -60,9 +57,8 @@ const DesktopNavigation = ({
           isActive={activeSection === 'cliente'} 
           onClick={e => {
             e.preventDefault();
-            console.log('DesktopNavigation: Client Area clicked');
             handleNavigation('cliente', '/#cliente');
-          }} 
+          }}
         />
         
         <NavigationItem 
@@ -71,9 +67,8 @@ const DesktopNavigation = ({
           isActive={activeSection === 'blog'} 
           onClick={e => {
             e.preventDefault();
-            console.log('DesktopNavigation: Blog clicked');
             handleNavigation('blog', '/#blog');
-          }} 
+          }}
         />
         
         <NavigationItem 
@@ -82,9 +77,8 @@ const DesktopNavigation = ({
           isActive={activeSection === 'contact'} 
           onClick={e => {
             e.preventDefault();
-            console.log('DesktopNavigation: Contact clicked');
             handleNavigation('contact', '/#contact');
-          }} 
+          }}
         />
         
       </div>

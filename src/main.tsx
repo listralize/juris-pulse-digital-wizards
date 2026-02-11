@@ -4,11 +4,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Debug information for production builds
-console.log('🚀 Starting application...');
-console.log('Environment:', import.meta.env.MODE);
-
-// Create root and render App with enhanced error handling
+// Create root and render App
 const container = document.getElementById("root");
 
 if (!container) {

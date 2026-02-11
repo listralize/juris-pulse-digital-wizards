@@ -30,7 +30,7 @@ export const BlogManagement: React.FC<BlogManagementProps> = ({
   const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
-    console.log('BlogManagement - Recebendo posts:', blogPosts.length);
+    setLocalPosts([...blogPosts]);
     setLocalPosts([...blogPosts]);
   }, [blogPosts]);
 

@@ -1,7 +1,6 @@
 const isDev = typeof window !== 'undefined' && 
   (window.location.hostname === 'localhost' || 
-   window.location.hostname === '127.0.0.1' ||
-   window.location.hostname.includes('lovable.app'));
+   window.location.hostname === '127.0.0.1');
 
 export const logger = {
   log: (...args: any[]) => { if (isDev) console.log(...args); },

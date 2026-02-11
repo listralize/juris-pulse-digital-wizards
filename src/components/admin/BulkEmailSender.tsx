@@ -101,7 +101,7 @@ export const BulkEmailSender: React.FC<BulkEmailSenderProps> = ({
       try {
         const leadData = parseLeadData(lead.lead_data);
         
-        console.log(`📧 Enviando email ${i + 1}/${validLeads.length} para:`, leadData.email);
+        
 
         // Buscar template completo do banco de dados para ter todas as configurações
         const { data: fullTemplate } = await supabase
@@ -145,7 +145,7 @@ export const BulkEmailSender: React.FC<BulkEmailSenderProps> = ({
           console.error(`❌ Erro ao enviar email para ${leadData.email}:`, error);
           errorCount++;
         } else {
-          console.log(`✅ Email enviado para ${leadData.email}`);
+          
           successCount++;
         }
 

@@ -80,7 +80,7 @@ export const useContactForm = (externalFormConfig?: any) => {
     }
     setIsSubmitting(true);
     try {
-      console.log('📤 Enviando formulário via edge function segura...');
+      
 
       // Incluir todos os campos personalizados nos dados enviados
       const customFieldsData = {};
@@ -114,7 +114,7 @@ export const useContactForm = (externalFormConfig?: any) => {
         throw error;
       }
 
-      console.log('✅ Resposta da edge function:', data);
+      
       
       // Rastrear conversão no analytics
       await trackConversion(

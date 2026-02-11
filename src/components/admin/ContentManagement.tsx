@@ -52,18 +52,10 @@ export const ContentManagement: React.FC<ContentManagementProps> = ({
 
   const handleSaveAll = async () => {
     try {
-      console.log('💾 ContentManagement: Salvando todos os dados...', { pageTexts, teamMembers });
-      
-      // Salvar textos da página
       await onSavePageTexts();
-      console.log('✅ ContentManagement: Textos da página salvos');
-      
-      // Salvar membros da equipe
       await onSaveTeamMembers();
-      console.log('✅ ContentManagement: Membros da equipe salvos');
-      
     } catch (error) {
-      console.error('❌ ContentManagement: Erro ao salvar dados:', error);
+      console.error('ContentManagement: Erro ao salvar dados:', error);
       throw error;
     }
   };

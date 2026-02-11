@@ -45,7 +45,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   useEffect(() => {
     const loadCurrentData = async () => {
       try {
-        console.log('🔄 HomePageEditor: Carregando dados atuais do Supabase...');
+        
         const { supabase } = await import('../../integrations/supabase/client');
         
         // Carregar dados de contato
@@ -73,7 +73,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           .maybeSingle();
 
         if (contact || footer || settings) {
-          console.log('🔄 HomePageEditor: Dados carregados:', { contact, footer, settings });
+          
           
           // Atualizar pageTexts com os dados mais recentes
           const updatedTexts = {
@@ -126,7 +126,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   }, []); // Executar apenas uma vez quando o componente monta
 
   const handleInputChange = (field: keyof PageTexts, value: string) => {
-    console.log('📝 HomePageEditor: Alterando campo:', field, 'para:', value);
+    
     const updatedTexts = {
       ...pageTexts,
       [field]: value
@@ -135,7 +135,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
   };
 
   const handleNestedChange = (parent: keyof PageTexts, field: string, value: string) => {
-    console.log('📝 HomePageEditor: Alterando campo aninhado:', parent, field, 'para:', value);
+    
     const parentObject = pageTexts[parent] || {};
     const updatedTexts = {
       ...pageTexts,
@@ -149,7 +149,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
 
   const handleSaveAndNotify = async () => {
     try {
-      console.log('💾 HomePageEditor: Salvando alterações...', pageTexts);
+      
       
       // Salvar dados específicos nas tabelas correspondentes PRIMEIRO
       await saveToSupabaseTables();
@@ -159,7 +159,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
         await onSaveAll();
         
         // Disparar evento personalizado para notificar todas as seções
-        console.log('📡 HomePageEditor: Disparando evento pageTextsUpdated');
+        
         const event = new CustomEvent('pageTextsUpdated', { 
           detail: {
             ...pageTexts,
@@ -214,7 +214,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             .insert(contactData);
         }
         
-        console.log('📞 Dados de contato salvos na contact_info:', contactData);
+        
       }
       
       // Salvar dados do footer na tabela footer_info
@@ -243,7 +243,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
             .insert(footerData);
         }
         
-        console.log('🦶 Dados do footer salvos na footer_info:', footerData);
+        
       }
       
       // Salvar configurações gerais na tabela site_settings
@@ -288,7 +288,7 @@ export const HomePageEditor: React.FC<HomePageEditorProps> = ({
           .insert(siteData);
       }
       
-      console.log('⚙️ Configurações do site salvas na site_settings:', siteData);
+      
       
     } catch (error) {
       console.error('❌ Erro ao salvar nas tabelas do Supabase:', error);
