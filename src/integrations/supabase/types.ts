@@ -900,81 +900,6 @@ export type Database = {
           },
         ]
       }
-      marketing_campaigns: {
-        Row: {
-          budget: number | null
-          campaign_medium: string | null
-          campaign_name: string
-          campaign_source: string | null
-          campaign_type: string | null
-          clicks: number | null
-          conversions: number | null
-          cost: number | null
-          created_at: string
-          end_date: string | null
-          goals: string | null
-          id: string
-          impressions: number | null
-          start_date: string | null
-          status: string | null
-          target_audience: string | null
-          updated_at: string
-          utm_campaign: string | null
-          utm_content: string | null
-          utm_medium: string | null
-          utm_source: string | null
-          utm_term: string | null
-        }
-        Insert: {
-          budget?: number | null
-          campaign_medium?: string | null
-          campaign_name: string
-          campaign_source?: string | null
-          campaign_type?: string | null
-          clicks?: number | null
-          conversions?: number | null
-          cost?: number | null
-          created_at?: string
-          end_date?: string | null
-          goals?: string | null
-          id?: string
-          impressions?: number | null
-          start_date?: string | null
-          status?: string | null
-          target_audience?: string | null
-          updated_at?: string
-          utm_campaign?: string | null
-          utm_content?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-          utm_term?: string | null
-        }
-        Update: {
-          budget?: number | null
-          campaign_medium?: string | null
-          campaign_name?: string
-          campaign_source?: string | null
-          campaign_type?: string | null
-          clicks?: number | null
-          conversions?: number | null
-          cost?: number | null
-          created_at?: string
-          end_date?: string | null
-          goals?: string | null
-          id?: string
-          impressions?: number | null
-          start_date?: string | null
-          status?: string | null
-          target_audience?: string | null
-          updated_at?: string
-          utm_campaign?: string | null
-          utm_content?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-          utm_term?: string | null
-        }
-        Relationships: []
-      }
       marketing_settings: {
         Row: {
           created_at: string
@@ -1484,39 +1409,6 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id?: string
-        }
-        Relationships: []
-      }
-      webhook_configs: {
-        Row: {
-          created_at: string
-          endpoint_url: string | null
-          id: string
-          is_active: boolean
-          mappings: Json
-          name: string
-          test_data: Json | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          endpoint_url?: string | null
-          id?: string
-          is_active?: boolean
-          mappings?: Json
-          name: string
-          test_data?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          endpoint_url?: string | null
-          id?: string
-          is_active?: boolean
-          mappings?: Json
-          name?: string
-          test_data?: Json | null
-          updated_at?: string
         }
         Relationships: []
       }
