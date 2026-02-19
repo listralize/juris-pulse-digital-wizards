@@ -1,151 +1,81 @@
 
+# Limpeza do Banco de Dados Supabase - Reduzir de 54MB para ~5MB
 
-# Refatoracao Completa - Limpeza Final, Performance e Acessibilidade
+## Problema Atual (imagem do usuario)
+- Banco de dados: 0.054 GB / 0.5 GB (11%)
+- Objetivo: reduzir drasticamente para nao se aproximar do limite do plano gratuito
 
-## Visao Geral
+## Analise dos Dados
 
-A analise do codebase revelou **364 console.log/warn restantes em 18 arquivos** que sobreviveram as limpezas anteriores, alem de oportunidades de otimizacao em componentizacao, state management, performance e acessibilidade.
+| Tabela | Linhas | Tamanho | Problema |
+|--------|--------|---------|----------|
+| `admin_settings` | 1122 | **12 MB** | Deveria ter 1 linha. 1121 duplicatas |
+| `website_analytics` | 8739 | **6.5 MB** | 7764 linhas com +30 dias (89%). Funcao de limpeza existe mas nunca roda |
+| `conversion_events` | 1444 | **2.3 MB** | Usuario quer MANTER todos (historico de leads) |
+| `footer_info` | 40 | 32 KB | 39 duplicatas |
+| `contact_info` | 40 | 64 KB | 39 duplicatas |
+| `edge_rate_limits` | 77 | 80 KB | 100% expirados |
+| `marketing_campaigns` | 0 | 32 KB | Nunca usada no codigo |
+| `webhook_configs` | 0 | 16 KB | Nunca usada no codigo |
+| `analytics_monthly_summary` | 0 | 24 KB | Nunca populada |
 
----
-
-## Fase 1: Eliminar os 364 console.log/warn Restantes
-
-Os 18 arquivos com logs remanescentes serao limpos substituindo `console.log` por `logger.log` e `console.warn` por `logger.warn`:
-
-| Arquivo | Matches | Acao |
-|---------|---------|------|
-| `src/components/admin/MarketingManagement.tsx` | ~115 | Substituir por logger |
-| `src/components/admin/ConversionFunnel.tsx` | ~30 | Substituir por logger |
-| `src/components/admin/SupabaseDataManager.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/EnhancedEmailTemplateManager.tsx` | ~2 | Substituir por logger |
-| `src/components/admin/LeadDetailDialog.tsx` | ~2 | Substituir por logger |
-| `src/components/admin/LeadWebhookManager.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/VisualFlowEditor.tsx` | ~2 | Substituir por logger |
-| `src/components/admin/service-pages/FAQEditor.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/service-pages/TestimonialsEditor.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/service-pages/BenefitsEditor.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/service-pages/ProcessEditor.tsx` | ~5 | Substituir por logger |
-| `src/components/admin/UniversalGallery.tsx` | ~3 | Substituir por logger |
-| `src/components/StepFormLoader.tsx` | ~3 | Substituir por logger |
-| `src/components/StepFormTestimonials.tsx` | ~4 | Substituir por logger |
-| `src/components/NeuralBackground.tsx` | 1 | Manter (WebGL warning legitimo) |
-| `src/hooks/useSupabaseDataNew.ts` | ~4 | Substituir por logger |
-| `src/pages/Admin.tsx` | ~6 | Substituir por logger |
-| `src/utils/logger.ts` | 4 | Manter (e o proprio logger) |
-
-**Total: ~200 substituicoes, 18 arquivos**
+**Economia estimada: ~19 MB (de ~22 MB para ~3 MB)**
 
 ---
 
-## Fase 2: Otimizacao de State Management
+## Acoes
 
-### Problema Atual
-O `useSupabaseDataNew.ts` duplica estado desnecessariamente - recebe dados dos hooks (`rawServicePages`, `rawCategories`, etc.) e copia para estados locais via useEffect, criando re-renders extras.
+### 1. Limpar admin_settings (economia: ~12 MB)
+- Deletar as 1121 linhas duplicatas, mantendo apenas a mais recente (id: `68ad83e9-7172-48d5-a519-045e980df900`)
+- Adicionar constraint UNIQUE para prevenir futuras duplicatas
 
-### Solucao
-Simplificar o hook removendo os estados intermediarios redundantes, usando `useMemo` para derivar dados processados diretamente dos hooks fonte.
+### 2. Limpar website_analytics (economia: ~5.8 MB)
+- Primeiro, executar a funcao `cleanup_old_analytics()` que ja existe no banco -- ela resume dados antigos em `analytics_monthly_summary` e deleta os registros com +30 dias
+- Configurar um cron job (pg_cron + pg_net) para rodar semanalmente, evitando acumulo futuro
 
-**Arquivo:** `src/hooks/useSupabaseDataNew.ts`
-- Remover os 4 `useState` + 4 `useEffect` de copia de dados
-- Usar dados diretamente dos hooks com fallback via operador `??`
-- Calcular `isLoading` com `useMemo` em vez de useEffect
+### 3. Conversion Events -- MANTER TODOS
+- O usuario quer ver leads com mais de 30 dias
+- A funcao `cleanup_old_analytics()` atual DELETA conversion_events antigos -- isso precisa ser corrigido
+- Alterar a funcao para NAO deletar conversion_events, apenas website_analytics
 
----
+### 4. Limpar duplicatas de footer_info e contact_info
+- Deletar 39 duplicatas de cada tabela, mantendo apenas a linha mais recente
 
-## Fase 3: Performance - Lazy Loading e Code Splitting
+### 5. Limpar edge_rate_limits expirados
+- Deletar todas as 77 linhas (100% expiradas)
 
-### 3a. Admin Page - Lazy Load das Tabs
-O `Admin.tsx` importa **9 componentes pesados** eagerly. Apenas a tab ativa deveria ser carregada.
+### 6. Dropar tabelas nao utilizadas
+- `marketing_campaigns` -- 0 linhas, zero referencias no codigo
+- `webhook_configs` -- 0 linhas, zero referencias no codigo (webhooks sao gerenciados via `admin_settings.webhook_configs` e `admin_settings.lead_webhook_config`)
 
-**Arquivo:** `src/pages/Admin.tsx`
-- Converter imports dos componentes de tab para `React.lazy()`
-- Envolver cada `TabsContent` com `Suspense`
-
-Componentes a lazy-load:
-- `ContentManagement`
-- `ServicePagesManager`
-- `BlogManagement`
-- `LinkTreeManagement`
-- `LeadsManagement`
-- `EnhancedEmailTemplateManager`
-- `StepFormBuilder`
-- `MarketingManagement`
-
-### 3b. Memoizacao de Componentes Pesados
-**Arquivos afetados:**
-- `src/components/SectionsContainer.tsx` - Memoizar cada `Section` para evitar re-render quando outra section muda de estado
-- `src/components/sections/PracticeAreas.tsx` - Memoizar a lista de areas que raramente muda
-
----
-
-## Fase 4: Acessibilidade (WCAG)
-
-### 4a. Melhorias na Navegacao por Teclado
-**Arquivo:** `src/components/SectionsContainer.tsx`
-- Adicionar `role="region"` e `aria-label` em cada section
-- Adicionar skip-navigation link no topo
-
-**Arquivo:** `src/components/navbar/index.tsx`
-- Garantir `aria-current="page"` no item ativo
-- Adicionar `role="navigation"` e `aria-label="Menu principal"`
-
-### 4b. Melhorias nos Formularios
-**Arquivo:** `src/components/contact/form/DynamicFormRenderer.tsx`
-- Adicionar `aria-required` nos campos obrigatorios
-- Adicionar `aria-describedby` para mensagens de erro
-
-### 4c. Melhorias no Hero
-**Arquivo:** `src/components/sections/Hero.tsx`
-- Adicionar `role="banner"` na section hero
-- Melhorar `alt` text da logo com descricao completa
-- Converter indicador de scroll para ter `aria-hidden="true"` (decorativo)
-
----
-
-## Fase 5: Responsividade Mobile-First
-
-### Problema Atual
-O `SectionsContainer.tsx` e `Section.tsx` usam muitas checagens `(isMobile || isTablet)` inline com estilos duplicados. Isso torna o codigo fragil.
-
-### Solucao
-**Arquivos:** `src/components/SectionsContainer.tsx`, `src/components/Section.tsx`
-- Extrair estilos mobile/desktop para constantes ou funcoes helper
-- Reduzir a repeticao de `(isMobile || isTablet)` criando uma variavel `isTouch` uma unica vez
-
----
-
-## Fase 6: TypeScript Strict - Tipagem dos Componentes Admin
-
-### Problema
-O `LeadsManagement.tsx` (1327 linhas) e o `MarketingManagement.tsx` (1515 linhas) sao monolitos com tipagem fraca (`any` em varios pontos).
-
-### Solucao
-- Adicionar tipos estrictos para os dados de marketing (`MarketingScripts` ja existe, mas subitens usam `any`)
-- Tipar os payloads de `config` em `implementFacebookPixel`, `implementGoogleAnalytics`, `implementGoogleTagManager`, `implementCustomScripts`
+### 7. Prevenir futuras duplicatas
+- Corrigir `HomePageEditor.tsx`: usar `.order('updated_at', { ascending: false }).limit(1).maybeSingle()` consistentemente (ja esta correto)
+- Os componentes que acessam admin_settings ja usam `.limit(1)` ou `.order().limit(1)`, o problema foi historico
 
 ---
 
 ## Detalhes Tecnicos
 
-### Ordem de Execucao
-1. Fase 1 (console.log) - Sem risco, pura limpeza
-2. Fase 2 (state management) - Baixo risco, melhora re-renders
-3. Fase 3 (lazy loading) - Medio risco, testar navegacao admin
-4. Fase 4 (acessibilidade) - Sem risco, aditivo
-5. Fase 5 (responsividade) - Baixo risco, refactor de estilos
-6. Fase 6 (TypeScript) - Sem risco, pura tipagem
+### SQL de Limpeza (sera executado via migration/insert tool)
 
-### Restricoes Respeitadas
-- Nenhuma funcionalidade existente sera alterada
-- Nenhuma integracao com Supabase, webhooks ou APIs externas sera modificada
-- Dados existentes no banco permanecem intactos
-- Design visual permanece identico
-- Estrutura de rotas nao muda
+**admin_settings**: Manter apenas a linha mais recente, deletar 1121 duplicatas
 
-### Estimativa de Impacto
-- **364 console.log/warn** eliminados (console de producao 100% limpo)
-- **~8 re-renders** eliminados por ciclo no admin (state management)
-- **~500KB** de JS nao carregado no load inicial do admin (lazy loading)
-- **WCAG 2.1 AA** compliance melhorado significativamente
-- **0 breaking changes** em funcionalidades existentes
+**website_analytics**: Chamar `cleanup_old_analytics()` para resumir e limpar
 
+**cleanup_old_analytics()**: Recriar a funcao SEM o `DELETE FROM conversion_events` para preservar historico de leads
+
+**Cron job**: Configurar `pg_cron` para rodar `cleanup_old_analytics()` semanalmente
+
+**footer_info / contact_info**: Deletar duplicatas mantendo a mais recente de cada
+
+**edge_rate_limits**: Deletar todos os registros expirados
+
+**Tabelas**: DROP `marketing_campaigns` e `webhook_configs`
+
+### Arquivos de Codigo a Modificar
+Nenhum arquivo de codigo precisa ser alterado -- o codigo atual ja funciona corretamente com uma unica linha por tabela. O problema foi causado por versoes anteriores do codigo que faziam INSERT em vez de UPDATE.
+
+### Restricoes
+- Conversion events preservados integralmente (requisito do usuario)
+- Nenhuma funcionalidade existente alterada
+- Nenhuma integracao quebrada (webhook_configs na tabela propria nao e usada; webhooks reais estao em admin_settings)
