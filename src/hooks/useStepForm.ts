@@ -260,8 +260,8 @@ export const useStepForm = () => {
       const extractedData = {
         name: formData.name || formData.Nome || mappedResponses.Nome || mappedResponses.name || '',
         email: formData.email || formData.Email || mappedResponses.Email || mappedResponses.email || '',
-        phone: formData.phone || formData.telefone || formData.whatsapp ||
-          formData['Telefone/WhatsApp'] || mappedResponses.telefone ||
+        phone: formData.Telefone || formData.phone || formData.telefone || formData.whatsapp ||
+          formData['Telefone/WhatsApp'] || mappedResponses.Telefone || mappedResponses.telefone ||
           mappedResponses.phone || mappedResponses.whatsapp ||
           mappedResponses['Telefone/WhatsApp'] || '',
       };
