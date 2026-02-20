@@ -1,154 +1,173 @@
 
+# Analise Profunda do StepForm: Erros Criticos + Refatoracao
 
-# Webhook com Resumo Inteligente do Caso (Template-Based NLG)
+## Problemas Encontrados (por gravidade)
 
-## Problema Atual
+---
 
-O webhook envia um JSON bruto com TUDO (`responses`, `extractedData`, `allData`, `metadata`, UTMs...). Quem recebe no CRM ve um bloco ilegivel. O plano anterior propunha regras fixas com `if pergunta.includes("bens")` -- isso e fragil e so funciona para divorcio.
+### BUG 1 - CRITICO: Leads salvos em `conversion_events` COM e SEM parse (dados inconsistentes)
 
-## Solucao: Template Engine com NLG (Natural Language Generation)
+**Onde:** `useAnalytics.ts` linha 90 vs `useStepForm.ts` linha 462
 
-Em vez de regras hardcoded por tipo de pergunta, usar uma abordagem generica que funciona para QUALQUER formulario, presente ou futuro:
-
-### Arquitetura
-
+O StepForm salva `lead_data` como **objeto JSONB** na `conversion_events`:
 ```text
-mappedResponses + steps metadata
-        |
-        v
-  buildCaseSummary()
-        |
-        +-- 1. Separar campos de contato (nome, email, telefone)
-        +-- 2. Classificar respostas por tipo de step
-        +-- 3. Gerar frases naturais com template:
-        |       "sim/nao" -> afirmativa/negativa
-        |       opcao unica -> "Pergunta: Resposta"
-        |       texto livre -> incluir se curto, truncar se longo
-        +-- 4. Montar paragrafo unico separado por " | "
-        |
-        v
-  webhookPayload simplificado
+lead_data: { ...extractedData, service: serviceName, respostas_mapeadas: mappedResponses }
 ```
 
-### Logica do `buildCaseSummary`
-
+Mas o formulario de contato (via `useContactForm.ts` -> `trackConversion()`) salva como **string JSON**:
 ```text
-function buildCaseSummary(mappedResponses, steps, formName):
-  
-  CONTACT_KEYS = set de variacoes de nome/email/telefone (case-insensitive)
-  
-  partes = []
-  
-  para cada (pergunta, resposta) em mappedResponses:
-    // Pular campos de contato
-    se normalizar(pergunta) esta em CONTACT_KEYS: continuar
-    se resposta vazia: continuar
-    
-    // Encontrar o step original para contexto
-    step = steps.find(s => s.title === pergunta)
-    
-    // Deteccao inteligente de tipo de resposta:
-    
-    CASO 1 - Resposta binaria (Sim/Nao):
-      se resposta == "Sim" ou "Nao":
-        // Gerar frase afirmativa/negativa a partir do titulo
-        // "Ha bens para dividir?" + "Sim" -> "Possui bens para dividir"
-        // "Ha bens para dividir?" + "Nao" -> "Nao possui bens para dividir"
-        frase = transformBinaryAnswer(pergunta, resposta)
-        
-    CASO 2 - Opcao de multipla escolha (step tem options[]):
-      // Usar resposta direta, ja e descritiva
-      // "Qual o regime?" + "Comunhao parcial" -> "Regime: Comunhao parcial"
-      frase = compactLabel(pergunta) + ": " + resposta
-        
-    CASO 3 - Texto livre:
-      // Truncar se > 80 chars
-      frase = compactLabel(pergunta) + ": " + truncar(resposta, 80)
-    
-    partes.push(frase)
-  
-  retorna formName + " | " + partes.join(" | ")
+lead_data: JSON.stringify(formData)
 ```
 
-### Funcoes auxiliares
+Resultado: na mesma tabela `conversion_events`, alguns registros tem `lead_data` como objeto e outros como string. O painel admin faz `JSON.parse` apenas se for string (linha 254 do LeadsManagement), mas isso cria inconsistencia e dificulta queries SQL.
 
-**`transformBinaryAnswer(pergunta, resposta)`**: Converte perguntas Sim/Nao em frases naturais:
-- Remove "Ha ", "Existe ", "Possui ", "Tem ", "Voce tem " do inicio
-- Remove "?" do final
-- Se "Sim": "Possui " + resto ("bens para dividir")
-- Se "Nao": "Sem " + resto ("bens para dividir")
+**Correcao:** No `useAnalytics.ts`, remover o `JSON.stringify` e salvar como objeto direto.
 
-**`compactLabel(pergunta)`**: Encurta titulos longos:
-- Remove "Qual e o/a ", "Qual o/a ", "Selecione ", "Escolha ", "Informe "
-- Remove "?" do final
-- Capitaliza primeira letra
-- Exemplo: "Qual e o regime de bens?" -> "Regime de bens"
+---
 
-### Exemplo real (divorcio)
+### BUG 2 - CRITICO: `visitor_id` sempre unico (tracking quebrado)
 
-Respostas do lead:
+**Onde:** `useStepForm.ts` linhas 417 e 455
+
+Ambas as linhas geram um `visitor_id` novo a cada submit:
 ```text
-{
-  "Nome": "Maria Santos",
-  "Email": "maria@email.com",  
-  "Telefone": "(62) 99459-4496",
-  "Qual o regime de bens?": "Comunhao parcial",
-  "Ha bens para dividir?": "Sim",
-  "Ha dividas em comum?": "Nao",
-  "Possui filhos menores?": "Sim, 2 filhos",
-  "Deseja guarda compartilhada?": "Sim",
-  "Ha pensao alimenticia?": "Sim",
-  "Qual a urgencia?": "Preciso resolver urgentemente"
-}
+visitor_id: `stepform_${Date.now()}`
 ```
 
-Resultado:
+Isso significa que CADA submissao tem um visitor_id diferente, impossibilitando rastrear se o mesmo visitante voltou. O `useAnalytics.ts` ja tem um sistema correto com `localStorage` (linha 25-31). O StepForm deveria usar esse mesmo visitor_id.
+
+**Correcao:** Importar e reutilizar a funcao `getOrCreateVisitorId()` do `useAnalytics.ts` no `useStepForm.ts`.
+
+---
+
+### BUG 3 - CRITICO: Dedup do StepForm silenciosamente descarta leads validos
+
+**Onde:** `useStepForm.ts` linhas 363-402
+
+A dedup busca ate 10 `conversion_events` nos ultimos 5 minutos para o mesmo `form_id` e verifica se algum tem o mesmo email. Problemas:
+
+1. Se houver mais de 10 submissoes de OUTROS emails no mesmo periodo, a query retorna 10 sem o email duplicado, e o lead passa como "novo" (falso negativo).
+2. Se o lead E duplicado, mostra toast "Sucesso!" e redireciona -- o usuario pensa que enviou, mas o CRM nunca recebe. Google Ads ja contou a visita, gerando discrepancia.
+3. A query nao filtra por email no SQL, fazendo fetch desnecessario.
+
+**Correcao:** Fazer a verificacao de duplicata no SQL usando `lead_data->>email` ou, mais simples, verificar na `form_leads` (que tem o email no `lead_data`) com um filtro mais preciso. Reduzir janela para 2 minutos. E se for duplicata, NAO mostrar toast de sucesso -- mostrar mensagem diferente.
+
+---
+
+### BUG 4 - GRAVE: `process-webhook-queue` nunca executa se o usuario fechar a aba
+
+**Onde:** `useStepForm.ts` linhas 568-574
+
+O unico trigger para processar a fila de webhooks e um `setTimeout` no browser:
 ```text
-{
-  "nome": "Maria Santos",
-  "email": "maria@email.com",
-  "telefone": "(62) 99459-4496",
-  "resumo_caso": "Divorcio | Regime de bens: Comunhao parcial | Possui bens para dividir | Sem dividas em comum | Filhos menores: Sim, 2 filhos | Possui guarda compartilhada | Possui pensao alimenticia | Urgencia: Preciso resolver urgentemente",
-  "formulario": "Divorcio",
-  "data_envio": "2026-02-20T12:00:00Z"
-}
+setTimeout(async () => {
+  await supabase.functions.invoke('process-webhook-queue', { body: {} });
+}, Math.min(delaySeconds * 1000, 30000));
 ```
 
-## Alteracoes Tecnicas
+Se o usuario fechar a aba antes do timeout (muito provavel com delays de 30s+), o webhook fica `pending` para sempre. Nao existe cron nem trigger automatico.
 
-### `src/hooks/useStepForm.ts`
+**Correcao:** Disparar o `process-webhook-queue` IMEDIATAMENTE apos inserir na fila (delay = 0), e TAMBEM apos o delay configurado. O `send_at` na fila ja controla quando o webhook sera realmente enviado -- a edge function ja verifica `lte('send_at', now)`.
 
-1. Adicionar 3 funcoes utilitarias ANTES do hook:
+---
 
-- `compactLabel(label)`: remove prefixos interrogativos e "?"
-- `transformBinaryAnswer(question, answer)`: converte Sim/Nao em frases naturais
-- `buildCaseSummary(mappedResponses, steps, formName)`: orquestra a geracao do resumo
+### BUG 5 - GRAVE: Evento GTM do StepForm envia dados incompletos
 
-2. Substituir o `webhookPayload` atual (linhas 453-466) por:
+**Onde:** `useStepForm.ts` linha 475 + `useStepFormMarketingScripts.ts` linhas 171-178
 
+O CustomEvent enviado:
 ```text
-const resumo = buildCaseSummary(mappedResponses, form.steps, serviceName);
-const webhookPayload = {
-  nome: extractedData.name,
-  email: extractedData.email,
-  telefone: extractedData.phone,
-  resumo_caso: resumo,
-  urgencia: urgency,
-  formulario: form.name,
-  data_envio: new Date().toISOString(),
-  lead_id: savedLead?.id,
-  form_slug: form.slug
-};
+detail: { formSlug, formId, formName, userData: formResponses }
 ```
 
-### Nenhuma alteracao no edge function `process-webhook-queue`
+Mas o handler GTM tenta ler:
+```text
+event.detail.userData.email  // OK se campo = "email"
+event.detail.formData.email  // UNDEFINED - nunca enviado
+event.detail.answers.email   // UNDEFINED - nunca enviado
+```
 
-Ele ja envia `item.payload` como JSON -- o payload simplificado sera enviado automaticamente.
+Se o campo de email no form se chama "Email" (maiuscula), o handler cai para `userData.Email` que funciona. Mas `formData` e `answers` sao sempre undefined, fazendo o handler iterar por fallbacks desnecessarios.
 
-## Resumo
+**Correcao:** Incluir `answers`, `formData`, `extractedData` e `sessionId` no detail do CustomEvent.
+
+---
+
+### BUG 6 - MEDIO: Contact form NAO salva em `form_leads`
+
+**Onde:** `supabase/functions/contact-form/index.ts`
+
+A edge function do formulario de contato processa o lead, envia email e webhook, mas NAO insere em `form_leads`. O frontend insere em `conversion_events` via `trackConversion()`. Mas o painel admin le de `conversion_events`, entao os leads aparecem. Porem, o StepFormBuilder que conta leads por `form_name` na `form_leads` NUNCA mostra leads do formulario de contato -- o que e correto.
+
+O problema real e que se o frontend falhar (JS bloqueado, erro de rede), o `trackConversion` nao executa e o lead e PERDIDO completamente -- a edge function ja retornou "sucesso" e o email foi enviado, mas nenhum registro ficou no banco.
+
+**Correcao:** A edge function `contact-form` deve inserir o lead em `form_leads` no server-side (garantido), e o frontend pode continuar inserindo em `conversion_events` para analytics.
+
+---
+
+### BUG 7 - MEDIO: `form_id` inconsistente entre tabelas
+
+**Onde:** `useStepForm.ts`
+
+Na `form_leads` (linha 408): `form_id: form.slug || form.id || 'stepform'`
+Na `conversion_events` (linha 460): `form_id: form.id || 'stepform'`
+Na dedup query (linha 371): `form_id: form.id || 'stepform'`
+
+Resultado: `form_leads` usa o SLUG ("divorcioform"), enquanto `conversion_events` usa o UUID. A dedup compara com UUID. Se o admin busca por slug na form_leads, encontra. Se busca por slug na conversion_events, nao encontra.
+
+**Correcao:** Usar `form.slug` consistentemente em ambas as tabelas.
+
+---
+
+### MELHORIA 8: `loading` state com dupla funcao
+
+**Onde:** `useStepForm.ts`
+
+O estado `loading` e usado tanto para carregamento inicial do form (linha 168) quanto para submissao (linha 271). Isso nao causa bug visivel hoje porque o componente StepForm.tsx verifica `if (!form)` separadamente, mas e uma pratica fragil.
+
+**Correcao:** Criar estado separado `isSubmitting` para a submissao.
+
+---
+
+## Plano de Implementacao
+
+### 1. `src/hooks/useStepForm.ts` (principal)
+
+- Extrair `getOrCreateVisitorId` de `useAnalytics.ts` e reutilizar (ou importar)
+- Criar estado `isSubmitting` separado de `loading`
+- Corrigir dedup: query SQL filtrando por email, janela de 2 min, mensagem diferente para duplicata
+- Unificar `form_id` usando `form.slug` em todas as insercoes
+- Disparar `process-webhook-queue` imediatamente (com delay 0) alem do timer
+- Enriquecer o CustomEvent `stepFormSubmitSuccess` com `answers`, `formData`, `extractedData`, `sessionId`
+- Retornar `isSubmitting` do hook (em vez de `loading` para o botao de submit)
+
+### 2. `src/hooks/useAnalytics.ts`
+
+- Exportar `getOrCreateVisitorId` para reuso
+- Remover `JSON.stringify` do `lead_data` no `trackConversion`
+
+### 3. `supabase/functions/contact-form/index.ts`
+
+- Adicionar INSERT em `form_leads` server-side para garantir que o lead nunca se perde
+
+### 4. `src/components/stepform/StepFormFields.tsx`
+
+- Usar `isSubmitting` em vez de `loading` no botao de submit
+
+### 5. `src/pages/StepForm.tsx`
+
+- Passar `isSubmitting` do hook para o componente StepFormFields
+
+---
+
+## Resumo de Arquivos
 
 | Arquivo | Alteracao |
 |---|---|
-| `src/hooks/useStepForm.ts` | Adicionar `buildCaseSummary` + helpers, substituir webhookPayload |
+| `src/hooks/useStepForm.ts` | Corrigir visitor_id, dedup, form_id, loading/isSubmitting, webhook trigger, CustomEvent |
+| `src/hooks/useAnalytics.ts` | Exportar getOrCreateVisitorId, remover JSON.stringify |
+| `supabase/functions/contact-form/index.ts` | Inserir lead em form_leads server-side |
+| `src/components/stepform/StepFormFields.tsx` | Usar isSubmitting |
+| `src/pages/StepForm.tsx` | Passar isSubmitting |
 
-Nenhuma outra funcionalidade e alterada. A mudanca afeta APENAS o conteudo enviado via webhook.
+Nenhuma alteracao em funcionalidades nao relacionadas ao StepForm e tracking de leads.
