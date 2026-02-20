@@ -1,159 +1,167 @@
 
-# Otimizacao Completa do StepForm: UX + Webhook Inteligente com Timing Anti-Ban
 
-## Problemas Identificados
+# Analise Profunda de 1.331 Leads + Plano de Conversao Extrema
 
-### UX/Conversao
-1. **Pagina /obrigado redireciona para WhatsApp em 3 segundos** -- agressivo, contribui para banimentos e assusta o usuario
-2. **Opcoes de resposta sao botoes genericos** sem icones ou destaque visual, parecem "frios"
-3. **Formulario final nao tem labels** acima dos campos, apenas placeholders que somem ao digitar
-4. **Nao mostra "Etapa X de Y"** -- usuario nao sabe quantas perguntas faltam
-5. **Botao de envio diz "Enviar Formulario"** -- generico, sem orientacao a acao
-6. **Step de urgencia foi adicionado mas nao esta salvando a resposta** nos leads recentes (os leads mais recentes nao tem "Qual a urgencia do seu caso?" no `respostas_mapeadas`)
+## ANALISE COMPLETA DOS DADOS
 
-### Webhook/WhatsApp Anti-Ban
-7. **Webhook enviado diretamente do navegador** (`fetch` no useStepForm) -- sem controle de timing, sem retry robusto
-8. **Todos os leads disparam webhook ao mesmo tempo** -- se 10 pessoas enviam em 5 minutos, o WhatsApp recebe 10 mensagens seguidas
-9. **Nenhum controle de rate limiting** -- risco alto de ban
+### Distribuicao dos Leads (1.331 total)
 
----
+**Regime de casamento:**
+- Comunhao parcial: 45% (maioria absoluta)
+- Uniao estavel: 24%
+- Separacao total: 14%
+- Nao sei: 12%
+- Comunhao universal: 5%
 
-## Plano de Implementacao
+**Combinacoes de complexidade (onde se GANHA e PERDE dinheiro):**
 
-### 1. Sistema de Fila de Webhook com Timing Inteligente
+| Complexidade | Combinacao | % dos leads | Valor potencial |
+|---|---|---|---|
+| SIMPLES | Sem filhos + Sem bens + Sem divida | 25.8% (344) | Baixo (divorcio rapido) |
+| MEDIO | Com filhos + Sem bens + Sem divida | 26.4% (352) | Medio (guarda + pensao) |
+| COMPLEXO | Com filhos + Com bens + Com divida | 17.3% (230) | ALTO (caso completo) |
+| MEDIO-ALTO | Com filhos + Com bens + Sem divida | 8.4% (112) | Medio-alto |
 
-**Criar tabela `webhook_queue`** no banco:
+**Insight critico:** 52% dos leads sao casos SIMPLES ou MEDIO-SIMPLES. 25.7% sao casos COMPLEXOS/ALTO-VALOR. O formulario trata todos iguais -- deveria priorizar os complexos.
 
-```text
-webhook_queue
-- id (uuid, PK)
-- lead_id (text) -- referencia ao lead
-- webhook_url (text) -- URL do webhook (Make.com)
-- payload (jsonb) -- dados completos do lead
-- urgency (text) -- "urgente", "semanas", "pesquisando"
-- send_at (timestamptz) -- quando enviar (agora + delay baseado na urgencia)
-- sent_at (timestamptz, nullable) -- quando foi efetivamente enviado
-- status (text) -- "pending", "sent", "failed", "retrying"
-- attempts (int, default 0)
-- error_message (text, nullable)
-- created_at (timestamptz)
-```
+**Guarda (dos 57% que tem filhos):**
+- Compartilhada: 57% | Nao sei: 21% | Unilateral: 17% | Alternada: 5%
 
-**Regras de delay:**
-- "Preciso resolver urgentemente" -> `send_at = now() + 30 segundos`
-- "Nas proximas semanas" -> `send_at = now() + 3 minutos`
-- "Estou pesquisando" -> `send_at = now() + 8 minutos`
-- Sem resposta de urgencia (leads antigos) -> `send_at = now() + 1 minuto`
+**Pensao:** 80% SIM (dos que tem filhos)
 
-Alem disso, o sistema garante um **intervalo minimo de 45 segundos** entre envios consecutivos para o mesmo `webhook_url`, evitando rajadas.
+**Horarios de pico (UTC -> Brasilia -3h):**
+- 21h-01h Brasilia (horarios 0-4 UTC) = 27% dos leads
+- 10h-13h Brasilia (13-16 UTC) = 19% dos leads
 
-### 2. Edge Function `process-webhook-queue`
+**Dias da semana:** Distribuicao uniforme (160-213/dia). Terça tem mais (213), Sabado menos (160).
 
-**Criar `supabase/functions/process-webhook-queue/index.ts`:**
+**UTM/Source:** 99.5% chega como "direto" -- sem UTM tracking configurado nas campanhas. Isso e um problema grave de atribuicao.
 
-- Busca itens da `webhook_queue` onde `status = 'pending'` e `send_at <= now()`
-- Ordena por `send_at ASC`
-- Para cada item:
-  - Verifica se o ultimo envio para aquele `webhook_url` foi ha menos de 45 segundos; se sim, pula
-  - Envia POST para o webhook_url com o payload
-  - Atualiza `status = 'sent'` e `sent_at = now()`
-  - Em caso de erro: incrementa `attempts`, marca `status = 'retrying'` (ate 3 tentativas), depois `status = 'failed'`
-- Retorna quantos foram processados
+### PROBLEMAS CRITICOS ENCONTRADOS
 
-**Gatilho:** Essa funcao sera chamada de duas formas:
-1. **Pelo cliente** apos inserir na fila (com delay de 30s via `setTimeout` no frontend para o caso urgente)
-2. **Via `pg_cron`** (se disponivel) a cada 2 minutos para processar filas pendentes
+1. **form_leads so tem 90 registros (93% de perda)** -- dos 90, todos sao do desenvolvedor (onfleekmidiacriativa@gmail.com). NENHUM lead real esta na form_leads. O retry implementado anteriormente nao esta funcionando no producao porque o codigo ainda nao foi publicado.
 
-### 3. Modificar `useStepForm.ts` -- Webhook via Fila
+2. **Step de urgencia nao esta funcionando em producao** -- dos 20 leads mais recentes, apenas 1 (o teste) tem urgencia preenchida. O codigo novo (com urgencia + webhook queue) precisa ser publicado.
 
-**Arquivo:** `src/hooks/useStepForm.ts`
+3. **Campos Email e Telefone marcados como `required: false` no banco** -- o formulario exige email no codigo mas o campo no banco diz `required: false`. Telefone tambem e `required: false`, o que significa que leads podem enviar sem telefone.
 
-Substituir o bloco de envio de webhook direto (linhas 450-481) por:
-- Extrair a resposta de urgencia dos `answers` (titulo do step de urgencia)
-- Calcular o `send_at` baseado na urgencia
-- Inserir na tabela `webhook_queue` com payload completo
-- Agendar chamada ao edge function `process-webhook-queue` apos o delay calculado
+4. **Webhook queue esta VAZIO** -- nenhum lead usou a fila. O codigo antigo (fetch direto) ainda esta rodando em producao.
 
-Isso remove o `fetch` direto para Make.com do navegador do usuario.
+5. **DDD/State nao esta sendo salvo** -- a coluna `ddd` e `state` da `conversion_events` estao todas NULL. O trigger `update_lead_location` existe mas nao esta ativo ou nao esta encontrando o campo correto.
 
-### 4. Melhorias de UX no StepForm
-
-#### 4a. StepFormHeader -- Mostrar "Etapa X de Y"
-
-**Arquivo:** `src/components/stepform/StepFormHeader.tsx`
-
-Adicionar props `currentStepNumber` e `totalSteps`. Exibir abaixo da barra de progresso:
-- "Etapa 2 de 7" em texto discreto
-- Manter o texto motivacional existente
-
-#### 4b. StepQuestion -- Opcoes mais visuais
-
-**Arquivo:** `src/components/stepform/StepQuestion.tsx`
-
-Melhorias visuais nas opcoes:
-- Adicionar icone de circulo vazio a esquerda que vira check quando selecionado
-- Efeito de hover com sombra mais pronunciada e leve escala
-- Feedback haptico visual: ao clicar, a opcao "pulsa" brevemente antes de avancar
-- Bordas mais grossas e arredondadas
-
-#### 4c. StepFormFields -- Labels + botao orientado a acao
-
-**Arquivo:** `src/components/stepform/StepFormFields.tsx`
-
-- Adicionar `<label>` visivel acima de cada campo (usando `field.label || field.placeholder`)
-- Trocar texto do botao de "Enviar Formulario" para "Quero minha consulta gratuita"
-- Adicionar icone de seta no botao
-- Remover o `animate-pulse` do botao (cansa o usuario, parece spam)
-
-#### 4d. Pagina /obrigado -- Parar redirecionamento automatico
-
-**Arquivo:** `src/pages/Obrigado.tsx`
-
-Mudancas criticas:
-- **Remover o `setTimeout` que redireciona para WhatsApp em 3 segundos** -- isso e a principal causa de banimentos
-- Manter apenas o botao "Falar no WhatsApp" como acao voluntaria do usuario
-- Adicionar mensagem: "Um especialista entrara em contato com voce em breve pelo WhatsApp"
-- Adicionar estimativa de tempo baseada na urgencia (passada via query param): 
-  - Urgente: "Voce sera contactado em instantes"
-  - Semanas: "Entraremos em contato em ate 24h"
-  - Pesquisando: "Enviaremos informacoes por email em breve"
-
-### 5. Passar urgencia para a pagina /obrigado
-
-**Arquivo:** `src/hooks/useStepForm.ts`
-
-Na hora do redirect, anexar a urgencia como query param:
-```text
-/obrigado?urgencia=urgente
-```
-
-A pagina /obrigado le esse parametro e exibe a mensagem personalizada.
+6. **Deduplicacao falha** -- a query de deduplicacao verifica `form_id = form.slug` mas o campo salvo no conversion_events e `form_id = form.id` (UUID). Nunca vai encontrar duplicatas.
 
 ---
 
-## Resumo Tecnico
+## PLANO DE IMPLEMENTACAO
 
-| Arquivo | Tipo | Alteracao |
+### 1. Corrigir campos required no banco (SQL)
+
+Atualizar o step de formulario no `step_forms` para marcar Email e Telefone como `required: true`. Isso garante que o codigo de validacao frontend funcione corretamente.
+
+### 2. Corrigir deduplicacao no useStepForm.ts
+
+O bug atual: busca por `form_id = form.slug` (ex: "divorcioform") mas o INSERT salva `form_id = form.id` (UUID). Corrigir para usar o UUID ou slug consistentemente.
+
+### 3. Ativar trigger de localizacao (SQL)
+
+Verificar se os triggers `update_lead_location` e `update_step_form_lead_location` estao ativos. Se nao, recria-los para as tabelas `conversion_events` e `form_leads`. O campo do telefone no trigger busca `lead_data->>'phone'` mas os leads salvam como `lead_data->>'Telefone'` -- precisa buscar ambos.
+
+### 4. Melhorar copy de TODOS os steps para conversao extrema
+
+Atualizar via SQL os textos dos steps. Aplicar principios de micro-copy persuasivo:
+
+**Step 1 - Regime:**
+- Titulo: "Qual o regime do seu casamento?" (manter)
+- Descricao: "Isso nos ajuda a entender como proteger melhor os seus direitos. Fique tranquilo, e rapido!"
+
+**Step 2 - Bens:**
+- Titulo: "Existem bens para dividir?" (manter)
+- Descricao: "Imoveis, veiculos ou investimentos adquiridos durante a relacao. Vamos garantir o que e seu."
+
+**Step 3 - Divida:**
+- Titulo: "Ha alguma divida em comum?" (manter)
+- Descricao: "Financiamentos ou emprestimos em conjunto. Resolvemos isso para voce nao ter dor de cabeca."
+
+**Step 4 - Filhos:**
+- Titulo: "Voces tem filhos menores de 18 anos?" (manter)
+- Descricao: "O bem-estar dos seus filhos e nossa prioridade numero um."
+
+**Step 5 - Guarda:**
+- Titulo: "Qual tipo de guarda voce idealiza?" (manter)
+- Descricao: "Cada familia e unica. Vamos encontrar a melhor solucao para os seus filhos."
+
+**Step 6 - Pensao:**
+- Titulo: "Havera pensao alimenticia?" (manter)
+- Descricao: "Vamos calcular o valor justo para proteger o sustento dos seus filhos."
+
+**Step 7 - Urgencia:**
+- Titulo: "Qual a urgencia do seu caso?" (manter)
+- Descricao: "Nos ajuda a priorizar o seu atendimento."
+
+**Step 8 - Formulario:**
+- Titulo: "Ultimo passo! Seus dados para contato."
+- Descricao: "Preencha abaixo e receba uma analise gratuita do seu caso em ate 24h. 100% confidencial."
+
+### 5. Otimizar StepQuestion.tsx - Micro-interacoes
+
+- Reduzir o delay de 400ms para 300ms (mais responsivo)
+- Adicionar "ripple effect" sutil ao clicar (sem framer-motion extra, apenas CSS)
+- Reset do `selectedIndex` quando o step muda (bug: se usuario voltar, a selecao anterior fica marcada)
+
+### 6. Otimizar StepFormFields.tsx - Formulario final
+
+- Tornar Telefone `required` visualmente (ja e no banco apos correcao)
+- Mover o badge "100% Confidencial" para DEPOIS dos campos (nao antes -- usuario precisa ver os campos primeiro)
+- Reduzir espacamento entre campos para o formulario parecer mais curto
+- Adicionar contador de caracteres sutil no nome (min 3 chars)
+
+### 7. Otimizar StepForm.tsx - Performance
+
+- Adicionar `loading="lazy"` no logo da StepFormHeader
+- Reduzir a animacao de transicao de 0.3s para 0.2s (mais rapido)
+- Remover import do `StepOffer` e `StepContent` se nao estao em uso no divorcioform (tree-shaking nao funciona com dynamic imports condicionais)
+
+### 8. Pagina /obrigado - Mensagem mais forte
+
+- Adicionar nome do usuario via query param (passado do useStepForm)
+- "Obrigado, [Nome]!" personalizado
+- Adicionar contagem de pessoas que ja foram ajudadas: "Mais de 1.000 pessoas ja resolveram seu caso conosco"
+- Botao WhatsApp maior e mais proeminente
+
+### 9. Corrigir trigger de DDD (SQL)
+
+O trigger `update_lead_location` busca `NEW.lead_data->>'phone'` mas o campo real e `'Telefone'`. Recriar o trigger para buscar em multiplos campos:
+```
+phone_number := COALESCE(
+  NEW.lead_data->>'phone',
+  NEW.lead_data->>'Telefone',
+  NEW.lead_data->>'telefone',
+  NEW.lead_data->>'whatsapp',
+  NEW.lead_data->'respostas_mapeadas'->>'Telefone'
+);
+```
+
+### 10. Passar nome do usuario para /obrigado
+
+No `useStepForm.ts`, ao redirecionar, incluir o nome no query param:
+```
+/obrigado?urgencia=urgente&nome=João
+```
+
+---
+
+## RESUMO TECNICO
+
+| Arquivo/Recurso | Tipo | Alteracao |
 |---|---|---|
-| `webhook_queue` (tabela SQL) | Criar | Fila de webhooks com timing |
-| `supabase/functions/process-webhook-queue/index.ts` | Criar | Edge function que processa a fila |
-| `src/hooks/useStepForm.ts` | Editar | Trocar fetch direto por insert na fila + disparar edge function com delay |
-| `src/components/stepform/StepFormHeader.tsx` | Editar | Adicionar "Etapa X de Y" |
-| `src/components/stepform/StepQuestion.tsx` | Editar | Melhorar visual das opcoes (icones, hover, feedback) |
-| `src/components/stepform/StepFormFields.tsx` | Editar | Labels visiveis, botao com texto de acao, remover pulse |
-| `src/pages/Obrigado.tsx` | Editar | Remover auto-redirect WhatsApp, mensagem personalizada por urgencia |
+| Tabela `step_forms` (SQL) | UPDATE | Marcar Email/Telefone required:true, melhorar copy de todos os steps |
+| Triggers DDD (SQL) | RECREATE | Buscar telefone em multiplos campos (phone, Telefone, etc) + ativar triggers |
+| `src/hooks/useStepForm.ts` | Editar | Corrigir deduplicacao (form_id), passar nome no redirect |
+| `src/components/stepform/StepQuestion.tsx` | Editar | Reduzir delay 400->300ms, reset selectedIndex por step |
+| `src/components/stepform/StepFormFields.tsx` | Editar | Reordenar trust badge, espacamento, required visual |
+| `src/pages/StepForm.tsx` | Editar | Reduzir animacao 0.3->0.2s, lazy logo |
+| `src/pages/Obrigado.tsx` | Editar | Nome personalizado, contagem social proof |
 
-**Dependencias:** Nenhuma nova
+**Nenhuma alteracao em funcionalidades nao relacionadas ao StepForm e /obrigado.**
 
-**Fluxo do webhook anti-ban:**
-```text
-Usuario envia form
-  -> Salva lead no banco (form_leads + conversion_events)
-  -> Insere na webhook_queue com send_at baseado na urgencia
-  -> Agenda chamada ao edge function process-webhook-queue
-  -> Edge function processa fila respeitando intervalo minimo de 45s entre envios
-  -> Webhook (Make.com) recebe o lead com spacing natural
-  -> WhatsApp nao detecta automacao agressiva
-```
-
-**Nenhuma alteracao em funcionalidades nao relacionadas ao StepForm e pagina /obrigado.**
