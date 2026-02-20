@@ -1,167 +1,114 @@
 
+# Melhorias no Painel Admin: StepForm Builder + Gestao de Leads
 
-# Analise Profunda de 1.331 Leads + Plano de Conversao Extrema
+## Problemas Encontrados
 
-## ANALISE COMPLETA DOS DADOS
+### 1. Status do Lead INCONSISTENTE entre componentes (CRITICO)
 
-### Distribuicao dos Leads (1.331 total)
+A tabela `lead_status` no banco tem os valores: `novo`, `contatado`, `qualificado`, `convertido`, `perdido`.
 
-**Regime de casamento:**
-- Comunhao parcial: 45% (maioria absoluta)
-- Uniao estavel: 24%
-- Separacao total: 14%
-- Nao sei: 12%
-- Comunhao universal: 5%
+Porem os componentes usam valores DIFERENTES:
 
-**Combinacoes de complexidade (onde se GANHA e PERDE dinheiro):**
+| Componente | Valores usados |
+|---|---|
+| **ResponsiveLeadsTable** (Select) | `novo`, `contato`, `cliente`, `perdido` |
+| **LeadsKanban** (colunas) | `novo`, `contatado`, `qualificado`, `proposta`, `convertido`, `perdido` |
+| **Estatisticas** (cards superiores) | Filtra por `contato` e `convertido` |
+| **Banco de dados** | `novo`, `contatado`, `qualificado`, `convertido`, `perdido` |
 
-| Complexidade | Combinacao | % dos leads | Valor potencial |
-|---|---|---|---|
-| SIMPLES | Sem filhos + Sem bens + Sem divida | 25.8% (344) | Baixo (divorcio rapido) |
-| MEDIO | Com filhos + Sem bens + Sem divida | 26.4% (352) | Medio (guarda + pensao) |
-| COMPLEXO | Com filhos + Com bens + Com divida | 17.3% (230) | ALTO (caso completo) |
-| MEDIO-ALTO | Com filhos + Com bens + Sem divida | 8.4% (112) | Medio-alto |
+Resultado: quando o admin muda o status na tabela para "contato", o Kanban nao reconhece porque espera "contatado". Quando muda no Kanban para "convertido", o card de estatisticas filtra por "convertido" mas o select da tabela nao tem essa opcao. Dados ficam "perdidos" entre componentes.
 
-**Insight critico:** 52% dos leads sao casos SIMPLES ou MEDIO-SIMPLES. 25.7% sao casos COMPLEXOS/ALTO-VALOR. O formulario trata todos iguais -- deveria priorizar os complexos.
+### 2. Kanban pagina TODOS os leads de uma coluna juntos
 
-**Guarda (dos 57% que tem filhos):**
-- Compartilhada: 57% | Nao sei: 21% | Unilateral: 17% | Alternada: 5%
+O Kanban fatia os leads da coluna usando `slice(kanbanIndexOfFirstLead, kanbanIndexOfLastLead)` -- isso pagina DENTRO de cada coluna, mas o controle de pagina e global. Se voce esta na pagina 2, todas as colunas mostram o "segundo lote" de leads, mesmo que a coluna "novo" tenha 500 leads e "convertido" tenha 3. A experiencia e confusa.
 
-**Pensao:** 80% SIM (dos que tem filhos)
+### 3. StepFormBuilder: Botao "Cancelar" duplicado
 
-**Horarios de pico (UTC -> Brasilia -3h):**
-- 21h-01h Brasilia (horarios 0-4 UTC) = 27% dos leads
-- 10h-13h Brasilia (13-16 UTC) = 19% dos leads
+Na barra superior do editor, existem dois botoes "Voltar" com icone `ArrowLeft` -- um na esquerda e outro na direita (linhas 335-344 e 357-366). O da direita diz "Cancelar" mas faz a mesma coisa.
 
-**Dias da semana:** Distribuicao uniforme (160-213/dia). Terça tem mais (213), Sabado menos (160).
+### 4. StepFormBuilder: Tracking config salvo DUAS VEZES
 
-**UTM/Source:** 99.5% chega como "direto" -- sem UTM tracking configurado nas campanhas. Isso e um problema grave de atribuicao.
+O `saveForm()` ja inclui `tracking_config` no payload (linhas 252-271). Porem existe um botao separado "Salvar Configuracoes de Rastreamento" que chama `saveTrackingConfig()` e salva so o tracking. O admin precisa lembrar de clicar em DOIS botoes de salvar, ou perde as configs de tracking ao salvar o form geral (que sobrescreve com o estado local).
 
-### PROBLEMAS CRITICOS ENCONTRADOS
+### 5. LeadComments armazena comentarios na `conversion_events`
 
-1. **form_leads so tem 90 registros (93% de perda)** -- dos 90, todos sao do desenvolvedor (onfleekmidiacriativa@gmail.com). NENHUM lead real esta na form_leads. O retry implementado anteriormente nao esta funcionando no producao porque o codigo ainda nao foi publicado.
+Os comentarios de lead sao salvos como `event_type = 'comment'` na tabela `conversion_events`. Isso polui a tabela de leads e os comentarios aparecem na contagem total de "leads" se o filtro nao excluir event_type 'comment'. Alem disso, o `loadLeads` filtra por `event_type IN ('form_submission', 'webhook_received')`, entao os comentarios nao aparecem como leads -- mas e uma pratica fragil.
 
-2. **Step de urgencia nao esta funcionando em producao** -- dos 20 leads mais recentes, apenas 1 (o teste) tem urgencia preenchida. O codigo novo (com urgencia + webhook queue) precisa ser publicado.
+### 6. Deduplicacao usa `processedLeads` mas retorna `enrichedLeads`
 
-3. **Campos Email e Telefone marcados como `required: false` no banco** -- o formulario exige email no codigo mas o campo no banco diz `required: false`. Telefone tambem e `required: false`, o que significa que leads podem enviar sem telefone.
+Na funcao `loadLeads` do LeadsManagement (linha 328), a deduplicacao roda sobre `processedLeads`, mas o `setLeads` na linha 422 usa `enrichedLeads` (que NAO foi deduplicado). Ou seja, a deduplicacao e calculada mas NUNCA aplicada -- os leads duplicados aparecem normalmente.
 
-4. **Webhook queue esta VAZIO** -- nenhum lead usou a fila. O codigo antigo (fetch direto) ainda esta rodando em producao.
+### 7. Nao ha filtro por formulario (form_name/form_id)
 
-5. **DDD/State nao esta sendo salvo** -- a coluna `ddd` e `state` da `conversion_events` estao todas NULL. O trigger `update_lead_location` existe mas nao esta ativo ou nao esta encontrando o campo correto.
+O filtro `formFilter` esta declarado (linha 64) mas nunca e usado no `useEffect` de filtragem (linhas 741-831). O admin nao consegue filtrar leads por formulario especifico (ex: so ver leads do "divorcioform").
 
-6. **Deduplicacao falha** -- a query de deduplicacao verifica `form_id = form.slug` mas o campo salvo no conversion_events e `form_id = form.id` (UUID). Nunca vai encontrar duplicatas.
+### 8. StepFormBuilder: sem contagem de leads por formulario
+
+O card de cada formulario mostra "Etapas" e "Webhook", mas nao mostra quantos leads aquele formulario gerou. O admin precisa ir na aba Leads para saber.
 
 ---
 
-## PLANO DE IMPLEMENTACAO
+## Plano de Implementacao
 
-### 1. Corrigir campos required no banco (SQL)
+### 1. Unificar status do lead em TODOS os componentes
 
-Atualizar o step de formulario no `step_forms` para marcar Email e Telefone como `required: true`. Isso garante que o codigo de validacao frontend funcione corretamente.
+Definir um unico conjunto de status consistente com o banco:
 
-### 2. Corrigir deduplicacao no useStepForm.ts
-
-O bug atual: busca por `form_id = form.slug` (ex: "divorcioform") mas o INSERT salva `form_id = form.id` (UUID). Corrigir para usar o UUID ou slug consistentemente.
-
-### 3. Ativar trigger de localizacao (SQL)
-
-Verificar se os triggers `update_lead_location` e `update_step_form_lead_location` estao ativos. Se nao, recria-los para as tabelas `conversion_events` e `form_leads`. O campo do telefone no trigger busca `lead_data->>'phone'` mas os leads salvam como `lead_data->>'Telefone'` -- precisa buscar ambos.
-
-### 4. Melhorar copy de TODOS os steps para conversao extrema
-
-Atualizar via SQL os textos dos steps. Aplicar principios de micro-copy persuasivo:
-
-**Step 1 - Regime:**
-- Titulo: "Qual o regime do seu casamento?" (manter)
-- Descricao: "Isso nos ajuda a entender como proteger melhor os seus direitos. Fique tranquilo, e rapido!"
-
-**Step 2 - Bens:**
-- Titulo: "Existem bens para dividir?" (manter)
-- Descricao: "Imoveis, veiculos ou investimentos adquiridos durante a relacao. Vamos garantir o que e seu."
-
-**Step 3 - Divida:**
-- Titulo: "Ha alguma divida em comum?" (manter)
-- Descricao: "Financiamentos ou emprestimos em conjunto. Resolvemos isso para voce nao ter dor de cabeca."
-
-**Step 4 - Filhos:**
-- Titulo: "Voces tem filhos menores de 18 anos?" (manter)
-- Descricao: "O bem-estar dos seus filhos e nossa prioridade numero um."
-
-**Step 5 - Guarda:**
-- Titulo: "Qual tipo de guarda voce idealiza?" (manter)
-- Descricao: "Cada familia e unica. Vamos encontrar a melhor solucao para os seus filhos."
-
-**Step 6 - Pensao:**
-- Titulo: "Havera pensao alimenticia?" (manter)
-- Descricao: "Vamos calcular o valor justo para proteger o sustento dos seus filhos."
-
-**Step 7 - Urgencia:**
-- Titulo: "Qual a urgencia do seu caso?" (manter)
-- Descricao: "Nos ajuda a priorizar o seu atendimento."
-
-**Step 8 - Formulario:**
-- Titulo: "Ultimo passo! Seus dados para contato."
-- Descricao: "Preencha abaixo e receba uma analise gratuita do seu caso em ate 24h. 100% confidencial."
-
-### 5. Otimizar StepQuestion.tsx - Micro-interacoes
-
-- Reduzir o delay de 400ms para 300ms (mais responsivo)
-- Adicionar "ripple effect" sutil ao clicar (sem framer-motion extra, apenas CSS)
-- Reset do `selectedIndex` quando o step muda (bug: se usuario voltar, a selecao anterior fica marcada)
-
-### 6. Otimizar StepFormFields.tsx - Formulario final
-
-- Tornar Telefone `required` visualmente (ja e no banco apos correcao)
-- Mover o badge "100% Confidencial" para DEPOIS dos campos (nao antes -- usuario precisa ver os campos primeiro)
-- Reduzir espacamento entre campos para o formulario parecer mais curto
-- Adicionar contador de caracteres sutil no nome (min 3 chars)
-
-### 7. Otimizar StepForm.tsx - Performance
-
-- Adicionar `loading="lazy"` no logo da StepFormHeader
-- Reduzir a animacao de transicao de 0.3s para 0.2s (mais rapido)
-- Remover import do `StepOffer` e `StepContent` se nao estao em uso no divorcioform (tree-shaking nao funciona com dynamic imports condicionais)
-
-### 8. Pagina /obrigado - Mensagem mais forte
-
-- Adicionar nome do usuario via query param (passado do useStepForm)
-- "Obrigado, [Nome]!" personalizado
-- Adicionar contagem de pessoas que ja foram ajudadas: "Mais de 1.000 pessoas ja resolveram seu caso conosco"
-- Botao WhatsApp maior e mais proeminente
-
-### 9. Corrigir trigger de DDD (SQL)
-
-O trigger `update_lead_location` busca `NEW.lead_data->>'phone'` mas o campo real e `'Telefone'`. Recriar o trigger para buscar em multiplos campos:
-```
-phone_number := COALESCE(
-  NEW.lead_data->>'phone',
-  NEW.lead_data->>'Telefone',
-  NEW.lead_data->>'telefone',
-  NEW.lead_data->>'whatsapp',
-  NEW.lead_data->'respostas_mapeadas'->>'Telefone'
-);
+```text
+novo | contatado | qualificado | proposta | convertido | perdido
 ```
 
-### 10. Passar nome do usuario para /obrigado
+Arquivos a editar:
+- **`ResponsiveLeadsTable.tsx`**: Atualizar o `<Select>` para usar `novo, contatado, qualificado, proposta, convertido, perdido`
+- **`LeadsManagement.tsx`**: Atualizar os cards de estatisticas para filtrar por `contatado` (nao `contato`) e `convertido`
+- **`LeadsKanban.tsx`**: Remover o `getKanbanStatus` mapping (ja nao sera necessario pois os valores serao iguais)
 
-No `useStepForm.ts`, ao redirecionar, incluir o nome no query param:
+### 2. Corrigir deduplicacao ignorada
+
+Na `loadLeads` do `LeadsManagement.tsx`, trocar `setLeads(enrichedLeads)` por `setLeads(deduplicatedLeads)` -- mas ANTES aplicar o enriquecimento de DDD nos deduplicados (mover a logica de enriquecimento para rodar sobre `deduplicatedLeads`).
+
+### 3. Ativar filtro por formulario
+
+No `useEffect` de filtragem (linha 741), adicionar logica para `formFilter`:
+
+```text
+if (formFilter !== 'all') {
+  filtered = filtered.filter(lead => lead.form_name === formFilter || lead.form_id === formFilter);
+}
 ```
-/obrigado?urgencia=urgente&nome=João
-```
+
+Adicionar um `<Select>` na area de filtros com os `form_name` unicos extraidos dos leads.
+
+### 4. Remover botao "Cancelar" duplicado no StepFormBuilder
+
+Remover o segundo botao "Cancelar" (linhas 357-366) que duplica o "Voltar" da esquerda.
+
+### 5. Unificar salvamento do tracking config
+
+Remover o botao separado "Salvar Configuracoes de Rastreamento" e garantir que o `saveForm()` sempre salve o tracking junto. O estado `trackingConfig` ja e incluido no `saveForm`, entao basta remover o botao redundante e a funcao `saveTrackingConfig`.
+
+### 6. Melhorar Kanban: remover paginacao global confusa
+
+Remover a paginacao global do Kanban (que fatia cada coluna igualmente). Em vez disso, limitar cada coluna a mostrar os 10 leads mais recentes com um botao "Ver mais" que expande. Isso e mais natural para um board Kanban.
+
+### 7. Adicionar contagem de leads no card do StepFormBuilder
+
+No componente da lista de formularios, buscar a contagem de leads por `form_name` ou `form_id` e exibir no card junto com "Etapas" e "Webhook".
+
+### 8. Exibir respostas do StepForm no detalhe do lead
+
+No `LeadDetailDialog`, quando o lead tem `respostas_mapeadas` no `lead_data`, exibir cada pergunta/resposta de forma formatada em vez de mostrar como campo dinamico generico.
 
 ---
 
-## RESUMO TECNICO
+## Resumo Tecnico
 
-| Arquivo/Recurso | Tipo | Alteracao |
+| Arquivo | Tipo | Alteracao |
 |---|---|---|
-| Tabela `step_forms` (SQL) | UPDATE | Marcar Email/Telefone required:true, melhorar copy de todos os steps |
-| Triggers DDD (SQL) | RECREATE | Buscar telefone em multiplos campos (phone, Telefone, etc) + ativar triggers |
-| `src/hooks/useStepForm.ts` | Editar | Corrigir deduplicacao (form_id), passar nome no redirect |
-| `src/components/stepform/StepQuestion.tsx` | Editar | Reduzir delay 400->300ms, reset selectedIndex por step |
-| `src/components/stepform/StepFormFields.tsx` | Editar | Reordenar trust badge, espacamento, required visual |
-| `src/pages/StepForm.tsx` | Editar | Reduzir animacao 0.3->0.2s, lazy logo |
-| `src/pages/Obrigado.tsx` | Editar | Nome personalizado, contagem social proof |
+| `src/components/admin/ResponsiveLeadsTable.tsx` | Editar | Unificar opcoes de status (6 opcoes) |
+| `src/components/admin/LeadsKanban.tsx` | Editar | Remover mapping de status, limitar leads por coluna |
+| `src/components/admin/LeadsManagement.tsx` | Editar | Corrigir deduplicacao, ativar filtro por formulario, corrigir estatisticas |
+| `src/components/admin/StepFormBuilder.tsx` | Editar | Remover botao duplicado, unificar save do tracking, adicionar contagem de leads |
+| `src/components/admin/LeadDetailDialog.tsx` | Editar | Exibir respostas_mapeadas formatadas |
 
-**Nenhuma alteracao em funcionalidades nao relacionadas ao StepForm e /obrigado.**
-
+**Nenhuma alteracao em funcionalidades nao relacionadas ao admin de StepForm e Leads.**
