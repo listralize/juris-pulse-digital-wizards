@@ -22,7 +22,7 @@ const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
-const getOrCreateVisitorId = () => {
+export const getOrCreateVisitorId = () => {
   let visitorId = localStorage.getItem('visitor_id');
   if (!visitorId) {
     visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -87,7 +87,7 @@ export const useAnalytics = () => {
         form_name: formName,
         page_url: window.location.href,
         timestamp: new Date().toISOString(),
-        lead_data: JSON.stringify(formData),
+        lead_data: formData,
         conversion_value: 100,
         referrer: document.referrer || null,
         user_agent: navigator.userAgent,

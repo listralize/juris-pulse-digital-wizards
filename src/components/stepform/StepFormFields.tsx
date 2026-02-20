@@ -17,12 +17,12 @@ interface StepFormFieldsProps {
   styles: StepFormData['styles'];
   formData: Record<string, string>;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  loading: boolean;
+  isSubmitting: boolean;
   onSubmit: () => void;
 }
 
 export const StepFormFields: React.FC<StepFormFieldsProps> = ({
-  step, styles, formData, setFormData, loading, onSubmit
+  step, styles, formData, setFormData, isSubmitting, onSubmit
 }) => {
   const primaryColor = styles.primary_color || '#4CAF50';
 
@@ -76,13 +76,13 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
         type="button"
         onClick={onSubmit}
         className="w-full h-14 text-base font-semibold"
-        disabled={loading}
+        disabled={isSubmitting}
         style={{
           backgroundColor: primaryColor,
           borderRadius: styles.button_style === 'rounded' ? '0.5rem' : '0.25rem',
         }}
       >
-        {loading ? 'Enviando...' : (
+        {isSubmitting ? 'Enviando...' : (
           <span className="flex items-center gap-2">
             Quero minha consulta gratuita
             <ArrowRight className="w-5 h-5" />

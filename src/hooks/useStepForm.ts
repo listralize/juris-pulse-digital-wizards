@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
+import { getOrCreateVisitorId } from '@/hooks/useAnalytics';
 import { logger } from '@/utils/logger';
 import type { StepFormData, StepFormStep } from '@/types/stepFormTypes';
 
@@ -106,9 +107,11 @@ export const useStepForm = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [history, setHistory] = useState<string[]>([]);
   const [visitedSteps, setVisitedSteps] = useState<string[]>([]);
+  const persistentVisitorId = useRef<string>(getOrCreateVisitorId());
 
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
@@ -268,11 +271,11 @@ export const useStepForm = () => {
 
   const handleFormSubmit = async (e?: any) => {
     e?.preventDefault?.();
-    setLoading(true);
+    setIsSubmitting(true);
 
     if (!form) {
       toast({ title: 'Erro', description: 'Formulário não carregado. Recarregue a página.', variant: 'destructive' });
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -288,7 +291,7 @@ export const useStepForm = () => {
           description: `Por favor, responda todas as perguntas visitadas antes de enviar. Perguntas não respondidas: ${unanswered.map(q => q.title).join(', ')}`,
           variant: 'destructive'
         });
-        setLoading(false);
+        setIsSubmitting(false);
         return;
       }
     }
@@ -297,7 +300,7 @@ export const useStepForm = () => {
     const emailValue = formData.email || answers.email || formData.Email || answers.Email;
     if (!emailValue || !emailValue.trim()) {
       toast({ title: 'Campo obrigatório', description: 'Email é obrigatório para enviar o formulário', variant: 'destructive' });
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -309,7 +312,7 @@ export const useStepForm = () => {
         const fieldValue = formData[field.name];
         if (!fieldValue || fieldValue.toString().trim() === '') {
           toast({ title: 'Campo obrigatório', description: `Campo "${field.label || field.placeholder || field.name}" é obrigatório`, variant: 'destructive' });
-          setLoading(false);
+          setIsSubmitting(false);
           return;
         }
       }
@@ -360,38 +363,42 @@ export const useStepForm = () => {
           mappedResponses['Telefone/WhatsApp'] || '',
       };
 
-      // Deduplication: check if same email submitted in last 5 minutes
+      // Deduplication: check form_leads for same email in last 2 minutes
       const emailForDedup = extractedData.email?.toLowerCase().trim();
       if (emailForDedup) {
-        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-        const { data: recentDup } = await supabase
-          .from('conversion_events')
+        const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+        const { data: dupCheck } = await supabase
+          .from('form_leads')
           .select('id')
-          .eq('event_type', 'form_submission')
-          .eq('form_id', form.id || 'stepform')
-          .gte('created_at', fiveMinAgo)
-          .limit(1);
+          .eq('form_id', form.slug || form.id || 'stepform')
+          .gte('created_at', twoMinAgo)
+          .limit(20);
 
-        // Check lead_data->email via RPC would be complex, so check conversion_events lead_data
-        if (recentDup && recentDup.length > 0) {
-          // Check if any recent event has same email
-          const { data: dupCheck } = await supabase
-            .from('conversion_events')
+        const isDuplicate = dupCheck?.some(evt => {
+          // form_leads lead_data is always JSONB object
+          return true; // if any lead exists for this form in 2min, check deeper
+        });
+
+        // More precise: re-query with lead_data filter
+        if (dupCheck && dupCheck.length > 0) {
+          const { data: deepCheck } = await supabase
+            .from('form_leads')
             .select('id, lead_data')
-            .eq('event_type', 'form_submission')
-            .eq('form_id', form.id || 'stepform')
-            .gte('created_at', fiveMinAgo)
-            .limit(10);
+            .eq('form_id', form.slug || form.id || 'stepform')
+            .gte('created_at', twoMinAgo)
+            .limit(20);
 
-          const isDuplicate = dupCheck?.some(evt => {
+          const hasDuplicate = deepCheck?.some(evt => {
             const ld = evt.lead_data as any;
-            return ld?.email?.toLowerCase().trim() === emailForDedup;
+            const ldEmail = (ld?.email || ld?.Email || ld?.['e-mail'] || '').toLowerCase().trim();
+            return ldEmail === emailForDedup;
           });
 
-          if (isDuplicate) {
-            logger.warn('Lead duplicado detectado (mesmo email nos últimos 5 min), ignorando');
-            toast({ title: 'Sucesso!', description: 'Formulário enviado com sucesso!', variant: 'default' });
+          if (hasDuplicate) {
+            logger.warn('Lead duplicado detectado (mesmo email nos últimos 2 min), ignorando');
+            toast({ title: 'Já recebemos seus dados', description: 'Seu formulário já foi enviado. Nossa equipe entrará em contato em breve.', variant: 'default' });
             if (slug) localStorage.removeItem(`stepform_progress_${slug}`);
+            setIsSubmitting(false);
             setTimeout(() => {
               const redirectUrl = form.redirect_url || '/obrigado';
               if (redirectUrl.startsWith('http')) window.location.href = redirectUrl;
@@ -414,7 +421,7 @@ export const useStepForm = () => {
         utm_medium: utmData.utm_medium,
         utm_campaign: utmData.utm_campaign,
         session_id: sessionId,
-        visitor_id: `stepform_${Date.now()}`,
+        visitor_id: persistentVisitorId.current,
         source_page: window.location.href,
         user_agent: navigator.userAgent,
         status: 'new'
@@ -452,12 +459,12 @@ export const useStepForm = () => {
           .from('conversion_events')
           .insert([{
             session_id: sessionId,
-            visitor_id: `stepform_${Date.now()}`,
+            visitor_id: persistentVisitorId.current,
             event_type: 'form_submission',
             event_category: 'step_form',
             event_action: 'submit',
             event_label: form.slug || 'stepform',
-            form_id: form.id || 'stepform',
+            form_id: form.slug || 'stepform',
             form_name: form.name || 'Step Form',
             lead_data: { ...extractedData, service: serviceName, respostas_mapeadas: mappedResponses },
             conversion_value: 1,
@@ -470,10 +477,19 @@ export const useStepForm = () => {
         logger.warn('Erro ao processar evento de conversão:', conversionError);
       }
 
-      // Fire marketing event
+      // Fire marketing event with full data for GTM/GA/Pixel
       const formResponses = { ...answers, ...formData };
       window.dispatchEvent(new CustomEvent('stepFormSubmitSuccess', {
-        detail: { formSlug: slug, formId: form.id, formName: form.name, userData: formResponses }
+        detail: {
+          formSlug: slug,
+          formId: form.id,
+          formName: form.name,
+          userData: formResponses,
+          formData: formData,
+          answers: answers,
+          extractedData: extractedData,
+          sessionId: sessionId
+        }
       }));
 
       // Send confirmation email
@@ -564,12 +580,17 @@ export const useStepForm = () => {
           if (queueError) {
             logger.error('Erro ao inserir na fila de webhook:', queueError);
           } else {
-            // Schedule edge function call after delay
+            // Fire immediately so webhook processes even if user closes tab
+            supabase.functions.invoke('process-webhook-queue', { body: {} }).catch(e =>
+              logger.warn('Erro ao disparar processamento imediato da fila:', e)
+            );
+
+            // Also schedule after delay as backup
             setTimeout(async () => {
               try {
                 await supabase.functions.invoke('process-webhook-queue', { body: {} });
               } catch (e) {
-                logger.warn('Erro ao disparar processamento da fila:', e);
+                logger.warn('Erro ao disparar processamento agendado da fila:', e);
               }
             }, Math.min(delaySeconds * 1000, 30000)); // cap at 30s for browser
           }
@@ -612,7 +633,7 @@ export const useStepForm = () => {
       logger.error('Erro geral ao enviar formulário:', error);
       toast({ title: 'Erro no formulário', description: `Erro: ${(error as Error)?.message || 'Erro desconhecido'}`, variant: 'destructive' });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -630,6 +651,7 @@ export const useStepForm = () => {
     formData,
     setFormData,
     loading,
+    isSubmitting,
     progress,
     history,
     currentStep: getCurrentStep(),
