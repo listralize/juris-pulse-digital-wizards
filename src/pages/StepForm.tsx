@@ -86,7 +86,8 @@ const useStepFormSEO = (form: any, slug?: string) => {
 const StepForm: React.FC = () => {
   const {
     slug, form, currentStep, currentStepId, formData, setFormData, loading, progress,
-    canGoBack, saveAnswer, goToNextStep, goBack, handleFormSubmit
+    canGoBack, saveAnswer, goToNextStep, goBack, handleFormSubmit,
+    visitedStepsCount, totalReachableSteps
   } = useStepForm();
 
   useStepFormSEO(form, slug);
@@ -105,7 +106,7 @@ const StepForm: React.FC = () => {
       style={{ backgroundColor: form.styles.background_color || '#ffffff', color: form.styles.text_color || '#000000' }}
     >
       <div className="max-w-2xl mx-auto w-full">
-        <StepFormHeader form={form} progress={progress} />
+        <StepFormHeader form={form} progress={progress} currentStepNumber={visitedStepsCount} totalSteps={totalReachableSteps} />
 
         {currentStep && (
           <Card className="border-0 shadow-xl">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+import { Check, Circle } from 'lucide-react';
 import { renderStepElement } from '@/components/StepFormElements';
 import type { StepFormStep, StepFormData } from '@/types/stepFormTypes';
 
@@ -19,8 +19,10 @@ export const StepQuestion: React.FC<StepQuestionProps> = ({ step, styles, onAnsw
     onAnswer(step.id, option.text);
     setTimeout(() => {
       onNext(option.nextStep, option.actionType, option.text);
-    }, 350);
+    }, 400);
   };
+
+  const primaryColor = styles.primary_color || '#4CAF50';
 
   return (
     <div className="space-y-6">
@@ -62,24 +64,28 @@ export const StepQuestion: React.FC<StepQuestionProps> = ({ step, styles, onAnsw
         <div className="space-y-3">
           {step.options.map((option, index) => {
             const isSelected = selectedIndex === index;
-            const primaryColor = styles.primary_color || '#4CAF50';
             return (
-              <Button
+              <button
                 key={index}
-                variant="outline"
-                className="w-full justify-between p-4 h-auto min-h-[48px] text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+                className="w-full flex items-center gap-3 p-4 min-h-[52px] text-left transition-all duration-200 rounded-xl border-2 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                 style={{
-                  borderColor: isSelected ? primaryColor : `${primaryColor}66`,
-                  color: isSelected ? '#fff' : primaryColor,
+                  borderColor: isSelected ? primaryColor : `${primaryColor}40`,
+                  color: isSelected ? '#fff' : 'inherit',
                   backgroundColor: isSelected ? primaryColor : 'transparent',
-                  borderRadius: styles.button_style === 'rounded' ? '0.5rem' : '0.25rem',
-                  borderWidth: '2px',
+                  boxShadow: isSelected ? `0 4px 14px ${primaryColor}40` : undefined,
                 }}
                 onClick={() => handleSelect(option, index)}
               >
-                <span>{option.text}</span>
-                {isSelected && <Check className="w-5 h-5 flex-shrink-0" />}
-              </Button>
+                {/* Icon: circle or check */}
+                <span className="flex-shrink-0">
+                  {isSelected ? (
+                    <Check className="w-5 h-5" />
+                  ) : (
+                    <Circle className="w-5 h-5 opacity-40" style={{ color: primaryColor }} />
+                  )}
+                </span>
+                <span className="flex-1 font-medium">{option.text}</span>
+              </button>
             );
           })}
         </div>

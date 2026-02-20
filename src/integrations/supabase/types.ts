@@ -1412,6 +1412,48 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          error_message: string | null
+          id: string
+          lead_id: string | null
+          payload: Json
+          send_at: string
+          sent_at: string | null
+          status: string
+          urgency: string | null
+          webhook_url: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          payload?: Json
+          send_at?: string
+          sent_at?: string | null
+          status?: string
+          urgency?: string | null
+          webhook_url: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          payload?: Json
+          send_at?: string
+          sent_at?: string | null
+          status?: string
+          urgency?: string | null
+          webhook_url?: string
+        }
+        Relationships: []
+      }
       website_analytics: {
         Row: {
           bounce: boolean | null
