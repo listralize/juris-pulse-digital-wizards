@@ -1,61 +1,97 @@
 
-# Otimizacao do StepForm + Redirecionamento WhatsApp na Pagina Obrigado
+# Otimizacao do Campo Telefone com Regra do 9 e DDD Select
 
-## Resumo
-Implementar melhorias de conversao no StepForm (animacoes, progresso visual, trust badges) e adicionar redirecionamento automatico para WhatsApp na pagina de obrigado apos 3 segundos.
+## Analise dos Dados
 
-## Alteracoes
+Dos 86 leads do divorcioform:
+- **100% tem `ddd: null` no banco** porque o campo `phone` no `lead_data` esta vazio (o codigo busca `formData.phone` mas o campo real e `formData.Telefone`)
+- Telefones digitados em formatos variados: `62999118230`, `062998005141`, ` 6298005141` (com espaco e faltando digito)
+- A tabela `ddd_locations` esta incompleta (faltam DDDs 12-19, 22, 24, 42-47, 49, 53-55, etc.)
 
-### 1. Pagina de Obrigado - Redirecionamento WhatsApp
-- Apos 3 segundos, redirecionar automaticamente para `https://api.whatsapp.com/send?phone=5562994594496&text=Quero saber mais sobre o divorcio`
-- Mostrar contagem regressiva visual ("Redirecionando para WhatsApp em 3...2...1...")
-- Manter botoes manuais caso o usuario queira agir antes
-- Trocar botao do Instagram por botao do WhatsApp como acao principal
+## Plano de Implementacao
 
-### 2. StepForm.tsx - Animacoes entre Steps
-- Envolver o conteudo do card com `AnimatePresence` e `motion.div` do framer-motion
-- Animacao de slide horizontal + fade ao trocar de step
-- Usar `currentStepId` como key para disparar a animacao
+### 1. Componente PhoneFieldWithDDD (novo arquivo)
 
-### 3. StepFormHeader.tsx - Barra de Progresso Aprimorada
-- Aumentar altura da barra para h-3
-- Adicionar indicador percentual numerico abaixo da barra
-- Texto motivacional dinamico baseado no progresso:
-  - 0-25%: "Vamos comecar!"
-  - 25-50%: "Voce esta indo bem!"
-  - 50-75%: "Quase la!"
-  - 75-100%: "Falta pouco para finalizar!"
+Criar `src/components/stepform/PhoneFieldWithDDD.tsx` -- um campo de telefone inteligente com:
 
-### 4. StepQuestion.tsx - Botoes de Opcao Melhorados
-- Adicionar efeito hover com escala (`hover:scale-[1.02]`) e sombra
-- Icone de check animado ao selecionar uma opcao (estado visual antes de navegar)
-- Transicao de cor de fundo no hover
+- **Select de DDD** a esquerda com todos os DDDs do Brasil (11 a 99), mostrando `(DDD) - Estado`
+- **Input de numero** a direita, aceitando apenas digitos
+- **Prefixo +55** fixo e visivel
+- **Mascara automatica** baseada na regra do 9:
+  - DDDs com 9 digitos (11-19, 21, 22, 24, 27, 28): campo aceita 9 digitos, placeholder `9 XXXX-XXXX`
+  - DDDs com 8 digitos (todos os outros): campo aceita 8 digitos, placeholder `XXXX-XXXX`
+- **Valor salvo no formData**: sempre no formato `55{DDD}{numero}` (ex: `5562999118230`)
+- **DDD padrao**: 62 (Goias, baseado nos dados -- 96% dos leads sao de GO)
+- Lista completa de DDDs hardcoded no componente (nao depende da tabela `ddd_locations`)
 
-### 5. StepFormFields.tsx - Trust Badges e Urgencia
-- Adicionar icone de cadeado com "100% Confidencial" acima do formulario
-- Texto "Seus dados estao protegidos" abaixo do botao de envio
-- Indicador verde pulsante "Especialista disponivel agora" proximo ao botao
-- Botao de envio maior com animacao pulse sutil
+### 2. Regra do 9 -- Logica
 
-### 6. useStepForm.ts - Persistencia de Progresso
-- Salvar `currentStepId`, `answers`, `formData` e `history` no localStorage a cada mudanca
-- Ao carregar o form, verificar se existe progresso salvo para o mesmo slug
-- Limpar localStorage apos envio bem-sucedido
+```text
+DDDs COM 9 digitos (celular): 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28
+DDDs COM 8 digitos (celular): todos os demais (31-99 exceto os acima)
+```
+
+O componente:
+- Ao selecionar o DDD, ajusta automaticamente o placeholder e o limite de caracteres
+- Se o usuario digitar 9 digitos num DDD de 8, remove o 9 da frente automaticamente
+- Se o usuario digitar 8 digitos num DDD de 9, adiciona o 9 na frente automaticamente
+- Validacao visual: borda verde quando completo, vermelha quando incompleto
+
+### 3. Integracao no StepFormFields
+
+Modificar `src/components/stepform/StepFormFields.tsx`:
+- Detectar campos do tipo `tel` ou com nome contendo "telefone", "phone", "whatsapp" (case insensitive)
+- Para esses campos, renderizar o `PhoneFieldWithDDD` em vez do `Input` padrao
+- O valor salvo no `formData` sera o numero completo: `55{DDD}{numero}`
+
+### 4. Correcao do Mapeamento no useStepForm
+
+Modificar `src/hooks/useStepForm.ts` linha 263:
+- Adicionar `formData.Telefone` na cadeia de fallback do `extractedData.phone`
+- Isso corrige o bug que causava `phone: ""` em 100% dos leads, impedindo o trigger de DDD de funcionar
+
+### 5. Completar Tabela ddd_locations (via SQL)
+
+Inserir os DDDs faltantes na tabela `ddd_locations` para que o trigger de localizacao funcione corretamente para todos os leads futuros. DDDs faltantes:
+- SP: 12, 13, 14, 15, 16, 17, 18, 19
+- RJ: 22, 24
+- PR: 42, 43, 44, 45, 46
+- SC: 47, 49
+- RS: 53, 54, 55
+- BA: 73, 74, 75, 77
+- MA: 99
+- PA: 93, 94
+- E outros
 
 ---
 
 ## Detalhes Tecnicos
 
-**Arquivos modificados:**
-- `src/pages/Obrigado.tsx` - Adicionar useEffect com setTimeout para redirect WhatsApp + contagem regressiva
-- `src/pages/StepForm.tsx` - Wrapper AnimatePresence do framer-motion
-- `src/components/stepform/StepFormHeader.tsx` - Barra de progresso com percentual e texto motivacional
-- `src/components/stepform/StepQuestion.tsx` - Hover animado e check visual nos botoes
-- `src/components/stepform/StepFormFields.tsx` - Trust badges, urgencia e botao aprimorado
-- `src/hooks/useStepForm.ts` - localStorage para persistir progresso parcial
+### Arquivos criados:
+| Arquivo | Descricao |
+|---|---|
+| `src/components/stepform/PhoneFieldWithDDD.tsx` | Componente de telefone com DDD select + regra do 9 |
 
-**Dependencias:** Nenhuma nova (framer-motion ja instalado)
+### Arquivos modificados:
+| Arquivo | Alteracao |
+|---|---|
+| `src/components/stepform/StepFormFields.tsx` | Detectar campo tel/telefone e renderizar PhoneFieldWithDDD |
+| `src/hooks/useStepForm.ts` | Adicionar `formData.Telefone` no mapeamento de phone |
 
-**Banco de dados:** Nenhuma alteracao
+### Migracao SQL:
+- Inserir DDDs faltantes na tabela `ddd_locations`
 
-**Funcionalidades existentes:** Nenhuma alteracao em interfaces ou fluxos nao relacionados ao StepForm e pagina Obrigado
+### Exemplo do componente PhoneFieldWithDDD:
+
+```text
++---------------------------------------+
+| +55 | (62) GO v | 9 9911-8230     |
++---------------------------------------+
+```
+
+- O "+55" e fixo (label visual)
+- O DDD e um select com busca
+- O numero aceita apenas digitos com mascara automatica
+- Ao mudar o DDD, o placeholder e limite mudam conforme regra do 9
+
+### Nenhuma alteracao em UI/funcionalidades nao relacionadas ao StepForm.
