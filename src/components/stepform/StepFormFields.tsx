@@ -2,7 +2,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Shield, CircleDot } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Lock, Shield, CircleDot, ArrowRight } from 'lucide-react';
 import { PhoneFieldWithDDD } from './PhoneFieldWithDDD';
 import type { StepFormStep, StepFormData } from '@/types/stepFormTypes';
 
@@ -26,7 +27,7 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
   const primaryColor = styles.primary_color || '#4CAF50';
 
   return (
-    <form noValidate onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
+    <form noValidate onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-5">
       {/* Trust badge */}
       <div className="flex items-center gap-2 text-sm opacity-70 mb-2">
         <Lock className="w-4 h-4" />
@@ -34,9 +35,14 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
       </div>
 
       {step.formFields?.map((field, index) => (
-        <div key={index}>
+        <div key={index} className="space-y-1.5">
+          <Label htmlFor={`field-${field.name}`} className="text-sm font-medium">
+            {field.label || field.placeholder}
+            {field.required && <span className="text-red-500 ml-1">*</span>}
+          </Label>
           {field.type === 'textarea' ? (
             <Textarea
+              id={`field-${field.name}`}
               name={field.name}
               placeholder={field.placeholder}
               required={field.required}
@@ -53,6 +59,7 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
             />
           ) : (
             <Input
+              id={`field-${field.name}`}
               type={field.type}
               name={field.name}
               placeholder={field.placeholder}
@@ -74,15 +81,19 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
       <Button
         type="button"
         onClick={onSubmit}
-        className="w-full h-14 text-base font-semibold animate-pulse"
+        className="w-full h-14 text-base font-semibold"
         disabled={loading}
         style={{
           backgroundColor: primaryColor,
           borderRadius: styles.button_style === 'rounded' ? '0.5rem' : '0.25rem',
-          animationDuration: '3s',
         }}
       >
-        {loading ? 'Enviando...' : 'Enviar Formulário'}
+        {loading ? 'Enviando...' : (
+          <span className="flex items-center gap-2">
+            Quero minha consulta gratuita
+            <ArrowRight className="w-5 h-5" />
+          </span>
+        )}
       </Button>
 
       <div className="flex items-center justify-center gap-1 text-xs opacity-60">

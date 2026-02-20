@@ -4,6 +4,8 @@ import type { StepFormData } from '@/types/stepFormTypes';
 interface StepFormHeaderProps {
   form: StepFormData;
   progress: number;
+  currentStepNumber?: number;
+  totalSteps?: number;
 }
 
 const getMotivationalText = (progress: number) => {
@@ -13,7 +15,7 @@ const getMotivationalText = (progress: number) => {
   return 'Falta pouco para finalizar!';
 };
 
-export const StepFormHeader: React.FC<StepFormHeaderProps> = ({ form, progress }) => {
+export const StepFormHeader: React.FC<StepFormHeaderProps> = ({ form, progress, currentStepNumber, totalSteps }) => {
   return (
     <>
       {/* Progress Bar */}
@@ -27,12 +29,19 @@ export const StepFormHeader: React.FC<StepFormHeaderProps> = ({ form, progress }
             }}
           />
         </div>
-        <div className="flex justify-between items-center mt-1 mb-6">
+        <div className="flex justify-between items-center mt-1 mb-1">
           <span className="text-xs font-medium opacity-70">{getMotivationalText(progress)}</span>
           <span className="text-xs font-bold" style={{ color: form.styles.primary_color || '#4CAF50' }}>
             {Math.round(progress)}%
           </span>
         </div>
+        {currentStepNumber != null && totalSteps != null && (
+          <div className="text-center mb-4">
+            <span className="text-xs font-medium opacity-50">
+              Etapa {currentStepNumber} de {totalSteps}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Logo */}

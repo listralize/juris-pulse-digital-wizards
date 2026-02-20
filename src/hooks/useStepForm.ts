@@ -447,7 +447,7 @@ export const useStepForm = () => {
         logger.error('Erro geral no envio de email stepform:', emailError);
       }
 
-      // Send webhook
+      // Queue webhook with anti-ban timing
       if (form.webhook_url?.trim()) {
         try {
           const webhookPayload = {
@@ -465,19 +465,50 @@ export const useStepForm = () => {
             metadata: { page_url: window.location.href, referrer: document.referrer, user_agent: navigator.userAgent }
           };
 
-          const webhookResponse = await fetch(form.webhook_url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'User-Agent': 'StepForm-Webhook/1.0' },
-            body: JSON.stringify(webhookPayload)
-          });
+          // Determine urgency from answers
+          const urgencyStep = form.steps.find(s => s.id?.includes('urgency') || s.title?.toLowerCase().includes('urgência') || s.title?.toLowerCase().includes('urgencia'));
+          const urgencyAnswer = urgencyStep ? answers[urgencyStep.id] : undefined;
+          let urgency = 'default';
+          let delaySeconds = 60; // default 1 min
+          if (urgencyAnswer?.toLowerCase().includes('urgente')) {
+            urgency = 'urgente';
+            delaySeconds = 30;
+          } else if (urgencyAnswer?.toLowerCase().includes('semana')) {
+            urgency = 'semanas';
+            delaySeconds = 180;
+          } else if (urgencyAnswer?.toLowerCase().includes('pesquisando')) {
+            urgency = 'pesquisando';
+            delaySeconds = 480;
+          }
 
-          if (!webhookResponse.ok) {
-            const responseText = await webhookResponse.text();
-            throw new Error(`Webhook failed: ${webhookResponse.status} - ${responseText}`);
+          const sendAt = new Date(Date.now() + delaySeconds * 1000).toISOString();
+
+          // Insert into webhook queue
+          const { error: queueError } = await supabase
+            .from('webhook_queue')
+            .insert([{
+              lead_id: savedLead?.id || sessionId,
+              webhook_url: form.webhook_url,
+              payload: webhookPayload,
+              urgency,
+              send_at: sendAt,
+              status: 'pending'
+            }]);
+
+          if (queueError) {
+            logger.error('Erro ao inserir na fila de webhook:', queueError);
+          } else {
+            // Schedule edge function call after delay
+            setTimeout(async () => {
+              try {
+                await supabase.functions.invoke('process-webhook-queue', { body: {} });
+              } catch (e) {
+                logger.warn('Erro ao disparar processamento da fila:', e);
+              }
+            }, Math.min(delaySeconds * 1000, 30000)); // cap at 30s for browser
           }
         } catch (webhookError) {
-          logger.error('Erro ao enviar webhook:', webhookError);
-          toast({ title: 'Aviso', description: 'Dados salvos, mas houve erro no envio do webhook', variant: 'default' });
+          logger.error('Erro ao enfileirar webhook:', webhookError);
         }
       }
 
@@ -486,8 +517,19 @@ export const useStepForm = () => {
       // Clear saved progress after successful submission
       if (slug) localStorage.removeItem(`stepform_progress_${slug}`);
 
+      // Determine urgency for redirect
+      const urgencyStepForRedirect = form.steps.find(s => s.id?.includes('urgency') || s.title?.toLowerCase().includes('urgência') || s.title?.toLowerCase().includes('urgencia'));
+      const urgencyForRedirect = urgencyStepForRedirect ? answers[urgencyStepForRedirect.id] : '';
+      let urgencyParam = '';
+      if (urgencyForRedirect?.toLowerCase().includes('urgente')) urgencyParam = 'urgente';
+      else if (urgencyForRedirect?.toLowerCase().includes('semana')) urgencyParam = 'semanas';
+      else if (urgencyForRedirect?.toLowerCase().includes('pesquisando')) urgencyParam = 'pesquisando';
+
       setTimeout(() => {
-        const redirectUrl = form.redirect_url || '/obrigado';
+        let redirectUrl = form.redirect_url || '/obrigado';
+        if (!redirectUrl.startsWith('http') && urgencyParam) {
+          redirectUrl += `?urgencia=${urgencyParam}`;
+        }
         if (redirectUrl.startsWith('http')) {
           window.location.href = redirectUrl;
         } else {
@@ -525,5 +567,7 @@ export const useStepForm = () => {
     goToNextStep,
     goBack,
     handleFormSubmit,
+    visitedStepsCount: visitedSteps.length,
+    totalReachableSteps,
   };
 };
