@@ -227,10 +227,24 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
   // Função para obter campos dinâmicos do webhook
   const getDynamicFields = () => {
     const excludeKeys = [
-      'name', 'email', 'phone', 'telefone', 'service', 'message', 
+      'name', 'email', 'phone', 'telefone', 'tel', 'celular', 'service', 'message', 'mensagem',
       'urgent', 'isUrgent', 'customFields', 'formConfig', 'timestamp', 
-      'webhook_timestamp', 'webhook_source', 'processing_method', 'subject', 'Assunto'
+      'webhook_timestamp', 'webhook_source', 'processing_method', 'subject', 'Assunto',
+      'respostas_mapeadas', 'source', 'origem', 'company', 'empresa',
+      'nome', 'e_mail', 'mail', 'servico', 'Servico', 'source_page',
+      'full_name', 'first_name', 'msg', 'description', 'observacoes',
+      'Nome', 'Email', 'Telefone', 'Tel', 'Celular'
     ];
+
+    // Dynamically exclude keys already in respostas_mapeadas to prevent duplication for legacy leads
+    const respostas = leadData.respostas_mapeadas;
+    if (respostas && typeof respostas === 'object') {
+      Object.keys(respostas).forEach(key => {
+        if (!excludeKeys.includes(key)) {
+          excludeKeys.push(key);
+        }
+      });
+    }
     
     return Object.keys(leadData).filter(key => 
       !excludeKeys.includes(key) &&

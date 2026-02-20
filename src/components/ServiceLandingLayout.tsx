@@ -102,6 +102,53 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
 
   const correctAreaPath = getCorrectAreaPath(serviceArea);
 
+  // SEO: dynamic title + meta description
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = `${finalTitle} | ${serviceArea} | Advocacia Especializada`;
+
+    let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+    const prevMetaContent = metaDesc?.content || '';
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = 'description';
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.content = finalDescription.slice(0, 160);
+
+    // JSON-LD structured data
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'LegalService',
+          name: finalTitle,
+          description: finalDescription,
+          areaServed: { '@type': 'Country', name: 'Brasil' },
+          serviceType: serviceArea,
+        },
+        ...(finalFaq.length > 0 ? [{
+          '@type': 'FAQPage',
+          mainEntity: finalFaq.map(f => ({
+            '@type': 'Question',
+            name: f.question,
+            acceptedAnswer: { '@type': 'Answer', text: f.answer },
+          })),
+        }] : []),
+      ],
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+
+    return () => {
+      document.title = prevTitle;
+      if (metaDesc) metaDesc.content = prevMetaContent;
+      script.remove();
+    };
+  }, [finalTitle, finalDescription, serviceArea, finalFaq]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     
@@ -125,7 +172,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
     );
     
     return () => {
-      // Only kill tweens created by this component
       if (titleRef.current) gsap.killTweensOf(titleRef.current);
       if (descriptionRef.current) gsap.killTweensOf(descriptionRef.current);
       if (ctaRef.current) gsap.killTweensOf(ctaRef.current);
@@ -142,8 +188,6 @@ const ServiceLandingLayout: React.FC<ServiceLandingLayoutProps> = ({
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-black'} relative`}>
-      
-      <Navbar />
       
       <Navbar />
       
