@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Check } from 'lucide-react';
 import { renderStepElement } from '@/components/StepFormElements';
 import type { StepFormStep, StepFormData } from '@/types/stepFormTypes';
 
@@ -11,6 +12,16 @@ interface StepQuestionProps {
 }
 
 export const StepQuestion: React.FC<StepQuestionProps> = ({ step, styles, onAnswer, onNext }) => {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const handleSelect = (option: any, index: number) => {
+    setSelectedIndex(index);
+    onAnswer(step.id, option.text);
+    setTimeout(() => {
+      onNext(option.nextStep, option.actionType, option.text);
+    }, 350);
+  };
+
   return (
     <div className="space-y-6">
       {/* Media */}
@@ -49,24 +60,28 @@ export const StepQuestion: React.FC<StepQuestionProps> = ({ step, styles, onAnsw
       {/* Options */}
       {step.options && (
         <div className="space-y-3">
-          {step.options.map((option, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="w-full justify-start p-4 h-auto min-h-[44px] text-left"
-              style={{
-                borderColor: styles.primary_color || '#4CAF50',
-                color: styles.primary_color || '#4CAF50',
-                borderRadius: styles.button_style === 'rounded' ? '0.5rem' : '0.25rem'
-              }}
-              onClick={() => {
-                onAnswer(step.id, option.text);
-                onNext(option.nextStep, option.actionType, option.text);
-              }}
-            >
-              {option.text}
-            </Button>
-          ))}
+          {step.options.map((option, index) => {
+            const isSelected = selectedIndex === index;
+            const primaryColor = styles.primary_color || '#4CAF50';
+            return (
+              <Button
+                key={index}
+                variant="outline"
+                className="w-full justify-between p-4 h-auto min-h-[48px] text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+                style={{
+                  borderColor: isSelected ? primaryColor : `${primaryColor}66`,
+                  color: isSelected ? '#fff' : primaryColor,
+                  backgroundColor: isSelected ? primaryColor : 'transparent',
+                  borderRadius: styles.button_style === 'rounded' ? '0.5rem' : '0.25rem',
+                  borderWidth: '2px',
+                }}
+                onClick={() => handleSelect(option, index)}
+              >
+                <span>{option.text}</span>
+                {isSelected && <Check className="w-5 h-5 flex-shrink-0" />}
+              </Button>
+            );
+          })}
         </div>
       )}
     </div>

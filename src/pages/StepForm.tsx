@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { SocialProofElement } from '@/components/StepFormElements';
 import { StepFormTestimonials } from '@/components/StepFormTestimonials';
 import { StepFormLoader } from '@/components/StepFormLoader';
@@ -15,7 +16,7 @@ import { StepFormFooter } from '@/components/stepform/StepFormFooter';
 
 const StepForm: React.FC = () => {
   const {
-    form, currentStep, formData, setFormData, loading, progress,
+    form, currentStep, currentStepId, formData, setFormData, loading, progress,
     canGoBack, saveAnswer, goToNextStep, goBack, handleFormSubmit
   } = useStepForm();
 
@@ -36,7 +37,7 @@ const StepForm: React.FC = () => {
         <StepFormHeader form={form} progress={progress} />
 
         {currentStep && (
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-xl">
             <CardContent className="p-8">
               {canGoBack && (
                 <Button variant="ghost" onClick={goBack} className="mb-4 p-0 h-auto">
@@ -44,34 +45,44 @@ const StepForm: React.FC = () => {
                 </Button>
               )}
 
-              <h2 className="text-2xl font-bold mb-4">{currentStep.title}</h2>
-              {currentStep.description && <p className="text-muted-foreground mb-6">{currentStep.description}</p>}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStepId}
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -30 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                >
+                  <h2 className="text-2xl font-bold mb-4">{currentStep.title}</h2>
+                  {currentStep.description && <p className="text-muted-foreground mb-6">{currentStep.description}</p>}
 
-              {currentStep.type === 'question' && (
-                <StepQuestion step={currentStep} styles={form.styles} onAnswer={saveAnswer} onNext={goToNextStep} />
-              )}
+                  {currentStep.type === 'question' && (
+                    <StepQuestion step={currentStep} styles={form.styles} onAnswer={saveAnswer} onNext={goToNextStep} />
+                  )}
 
-              {currentStep.type === 'content' && (
-                <StepContent step={currentStep} styles={form.styles} onNext={goToNextStep} />
-              )}
+                  {currentStep.type === 'content' && (
+                    <StepContent step={currentStep} styles={form.styles} onNext={goToNextStep} />
+                  )}
 
-              {currentStep.type === 'form' && (
-                <StepFormFields
-                  step={currentStep} styles={form.styles} formData={formData}
-                  setFormData={setFormData} loading={loading} onSubmit={handleFormSubmit}
-                />
-              )}
+                  {currentStep.type === 'form' && (
+                    <StepFormFields
+                      step={currentStep} styles={form.styles} formData={formData}
+                      setFormData={setFormData} loading={loading} onSubmit={handleFormSubmit}
+                    />
+                  )}
 
-              {currentStep.socialProofConfig && ((currentStep.socialProofConfig as any).enabled ?? true) &&
-                (currentStep.socialProofConfig.testimonials?.length || currentStep.socialProofConfig.stats?.length) && (
-                <div className="mt-6">
-                  <SocialProofElement config={currentStep.socialProofConfig} primaryColor={form.styles.primary_color || '#4CAF50'} />
-                </div>
-              )}
+                  {currentStep.socialProofConfig && ((currentStep.socialProofConfig as any).enabled ?? true) &&
+                    (currentStep.socialProofConfig.testimonials?.length || currentStep.socialProofConfig.stats?.length) && (
+                    <div className="mt-6">
+                      <SocialProofElement config={currentStep.socialProofConfig} primaryColor={form.styles.primary_color || '#4CAF50'} />
+                    </div>
+                  )}
 
-              {currentStep.type === 'offer' && (
-                <StepOffer step={currentStep} styles={form.styles} onNext={goToNextStep} />
-              )}
+                  {currentStep.type === 'offer' && (
+                    <StepOffer step={currentStep} styles={form.styles} onNext={goToNextStep} />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </CardContent>
           </Card>
         )}
