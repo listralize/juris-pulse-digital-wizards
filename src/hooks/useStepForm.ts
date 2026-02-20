@@ -1,10 +1,34 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 import { logger } from '@/utils/logger';
 import type { StepFormData, StepFormStep } from '@/types/stepFormTypes';
+
+// Count reachable steps by traversing flow_config edges from the first step
+const countReachableSteps = (steps: StepFormStep[], flowConfig?: StepFormData['flow_config']): number => {
+  if (!flowConfig?.edges || flowConfig.edges.length === 0) return steps.length;
+
+  const allTargets = flowConfig.edges.map(e => e.target);
+  const firstStep = steps.find(s => !allTargets.includes(s.id));
+  if (!firstStep) return steps.length;
+
+  const visited = new Set<string>();
+  const queue = [firstStep.id];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (visited.has(current)) continue;
+    visited.add(current);
+    const outEdges = flowConfig.edges.filter(e => e.source === current);
+    for (const edge of outEdges) {
+      if (!visited.has(edge.target) && steps.some(s => s.id === edge.target)) {
+        queue.push(edge.target);
+      }
+    }
+  }
+  return visited.size;
+};
 
 export const useStepForm = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -21,6 +45,11 @@ export const useStepForm = () => {
 
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
+
+  const totalReachableSteps = useMemo(() => {
+    if (!form) return 1;
+    return countReachableSteps(form.steps, form.flow_config);
+  }, [form]);
 
   useEffect(() => {
     if (slug) loadForm();
@@ -61,14 +90,12 @@ export const useStepForm = () => {
     }
   }, [currentStepId, answers, formData, history, visitedSteps, slug]);
 
+  // Progress based on visited steps / reachable steps
   useEffect(() => {
     if (form && currentStepId) {
-      const currentIndex = form.steps.findIndex(step => step.id === currentStepId);
-      if (currentIndex !== -1) {
-        setProgress(((currentIndex + 1) / form.steps.length) * 100);
-      }
+      setProgress((visitedSteps.length / totalReachableSteps) * 100);
     }
-  }, [currentStepId, form]);
+  }, [currentStepId, form, visitedSteps, totalReachableSteps]);
 
   const loadForm = async () => {
     try {
@@ -223,7 +250,7 @@ export const useStepForm = () => {
 
     try {
       const serviceName = form.name || form.title || document.title || 'Consultoria Jurídica';
-      const allData = {
+      const allData: Record<string, any> = {
         ...answers,
         ...formData,
         service: serviceName,
@@ -266,7 +293,49 @@ export const useStepForm = () => {
           mappedResponses['Telefone/WhatsApp'] || '',
       };
 
-      // Save lead
+      // Deduplication: check if same email submitted in last 5 minutes
+      const emailForDedup = extractedData.email?.toLowerCase().trim();
+      if (emailForDedup) {
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const { data: recentDup } = await supabase
+          .from('conversion_events')
+          .select('id')
+          .eq('event_type', 'form_submission')
+          .eq('form_id', form.slug || 'stepform')
+          .gte('created_at', fiveMinAgo)
+          .limit(1);
+
+        // Check lead_data->email via RPC would be complex, so check conversion_events lead_data
+        if (recentDup && recentDup.length > 0) {
+          // Check if any recent event has same email
+          const { data: dupCheck } = await supabase
+            .from('conversion_events')
+            .select('id, lead_data')
+            .eq('event_type', 'form_submission')
+            .eq('form_id', form.slug || 'stepform')
+            .gte('created_at', fiveMinAgo)
+            .limit(10);
+
+          const isDuplicate = dupCheck?.some(evt => {
+            const ld = evt.lead_data as any;
+            return ld?.email?.toLowerCase().trim() === emailForDedup;
+          });
+
+          if (isDuplicate) {
+            logger.warn('Lead duplicado detectado (mesmo email nos últimos 5 min), ignorando');
+            toast({ title: 'Sucesso!', description: 'Formulário enviado com sucesso!', variant: 'default' });
+            if (slug) localStorage.removeItem(`stepform_progress_${slug}`);
+            setTimeout(() => {
+              const redirectUrl = form.redirect_url || '/obrigado';
+              if (redirectUrl.startsWith('http')) window.location.href = redirectUrl;
+              else navigate(redirectUrl);
+            }, 1500);
+            return;
+          }
+        }
+      }
+
+      // Save lead with retry
       const leadData = {
         lead_data: { ...allData, ...extractedData, respostas_mapeadas: mappedResponses },
         form_id: form.slug || form.id || 'stepform',
@@ -284,15 +353,30 @@ export const useStepForm = () => {
         status: 'new'
       };
 
-      const { data: savedLead, error: leadError } = await supabase
-        .from('form_leads')
-        .insert([leadData])
-        .select()
-        .single();
+      let savedLead: any = null;
+      const insertLead = async () => {
+        const { data, error } = await supabase
+          .from('form_leads')
+          .insert([leadData])
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      };
 
-      if (leadError) {
-        logger.error('Erro ao salvar lead:', leadError);
-        toast({ title: 'Aviso', description: 'Não foi possível salvar em form_leads. Continuando o envio...', variant: 'default' });
+      try {
+        savedLead = await insertLead();
+      } catch (firstError) {
+        logger.error('Primeiro erro ao salvar lead em form_leads:', firstError);
+        // Retry once
+        try {
+          savedLead = await insertLead();
+        } catch (retryError) {
+          logger.error('Retry falhou ao salvar lead em form_leads:', retryError);
+          // Flag the conversion event so we know form_leads failed
+          allData._form_leads_failed = true;
+          allData._form_leads_error = (retryError as Error)?.message || 'unknown';
+        }
       }
 
       // Save conversion event
