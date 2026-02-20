@@ -85,7 +85,7 @@ const useStepFormSEO = (form: any, slug?: string) => {
 
 const StepForm: React.FC = () => {
   const {
-    slug, form, currentStep, currentStepId, formData, setFormData, loading, progress,
+    slug, form, currentStep, currentStepId, formData, setFormData, loading, isSubmitting, progress,
     canGoBack, saveAnswer, goToNextStep, goBack, handleFormSubmit,
     visitedStepsCount, totalReachableSteps
   } = useStepForm();
@@ -139,7 +139,7 @@ const StepForm: React.FC = () => {
                   {currentStep.type === 'form' && (
                     <StepFormFields
                       step={currentStep} styles={form.styles} formData={formData}
-                      setFormData={setFormData} loading={loading} onSubmit={handleFormSubmit}
+                      setFormData={setFormData} isSubmitting={isSubmitting} onSubmit={handleFormSubmit}
                     />
                   )}
 

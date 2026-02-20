@@ -148,8 +148,48 @@ serve(async (req) => {
       }
     }
 
-    // Conversão é gerenciada pelo frontend via useAnalytics para evitar duplicação
-    console.log('✅ Dados processados - conversão será registrada pelo frontend');
+    // Save lead to form_leads server-side (guaranteed persistence)
+    try {
+      const { error: leadError } = await supabase
+        .from('form_leads')
+        .insert([{
+          lead_data: {
+            name: submissionData.name,
+            email: submissionData.email,
+            phone: submissionData.phone,
+            message: submissionData.message,
+            service: submissionData.service,
+            isUrgent: submissionData.isUrgent,
+            customFields: submissionData.customFields,
+          },
+          form_id: formId,
+          form_name: formConfig?.name || 'Formulário de Contato',
+          session_id: sessionId,
+          visitor_id: visitorId,
+          source_page: headers.referer || '',
+          referrer: headers.referer || '',
+          user_agent: headers['user-agent'] || '',
+          utm_source: getUTMParam('utm_source'),
+          utm_medium: getUTMParam('utm_medium'),
+          utm_campaign: getUTMParam('utm_campaign'),
+          status: 'new',
+          ddd: ddd,
+          state: locationInfo?.state_name || null,
+          capital: locationInfo?.capital || null,
+          region: locationInfo?.region || null,
+        }]);
+
+      if (leadError) {
+        console.error('❌ Erro ao salvar lead em form_leads:', leadError);
+      } else {
+        console.log('✅ Lead salvo em form_leads com sucesso');
+      }
+    } catch (leadSaveError) {
+      console.error('❌ Erro geral ao salvar lead em form_leads:', leadSaveError);
+    }
+
+    // Conversão analytics é gerenciada pelo frontend via useAnalytics
+    console.log('✅ Dados processados - conversão analytics será registrada pelo frontend');
 
     // 2. Enviar email automático de boas-vindas
     try {
