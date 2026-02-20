@@ -419,8 +419,12 @@ export const LeadsManagement: React.FC = () => {
       }
       setAvailableServices(Array.from(servicesSet).sort());
 
-      setLeads(enrichedLeads);
-      setFilteredLeads(enrichedLeads);
+      // Apply enrichment to deduplicated leads (not enrichedLeads which includes duplicates)
+      const deduplicatedIds = new Set(deduplicatedLeads.map((l: any) => l.id));
+      const finalLeads = enrichedLeads.filter((l: any) => deduplicatedIds.has(l.id));
+      
+      setLeads(finalLeads);
+      setFilteredLeads(finalLeads);
       setLeadStatuses(statusMap);
       setLeadStatusDates(statusDatesMap);
     } catch (error) {
@@ -808,6 +812,13 @@ export const LeadsManagement: React.FC = () => {
         });
       }
 
+      // Filtro por formulário
+      if (formFilter !== 'all') {
+        filtered = filtered.filter((lead) => {
+          return lead.form_name === formFilter || lead.form_id === formFilter;
+        });
+      }
+
       // Filtro por serviço (síncrono)
       if (serviceFilter !== 'all') {
         filtered = filtered.filter((lead) => {
@@ -828,7 +839,7 @@ export const LeadsManagement: React.FC = () => {
     };
 
     filterLeads();
-  }, [leads, searchQuery, dateFilter, serviceFilter, customDateStart, customDateEnd]);
+  }, [leads, searchQuery, dateFilter, serviceFilter, formFilter, customDateStart, customDateEnd]);
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -962,6 +973,20 @@ export const LeadsManagement: React.FC = () => {
           </div>
         )}
 
+        <Select value={formFilter} onValueChange={setFormFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por formulário" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os formulários</SelectItem>
+            {Array.from(new Set(leads.map(l => l.form_name).filter(Boolean))).sort().map(formName => (
+              <SelectItem key={formName!} value={formName!}>
+                {formName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Select value={serviceFilter} onValueChange={setServiceFilter}>
           <SelectTrigger>
             <SelectValue placeholder="Filtrar por serviço" />
@@ -979,6 +1004,7 @@ export const LeadsManagement: React.FC = () => {
         <Button variant="outline" onClick={() => {
           setSearchQuery('');
           setDateFilter('all');
+          setFormFilter('all');
           setServiceFilter('all');
         }}>
           <Filter className="h-4 w-4 mr-2" />
@@ -1019,8 +1045,8 @@ export const LeadsManagement: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Contato (Período)</CardTitle>
-            <Badge variant="default">Contato</Badge>
+            <CardTitle className="text-sm font-medium">Contatados (Período)</CardTitle>
+            <Badge variant="default">Contatado</Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -1029,7 +1055,7 @@ export const LeadsManagement: React.FC = () => {
                 
                 if (dateFilter === 'all') {
                   // Se não há filtro de data, mostrar todos os "Em Contato"
-                  contactCount = leads.filter(lead => leadStatuses[lead.id] === 'contato').length;
+                  contactCount = leads.filter(lead => leadStatuses[lead.id] === 'contatado').length;
                 } else {
                   // Para período específico, verificar se o status foi alterado no período
                   const now = new Date();
@@ -1082,7 +1108,7 @@ export const LeadsManagement: React.FC = () => {
 
                   // Filtrar pelos status que foram alterados no período
                   contactCount = Object.entries(leadStatusDates).filter(([leadId, statusInfo]) => {
-                    if (statusInfo.status !== 'contato') return false;
+                    if (statusInfo.status !== 'contatado') return false;
                     const statusDate = new Date(statusInfo.updated_at);
                     return statusDate >= startDate && statusDate <= endDate;
                   }).length;

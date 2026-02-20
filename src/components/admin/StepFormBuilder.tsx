@@ -46,6 +46,7 @@ export const StepFormBuilder: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
+  const [leadCounts, setLeadCounts] = useState<{ [key: string]: number }>({});
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
   const [trackingConfig, setTrackingConfig] = useState({
@@ -66,6 +67,7 @@ export const StepFormBuilder: React.FC = () => {
 
   useEffect(() => {
     loadForms();
+    loadLeadCounts();
   }, []);
 
   useEffect(() => {
@@ -102,6 +104,26 @@ export const StepFormBuilder: React.FC = () => {
       setTrackingConfig(normalized);
     } catch (error) {
       console.error('Erro ao carregar configurações de tracking:', error);
+    }
+  };
+
+  const loadLeadCounts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('conversion_events')
+        .select('form_name, form_id')
+        .eq('event_type', 'form_submission');
+      
+      if (error) throw error;
+      
+      const counts: { [key: string]: number } = {};
+      (data || []).forEach((row: any) => {
+        const key = row.form_name || row.form_id || 'unknown';
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      setLeadCounts(counts);
+    } catch (error) {
+      console.error('Erro ao carregar contagem de leads:', error);
     }
   };
 
@@ -353,16 +375,6 @@ export const StepFormBuilder: React.FC = () => {
             <Button onClick={saveForm}>
               <Save className="w-4 h-4 mr-2" />
               Salvar Formulário
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSelectedForm(null);
-                setIsCreating(false);
-              }}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Cancelar
             </Button>
           </div>
         </div>
@@ -694,10 +706,9 @@ export const StepFormBuilder: React.FC = () => {
                       </p>
                     </div>
 
-                    <Button onClick={saveTrackingConfig} className="w-full">
-                      <Save className="w-4 h-4 mr-2" />
-                      Salvar Configurações de Rastreamento
-                    </Button>
+                    <p className="text-xs text-muted-foreground italic">
+                      As configurações de rastreamento são salvas automaticamente ao clicar em "Salvar Formulário".
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -936,13 +947,17 @@ export const StepFormBuilder: React.FC = () => {
                     {window.location.origin}/form/{form.slug}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="font-medium">Etapas:</span> {form.steps.length}
                   </div>
                   <div>
                     <span className="font-medium">Webhook:</span>{' '}
-                    {form.webhook_url ? '✅ Configurado' : '❌ Não configurado'}
+                    {form.webhook_url ? '✅' : '❌'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Leads:</span>{' '}
+                    {leadCounts[form.name] || leadCounts[form.slug] || leadCounts[form.id || ''] || 0}
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">

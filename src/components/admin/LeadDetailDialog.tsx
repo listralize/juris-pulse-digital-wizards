@@ -370,6 +370,21 @@ export const LeadDetailDialog: React.FC<LeadDetailDialogProps> = ({
                       </div>
                     )}
 
+                    {/* Respostas mapeadas do StepForm */}
+                    {leadData.respostas_mapeadas && typeof leadData.respostas_mapeadas === 'object' && (
+                      <div className="pt-2 border-t">
+                        <h4 className="text-sm font-medium text-foreground mb-2">Respostas do Formulário</h4>
+                        <div className="space-y-2">
+                          {Object.entries(leadData.respostas_mapeadas).map(([question, answer]) => (
+                            <div key={question} className="p-2 bg-muted/30 rounded">
+                              <span className="text-xs font-medium text-muted-foreground">{question}</span>
+                              <p className="text-sm mt-0.5">{String(answer)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Campos dinâmicos do webhook */}
                     {getDynamicFields().map((key) => (
                       <div key={key} className="pt-2 border-t">
