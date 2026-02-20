@@ -3,7 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Lock, Shield, CircleDot } from 'lucide-react';
+import { PhoneFieldWithDDD } from './PhoneFieldWithDDD';
 import type { StepFormStep, StepFormData } from '@/types/stepFormTypes';
+
+const isPhoneField = (field: { name: string; type: string }) => {
+  const nameLower = field.name.toLowerCase();
+  return field.type === 'tel' || nameLower.includes('telefone') || nameLower.includes('phone') || nameLower.includes('whatsapp');
+};
 
 interface StepFormFieldsProps {
   step: StepFormStep;
@@ -37,6 +43,13 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
               value={formData[field.name] || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
               className="min-h-[120px]"
+            />
+          ) : isPhoneField(field) ? (
+            <PhoneFieldWithDDD
+              name={field.name}
+              value={formData[field.name] || ''}
+              onChange={(val) => setFormData(prev => ({ ...prev, [field.name]: val }))}
+              required={field.required}
             />
           ) : (
             <Input
