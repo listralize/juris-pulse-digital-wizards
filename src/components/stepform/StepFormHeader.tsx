@@ -6,18 +6,33 @@ interface StepFormHeaderProps {
   progress: number;
 }
 
+const getMotivationalText = (progress: number) => {
+  if (progress <= 25) return 'Vamos começar!';
+  if (progress <= 50) return 'Você está indo bem!';
+  if (progress <= 75) return 'Quase lá!';
+  return 'Falta pouco para finalizar!';
+};
+
 export const StepFormHeader: React.FC<StepFormHeaderProps> = ({ form, progress }) => {
   return (
     <>
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
-        <div
-          className="h-2 rounded-full transition-all duration-300"
-          style={{
-            width: `${progress}%`,
-            backgroundColor: form.styles.primary_color || '#4CAF50'
-          }}
-        />
+      <div className="mb-2">
+        <div className="w-full bg-gray-200 rounded-full h-3">
+          <div
+            className="h-3 rounded-full transition-all duration-500 ease-out"
+            style={{
+              width: `${progress}%`,
+              backgroundColor: form.styles.primary_color || '#4CAF50'
+            }}
+          />
+        </div>
+        <div className="flex justify-between items-center mt-1 mb-6">
+          <span className="text-xs font-medium opacity-70">{getMotivationalText(progress)}</span>
+          <span className="text-xs font-bold" style={{ color: form.styles.primary_color || '#4CAF50' }}>
+            {Math.round(progress)}%
+          </span>
+        </div>
       </div>
 
       {/* Logo */}

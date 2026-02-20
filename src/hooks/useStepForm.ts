@@ -26,14 +26,40 @@ export const useStepForm = () => {
     if (slug) loadForm();
   }, [slug]);
 
+  // Restore progress from localStorage
   useEffect(() => {
     if (form && form.steps.length > 0 && !currentStepId) {
+      const storageKey = `stepform_progress_${slug}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.currentStepId && form.steps.find(s => s.id === parsed.currentStepId)) {
+            setCurrentStepId(parsed.currentStepId);
+            setAnswers(parsed.answers || {});
+            setFormData(parsed.formData || {});
+            setHistory(parsed.history || []);
+            setVisitedSteps(parsed.visitedSteps || [parsed.currentStepId]);
+            return;
+          }
+        } catch {}
+      }
       const firstStepId = getFirstStepFromFlow() || form.steps[0].id;
       setCurrentStepId(firstStepId);
       setHistory([]);
       setVisitedSteps([firstStepId]);
     }
   }, [form, currentStepId]);
+
+  // Persist progress to localStorage
+  useEffect(() => {
+    if (slug && currentStepId) {
+      const storageKey = `stepform_progress_${slug}`;
+      localStorage.setItem(storageKey, JSON.stringify({
+        currentStepId, answers, formData, history, visitedSteps
+      }));
+    }
+  }, [currentStepId, answers, formData, history, visitedSteps, slug]);
 
   useEffect(() => {
     if (form && currentStepId) {
@@ -372,6 +398,9 @@ export const useStepForm = () => {
       }
 
       toast({ title: 'Sucesso!', description: 'Formulário enviado com sucesso!', variant: 'default' });
+
+      // Clear saved progress after successful submission
+      if (slug) localStorage.removeItem(`stepform_progress_${slug}`);
 
       setTimeout(() => {
         const redirectUrl = form.redirect_url || '/obrigado';
