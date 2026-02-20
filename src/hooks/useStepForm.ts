@@ -392,7 +392,7 @@ export const useStepForm = () => {
             event_label: form.slug || 'stepform',
             form_id: form.id || 'stepform',
             form_name: form.name || 'Step Form',
-            lead_data: { ...extractedData, service: serviceName, respostas_mapeadas: mappedResponses, ...mappedResponses },
+            lead_data: { ...extractedData, service: serviceName, respostas_mapeadas: mappedResponses },
             conversion_value: 1,
             page_url: window.location.href,
             referrer: document.referrer || null,
