@@ -47,7 +47,7 @@ export const StepFormHeader: React.FC<StepFormHeaderProps> = ({ form, progress, 
       {/* Logo */}
       {form.logo_url && (
         <div className="text-center mb-8">
-          <img src={form.logo_url} alt="Logo" className="max-w-xs mx-auto h-auto" />
+          <img src={form.logo_url} alt="Logo" className="max-w-xs mx-auto h-auto" loading="lazy" />
         </div>
       )}
 

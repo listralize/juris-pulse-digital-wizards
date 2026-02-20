@@ -123,7 +123,7 @@ const StepForm: React.FC = () => {
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
                   <h2 className="text-2xl font-bold mb-4">{currentStep.title}</h2>
                   {currentStep.description && <p className="text-muted-foreground mb-6">{currentStep.description}</p>}

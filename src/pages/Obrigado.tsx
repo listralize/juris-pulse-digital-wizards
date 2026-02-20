@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, ArrowRight, MessageCircle, Clock } from 'lucide-react';
+import { CheckCircle, ArrowRight, MessageCircle, Clock, Users } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useTheme } from '../components/ThemeProvider';
 
@@ -25,6 +25,7 @@ const ObrigadoPage = () => {
   const isDark = theme === 'dark';
   const [searchParams] = useSearchParams();
   const urgencia = searchParams.get('urgencia');
+  const nome = searchParams.get('nome');
   const urgencyInfo = getUrgencyMessage(urgencia);
 
   return (
@@ -37,7 +38,7 @@ const ObrigadoPage = () => {
         </div>
         
         <h1 className="text-4xl md:text-5xl font-canela mb-4">
-          Obrigado por entrar em contato!
+          {nome ? `Obrigado, ${decodeURIComponent(nome)}!` : 'Obrigado por entrar em contato!'}
         </h1>
         
         <p className={`text-lg md:text-xl mb-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -45,24 +46,30 @@ const ObrigadoPage = () => {
         </p>
 
         {/* Urgency-based message */}
-        <div className={`flex items-center justify-center gap-2 text-base mb-8 font-semibold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+        <div className={`flex items-center justify-center gap-2 text-base mb-4 font-semibold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
           <Clock className="w-5 h-5" />
           <span>{urgencyInfo.icon} {urgencyInfo.text}</span>
+        </div>
+
+        {/* Social proof */}
+        <div className={`flex items-center justify-center gap-2 text-sm mb-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          <Users className="w-4 h-4" />
+          <span>Mais de 1.000 pessoas já resolveram seu caso conosco</span>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             onClick={() => { window.location.href = WHATSAPP_URL; }}
-            className="px-6 py-6 text-base bg-green-500 hover:bg-green-600 text-white transition-all"
+            className="px-8 py-7 text-lg bg-green-500 hover:bg-green-600 text-white transition-all font-semibold"
           >
-            <MessageCircle className="mr-2 h-4 w-4" />
+            <MessageCircle className="mr-2 h-5 w-5" />
             Falar no WhatsApp agora
           </Button>
           
           <Button 
             onClick={() => navigate('/')}
             variant="outline"
-            className={`px-6 py-6 text-base ${isDark 
+            className={`px-6 py-7 text-base ${isDark 
               ? 'border-white/20 text-white hover:bg-white/10' 
               : 'border-black/20 text-black hover:bg-black/10'} transition-all`}
           >
