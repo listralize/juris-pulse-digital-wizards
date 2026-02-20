@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { ChevronLeft, ChevronRight, Mail, MessageSquare } from 'lucide-react';
+import { ChevronDown, Mail, MessageSquare } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
@@ -20,13 +19,11 @@ interface Lead {
   created_at: string;
 }
 
-// Helper para parsear dados do lead
 const parseLeadData = (leadData: any) => {
   try {
     if (typeof leadData === 'string') {
       leadData = JSON.parse(leadData);
     }
-    
     return {
       name: leadData?.name || leadData?.nome || '',
       email: leadData?.email || '',
@@ -49,6 +46,8 @@ interface LeadsKanbanProps {
   onLeadClick: (lead: Lead) => void;
 }
 
+const INITIAL_VISIBLE = 10;
+
 export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
   filteredLeads,
   leadStatuses,
@@ -57,174 +56,104 @@ export const LeadsKanban: React.FC<LeadsKanbanProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  
-  // Paginação para Kanban
-  const [kanbanCurrentPage, setKanbanCurrentPage] = useState(1);
-  const [kanbanLeadsPerPage] = useState(8);
-
-  // Calcular dados de paginação para Kanban
-  const kanbanIndexOfLastLead = kanbanCurrentPage * kanbanLeadsPerPage;
-  const kanbanIndexOfFirstLead = kanbanIndexOfLastLead - kanbanLeadsPerPage;
-  const kanbanTotalPages = Math.ceil(filteredLeads.length / kanbanLeadsPerPage);
-
-  const goToKanbanNextPage = () => {
-    setKanbanCurrentPage(prev => Math.min(prev + 1, kanbanTotalPages));
-  };
-
-  const goToKanbanPreviousPage = () => {
-    setKanbanCurrentPage(prev => Math.max(prev - 1, 1));
-  };
+  const [expandedColumns, setExpandedColumns] = useState<{ [key: string]: boolean }>({});
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
+    if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) return;
 
-    if (!destination) {
-      return;
-    }
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    // Encontrar o lead e atualizar o status
     const lead = filteredLeads.find(l => l.id === draggableId);
     if (lead) {
-      console.log('🎯 Movendo lead:', {
-        leadId: draggableId,
-        from: source.droppableId,
-        to: destination.droppableId,
-        leadName: parseLeadData(lead.lead_data).name
-      });
-      
       updateLeadStatus(lead.id, destination.droppableId);
-    } else {
-      console.error('❌ Lead não encontrado:', draggableId);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Paginação do Kanban */}
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-muted-foreground">
-          Mostrando {kanbanIndexOfFirstLead + 1}-{Math.min(kanbanIndexOfLastLead, filteredLeads.length)} de {filteredLeads.length} leads
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToKanbanPreviousPage}
-            disabled={kanbanCurrentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Anterior
-          </Button>
-          <span className="text-sm">
-            Página {kanbanCurrentPage} de {kanbanTotalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToKanbanNextPage}
-            disabled={kanbanCurrentPage === kanbanTotalPages}
-          >
-            Próxima
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
-      {/* Board Kanban com Drag and Drop */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'].map(status => {
-            // Mapear status da tabela para Kanban
-            const getKanbanStatus = (tableStatus: string) => {
-              const statusMap: { [key: string]: string } = {
-                'contato': 'contatado',
-                'em contato': 'contatado', 
-                'descartado': 'perdido',
-                'novo': 'novo',
-                'qualificado': 'qualificado',
-                'proposta': 'proposta', 
-                'convertido': 'convertido',
-                'perdido': 'perdido',
-                'contatado': 'contatado'
-              };
-              return statusMap[tableStatus?.toLowerCase()] || tableStatus;
-            };
+  const toggleExpand = (status: string) => {
+    setExpandedColumns(prev => ({ ...prev, [status]: !prev[status] }));
+  };
 
-            const allStatusLeads = filteredLeads.filter(lead => {
-              const leadStatus = leadStatuses[lead.id];
-              const kanbanStatus = getKanbanStatus(leadStatus);
-              return kanbanStatus === status || (status === 'novo' && !leadStatus);
-            });
-            const statusLeads = allStatusLeads.slice(kanbanIndexOfFirstLead, kanbanIndexOfLastLead);
-            
-            return (
-              <div key={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
-                <h3 className={`font-semibold mb-3 capitalize ${isDark ? 'text-white' : 'text-black'}`}>
-                  {status} ({allStatusLeads.length})
-                </h3>
-                <Droppable droppableId={status}>
-                  {(provided, snapshot) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className={`space-y-2 min-h-[200px] ${
-                        snapshot.isDraggingOver ? 'bg-blue-50/50' : ''
-                      }`}
-                    >
-                      {statusLeads.map((lead, index) => {
-                        const leadData = parseLeadData(lead.lead_data);
-                        return (
-                          <Draggable key={lead.id} draggableId={lead.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`p-3 rounded border cursor-pointer hover:shadow-md transition-shadow ${
-                                  snapshot.isDragging 
-                                    ? 'shadow-lg rotate-2' 
-                                    : isDark 
-                                      ? 'bg-white/5 border-white/10 hover:bg-white/10' 
-                                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                                }`}
-                                onClick={() => !snapshot.isDragging && onLeadClick(lead)}
-                              >
-                                <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-black'}`}>
-                                  {leadData.name || 'Nome não informado'}
-                                </h4>
-                                <p className="text-xs text-muted-foreground">{leadData.email}</p>
-                                {leadData.service && (
-                                  <p className="text-xs text-blue-600 mt-1">{leadData.service}</p>
+  return (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {['novo', 'contatado', 'qualificado', 'proposta', 'convertido', 'perdido'].map(status => {
+          const allStatusLeads = filteredLeads.filter(lead => {
+            const leadStatus = leadStatuses[lead.id];
+            return leadStatus === status || (status === 'novo' && !leadStatus);
+          });
+          
+          const isExpanded = expandedColumns[status] || false;
+          const visibleLeads = isExpanded ? allStatusLeads : allStatusLeads.slice(0, INITIAL_VISIBLE);
+          const hasMore = allStatusLeads.length > INITIAL_VISIBLE;
+          
+          return (
+            <div key={status} className={`${isDark ? 'bg-black border-white/20' : 'bg-white border-gray-200'} border rounded-lg p-4`}>
+              <h3 className={`font-semibold mb-3 capitalize ${isDark ? 'text-white' : 'text-black'}`}>
+                {status} ({allStatusLeads.length})
+              </h3>
+              <Droppable droppableId={status}>
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={`space-y-2 min-h-[200px] ${snapshot.isDraggingOver ? 'bg-blue-50/50' : ''}`}
+                  >
+                    {visibleLeads.map((lead, index) => {
+                      const leadData = parseLeadData(lead.lead_data);
+                      return (
+                        <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-3 rounded border cursor-pointer hover:shadow-md transition-shadow ${
+                                snapshot.isDragging 
+                                  ? 'shadow-lg rotate-2' 
+                                  : isDark 
+                                    ? 'bg-white/5 border-white/10 hover:bg-white/10' 
+                                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                              }`}
+                              onClick={() => !snapshot.isDragging && onLeadClick(lead)}
+                            >
+                              <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-black'}`}>
+                                {leadData.name || 'Nome não informado'}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">{leadData.email}</p>
+                              {leadData.service && (
+                                <p className="text-xs text-blue-600 mt-1">{leadData.service}</p>
+                              )}
+                              <div className="flex justify-between items-center mt-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                                </span>
+                                {leadData.urgent && (
+                                  <Badge variant="destructive" className="text-xs">Urgente</Badge>
                                 )}
-                                <div className="flex justify-between items-center mt-2">
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(lead.created_at).toLocaleDateString('pt-BR')}
-                                  </span>
-                                  {leadData.urgent && (
-                                    <Badge variant="destructive" className="text-xs">Urgente</Badge>
-                                  )}
-                                </div>
                               </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            );
-          })}
-        </div>
-      </DragDropContext>
-    </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+              {hasMore && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full mt-2 text-xs"
+                  onClick={() => toggleExpand(status)}
+                >
+                  <ChevronDown className={`h-3 w-3 mr-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  {isExpanded ? 'Mostrar menos' : `Ver mais ${allStatusLeads.length - INITIAL_VISIBLE} leads`}
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </DragDropContext>
   );
 };

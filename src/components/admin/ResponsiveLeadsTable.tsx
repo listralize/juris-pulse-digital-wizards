@@ -98,8 +98,10 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                 </div>
                 <Badge variant="outline" className={
                   status === 'novo' ? 'bg-blue-50 text-blue-700' :
-                  status === 'contato' ? 'bg-yellow-50 text-yellow-700' :
-                  status === 'cliente' ? 'bg-green-50 text-green-700' :
+                  status === 'contatado' ? 'bg-yellow-50 text-yellow-700' :
+                  status === 'qualificado' ? 'bg-purple-50 text-purple-700' :
+                  status === 'proposta' ? 'bg-orange-50 text-orange-700' :
+                  status === 'convertido' ? 'bg-green-50 text-green-700' :
                   'bg-red-50 text-red-700'
                 }>
                   {status}
@@ -136,12 +138,14 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                    <SelectTrigger className="w-20 h-8">
                      <SelectValue />
                    </SelectTrigger>
-                   <SelectContent>
-                     <SelectItem value="novo">Novo</SelectItem>
-                     <SelectItem value="contato">Contato</SelectItem>
-                     <SelectItem value="cliente">Cliente</SelectItem>
-                     <SelectItem value="perdido">Perdido</SelectItem>
-                   </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="novo">Novo</SelectItem>
+                      <SelectItem value="contatado">Contatado</SelectItem>
+                      <SelectItem value="qualificado">Qualificado</SelectItem>
+                      <SelectItem value="proposta">Proposta</SelectItem>
+                      <SelectItem value="convertido">Convertido</SelectItem>
+                      <SelectItem value="perdido">Perdido</SelectItem>
+                    </SelectContent>
                  </Select>
                </div>
             </div>
@@ -242,12 +246,14 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                       <SelectTrigger className="w-24">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="novo">Novo</SelectItem>
-                        <SelectItem value="contato">Contato</SelectItem>
-                        <SelectItem value="cliente">Cliente</SelectItem>
-                        <SelectItem value="perdido">Perdido</SelectItem>
-                      </SelectContent>
+                       <SelectContent>
+                         <SelectItem value="novo">Novo</SelectItem>
+                         <SelectItem value="contatado">Contatado</SelectItem>
+                         <SelectItem value="qualificado">Qualificado</SelectItem>
+                         <SelectItem value="proposta">Proposta</SelectItem>
+                         <SelectItem value="convertido">Convertido</SelectItem>
+                         <SelectItem value="perdido">Perdido</SelectItem>
+                       </SelectContent>
                     </Select>
                   </td>
                   <td className="p-2">
