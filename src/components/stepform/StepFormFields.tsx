@@ -27,13 +27,7 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
   const primaryColor = styles.primary_color || '#4CAF50';
 
   return (
-    <form noValidate onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-5">
-      {/* Trust badge */}
-      <div className="flex items-center gap-2 text-sm opacity-70 mb-2">
-        <Lock className="w-4 h-4" />
-        <span>100% Confidencial — seus dados estão protegidos</span>
-      </div>
-
+    <form noValidate onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
       {step.formFields?.map((field, index) => (
         <div key={index} className="space-y-1.5">
           <Label htmlFor={`field-${field.name}`} className="text-sm font-medium">
@@ -95,6 +89,12 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
           </span>
         )}
       </Button>
+
+      {/* Trust badge after fields */}
+      <div className="flex items-center gap-2 text-sm opacity-70 mt-1">
+        <Lock className="w-4 h-4" />
+        <span>100% Confidencial — seus dados estão protegidos</span>
+      </div>
 
       <div className="flex items-center justify-center gap-1 text-xs opacity-60">
         <Shield className="w-3 h-3" />

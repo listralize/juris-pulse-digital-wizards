@@ -14,12 +14,17 @@ interface StepQuestionProps {
 export const StepQuestion: React.FC<StepQuestionProps> = ({ step, styles, onAnswer, onNext }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+  // Reset selection when step changes
+  React.useEffect(() => {
+    setSelectedIndex(null);
+  }, [step.id]);
+
   const handleSelect = (option: any, index: number) => {
     setSelectedIndex(index);
     onAnswer(step.id, option.text);
     setTimeout(() => {
       onNext(option.nextStep, option.actionType, option.text);
-    }, 400);
+    }, 300);
   };
 
   const primaryColor = styles.primary_color || '#4CAF50';

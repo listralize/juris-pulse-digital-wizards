@@ -301,7 +301,7 @@ export const useStepForm = () => {
           .from('conversion_events')
           .select('id')
           .eq('event_type', 'form_submission')
-          .eq('form_id', form.slug || 'stepform')
+          .eq('form_id', form.id || 'stepform')
           .gte('created_at', fiveMinAgo)
           .limit(1);
 
@@ -312,7 +312,7 @@ export const useStepForm = () => {
             .from('conversion_events')
             .select('id, lead_data')
             .eq('event_type', 'form_submission')
-            .eq('form_id', form.slug || 'stepform')
+            .eq('form_id', form.id || 'stepform')
             .gte('created_at', fiveMinAgo)
             .limit(10);
 
@@ -527,8 +527,13 @@ export const useStepForm = () => {
 
       setTimeout(() => {
         let redirectUrl = form.redirect_url || '/obrigado';
-        if (!redirectUrl.startsWith('http') && urgencyParam) {
-          redirectUrl += `?urgencia=${urgencyParam}`;
+        if (!redirectUrl.startsWith('http')) {
+          const params = new URLSearchParams();
+          if (urgencyParam) params.set('urgencia', urgencyParam);
+          const userName = extractedData.name || formData.Nome || formData.name || '';
+          if (userName) params.set('nome', userName);
+          const qs = params.toString();
+          if (qs) redirectUrl += `?${qs}`;
         }
         if (redirectUrl.startsWith('http')) {
           window.location.href = redirectUrl;
