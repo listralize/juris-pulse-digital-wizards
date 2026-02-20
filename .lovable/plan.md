@@ -1,95 +1,154 @@
 
 
-# Correcao de Duplicacao de Respostas + SEO das Paginas de Servico
+# Webhook com Resumo Inteligente do Caso (Template-Based NLG)
 
-## Problemas Identificados
+## Problema Atual
 
-### 1. Respostas duplicadas no detalhe do lead (CRITICO - visivel na screenshot)
+O webhook envia um JSON bruto com TUDO (`responses`, `extractedData`, `allData`, `metadata`, UTMs...). Quem recebe no CRM ve um bloco ilegivel. O plano anterior propunha regras fixas com `if pergunta.includes("bens")` -- isso e fragil e so funciona para divorcio.
 
-A causa raiz esta em **duas camadas**:
+## Solucao: Template Engine com NLG (Natural Language Generation)
 
-**a) No salvamento (`useStepForm.ts`, linha 395):** O `lead_data` da `conversion_events` e salvo como:
+Em vez de regras hardcoded por tipo de pergunta, usar uma abordagem generica que funciona para QUALQUER formulario, presente ou futuro:
+
+### Arquitetura
+
 ```text
-{ ...extractedData, service, respostas_mapeadas: mappedResponses, ...mappedResponses }
-```
-O `...mappedResponses` espalha TODAS as respostas (Nome, Email, Telefone, "Ha bens para dividir?", etc.) como chaves de nivel superior no `lead_data`. Resultado: cada resposta existe DUAS vezes -- dentro de `respostas_mapeadas` E como campo avulso.
-
-**b) Na exibicao (`LeadDetailDialog.tsx`):** O componente exibe:
-1. Secao "Respostas do Formulario" iterando `respostas_mapeadas` (Nome, Email, Telefone, etc.)
-2. Secao "Campos dinamicos" via `getDynamicFields()` que pega TODOS os campos de nivel superior que nao estao na lista `excludeKeys`
-
-Como `excludeKeys` so exclui chaves em ingles/minusculo (`name`, `email`, `phone`), as chaves em portugues com maiuscula ("Nome", "Email", "Telefone", "Ha Bens Para Dividir?", etc.) passam pelo filtro e aparecem duplicadas.
-
-### 2. Navbar DUPLICADA nas paginas de servico (BUG)
-
-Em `ServiceLandingLayout.tsx`, linhas 146-148:
-```text
-<Navbar />
-<Navbar />
-```
-A Navbar esta renderizada DUAS VEZES.
-
-### 3. Paginas de servico SEM SEO (meta tags)
-
-O `ServiceLandingLayout` e o `DynamicServicePage` nao definem `document.title` nem meta description. Nao ha nenhuma tag SEO dinamica -- o Google indexa todas as paginas de servico com o mesmo titulo generico do `index.html`.
-
-### 4. Paginas de servico SEM dados estruturados (JSON-LD)
-
-Nenhuma pagina de servico gera schema `LegalService` ou `FAQPage` para o Google. As FAQs ja existem mas nao sao aproveitadas como dados estruturados.
-
----
-
-## Plano de Implementacao
-
-### 1. Corrigir salvamento do lead_data (useStepForm.ts)
-
-Remover o `...mappedResponses` do spread no INSERT da `conversion_events` (linha 395). Os dados ja existem dentro de `respostas_mapeadas`, nao precisam ser duplicados no nivel superior.
-
-**Antes:**
-```text
-lead_data: { ...extractedData, service: serviceName, respostas_mapeadas: mappedResponses, ...mappedResponses }
+mappedResponses + steps metadata
+        |
+        v
+  buildCaseSummary()
+        |
+        +-- 1. Separar campos de contato (nome, email, telefone)
+        +-- 2. Classificar respostas por tipo de step
+        +-- 3. Gerar frases naturais com template:
+        |       "sim/nao" -> afirmativa/negativa
+        |       opcao unica -> "Pergunta: Resposta"
+        |       texto livre -> incluir se curto, truncar se longo
+        +-- 4. Montar paragrafo unico separado por " | "
+        |
+        v
+  webhookPayload simplificado
 ```
 
-**Depois:**
+### Logica do `buildCaseSummary`
+
 ```text
-lead_data: { ...extractedData, service: serviceName, respostas_mapeadas: mappedResponses }
+function buildCaseSummary(mappedResponses, steps, formName):
+  
+  CONTACT_KEYS = set de variacoes de nome/email/telefone (case-insensitive)
+  
+  partes = []
+  
+  para cada (pergunta, resposta) em mappedResponses:
+    // Pular campos de contato
+    se normalizar(pergunta) esta em CONTACT_KEYS: continuar
+    se resposta vazia: continuar
+    
+    // Encontrar o step original para contexto
+    step = steps.find(s => s.title === pergunta)
+    
+    // Deteccao inteligente de tipo de resposta:
+    
+    CASO 1 - Resposta binaria (Sim/Nao):
+      se resposta == "Sim" ou "Nao":
+        // Gerar frase afirmativa/negativa a partir do titulo
+        // "Ha bens para dividir?" + "Sim" -> "Possui bens para dividir"
+        // "Ha bens para dividir?" + "Nao" -> "Nao possui bens para dividir"
+        frase = transformBinaryAnswer(pergunta, resposta)
+        
+    CASO 2 - Opcao de multipla escolha (step tem options[]):
+      // Usar resposta direta, ja e descritiva
+      // "Qual o regime?" + "Comunhao parcial" -> "Regime: Comunhao parcial"
+      frase = compactLabel(pergunta) + ": " + resposta
+        
+    CASO 3 - Texto livre:
+      // Truncar se > 80 chars
+      frase = compactLabel(pergunta) + ": " + truncar(resposta, 80)
+    
+    partes.push(frase)
+  
+  retorna formName + " | " + partes.join(" | ")
 ```
 
-### 2. Corrigir exibicao no LeadDetailDialog.tsx
+### Funcoes auxiliares
 
-Para leads **ja salvos** com dados duplicados, a correcao deve ser na exibicao:
+**`transformBinaryAnswer(pergunta, resposta)`**: Converte perguntas Sim/Nao em frases naturais:
+- Remove "Ha ", "Existe ", "Possui ", "Tem ", "Voce tem " do inicio
+- Remove "?" do final
+- Se "Sim": "Possui " + resto ("bens para dividir")
+- Se "Nao": "Sem " + resto ("bens para dividir")
 
-- Adicionar ao `excludeKeys` do `getDynamicFields()` todas as chaves que ja estao em `respostas_mapeadas`. Ou seja, se `respostas_mapeadas` existe, excluir dinamicamente todas as suas chaves do `getDynamicFields`.
-- Tambem excluir campos de contato que ja aparecem no cabecalho (Nome/name, Email/email, Telefone/phone em qualquer variacao de maiuscula).
-- Excluir campos internos/tecnicos: `respostas_mapeadas`, `source`, `company`, `nome`, `tel`, `celular`, `source_page`, `service`, `Servico`.
+**`compactLabel(pergunta)`**: Encurta titulos longos:
+- Remove "Qual e o/a ", "Qual o/a ", "Selecione ", "Escolha ", "Informe "
+- Remove "?" do final
+- Capitaliza primeira letra
+- Exemplo: "Qual e o regime de bens?" -> "Regime de bens"
 
-### 3. Remover Navbar duplicada (ServiceLandingLayout.tsx)
+### Exemplo real (divorcio)
 
-Remover a segunda chamada `<Navbar />` na linha 148.
+Respostas do lead:
+```text
+{
+  "Nome": "Maria Santos",
+  "Email": "maria@email.com",  
+  "Telefone": "(62) 99459-4496",
+  "Qual o regime de bens?": "Comunhao parcial",
+  "Ha bens para dividir?": "Sim",
+  "Ha dividas em comum?": "Nao",
+  "Possui filhos menores?": "Sim, 2 filhos",
+  "Deseja guarda compartilhada?": "Sim",
+  "Ha pensao alimenticia?": "Sim",
+  "Qual a urgencia?": "Preciso resolver urgentemente"
+}
+```
 
-### 4. Adicionar SEO dinamico nas paginas de servico (ServiceLandingLayout.tsx)
+Resultado:
+```text
+{
+  "nome": "Maria Santos",
+  "email": "maria@email.com",
+  "telefone": "(62) 99459-4496",
+  "resumo_caso": "Divorcio | Regime de bens: Comunhao parcial | Possui bens para dividir | Sem dividas em comum | Filhos menores: Sim, 2 filhos | Possui guarda compartilhada | Possui pensao alimenticia | Urgencia: Preciso resolver urgentemente",
+  "formulario": "Divorcio",
+  "data_envio": "2026-02-20T12:00:00Z"
+}
+```
 
-Adicionar um `useEffect` que define:
-- `document.title` = `{serviceName} | {serviceArea} | Nome do Escritorio`
-- Meta description via `document.querySelector('meta[name="description"]')` ou criando a tag se nao existir
+## Alteracoes Tecnicas
 
-### 5. Adicionar dados estruturados JSON-LD (ServiceLandingLayout.tsx)
+### `src/hooks/useStepForm.ts`
 
-Injetar um `<script type="application/ld+json">` com:
-- Schema `LegalService` com `name`, `description`, `areaServed`
-- Schema `FAQPage` com as perguntas e respostas da secao FAQ
+1. Adicionar 3 funcoes utilitarias ANTES do hook:
 
-Limpeza do script no `useEffect` cleanup para evitar acumulo ao navegar entre paginas.
+- `compactLabel(label)`: remove prefixos interrogativos e "?"
+- `transformBinaryAnswer(question, answer)`: converte Sim/Nao em frases naturais
+- `buildCaseSummary(mappedResponses, steps, formName)`: orquestra a geracao do resumo
 
----
+2. Substituir o `webhookPayload` atual (linhas 453-466) por:
 
-## Resumo Tecnico
+```text
+const resumo = buildCaseSummary(mappedResponses, form.steps, serviceName);
+const webhookPayload = {
+  nome: extractedData.name,
+  email: extractedData.email,
+  telefone: extractedData.phone,
+  resumo_caso: resumo,
+  urgencia: urgency,
+  formulario: form.name,
+  data_envio: new Date().toISOString(),
+  lead_id: savedLead?.id,
+  form_slug: form.slug
+};
+```
+
+### Nenhuma alteracao no edge function `process-webhook-queue`
+
+Ele ja envia `item.payload` como JSON -- o payload simplificado sera enviado automaticamente.
+
+## Resumo
 
 | Arquivo | Alteracao |
 |---|---|
-| `src/hooks/useStepForm.ts` | Remover `...mappedResponses` do spread da conversion_events (linha 395) |
-| `src/components/admin/LeadDetailDialog.tsx` | Expandir `excludeKeys` dinamicamente com chaves de `respostas_mapeadas` + campos de contato |
-| `src/components/ServiceLandingLayout.tsx` | Remover Navbar duplicada, adicionar SEO (document.title + meta description + JSON-LD) |
+| `src/hooks/useStepForm.ts` | Adicionar `buildCaseSummary` + helpers, substituir webhookPayload |
 
-Nenhuma alteracao em funcionalidades nao relacionadas.
-
+Nenhuma outra funcionalidade e alterada. A mudanca afeta APENAS o conteudo enviado via webhook.
