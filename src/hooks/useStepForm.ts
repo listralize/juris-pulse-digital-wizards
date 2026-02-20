@@ -6,6 +6,73 @@ import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts
 import { logger } from '@/utils/logger';
 import type { StepFormData, StepFormStep } from '@/types/stepFormTypes';
 
+// --- NLG helpers for webhook case summary ---
+
+const CONTACT_KEYS = new Set([
+  'nome', 'name', 'email', 'e-mail', 'telefone', 'phone', 'celular', 'whatsapp',
+  'telefone/whatsapp', 'tel', 'fone',
+]);
+
+/** Remove interrogative prefixes and "?" to produce a compact label */
+const compactLabel = (label: string): string => {
+  let s = label.trim();
+  s = s.replace(/\?$/g, '').trim();
+  // Remove common PT-BR interrogative prefixes (case-insensitive)
+  s = s.replace(/^(qual\s+[eé]\s+(o|a)\s+|qual\s+(o|a)\s+|selecione\s+|escolha\s+|informe\s+(o|a|seu|sua)?\s*|descreva\s+|digite\s+(o|a|seu|sua)?\s*)/i, '');
+  s = s.trim();
+  // Capitalize first letter
+  if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
+  return s;
+};
+
+/** Convert binary (Sim/Não) answers into natural-language phrases */
+const transformBinaryAnswer = (question: string, answer: string): string => {
+  let stem = question.trim().replace(/\?$/g, '').trim();
+  // Remove leading verbs: "Há ", "Existe ", "Possui ", "Tem ", "Você tem ", "Deseja ", "Há algum(a) "
+  stem = stem.replace(/^(h[aá]\s+|existe[m]?\s+|possui\s+|tem\s+|voc[eê]\s+tem\s+|deseja\s+|h[aá]\s+algum[a]?\s+)/i, '');
+  stem = stem.trim();
+  // lowercase first char for joining
+  if (stem.length > 0) stem = stem.charAt(0).toLowerCase() + stem.slice(1);
+
+  const isYes = /^sim/i.test(answer.trim());
+  if (isYes) return `Possui ${stem}`;
+  return `Sem ${stem}`;
+};
+
+/** Build a human-readable case summary from mapped responses */
+const buildCaseSummary = (
+  mappedResponses: Record<string, any>,
+  steps: StepFormStep[],
+  formName: string
+): string => {
+  const parts: string[] = [formName || 'Consulta Jurídica'];
+
+  for (const [question, rawAnswer] of Object.entries(mappedResponses)) {
+    // Skip contact fields
+    if (CONTACT_KEYS.has(question.toLowerCase().trim())) continue;
+
+    const answer = String(rawAnswer ?? '').trim();
+    if (!answer) continue;
+
+    // Find matching step for metadata
+    const step = steps.find(s => s.title === question);
+
+    // Case 1: Binary answer
+    if (/^(sim|n[aã]o)$/i.test(answer)) {
+      parts.push(transformBinaryAnswer(question, answer));
+      continue;
+    }
+
+    // Case 2: Multiple-choice (step has options) or any other
+    const label = compactLabel(question);
+    // Truncate long free-text answers
+    const truncated = answer.length > 80 ? answer.substring(0, 77) + '...' : answer;
+    parts.push(`${label}: ${truncated}`);
+  }
+
+  return parts.join(' | ');
+};
+
 // Count reachable steps by traversing flow_config edges from the first step
 const countReachableSteps = (steps: StepFormStep[], flowConfig?: StepFormData['flow_config']): number => {
   if (!flowConfig?.edges || flowConfig.edges.length === 0) return steps.length;
@@ -450,19 +517,17 @@ export const useStepForm = () => {
       // Queue webhook with anti-ban timing
       if (form.webhook_url?.trim()) {
         try {
+          const resumoCaso = buildCaseSummary(mappedResponses, form.steps, serviceName);
           const webhookPayload = {
-            formId: form.id,
-            formSlug: form.slug,
-            formName: form.name,
-            responses: mappedResponses,
-            extractedData,
-            allData,
-            submissionDate: new Date().toISOString(),
-            sessionId,
-            leadId: savedLead?.id,
-            completionPercentage,
-            ...utmData,
-            metadata: { page_url: window.location.href, referrer: document.referrer, user_agent: navigator.userAgent }
+            nome: extractedData.name,
+            email: extractedData.email,
+            telefone: extractedData.phone,
+            resumo_caso: resumoCaso,
+            urgencia: 'default',
+            formulario: form.name,
+            data_envio: new Date().toISOString(),
+            lead_id: savedLead?.id,
+            form_slug: form.slug
           };
 
           // Determine urgency from answers
@@ -480,6 +545,7 @@ export const useStepForm = () => {
             urgency = 'pesquisando';
             delaySeconds = 480;
           }
+          webhookPayload.urgencia = urgency;
 
           const sendAt = new Date(Date.now() + delaySeconds * 1000).toISOString();
 
