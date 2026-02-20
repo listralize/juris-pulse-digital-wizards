@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -14,11 +14,82 @@ import { StepFormFields } from '@/components/stepform/StepFormFields';
 import { StepOffer } from '@/components/stepform/StepOffer';
 import { StepFormFooter } from '@/components/stepform/StepFormFooter';
 
+// Inject dynamic SEO meta tags from form config
+const useStepFormSEO = (form: any, slug?: string) => {
+  useEffect(() => {
+    if (!form) return;
+
+    const seoConfig = form.seo_config as any;
+    const seo = form.seo as any;
+
+    // Title
+    const title = seoConfig?.meta_title || seo?.meta_title || form.title || 'Formulário';
+    document.title = title;
+
+    // Helper to set/create meta tags
+    const setMeta = (name: string, content: string, property?: boolean) => {
+      if (!content) return;
+      const attr = property ? 'property' : 'name';
+      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement;
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, name);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    const description = seoConfig?.meta_description || seo?.meta_description || '';
+    const keywords = seoConfig?.meta_keywords || '';
+
+    setMeta('description', description);
+    setMeta('keywords', keywords);
+    setMeta('og:title', title, true);
+    setMeta('og:description', description, true);
+    setMeta('og:type', 'website', true);
+    setMeta('og:url', window.location.href, true);
+
+    // Canonical
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = window.location.origin + '/formulario/' + (slug || '');
+
+    // JSON-LD
+    let jsonLd = document.querySelector('script[data-stepform-jsonld]') as HTMLScriptElement;
+    if (!jsonLd) {
+      jsonLd = document.createElement('script');
+      jsonLd.type = 'application/ld+json';
+      jsonLd.setAttribute('data-stepform-jsonld', 'true');
+      document.head.appendChild(jsonLd);
+    }
+    jsonLd.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'LegalService',
+      name: form.name || form.title,
+      description: description,
+      url: window.location.href,
+      areaServed: { '@type': 'Country', name: 'Brazil' },
+      serviceType: form.name || 'Consultoria Jurídica'
+    });
+
+    return () => {
+      // Cleanup JSON-LD on unmount
+      jsonLd?.remove();
+    };
+  }, [form, slug]);
+};
+
 const StepForm: React.FC = () => {
   const {
-    form, currentStep, currentStepId, formData, setFormData, loading, progress,
+    slug, form, currentStep, currentStepId, formData, setFormData, loading, progress,
     canGoBack, saveAnswer, goToNextStep, goBack, handleFormSubmit
   } = useStepForm();
+
+  useStepFormSEO(form, slug);
 
   if (loading) {
     return <StepFormLoader title="Carregando seu formulário..." message="Estamos preparando tudo para você. Aguarde alguns instantes..." />;
