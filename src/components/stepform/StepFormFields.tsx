@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Lock, Shield, CircleDot, ArrowRight } from 'lucide-react';
-import { PhoneFieldWithDDD } from './PhoneFieldWithDDD';
+import { PhoneFieldWithDDD, isValidPhone } from './PhoneFieldWithDDD';
+import { toast } from 'sonner';
 import type { StepFormStep, StepFormData } from '@/types/stepFormTypes';
 
 const isPhoneField = (field: { name: string; type: string }) => {
@@ -27,7 +28,19 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
   const primaryColor = styles.primary_color || '#4CAF50';
 
   return (
-    <form noValidate onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
+    <form noValidate onSubmit={(e) => {
+      e.preventDefault();
+      // Validate phone fields before submit
+      const phoneFields = step.formFields?.filter(f => isPhoneField(f) && f.required) || [];
+      for (const field of phoneFields) {
+        const val = formData[field.name] || '';
+        if (!isValidPhone(val)) {
+          toast.error('Informe um número de telefone válido com DDD');
+          return;
+        }
+      }
+      onSubmit();
+    }} className="space-y-4">
       {step.formFields?.map((field, index) => (
         <div key={index} className="space-y-1.5">
           <Label htmlFor={`field-${field.name}`} className="text-sm font-medium">
@@ -73,8 +86,7 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
       </div>
 
       <Button
-        type="button"
-        onClick={onSubmit}
+        type="submit"
         className="w-full h-14 text-base font-semibold"
         disabled={isSubmitting}
         style={{
