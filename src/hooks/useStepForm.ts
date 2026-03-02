@@ -296,12 +296,18 @@ export const useStepForm = () => {
       }
     }
 
-    // Validate email
-    const emailValue = formData.email || answers.email || formData.Email || answers.Email;
-    if (!emailValue || !emailValue.trim()) {
-      toast({ title: 'Campo obrigatório', description: 'Email é obrigatório para enviar o formulário', variant: 'destructive' });
-      setIsSubmitting(false);
-      return;
+    // Validate email only if the form has an email field
+    const currentStepForEmail = getCurrentStep();
+    const hasEmailField = currentStepForEmail?.formFields?.some(
+      f => f.type === 'email' || f.name.toLowerCase().includes('email')
+    );
+    if (hasEmailField) {
+      const emailValue = formData.email || answers.email || formData.Email || answers.Email;
+      if (!emailValue || !emailValue.trim()) {
+        toast({ title: 'Campo obrigatório', description: 'Email é obrigatório para enviar o formulário', variant: 'destructive' });
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     // Validate required form fields

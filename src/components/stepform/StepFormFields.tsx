@@ -96,7 +96,7 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
       >
         {isSubmitting ? 'Enviando...' : (
           <span className="flex items-center gap-2">
-            Quero minha consulta gratuita
+            Enviar
             <ArrowRight className="w-5 h-5" />
           </span>
         )}
