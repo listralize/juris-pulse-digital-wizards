@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-const DDDS_WITH_9 = new Set([11,12,13,14,15,16,17,18,19,21,22,24,27,28]);
+
 
 interface PhoneFieldWithDDDProps {
   name: string;
@@ -33,22 +33,6 @@ function formatPhone(digits: string): string {
   return `(${ddd}) ${num.slice(0, 5)}-${num.slice(5)}`;
 }
 
-/** Normalize 9th digit based on DDD rules */
-function normalize9thDigit(digits: string): string {
-  if (digits.length < 10) return digits;
-  const ddd = parseInt(digits.slice(0, 2));
-  const num = digits.slice(2);
-  if (DDDS_WITH_9.has(ddd)) {
-    if (num.length === 8 && num[0] !== '9') {
-      return digits.slice(0, 2) + '9' + num;
-    }
-  } else {
-    if (num.length === 9 && num[0] === '9') {
-      return digits.slice(0, 2) + num.slice(1);
-    }
-  }
-  return digits;
-}
 
 /** Check if a phone value (format 55XXXXXXXXXXX) is valid */
 export function isValidPhone(value: string): boolean {
@@ -84,9 +68,8 @@ export const PhoneFieldWithDDD: React.FC<PhoneFieldWithDDDProps> = ({
     setTouched(true);
     const digits = extractDigits(displayValue);
     if (digits.length >= 10) {
-      const normalized = normalize9thDigit(digits);
-      setDisplayValue(formatPhone(normalized));
-      onChange(`55${normalized}`);
+      setDisplayValue(formatPhone(digits));
+      onChange(`55${digits}`);
     } else if (digits.length === 0) {
       setDisplayValue('');
       onChange('');
