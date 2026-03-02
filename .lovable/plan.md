@@ -1,87 +1,60 @@
 
-
-# Corrigir Campo de Telefone - Nova Abordagem
+# Corrigir StepForm do Divorcio - 3 Bugs Criticos
 
 ## Problemas Encontrados
 
-### BUG 1: Loop infinito entre estado interno e externo
-O componente atual tem um ciclo vicioso:
-1. Usuario digita -> `extractDigits` extrai digitos -> `emitValue` adiciona `55` na frente -> `onChange("55XX...")`
-2. O `formData` atualiza com `55XX...`
-3. O `useEffect` detecta mudanca em `value` -> chama `extractDigits("55XX...")` -> remove o `55` -> atualiza `digits`
-4. Isso causa re-renders desnecessarios e, com autofill, pode cortar/duplicar digitos
+### BUG 1 (BLOQUEANTE): Formulario exige email, mas nao tem campo de email
+O formulario `divorcioform` tem apenas 2 campos: **Nome** e **Telefone**. Porem, no `useStepForm.ts` (linhas 300-305), existe uma validacao obrigatoria de email:
 
-### BUG 2: Nenhuma validacao de telefone no submit
-O `handleFormSubmit` (useStepForm.ts, linha 311-318) verifica apenas se o campo required esta vazio (`!fieldValue || fieldValue.toString().trim() === ''`). Como o componente emite `55X` mesmo com 1 digito, qualquer numero parcial passa como valido.
-
-### BUG 3: Mascara cria salto visual
-Ao digitar o 9o digito (do numero, sem DDD), o formato muda de `XXXX-XXXX` para `XXXXX-XXXX`. Isso faz o cursor pular e confunde o usuario.
-
-## Solucao: Abordagem Simples e Robusta
-
-### Filosofia
-- **Zero mascara durante digitacao** -- deixar o usuario/autofill digitar livremente
-- **Formatar apenas no blur** -- quando sai do campo, aplica a mascara bonita
-- **Validar no submit** -- bloquear envio se telefone invalido
-
-### Como funciona
-
-1. **Digitando**: o campo aceita qualquer input, mostra como o usuario digita (sem mascara forcada)
-2. **Autofill**: o navegador preenche `(62) 99999-0000` ou `62999990000` ou `+5562999990000` -- tudo aceito
-3. **Ao sair do campo (blur)**: extrai os digitos, normaliza o 9o digito, formata como `(XX) XXXXX-XXXX`, e emite `55XXXXXXXXXXX`
-4. **Ao clicar enviar**: StepFormFields valida que o telefone tem 10-11 digitos antes de chamar onSubmit. Se invalido, mostra mensagem de erro e nao envia.
-
-## Alteracoes
-
-### `src/components/stepform/PhoneFieldWithDDD.tsx`
-
-Reescrever com abordagem "format on blur":
-
-- Estado interno: `displayValue` (string formatada mostrada ao usuario)
-- **onChange**: armazena o texto como o usuario digita, SEM mascara. Nao emite para o pai durante digitacao.
-- **onBlur**: extrai digitos, normaliza 9o digito, formata como `(XX) XXXXX-XXXX`, emite `55XXXXXXXXXXX` para o pai
-- **Exportar funcao `isValidPhone(value)`**: recebe o valor `55XXXXXXXXXXX` e retorna true se tem 12-13 digitos (55 + 10 ou 11 digitos)
-- Remover o `useEffect` de sync (causa do loop)
-- Inicializar `displayValue` a partir do `value` prop apenas uma vez (no useState)
-
-### `src/components/stepform/StepFormFields.tsx`
-
-- Importar `isValidPhone` do PhoneFieldWithDDD
-- Antes de chamar `onSubmit()`, validar todos os campos de telefone:
-  - Se algum campo telefone required tem valor invalido, mostrar toast de erro e nao enviar
-  - Mostrar mensagem: "Informe um numero de telefone valido com DDD"
-
-## Detalhes tecnicos
-
-### Funcao `extractDigits` (simplificada)
-- Remove tudo que nao e digito
-- Se comeca com `55` e tem 12+ digitos, remove o `55`
-- Limita a 11 digitos
-
-### Funcao `isValidPhone` (nova, exportada)
 ```text
-recebe valor no formato "55XXXXXXXXXXX"
-extrai digitos apos o 55
-retorna true se tem 10 ou 11 digitos
+if (!emailValue || !emailValue.trim()) {
+  toast('Email e obrigatorio para enviar o formulario');
+  return; // <-- BLOQUEIA O ENVIO
+}
 ```
 
-### Formato visual no blur
-```text
-10 digitos: (XX) XXXX-XXXX
-11 digitos: (XX) XXXXX-XXXX
-```
+Como nao existe campo de email no formulario, `emailValue` e sempre vazio, e o envio **nunca funciona**. Este e o motivo pelo qual o usuario nao consegue enviar.
 
-### Formato emitido (sem mudanca)
-```text
-55XXXXXXXXXXX (12 ou 13 digitos)
-```
+**Solucao**: Tornar a validacao de email condicional -- so exigir se o formulario tiver um campo de email configurado.
 
-## Resumo de arquivos
+### BUG 2: Texto do botao errado
+Em `StepFormFields.tsx` (linha 99), o texto esta fixo como "Quero minha consulta gratuita". O usuario quer que seja "Enviar".
 
-| Arquivo | Alteracao |
+**Solucao**: Trocar o texto para "Enviar".
+
+### BUG 3: normalize9thDigit remove digitos validos
+A funcao `normalize9thDigit` no `PhoneFieldWithDDD.tsx` usa uma lista desatualizada (`DDDS_WITH_9`) que contem apenas DDDs de SP/RJ/ES. Para DDDs como 62 (Goiania), ela **remove** o 9o digito, corrompendo o numero. Desde 2016, todos os celulares brasileiros tem 9 digitos.
+
+**Solucao**: Remover `DDDS_WITH_9` e `normalize9thDigit` completamente.
+
+## Alteracoes por arquivo
+
+### 1. `src/hooks/useStepForm.ts`
+- **Linhas 299-305**: Tornar validacao de email condicional. So exigir email se existir um campo de email no formulario atual (verificar `currentStep.formFields` por campo com `type === 'email'` ou `name` contendo 'email')
+- Se nao houver campo de email, pular a validacao e permitir envio sem email
+
+### 2. `src/components/stepform/StepFormFields.tsx`
+- **Linha 99**: Trocar "Quero minha consulta gratuita" por "Enviar"
+
+### 3. `src/components/stepform/PhoneFieldWithDDD.tsx`
+- **Linha 5**: Remover constante `DDDS_WITH_9`
+- **Linhas 37-51**: Remover funcao `normalize9thDigit`
+- **Linha 87**: No `handleBlur`, usar `digits` diretamente em vez de `normalize9thDigit(digits)`
+
+## Tracking (ja funciona)
+Verifiquei o `tracking_config` do formulario e o `useStepFormMarketingScripts.ts`:
+- Facebook Pixel: habilitado, evento "Lead", pixel ID 1024100955860841
+- GTM: habilitado, container GTM-PL22PJ6V, evento "submit"
+- GA: desabilitado (correto)
+- O evento `stepFormSubmitSuccess` e disparado apos salvar o lead (linha 482 do useStepForm.ts) e os handlers de FB/GTM capturam esse evento corretamente
+- O redirecionamento para `/obrigado` esta configurado (linha 616) e funciona apos 1.5s
+
+O tracking so nao funcionava porque o formulario nunca completava o submit (Bug 1).
+
+## Resumo
+
+| Arquivo | O que muda |
 |---|---|
-| `src/components/stepform/PhoneFieldWithDDD.tsx` | Reescrever: format-on-blur, exportar isValidPhone |
-| `src/components/stepform/StepFormFields.tsx` | Adicionar validacao de telefone antes do submit |
-
-Nenhum outro arquivo precisa ser alterado.
-
+| `src/hooks/useStepForm.ts` | Validacao de email condicional |
+| `src/components/stepform/StepFormFields.tsx` | Texto do botao: "Enviar" |
+| `src/components/stepform/PhoneFieldWithDDD.tsx` | Remover normalize9thDigit e DDDS_WITH_9 |
