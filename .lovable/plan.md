@@ -1,25 +1,37 @@
 
 
-# Enhanced Conversions Migration + Marketing Scripts Fix
+# Fix GTM Double-Firing: Clear custom_head_html from divorcioform
 
-## Current State
+## Problem
+The GTM container is loaded twice on the StepForm page:
+1. Globally via `useMarketingLoader` (correct)
+2. Via `custom_head_html` in the divorcioform's `tracking_config` (duplicate)
 
-The code in `useStepForm.ts` (lines 441-444) already sends `gclid`, `transaction_id`, `utm_term`, `utm_content` to `form_leads`, but **these columns don't exist in the database**. This causes the INSERT to fail silently, resulting in `savedLead = null` and empty `lead_id` in the dataLayer.
+This causes 2-3 conversion hits per form submission.
 
-Similarly, `conversion_events` lacks `gclid` and `transaction_id` columns.
+## What I Can Do (Step 1)
 
-## Changes Required
+Run a SQL migration to clear the `custom_head_html` field from the divorcioform's `tracking_config`:
 
-### 1. Database Migration — Enhanced Conversions
-Add columns to `form_leads` and `conversion_events`, create `offline_conversions` table, and add performance indexes. This is the SQL provided by the user.
+```sql
+UPDATE public.step_forms
+SET tracking_config = tracking_config - 'custom_head_html'
+WHERE slug = 'divorcioform'
+  AND tracking_config->>'custom_head_html' IS NOT NULL;
+```
 
-### 2. `src/hooks/useStepFormMarketingScripts.ts` (lines 230-241)
-Add `extractedData` as first priority source for email/name/phone in the GTM handler. Currently the code reads `userData`, `formData`, `answers` but misses `extractedData` which is the properly processed data from `useStepForm`.
+This removes only the `custom_head_html` key from the JSON, leaving all other tracking config intact.
 
-**Change**: Add `const extracted = event.detail?.extractedData || {};` and prioritize `extracted.email`, `extracted.name`, `extracted.phone` in the fallback chain.
+## What You Need to Do (Step 2 — GTM Console)
 
-### 3. Add email field to divorcioform
-Run an UPDATE on `step_forms` to append an optional email field to the form step of `divorcioform`. Field will be `required: false` so it doesn't block submissions.
+This is outside Lovable's scope — done in the GTM web interface:
 
-### No other files are modified — all existing UI and functionality remains intact.
+1. Go to GTM → Variables → create/rename Data Layer Variables:
+   - `customer_full_name` (replaces `user_name`)
+   - `customer_email` (replaces `user_email`)  
+   - `customer_phone` (replaces `user_phone`)
+2. Update tag **01 - GADS - Envio de formulário de Lead** to use the new variables
+3. Publish the GTM container
+
+## No code files are modified — only a database field is cleared.
 
