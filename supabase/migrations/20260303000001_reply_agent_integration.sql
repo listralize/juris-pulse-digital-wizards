@@ -35,23 +35,44 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_lead_profiles_email_lower
   ON public.lead_profiles (lower(email));
 
--- 4. Add google_ads_conversion_id and google_ads_conversion_label to marketing_settings
---    These are needed for the direct gtag conversion call on the /obrigado page.
+-- 4. Add centralize_* fields to marketing_settings (Centralize = Reply Agent CRM panel)
 ALTER TABLE public.marketing_settings
-  ADD COLUMN IF NOT EXISTS google_ads_conversion_id TEXT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS google_ads_conversion_label TEXT DEFAULT NULL;
+  ADD COLUMN IF NOT EXISTS centralize_enabled BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS centralize_api_key TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS centralize_flow_id_default TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS centralize_flow_id_urgente TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS centralize_flow_id_semanas TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS centralize_flow_id_pesquisando TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS centralize_create_contact BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_trigger_flow BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_apply_tags BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_tag_prefix_service TEXT DEFAULT 'servico',
+  ADD COLUMN IF NOT EXISTS centralize_tag_prefix_urgency TEXT DEFAULT 'urgencia',
+  ADD COLUMN IF NOT EXISTS centralize_tag_prefix_form TEXT DEFAULT 'form',
+  ADD COLUMN IF NOT EXISTS centralize_sync_email BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_sync_phone BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_sync_name BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_sync_custom_fields BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS centralize_default_channel TEXT DEFAULT 'whatsapp',
+  ADD COLUMN IF NOT EXISTS centralize_webhook_callback_url TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS centralize_notify_on_reply BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS centralize_notify_email TEXT DEFAULT NULL;
+
+-- 5. Add google_ads_conversion fields to step_forms tracking_config
+--    (Per-form Google Ads conversion tracking is stored inside tracking_config JSONB)
+--    No schema change needed — tracking_config is already JSONB and accepts any keys.
+--    The new fields google_ads_conversion_id and google_ads_conversion_label are
+--    read/written directly in the tracking_config JSON object by StepFormBuilder.
 
 COMMENT ON COLUMN public.marketing_settings.reply_agent_enabled IS
-  'Whether to sync leads to Reply Agent CRM automatically';
-COMMENT ON COLUMN public.marketing_settings.reply_agent_flow_id IS
+  'Legacy: use centralize_enabled instead';
+COMMENT ON COLUMN public.marketing_settings.centralize_enabled IS
+  'Whether to sync leads to Centralize (Reply Agent) CRM automatically';
+COMMENT ON COLUMN public.marketing_settings.centralize_flow_id_default IS
   'Default Smart Flow ID to trigger for all new leads';
-COMMENT ON COLUMN public.marketing_settings.reply_agent_flow_id_urgente IS
+COMMENT ON COLUMN public.marketing_settings.centralize_flow_id_urgente IS
   'Smart Flow ID for leads with urgency = urgente';
-COMMENT ON COLUMN public.marketing_settings.reply_agent_flow_id_semanas IS
+COMMENT ON COLUMN public.marketing_settings.centralize_flow_id_semanas IS
   'Smart Flow ID for leads with urgency = semanas';
-COMMENT ON COLUMN public.marketing_settings.reply_agent_flow_id_pesquisando IS
+COMMENT ON COLUMN public.marketing_settings.centralize_flow_id_pesquisando IS
   'Smart Flow ID for leads with urgency = pesquisando';
-COMMENT ON COLUMN public.marketing_settings.google_ads_conversion_id IS
-  'Google Ads Conversion ID (AW-XXXXXXXXX) for direct gtag conversion events';
-COMMENT ON COLUMN public.marketing_settings.google_ads_conversion_label IS
-  'Google Ads Conversion Label for direct gtag conversion events';

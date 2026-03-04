@@ -49,14 +49,9 @@ const fireObrigadoEvents = (params: {
     timestamp: new Date().toISOString(),
   });
 
-  // gtag GA4 — se o gtag estiver disponível (carregado pelo GTM ou GA do formulário)
-  if (typeof (window as any).gtag === 'function') {
-    (window as any).gtag('event', 'generate_lead', {
-      currency: 'BRL',
-      value: 1,
-      form_slug: params.formSlug || '',
-    });
-  }
+  // Nota: gtag('event', 'conversion') para Google Ads é disparado no momento do submit
+  // pelo useStepFormMarketingScripts quando google_ads_conversion_id está configurado.
+  // Não disparamos nada adicional aqui para evitar dupla contagem.
 };
 
 const ObrigadoPage = () => {

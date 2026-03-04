@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 
-import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail, FormInput } from 'lucide-react';
+import { FileText, Briefcase, Globe, Edit, Database, Link, Users, Mail, FormInput, Bot } from 'lucide-react';
 import { useSupabaseDataNew } from '../hooks/useSupabaseDataNew';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import { useSupabasePageTexts } from '../hooks/supabase/useSupabasePageTexts';
@@ -25,6 +25,7 @@ const LeadsManagement = React.lazy(() => import('../components/admin/LeadsManage
 const EnhancedEmailTemplateManager = React.lazy(() => import('../components/admin/EnhancedEmailTemplateManager').then(m => ({ default: m.EnhancedEmailTemplateManager })));
 const StepFormBuilder = React.lazy(() => import('../components/admin/StepFormBuilder').then(m => ({ default: m.StepFormBuilder })));
 const MarketingManagement = React.lazy(() => import('../components/admin/MarketingManagement').then(m => ({ default: m.MarketingManagement })));
+const CentralizeManagement = React.lazy(() => import('../components/admin/CentralizeManagement').then(m => ({ default: m.CentralizeManagement })));
 
 const TabFallback = () => (
   <div className="flex items-center justify-center p-12">
@@ -155,7 +156,7 @@ const Admin = () => {
             <AdminHeader onLogout={logout} />
 
             <Tabs defaultValue="content" className="space-y-6">
-              <TabsList className="hidden md:grid w-full grid-cols-7 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
+              <TabsList className="hidden md:grid w-full grid-cols-8 backdrop-blur-md bg-white/10 border border-white/20 shadow-lg overflow-x-auto"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -203,6 +204,11 @@ const Admin = () => {
                   <span className="hidden sm:inline">Dashboard</span>
                   <span className="sm:hidden">Dashboard</span>
                 </TabsTrigger>
+                <TabsTrigger value="centralize" className="flex items-center gap-2 text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:bg-white/20 text-xs md:text-sm whitespace-nowrap">
+                  <Bot className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Centralize</span>
+                  <span className="sm:hidden">Bot</span>
+                </TabsTrigger>
               </TabsList>
 
               {/* Mobile/Tablet Dropdown Menu */}
@@ -216,6 +222,7 @@ const Admin = () => {
                   <TabsTrigger value="email-templates" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Mail className="w-3 h-3" /></TabsTrigger>
                   <TabsTrigger value="step-forms" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><FormInput className="w-3 h-3" /></TabsTrigger>
                   <TabsTrigger value="marketing" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Briefcase className="w-3 h-3" /></TabsTrigger>
+                  <TabsTrigger value="centralize" className="text-white/80 text-xs py-2 data-[state=active]:bg-white/20"><Bot className="w-3 h-3" /></TabsTrigger>
                 </TabsList>
               </div>
 
@@ -264,6 +271,12 @@ const Admin = () => {
               <TabsContent value="marketing">
                 <Suspense fallback={<TabFallback />}>
                   <MarketingManagement />
+                </Suspense>
+              </TabsContent>
+
+              <TabsContent value="centralize">
+                <Suspense fallback={<TabFallback />}>
+                  <CentralizeManagement />
                 </Suspense>
               </TabsContent>
             </Tabs>

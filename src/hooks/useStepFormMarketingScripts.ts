@@ -6,13 +6,21 @@ import { logger } from '@/utils/logger';
  * useStepFormMarketingScripts
  *
  * Carrega e implementa os scripts de marketing para um StepForm específico.
+ *
  * Responsabilidades:
- *  1. Injetar custom_head_html e custom_body_html no DOM (GTM snippet, etc.)
- *  2. Registrar listeners para o evento stepFormSubmitSuccess e disparar:
- *     - Facebook Pixel fbq('track', ...)
- *     - Google Tag Manager dataLayer.push(...)
- *     - Google Analytics gtag('event', ...)
- *     - Google Ads conversion direta gtag('event', 'conversion', { send_to: ... })
+ *  1. Injetar custom_head_html no <head> — principal mecanismo para carregar
+ *     o snippet do GTM configurado por formulário (era o bug: campo existia
+ *     no banco mas nunca era injetado no DOM)
+ *  2. Injetar custom_body_html no <body> (noscript do GTM, etc.)
+ *  3. Registrar listeners para 'stepFormSubmitSuccess' e disparar:
+ *     - Facebook Pixel: fbq('track', eventName)
+ *     - Google Tag Manager: dataLayer.push({ event: eventName, ...userData })
+ *     - Google Analytics: gtag('event', eventName)
+ *
+ * IMPORTANTE: O evento enviado ao GTM usa o `event_name` configurado no
+ * StepFormBuilder (aba Tracking → GTM → Nome do Evento). O GTM então captura
+ * esse evento e dispara a tag do Google Ads. NÃO adicionamos eventos extras
+ * como 'conversion' ou 'generate_lead' — isso é responsabilidade do GTM.
  */
 export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
@@ -50,13 +58,14 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       logger.log(`[${formSlug}] Configuração de tracking carregada:`, config);
 
       // ─── 1. Injetar custom_head_html no <head> ─────────────────────────────
-      // Este é o mecanismo principal para carregar o snippet do GTM por formulário.
-      // O campo existe no banco mas nunca era injetado — esse era o bug principal.
+      // BUG CORRIGIDO: o campo existia no banco mas nunca era injetado no DOM.
+      // Coloque o snippet completo do GTM neste campo no StepFormBuilder.
       if (config.custom_head_html) {
         injectCustomHtml(config.custom_head_html, 'head', formSlug);
       }
 
       // ─── 2. Injetar custom_body_html no <body> ─────────────────────────────
+      // Para o <noscript> do GTM, se necessário.
       if (config.custom_body_html) {
         injectCustomHtml(config.custom_body_html, 'body', formSlug);
       }
@@ -74,20 +83,25 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       }
 
       // ─── 4. Google Tag Manager — dataLayer.push ────────────────────────────
+      // Usa o event_name configurado no StepFormBuilder (ex: 'submit', 'lead', etc.)
+      // O GTM captura esse evento e dispara as tags configuradas (Google Ads, etc.)
       const gtmCfg = config.google_tag_manager || {};
-      if (gtmCfg.enabled === true && (gtmCfg.event_name || '').trim()) {
-        implementGoogleTagManager((gtmCfg.event_name || '').trim());
+      const gtmEventName = gtmCfg.enabled === true ? (gtmCfg.event_name || '').trim() : '';
+      if (gtmEventName) {
+        implementGoogleTagManager(gtmEventName);
       }
 
-      // ─── 5. Google Analytics — gtag('event', ...) ─────────────────────────
+            // ─── 5. Google Analytics — gtag('event', ...) ─────────────────
       const gaCfg = config.google_analytics || {};
-      if (gaCfg.enabled === true && (gaCfg.event_name || '').trim()) {
-        implementGoogleAnalytics((gaCfg.event_name || '').trim());
+      const gaEventName = gaCfg.enabled === true ? (gaCfg.event_name || '').trim() : '';
+      if (gaEventName) {
+        implementGoogleAnalytics(gaEventName);
       }
 
-      // ─── 6. Google Ads — conversão direta (bypass GTM) ────────────────────
-      // Dispara gtag('event', 'conversion', { send_to: 'AW-xxx/label' }) direto
-      // no momento do submit, sem depender do GTM capturar o dataLayer.
+      // ─── 6. Google Ads — conversão direta (bypass GTM) ─────────────────
+      // Dispara gtag('event', 'conversion', { send_to: 'AW-xxx/label' }) no momento
+      // do submit. É o método mais confiável pois não depende do GTM capturar o dataLayer.
+      // Configurado no StepFormBuilder → aba Tracking → Google Ads — Conversão Direta.
       const gadsId = (config.google_ads_conversion_id || '').trim();
       const gadsLabel = (config.google_ads_conversion_label || '').trim();
       if (gadsId && gadsLabel) {
@@ -101,22 +115,21 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
   /**
    * Injeta HTML arbitrário no <head> ou <body>.
-   * Executa scripts inline corretamente (innerHTML não executa scripts).
+   * Recria elementos <script> para que sejam executados (innerHTML não executa scripts).
    */
   const injectCustomHtml = (html: string, target: 'head' | 'body', slug: string) => {
-    const attr = `data-stepform-custom-${target}`;
+    const attrName = `data-stepform-custom-${target}`;
     // Evitar injeção duplicada
-    if (document.querySelector(`[${attr}="${slug}"]`)) return;
+    if (document.querySelector(`[${attrName}="${slug}"]`)) return;
 
     const container = document.createElement('div');
-    container.setAttribute(attr, slug);
+    container.setAttribute(attrName, slug);
     container.style.display = 'none';
 
-    // Para executar scripts inline, precisamos recriar os elementos <script>
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
-
     const fragment = document.createDocumentFragment();
+
     Array.from(tempDiv.childNodes).forEach(node => {
       if ((node as Element).tagName === 'SCRIPT') {
         const script = document.createElement('script');
@@ -124,11 +137,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         const type = (node as HTMLScriptElement).type;
         if (src) script.src = src;
         if (type) script.type = type;
-        script.async = (node as HTMLScriptElement).async;
+        script.async = (node as HTMLScriptElement).async !== false;
         script.text = (node as HTMLScriptElement).text;
-        // Copiar atributos
         Array.from((node as Element).attributes).forEach(attr => {
-          if (attr.name !== 'src' && attr.name !== 'type' && attr.name !== 'async') {
+          if (!['src', 'type', 'async'].includes(attr.name)) {
             script.setAttribute(attr.name, attr.value);
           }
         });
@@ -163,9 +175,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     return map[eventType] || eventType.replace(/\s+/g, '');
   };
 
+  /** Deduplicação de eventos: retorna true se já foi enviado recentemente */
   const dedup = (key: string, ttlMs = 3000): boolean => {
     const sentMap = (window as any).__stepFormEventSent || {};
-    if (sentMap[formSlug]?.[key]) return true; // já enviado
+    if (sentMap[formSlug]?.[key]) return true;
     sentMap[formSlug] = { ...(sentMap[formSlug] || {}), [key]: true };
     (window as any).__stepFormEventSent = sentMap;
     setTimeout(() => {
@@ -180,7 +193,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug !== formSlug) return;
       if (dedup('fb')) return;
-
       setTimeout(() => {
         if ((window as any).fbq) {
           (window as any).fbq('track', eventName, {
@@ -192,9 +204,8 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         } else {
           logger.warn(`[${formSlug}] fbq não disponível`);
         }
-      }, 500);
+      }, 1000);
     };
-
     const existing = (window as any)[`stepFormPixelHandler_${formSlug}`];
     if (existing) window.removeEventListener('stepFormSubmitSuccess', existing);
     window.addEventListener('stepFormSubmitSuccess', handleSuccess as EventListener);
@@ -205,7 +216,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug !== formSlug) return;
       if (dedup('gtm')) return;
-
       setTimeout(() => {
         const userData = event.detail?.userData || {};
         const formData = event.detail?.formData || {};
@@ -219,6 +229,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         const telefone = userData.telefone || formData.telefone || answers.telefone ||
           userData.phone || formData.phone || answers.phone ||
           userData.Telefone || formData.Telefone || answers.Telefone || '';
+        const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
 
         const eventData = {
           event: eventName,
@@ -235,6 +246,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           form_name: event.detail?.formName || `StepForm ${formSlug}`,
           form_id: formSlug,
           domain: window.location.hostname,
+          ip_address: ip,
           utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
           utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
           utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
@@ -244,10 +256,9 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
         (window as any).dataLayer = (window as any).dataLayer || [];
         (window as any).dataLayer.push(eventData);
-        logger.log(`[${formSlug}] GTM dataLayer.push: ${eventName}`);
-      }, 500);
+        logger.log(`[${formSlug}] GTM dataLayer.push: "${eventName}"`, eventData);
+      }, 1000);
     };
-
     const existing = (window as any)[`stepFormGTMHandler_${formSlug}`];
     if (existing) window.removeEventListener('stepFormSubmitSuccess', existing);
     window.addEventListener('stepFormSubmitSuccess', handleSuccess as EventListener);
@@ -258,7 +269,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug !== formSlug) return;
       if (dedup('ga')) return;
-
       setTimeout(() => {
         if ((window as any).gtag) {
           (window as any).gtag('event', eventName, {
@@ -273,7 +283,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         }
       }, 250);
     };
-
     const existing = (window as any)[`stepFormGAHandler_${formSlug}`];
     if (existing) window.removeEventListener('stepFormSubmitSuccess', existing);
     window.addEventListener('stepFormSubmitSuccess', handleSuccess as EventListener);
@@ -287,12 +296,10 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
    */
   const implementGoogleAdsConversion = (conversionId: string, conversionLabel: string) => {
     const sendTo = `${conversionId}/${conversionLabel}`;
-
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug !== formSlug) return;
       if (dedup('gads')) return;
-
-      // Aguarda 800ms para garantir que o gtag.js já carregou
+      // Aguarda 1s para garantir que o gtag.js já carregou (via custom_head_html)
       setTimeout(() => {
         if ((window as any).gtag) {
           (window as any).gtag('event', 'conversion', {
@@ -302,30 +309,24 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           });
           logger.log(`[${formSlug}] Google Ads conversion disparada: ${sendTo}`);
         } else {
-          // gtag não carregou ainda — tenta injetar o script e disparar
-          logger.warn(`[${formSlug}] gtag não disponível para conversão direta. Tentando carregar...`);
+          // gtag não carregou ainda — carrega o script e dispara
+          logger.warn(`[${formSlug}] gtag não disponível. Carregando script...`);
           const gtagScript = document.createElement('script');
           gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${conversionId}`;
           gtagScript.async = true;
           gtagScript.onload = () => {
             (window as any).dataLayer = (window as any).dataLayer || [];
-            (window as any).gtag = function () {
-              (window as any).dataLayer.push(arguments);
-            };
-            (window as any).gtag('js', new Date());
-            (window as any).gtag('config', conversionId);
-            (window as any).gtag('event', 'conversion', {
-              send_to: sendTo,
-              value: 1.0,
-              currency: 'BRL',
-            });
+            function gtag(...args: any[]) { (window as any).dataLayer.push(args); }
+            (window as any).gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', conversionId);
+            gtag('event', 'conversion', { send_to: sendTo, value: 1.0, currency: 'BRL' });
             logger.log(`[${formSlug}] Google Ads conversion disparada (após carregar gtag): ${sendTo}`);
           };
           document.head.appendChild(gtagScript);
         }
-      }, 800);
+      }, 1000);
     };
-
     const existing = (window as any)[`stepFormGAdsHandler_${formSlug}`];
     if (existing) window.removeEventListener('stepFormSubmitSuccess', existing);
     window.addEventListener('stepFormSubmitSuccess', handleSuccess as EventListener);
@@ -333,7 +334,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   const removeStepFormScripts = (slug: string) => {
-    // Remover elementos injetados no DOM
     [
       `[data-stepform-custom-head="${slug}"]`,
       `[data-stepform-custom-body="${slug}"]`,
@@ -345,9 +345,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       document.querySelectorAll(selector).forEach(el => el.remove());
     });
 
-    // Remover event listeners
-    const handlers = ['Pixel', 'GTM', 'GA', 'GAds'];
-    handlers.forEach(name => {
+    ['Pixel', 'GTM', 'GA', 'GAds'].forEach(name => {
       const key = `stepForm${name}Handler_${slug}`;
       const handler = (window as any)[key];
       if (handler) {

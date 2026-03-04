@@ -124,14 +124,6 @@ interface AnalyticsData {
 }
 export const MarketingManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('scripts');
-  const [replyAgent, setReplyAgent] = useState({
-    enabled: false,
-    flowId: '',
-    flowIdUrgente: '',
-    flowIdSemanas: '',
-    flowIdPesquisando: '',
-  });
-
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
@@ -212,15 +204,6 @@ export const MarketingManagement: React.FC = () => {
         };
         logger.log('📝 Atualizando interface com:', newScripts);
         setMarketingScripts(newScripts);
-
-        // Carregar configurações do Reply Agent
-        setReplyAgent({
-          enabled: (settings as any).reply_agent_enabled || false,
-          flowId: (settings as any).reply_agent_flow_id || '',
-          flowIdUrgente: (settings as any).reply_agent_flow_id_urgente || '',
-          flowIdSemanas: (settings as any).reply_agent_flow_id_semanas || '',
-          flowIdPesquisando: (settings as any).reply_agent_flow_id_pesquisando || '',
-        });
 
         // Atualizar tracking
         if (settings.form_tracking_config) {
@@ -674,12 +657,6 @@ export const MarketingManagement: React.FC = () => {
           pageView: true,
           conversion: true
         },
-        // Reply Agent CRM
-        reply_agent_enabled: replyAgent.enabled,
-        reply_agent_flow_id: replyAgent.flowId || null,
-        reply_agent_flow_id_urgente: replyAgent.flowIdUrgente || null,
-        reply_agent_flow_id_semanas: replyAgent.flowIdSemanas || null,
-        reply_agent_flow_id_pesquisando: replyAgent.flowIdPesquisando || null,
         updated_at: new Date().toISOString()
       };
       logger.log('📤 Dados a serem salvos:', configData);
@@ -1048,98 +1025,6 @@ export const MarketingManagement: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Reply Agent CRM Integration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-green-500" />
-                Reply Agent CRM — Integração de Leads
-              </CardTitle>
-              <CardDescription>
-                Sincroniza automaticamente todos os leads capturados nos formulários com o Reply Agent CRM e dispara Smart Flows de nutrição.
-                A API Key deve ser configurada como <strong>Secret</strong> no Supabase: <code>REPLY_AGENT_API_KEY</code>.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="reply-agent-enabled"
-                  checked={replyAgent.enabled}
-                  onCheckedChange={val => setReplyAgent(prev => ({ ...prev, enabled: val }))}
-                />
-                <Label htmlFor="reply-agent-enabled" className="cursor-pointer">
-                  {replyAgent.enabled ? <span className="text-green-600 font-semibold">✅ Integração ativa</span> : <span className="text-gray-500">Integração desativada</span>}
-                </Label>
-              </div>
-
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  O Smart Flow padrão é disparado para todos os leads. Você pode configurar flows diferentes por nível de urgência para personalizar a abordagem.
-                  Encontre os IDs em <strong>Reply Agent &rarr; Automações &rarr; Smart Flows</strong>.
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="ra-flow-id">Smart Flow Padrão (todos os leads)</Label>
-                  <Input
-                    id="ra-flow-id"
-                    placeholder="Ex: 123456"
-                    value={replyAgent.flowId}
-                    onChange={e => setReplyAgent(prev => ({ ...prev, flowId: e.target.value }))}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <Label htmlFor="ra-flow-urgente">⚡ Flow — Urgente</Label>
-                    <Input
-                      id="ra-flow-urgente"
-                      placeholder="ID do flow"
-                      value={replyAgent.flowIdUrgente}
-                      onChange={e => setReplyAgent(prev => ({ ...prev, flowIdUrgente: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ra-flow-semanas">📋 Flow — Em semanas</Label>
-                    <Input
-                      id="ra-flow-semanas"
-                      placeholder="ID do flow"
-                      value={replyAgent.flowIdSemanas}
-                      onChange={e => setReplyAgent(prev => ({ ...prev, flowIdSemanas: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ra-flow-pesquisando">🔍 Flow — Pesquisando</Label>
-                    <Input
-                      id="ra-flow-pesquisando"
-                      placeholder="ID do flow"
-                      value={replyAgent.flowIdPesquisando}
-                      onChange={e => setReplyAgent(prev => ({ ...prev, flowIdPesquisando: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {replyAgent.enabled && !replyAgent.flowId && (
-                <Alert>
-                  <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                  <AlertDescription className="text-yellow-700">
-                    Integração ativa mas sem Smart Flow configurado. Os contatos serão criados no CRM mas nenhuma automação será disparada.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {replyAgent.enabled && replyAgent.flowId && (
-                <Alert>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <AlertDescription className="text-green-700">
-                    Todos os leads serão sincronizados com o Reply Agent e o Smart Flow <strong>{replyAgent.flowId}</strong> será disparado automaticamente.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* TRACKING TAB */}
