@@ -15,12 +15,14 @@ import { logger } from '@/utils/logger';
  *  3. Registrar listeners para 'stepFormSubmitSuccess' e disparar:
  *     - Facebook Pixel: fbq('track', eventName)
  *     - Google Tag Manager: dataLayer.push({ event: eventName, ...userData })
+ *       → inclui transaction_id e gclid para Enhanced Conversions
  *     - Google Analytics: gtag('event', eventName)
+ *     - Google Ads Direto: gtag('event', 'conversion', { send_to, transaction_id })
  *
- * IMPORTANTE: O evento enviado ao GTM usa o `event_name` configurado no
- * StepFormBuilder (aba Tracking → GTM → Nome do Evento). O GTM então captura
- * esse evento e dispara a tag do Google Ads. NÃO adicionamos eventos extras
- * como 'conversion' ou 'generate_lead' — isso é responsabilidade do GTM.
+ * ESTRATÉGIA DE ENHANCED CONVERSIONS:
+ *  O GTM recebe o event_name configurado (ex: 'submit') + transaction_id + gclid.
+ *  O Google Ads usa o transaction_id para deduplicar conversões online/offline.
+ *  O gclid é salvo no Supabase para upload de conversões offline qualificadas.
  */
 export const useStepFormMarketingScripts = (formSlug: string) => {
   useEffect(() => {
@@ -65,7 +67,6 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       }
 
       // ─── 2. Injetar custom_body_html no <body> ─────────────────────────────
-      // Para o <noscript> do GTM, se necessário.
       if (config.custom_body_html) {
         injectCustomHtml(config.custom_body_html, 'body', formSlug);
       }
@@ -85,22 +86,24 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       // ─── 4. Google Tag Manager — dataLayer.push ────────────────────────────
       // Usa o event_name configurado no StepFormBuilder (ex: 'submit', 'lead', etc.)
       // O GTM captura esse evento e dispara as tags configuradas (Google Ads, etc.)
+      // Enhanced Conversions: transaction_id e gclid são incluídos no dataLayer.
       const gtmCfg = config.google_tag_manager || {};
       const gtmEventName = gtmCfg.enabled === true ? (gtmCfg.event_name || '').trim() : '';
       if (gtmEventName) {
         implementGoogleTagManager(gtmEventName);
       }
 
-            // ─── 5. Google Analytics — gtag('event', ...) ─────────────────
+      // ─── 5. Google Analytics — gtag('event', ...) ─────────────────────────
       const gaCfg = config.google_analytics || {};
       const gaEventName = gaCfg.enabled === true ? (gaCfg.event_name || '').trim() : '';
       if (gaEventName) {
         implementGoogleAnalytics(gaEventName);
       }
 
-      // ─── 6. Google Ads — conversão direta (bypass GTM) ─────────────────
-      // Dispara gtag('event', 'conversion', { send_to: 'AW-xxx/label' }) no momento
-      // do submit. É o método mais confiável pois não depende do GTM capturar o dataLayer.
+      // ─── 6. Google Ads — conversão direta com transaction_id ──────────────
+      // Dispara gtag('event', 'conversion', { send_to, transaction_id }) no submit.
+      // É o método mais confiável: não depende do GTM e inclui o transaction_id
+      // para deduplicação de conversões online/offline (Enhanced Conversions).
       // Configurado no StepFormBuilder → aba Tracking → Google Ads — Conversão Direta.
       const gadsId = (config.google_ads_conversion_id || '').trim();
       const gadsLabel = (config.google_ads_conversion_label || '').trim();
@@ -212,6 +215,13 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
     (window as any)[`stepFormPixelHandler_${formSlug}`] = handleSuccess;
   };
 
+  /**
+   * Google Tag Manager — dataLayer.push com Enhanced Conversions
+   *
+   * Inclui transaction_id e gclid no dataLayer para que o GTM possa:
+   *  - Usar o transaction_id como "ID de transação" na tag de conversão do Google Ads
+   *  - Usar o gclid para Enhanced Conversions for Leads (upload offline)
+   */
   const implementGoogleTagManager = (eventName: string) => {
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug !== formSlug) return;
@@ -229,24 +239,34 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         const telefone = userData.telefone || formData.telefone || answers.telefone ||
           userData.phone || formData.phone || answers.phone ||
           userData.Telefone || formData.Telefone || answers.Telefone || '';
-        const ip = userData.ip_address || formData.ip_address || answers.ip_address || '';
+
+        // Enhanced Conversions: transaction_id e gclid do evento
+        const transactionId = event.detail?.transactionId || '';
+        const gclid = event.detail?.gclid || sessionStorage.getItem('_gclid') || '';
 
         const eventData = {
           event: eventName,
-          page_location: window.location.href,
-          page_path: window.location.pathname,
-          page_title: document.title,
-          session_id: event.detail?.sessionId || sessionStorage.getItem('sessionId') || '',
-          timestamp: new Date().toISOString(),
-          user_agent: navigator.userAgent,
+          // Enhanced Conversions — campos críticos para deduplicação
+          transaction_id: transactionId,
+          gclid: gclid,
+          // Dados do usuário para Enhanced Conversions for Leads
           customer_email: email,
           customer_phone: telefone,
           customer_full_name: nome,
+          // Metadados do formulário
           form_slug: formSlug,
           form_name: event.detail?.formName || `StepForm ${formSlug}`,
           form_id: formSlug,
+          lead_id: event.detail?.leadId || '',
+          // Contexto da página
+          page_location: window.location.href,
+          page_path: window.location.pathname,
+          page_title: document.title,
+          session_id: event.detail?.sessionId || '',
+          timestamp: new Date().toISOString(),
+          user_agent: navigator.userAgent,
           domain: window.location.hostname,
-          ip_address: ip,
+          // UTMs
           utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
           utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
           utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
@@ -256,7 +276,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
 
         (window as any).dataLayer = (window as any).dataLayer || [];
         (window as any).dataLayer.push(eventData);
-        logger.log(`[${formSlug}] GTM dataLayer.push: "${eventName}"`, eventData);
+        logger.log(`[${formSlug}] GTM dataLayer.push: "${eventName}" | transaction_id: ${transactionId} | gclid: ${gclid || '(sem gclid)'}`, eventData);
       }, 1000);
     };
     const existing = (window as any)[`stepFormGTMHandler_${formSlug}`];
@@ -290,24 +310,45 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
   };
 
   /**
+   * Google Ads — conversão direta com transaction_id (Enhanced Conversions)
+   *
    * Dispara gtag('event', 'conversion') diretamente para o Google Ads,
-   * sem passar pelo GTM. É o método mais confiável pois não depende de
-   * nenhuma tag configurada no GTM.
+   * sem passar pelo GTM. Inclui:
+   *  - transaction_id: para deduplicação de conversões online/offline
+   *  - gclid: para Enhanced Conversions for Leads
+   *
+   * É o método mais confiável pois não depende de nenhuma tag no GTM.
+   * Configurado no StepFormBuilder → aba Tracking → Google Ads — Conversão Direta.
    */
   const implementGoogleAdsConversion = (conversionId: string, conversionLabel: string) => {
     const sendTo = `${conversionId}/${conversionLabel}`;
     const handleSuccess = (event: CustomEvent) => {
       if (event.detail?.formSlug !== formSlug) return;
       if (dedup('gads')) return;
+
+      const transactionId = event.detail?.transactionId || '';
+      const gclid = event.detail?.gclid || sessionStorage.getItem('_gclid') || '';
+
       // Aguarda 1s para garantir que o gtag.js já carregou (via custom_head_html)
       setTimeout(() => {
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'conversion', {
+        const fireConversion = (gtagFn: Function) => {
+          const conversionData: Record<string, any> = {
             send_to: sendTo,
             value: 1.0,
             currency: 'BRL',
-          });
-          logger.log(`[${formSlug}] Google Ads conversion disparada: ${sendTo}`);
+          };
+          // transaction_id é crítico para deduplicação no Google Ads
+          if (transactionId) conversionData.transaction_id = transactionId;
+          gtagFn('event', 'conversion', conversionData);
+          logger.log(
+            `[${formSlug}] Google Ads conversion disparada: ${sendTo}`,
+            `| transaction_id: ${transactionId || '(sem id)'}`,
+            `| gclid: ${gclid || '(sem gclid)'}`
+          );
+        };
+
+        if ((window as any).gtag) {
+          fireConversion((window as any).gtag);
         } else {
           // gtag não carregou ainda — carrega o script e dispara
           logger.warn(`[${formSlug}] gtag não disponível. Carregando script...`);
@@ -320,8 +361,7 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
             (window as any).gtag = gtag;
             gtag('js', new Date());
             gtag('config', conversionId);
-            gtag('event', 'conversion', { send_to: sendTo, value: 1.0, currency: 'BRL' });
-            logger.log(`[${formSlug}] Google Ads conversion disparada (após carregar gtag): ${sendTo}`);
+            fireConversion(gtag);
           };
           document.head.appendChild(gtagScript);
         }

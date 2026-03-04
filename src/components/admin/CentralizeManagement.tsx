@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import {
   Save, RefreshCw, Info, AlertTriangle, CheckCircle, Zap, MessageSquare,
   Users, Settings, Tag, Send, Globe, Phone, Mail, Hash, ArrowRight,
-  Bot, Workflow, Bell, Shield, Database
+  Bot, Workflow, Bell, Shield, Database, TrendingUp, Upload, Target
 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 
@@ -78,6 +78,8 @@ export const CentralizeManagement: React.FC = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [settingsId, setSettingsId] = useState<string | null>(null);
+  const [isUploadingConversions, setIsUploadingConversions] = useState(false);
+  const [uploadResult, setUploadResult] = useState<{ success: boolean; message: string; details?: any } | null>(null);
 
   useEffect(() => {
     loadConfig();
@@ -260,7 +262,7 @@ export const CentralizeManagement: React.FC = () => {
       </div>
 
       <Tabs defaultValue="connection" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 h-auto">
+        <TabsList className="grid w-full grid-cols-5 h-auto">
           <TabsTrigger value="connection" className="flex items-center gap-1.5 text-xs py-2">
             <Shield className="w-3.5 h-3.5" />
             Conexão
@@ -276,6 +278,10 @@ export const CentralizeManagement: React.FC = () => {
           <TabsTrigger value="notifications" className="flex items-center gap-1.5 text-xs py-2">
             <Bell className="w-3.5 h-3.5" />
             Notificações
+          </TabsTrigger>
+          <TabsTrigger value="google-ads" className="flex items-center gap-1.5 text-xs py-2">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Google Ads
           </TabsTrigger>
         </TabsList>
 
@@ -757,6 +763,200 @@ export const CentralizeManagement: React.FC = () => {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ─── ABA: GOOGLE ADS ───────────────────────────────── */}
+        <TabsContent value="google-ads" className="space-y-4">
+
+          {/* Enhanced Conversions — Explicação */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-blue-800">
+                <TrendingUp className="w-4 h-4" />
+                Enhanced Conversions for Leads
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Estratégia avançada para reduzir o custo das suas campanhas. O Google Ads aprende quais cliques geraram clientes reais — não apenas leads — e otimiza o Smart Bidding para buscar mais desses perfis.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="font-semibold text-blue-800 mb-1 flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5" /> 1. GCLID Capturado
+                  </p>
+                  <p className="text-blue-600 text-xs">Quando o lead vem de um anúncio, o Google Ads envia um <code className="bg-blue-50 px-1 rounded">gclid</code> na URL. O sistema captura e salva automaticamente.</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="font-semibold text-blue-800 mb-1 flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" /> 2. Lead Qualificado
+                  </p>
+                  <p className="text-blue-600 text-xs">Quando o lead se torna cliente (status: qualificado/convertido), ele é marcado para upload. Você controla quem é enviado.</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="font-semibold text-blue-800 mb-1 flex items-center gap-1.5">
+                    <Upload className="w-3.5 h-3.5" /> 3. Upload Offline
+                  </p>
+                  <p className="text-blue-600 text-xs">O sistema envia as conversões qualificadas para o Google Ads via API. O algoritmo aprende e reduz o CPA das próximas campanhas.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Upload Manual de Conversões Offline */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Upload className="w-4 h-4 text-green-500" />
+                Upload de Conversões Offline
+              </CardTitle>
+              <CardDescription>
+                Envia leads qualificados (com gclid) para o Google Ads como conversões offline.
+                Configure os Secrets do Google Ads no Supabase antes de usar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  Configure os seguintes Secrets no Supabase → Edge Functions → Secrets:
+                  <ul className="mt-2 space-y-1 text-xs font-mono">
+                    <li><code>GOOGLE_ADS_DEVELOPER_TOKEN</code></li>
+                    <li><code>GOOGLE_ADS_CUSTOMER_ID</code> (sem hífens, ex: 1234567890)</li>
+                    <li><code>GOOGLE_ADS_REFRESH_TOKEN</code></li>
+                    <li><code>GOOGLE_ADS_CLIENT_ID</code></li>
+                    <li><code>GOOGLE_ADS_CLIENT_SECRET</code></li>
+                    <li><code>GOOGLE_ADS_CONVERSION_ACTION_ID</code></li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    setIsUploadingConversions(true);
+                    setUploadResult(null);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('upload-offline-conversions', {
+                        body: { dry_run: true },
+                      });
+                      if (error) throw error;
+                      setUploadResult({
+                        success: true,
+                        message: data?.message || `${data?.leads?.length || 0} conversões prontas para envio`,
+                        details: data,
+                      });
+                    } catch (err: any) {
+                      setUploadResult({ success: false, message: err?.message || String(err) });
+                    } finally {
+                      setIsUploadingConversions(false);
+                    }
+                  }}
+                  disabled={isUploadingConversions}
+                >
+                  {isUploadingConversions ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Target className="w-4 h-4 mr-2" />
+                  )}
+                  Simular (Dry Run)
+                </Button>
+
+                <Button
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={async () => {
+                    setIsUploadingConversions(true);
+                    setUploadResult(null);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('upload-offline-conversions', {
+                        body: { dry_run: false, limit: 100 },
+                      });
+                      if (error) throw error;
+                      setUploadResult({
+                        success: true,
+                        message: `${data?.sent || 0} conversões enviadas ao Google Ads${data?.failed > 0 ? ` (${data.failed} falhas)` : ''}`,
+                        details: data,
+                      });
+                      if ((data?.sent || 0) > 0) {
+                        toast.success(`${data.sent} conversões enviadas ao Google Ads!`);
+                      }
+                    } catch (err: any) {
+                      setUploadResult({ success: false, message: err?.message || String(err) });
+                      toast.error('Erro ao enviar conversões: ' + (err?.message || String(err)));
+                    } finally {
+                      setIsUploadingConversions(false);
+                    }
+                  }}
+                  disabled={isUploadingConversions}
+                >
+                  {isUploadingConversions ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4 mr-2" />
+                  )}
+                  Enviar Conversões Offline
+                </Button>
+              </div>
+
+              {uploadResult && (
+                <div className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${
+                  uploadResult.success ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
+                }`}>
+                  {uploadResult.success
+                    ? <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                    : <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
+                  <div>
+                    <p className="font-medium">{uploadResult.message}</p>
+                    {uploadResult.details?.errors?.length > 0 && (
+                      <p className="text-xs mt-1 opacity-75">
+                        Erros: {uploadResult.details.errors.map((e: any) => e.lead_id).join(', ')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Instruções para configurar no GTM */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Settings className="w-4 h-4 text-gray-500" />
+                Como configurar o transaction_id no GTM
+              </CardTitle>
+              <CardDescription>
+                Para que o Google Ads possa deduplica conversões online e offline, o GTM precisa passar o transaction_id na tag de conversão.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="space-y-2">
+                <p className="font-medium text-gray-700">Passo 1 — Criar variável no GTM:</p>
+                <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs space-y-1">
+                  <p>Tipo: Variável da Camada de Dados</p>
+                  <p>Nome da variável: <code className="bg-white px-1 rounded border">transaction_id</code></p>
+                  <p>Nome de exibição: <code className="bg-white px-1 rounded border">DL - transaction_id</code></p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-gray-700">Passo 2 — Configurar a tag de conversão do Google Ads:</p>
+                <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs space-y-1">
+                  <p>Na tag "Enviar formulário de Lead" → Parâmetros adicionais:</p>
+                  <p>Chave: <code className="bg-white px-1 rounded border">transaction_id</code></p>
+                  <p>Valor: <code className="bg-white px-1 rounded border">{'{{'} DL - transaction_id {'}}'}</code></p>
+                </div>
+              </div>
+              <Alert>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <AlertDescription className="text-sm text-green-700">
+                  O sistema já envia o <code className="bg-green-50 px-1 rounded">transaction_id</code> no dataLayer automaticamente. Você só precisa criar a variável no GTM e adicioná-la à tag de conversão.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
         </TabsContent>

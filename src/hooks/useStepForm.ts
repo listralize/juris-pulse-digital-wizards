@@ -348,6 +348,18 @@ export const useStepForm = () => {
         utm_content: urlParams.get('utm_content')
       };
 
+      // ── Enhanced Conversions: capturar GCLID ─────────────────────────────────
+      // O Google anexa ?gclid= na URL de destino quando o usuário clica em um
+      // anúncio. Persistimos no sessionStorage para sobreviver à navegação
+      // multi-etapa do formulário.
+      const gclidFromUrl = urlParams.get('gclid');
+      if (gclidFromUrl) sessionStorage.setItem('_gclid', gclidFromUrl);
+      const gclid = gclidFromUrl || sessionStorage.getItem('_gclid') || null;
+
+      // transaction_id único para deduplicação no Google Ads
+      // Formato: {slug}_{timestamp}_{random} — legível e único
+      const transactionId = `${form.slug || 'form'}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
       const sessionId = `stepform_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Map responses with step titles instead of IDs
@@ -426,6 +438,10 @@ export const useStepForm = () => {
         utm_source: utmData.utm_source,
         utm_medium: utmData.utm_medium,
         utm_campaign: utmData.utm_campaign,
+        utm_term: utmData.utm_term,
+        utm_content: utmData.utm_content,
+        gclid: gclid,
+        transaction_id: transactionId,
         session_id: sessionId,
         visitor_id: persistentVisitorId.current,
         source_page: window.location.href,
@@ -494,7 +510,11 @@ export const useStepForm = () => {
           formData: formData,
           answers: answers,
           extractedData: extractedData,
-          sessionId: sessionId
+          sessionId: sessionId,
+          // Enhanced Conversions — usados pelo useStepFormMarketingScripts
+          gclid: gclid,
+          transactionId: transactionId,
+          leadId: savedLead?.id || null
         }
       }));
 
@@ -523,6 +543,8 @@ export const useStepForm = () => {
           form_slug: form.slug || slug || '',
           form_name: form.name || '',
           lead_id: savedLead?.id || '',
+          gclid: gclid || '',
+          transaction_id: transactionId,
         }
       }).then(res => {
         if (res.error) logger.error('reply-agent-sync error:', res.error);

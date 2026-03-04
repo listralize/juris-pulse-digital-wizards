@@ -40,6 +40,8 @@ interface LeadPayload {
   form_slug?: string
   form_name?: string
   lead_id?: string          // ID do lead na tabela form_leads ou step_form_leads
+  gclid?: string            // Google Click ID — para Enhanced Conversions offline
+  transaction_id?: string   // ID único de transação — para deduplicação no Google Ads
   custom_fields?: Record<string, string>
   // Controle
   automation_id?: string    // Override do REPLY_AGENT_FLOW_ID para este lead específico
@@ -242,9 +244,14 @@ serve(async (req) => {
         is_synced_with_replyagent: true,
         last_sync_at: new Date().toISOString(),
         notes: payload.message || null,
+        // Enhanced Conversions: salvar gclid e transaction_id para upload offline
+        gclid: payload.gclid || null,
+        transaction_id: payload.transaction_id || null,
         custom_fields: {
           form_name: payload.form_name || '',
           lead_id: payload.lead_id || '',
+          gclid: payload.gclid || '',
+          transaction_id: payload.transaction_id || '',
         },
       }
 
