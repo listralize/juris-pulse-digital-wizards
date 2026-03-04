@@ -787,11 +787,12 @@ export const MarketingManagement: React.FC = () => {
       </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="scripts">📊 Scripts</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
+          <TabsTrigger value="google-ads">📈 Google Ads</TabsTrigger>
           <TabsTrigger value="reports">📑 Relatórios</TabsTrigger>
-          <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
+          <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
         </TabsList>
 
         {/* SCRIPTS TAB */}
