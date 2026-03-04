@@ -354,6 +354,21 @@ serve(async (req) => {
       console.warn('[reply-agent-sync] lead_profiles falhou:', profileErr)
     }
 
+    // Atualizar form_leads com o ID do contato (quando lead_id é fornecido)
+    if (payload.lead_id) {
+      try {
+        await supabase
+          .from('form_leads')
+          .update({
+            replyagent_contact_id: String(contact.id),
+            centralize_synced_at: new Date().toISOString(),
+          })
+          .eq('id', payload.lead_id)
+        console.log(`[reply-agent-sync] form_leads atualizado: lead ${payload.lead_id} -> contact ${contact.id}`)
+      } catch (updateErr) {
+        console.warn('[reply-agent-sync] Atualização form_leads falhou:', updateErr)
+      }
+    }
     // SmartFlow
     const automationId = resolveFlowId(payload, formConfig, defaultFlowId)
     let flowTriggered = false
