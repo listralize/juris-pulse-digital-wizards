@@ -70,15 +70,22 @@ const createContact = async (
   if (last_name) body.last_name = last_name
   if (payload.email) body.primary_email = payload.email.trim().toLowerCase()
 
+  // Normalizar o telefone principal
   const rawPhone = payload.phone || payload.whatsapp || ''
+  const rawWhatsapp = payload.whatsapp || payload.phone || ''
+
   if (rawPhone) {
-    const normalized = normalizePhone(rawPhone)
-    body.primary_phone_number = normalized
-    body.primary_whatsapp_number = normalized
+    const normalizedPhone = normalizePhone(rawPhone)
+    body.primary_phone_number = normalizedPhone
+    console.log(`[reply-agent-sync] Phone normalizado: ${rawPhone} → ${normalizedPhone}`)
   }
 
-  if (payload.whatsapp && payload.whatsapp !== payload.phone) {
-    body.primary_whatsapp_number = normalizePhone(payload.whatsapp)
+  // WhatsApp: enviar sempre que houver número, mesmo que igual ao phone
+  // A API da Reply Agent aceita primary_whatsapp_number no POST /contact
+  if (rawWhatsapp) {
+    const normalizedWhatsapp = normalizePhone(rawWhatsapp)
+    body.primary_whatsapp_number = normalizedWhatsapp
+    console.log(`[reply-agent-sync] WhatsApp normalizado: ${rawWhatsapp} → ${normalizedWhatsapp}`)
   }
 
   if (payload.custom_fields && Object.keys(payload.custom_fields).length > 0) {
@@ -102,7 +109,75 @@ const createContact = async (
 
   if (!res.ok) throw new Error(`createContact ${res.status}: ${text}`)
 
-  return JSON.parse(text) as ReplyAgentContact
+  const contact = JSON.parse(text) as ReplyAgentContact
+  
+  // Log detalhado do contato criado para diagnóstico
+  console.log(`[reply-agent-sync] Contact created:`, JSON.stringify({
+    id: contact.id,
+    first_name: contact.first_name,
+    last_name: contact.last_name,
+    primary_phone_number: contact.primary_phone_number,
+    primary_whatsapp_number: contact.primary_whatsapp_number,
+    primary_email: contact.primary_email,
+  }))
+
+  // Se o WhatsApp não foi populado na criação, tentar atualizar via PATCH
+  if (rawWhatsapp && !contact.primary_whatsapp_number) {
+    console.log(`[reply-agent-sync] ⚠️ WhatsApp não populado na criação. Tentando atualizar via PATCH...`)
+    try {
+      await updateContactWhatsapp(apiKey, contact.id, normalizePhone(rawWhatsapp))
+    } catch (patchErr) {
+      console.warn(`[reply-agent-sync] ⚠️ Falha ao atualizar WhatsApp via PATCH:`, patchErr)
+    }
+  }
+
+  return contact
+}
+
+/**
+ * Tenta atualizar o WhatsApp de um contato existente via PATCH
+ * A Reply Agent pode ter um endpoint de atualização de contato
+ */
+const updateContactWhatsapp = async (
+  apiKey: string,
+  contactId: number,
+  whatsappNumber: string
+): Promise<void> => {
+  // Tentar PATCH /contacts/{id}
+  const patchBody = {
+    primary_whatsapp_number: whatsappNumber,
+  }
+
+  console.log(`[reply-agent-sync] → PATCH /contacts/${contactId} body:`, JSON.stringify(patchBody))
+
+  const res = await fetch(`${BASE}/contacts/${contactId}`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(patchBody),
+  })
+
+  const text = await res.text()
+  console.log(`[reply-agent-sync] ← PATCH /contacts/${contactId} ${res.status}:`, text)
+
+  if (!res.ok) {
+    // Tentar PUT como fallback
+    console.log(`[reply-agent-sync] PATCH falhou, tentando PUT /contacts/${contactId}...`)
+    const putRes = await fetch(`${BASE}/contacts/${contactId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(patchBody),
+    })
+    const putText = await putRes.text()
+    console.log(`[reply-agent-sync] ← PUT /contacts/${contactId} ${putRes.status}:`, putText)
+  }
 }
 
 const applyTags = async (
@@ -261,6 +336,7 @@ serve(async (req) => {
         tags_applied: tags,
         flow_triggered: flowTriggered,
         automation_id: automationId || null,
+        whatsapp_populated: !!contact.primary_whatsapp_number,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
