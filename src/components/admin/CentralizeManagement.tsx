@@ -10,7 +10,8 @@ import { Badge } from '../ui/badge';
 import { toast } from 'sonner';
 import {
   Save, CheckCircle, AlertTriangle, Zap, X, Plus, Tag,
-  ChevronDown, Search, Loader2, Info, RotateCcw, ExternalLink, Bot
+  ChevronDown, Search, Loader2, Info, RotateCcw, ExternalLink, Bot,
+  RefreshCw, ArrowRight, Trash2
 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 
@@ -24,13 +25,21 @@ interface GlobalConfig {
   notify_email: string;
 }
 
+interface FlowMapping {
+  id: string;
+  answer_contains: string;
+  flow_id: string;
+  label?: string;
+}
 interface FormCentralizeConfig {
   flow_id_default: string;
   flow_id_urgente: string;
   flow_id_semanas: string;
   flow_id_pesquisando: string;
   tags: string[];
+  tags_to_remove: string[];
   enabled: boolean;
+  flow_mappings: FlowMapping[];
 }
 
 interface StepFormItem {
@@ -62,7 +71,9 @@ const DEFAULT_FORM_CONFIG: FormCentralizeConfig = {
   flow_id_semanas: '',
   flow_id_pesquisando: '',
   tags: [],
+  tags_to_remove: [],
   enabled: true,
+  flow_mappings: [],
 };
 
 interface TagSelectorProps {
@@ -183,6 +194,8 @@ export const CentralizeManagement: React.FC = () => {
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const [expandedForms, setExpandedForms] = useState<Set<string>>(new Set());
+  const [isBulkSyncing, setIsBulkSyncing] = useState(false);
+  const [bulkSyncResult, setBulkSyncResult] = useState<{ synced: number; skipped: number; errors: number; total: number } | null>(null);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -335,19 +348,66 @@ export const CentralizeManagement: React.FC = () => {
   const addTag = (formId: string, tag: string) => {
     const trimmed = tag.trim();
     if (!trimmed) return;
-    setForms(prev => prev.map(f => {
-      if (f.id !== formId) return f;
-      if (f.centralize_config.tags.includes(trimmed)) return f;
-      return { ...f, centralize_config: { ...f.centralize_config, tags: [...f.centralize_config.tags, trimmed] } };
-    }));
+    setForms(prev => prev.map(f => f.id === formId
+      ? { ...f, centralize_config: { ...f.centralize_config, tags: [...f.centralize_config.tags, trimmed] } }
+      : f
+    ));
   };
 
   const removeTag = (formId: string, tag: string) => {
-    setForms(prev => prev.map(f =>
-      f.id === formId
-        ? { ...f, centralize_config: { ...f.centralize_config, tags: f.centralize_config.tags.filter(t => t !== tag) } }
-        : f
+    setForms(prev => prev.map(f => f.id === formId
+      ? { ...f, centralize_config: { ...f.centralize_config, tags: f.centralize_config.tags.filter(t => t !== tag) } }
+      : f
     ));
+  };
+
+  const addFlowMapping = (formId: string) => {
+    const newMapping: FlowMapping = { id: Date.now().toString(), answer_contains: '', flow_id: '', label: '' };
+    setForms(prev => prev.map(f => f.id === formId
+      ? { ...f, centralize_config: { ...f.centralize_config, flow_mappings: [...(f.centralize_config.flow_mappings || []), newMapping] } }
+      : f
+    ));
+  };
+
+  const updateFlowMapping = (formId: string, mappingId: string, field: keyof FlowMapping, value: string) => {
+    setForms(prev => prev.map(f => f.id === formId
+      ? { ...f, centralize_config: { ...f.centralize_config, flow_mappings: (f.centralize_config.flow_mappings || []).map(m => m.id === mappingId ? { ...m, [field]: value } : m) } }
+      : f
+    ));
+  };
+
+  const removeFlowMapping = (formId: string, mappingId: string) => {
+    setForms(prev => prev.map(f => f.id === formId
+      ? { ...f, centralize_config: { ...f.centralize_config, flow_mappings: (f.centralize_config.flow_mappings || []).filter(m => m.id !== mappingId) } }
+      : f
+    ));
+  };
+
+  const runBulkSync = async (dryRun = false) => {
+    setIsBulkSyncing(true);
+    setBulkSyncResult(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/centralize-bulk-sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ limit: 100, dry_run: dryRun }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBulkSyncResult({ synced: data.synced, skipped: data.skipped, errors: data.errors, total: data.total_processed });
+        toast.success(dryRun ? `Simulação: ${data.synced} leads seriam sincronizados` : `${data.synced} leads sincronizados com sucesso`);
+      } else {
+        toast.error(data.error || 'Erro na sincronização');
+      }
+    } catch (err) {
+      toast.error('Erro ao executar sincronização');
+    } finally {
+      setIsBulkSyncing(false);
+    }
   };
 
   const toggleForm = (formId: string) => {
@@ -532,31 +592,74 @@ export const CentralizeManagement: React.FC = () => {
 
                   {isExpanded && form.centralize_config.enabled && (
                     <div className="px-4 pb-4 pt-2 space-y-4 border-t bg-muted/10">
+                      {/* Flow Padrão */}
                       <div>
                         <Label className="text-xs font-medium flex items-center gap-1.5 mb-2">
                           <Zap className="w-3.5 h-3.5 text-yellow-500" />
-                          Smart Flows por Urgência
+                          Smart Flow Padrão
                         </Label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            { key: 'flow_id_default', label: 'Padrão', color: 'text-muted-foreground' },
-                            { key: 'flow_id_urgente', label: 'Urgente', color: 'text-yellow-600' },
-                            { key: 'flow_id_semanas', label: 'Semanas', color: 'text-muted-foreground' },
-                            { key: 'flow_id_pesquisando', label: 'Pesquisando', color: 'text-muted-foreground' },
-                          ].map(({ key, label, color }) => (
-                            <div key={key}>
-                              <Label className={`text-[10px] uppercase tracking-wide ${color}`}>{label}</Label>
-                              <Input
-                                placeholder="ID do flow"
-                                value={(form.centralize_config as any)[key]}
-                                onChange={e => updateFormConfig(form.id, key as keyof FormCentralizeConfig, e.target.value)}
-                                className="font-mono text-xs h-8 mt-0.5"
-                              />
-                            </div>
-                          ))}
+                        <Input
+                          placeholder="ID do flow padrão (fallback)"
+                          value={form.centralize_config.flow_id_default}
+                          onChange={e => updateFormConfig(form.id, 'flow_id_default', e.target.value)}
+                          className="font-mono text-xs h-8"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Disparado quando nenhum mapeamento abaixo for correspondido.
+                        </p>
+                      </div>
+
+                      {/* Flow Mappings por Resposta */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-xs font-medium flex items-center gap-1.5">
+                            <ArrowRight className="w-3.5 h-3.5 text-primary" />
+                            Mapeamento de Respostas → Flow
+                          </Label>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[10px]"
+                            onClick={() => addFlowMapping(form.id)}
+                          >
+                            <Plus className="w-3 h-3 mr-1" /> Adicionar
+                          </Button>
                         </div>
+                        {(form.centralize_config.flow_mappings || []).length === 0 ? (
+                          <div className="text-center py-3 border border-dashed rounded-md">
+                            <p className="text-[10px] text-muted-foreground">Nenhum mapeamento. Clique em Adicionar para criar.</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Ex: se resposta contém "Divórcio" → dispara Flow X</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {(form.centralize_config.flow_mappings || []).map(mapping => (
+                              <div key={mapping.id} className="flex items-center gap-2 p-2 bg-muted/20 rounded-md border">
+                                <div className="flex-1 min-w-0">
+                                  <Input
+                                    placeholder="Se resposta contém... (ex: Divórcio)"
+                                    value={mapping.answer_contains}
+                                    onChange={e => updateFlowMapping(form.id, mapping.id, 'answer_contains', e.target.value)}
+                                    className="text-xs h-7 mb-1"
+                                  />
+                                  <Input
+                                    placeholder="ID do SmartFlow"
+                                    value={mapping.flow_id}
+                                    onChange={e => updateFlowMapping(form.id, mapping.id, 'flow_id', e.target.value)}
+                                    className="font-mono text-xs h-7"
+                                  />
+                                </div>
+                                <button
+                                  onClick={() => removeFlowMapping(form.id, mapping.id)}
+                                  className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <p className="text-[10px] text-muted-foreground mt-1.5">
-                          Selecionado pela urgência declarada pelo lead. Se não configurado, usa o Flow Padrão Global.
+                          A verificação é case-insensitive. Prioridade: mapeamentos → flow padrão do formulário → flow global.
                         </p>
                       </div>
 
@@ -588,6 +691,65 @@ export const CentralizeManagement: React.FC = () => {
               );
             })
           )}
+        </CardContent>
+      </Card>
+
+      {/* Sincronização em Lote */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 text-primary" />
+            <div>
+              <CardTitle className="text-base">Sincronização de Leads Existentes</CardTitle>
+              <CardDescription className="text-xs mt-0.5">Sincronize leads que ainda não foram enviados para a Reply Agent</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {bulkSyncResult && (
+            <div className="grid grid-cols-4 gap-2 p-3 bg-muted/30 rounded-lg">
+              <div className="text-center">
+                <p className="text-lg font-bold text-primary">{bulkSyncResult.total}</p>
+                <p className="text-[10px] text-muted-foreground">Total</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-green-600">{bulkSyncResult.synced}</p>
+                <p className="text-[10px] text-muted-foreground">Sincronizados</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-yellow-600">{bulkSyncResult.skipped}</p>
+                <p className="text-[10px] text-muted-foreground">Ignorados</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-destructive">{bulkSyncResult.errors}</p>
+                <p className="text-[10px] text-muted-foreground">Erros</p>
+              </div>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => runBulkSync(true)}
+              disabled={isBulkSyncing}
+              className="text-xs"
+            >
+              {isBulkSyncing ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Info className="w-3.5 h-3.5 mr-2" />}
+              Simular (dry run)
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => runBulkSync(false)}
+              disabled={isBulkSyncing}
+              className="text-xs"
+            >
+              {isBulkSyncing ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
+              Sincronizar agora
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            Busca por WhatsApp para evitar duplicatas. Leads já sincronizados são ignorados. Rate limit: 300ms entre requests.
+          </p>
         </CardContent>
       </Card>
 
