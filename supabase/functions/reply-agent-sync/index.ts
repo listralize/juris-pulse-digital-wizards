@@ -1,5 +1,5 @@
 // reply-agent-sync — integração com Reply Agent CRM
-// Per-form tags & flows via step_forms.centralize_config
+// v3: Upsert inteligente por WhatsApp + deduplicação de tags + SmartFlow controlado
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -12,6 +12,7 @@ const corsHeaders = {
 
 const BASE = 'https://ra-bcknd.com/v1'
 
+// Slugs válidos de custom fields na Reply Agent
 const VALID_REPLY_SLUGS = new Set([
   'cpf', 'assunto', 'link_astrea', 'login_astrea', 'senha_astrea',
   'link_processo', 'login_inss', 'senha_inss', 'documentos', 'profissao',
@@ -42,6 +43,7 @@ interface ReplyContact {
   id: number
   first_name: string
   last_name?: string
+  tags?: string[]
   system_fields?: { primary_mobile?: string; primary_whatsapp?: string; primary_email?: string }
   custom_fields?: Record<string, unknown>
   mobile_contacts?: Array<{ type: string; full_mobile_number: string; is_primary: boolean }>
@@ -63,8 +65,39 @@ const normalizePhone = (raw: string): string => {
   return `+55${digits}`
 }
 
+const replyHeaders = (apiKey: string) => ({
+  'Authorization': `Bearer ${apiKey}`,
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+})
+
 // ─── Reply Agent API ──────────────────────────────────────────────────────────
 
+/**
+ * Busca contato existente por número de WhatsApp.
+ * GET /contacts/by-whatsapp?whatsapp=+55...
+ */
+const findContactByWhatsapp = async (apiKey: string, whatsapp: string): Promise<ReplyContact | null> => {
+  try {
+    const url = `${BASE}/contacts/by-whatsapp?whatsapp=${encodeURIComponent(whatsapp)}`
+    const res = await fetch(url, { method: 'GET', headers: replyHeaders(apiKey) })
+    if (!res.ok) return null
+    const data = await res.json()
+    const contacts: ReplyContact[] = data?.data || (Array.isArray(data) ? data : [])
+    if (contacts.length > 0) {
+      console.log(`[reply-agent-sync] 🔍 Contato existente encontrado: ID ${contacts[0].id}`)
+      return contacts[0]
+    }
+    return null
+  } catch (err) {
+    console.warn('[reply-agent-sync] ⚠️ findContactByWhatsapp falhou:', err)
+    return null
+  }
+}
+
+/**
+ * Cria novo contato com todos os campos de uma vez.
+ */
 const createContact = async (apiKey: string, payload: LeadPayload): Promise<ReplyContact> => {
   const { first_name, last_name } = splitName(payload.name)
   const body: Record<string, unknown> = {
@@ -78,21 +111,71 @@ const createContact = async (apiKey: string, payload: LeadPayload): Promise<Repl
   if (rawPhone) body.primary_phone_number = normalizePhone(rawPhone)
   if (rawWhatsapp) body.primary_whatsapp_number = normalizePhone(rawWhatsapp)
 
-  const customFields: Record<string, unknown> = {}
-  if (payload.service) customFields['assunto'] = payload.service
-  if (payload.message) customFields['complemento'] = payload.message
+  body.custom_fields = buildCustomFields(payload)
+
+  console.log('[reply-agent-sync] → POST /contact', JSON.stringify({
+    first_name: body.first_name, last_name: body.last_name,
+    primary_phone_number: body.primary_phone_number,
+    primary_whatsapp_number: body.primary_whatsapp_number,
+    custom_fields_keys: Object.keys(body.custom_fields as object),
+  }))
+
+  const res = await fetch(`${BASE}/contact`, {
+    method: 'POST',
+    headers: replyHeaders(apiKey),
+    body: JSON.stringify(body),
+  })
+  const text = await res.text()
+  console.log(`[reply-agent-sync] ← POST /contact ${res.status}:`, text.substring(0, 600))
+  if (!res.ok) throw new Error(`createContact ${res.status}: ${text}`)
+  return JSON.parse(text) as ReplyContact
+}
+
+/**
+ * Atualiza custom fields de contato existente via PUT /contacts/{id}/set-custom-field.
+ */
+const updateContactFields = async (apiKey: string, contactId: number, payload: LeadPayload): Promise<void> => {
+  const fields = buildCustomFields(payload)
+  for (const [slug, value] of Object.entries(fields)) {
+    try {
+      const res = await fetch(`${BASE}/contacts/${contactId}/set-custom-field`, {
+        method: 'PUT',
+        headers: replyHeaders(apiKey),
+        body: JSON.stringify({ system_name: slug, field_value: String(value) }),
+      })
+      if (!res.ok) {
+        const text = await res.text()
+        console.warn(`[reply-agent-sync] ⚠️ set-custom-field [${slug}] ${res.status}: ${text.substring(0, 100)}`)
+      } else {
+        console.log(`[reply-agent-sync] ✅ set-custom-field [${slug}]`)
+      }
+    } catch (err) {
+      console.warn(`[reply-agent-sync] ⚠️ set-custom-field [${slug}] falhou:`, err)
+    }
+  }
+}
+
+/**
+ * Monta o objeto de custom_fields a partir do payload.
+ */
+const buildCustomFields = (payload: LeadPayload): Record<string, unknown> => {
+  const fields: Record<string, unknown> = {}
+
+  if (payload.service) fields['assunto'] = payload.service
+  if (payload.message) fields['complemento'] = payload.message
 
   if (payload.custom_fields) {
     for (const [key, value] of Object.entries(payload.custom_fields)) {
       if (VALID_REPLY_SLUGS.has(key) && value != null && value !== '') {
-        customFields[key] = value
+        fields[key] = value
       }
     }
   }
 
+  // Consolidar dados de rastreamento no campo JSON
   const tracking: Record<string, string> = {}
   const UTM_FIELDS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
-                      'pagina_origem', 'referrer', 'lead_id', 'formulario']
+                      'pagina_origem', 'referrer', 'formulario']
   if (payload.custom_fields) {
     for (const f of UTM_FIELDS) {
       if (payload.custom_fields[f]) tracking[f] = payload.custom_fields[f]
@@ -104,38 +187,43 @@ const createContact = async (apiKey: string, payload: LeadPayload): Promise<Repl
   if (payload.form_name) tracking['form_name'] = payload.form_name
   if (payload.lead_id) tracking['lead_id'] = payload.lead_id
 
-  if (Object.keys(tracking).length > 0) customFields['json'] = JSON.stringify(tracking)
-  if (Object.keys(customFields).length > 0) body.custom_fields = customFields
+  if (Object.keys(tracking).length > 0) fields['json'] = JSON.stringify(tracking)
 
-  console.log('[reply-agent-sync] → POST /contact', JSON.stringify({
-    first_name: body.first_name, last_name: body.last_name,
-    primary_phone_number: body.primary_phone_number, primary_whatsapp_number: body.primary_whatsapp_number,
-    primary_email: body.primary_email, custom_fields_keys: Object.keys(customFields),
-  }))
-
-  const res = await fetch(`${BASE}/contact`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  const text = await res.text()
-  console.log(`[reply-agent-sync] ← POST /contact ${res.status}:`, text.substring(0, 600))
-  if (!res.ok) throw new Error(`createContact ${res.status}: ${text}`)
-  return JSON.parse(text) as ReplyContact
+  return fields
 }
 
-const applyTags = async (apiKey: string, contactId: number, tags: string[]): Promise<void> => {
-  if (!tags.length) return
+/**
+ * Aplica tags ao contato, ignorando as que já existem (deduplicação).
+ */
+const applyTags = async (
+  apiKey: string,
+  contactId: number,
+  newTags: string[],
+  existingTags: string[] = []
+): Promise<void> => {
+  if (!newTags.length) return
+
+  const existingNorm = new Set(existingTags.map(t => t.toLowerCase().trim()))
+  const tagsToApply = newTags.filter(t => !existingNorm.has(t.toLowerCase().trim()))
+
+  if (!tagsToApply.length) {
+    console.log('[reply-agent-sync] ℹ️ Todas as tags já existem no contato')
+    return
+  }
+
   const res = await fetch(`${BASE}/contacts/${contactId}/tags`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ tags }),
+    headers: replyHeaders(apiKey),
+    body: JSON.stringify({ tags: tagsToApply }),
   })
   const text = await res.text()
   console.log(`[reply-agent-sync] ← POST /contacts/${contactId}/tags ${res.status}:`, text.substring(0, 300))
   if (!res.ok) console.warn(`[reply-agent-sync] ⚠️ applyTags ${res.status}: ${text}`)
 }
 
+/**
+ * Dispara um Smart Flow para o contato.
+ */
 const sendFlow = async (apiKey: string, automationId: string, contactId: number): Promise<void> => {
   const fd = new FormData()
   fd.append('automation_id', automationId)
@@ -170,9 +258,10 @@ serve(async (req) => {
 
     const payload: LeadPayload = await req.json()
 
-    console.log('[reply-agent-sync] Payload:', JSON.stringify({
+    console.log('[reply-agent-sync] Payload recebido:', JSON.stringify({
       name: payload.name, phone: payload.phone, email: payload.email,
       form_slug: payload.form_slug, automation_id: payload.automation_id,
+      urgency: payload.urgency,
     }))
 
     if (!payload.name) {
@@ -180,17 +269,44 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // ── 1. Create contact ─────────────────────────────────────────────────────
+    // ── 1. Upsert inteligente: busca por WhatsApp antes de criar ──────────────
+    const rawWhatsapp = payload.whatsapp || payload.phone || ''
+    const normalizedWhatsapp = rawWhatsapp ? normalizePhone(rawWhatsapp) : ''
+
     let contact: ReplyContact
-    try {
-      contact = await createContact(apiKey, payload)
-    } catch (err) {
-      console.error('[reply-agent-sync] ❌ Falha ao criar contato:', err)
-      return new Response(JSON.stringify({ error: 'Falha ao criar contato', detail: String(err) }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    let isNewContact = true
+
+    if (normalizedWhatsapp) {
+      const existing = await findContactByWhatsapp(apiKey, normalizedWhatsapp)
+      if (existing) {
+        contact = existing
+        isNewContact = false
+        console.log(`[reply-agent-sync] ♻️ Contato existente reutilizado: ID ${contact.id}`)
+        // Atualizar campos do contato existente com novos dados
+        await updateContactFields(apiKey, contact.id, payload)
+      } else {
+        try {
+          contact = await createContact(apiKey, payload)
+          console.log(`[reply-agent-sync] ✨ Novo contato criado: ID ${contact.id}`)
+        } catch (err) {
+          console.error('[reply-agent-sync] ❌ Falha ao criar contato:', err)
+          return new Response(JSON.stringify({ error: 'Falha ao criar contato', detail: String(err) }),
+            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
+      }
+    } else {
+      // Sem número de contato, sempre cria novo
+      try {
+        contact = await createContact(apiKey, payload)
+        console.log(`[reply-agent-sync] ✨ Novo contato criado (sem WhatsApp): ID ${contact.id}`)
+      } catch (err) {
+        console.error('[reply-agent-sync] ❌ Falha ao criar contato:', err)
+        return new Response(JSON.stringify({ error: 'Falha ao criar contato', detail: String(err) }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
     }
 
-    // ── 2. Per-form tags (manual only) ────────────────────────────────────────
+    // ── 2. Tags: per-form (manuais) + fonte de tráfego ────────────────────────
     let tags: string[] = []
     let formConfig: any = null
 
@@ -209,21 +325,25 @@ serve(async (req) => {
       }
     }
 
-    // Traffic source tag (always applied)
+    // Tag de fonte de tráfego (sempre aplicada)
     tags.push(payload.gclid ? 'TRAFEGO_PAGO' : 'organico')
 
+    // Tags já existentes no contato (para deduplicação)
+    const existingTags: string[] = Array.isArray(contact.tags)
+      ? contact.tags.map((t: any) => (typeof t === 'string' ? t : t?.name || ''))
+      : []
+
     try {
-      await applyTags(apiKey, contact.id, tags)
-      console.log(`[reply-agent-sync] ✅ Tags: ${tags.join(', ')}`)
+      await applyTags(apiKey, contact.id, tags, existingTags)
+      console.log(`[reply-agent-sync] ✅ Tags aplicadas: ${tags.join(', ')}`)
     } catch (tagErr) {
       console.warn('[reply-agent-sync] ⚠️ applyTags falhou:', tagErr)
     }
 
-    // ── 3. Save lead_profiles ─────────────────────────────────────────────────
+    // ── 3. Salvar/atualizar lead_profiles no Supabase ─────────────────────────
     try {
       const { first_name, last_name } = splitName(payload.name)
       const rawPhone = payload.phone || payload.whatsapp || ''
-      const rawWhatsapp = payload.whatsapp || payload.phone || ''
 
       await supabase.from('lead_profiles').upsert({
         replyagent_contact_id: String(contact.id),
@@ -231,11 +351,11 @@ serve(async (req) => {
         last_name: last_name || null,
         email: payload.email?.trim().toLowerCase() || null,
         phone: rawPhone ? normalizePhone(rawPhone) : null,
-        whatsapp_number: rawWhatsapp ? normalizePhone(rawWhatsapp) : null,
+        whatsapp_number: normalizedWhatsapp || null,
         service_interest: payload.service || null,
         urgency_level: payload.urgency === 'urgente' ? 'urgent' : 'normal',
         lead_source: payload.form_slug || 'website',
-        lead_status: 'novo',
+        lead_status: isNewContact ? 'novo' : 'retorno',
         is_synced_with_replyagent: true,
         last_sync_at: new Date().toISOString(),
         notes: payload.message || null,
@@ -247,15 +367,17 @@ serve(async (req) => {
           lead_id: payload.lead_id || '',
         },
       }, { onConflict: 'replyagent_contact_id' })
-      console.log('[reply-agent-sync] ✅ lead_profiles salvo')
+
+      console.log(`[reply-agent-sync] ✅ lead_profiles ${isNewContact ? 'criado' : 'atualizado'}`)
     } catch (profileErr) {
       console.warn('[reply-agent-sync] ⚠️ lead_profiles falhou:', profileErr)
     }
 
-    // ── 4. SmartFlow — per-form config first, then fallback ───────────────────
+    // ── 4. SmartFlow ──────────────────────────────────────────────────────────
+    // Para contatos existentes: dispara apenas se automation_id vier explicitamente
+    // Para novos contatos: usa config do formulário ou fallback
     let automationId = payload.automation_id || ''
 
-    // If no automation_id from client, try per-form config
     if (!automationId && formConfig?.enabled) {
       const urgency = payload.urgency || 'default'
       if (urgency === 'urgente') automationId = formConfig.flow_id_urgente || formConfig.flow_id_default || ''
@@ -264,11 +386,13 @@ serve(async (req) => {
       else automationId = formConfig.flow_id_default || ''
     }
 
-    // Final fallback to env var
     if (!automationId) automationId = defaultFlowId
 
     let flowTriggered = false
-    if (automationId && !payload.skip_flow) {
+    // Novos contatos: dispara automaticamente | Existentes: apenas se automation_id explícito
+    const shouldFire = automationId && !payload.skip_flow && (isNewContact || !!payload.automation_id)
+
+    if (shouldFire) {
       try {
         await sendFlow(apiKey, automationId, contact.id)
         flowTriggered = true
@@ -276,11 +400,14 @@ serve(async (req) => {
       } catch (flowErr) {
         console.warn('[reply-agent-sync] ⚠️ SmartFlow falhou:', flowErr)
       }
+    } else if (!isNewContact && !payload.automation_id) {
+      console.log('[reply-agent-sync] ℹ️ Contato existente — SmartFlow não disparado automaticamente')
     }
 
     return new Response(JSON.stringify({
       success: true,
       contact_id: contact.id,
+      is_new_contact: isNewContact,
       tags_applied: tags,
       flow_triggered: flowTriggered,
       automation_id: automationId || null,
