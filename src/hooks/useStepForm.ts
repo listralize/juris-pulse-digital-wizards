@@ -539,14 +539,18 @@ export const useStepForm = () => {
         return 'default';
       })();
 
-      // Fetch automation_id from marketing_settings based on urgency
+      // Fetch automation_id from marketing_settings based on urgency.
+      // IMPORTANTE: a edge function é chamada SEMPRE para criar o contato.
+      // O SmartFlow só é pulado se não houver flow_id configurado (skip_flow=true na edge fn).
       const fetchAutomationId = async (): Promise<string | undefined> => {
         try {
           const { data: mktSettings } = await supabase
             .from('marketing_settings')
             .select('reply_agent_enabled, reply_agent_flow_id, reply_agent_flow_id_urgente, reply_agent_flow_id_semanas, reply_agent_flow_id_pesquisando')
             .limit(1)
-            .single();
+            .maybeSingle();
+          // Retorna o flow_id se reply_agent_enabled=true, caso contrário retorna undefined
+          // mas a edge function ainda será chamada para criar o contato
           if (!mktSettings?.reply_agent_enabled) return undefined;
           if (urgencyValue === 'urgente') return mktSettings.reply_agent_flow_id_urgente || mktSettings.reply_agent_flow_id || undefined;
           if (urgencyValue === 'semanas') return mktSettings.reply_agent_flow_id_semanas || mktSettings.reply_agent_flow_id || undefined;
@@ -555,6 +559,8 @@ export const useStepForm = () => {
         } catch { return undefined; }
       };
 
+      // Sempre chama a edge function para criar o contato,
+      // independente do reply_agent_enabled (que controla apenas o SmartFlow)
       fetchAutomationId().then(automationId => {
         supabase.functions.invoke('reply-agent-sync', {
           body: {
