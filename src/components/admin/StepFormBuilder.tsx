@@ -62,7 +62,10 @@ export const StepFormBuilder: React.FC = () => {
     gtm_event_name: 'form_submit',
     // Códigos customizados
     custom_head_html: '',
-    custom_body_html: ''
+    custom_body_html: '',
+    // Google Ads — conversão direta (bypass GTM)
+    google_ads_conversion_id: '',
+    google_ads_conversion_label: '',
   });
 
   useEffect(() => {
@@ -99,7 +102,9 @@ export const StepFormBuilder: React.FC = () => {
         gtm_id: cfg?.gtm_id ?? cfg?.google_tag_manager?.container_id ?? '',
         gtm_event_name: cfg?.gtm_event_name ?? cfg?.google_tag_manager?.event_name ?? 'form_submit',
         custom_head_html: cfg?.custom_head_html ?? cfg?.head_html ?? '',
-        custom_body_html: cfg?.custom_body_html ?? cfg?.body_html ?? ''
+        custom_body_html: cfg?.custom_body_html ?? cfg?.body_html ?? '',
+        google_ads_conversion_id: cfg?.google_ads_conversion_id ?? '',
+        google_ads_conversion_label: cfg?.google_ads_conversion_label ?? '',
       };
       setTrackingConfig(normalized);
     } catch (error) {
@@ -150,6 +155,8 @@ export const StepFormBuilder: React.FC = () => {
         },
         custom_head_html: trackingConfig.custom_head_html,
         custom_body_html: trackingConfig.custom_body_html,
+        google_ads_conversion_id: trackingConfig.google_ads_conversion_id || null,
+        google_ads_conversion_label: trackingConfig.google_ads_conversion_label || null,
       };
 
       const { error } = await supabase
@@ -290,6 +297,8 @@ export const StepFormBuilder: React.FC = () => {
           },
           custom_head_html: trackingConfig.custom_head_html,
           custom_body_html: trackingConfig.custom_body_html,
+          google_ads_conversion_id: trackingConfig.google_ads_conversion_id || null,
+          google_ads_conversion_label: trackingConfig.google_ads_conversion_label || null,
         },
         flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
         is_active: selectedForm.is_active
@@ -704,6 +713,40 @@ export const StepFormBuilder: React.FC = () => {
                       <p className="text-xs text-muted-foreground">
                         Dica: você pode usar estes campos para colar o código completo do Google Tag Manager (HEAD e BODY) específico deste Step Form.
                       </p>
+                    </div>
+
+                    {/* Google Ads — Conversão Direta */}
+                    <div className="space-y-3 border-t pt-4">
+                      <div>
+                        <Label className="font-semibold text-sm">Google Ads — Conversão Direta</Label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Configure o ID e Label de conversão para disparar <code>gtag('event', 'conversion')</code> direto quando o lead for enviado, sem depender do GTM.
+                          Encontre em: <strong>Google Ads → Metas → Conversões → Tag do Google</strong>.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <Label>ID de Conversão</Label>
+                          <Input
+                            placeholder="AW-123456789"
+                            value={trackingConfig.google_ads_conversion_id}
+                            onChange={(e) => setTrackingConfig(prev => ({ ...prev, google_ads_conversion_id: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Label de Conversão</Label>
+                          <Input
+                            placeholder="AbCdEfGhIjKlMnOp"
+                            value={trackingConfig.google_ads_conversion_label}
+                            onChange={(e) => setTrackingConfig(prev => ({ ...prev, google_ads_conversion_label: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      {trackingConfig.google_ads_conversion_id && trackingConfig.google_ads_conversion_label && (
+                        <p className="text-xs text-green-600 font-medium">
+                          ✅ Conversão configurada: {trackingConfig.google_ads_conversion_id}/{trackingConfig.google_ads_conversion_label}
+                        </p>
+                      )}
                     </div>
 
                     <p className="text-xs text-muted-foreground italic">

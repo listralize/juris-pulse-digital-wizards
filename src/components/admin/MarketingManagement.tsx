@@ -7,7 +7,7 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Save, Eye, BarChart3, Target, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw, Globe } from 'lucide-react';
+import { Save, Eye, BarChart3, Code, TrendingUp, AlertTriangle, CheckCircle, Info, Users, MousePointer, Calendar, ArrowUpDown, Settings, Trash2, RefreshCw, Globe } from 'lucide-react';
 import { MapPin } from 'lucide-react';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -131,10 +131,7 @@ export const MarketingManagement: React.FC = () => {
     flowIdSemanas: '',
     flowIdPesquisando: '',
   });
-  const [googleAdsConversion, setGoogleAdsConversion] = useState({
-    conversionId: '',
-    conversionLabel: '',
-  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
@@ -223,12 +220,6 @@ export const MarketingManagement: React.FC = () => {
           flowIdUrgente: (settings as any).reply_agent_flow_id_urgente || '',
           flowIdSemanas: (settings as any).reply_agent_flow_id_semanas || '',
           flowIdPesquisando: (settings as any).reply_agent_flow_id_pesquisando || '',
-        });
-
-        // Carregar configurações de conversão do Google Ads
-        setGoogleAdsConversion({
-          conversionId: (settings as any).google_ads_conversion_id || '',
-          conversionLabel: (settings as any).google_ads_conversion_label || '',
         });
 
         // Atualizar tracking
@@ -689,9 +680,6 @@ export const MarketingManagement: React.FC = () => {
         reply_agent_flow_id_urgente: replyAgent.flowIdUrgente || null,
         reply_agent_flow_id_semanas: replyAgent.flowIdSemanas || null,
         reply_agent_flow_id_pesquisando: replyAgent.flowIdPesquisando || null,
-        // Google Ads Conversion
-        google_ads_conversion_id: googleAdsConversion.conversionId || null,
-        google_ads_conversion_label: googleAdsConversion.conversionLabel || null,
         updated_at: new Date().toISOString()
       };
       logger.log('📤 Dados a serem salvos:', configData);
@@ -1057,58 +1045,6 @@ export const MarketingManagement: React.FC = () => {
                 }
               }))} rows={5} />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Google Ads Conversion Tracking */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-500" />
-                Google Ads — Rastreamento de Conversão Direta
-              </CardTitle>
-              <CardDescription>
-                Configure o ID e Label de conversão do Google Ads para disparo direto via <code>gtag</code> na página <strong>/obrigado</strong>.
-                Isso garante que as conversões sejam registradas mesmo quando o GTM não carrega corretamente.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  Encontre o ID e Label em <strong>Google Ads &rarr; Metas &rarr; Conversões &rarr; Detalhes da conversão &rarr; Tag do Google</strong>.
-                  Formato: <code>AW-XXXXXXXXX</code> / <code>AbCdEfGhIjK</code>
-                </AlertDescription>
-              </Alert>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="gads-conversion-id">ID de Conversão</Label>
-                  <Input
-                    id="gads-conversion-id"
-                    placeholder="AW-123456789"
-                    value={googleAdsConversion.conversionId}
-                    onChange={e => setGoogleAdsConversion(prev => ({ ...prev, conversionId: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="gads-conversion-label">Label de Conversão</Label>
-                  <Input
-                    id="gads-conversion-label"
-                    placeholder="AbCdEfGhIjKlMnOp"
-                    value={googleAdsConversion.conversionLabel}
-                    onChange={e => setGoogleAdsConversion(prev => ({ ...prev, conversionLabel: e.target.value }))}
-                  />
-                </div>
-              </div>
-              {googleAdsConversion.conversionId && googleAdsConversion.conversionLabel && (
-                <Alert>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <AlertDescription className="text-green-700">
-                    Conversão configurada: <code>{googleAdsConversion.conversionId}/{googleAdsConversion.conversionLabel}</code>.
-                    Será disparada automaticamente na página <strong>/obrigado</strong>.
-                  </AlertDescription>
-                </Alert>
-              )}
             </CardContent>
           </Card>
 
