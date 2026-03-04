@@ -1,32 +1,25 @@
 
 
-# Fix 2 Build Errors + Apply Migrations
+# Enhanced Conversions Migration + Marketing Scripts Fix
 
-## Build Error Fixes
+## Current State
 
-### 1. `src/hooks/useStepForm.ts` (line 681)
-- Remove `extractedData.service ||` — property doesn't exist on the type `{ name, email, phone }`
-- The fallback `formData.servico || formData.service || serviceName` already covers it
+The code in `useStepForm.ts` (lines 441-444) already sends `gclid`, `transaction_id`, `utm_term`, `utm_content` to `form_leads`, but **these columns don't exist in the database**. This causes the INSERT to fail silently, resulting in `savedLead = null` and empty `lead_id` in the dataLayer.
 
-### 2. `supabase/functions/send-smtp-email/index.ts` (line 2)
-- Change `import { Resend } from "npm:resend@2.0.0"` to `import { Resend } from "https://esm.sh/resend@2.0.0"`
-- The `npm:` specifier requires a deno.json config; `esm.sh` works directly
+Similarly, `conversion_events` lacks `gclid` and `transaction_id` columns.
 
-## Supabase Migrations
+## Changes Required
 
-### Migration 1 — Centralize / Reply Agent columns + lead_profiles table
-- Add ~25 columns to `marketing_settings` for Reply Agent/Centralize integration
-- Create `lead_profiles` table with RLS policy and index
-- Execute the SQL provided by the user verbatim
+### 1. Database Migration — Enhanced Conversions
+Add columns to `form_leads` and `conversion_events`, create `offline_conversions` table, and add performance indexes. This is the SQL provided by the user.
 
-### Migration 2
-The user only provided Migration 1 in their message. Will apply what was given.
+### 2. `src/hooks/useStepFormMarketingScripts.ts` (lines 230-241)
+Add `extractedData` as first priority source for email/name/phone in the GTM handler. Currently the code reads `userData`, `formData`, `answers` but misses `extractedData` which is the properly processed data from `useStepForm`.
 
-## File Changes Summary
+**Change**: Add `const extracted = event.detail?.extractedData || {};` and prioritize `extracted.email`, `extracted.name`, `extracted.phone` in the fallback chain.
 
-| File | Change |
-|---|---|
-| `src/hooks/useStepForm.ts:681` | Remove `extractedData.service \|\|` |
-| `supabase/functions/send-smtp-email/index.ts:2` | `npm:resend` → `https://esm.sh/resend` |
-| Supabase DB | Run migration SQL for marketing_settings + lead_profiles |
+### 3. Add email field to divorcioform
+Run an UPDATE on `step_forms` to append an optional email field to the form step of `divorcioform`. Field will be `required: false` so it doesn't block submissions.
+
+### No other files are modified — all existing UI and functionality remains intact.
 
