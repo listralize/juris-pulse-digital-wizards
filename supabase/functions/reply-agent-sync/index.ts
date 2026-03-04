@@ -71,13 +71,19 @@ const splitName = (fullName: string): { first_name: string; last_name: string } 
 
 /**
  * Normalizes a Brazilian phone number to E.164 format (+55XXXXXXXXXXX).
- * Accepts formats: (62) 99459-4496, 62994594496, +5562994594496, etc.
+ * Accepts formats: (62) 99459-4496, 62999118230, +5562999118230, etc.
+ *
+ * Regra: sempre retorna +55 + dígitos puros.
+ * O número já deve vir com o 9 correto (ex: 62999118230 = DDD 62 + 9 dígitos).
+ * Não adiciona nem remove dígitos — apenas garante o prefixo +55.
  */
 const normalizePhone = (raw: string): string => {
   const digits = raw.replace(/\D/g, '')
+  // Já tem o DDI 55
   if (digits.startsWith('55') && digits.length >= 12) return `+${digits}`
+  // Sem DDI — adiciona +55
   if (digits.length >= 10) return `+55${digits}`
-  return raw // return as-is if we can't normalize
+  return raw // retorna como está se não conseguir normalizar
 }
 
 /**
