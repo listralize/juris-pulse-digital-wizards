@@ -104,14 +104,14 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}))
     const { limit = 50, offset = 0, form_slug, dry_run = false } = body
 
-    // Buscar config global
+    // Buscar config global — prioridade: banco > variável de ambiente
     const { data: mktSettings } = await supabase
       .from('marketing_settings')
-      .select('reply_agent_api_key, reply_agent_enabled')
+      .select('reply_agent_api_key, centralize_api_key, reply_agent_enabled, centralize_enabled')
       .limit(1)
       .maybeSingle()
 
-    const apiKey = mktSettings?.reply_agent_api_key || ''
+    const apiKey = mktSettings?.centralize_api_key || mktSettings?.reply_agent_api_key || Deno.env.get('REPLYAGENT_API_KEY') || Deno.env.get('REPLY_AGENT_API_KEY') || ''
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API Key não configurada' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

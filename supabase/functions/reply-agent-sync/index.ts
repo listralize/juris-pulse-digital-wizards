@@ -248,15 +248,15 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Buscar config global
+    // Buscar config global — prioridade: banco > variável de ambiente
     const { data: mktSettings } = await supabase
       .from('marketing_settings')
-      .select('reply_agent_api_key, reply_agent_flow_id, reply_agent_enabled')
+      .select('reply_agent_api_key, centralize_api_key, reply_agent_flow_id, centralize_flow_id_default, reply_agent_enabled, centralize_enabled')
       .limit(1)
       .maybeSingle()
 
-    const apiKey = mktSettings?.reply_agent_api_key || ''
-    const defaultFlowId = mktSettings?.reply_agent_flow_id || ''
+    const apiKey = mktSettings?.centralize_api_key || mktSettings?.reply_agent_api_key || Deno.env.get('REPLYAGENT_API_KEY') || Deno.env.get('REPLY_AGENT_API_KEY') || ''
+    const defaultFlowId = mktSettings?.centralize_flow_id_default || mktSettings?.reply_agent_flow_id || ''
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API Key não configurada no Centralize' }),
