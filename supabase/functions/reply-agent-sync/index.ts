@@ -100,11 +100,18 @@ const createContact = async (
   }
 
   if (payload.email) body.primary_email = payload.email.trim().toLowerCase()
-  if (payload.phone) body.primary_phone_number = normalizePhone(payload.phone)
-  // Se whatsapp não foi explicitamente fornecido, usa o telefone como WhatsApp
-  // (no Brasil, telefone celular = WhatsApp na grande maioria dos casos)
-  const whatsappNumber = payload.whatsapp || payload.phone
-  if (whatsappNumber) body.primary_whatsapp_number = normalizePhone(whatsappNumber)
+
+  const phoneNum = payload.phone ? normalizePhone(payload.phone) : null
+  const whatsappNum = (payload.whatsapp || payload.phone) ? normalizePhone(payload.whatsapp || payload.phone!) : null
+
+  if (phoneNum && whatsappNum && phoneNum === whatsappNum) {
+    // Same number: send only as WhatsApp (API ignores whatsapp if phone has same value)
+    body.primary_whatsapp_number = whatsappNum
+  } else {
+    if (phoneNum) body.primary_phone_number = phoneNum
+    if (whatsappNum) body.primary_whatsapp_number = whatsappNum
+  }
+
   if (payload.service) body.company_name = payload.service // use company_name as service label
 
   // Map custom fields if provided
