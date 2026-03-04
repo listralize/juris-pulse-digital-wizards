@@ -1,60 +1,32 @@
 
-# Corrigir StepForm do Divorcio - 3 Bugs Criticos
 
-## Problemas Encontrados
+# Fix 2 Build Errors + Apply Migrations
 
-### BUG 1 (BLOQUEANTE): Formulario exige email, mas nao tem campo de email
-O formulario `divorcioform` tem apenas 2 campos: **Nome** e **Telefone**. Porem, no `useStepForm.ts` (linhas 300-305), existe uma validacao obrigatoria de email:
+## Build Error Fixes
 
-```text
-if (!emailValue || !emailValue.trim()) {
-  toast('Email e obrigatorio para enviar o formulario');
-  return; // <-- BLOQUEIA O ENVIO
-}
-```
+### 1. `src/hooks/useStepForm.ts` (line 681)
+- Remove `extractedData.service ||` — property doesn't exist on the type `{ name, email, phone }`
+- The fallback `formData.servico || formData.service || serviceName` already covers it
 
-Como nao existe campo de email no formulario, `emailValue` e sempre vazio, e o envio **nunca funciona**. Este e o motivo pelo qual o usuario nao consegue enviar.
+### 2. `supabase/functions/send-smtp-email/index.ts` (line 2)
+- Change `import { Resend } from "npm:resend@2.0.0"` to `import { Resend } from "https://esm.sh/resend@2.0.0"`
+- The `npm:` specifier requires a deno.json config; `esm.sh` works directly
 
-**Solucao**: Tornar a validacao de email condicional -- so exigir se o formulario tiver um campo de email configurado.
+## Supabase Migrations
 
-### BUG 2: Texto do botao errado
-Em `StepFormFields.tsx` (linha 99), o texto esta fixo como "Quero minha consulta gratuita". O usuario quer que seja "Enviar".
+### Migration 1 — Centralize / Reply Agent columns + lead_profiles table
+- Add ~25 columns to `marketing_settings` for Reply Agent/Centralize integration
+- Create `lead_profiles` table with RLS policy and index
+- Execute the SQL provided by the user verbatim
 
-**Solucao**: Trocar o texto para "Enviar".
+### Migration 2
+The user only provided Migration 1 in their message. Will apply what was given.
 
-### BUG 3: normalize9thDigit remove digitos validos
-A funcao `normalize9thDigit` no `PhoneFieldWithDDD.tsx` usa uma lista desatualizada (`DDDS_WITH_9`) que contem apenas DDDs de SP/RJ/ES. Para DDDs como 62 (Goiania), ela **remove** o 9o digito, corrompendo o numero. Desde 2016, todos os celulares brasileiros tem 9 digitos.
+## File Changes Summary
 
-**Solucao**: Remover `DDDS_WITH_9` e `normalize9thDigit` completamente.
-
-## Alteracoes por arquivo
-
-### 1. `src/hooks/useStepForm.ts`
-- **Linhas 299-305**: Tornar validacao de email condicional. So exigir email se existir um campo de email no formulario atual (verificar `currentStep.formFields` por campo com `type === 'email'` ou `name` contendo 'email')
-- Se nao houver campo de email, pular a validacao e permitir envio sem email
-
-### 2. `src/components/stepform/StepFormFields.tsx`
-- **Linha 99**: Trocar "Quero minha consulta gratuita" por "Enviar"
-
-### 3. `src/components/stepform/PhoneFieldWithDDD.tsx`
-- **Linha 5**: Remover constante `DDDS_WITH_9`
-- **Linhas 37-51**: Remover funcao `normalize9thDigit`
-- **Linha 87**: No `handleBlur`, usar `digits` diretamente em vez de `normalize9thDigit(digits)`
-
-## Tracking (ja funciona)
-Verifiquei o `tracking_config` do formulario e o `useStepFormMarketingScripts.ts`:
-- Facebook Pixel: habilitado, evento "Lead", pixel ID 1024100955860841
-- GTM: habilitado, container GTM-PL22PJ6V, evento "submit"
-- GA: desabilitado (correto)
-- O evento `stepFormSubmitSuccess` e disparado apos salvar o lead (linha 482 do useStepForm.ts) e os handlers de FB/GTM capturam esse evento corretamente
-- O redirecionamento para `/obrigado` esta configurado (linha 616) e funciona apos 1.5s
-
-O tracking so nao funcionava porque o formulario nunca completava o submit (Bug 1).
-
-## Resumo
-
-| Arquivo | O que muda |
+| File | Change |
 |---|---|
-| `src/hooks/useStepForm.ts` | Validacao de email condicional |
-| `src/components/stepform/StepFormFields.tsx` | Texto do botao: "Enviar" |
-| `src/components/stepform/PhoneFieldWithDDD.tsx` | Remover normalize9thDigit e DDDS_WITH_9 |
+| `src/hooks/useStepForm.ts:681` | Remove `extractedData.service \|\|` |
+| `supabase/functions/send-smtp-email/index.ts:2` | `npm:resend` → `https://esm.sh/resend` |
+| Supabase DB | Run migration SQL for marketing_settings + lead_profiles |
+
