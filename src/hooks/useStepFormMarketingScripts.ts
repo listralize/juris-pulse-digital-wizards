@@ -230,13 +230,18 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
         const userData = event.detail?.userData || {};
         const formData = event.detail?.formData || {};
         const answers = event.detail?.answers || {};
+        // extractedData já tem email/nome/telefone processados corretamente pelo useStepForm
+        const extracted = event.detail?.extractedData || {};
 
-        const email = userData.email || formData.email || answers.email ||
+        const email = extracted.email ||
+          userData.email || formData.email || answers.email ||
           userData.Email || formData.Email || answers.Email || '';
-        const nome = userData.nome || formData.nome || answers.nome ||
+        const nome = extracted.name ||
+          userData.nome || formData.nome || answers.nome ||
           userData.name || formData.name || answers.name ||
           userData.Nome || formData.Nome || answers.Nome || '';
-        const telefone = userData.telefone || formData.telefone || answers.telefone ||
+        const telefone = extracted.phone ||
+          userData.telefone || formData.telefone || answers.telefone ||
           userData.phone || formData.phone || answers.phone ||
           userData.Telefone || formData.Telefone || answers.Telefone || '';
 
