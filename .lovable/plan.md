@@ -1,47 +1,34 @@
 
 
-# Fix Reply Agent: Email, Phone, WhatsApp Not Arriving
+# Fix Reply Agent: WhatsApp Not Saved When Same as Phone
 
-## Root Cause Analysis
+## Root Cause (Confirmed by Logs)
 
-Looking at the data, I found two issues:
+The Reply Agent API response shows `primary_whatsapp: null` even though we send `primary_whatsapp_number`. This happens because the API silently discards `primary_whatsapp_number` when it has the same value as `primary_phone_number`.
 
-### Issue 1: Latest form submission has empty phone
-The most recent divorcioform submission (id `b741f9dc`) has `phone: ""` (empty) — the "Telefone" field is `required: false` and was left blank. This explains why phone/whatsapp are null in Reply Agent.
+Current code (line 102-107) sends **both** fields with the same number — the API keeps only `primary_phone_number` and drops the WhatsApp.
 
-### Issue 2: No diagnostic logging
-The edge function doesn't log the exact payload being sent to Reply Agent's API, making it impossible to verify what's actually being transmitted. We can see from logs that email IS reaching the function (`Processing lead: Derick Fernandes Godoi | onfleekmidiacriativa@gmail.com`), but we can't confirm what the API receives.
+## Fix
 
-### Possible Issue 3: Reply Agent API field names
-The code sends `primary_email`, `primary_phone_number`, `primary_whatsapp_number` — but if the Reply Agent API expects different field names (e.g., `email`, `phone_number`, `whatsapp_number`), the fields would be silently ignored and the contact created without them.
-
-## Changes
-
-### 1. `supabase/functions/reply-agent-sync/index.ts` — Add diagnostic logging
-
-In `createContact`, log the exact body being sent AND the full response from Reply Agent:
+**`supabase/functions/reply-agent-sync/index.ts`** — In `createContact`, replace the phone/whatsapp mapping (lines 102-107) with logic that sends the number **only as `primary_whatsapp_number`** when both are the same:
 
 ```typescript
-console.log('[reply-agent-sync] → createContact body:', JSON.stringify(body))
-// ... fetch ...
-console.log('[reply-agent-sync] ← createContact response:', JSON.stringify(data))
+const phoneNum = payload.phone ? normalizePhone(payload.phone) : null
+const whatsappNum = (payload.whatsapp || payload.phone) ? normalizePhone(payload.whatsapp || payload.phone) : null
+
+if (phoneNum && whatsappNum && phoneNum === whatsappNum) {
+  // Same number: send only as WhatsApp (API ignores whatsapp if phone has same value)
+  body.primary_whatsapp_number = whatsappNum
+} else {
+  if (phoneNum) body.primary_phone_number = phoneNum
+  if (whatsappNum) body.primary_whatsapp_number = whatsappNum
+}
 ```
 
-This will show in the Edge Function logs exactly what's being sent and what Reply Agent returns, so we can confirm the field mapping.
+This ensures the SmartFlow can reach the contact via WhatsApp. No email field will be added to the form — only the edge function mapping changes.
 
-### 2. `supabase/functions/reply-agent-sync/index.ts` — Also log the incoming payload
-
-At the top of the handler, log the full payload to confirm what the client is sending:
-
-```typescript
-console.log('[reply-agent-sync] Payload received:', JSON.stringify(payload))
-```
-
-### 3. No other changes
-
-The edge function code and `useStepForm.ts` logic look correct. The field extraction (`formData.Telefone`, `formData.email`, etc.) matches the form field names. The issue is likely that:
-- The phone was genuinely empty in the last test submission
-- OR the Reply Agent API field names need adjustment (we'll know from the logs)
-
-After deploying with logging, one test submission will reveal the exact problem.
+## No other changes
+- No form field changes (no email field added)
+- No changes to `useStepForm.ts`
+- Tags logic already correct from previous fix
 
