@@ -1,16 +1,1 @@
 project_id = "hmfsvccbyxhdwmrgcyff"
-
-[functions.send-welcome-email]
-verify_jwt = false
-
-[functions.send-smtp-email]
-verify_jwt = false
-
-[functions.webhook-receiver]
-verify_jwt = false
-
-[functions.lead-webhook-receiver]
-verify_jwt = false
-
-[functions.process-webhook-queue]
-verify_jwt = false
