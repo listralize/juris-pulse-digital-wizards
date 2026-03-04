@@ -287,6 +287,7 @@ export type Database = {
           event_type: string
           form_id: string | null
           form_name: string | null
+          gclid: string | null
           id: string
           lead_data: Json | null
           page_url: string
@@ -295,6 +296,7 @@ export type Database = {
           session_id: string
           state: string | null
           timestamp: string
+          transaction_id: string | null
           user_agent: string | null
           visitor_id: string | null
         }
@@ -312,6 +314,7 @@ export type Database = {
           event_type: string
           form_id?: string | null
           form_name?: string | null
+          gclid?: string | null
           id?: string
           lead_data?: Json | null
           page_url: string
@@ -320,6 +323,7 @@ export type Database = {
           session_id: string
           state?: string | null
           timestamp?: string
+          transaction_id?: string | null
           user_agent?: string | null
           visitor_id?: string | null
         }
@@ -337,6 +341,7 @@ export type Database = {
           event_type?: string
           form_id?: string | null
           form_name?: string | null
+          gclid?: string | null
           id?: string
           lead_data?: Json | null
           page_url?: string
@@ -345,6 +350,7 @@ export type Database = {
           session_id?: string
           state?: string | null
           timestamp?: string
+          transaction_id?: string | null
           user_agent?: string | null
           visitor_id?: string | null
         }
@@ -517,21 +523,28 @@ export type Database = {
           form_id: string | null
           form_name: string | null
           form_step_data: Json | null
+          gclid: string | null
           id: string
           ip_address: string | null
           is_whatsapp_conversion: boolean | null
           lead_data: Json
+          offline_conversion_status: string | null
+          offline_conversion_uploaded_at: string | null
+          offline_conversion_value: number | null
           referrer: string | null
           region: string | null
           session_id: string
           source_page: string | null
           state: string | null
           status: string | null
+          transaction_id: string | null
           updated_at: string
           user_agent: string | null
           utm_campaign: string | null
+          utm_content: string | null
           utm_medium: string | null
           utm_source: string | null
+          utm_term: string | null
           visitor_id: string | null
         }
         Insert: {
@@ -547,21 +560,28 @@ export type Database = {
           form_id?: string | null
           form_name?: string | null
           form_step_data?: Json | null
+          gclid?: string | null
           id?: string
           ip_address?: string | null
           is_whatsapp_conversion?: boolean | null
           lead_data: Json
+          offline_conversion_status?: string | null
+          offline_conversion_uploaded_at?: string | null
+          offline_conversion_value?: number | null
           referrer?: string | null
           region?: string | null
           session_id: string
           source_page?: string | null
           state?: string | null
           status?: string | null
+          transaction_id?: string | null
           updated_at?: string
           user_agent?: string | null
           utm_campaign?: string | null
+          utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
           visitor_id?: string | null
         }
         Update: {
@@ -577,21 +597,28 @@ export type Database = {
           form_id?: string | null
           form_name?: string | null
           form_step_data?: Json | null
+          gclid?: string | null
           id?: string
           ip_address?: string | null
           is_whatsapp_conversion?: boolean | null
           lead_data?: Json
+          offline_conversion_status?: string | null
+          offline_conversion_uploaded_at?: string | null
+          offline_conversion_value?: number | null
           referrer?: string | null
           region?: string | null
           session_id?: string
           source_page?: string | null
           state?: string | null
           status?: string | null
+          transaction_id?: string | null
           updated_at?: string
           user_agent?: string | null
           utm_campaign?: string | null
+          utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
           visitor_id?: string | null
         }
         Relationships: []
@@ -1097,6 +1124,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      offline_conversions: {
+        Row: {
+          conversion_name: string
+          conversion_time: string
+          conversion_value: number | null
+          created_at: string | null
+          currency_code: string | null
+          error_message: string | null
+          form_lead_id: string | null
+          gclid: string
+          google_ads_response: Json | null
+          id: string
+          status: string
+          transaction_id: string | null
+          updated_at: string | null
+          uploaded_at: string | null
+        }
+        Insert: {
+          conversion_name?: string
+          conversion_time: string
+          conversion_value?: number | null
+          created_at?: string | null
+          currency_code?: string | null
+          error_message?: string | null
+          form_lead_id?: string | null
+          gclid: string
+          google_ads_response?: Json | null
+          id?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+        }
+        Update: {
+          conversion_name?: string
+          conversion_time?: string
+          conversion_value?: number | null
+          created_at?: string | null
+          currency_code?: string | null
+          error_message?: string | null
+          form_lead_id?: string | null
+          gclid?: string
+          google_ads_response?: Json | null
+          id?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offline_conversions_form_lead_id_fkey"
+            columns: ["form_lead_id"]
+            isOneToOne: false
+            referencedRelation: "form_leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_benefits: {
         Row: {
