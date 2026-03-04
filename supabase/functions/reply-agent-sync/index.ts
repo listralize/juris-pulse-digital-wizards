@@ -5,16 +5,18 @@
  *
  * Fluxo:
  *  1. Recebe os dados do lead (nome, email, telefone, serviço, urgência, etc.)
- *  2. Cria (ou atualiza) o contato via POST /v1/contact
- *  3. Salva o replyagent_contact_id na tabela lead_profiles do Supabase
- *  4. Se um automation_id for fornecido, dispara o Smart Flow via POST /v1/send-a-flow
- *  5. Retorna o contato criado e o resultado do flow
+ *  2. Cria o contato via POST /v1/contact (JSON body)
+ *  3. Aplica tags via POST /v1/contacts/{id}/tags (JSON body)
+ *  4. Se um automation_id for fornecido, dispara o Smart Flow via POST /v1/send-a-flow (FormData)
+ *  5. Salva o replyagent_contact_id na tabela lead_profiles do Supabase
+ *  6. Retorna o contato criado e o resultado do flow
  *
  * Configuração necessária (Supabase Secrets):
- *  - REPLY_AGENT_API_KEY  →  Bearer token da API do Reply Agent
+ *  - REPLYAGENT_API_KEY   →  Bearer token da API do Reply Agent
  *  - REPLY_AGENT_FLOW_ID  →  ID do Smart Flow padrão a disparar (opcional)
  *
- * Pode ser chamada internamente pelas funções contact-form e process-webhook-queue.
+ * API Docs: https://developers.replyagent.com/
+ * Base URL: https://ra-bcknd.com/v1
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -26,10 +28,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const REPLY_AGENT_BASE_URL = 'https://ra-bcknd.com/v1'
+const BASE = 'https://ra-bcknd.com/v1'
 
 interface LeadPayload {
-  // Dados do lead
   name: string
   email?: string
   phone?: string
@@ -39,13 +40,12 @@ interface LeadPayload {
   message?: string
   form_slug?: string
   form_name?: string
-  lead_id?: string          // ID do lead na tabela form_leads ou step_form_leads
-  gclid?: string            // Google Click ID — para Enhanced Conversions offline
-  transaction_id?: string   // ID único de transação — para deduplicação no Google Ads
+  lead_id?: string
+  gclid?: string
+  transaction_id?: string
   custom_fields?: Record<string, string>
-  // Controle
-  automation_id?: string    // Override do REPLY_AGENT_FLOW_ID para este lead específico
-  skip_flow?: boolean       // Se true, cria o contato mas não dispara o flow
+  automation_id?: string
+  skip_flow?: boolean
 }
 
 interface ReplyAgentContact {
@@ -58,38 +58,29 @@ interface ReplyAgentContact {
   [key: string]: unknown
 }
 
-/**
- * Splits a full name into first_name and last_name.
- * e.g. "João da Silva" → { first_name: "João", last_name: "da Silva" }
- */
-const splitName = (fullName: string): { first_name: string; last_name: string } => {
+/** Splits "João da Silva" → { first_name: "João", last_name: "da Silva" } */
+const splitName = (fullName: string) => {
   const parts = fullName.trim().split(/\s+/)
-  const first_name = parts[0] || 'Lead'
-  const last_name = parts.slice(1).join(' ') || ''
-  return { first_name, last_name }
+  return {
+    first_name: parts[0] || 'Lead',
+    last_name: parts.slice(1).join(' ') || '',
+  }
 }
 
 /**
- * Normalizes a Brazilian phone number to E.164 format (+55XXXXXXXXXXX).
- * Accepts formats: (62) 99459-4496, 62999118230, +5562999118230, etc.
- *
- * Regra: sempre retorna +55 + dígitos puros.
- * O número já deve vir com o 9 correto (ex: 62999118230 = DDD 62 + 9 dígitos).
- * Não adiciona nem remove dígitos — apenas garante o prefixo +55.
+ * Normalizes a Brazilian phone number to E.164 (+55XXXXXXXXXXX).
+ * - Strips all non-digits
+ * - If already starts with 55 and has ≥12 digits → prepend +
+ * - Otherwise → prepend +55
  */
 const normalizePhone = (raw: string): string => {
   const digits = raw.replace(/\D/g, '')
-  // Já tem o DDI 55
+  if (!digits) return raw
   if (digits.startsWith('55') && digits.length >= 12) return `+${digits}`
-  // Sem DDI — adiciona +55
-  if (digits.length >= 10) return `+55${digits}`
-  return raw // retorna como está se não conseguir normalizar
+  return `+55${digits}`
 }
 
-/**
- * Creates a new contact in Reply Agent.
- * Returns the created contact object.
- */
+/** POST /v1/contact — Creates a contact. Returns the created contact. */
 const createContact = async (
   apiKey: string,
   payload: LeadPayload
@@ -98,36 +89,41 @@ const createContact = async (
 
   const body: Record<string, unknown> = {
     first_name,
-    last_name: last_name || undefined,
     locale: 'pt-BR',
     opt_in_sms: true,
     opt_in_call: true,
     opt_in_email: true,
   }
 
-  if (payload.email) body.primary_email = payload.email.trim().toLowerCase()
+  if (last_name) body.last_name = last_name
 
-  const phoneNum = payload.phone ? normalizePhone(payload.phone) : null
-  const whatsappNum = (payload.whatsapp || payload.phone) ? normalizePhone(payload.whatsapp || payload.phone!) : null
-
-  if (phoneNum && whatsappNum && phoneNum === whatsappNum) {
-    // Same number: send only as WhatsApp (API ignores whatsapp if phone has same value)
-    body.primary_whatsapp_number = whatsappNum
-  } else {
-    if (phoneNum) body.primary_phone_number = phoneNum
-    if (whatsappNum) body.primary_whatsapp_number = whatsappNum
+  // Email
+  if (payload.email) {
+    body.primary_email = payload.email.trim().toLowerCase()
   }
 
-  if (payload.service) body.company_name = payload.service // use company_name as service label
+  // Phone & WhatsApp
+  // Brazilian leads: phone IS whatsapp in most cases.
+  // We always send as primary_whatsapp_number (required for SmartFlow).
+  // Also send as primary_phone_number for CRM display.
+  const rawPhone = payload.phone || payload.whatsapp || ''
+  const rawWhatsapp = payload.whatsapp || payload.phone || ''
 
-  // Map custom fields if provided
+  if (rawPhone) {
+    body.primary_phone_number = normalizePhone(rawPhone)
+  }
+  if (rawWhatsapp) {
+    body.primary_whatsapp_number = normalizePhone(rawWhatsapp)
+  }
+
+  // Custom fields
   if (payload.custom_fields && Object.keys(payload.custom_fields).length > 0) {
     body.custom_fields = payload.custom_fields
   }
 
-  console.log('[reply-agent-sync] → createContact body:', JSON.stringify(body))
+  console.log('[reply-agent-sync] → POST /contact body:', JSON.stringify(body))
 
-  const res = await fetch(`${REPLY_AGENT_BASE_URL}/contact`, {
+  const res = await fetch(`${BASE}/contact`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -137,18 +133,48 @@ const createContact = async (
     body: JSON.stringify(body),
   })
 
-  const data = await res.json()
-  console.log('[reply-agent-sync] ← createContact response:', JSON.stringify(data))
+  const text = await res.text()
+  console.log(`[reply-agent-sync] ← POST /contact ${res.status}:`, text)
 
   if (!res.ok) {
-    throw new Error(`Reply Agent createContact error ${res.status}: ${JSON.stringify(data)}`)
+    throw new Error(`createContact ${res.status}: ${text}`)
   }
 
-  return data as ReplyAgentContact
+  return JSON.parse(text) as ReplyAgentContact
 }
 
 /**
- * Triggers a Smart Flow for a given contact.
+ * POST /v1/contacts/{id}/tags — Applies multiple tags at once.
+ * Body: JSON { "tags": ["tag a", "tag b"] }
+ */
+const applyTags = async (
+  apiKey: string,
+  contactId: number,
+  tags: string[]
+): Promise<void> => {
+  if (!tags.length) return
+
+  const res = await fetch(`${BASE}/contacts/${contactId}/tags`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ tags }),
+  })
+
+  const text = await res.text()
+  console.log(`[reply-agent-sync] ← POST /contacts/${contactId}/tags ${res.status}:`, text)
+
+  if (!res.ok) {
+    console.warn(`[reply-agent-sync] ⚠️ applyTags failed ${res.status}: ${text}`)
+  }
+}
+
+/**
+ * POST /v1/send-a-flow — Triggers a Smart Flow.
+ * Body: FormData { automation_id, contact_id }
  */
 const sendFlow = async (
   apiKey: string,
@@ -159,7 +185,9 @@ const sendFlow = async (
   formData.append('automation_id', automationId)
   formData.append('contact_id', String(contactId))
 
-  const res = await fetch(`${REPLY_AGENT_BASE_URL}/send-a-flow`, {
+  console.log(`[reply-agent-sync] → POST /send-a-flow automation_id=${automationId} contact_id=${contactId}`)
+
+  const res = await fetch(`${BASE}/send-a-flow`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -167,30 +195,15 @@ const sendFlow = async (
     body: formData,
   })
 
+  const text = await res.text()
+  console.log(`[reply-agent-sync] ← POST /send-a-flow ${res.status}:`, text)
+
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Reply Agent sendFlow error ${res.status}: ${text}`)
+    throw new Error(`sendFlow ${res.status}: ${text}`)
   }
 }
 
-/**
- * Applies a tag to a contact (best-effort, non-blocking).
- */
-const applyTag = async (
-  apiKey: string,
-  contactId: number,
-  tag: string
-): Promise<void> => {
-  const formData = new FormData()
-  formData.append('contact_id', String(contactId))
-  formData.append('tag', tag)
-
-  await fetch(`${REPLY_AGENT_BASE_URL}/contact/apply-tag`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}` },
-    body: formData,
-  }).catch(() => {/* non-critical */})
-}
+// ─── Main Handler ─────────────────────────────────────────────────────────────
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -200,6 +213,7 @@ serve(async (req) => {
   try {
     const apiKey = Deno.env.get('REPLYAGENT_API_KEY')
     if (!apiKey) {
+      console.error('[reply-agent-sync] ❌ REPLYAGENT_API_KEY not configured')
       return new Response(
         JSON.stringify({ error: 'REPLYAGENT_API_KEY not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -212,6 +226,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const payload: LeadPayload = await req.json()
+    console.log('[reply-agent-sync] Payload received:', JSON.stringify(payload))
 
     if (!payload.name) {
       return new Response(
@@ -220,10 +235,7 @@ serve(async (req) => {
       )
     }
 
-    console.log(`[reply-agent-sync] Processing lead: ${payload.name} | ${payload.email || payload.phone}`)
-    console.log('[reply-agent-sync] Payload received:', JSON.stringify(payload))
-
-    // ─── 1. Create contact in Reply Agent ────────────────────────────────────
+    // ─── 1. Create contact ────────────────────────────────────────────────────
     let contact: ReplyAgentContact
     try {
       contact = await createContact(apiKey, payload)
@@ -236,29 +248,39 @@ serve(async (req) => {
       )
     }
 
-    // ─── 2. Apply tags ──────────────────────────────────────────────────────────
-    // Sempre aplica a tag do formulário
-    if (payload.form_slug) {
-      await applyTag(apiKey, contact.id, `form_${payload.form_slug}`)
-    }
-    // Tag de serviço
-    if (payload.service) {
-      await applyTag(apiKey, contact.id, `servico_${payload.service.toLowerCase().replace(/\s+/g, '_').substring(0, 50)}`)
-    }
-    // Tag de urgência (incluindo default)
+    // ─── 2. Apply tags ────────────────────────────────────────────────────────
+    const tags: string[] = []
+
+    // Tag do formulário
+    if (payload.form_slug) tags.push(`form_${payload.form_slug}`)
+
+    // Tag de urgência
     const urgencyTag = payload.urgency || 'default'
-    await applyTag(apiKey, contact.id, `urgencia_${urgencyTag}`)
+    tags.push(`urgencia_${urgencyTag}`)
+
     // Tag de origem (tráfego pago vs orgânico)
     if (payload.gclid) {
-      await applyTag(apiKey, contact.id, 'TRAFEGO_PAGO')
+      tags.push('TRAFEGO_PAGO')
     } else {
-      await applyTag(apiKey, contact.id, 'organico')
+      tags.push('organico')
     }
 
-    // ─── 3. Persist replyagent_contact_id in lead_profiles ───────────────────
+    // Tag de serviço
+    if (payload.service) {
+      tags.push(`servico_${payload.service.toLowerCase().replace(/\s+/g, '_').substring(0, 50)}`)
+    }
+
+    try {
+      await applyTags(apiKey, contact.id, tags)
+      console.log(`[reply-agent-sync] ✅ Tags applied: ${tags.join(', ')}`)
+    } catch (tagErr) {
+      console.warn('[reply-agent-sync] ⚠️ applyTags exception (non-blocking):', tagErr)
+    }
+
+    // ─── 3. Persist in lead_profiles ─────────────────────────────────────────
     try {
       const { first_name, last_name } = splitName(payload.name)
-      const profileData = {
+      await supabase.from('lead_profiles').upsert({
         replyagent_contact_id: String(contact.id),
         first_name,
         last_name: last_name || null,
@@ -272,7 +294,6 @@ serve(async (req) => {
         is_synced_with_replyagent: true,
         last_sync_at: new Date().toISOString(),
         notes: payload.message || null,
-        // Enhanced Conversions: salvar gclid e transaction_id para upload offline
         gclid: payload.gclid || null,
         transaction_id: payload.transaction_id || null,
         custom_fields: {
@@ -281,20 +302,11 @@ serve(async (req) => {
           gclid: payload.gclid || '',
           transaction_id: payload.transaction_id || '',
         },
-      }
+      }, { onConflict: 'replyagent_contact_id' })
 
-      const { error: upsertError } = await supabase
-        .from('lead_profiles')
-        .upsert(profileData, { onConflict: 'replyagent_contact_id' })
-
-      if (upsertError) {
-        console.error('[reply-agent-sync] ⚠️ Failed to upsert lead_profile:', upsertError)
-      } else {
-        console.log('[reply-agent-sync] ✅ lead_profiles upserted')
-      }
+      console.log('[reply-agent-sync] ✅ lead_profiles upserted')
     } catch (profileErr) {
-      console.error('[reply-agent-sync] ⚠️ lead_profiles upsert exception:', profileErr)
-      // Non-blocking — continue even if profile save fails
+      console.warn('[reply-agent-sync] ⚠️ lead_profiles upsert exception (non-blocking):', profileErr)
     }
 
     // ─── 4. Trigger Smart Flow ────────────────────────────────────────────────
@@ -307,17 +319,17 @@ serve(async (req) => {
         flowTriggered = true
         console.log(`[reply-agent-sync] ✅ Smart Flow ${automationId} triggered for contact ${contact.id}`)
       } catch (flowErr) {
-        console.error('[reply-agent-sync] ⚠️ Smart Flow trigger failed (non-blocking):', flowErr)
-        // Non-blocking — the contact was created successfully even if the flow fails
+        console.warn('[reply-agent-sync] ⚠️ Smart Flow trigger failed (non-blocking):', flowErr)
       }
     } else {
-      console.log('[reply-agent-sync] ℹ️ No automation_id configured — skipping Smart Flow')
+      console.log('[reply-agent-sync] ℹ️ No automation_id — skipping Smart Flow')
     }
 
     return new Response(
       JSON.stringify({
         success: true,
         contact_id: contact.id,
+        tags_applied: tags,
         flow_triggered: flowTriggered,
         automation_id: automationId || null,
       }),
