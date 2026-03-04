@@ -1,37 +1,39 @@
 
 
-# Fix GTM Double-Firing: Clear custom_head_html from divorcioform
+# Fix Reply Agent SmartFlow + Tags + WhatsApp Mapping
 
-## Problem
-The GTM container is loaded twice on the StepForm page:
-1. Globally via `useMarketingLoader` (correct)
-2. Via `custom_head_html` in the divorcioform's `tracking_config` (duplicate)
+## Problems Identified
 
-This causes 2-3 conversion hits per form submission.
+1. **SmartFlow not triggered**: `useStepForm.ts` calls `reply-agent-sync` without `automation_id`. The edge function only triggers the flow if it receives `automation_id` or the `REPLY_AGENT_FLOW_ID` secret is set. Neither is configured.
 
-## What I Can Do (Step 1)
+2. **WhatsApp field missing**: The code sends `phone` but not `whatsapp`. Reply Agent needs `primary_whatsapp_number` for WhatsApp SmartFlows. Brazilian phone = WhatsApp in most cases.
 
-Run a SQL migration to clear the `custom_head_html` field from the divorcioform's `tracking_config`:
+3. **Tags incomplete**: Urgency tag skipped when `urgency === 'default'`. Form slug tag and traffic source tag (`TRAFEGO_PAGO` / `organico`) not applied.
 
-```sql
-UPDATE public.step_forms
-SET tracking_config = tracking_config - 'custom_head_html'
-WHERE slug = 'divorcioform'
-  AND tracking_config->>'custom_head_html' IS NOT NULL;
+## Changes
+
+### 1. `src/hooks/useStepForm.ts` — Reply Agent sync block (lines 521-552)
+
+- Add `whatsapp: extractedData.phone` to the payload (Brazilian phone = WhatsApp)
+- Before invoking, fetch `marketing_settings` to get the correct `automation_id` based on urgency level
+- Add `extractedData.whatsapp = extractedData.phone` fallback after the extractedData block (line 382)
+
+### 2. `supabase/functions/reply-agent-sync/index.ts` — Three fixes
+
+**a) WhatsApp mapping (line 103-104)**: If `whatsapp` is not provided, auto-map `phone` to `primary_whatsapp_number`:
+```typescript
+const whatsappNumber = payload.whatsapp || payload.phone;
+if (whatsappNumber) body.primary_whatsapp_number = normalizePhone(whatsappNumber);
 ```
 
-This removes only the `custom_head_html` key from the JSON, leaving all other tracking config intact.
+**b) Tags block (lines 219-228)**: Always apply urgency tag (including `default`), add `TRAFEGO_PAGO` / `organico` tag based on gclid presence.
 
-## What You Need to Do (Step 2 — GTM Console)
+**c) No other changes** — the SmartFlow trigger logic at line 273 already works correctly once `automation_id` is passed from the client.
 
-This is outside Lovable's scope — done in the GTM web interface:
+## What is NOT changed
 
-1. Go to GTM → Variables → create/rename Data Layer Variables:
-   - `customer_full_name` (replaces `user_name`)
-   - `customer_email` (replaces `user_email`)  
-   - `customer_phone` (replaces `user_phone`)
-2. Update tag **01 - GADS - Envio de formulário de Lead** to use the new variables
-3. Publish the GTM container
-
-## No code files are modified — only a database field is cleared.
+- No UI changes
+- No database migrations needed
+- No changes to other hooks, components, or edge functions
+- The admin sidebar refactor mentioned by the user is a separate task and will not be included here
 
