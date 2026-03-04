@@ -179,10 +179,10 @@ serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get('REPLY_AGENT_API_KEY')
+    const apiKey = Deno.env.get('REPLYAGENT_API_KEY')
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'REPLY_AGENT_API_KEY not configured' }),
+        JSON.stringify({ error: 'REPLYAGENT_API_KEY not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
