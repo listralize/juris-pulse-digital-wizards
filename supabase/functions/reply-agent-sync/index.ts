@@ -112,6 +112,8 @@ const createContact = async (
     body.custom_fields = payload.custom_fields
   }
 
+  console.log('[reply-agent-sync] → createContact body:', JSON.stringify(body))
+
   const res = await fetch(`${REPLY_AGENT_BASE_URL}/contact`, {
     method: 'POST',
     headers: {
@@ -123,6 +125,7 @@ const createContact = async (
   })
 
   const data = await res.json()
+  console.log('[reply-agent-sync] ← createContact response:', JSON.stringify(data))
 
   if (!res.ok) {
     throw new Error(`Reply Agent createContact error ${res.status}: ${JSON.stringify(data)}`)
@@ -205,6 +208,7 @@ serve(async (req) => {
     }
 
     console.log(`[reply-agent-sync] Processing lead: ${payload.name} | ${payload.email || payload.phone}`)
+    console.log('[reply-agent-sync] Payload received:', JSON.stringify(payload))
 
     // ─── 1. Create contact in Reply Agent ────────────────────────────────────
     let contact: ReplyAgentContact
