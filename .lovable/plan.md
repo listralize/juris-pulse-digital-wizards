@@ -1,39 +1,47 @@
 
 
-# Fix Reply Agent SmartFlow + Tags + WhatsApp Mapping
+# Fix Reply Agent: Email, Phone, WhatsApp Not Arriving
 
-## Problems Identified
+## Root Cause Analysis
 
-1. **SmartFlow not triggered**: `useStepForm.ts` calls `reply-agent-sync` without `automation_id`. The edge function only triggers the flow if it receives `automation_id` or the `REPLY_AGENT_FLOW_ID` secret is set. Neither is configured.
+Looking at the data, I found two issues:
 
-2. **WhatsApp field missing**: The code sends `phone` but not `whatsapp`. Reply Agent needs `primary_whatsapp_number` for WhatsApp SmartFlows. Brazilian phone = WhatsApp in most cases.
+### Issue 1: Latest form submission has empty phone
+The most recent divorcioform submission (id `b741f9dc`) has `phone: ""` (empty) — the "Telefone" field is `required: false` and was left blank. This explains why phone/whatsapp are null in Reply Agent.
 
-3. **Tags incomplete**: Urgency tag skipped when `urgency === 'default'`. Form slug tag and traffic source tag (`TRAFEGO_PAGO` / `organico`) not applied.
+### Issue 2: No diagnostic logging
+The edge function doesn't log the exact payload being sent to Reply Agent's API, making it impossible to verify what's actually being transmitted. We can see from logs that email IS reaching the function (`Processing lead: Derick Fernandes Godoi | onfleekmidiacriativa@gmail.com`), but we can't confirm what the API receives.
+
+### Possible Issue 3: Reply Agent API field names
+The code sends `primary_email`, `primary_phone_number`, `primary_whatsapp_number` — but if the Reply Agent API expects different field names (e.g., `email`, `phone_number`, `whatsapp_number`), the fields would be silently ignored and the contact created without them.
 
 ## Changes
 
-### 1. `src/hooks/useStepForm.ts` — Reply Agent sync block (lines 521-552)
+### 1. `supabase/functions/reply-agent-sync/index.ts` — Add diagnostic logging
 
-- Add `whatsapp: extractedData.phone` to the payload (Brazilian phone = WhatsApp)
-- Before invoking, fetch `marketing_settings` to get the correct `automation_id` based on urgency level
-- Add `extractedData.whatsapp = extractedData.phone` fallback after the extractedData block (line 382)
+In `createContact`, log the exact body being sent AND the full response from Reply Agent:
 
-### 2. `supabase/functions/reply-agent-sync/index.ts` — Three fixes
-
-**a) WhatsApp mapping (line 103-104)**: If `whatsapp` is not provided, auto-map `phone` to `primary_whatsapp_number`:
 ```typescript
-const whatsappNumber = payload.whatsapp || payload.phone;
-if (whatsappNumber) body.primary_whatsapp_number = normalizePhone(whatsappNumber);
+console.log('[reply-agent-sync] → createContact body:', JSON.stringify(body))
+// ... fetch ...
+console.log('[reply-agent-sync] ← createContact response:', JSON.stringify(data))
 ```
 
-**b) Tags block (lines 219-228)**: Always apply urgency tag (including `default`), add `TRAFEGO_PAGO` / `organico` tag based on gclid presence.
+This will show in the Edge Function logs exactly what's being sent and what Reply Agent returns, so we can confirm the field mapping.
 
-**c) No other changes** — the SmartFlow trigger logic at line 273 already works correctly once `automation_id` is passed from the client.
+### 2. `supabase/functions/reply-agent-sync/index.ts` — Also log the incoming payload
 
-## What is NOT changed
+At the top of the handler, log the full payload to confirm what the client is sending:
 
-- No UI changes
-- No database migrations needed
-- No changes to other hooks, components, or edge functions
-- The admin sidebar refactor mentioned by the user is a separate task and will not be included here
+```typescript
+console.log('[reply-agent-sync] Payload received:', JSON.stringify(payload))
+```
+
+### 3. No other changes
+
+The edge function code and `useStepForm.ts` logic look correct. The field extraction (`formData.Telefone`, `formData.email`, etc.) matches the form field names. The issue is likely that:
+- The phone was genuinely empty in the last test submission
+- OR the Reply Agent API field names need adjustment (we'll know from the logs)
+
+After deploying with logging, one test submission will reveal the exact problem.
 
