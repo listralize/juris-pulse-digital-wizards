@@ -678,7 +678,7 @@ export const useStepForm = () => {
           if (urgencyParam) params.set('urgencia', urgencyParam);
           const userName = extractedData.name || formData.Nome || formData.name || '';
           if (userName) params.set('nome', userName);
-          const serviceParam = extractedData.service || formData.servico || formData.service || serviceName || '';
+          const serviceParam = formData.servico || formData.service || serviceName || '';
           if (serviceParam) params.set('servico', serviceParam);
           if (form.slug) params.set('form', form.slug);
           const qs = params.toString();

@@ -668,6 +668,72 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_profiles: {
+        Row: {
+          created_at: string | null
+          custom_fields: Json | null
+          email: string | null
+          first_name: string | null
+          gclid: string | null
+          id: string
+          is_synced_with_replyagent: boolean | null
+          last_name: string | null
+          last_sync_at: string | null
+          lead_source: string | null
+          lead_status: string | null
+          notes: string | null
+          phone: string | null
+          replyagent_contact_id: string | null
+          service_interest: string | null
+          transaction_id: string | null
+          updated_at: string | null
+          urgency_level: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_fields?: Json | null
+          email?: string | null
+          first_name?: string | null
+          gclid?: string | null
+          id?: string
+          is_synced_with_replyagent?: boolean | null
+          last_name?: string | null
+          last_sync_at?: string | null
+          lead_source?: string | null
+          lead_status?: string | null
+          notes?: string | null
+          phone?: string | null
+          replyagent_contact_id?: string | null
+          service_interest?: string | null
+          transaction_id?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_fields?: Json | null
+          email?: string | null
+          first_name?: string | null
+          gclid?: string | null
+          id?: string
+          is_synced_with_replyagent?: boolean | null
+          last_name?: string | null
+          last_sync_at?: string | null
+          lead_source?: string | null
+          lead_status?: string | null
+          notes?: string | null
+          phone?: string | null
+          replyagent_contact_id?: string | null
+          service_interest?: string | null
+          transaction_id?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       lead_status: {
         Row: {
           created_at: string
@@ -902,6 +968,26 @@ export type Database = {
       }
       marketing_settings: {
         Row: {
+          centralize_api_key: string | null
+          centralize_apply_tags: boolean | null
+          centralize_create_contact: boolean | null
+          centralize_default_channel: string | null
+          centralize_enabled: boolean | null
+          centralize_flow_id_default: string | null
+          centralize_flow_id_pesquisando: string | null
+          centralize_flow_id_semanas: string | null
+          centralize_flow_id_urgente: string | null
+          centralize_notify_email: string | null
+          centralize_notify_on_reply: boolean | null
+          centralize_sync_custom_fields: boolean | null
+          centralize_sync_email: boolean | null
+          centralize_sync_name: boolean | null
+          centralize_sync_phone: boolean | null
+          centralize_tag_prefix_form: string | null
+          centralize_tag_prefix_service: string | null
+          centralize_tag_prefix_urgency: string | null
+          centralize_trigger_flow: boolean | null
+          centralize_webhook_callback_url: string | null
           created_at: string
           custom_body_scripts: string | null
           custom_head_scripts: string | null
@@ -917,9 +1003,34 @@ export type Database = {
           google_tag_manager_enabled: boolean | null
           google_tag_manager_id: string | null
           id: string
+          reply_agent_enabled: boolean | null
+          reply_agent_flow_id: string | null
+          reply_agent_flow_id_pesquisando: string | null
+          reply_agent_flow_id_semanas: string | null
+          reply_agent_flow_id_urgente: string | null
           updated_at: string
         }
         Insert: {
+          centralize_api_key?: string | null
+          centralize_apply_tags?: boolean | null
+          centralize_create_contact?: boolean | null
+          centralize_default_channel?: string | null
+          centralize_enabled?: boolean | null
+          centralize_flow_id_default?: string | null
+          centralize_flow_id_pesquisando?: string | null
+          centralize_flow_id_semanas?: string | null
+          centralize_flow_id_urgente?: string | null
+          centralize_notify_email?: string | null
+          centralize_notify_on_reply?: boolean | null
+          centralize_sync_custom_fields?: boolean | null
+          centralize_sync_email?: boolean | null
+          centralize_sync_name?: boolean | null
+          centralize_sync_phone?: boolean | null
+          centralize_tag_prefix_form?: string | null
+          centralize_tag_prefix_service?: string | null
+          centralize_tag_prefix_urgency?: string | null
+          centralize_trigger_flow?: boolean | null
+          centralize_webhook_callback_url?: string | null
           created_at?: string
           custom_body_scripts?: string | null
           custom_head_scripts?: string | null
@@ -935,9 +1046,34 @@ export type Database = {
           google_tag_manager_enabled?: boolean | null
           google_tag_manager_id?: string | null
           id?: string
+          reply_agent_enabled?: boolean | null
+          reply_agent_flow_id?: string | null
+          reply_agent_flow_id_pesquisando?: string | null
+          reply_agent_flow_id_semanas?: string | null
+          reply_agent_flow_id_urgente?: string | null
           updated_at?: string
         }
         Update: {
+          centralize_api_key?: string | null
+          centralize_apply_tags?: boolean | null
+          centralize_create_contact?: boolean | null
+          centralize_default_channel?: string | null
+          centralize_enabled?: boolean | null
+          centralize_flow_id_default?: string | null
+          centralize_flow_id_pesquisando?: string | null
+          centralize_flow_id_semanas?: string | null
+          centralize_flow_id_urgente?: string | null
+          centralize_notify_email?: string | null
+          centralize_notify_on_reply?: boolean | null
+          centralize_sync_custom_fields?: boolean | null
+          centralize_sync_email?: boolean | null
+          centralize_sync_name?: boolean | null
+          centralize_sync_phone?: boolean | null
+          centralize_tag_prefix_form?: string | null
+          centralize_tag_prefix_service?: string | null
+          centralize_tag_prefix_urgency?: string | null
+          centralize_trigger_flow?: boolean | null
+          centralize_webhook_callback_url?: string | null
           created_at?: string
           custom_body_scripts?: string | null
           custom_head_scripts?: string | null
@@ -953,6 +1089,11 @@ export type Database = {
           google_tag_manager_enabled?: boolean | null
           google_tag_manager_id?: string | null
           id?: string
+          reply_agent_enabled?: boolean | null
+          reply_agent_flow_id?: string | null
+          reply_agent_flow_id_pesquisando?: string | null
+          reply_agent_flow_id_semanas?: string | null
+          reply_agent_flow_id_urgente?: string | null
           updated_at?: string
         }
         Relationships: []
