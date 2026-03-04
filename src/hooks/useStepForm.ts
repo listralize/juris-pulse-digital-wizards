@@ -571,6 +571,18 @@ export const useStepForm = () => {
             gclid: gclid || '',
             transaction_id: transactionId,
             automation_id: automationId,
+            custom_fields: {
+              ...(utmData.utm_source ? { utm_source: utmData.utm_source } : {}),
+              ...(utmData.utm_medium ? { utm_medium: utmData.utm_medium } : {}),
+              ...(utmData.utm_campaign ? { utm_campaign: utmData.utm_campaign } : {}),
+              ...(utmData.utm_term ? { utm_term: utmData.utm_term } : {}),
+              ...(utmData.utm_content ? { utm_content: utmData.utm_content } : {}),
+              ...(gclid ? { gclid } : {}),
+              pagina_origem: window.location.href,
+              referrer: document.referrer || '',
+              lead_id: savedLead?.id || '',
+              formulario: form.name || form.slug || '',
+            },
           }
         }).then(res => {
           if (res.error) logger.error('reply-agent-sync error:', res.error);
