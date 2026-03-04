@@ -101,7 +101,10 @@ const createContact = async (
 
   if (payload.email) body.primary_email = payload.email.trim().toLowerCase()
   if (payload.phone) body.primary_phone_number = normalizePhone(payload.phone)
-  if (payload.whatsapp) body.primary_whatsapp_number = normalizePhone(payload.whatsapp)
+  // Se whatsapp não foi explicitamente fornecido, usa o telefone como WhatsApp
+  // (no Brasil, telefone celular = WhatsApp na grande maioria dos casos)
+  const whatsappNumber = payload.whatsapp || payload.phone
+  if (whatsappNumber) body.primary_whatsapp_number = normalizePhone(whatsappNumber)
   if (payload.service) body.company_name = payload.service // use company_name as service label
 
   // Map custom fields if provided
@@ -216,15 +219,23 @@ serve(async (req) => {
       )
     }
 
-    // ─── 2. Apply urgency tag ─────────────────────────────────────────────────
-    if (payload.urgency && payload.urgency !== 'default') {
-      await applyTag(apiKey, contact.id, `urgencia_${payload.urgency}`)
+    // ─── 2. Apply tags ──────────────────────────────────────────────────────────
+    // Sempre aplica a tag do formulário
+    if (payload.form_slug) {
+      await applyTag(apiKey, contact.id, `form_${payload.form_slug}`)
     }
+    // Tag de serviço
     if (payload.service) {
       await applyTag(apiKey, contact.id, `servico_${payload.service.toLowerCase().replace(/\s+/g, '_').substring(0, 50)}`)
     }
-    if (payload.form_slug) {
-      await applyTag(apiKey, contact.id, `form_${payload.form_slug}`)
+    // Tag de urgência (incluindo default)
+    const urgencyTag = payload.urgency || 'default'
+    await applyTag(apiKey, contact.id, `urgencia_${urgencyTag}`)
+    // Tag de origem (tráfego pago vs orgânico)
+    if (payload.gclid) {
+      await applyTag(apiKey, contact.id, 'TRAFEGO_PAGO')
+    } else {
+      await applyTag(apiKey, contact.id, 'organico')
     }
 
     // ─── 3. Persist replyagent_contact_id in lead_profiles ───────────────────
