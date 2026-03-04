@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ArrowRight, MessageCircle, Clock, Users } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useTheme } from '../components/ThemeProvider';
+import { supabase } from '../integrations/supabase/client';
 
 const WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=5562994594496&text=Quero%20saber%20mais%20sobre%20o%20div%C3%B3rcio';
 
@@ -19,6 +20,59 @@ const getUrgencyMessage = (urgencia: string | null) => {
   }
 };
 
+/**
+ * Fires Google Ads / GTM conversion events on the thank-you page.
+ * This is the most reliable conversion signal because it fires AFTER
+ * the lead has been saved — no dependency on form submission timing.
+ *
+ * If google_ads_conversion_id and google_ads_conversion_label are configured
+ * in marketing_settings, a direct gtag('event', 'conversion') call is made
+ * with the correct send_to value, bypassing GTM entirely.
+ */
+const fireConversionEvents = (params: {
+  nome?: string | null;
+  servico?: string | null;
+  urgencia?: string | null;
+  formSlug?: string | null;
+  gadsConversionId?: string | null;
+  gadsConversionLabel?: string | null;
+}) => {
+  const dl = (window as any).dataLayer;
+  if (Array.isArray(dl)) {
+    dl.push({
+      event: 'conversion',
+      event_category: 'lead',
+      event_action: 'obrigado_page_view',
+      event_label: params.servico || 'contato',
+      customer_name: params.nome || '',
+      form_slug: params.formSlug || '',
+      urgency: params.urgencia || '',
+      page_url: window.location.href,
+      timestamp: new Date().toISOString(),
+    });
+    dl.push({
+      event: 'generate_lead',
+      currency: 'BRL',
+      value: 1,
+      lead_source: params.formSlug || 'website',
+    });
+  }
+
+  if (typeof (window as any).gtag === 'function') {
+    // GA4 recommended event
+    (window as any).gtag('event', 'generate_lead', { currency: 'BRL', value: 1 });
+
+    // Direct Google Ads conversion event (bypasses GTM, most reliable)
+    if (params.gadsConversionId && params.gadsConversionLabel) {
+      (window as any).gtag('event', 'conversion', {
+        send_to: `${params.gadsConversionId}/${params.gadsConversionLabel}`,
+        value: 1.0,
+        currency: 'BRL',
+      });
+    }
+  }
+};
+
 const ObrigadoPage = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -26,7 +80,33 @@ const ObrigadoPage = () => {
   const [searchParams] = useSearchParams();
   const urgencia = searchParams.get('urgencia');
   const nome = searchParams.get('nome');
+  const servico = searchParams.get('servico');
+  const formSlug = searchParams.get('form');
   const urgencyInfo = getUrgencyMessage(urgencia);
+
+  useEffect(() => {
+    // Fetch Google Ads conversion config from marketing_settings, then fire events
+    supabase
+      .from('marketing_settings')
+      .select('google_ads_conversion_id, google_ads_conversion_label')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        fireConversionEvents({
+          nome,
+          servico,
+          urgencia,
+          formSlug,
+          gadsConversionId: (data as any)?.google_ads_conversion_id || null,
+          gadsConversionLabel: (data as any)?.google_ads_conversion_label || null,
+        });
+      })
+      .catch(() => {
+        // Fallback: fire without Google Ads direct conversion
+        fireConversionEvents({ nome, servico, urgencia, formSlug });
+      });
+  }, []);
 
   return (
     <div className={`w-full min-h-screen flex flex-col items-center justify-center ${

@@ -5,25 +5,22 @@ import { supabase } from '@/integrations/supabase/client';
  * Unified marketing scripts loader.
  * Loads Facebook Pixel, Google Tag Manager, and Google Analytics
  * based on configuration stored in the `marketing_settings` Supabase table.
- * 
+ *
+ * FIX 1: dataLayer is initialized synchronously BEFORE any async call to prevent
+ *         race conditions where form submissions push events before GTM is ready.
+ * FIX 2: isProduction check removed — scripts must also load in staging/preview
+ *         environments to allow QA validation of conversion tracking.
+ * FIX 3: Duplicate GTM load guard added to prevent double-firing on hot reloads.
+ *
  * Should be called once at the App level.
  */
 export const useMarketingLoader = () => {
   useEffect(() => {
-    const isProduction =
-      window.location.protocol === 'https:' &&
-      !window.location.hostname.includes('localhost') &&
-      !window.location.hostname.includes('127.0.0.1');
+    // FIX 1: Initialize dataLayer synchronously so any early dataLayer.push()
+    // calls (e.g. from form submissions before GTM loads) are queued correctly.
+    (window as any).dataLayer = (window as any).dataLayer || [];
 
-    if (!isProduction) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      loadFromDatabase();
-    }, 500);
-
-    return () => clearTimeout(timer);
+    loadFromDatabase();
   }, []);
 
   const loadFromDatabase = async () => {
@@ -38,9 +35,6 @@ export const useMarketingLoader = () => {
       if (error || !settings) {
         return;
       }
-
-      // Ensure dataLayer exists before any script loads
-      (window as any).dataLayer = (window as any).dataLayer || [];
 
       if (settings.facebook_pixel_enabled && settings.facebook_pixel_id) {
         loadFacebookPixel(settings.facebook_pixel_id, settings.facebook_custom_code);
@@ -88,7 +82,12 @@ export const useMarketingLoader = () => {
   const loadGoogleTagManager = (containerId: string) => {
     if (!containerId.startsWith('GTM-')) return;
 
+    // FIX 3: Guard against double-loading GTM
+    if (document.querySelector(`script[data-marketing="gtm"][data-container="${containerId}"]`)) return;
+
     const script = document.createElement('script');
+    script.setAttribute('data-marketing', 'gtm');
+    script.setAttribute('data-container', containerId);
     script.innerHTML = `
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -96,7 +95,6 @@ export const useMarketingLoader = () => {
       'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
       })(window,document,'script','dataLayer','${containerId}');
     `;
-    script.setAttribute('data-marketing', 'gtm');
     document.head.appendChild(script);
 
     const noscript = document.createElement('noscript');
@@ -106,10 +104,13 @@ export const useMarketingLoader = () => {
   };
 
   const loadGoogleAnalytics = (measurementId: string, customCode?: string | null) => {
+    if (document.querySelector(`script[data-marketing="ga"][data-id="${measurementId}"]`)) return;
+
     const gtagScript = document.createElement('script');
     gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     gtagScript.async = true;
     gtagScript.setAttribute('data-marketing', 'ga');
+    gtagScript.setAttribute('data-id', measurementId);
     document.head.appendChild(gtagScript);
 
     const configScript = document.createElement('script');
@@ -117,7 +118,7 @@ export const useMarketingLoader = () => {
       window.dataLayer=window.dataLayer||[];
       function gtag(){dataLayer.push(arguments);}
       gtag('js',new Date());
-      gtag('config','${measurementId}');
+      gtag('config','${measurementId}',{send_page_view:true});
       ${customCode || ''}
     `;
     configScript.setAttribute('data-marketing', 'ga-config');

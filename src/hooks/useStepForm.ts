@@ -498,6 +498,37 @@ export const useStepForm = () => {
         }
       }));
 
+      // ── Reply Agent Sync ──────────────────────────────────────────────────────
+      // Cria o contato no Reply Agent CRM e dispara o Smart Flow configurado.
+      // Fire-and-forget: não bloqueia o fluxo do formulário.
+      supabase.functions.invoke('reply-agent-sync', {
+        body: {
+          name: extractedData.name,
+          email: extractedData.email,
+          phone: extractedData.phone,
+          service: serviceName,
+          urgency: (() => {
+            const urgencyStep = form.steps.find(s =>
+              s.id?.includes('urgency') ||
+              s.title?.toLowerCase().includes('urgência') ||
+              s.title?.toLowerCase().includes('urgencia')
+            );
+            const ans = urgencyStep ? answers[urgencyStep.id] : '';
+            if (ans?.toLowerCase().includes('urgente')) return 'urgente';
+            if (ans?.toLowerCase().includes('semana')) return 'semanas';
+            if (ans?.toLowerCase().includes('pesquisando')) return 'pesquisando';
+            return 'default';
+          })(),
+          message: mappedResponses['Mensagem'] || mappedResponses['message'] || mappedResponses['Descrição'] || '',
+          form_slug: form.slug || slug || '',
+          form_name: form.name || '',
+          lead_id: savedLead?.id || '',
+        }
+      }).then(res => {
+        if (res.error) logger.error('reply-agent-sync error:', res.error);
+        else logger.log('reply-agent-sync ok:', res.data);
+      }).catch(err => logger.warn('reply-agent-sync exception:', err));
+
       // Send confirmation email
       try {
         if (extractedData.email) {
@@ -625,6 +656,9 @@ export const useStepForm = () => {
           if (urgencyParam) params.set('urgencia', urgencyParam);
           const userName = extractedData.name || formData.Nome || formData.name || '';
           if (userName) params.set('nome', userName);
+          const serviceParam = extractedData.service || formData.servico || formData.service || serviceName || '';
+          if (serviceParam) params.set('servico', serviceParam);
+          if (form.slug) params.set('form', form.slug);
           const qs = params.toString();
           if (qs) redirectUrl += `?${qs}`;
         }

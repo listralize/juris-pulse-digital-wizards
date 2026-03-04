@@ -189,7 +189,34 @@ serve(async (req) => {
     }
 
     // Conversão analytics é gerenciada pelo frontend via useAnalytics
-    console.log('✅ Dados processados - conversão analytics será registrada pelo frontend');
+    console.log('✅ Dados processados - conversão analytics será registrada pelo frontend')
+
+    // ── Reply Agent Sync ──────────────────────────────────────────────────────
+    // Cria o contato no Reply Agent CRM e dispara o Smart Flow configurado.
+    // Executado de forma assíncrona (fire-and-forget) para não atrasar a resposta.
+    ;(async () => {
+      try {
+        const syncResponse = await supabase.functions.invoke('reply-agent-sync', {
+          body: {
+            name: submissionData.name,
+            email: submissionData.email,
+            phone: submissionData.phone,
+            service: submissionData.service,
+            urgency: submissionData.isUrgent ? 'urgente' : 'default',
+            message: submissionData.message,
+            form_slug: formConfig?.id || 'contact_form',
+            form_name: formConfig?.name || 'Formulário de Contato',
+          }
+        })
+        if (syncResponse.error) {
+          console.error('❌ reply-agent-sync error:', syncResponse.error)
+        } else {
+          console.log('✅ Reply Agent sync concluído:', syncResponse.data)
+        }
+      } catch (syncErr) {
+        console.error('❌ reply-agent-sync exception:', syncErr)
+      }
+    })();
 
     // 2. Enviar email automático de boas-vindas
     try {
