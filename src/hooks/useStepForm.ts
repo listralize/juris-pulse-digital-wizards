@@ -372,7 +372,7 @@ export const useStepForm = () => {
         mappedResponses[fieldName] = value;
       });
 
-      const extractedData = {
+      const extractedData: Record<string, string> = {
         name: formData.name || formData.Nome || mappedResponses.Nome || mappedResponses.name || '',
         email: formData.email || formData.Email || mappedResponses.Email || mappedResponses.email || '',
         phone: formData.Telefone || formData.phone || formData.telefone || formData.whatsapp ||
@@ -380,6 +380,11 @@ export const useStepForm = () => {
           mappedResponses.phone || mappedResponses.whatsapp ||
           mappedResponses['Telefone/WhatsApp'] || '',
       };
+
+      // Telefone brasileiro = WhatsApp na maioria dos casos
+      if (extractedData.phone && !extractedData.whatsapp) {
+        extractedData.whatsapp = extractedData.phone;
+      }
 
       // Deduplication: check form_leads for same email in last 2 minutes
       const emailForDedup = extractedData.email?.toLowerCase().trim();
@@ -521,35 +526,57 @@ export const useStepForm = () => {
       // ── Reply Agent Sync ──────────────────────────────────────────────────────
       // Cria o contato no Reply Agent CRM e dispara o Smart Flow configurado.
       // Fire-and-forget: não bloqueia o fluxo do formulário.
-      supabase.functions.invoke('reply-agent-sync', {
-        body: {
-          name: extractedData.name,
-          email: extractedData.email,
-          phone: extractedData.phone,
-          service: serviceName,
-          urgency: (() => {
-            const urgencyStep = form.steps.find(s =>
-              s.id?.includes('urgency') ||
-              s.title?.toLowerCase().includes('urgência') ||
-              s.title?.toLowerCase().includes('urgencia')
-            );
-            const ans = urgencyStep ? answers[urgencyStep.id] : '';
-            if (ans?.toLowerCase().includes('urgente')) return 'urgente';
-            if (ans?.toLowerCase().includes('semana')) return 'semanas';
-            if (ans?.toLowerCase().includes('pesquisando')) return 'pesquisando';
-            return 'default';
-          })(),
-          message: mappedResponses['Mensagem'] || mappedResponses['message'] || mappedResponses['Descrição'] || '',
-          form_slug: form.slug || slug || '',
-          form_name: form.name || '',
-          lead_id: savedLead?.id || '',
-          gclid: gclid || '',
-          transaction_id: transactionId,
-        }
-      }).then(res => {
-        if (res.error) logger.error('reply-agent-sync error:', res.error);
-        else logger.log('reply-agent-sync ok:', res.data);
-      }).catch(err => logger.warn('reply-agent-sync exception:', err));
+      const urgencyValue = (() => {
+        const urgencyStep = form.steps.find(s =>
+          s.id?.includes('urgency') ||
+          s.title?.toLowerCase().includes('urgência') ||
+          s.title?.toLowerCase().includes('urgencia')
+        );
+        const ans = urgencyStep ? answers[urgencyStep.id] : '';
+        if (ans?.toLowerCase().includes('urgente')) return 'urgente';
+        if (ans?.toLowerCase().includes('semana')) return 'semanas';
+        if (ans?.toLowerCase().includes('pesquisando')) return 'pesquisando';
+        return 'default';
+      })();
+
+      // Fetch automation_id from marketing_settings based on urgency
+      const fetchAutomationId = async (): Promise<string | undefined> => {
+        try {
+          const { data: mktSettings } = await supabase
+            .from('marketing_settings')
+            .select('reply_agent_enabled, reply_agent_flow_id, reply_agent_flow_id_urgente, reply_agent_flow_id_semanas, reply_agent_flow_id_pesquisando')
+            .limit(1)
+            .single();
+          if (!mktSettings?.reply_agent_enabled) return undefined;
+          if (urgencyValue === 'urgente') return mktSettings.reply_agent_flow_id_urgente || mktSettings.reply_agent_flow_id || undefined;
+          if (urgencyValue === 'semanas') return mktSettings.reply_agent_flow_id_semanas || mktSettings.reply_agent_flow_id || undefined;
+          if (urgencyValue === 'pesquisando') return mktSettings.reply_agent_flow_id_pesquisando || mktSettings.reply_agent_flow_id || undefined;
+          return mktSettings.reply_agent_flow_id || undefined;
+        } catch { return undefined; }
+      };
+
+      fetchAutomationId().then(automationId => {
+        supabase.functions.invoke('reply-agent-sync', {
+          body: {
+            name: extractedData.name,
+            email: extractedData.email,
+            phone: extractedData.phone,
+            whatsapp: extractedData.whatsapp || extractedData.phone,
+            service: serviceName,
+            urgency: urgencyValue,
+            message: mappedResponses['Mensagem'] || mappedResponses['message'] || mappedResponses['Descrição'] || '',
+            form_slug: form.slug || slug || '',
+            form_name: form.name || '',
+            lead_id: savedLead?.id || '',
+            gclid: gclid || '',
+            transaction_id: transactionId,
+            automation_id: automationId,
+          }
+        }).then(res => {
+          if (res.error) logger.error('reply-agent-sync error:', res.error);
+          else logger.log('reply-agent-sync ok:', res.data);
+        }).catch(err => logger.warn('reply-agent-sync exception:', err));
+      });
 
       // Send confirmation email
       try {
