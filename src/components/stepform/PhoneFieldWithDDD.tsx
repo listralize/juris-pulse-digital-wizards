@@ -60,8 +60,11 @@ export const PhoneFieldWithDDD: React.FC<PhoneFieldWithDDDProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Let the user type freely — no masking during input
-    setDisplayValue(e.target.value);
+    const raw = e.target.value;
+    setDisplayValue(raw);
+    // Emite onChange em CADA KEYSTROKE para que o formData sempre tenha o valor atual
+    const digits = extractDigits(raw);
+    onChange(digits.length > 0 ? `55${digits}` : '');
   };
 
   const handleBlur = () => {
