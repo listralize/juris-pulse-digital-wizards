@@ -1,5 +1,6 @@
 // reply-agent-sync — integração com Reply Agent CRM
-// v3: Upsert inteligente por WhatsApp + deduplicação de tags + SmartFlow controlado
+// v3.1: Upsert inteligente por WhatsApp + deduplicação de tags + SmartFlow controlado
+// Fix: endpoint correto POST /fetch-contacts-by-whatsapp (não GET)
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -75,18 +76,38 @@ const replyHeaders = (apiKey: string) => ({
 
 /**
  * Busca contato existente por número de WhatsApp.
- * GET /contacts/by-whatsapp?whatsapp=+55...
+ * POST /fetch-contacts-by-whatsapp com body { whatsapp_number: "+55..." }
+ * Fallback: POST /fetch-contacts-by-mobile-number
  */
 const findContactByWhatsapp = async (apiKey: string, whatsapp: string): Promise<ReplyContact | null> => {
   try {
-    const url = `${BASE}/contacts/by-whatsapp?whatsapp=${encodeURIComponent(whatsapp)}`
-    const res = await fetch(url, { method: 'GET', headers: replyHeaders(apiKey) })
-    if (!res.ok) return null
-    const data = await res.json()
-    const contacts: ReplyContact[] = data?.data || (Array.isArray(data) ? data : [])
-    if (contacts.length > 0) {
-      console.log(`[reply-agent-sync] 🔍 Contato existente encontrado: ID ${contacts[0].id}`)
-      return contacts[0]
+    // Endpoint correto: POST (não GET) com body formdata/json
+    const res = await fetch(`${BASE}/fetch-contacts-by-whatsapp`, {
+      method: 'POST',
+      headers: replyHeaders(apiKey),
+      body: JSON.stringify({ whatsapp_number: whatsapp }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const contacts: ReplyContact[] = data?.data || (Array.isArray(data) ? data : [])
+      if (contacts.length > 0) {
+        console.log(`[reply-agent-sync] 🔍 Contato encontrado por WhatsApp: ID ${contacts[0].id}`)
+        return contacts[0]
+      }
+    }
+    // Fallback: busca por mobile number
+    const res2 = await fetch(`${BASE}/fetch-contacts-by-mobile-number`, {
+      method: 'POST',
+      headers: replyHeaders(apiKey),
+      body: JSON.stringify({ mobile_number: whatsapp }),
+    })
+    if (res2.ok) {
+      const data2 = await res2.json()
+      const contacts2: ReplyContact[] = data2?.data || (Array.isArray(data2) ? data2 : [])
+      if (contacts2.length > 0) {
+        console.log(`[reply-agent-sync] 🔍 Contato encontrado por mobile: ID ${contacts2[0].id}`)
+        return contacts2[0]
+      }
     }
     return null
   } catch (err) {
