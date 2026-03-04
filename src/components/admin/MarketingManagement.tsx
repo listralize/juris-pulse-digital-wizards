@@ -787,11 +787,12 @@ export const MarketingManagement: React.FC = () => {
       </Alert>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="scripts">📊 Scripts Marketing</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="scripts">📊 Scripts</TabsTrigger>
           <TabsTrigger value="tracking">🎯 Rastreamento</TabsTrigger>
+          <TabsTrigger value="google-ads">📈 Google Ads</TabsTrigger>
           <TabsTrigger value="reports">📑 Relatórios</TabsTrigger>
-          <TabsTrigger value="dashboard">📈 Dashboard</TabsTrigger>
+          <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
         </TabsList>
 
         {/* SCRIPTS TAB */}
@@ -1481,6 +1482,104 @@ document.getElementById('${form.submitButtonId}').addEventListener('click', func
                     </AlertDescription>
                   </Alert>
                 </div>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* GOOGLE ADS TAB */}
+        <TabsContent value="google-ads" className="space-y-6">
+          {/* Enhanced Conversions Explanation */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-blue-800">
+                <TrendingUp className="w-4 h-4" />
+                Enhanced Conversions for Leads
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Estratégia avançada para reduzir o custo das suas campanhas. O Google Ads aprende quais cliques geraram clientes reais e otimiza o Smart Bidding.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="font-semibold text-blue-800 mb-1">1. GCLID Capturado</p>
+                  <p className="text-blue-600 text-xs">O sistema captura automaticamente o gclid da URL de anúncios.</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="font-semibold text-blue-800 mb-1">2. Lead Qualificado</p>
+                  <p className="text-blue-600 text-xs">Quando o lead vira cliente, é marcado para upload.</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="font-semibold text-blue-800 mb-1">3. Upload Offline</p>
+                  <p className="text-blue-600 text-xs">Conversões qualificadas são enviadas ao Google Ads via API.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Upload Offline Conversions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Upload de Conversões Offline</CardTitle>
+              <CardDescription>Envie leads qualificados (com gclid) para o Google Ads.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  Configure os Secrets no Supabase: <code>GOOGLE_ADS_DEVELOPER_TOKEN</code>, <code>GOOGLE_ADS_CUSTOMER_ID</code>, <code>GOOGLE_ADS_REFRESH_TOKEN</code>, <code>GOOGLE_ADS_CLIENT_ID</code>, <code>GOOGLE_ADS_CLIENT_SECRET</code>, <code>GOOGLE_ADS_CONVERSION_ACTION_ID</code>
+                </AlertDescription>
+              </Alert>
+
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.functions.invoke('upload-offline-conversions', { body: { dry_run: true } });
+                    if (error) throw error;
+                    toast.success(`${data?.leads?.length || 0} conversões prontas para envio`);
+                  } catch (err: any) { toast.error(err?.message || String(err)); }
+                }}>
+                  Simular (Dry Run)
+                </Button>
+                <Button size="sm" onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.functions.invoke('upload-offline-conversions', { body: { dry_run: false, limit: 100 } });
+                    if (error) throw error;
+                    toast.success(`${data?.sent || 0} conversões enviadas!`);
+                  } catch (err: any) { toast.error(err?.message || String(err)); }
+                }}>
+                  Enviar Conversões
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* GTM Instructions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Como configurar transaction_id no GTM</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="space-y-2">
+                <p className="font-medium">Passo 1 — Variável no GTM:</p>
+                <div className="bg-muted rounded-lg p-3 font-mono text-xs">
+                  <p>Tipo: Variável da Camada de Dados</p>
+                  <p>Nome: <code>transaction_id</code></p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium">Passo 2 — Tag de conversão:</p>
+                <div className="bg-muted rounded-lg p-3 font-mono text-xs">
+                  <p>Chave: <code>transaction_id</code></p>
+                  <p>Valor: <code>{'{{'}DL - transaction_id{'}}'}</code></p>
+                </div>
+              </div>
+              <Alert>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <AlertDescription className="text-sm text-green-700">
+                  O <code>transaction_id</code> já é enviado no dataLayer automaticamente.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
         </TabsContent>

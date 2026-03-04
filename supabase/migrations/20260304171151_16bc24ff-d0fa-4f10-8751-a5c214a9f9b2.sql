@@ -1,0 +1,1 @@
+ALTER TABLE public.step_forms ADD COLUMN IF NOT EXISTS centralize_config jsonb DEFAULT '{}'::jsonb;

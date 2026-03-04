@@ -1473,6 +1473,7 @@ export type Database = {
       }
       step_forms: {
         Row: {
+          centralize_config: Json | null
           created_at: string
           flow_config: Json | null
           footer_config: Json | null
@@ -1493,6 +1494,7 @@ export type Database = {
           webhook_url: string
         }
         Insert: {
+          centralize_config?: Json | null
           created_at?: string
           flow_config?: Json | null
           footer_config?: Json | null
@@ -1513,6 +1515,7 @@ export type Database = {
           webhook_url: string
         }
         Update: {
+          centralize_config?: Json | null
           created_at?: string
           flow_config?: Json | null
           footer_config?: Json | null

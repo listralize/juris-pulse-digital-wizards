@@ -544,13 +544,27 @@ export const useStepForm = () => {
       // O SmartFlow só é pulado se não houver flow_id configurado (skip_flow=true na edge fn).
       const fetchAutomationId = async (): Promise<string | undefined> => {
         try {
+          // 1. Try per-form config from centralize_config
+          const { data: formRow } = await supabase
+            .from('step_forms')
+            .select('centralize_config')
+            .eq('slug', form.slug || slug)
+            .maybeSingle();
+
+          const fc = formRow?.centralize_config as any;
+          if (fc?.enabled) {
+            if (urgencyValue === 'urgente') return fc.flow_id_urgente || fc.flow_id_default || undefined;
+            if (urgencyValue === 'semanas') return fc.flow_id_semanas || fc.flow_id_default || undefined;
+            if (urgencyValue === 'pesquisando') return fc.flow_id_pesquisando || fc.flow_id_default || undefined;
+            return fc.flow_id_default || undefined;
+          }
+
+          // 2. Fallback to global marketing_settings
           const { data: mktSettings } = await supabase
             .from('marketing_settings')
             .select('reply_agent_enabled, reply_agent_flow_id, reply_agent_flow_id_urgente, reply_agent_flow_id_semanas, reply_agent_flow_id_pesquisando')
             .limit(1)
             .maybeSingle();
-          // Retorna o flow_id se reply_agent_enabled=true, caso contrário retorna undefined
-          // mas a edge function ainda será chamada para criar o contato
           if (!mktSettings?.reply_agent_enabled) return undefined;
           if (urgencyValue === 'urgente') return mktSettings.reply_agent_flow_id_urgente || mktSettings.reply_agent_flow_id || undefined;
           if (urgencyValue === 'semanas') return mktSettings.reply_agent_flow_id_semanas || mktSettings.reply_agent_flow_id || undefined;
