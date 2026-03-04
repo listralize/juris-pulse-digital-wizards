@@ -1,34 +1,29 @@
 
 
-# Fix Reply Agent: WhatsApp Not Saved When Same as Phone
+# Apply 3 Corrections: Phone Field, Custom Fields, Edge Function
 
-## Root Cause (Confirmed by Logs)
+## Changes
 
-The Reply Agent API response shows `primary_whatsapp: null` even though we send `primary_whatsapp_number`. This happens because the API silently discards `primary_whatsapp_number` when it has the same value as `primary_phone_number`.
+### 1. `src/components/stepform/PhoneFieldWithDDD.tsx` — Emit onChange on every keystroke
 
-Current code (line 102-107) sends **both** fields with the same number — the API keeps only `primary_phone_number` and drops the WhatsApp.
+The current code only calls `onChange` in `handleBlur`. If the user clicks "Enviar" without blurring the phone field, `formData` has an empty phone value.
 
-## Fix
+Fix: In `handleChange`, extract digits and call `onChange(digits.length > 0 ? '55${digits}' : '')` on every keystroke, keeping the blur handler for formatting only.
 
-**`supabase/functions/reply-agent-sync/index.ts`** — In `createContact`, replace the phone/whatsapp mapping (lines 102-107) with logic that sends the number **only as `primary_whatsapp_number`** when both are the same:
+### 2. `src/hooks/useStepForm.ts` (lines 558-574) — Add `custom_fields` to reply-agent-sync payload
 
-```typescript
-const phoneNum = payload.phone ? normalizePhone(payload.phone) : null
-const whatsappNum = (payload.whatsapp || payload.phone) ? normalizePhone(payload.whatsapp || payload.phone) : null
+Add a `custom_fields` object containing UTM parameters, gclid, page origin, referrer, lead_id, and form name to the `reply-agent-sync` invocation body.
 
-if (phoneNum && whatsappNum && phoneNum === whatsappNum) {
-  // Same number: send only as WhatsApp (API ignores whatsapp if phone has same value)
-  body.primary_whatsapp_number = whatsappNum
-} else {
-  if (phoneNum) body.primary_phone_number = phoneNum
-  if (whatsappNum) body.primary_whatsapp_number = whatsappNum
-}
-```
+### 3. `supabase/functions/reply-agent-sync/index.ts` — Full replacement
 
-This ensures the SmartFlow can reach the contact via WhatsApp. No email field will be added to the form — only the edge function mapping changes.
+Key changes from the user's provided code:
+- `createContact`: always sends **both** `primary_phone_number` AND `primary_whatsapp_number` with the same normalized number (reverting the previous "only whatsapp" approach)
+- If `whatsapp` differs from `phone`, override only `primary_whatsapp_number`
+- Tags endpoint confirmed as `POST /v1/contacts/{id}/tags` with JSON body
+- SmartFlow uses `FormData` as before
+- Detailed logging preserved
 
-## No other changes
-- No form field changes (no email field added)
-- No changes to `useStepForm.ts`
-- Tags logic already correct from previous fix
+### 4. `supabase/config.toml` — Restore verify_jwt settings
+
+The last diff removed the `verify_jwt = false` entries for edge functions. These need to be restored so the functions remain callable without JWT.
 
