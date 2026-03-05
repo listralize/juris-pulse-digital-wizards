@@ -513,6 +513,7 @@ export type Database = {
         Row: {
           browser: string | null
           capital: string | null
+          centralize_synced_at: string | null
           city: string | null
           completion_percentage: number | null
           conversion_value: number | null
@@ -533,6 +534,7 @@ export type Database = {
           offline_conversion_value: number | null
           referrer: string | null
           region: string | null
+          replyagent_contact_id: string | null
           session_id: string
           source_page: string | null
           state: string | null
@@ -550,6 +552,7 @@ export type Database = {
         Insert: {
           browser?: string | null
           capital?: string | null
+          centralize_synced_at?: string | null
           city?: string | null
           completion_percentage?: number | null
           conversion_value?: number | null
@@ -570,6 +573,7 @@ export type Database = {
           offline_conversion_value?: number | null
           referrer?: string | null
           region?: string | null
+          replyagent_contact_id?: string | null
           session_id: string
           source_page?: string | null
           state?: string | null
@@ -587,6 +591,7 @@ export type Database = {
         Update: {
           browser?: string | null
           capital?: string | null
+          centralize_synced_at?: string | null
           city?: string | null
           completion_percentage?: number | null
           conversion_value?: number | null
@@ -607,6 +612,7 @@ export type Database = {
           offline_conversion_value?: number | null
           referrer?: string | null
           region?: string | null
+          replyagent_contact_id?: string | null
           session_id?: string
           source_page?: string | null
           state?: string | null
