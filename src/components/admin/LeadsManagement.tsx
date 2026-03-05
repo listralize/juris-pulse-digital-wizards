@@ -83,6 +83,8 @@ export const LeadsManagement: React.FC = () => {
   const [isLeadWebhookManagerOpen, setIsLeadWebhookManagerOpen] = useState(false);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [isProcessingAll, setIsProcessingAll] = useState(false);
+  const [centralizeMap, setCentralizeMap] = useState<{ [sessionId: string]: string }>({});
+  const [centralizeFilter, setCentralizeFilter] = useState('all');
 
   // Função para buscar localização baseada no DDD
   const getLocationByDDD = async (ddd: number) => {
@@ -205,6 +207,23 @@ export const LeadsManagement: React.FC = () => {
         capital: null,
         region: null,
       };
+    }
+  };
+
+  // Carregar mapa de sincronização Centralize (session_id -> replyagent_contact_id)
+  const loadCentralizeMap = async () => {
+    try {
+      const { data } = await supabase
+        .from('form_leads')
+        .select('session_id, replyagent_contact_id')
+        .not('replyagent_contact_id', 'is', null);
+      const map: { [sessionId: string]: string } = {};
+      (data || []).forEach((row: any) => {
+        if (row.session_id) map[row.session_id] = row.replyagent_contact_id;
+      });
+      setCentralizeMap(map);
+    } catch (e) {
+      console.error('Erro ao carregar mapa Centralize:', e);
     }
   };
 
@@ -427,6 +446,8 @@ export const LeadsManagement: React.FC = () => {
       setFilteredLeads(finalLeads);
       setLeadStatuses(statusMap);
       setLeadStatusDates(statusDatesMap);
+      // Carregar mapa Centralize em paralelo
+      loadCentralizeMap();
     } catch (error) {
       console.error('Erro geral:', error);
       toast.error('Erro ao carregar leads');
@@ -819,6 +840,13 @@ export const LeadsManagement: React.FC = () => {
         });
       }
 
+      // Filtro Centralize
+      if (centralizeFilter === 'synced') {
+        filtered = filtered.filter((lead) => !!centralizeMap[lead.session_id]);
+      } else if (centralizeFilter === 'not_synced') {
+        filtered = filtered.filter((lead) => !centralizeMap[lead.session_id]);
+      }
+
       // Filtro por serviço (síncrono)
       if (serviceFilter !== 'all') {
         filtered = filtered.filter((lead) => {
@@ -839,12 +867,18 @@ export const LeadsManagement: React.FC = () => {
     };
 
     filterLeads();
-  }, [leads, searchQuery, dateFilter, serviceFilter, formFilter, customDateStart, customDateEnd]);
+  }, [leads, searchQuery, dateFilter, serviceFilter, formFilter, customDateStart, customDateEnd, centralizeFilter, centralizeMap]);
 
   // Carregar dados iniciais
   useEffect(() => {
     loadLeads();
     loadEmailTemplates();
+  }, []);
+
+  // Auto-refresh do mapa Centralize a cada 5 minutos
+  useEffect(() => {
+    const interval = setInterval(loadCentralizeMap, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   // Função para abrir detalhes do lead
@@ -1001,11 +1035,23 @@ export const LeadsManagement: React.FC = () => {
           </SelectContent>
         </Select>
 
+        <Select value={centralizeFilter} onValueChange={setCentralizeFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por Centralize" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos (Centralize)</SelectItem>
+            <SelectItem value="synced">Vinculados na Centralize</SelectItem>
+            <SelectItem value="not_synced">Não vinculados</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Button variant="outline" onClick={() => {
           setSearchQuery('');
           setDateFilter('all');
           setFormFilter('all');
           setServiceFilter('all');
+          setCentralizeFilter('all');
         }}>
           <Filter className="h-4 w-4 mr-2" />
           Limpar Filtros
@@ -1243,6 +1289,7 @@ export const LeadsManagement: React.FC = () => {
                   }}
                   handleEditLead={() => {}}
                   handleDeleteLead={() => {}}
+                  centralizeMap={centralizeMap}
                 />
                 
                 {/* Paginação */}

@@ -44,6 +44,7 @@ interface ResponsiveLeadsTableProps {
   copyToClipboard: (text: string, type: string) => void;
   handleEditLead: (id: string) => void;
   handleDeleteLead: (id: string) => void;
+  centralizeMap?: { [sessionId: string]: string };
 }
 
 export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
@@ -58,7 +59,8 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
   viewLeadDetails,
   copyToClipboard,
   handleEditLead,
-  handleDeleteLead
+  handleDeleteLead,
+  centralizeMap = {}
 }) => {
   return (
     <>
@@ -96,6 +98,7 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                      </div>
                    </div>
                 </div>
+<div className="flex flex-col gap-1 items-end">
                 <Badge variant="outline" className={
                   status === 'novo' ? 'bg-blue-50 text-blue-700' :
                   status === 'contatado' ? 'bg-yellow-50 text-yellow-700' :
@@ -106,6 +109,12 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                 }>
                   {status}
                 </Badge>
+                {centralizeMap[lead.session_id] && (
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                    Centralize
+                  </Badge>
+                )}
+                </div>
               </div>
 
                <div className="space-y-2 text-sm">
@@ -170,7 +179,7 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
               <th className="text-left p-2">Localização</th>
               <th className="text-left p-2">Serviço</th>
               <th className="text-left p-2">Data</th>
-              <th className="text-left p-2">Status</th>
+              <th className="text-left p-2">Status / Centralize</th>
               <th className="text-left p-2">Ações</th>
             </tr>
           </thead>
@@ -242,6 +251,7 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                     {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="p-2">
+                    <div className="flex flex-col gap-1">
                     <Select value={status} onValueChange={(value) => updateLeadStatus(lead.id, value)}>
                       <SelectTrigger className="w-24">
                         <SelectValue />
@@ -255,6 +265,12 @@ export const ResponsiveLeadsTable: React.FC<ResponsiveLeadsTableProps> = ({
                          <SelectItem value="perdido">Perdido</SelectItem>
                        </SelectContent>
                     </Select>
+                    {centralizeMap[lead.session_id] && (
+                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs w-fit">
+                        Centralize
+                      </Badge>
+                    )}
+                    </div>
                   </td>
                   <td className="p-2">
                     <div className="flex gap-1">
