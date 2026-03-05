@@ -19,12 +19,12 @@ const VALID_REPLY_SLUGS = new Set([
   'json', 'sugestao_reuniao', 'respostacliente',
 ])
 
-const splitName = (fullName) => {
+const splitName = (fullName: string) => {
   const parts = (fullName || 'Lead').trim().split(/\s+/)
   return { first_name: parts[0] || 'Lead', last_name: parts.slice(1).join(' ') || '' }
 }
 
-const normalizePhone = (raw) => {
+const normalizePhone = (raw: string) => {
   if (!raw) return ''
   const digits = raw.replace(/\D/g, '')
   if (!digits) return ''
@@ -33,13 +33,13 @@ const normalizePhone = (raw) => {
   return `+55${digits}`
 }
 
-const replyHeaders = (apiKey) => ({
+const replyHeaders = (apiKey: string) => ({
   'Authorization': `Bearer ${apiKey}`,
   'Content-Type': 'application/json',
   'Accept': 'application/json',
 })
 
-const findContactByWhatsapp = async (apiKey, whatsapp) => {
+const findContactByWhatsapp = async (apiKey: string, whatsapp: string) => {
   try {
     const res = await fetch(`${BASE}/fetch-contacts-by-whatsapp`, {
       method: 'POST',
@@ -74,8 +74,8 @@ const findContactByWhatsapp = async (apiKey, whatsapp) => {
   }
 }
 
-const buildCustomFields = (payload) => {
-  const fields = {}
+const buildCustomFields = (payload: any) => {
+  const fields: Record<string, any> = {}
   if (payload.service) fields['assunto'] = payload.service
   if (payload.message) fields['complemento'] = payload.message
   if (payload.custom_fields) {
@@ -85,7 +85,7 @@ const buildCustomFields = (payload) => {
       }
     }
   }
-  const tracking = {}
+  const tracking: Record<string, any> = {}
   const UTM_FIELDS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'pagina_origem', 'referrer', 'formulario']
   if (payload.custom_fields) {
     for (const f of UTM_FIELDS) {
@@ -101,9 +101,9 @@ const buildCustomFields = (payload) => {
   return fields
 }
 
-const createContact = async (apiKey, payload) => {
+const createContact = async (apiKey: string, payload: any) => {
   const { first_name, last_name } = splitName(payload.name)
-  const body = { first_name, locale: 'pt-BR', opt_in_sms: true, opt_in_call: true, opt_in_email: true }
+  const body: Record<string, any> = { first_name, locale: 'pt-BR', opt_in_sms: true, opt_in_call: true, opt_in_email: true }
   if (last_name) body.last_name = last_name
   if (payload.email) body.primary_email = payload.email.trim().toLowerCase()
   const rawPhone = payload.phone || payload.whatsapp || ''
@@ -122,7 +122,7 @@ const createContact = async (apiKey, payload) => {
   return JSON.parse(text)
 }
 
-const updateContactFields = async (apiKey, contactId, payload) => {
+const updateContactFields = async (apiKey: string, contactId: any, payload: any) => {
   const fields = buildCustomFields(payload)
   for (const [slug, value] of Object.entries(fields)) {
     try {
@@ -141,7 +141,7 @@ const updateContactFields = async (apiKey, contactId, payload) => {
   }
 }
 
-const applyTags = async (apiKey, contactId, newTags, existingTags = []) => {
+const applyTags = async (apiKey: string, contactId: any, newTags: string[], existingTags: string[] = []) => {
   if (!newTags.length) return
   const existingNorm = new Set(existingTags.map(t => t.toLowerCase().trim()))
   const tagsToApply = newTags.filter(t => t && !existingNorm.has(t.toLowerCase().trim()))
@@ -156,7 +156,7 @@ const applyTags = async (apiKey, contactId, newTags, existingTags = []) => {
   if (!res.ok) console.warn(`[reply-agent-sync] applyTags ${res.status}: ${text}`)
 }
 
-const removeTags = async (apiKey, contactId, tagsToRemove, existingTags = []) => {
+const removeTags = async (apiKey: string, contactId: any, tagsToRemove: string[], existingTags: string[] = []) => {
   if (!tagsToRemove.length) return
   const existingNorm = new Set(existingTags.map(t => t.toLowerCase().trim()))
   const tagsPresent = tagsToRemove.filter(t => t && existingNorm.has(t.toLowerCase().trim()))
@@ -180,7 +180,7 @@ const removeTags = async (apiKey, contactId, tagsToRemove, existingTags = []) =>
   }
 }
 
-const sendFlow = async (apiKey, automationId, contactId) => {
+const sendFlow = async (apiKey: string, automationId: string, contactId: any) => {
   const fd = new FormData()
   fd.append('automation_id', automationId)
   fd.append('contact_id', String(contactId))
@@ -201,7 +201,7 @@ const sendFlow = async (apiKey, automationId, contactId) => {
  * 3. Urgência legacy (urgente/semanas/pesquisando/default)
  * 4. Flow padrão global
  */
-const resolveFlowId = (payload, formConfig, defaultFlowId) => {
+const resolveFlowId = (payload: any, formConfig: any, defaultFlowId: string) => {
   if (payload.automation_id) return payload.automation_id
   if (formConfig?.enabled) {
     // Flow Mappings por resposta (v4)
