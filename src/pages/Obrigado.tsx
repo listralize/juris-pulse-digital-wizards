@@ -1,10 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ArrowRight, MessageCircle, Clock, Users } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useTheme } from '../components/ThemeProvider';
 
-const WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=5562994594496&text=Quero%20saber%20mais%20sobre%20o%20div%C3%B3rcio';
+const WHATSAPP_NUMBER = '5562994594496';
+
+/**
+ * Gera a URL do WhatsApp com texto dinâmico baseado no serviço e nome do lead.
+ * Nunca usa texto hardcoded — se não houver parâmetros, abre o WhatsApp sem texto.
+ */
+const buildWhatsAppUrl = (servico: string | null, nome: string | null): string => {
+  const base = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}`;
+  if (!servico) return base;
+
+  const nomeDecoded = nome ? decodeURIComponent(nome) : null;
+  const servicoDecoded = decodeURIComponent(servico);
+
+  const text = nomeDecoded
+    ? `Olá! Sou ${nomeDecoded} e gostaria de mais informações sobre ${servicoDecoded}.`
+    : `Olá! Gostaria de mais informações sobre ${servicoDecoded}.`;
+
+  return `${base}&text=${encodeURIComponent(text)}`;
+};
 
 const getUrgencyMessage = (urgencia: string | null) => {
   switch (urgencia) {
@@ -36,7 +54,6 @@ const fireObrigadoEvents = (params: {
   urgencia?: string | null;
   formSlug?: string | null;
 }) => {
-  // dataLayer push — capturado pelo GTM se estiver configurado
   (window as any).dataLayer = (window as any).dataLayer || [];
   (window as any).dataLayer.push({
     event: 'obrigado_page_view',
@@ -48,10 +65,6 @@ const fireObrigadoEvents = (params: {
     page_url: window.location.href,
     timestamp: new Date().toISOString(),
   });
-
-  // Nota: gtag('event', 'conversion') para Google Ads é disparado no momento do submit
-  // pelo useStepFormMarketingScripts quando google_ads_conversion_id está configurado.
-  // Não disparamos nada adicional aqui para evitar dupla contagem.
 };
 
 const ObrigadoPage = () => {
@@ -59,15 +72,36 @@ const ObrigadoPage = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [searchParams] = useSearchParams();
+  const hasRedirected = useRef(false);
+
   const urgencia = searchParams.get('urgencia');
   const nome = searchParams.get('nome');
   const servico = searchParams.get('servico');
   const formSlug = searchParams.get('form');
-  const urgencyInfo = getUrgencyMessage(urgencia);
+
+  /**
+   * Proteção contra acesso direto à página /obrigado sem ter passado pelo formulário.
+   * Exige que pelo menos um dos parâmetros esperados esteja presente na URL.
+   * Esses parâmetros são adicionados exclusivamente pelo useStepForm no momento do submit.
+   */
+  const hasValidParams = !!(nome || servico || formSlug || urgencia);
 
   useEffect(() => {
-    fireObrigadoEvents({ nome, servico, urgencia, formSlug });
+    if (!hasValidParams && !hasRedirected.current) {
+      hasRedirected.current = true;
+      navigate('/', { replace: true });
+      return;
+    }
+    if (hasValidParams) {
+      fireObrigadoEvents({ nome, servico, urgencia, formSlug });
+    }
   }, []);
+
+  // Enquanto verifica os parâmetros, não renderiza nada para evitar flash
+  if (!hasValidParams) return null;
+
+  const whatsappUrl = buildWhatsAppUrl(servico, nome);
+  const urgencyInfo = getUrgencyMessage(urgencia);
 
   return (
     <div className={`w-full min-h-screen flex flex-col items-center justify-center ${
@@ -100,7 +134,7 @@ const ObrigadoPage = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
-            onClick={() => { window.location.href = WHATSAPP_URL; }}
+            onClick={() => { window.location.href = whatsappUrl; }}
             className="px-8 py-7 text-lg bg-green-500 hover:bg-green-600 text-white transition-all font-semibold"
           >
             <MessageCircle className="mr-2 h-5 w-5" />
