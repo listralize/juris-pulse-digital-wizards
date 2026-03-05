@@ -5,7 +5,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { defaultPageTexts } from '../../data/defaultPageTexts';
 import { logger } from '../../utils/logger';
 
-export const useSupabasePageTexts = () => {
+export const useSupabasePageTexts = (enabled = true) => {
   const [pageTexts, setPageTexts] = useState<PageTexts>(defaultPageTexts);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -196,8 +196,8 @@ export const useSupabasePageTexts = () => {
   };
 
   useEffect(() => {
-    loadPageTexts();
-  }, []);
+    if (enabled) loadPageTexts();
+  }, [enabled]);
 
   return {
     pageTexts,

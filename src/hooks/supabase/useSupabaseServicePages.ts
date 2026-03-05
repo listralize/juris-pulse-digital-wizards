@@ -88,7 +88,7 @@ const categories: CategoryInfo[] = [
   }
 ];
 
-export const useSupabaseServicePages = () => {
+export const useSupabaseServicePages = (enabled = true) => {
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -357,8 +357,8 @@ redirect_url: page.redirectUrl || ''
   };
 
   useEffect(() => {
-    loadServicePages();
-  }, []);
+    if (enabled) loadServicePages();
+  }, [enabled]);
 
   return {
     servicePages,

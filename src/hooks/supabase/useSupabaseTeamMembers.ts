@@ -4,7 +4,7 @@ import { TeamMember } from '../../types/adminTypes';
 import { supabase } from '../../integrations/supabase/client';
 import { logger } from '../../utils/logger';
 
-export const useSupabaseTeamMembers = () => {
+export const useSupabaseTeamMembers = (enabled = true) => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -79,8 +79,8 @@ export const useSupabaseTeamMembers = () => {
   };
 
   useEffect(() => {
-    loadTeamMembers();
-  }, []);
+    if (enabled) loadTeamMembers();
+  }, [enabled]);
 
   return {
     teamMembers,

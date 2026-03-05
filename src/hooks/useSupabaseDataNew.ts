@@ -7,7 +7,7 @@ import { useSupabasePageTexts } from './supabase/useSupabasePageTexts';
 import { TeamMember, ServicePage, CategoryInfo, PageTexts } from '../types/adminTypes';
 import { defaultPageTexts } from '../data/defaultPageTexts';
 
-export const useSupabaseDataNew = () => {
+export const useSupabaseDataNew = (enabled = true) => {
   const { 
     servicePages: rawServicePages, 
     categories: rawCategories, 
@@ -16,7 +16,7 @@ export const useSupabaseDataNew = () => {
     setServicePages,
     loadServicePages,
     refetch: refetchServicePages
-  } = useSupabaseServicePages();
+  } = useSupabaseServicePages(enabled);
 
   const { 
     categories: additionalCategories, 
@@ -24,7 +24,7 @@ export const useSupabaseDataNew = () => {
     saveCategories: saveCategoriesOnly,
     setCategories,
     refetch: refetchCategories
-  } = useSupabaseCategories();
+  } = useSupabaseCategories(enabled);
 
   const { 
     teamMembers: rawTeamMembers, 
@@ -32,7 +32,7 @@ export const useSupabaseDataNew = () => {
     saveTeamMembers,
     setTeamMembers,
     refetch: refetchTeam
-  } = useSupabaseTeamMembers();
+  } = useSupabaseTeamMembers(enabled);
 
   const { 
     pageTexts: rawPageTexts, 
@@ -40,7 +40,7 @@ export const useSupabaseDataNew = () => {
     savePageTexts,
     setPageTexts: setPageTextsInHook,
     refetch: refetchPageTexts
-  } = useSupabasePageTexts();
+  } = useSupabasePageTexts(enabled);
 
   // Derive data directly from hooks with fallbacks - no redundant state copies
   const servicePages = useMemo<ServicePage[]>(

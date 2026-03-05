@@ -4,7 +4,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { BlogPost } from '../../types/blogTypes';
 import { logger } from '../../utils/logger';
 
-export const useSupabaseBlog = () => {
+export const useSupabaseBlog = (enabled = true) => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -119,8 +119,8 @@ export const useSupabaseBlog = () => {
   };
 
   useEffect(() => {
-    loadBlogPosts();
-  }, []);
+    if (enabled) loadBlogPosts();
+  }, [enabled]);
 
   return {
     blogPosts,

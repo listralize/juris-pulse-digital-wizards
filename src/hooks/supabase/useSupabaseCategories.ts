@@ -99,7 +99,7 @@ const validateCategories = (data: unknown): CategoryInfo[] => {
   });
 };
 
-export const useSupabaseCategories = () => {
+export const useSupabaseCategories = (enabled = true) => {
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [adminSettingsId, setAdminSettingsId] = useState<string | null>(null);
@@ -179,8 +179,8 @@ export const useSupabaseCategories = () => {
   };
 
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (enabled) loadCategories();
+  }, [enabled]);
 
   return {
     categories,

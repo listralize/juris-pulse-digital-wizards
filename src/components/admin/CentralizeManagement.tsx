@@ -388,14 +388,25 @@ export const CentralizeManagement: React.FC = () => {
     setBulkSyncResult(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/centralize-bulk-sync`, {
+      // Usar anon key como fallback se não houver sessão ativa
+      const supabaseUrl = 'https://hmfsvccbyxhdwmrgcyff.supabase.co';
+      const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZnN2Y2NieXhoZHdtcmdjeWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NzU4MjksImV4cCI6MjA2NDQ1MTgyOX0.X7SiICMFL246-QjgNPYruRglx2JuQJA2XWj2NVgZzdU';
+      const authToken = session?.access_token || anonKey;
+      const res = await fetch(`${supabaseUrl}/functions/v1/centralize-bulk-sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
+          'Authorization': `Bearer ${authToken}`,
+          'apikey': anonKey,
         },
         body: JSON.stringify({ limit: 100, dry_run: dryRun }),
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('[bulk-sync] Erro HTTP:', res.status, errText);
+        toast.error(`Erro ${res.status}: ${errText.substring(0, 100)}`);
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         setBulkSyncResult({ synced: data.synced, skipped: data.skipped, errors: data.errors, total: data.total_processed });
@@ -404,7 +415,8 @@ export const CentralizeManagement: React.FC = () => {
         toast.error(data.error || 'Erro na sincronização');
       }
     } catch (err) {
-      toast.error('Erro ao executar sincronização');
+      console.error('[bulk-sync] Exceção:', err);
+      toast.error('Erro ao executar sincronização. Verifique o console.');
     } finally {
       setIsBulkSyncing(false);
     }
