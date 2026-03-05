@@ -195,7 +195,7 @@ export const CentralizeManagement: React.FC = () => {
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const [expandedForms, setExpandedForms] = useState<Set<string>>(new Set());
   const [isBulkSyncing, setIsBulkSyncing] = useState(false);
-  const [bulkSyncResult, setBulkSyncResult] = useState<{ synced: number; skipped: number; errors: number; total: number } | null>(null);
+  const [bulkSyncResult, setBulkSyncResult] = useState<{ found: number; not_found: number; no_phone: number; errors: number; total: number } | null>(null);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -383,7 +383,7 @@ export const CentralizeManagement: React.FC = () => {
     ));
   };
 
-  const runBulkSync = async (dryRun = false) => {
+  const runBulkSync = async () => {
     setIsBulkSyncing(true);
     setBulkSyncResult(null);
     try {
@@ -399,7 +399,7 @@ export const CentralizeManagement: React.FC = () => {
           'Authorization': `Bearer ${authToken}`,
           'apikey': anonKey,
         },
-        body: JSON.stringify({ limit: 100, dry_run: dryRun }),
+        body: JSON.stringify({ limit: 100 }),
       });
       if (!res.ok) {
         const errText = await res.text();
@@ -409,10 +409,16 @@ export const CentralizeManagement: React.FC = () => {
       }
       const data = await res.json();
       if (data.success) {
-        setBulkSyncResult({ synced: data.synced, skipped: data.skipped, errors: data.errors, total: data.total_processed });
-        toast.success(dryRun ? `Simulação: ${data.synced} leads seriam sincronizados` : `${data.synced} leads sincronizados com sucesso`);
+        setBulkSyncResult({
+          found: data.found_in_reply ?? 0,
+          not_found: data.not_found ?? 0,
+          no_phone: data.no_phone ?? 0,
+          errors: data.errors ?? 0,
+          total: data.total_checked ?? 0,
+        });
+        toast.success(data.message || `Verificação concluída`);
       } else {
-        toast.error(data.error || 'Erro na sincronização');
+        toast.error(data.error || 'Erro na verificação');
       }
     } catch (err) {
       console.error('[bulk-sync] Exceção:', err);
@@ -706,14 +712,16 @@ export const CentralizeManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Sincronização em Lote */}
+      {/* Verificação de Leads na Reply Agent */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <RefreshCw className="w-4 h-4 text-primary" />
+            <Search className="w-4 h-4 text-primary" />
             <div>
-              <CardTitle className="text-base">Sincronização de Leads Existentes</CardTitle>
-              <CardDescription className="text-xs mt-0.5">Sincronize leads que ainda não foram enviados para a Reply Agent</CardDescription>
+              <CardTitle className="text-base">Verificar Leads na Reply Agent</CardTitle>
+              <CardDescription className="text-xs mt-0.5">
+                Verifica quais leads do painel já existem na Reply Agent pelo WhatsApp e marca o vínculo no perfil do lead
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -722,45 +730,35 @@ export const CentralizeManagement: React.FC = () => {
             <div className="grid grid-cols-4 gap-2 p-3 bg-muted/30 rounded-lg">
               <div className="text-center">
                 <p className="text-lg font-bold text-primary">{bulkSyncResult.total}</p>
-                <p className="text-[10px] text-muted-foreground">Total</p>
+                <p className="text-[10px] text-muted-foreground">Verificados</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-green-600">{bulkSyncResult.synced}</p>
-                <p className="text-[10px] text-muted-foreground">Sincronizados</p>
+                <p className="text-lg font-bold text-green-600">{bulkSyncResult.found}</p>
+                <p className="text-[10px] text-muted-foreground">Na Reply</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-yellow-600">{bulkSyncResult.skipped}</p>
-                <p className="text-[10px] text-muted-foreground">Ignorados</p>
+                <p className="text-lg font-bold text-yellow-600">{bulkSyncResult.not_found}</p>
+                <p className="text-[10px] text-muted-foreground">Não encontrados</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-destructive">{bulkSyncResult.errors}</p>
-                <p className="text-[10px] text-muted-foreground">Erros</p>
+                <p className="text-lg font-bold text-muted-foreground">{bulkSyncResult.no_phone}</p>
+                <p className="text-[10px] text-muted-foreground">Sem telefone</p>
               </div>
             </div>
           )}
           <div className="flex gap-2">
             <Button
-              variant="outline"
               size="sm"
-              onClick={() => runBulkSync(true)}
+              onClick={() => runBulkSync()}
               disabled={isBulkSyncing}
               className="text-xs"
             >
-              {isBulkSyncing ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Info className="w-3.5 h-3.5 mr-2" />}
-              Simular (dry run)
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => runBulkSync(false)}
-              disabled={isBulkSyncing}
-              className="text-xs"
-            >
-              {isBulkSyncing ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
-              Sincronizar agora
+              {isBulkSyncing ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Search className="w-3.5 h-3.5 mr-2" />}
+              {isBulkSyncing ? 'Verificando...' : 'Verificar leads'}
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Busca por WhatsApp para evitar duplicatas. Leads já sincronizados são ignorados. Rate limit: 300ms entre requests.
+            Apenas verifica e marca o vínculo. Não cria contatos nem envia mensagens.
           </p>
         </CardContent>
       </Card>
