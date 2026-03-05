@@ -12,7 +12,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const BASE = 'https://api.replyagent.com/api/v1'
+const BASE = 'https://ra-bcknd.com/v1'
 
 const normalizePhone = (raw: string): string => {
   if (!raw) return ''
