@@ -255,6 +255,7 @@ export const useStepForm = () => {
         setHistory(prev => [...prev, currentStepId]);
         setVisitedSteps(prev => [...new Set([...prev, targetStepId!])]);
         setCurrentStepId(targetStepId);
+        tracking.trackStepView(targetStepId);
       } else {
         toast({ title: 'Erro de navegação', description: `Etapa "${targetStepId}" não encontrada`, variant: 'destructive' });
         logger.error('Steps disponíveis:', form?.steps.map(s => s.id), 'Tentando ir para:', targetStepId);
