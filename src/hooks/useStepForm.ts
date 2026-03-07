@@ -149,8 +149,21 @@ export const useStepForm = () => {
       setCurrentStepId(firstStepId);
       setHistory([]);
       setVisitedSteps([firstStepId]);
+      tracking.trackStepView(firstStepId);
     }
   }, [form, currentStepId]);
+
+  // Track abandonment on page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentStepId && !isSubmitting) {
+        const partialData = { ...answers, ...formData };
+        tracking.trackAbandonment(currentStepId, partialData);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentStepId, answers, formData, isSubmitting, tracking]);
 
   // Persist progress to localStorage
   useEffect(() => {
