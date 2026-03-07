@@ -390,7 +390,7 @@ export const StepFormBuilder: React.FC = () => {
         </div>
 
         <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="visual" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               Editor Visual
@@ -410,6 +410,10 @@ export const StepFormBuilder: React.FC = () => {
             <TabsTrigger value="testimonials" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Depoimentos
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Analytics
             </TabsTrigger>
           </TabsList>
 

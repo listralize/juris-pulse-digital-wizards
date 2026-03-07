@@ -290,6 +290,7 @@ export const useStepForm = () => {
   const handleFormSubmit = async (e?: any) => {
     e?.preventDefault?.();
     setIsSubmitting(true);
+    tracking.trackFormSubmit(currentStepId);
 
     if (!form) {
       toast({ title: 'Erro', description: 'Formulário não carregado. Recarregue a página.', variant: 'destructive' });
