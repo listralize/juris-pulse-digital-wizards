@@ -303,7 +303,7 @@ serve(async (req) => {
 
     // Tags
     const existingTags = Array.isArray(contact.tags)
-      ? contact.tags.map(t => typeof t === 'string' ? t : (t?.name || '')).filter(Boolean)
+      ? contact.tags.map((t: any) => typeof t === 'string' ? t : (t?.name || '')).filter(Boolean)
       : []
 
     const newTags = []
