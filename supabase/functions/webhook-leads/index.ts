@@ -167,7 +167,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error('❌ Erro no webhook:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
-      message: error.message 
+      message: (error as Error).message 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

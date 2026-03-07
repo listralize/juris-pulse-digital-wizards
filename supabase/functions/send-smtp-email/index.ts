@@ -177,7 +177,7 @@ async function sendEmail(to: string, subject: string, html: string) {
 
   } catch (error) {
     console.error("❌ Erro no envio via Resend:", error);
-    throw new Error(`Falha no envio: ${error.message}`);
+    throw new Error(`Falha no envio: ${(error as Error).message}`);
   }
 }
 

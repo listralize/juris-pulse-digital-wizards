@@ -1477,6 +1477,45 @@ export type Database = {
         }
         Relationships: []
       }
+      step_form_events: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          event_type: string
+          form_slug: string
+          id: string
+          option_value: string | null
+          partial_data: Json | null
+          session_id: string
+          step_id: string
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          event_type: string
+          form_slug: string
+          id?: string
+          option_value?: string | null
+          partial_data?: Json | null
+          session_id: string
+          step_id: string
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          event_type?: string
+          form_slug?: string
+          id?: string
+          option_value?: string | null
+          partial_data?: Json | null
+          session_id?: string
+          step_id?: string
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       step_forms: {
         Row: {
           centralize_config: Json | null

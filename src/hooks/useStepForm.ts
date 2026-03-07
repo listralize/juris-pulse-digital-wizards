@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 import { getOrCreateVisitorId } from '@/hooks/useAnalytics';
+import { useStepFormTracking } from '@/hooks/useStepFormTracking';
 import { logger } from '@/utils/logger';
 import type { StepFormData, StepFormStep } from '@/types/stepFormTypes';
 
@@ -115,6 +116,7 @@ export const useStepForm = () => {
 
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
+  const tracking = useStepFormTracking(slug || '');
 
   const totalReachableSteps = useMemo(() => {
     if (!form) return 1;
@@ -147,8 +149,21 @@ export const useStepForm = () => {
       setCurrentStepId(firstStepId);
       setHistory([]);
       setVisitedSteps([firstStepId]);
+      tracking.trackStepView(firstStepId);
     }
   }, [form, currentStepId]);
+
+  // Track abandonment on page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentStepId && !isSubmitting) {
+        const partialData = { ...answers, ...formData };
+        tracking.trackAbandonment(currentStepId, partialData);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentStepId, answers, formData, isSubmitting, tracking]);
 
   // Persist progress to localStorage
   useEffect(() => {
@@ -208,6 +223,8 @@ export const useStepForm = () => {
 
   const saveAnswer = (key: string, value: string) => {
     setAnswers(prev => ({ ...prev, [key]: value }));
+    // Track option click
+    tracking.trackOptionClick(key, value);
   };
 
   const getFirstStepFromFlow = () => {
@@ -251,6 +268,7 @@ export const useStepForm = () => {
         setHistory(prev => [...prev, currentStepId]);
         setVisitedSteps(prev => [...new Set([...prev, targetStepId!])]);
         setCurrentStepId(targetStepId);
+        tracking.trackStepView(targetStepId);
       } else {
         toast({ title: 'Erro de navegação', description: `Etapa "${targetStepId}" não encontrada`, variant: 'destructive' });
         logger.error('Steps disponíveis:', form?.steps.map(s => s.id), 'Tentando ir para:', targetStepId);
@@ -272,6 +290,7 @@ export const useStepForm = () => {
   const handleFormSubmit = async (e?: any) => {
     e?.preventDefault?.();
     setIsSubmitting(true);
+    tracking.trackFormSubmit(currentStepId);
 
     if (!form) {
       toast({ title: 'Erro', description: 'Formulário não carregado. Recarregue a página.', variant: 'destructive' });

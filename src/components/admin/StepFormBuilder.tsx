@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette, TrendingUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ import { StepFormPageCustomizer } from './StepFormPageCustomizer';
 import { VisualFlowEditor } from './VisualFlowEditor';
 import { SocialProofConfigEditor } from './StepFormConfigEditors';
 import { StepFormPageEditor } from './service-pages/StepFormPageEditor';
+import { StepFormAnalytics } from './StepFormAnalytics';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -389,7 +390,7 @@ export const StepFormBuilder: React.FC = () => {
         </div>
 
         <Tabs value={editMode} onValueChange={(value) => setEditMode(value as 'visual' | 'code')}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="visual" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               Editor Visual
@@ -409,6 +410,10 @@ export const StepFormBuilder: React.FC = () => {
             <TabsTrigger value="testimonials" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Depoimentos
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -938,6 +943,20 @@ export const StepFormBuilder: React.FC = () => {
                 />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            {selectedForm.slug && (
+              <StepFormAnalytics
+                formSlug={selectedForm.slug}
+                formSteps={(selectedForm.steps || []).map((s: any) => ({
+                  id: s.id,
+                  title: s.title,
+                  type: s.type,
+                  options: s.options,
+                }))}
+              />
+            )}
           </TabsContent>
         </Tabs>
 

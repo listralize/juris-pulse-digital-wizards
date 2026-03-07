@@ -85,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
         JSON.stringify({ 
           error: 'Dados inválidos', 
           details: 'Erro ao processar dados recebidos',
-          parseError: parseError.message,
+          parseError: (parseError as Error).message,
           receivedData: requestText 
         }),
         {
@@ -316,7 +316,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         error: 'Erro interno do servidor', 
-        details: error.message 
+        details: (error as Error).message 
       }),
       {
         status: 500,
