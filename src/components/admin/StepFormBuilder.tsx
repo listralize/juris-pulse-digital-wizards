@@ -17,6 +17,7 @@ import { StepFormPageCustomizer } from './StepFormPageCustomizer';
 import { VisualFlowEditor } from './VisualFlowEditor';
 import { SocialProofConfigEditor } from './StepFormConfigEditors';
 import { StepFormPageEditor } from './service-pages/StepFormPageEditor';
+import { StepFormAnalytics } from './StepFormAnalytics';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
