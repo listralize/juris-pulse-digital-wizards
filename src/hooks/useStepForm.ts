@@ -210,6 +210,8 @@ export const useStepForm = () => {
 
   const saveAnswer = (key: string, value: string) => {
     setAnswers(prev => ({ ...prev, [key]: value }));
+    // Track option click
+    tracking.trackOptionClick(key, value);
   };
 
   const getFirstStepFromFlow = () => {
