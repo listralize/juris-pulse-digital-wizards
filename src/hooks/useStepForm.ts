@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStepFormMarketingScripts } from '@/hooks/useStepFormMarketingScripts';
 import { getOrCreateVisitorId } from '@/hooks/useAnalytics';
+import { useStepFormTracking } from '@/hooks/useStepFormTracking';
 import { logger } from '@/utils/logger';
 import type { StepFormData, StepFormStep } from '@/types/stepFormTypes';
 
