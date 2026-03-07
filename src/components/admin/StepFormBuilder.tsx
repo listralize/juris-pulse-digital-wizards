@@ -944,6 +944,20 @@ export const StepFormBuilder: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            {selectedForm.slug && (
+              <StepFormAnalytics
+                formSlug={selectedForm.slug}
+                formSteps={(selectedForm.steps || []).map((s: any) => ({
+                  id: s.id,
+                  title: s.title,
+                  type: s.type,
+                  options: s.options,
+                }))}
+              />
+            )}
+          </TabsContent>
         </Tabs>
 
         {/* Galeria de Imagens */}
