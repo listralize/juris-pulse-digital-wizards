@@ -30,12 +30,17 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
   return (
     <form noValidate onSubmit={(e) => {
       e.preventDefault();
-      // Validate phone fields before submit
-      const phoneFields = step.formFields?.filter(f => isPhoneField(f) && f.required) || [];
-      for (const field of phoneFields) {
+      // Validate all required fields before submit
+      const requiredFields = step.formFields?.filter(f => f.required) || [];
+      for (const field of requiredFields) {
         const val = formData[field.name] || '';
-        if (!isValidPhone(val)) {
-          toast.error('Informe um número de telefone válido com DDD');
+        if (isPhoneField(field)) {
+          if (!isValidPhone(val)) {
+            toast.error('Informe um número de telefone válido com DDD');
+            return;
+          }
+        } else if (!val.trim()) {
+          toast.error(`Preencha o campo obrigatório: ${field.label || field.placeholder || field.name}`);
           return;
         }
       }
