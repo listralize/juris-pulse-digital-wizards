@@ -116,6 +116,7 @@ export const useStepForm = () => {
 
   const marketingSlug = useMemo(() => slug || '', [slug]);
   useStepFormMarketingScripts(marketingSlug);
+  const tracking = useStepFormTracking(slug || '');
 
   const totalReachableSteps = useMemo(() => {
     if (!form) return 1;
