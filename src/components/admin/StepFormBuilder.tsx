@@ -203,15 +203,23 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
-  const createNewForm = () => {
+  const createNewForm = (pageType: 'quiz' | 'landing_page' = 'quiz') => {
+    const isLanding = pageType === 'landing_page';
     const newForm: StepFormData = {
-      name: 'Novo Formulário',
-      slug: 'novo-formulario',
-      title: 'Formulário Interativo',
-      subtitle: 'Complete as etapas para prosseguir',
+      name: isLanding ? 'Nova Landing Page' : 'Novo Formulário',
+      slug: isLanding ? 'nova-landing-page' : 'novo-formulario',
+      title: isLanding ? 'Landing Page de Conversão' : 'Formulário Interativo',
+      subtitle: isLanding ? 'Conquiste mais clientes' : 'Complete as etapas para prosseguir',
       webhook_url: '',
       redirect_url: '/obrigado',
-      steps: [{
+      page_type: pageType,
+      sections: isLanding ? [
+        { id: 'hero_1', type: 'hero', display_order: 0, config: { headline: 'Precisa de Ajuda Jurídica?', subheadline: 'Atendimento especializado e confidencial', cta_text: 'Fale Conosco Agora', cta_url: '#formulario' } },
+        { id: 'badges_1', type: 'trust_badges', display_order: 1, config: { items: [{ icon: 'shield', text: 'Sigilo Total' }, { icon: 'clock', text: 'Resposta em 24h' }, { icon: 'award', text: '10+ Anos de Experiência' }] } },
+        { id: 'form_1', type: 'embedded_form', display_order: 2, config: { title: 'Fale Conosco', subtitle: 'Preencha o formulário e entraremos em contato', form_fields: [{ name: 'nome', type: 'text', placeholder: 'Seu nome completo', required: true, label: 'Nome' }, { name: 'telefone', type: 'tel', placeholder: '(00) 00000-0000', required: true, label: 'Telefone' }], cta_text: 'Solicitar Atendimento' } },
+        { id: 'faq_1', type: 'faq', display_order: 3, config: { title: 'Perguntas Frequentes', items: [{ question: 'Como funciona o atendimento?', answer: 'Após o contato, nossa equipe analisará seu caso e retornará em até 24 horas.' }] } },
+      ] : [],
+      steps: isLanding ? [] : [{
         id: 'inicio',
         title: 'Bem-vindo',
         type: 'question',
@@ -226,8 +234,8 @@ export const StepFormBuilder: React.FC = () => {
         button_style: 'rounded'
       },
       seo: {
-        meta_title: 'Formulário Interativo',
-        meta_description: 'Complete nosso formulário interativo'
+        meta_title: isLanding ? 'Landing Page de Conversão' : 'Formulário Interativo',
+        meta_description: isLanding ? 'Página de conversão' : 'Complete nosso formulário interativo'
       },
       footer_config: {
         enabled: false,
@@ -237,8 +245,8 @@ export const StepFormBuilder: React.FC = () => {
         font_size: 'text-sm'
       },
       seo_config: {
-        meta_title: 'Formulário Interativo',
-        meta_description: 'Complete nosso formulário interativo',
+        meta_title: '',
+        meta_description: '',
         meta_keywords: ''
       },
       tracking_config: {
@@ -254,6 +262,7 @@ export const StepFormBuilder: React.FC = () => {
     
     setSelectedForm(newForm);
     setIsCreating(true);
+    setShowNewFormDialog(false);
   };
 
   const saveForm = async () => {
