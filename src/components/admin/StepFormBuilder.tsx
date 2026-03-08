@@ -52,6 +52,7 @@ export const StepFormBuilder: React.FC = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const [leadCounts, setLeadCounts] = useState<{ [key: string]: number }>({});
   const [showImageGallery, setShowImageGallery] = useState(false);
+  const [showNewFormDialog, setShowNewFormDialog] = useState(false);
   const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
   const [trackingConfig, setTrackingConfig] = useState({
     facebook_pixel: false,
