@@ -30,14 +30,16 @@ type StepFormData = {
   logo_url?: string;
   webhook_url: string;
   redirect_url?: string;
-  steps: any; // JSONB
-  styles: any; // JSONB
-  seo: any; // JSONB
-  footer_config?: any; // JSONB
-  seo_config?: any; // JSONB
-  tracking_config?: any; // JSONB
-  flowConfig?: any; // JSONB para salvar posições e conexões do fluxo visual
+  steps: any;
+  styles: any;
+  seo: any;
+  footer_config?: any;
+  seo_config?: any;
+  tracking_config?: any;
+  flowConfig?: any;
   is_active: boolean;
+  page_type?: 'quiz' | 'landing_page';
+  sections?: any;
   created_at?: string;
   updated_at?: string;
 };
