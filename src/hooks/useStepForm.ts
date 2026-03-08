@@ -203,6 +203,8 @@ export const useStepForm = () => {
 
       const formData: StepFormData = {
         ...data,
+        page_type: (data.page_type as StepFormData['page_type']) || 'quiz',
+        sections: (data.sections as unknown) as StepFormData['sections'],
         steps: (data.steps as unknown) as StepFormStep[],
         styles: (data.styles as unknown) as StepFormData['styles'],
         seo: (data.seo as unknown) as StepFormData['seo'],

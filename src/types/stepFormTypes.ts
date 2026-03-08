@@ -117,3 +117,12 @@ export interface StepFormStep {
     }>;
   };
 }
+
+export interface LandingSection {
+  id: string;
+  type: 'hero' | 'trust_badges' | 'problems_grid' | 'cta_banner'
+    | 'embedded_form' | 'benefits' | 'team' | 'faq' | 'testimonials'
+    | 'text_image' | 'custom_html';
+  config: Record<string, any>;
+  display_order: number;
+}
