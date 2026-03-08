@@ -1,29 +1,42 @@
 
 
-# Apply 3 Corrections: Phone Field, Custom Fields, Edge Function
+# Estado Atual: Landing Page Builder Já Implementado
 
-## Changes
+Após análise completa do código, **tudo já foi implementado** nas mensagens anteriores desta conversa:
 
-### 1. `src/components/stepform/PhoneFieldWithDDD.tsx` — Emit onChange on every keystroke
+## O que já existe
 
-The current code only calls `onChange` in `handleBlur`. If the user clicks "Enviar" without blurring the phone field, `formData` has an empty phone value.
+### Banco de dados
+- Coluna `page_type` (text, default 'quiz') na tabela `step_forms`
+- Coluna `sections` (jsonb, default '[]') na tabela `step_forms`
 
-Fix: In `handleChange`, extract digits and call `onChange(digits.length > 0 ? '55${digits}' : '')` on every keystroke, keeping the blur handler for formatting only.
+### Admin (StepFormBuilder)
+- Dialog de criação com escolha entre **Quiz** e **Landing Page** (linha 206-266)
+- Aba "Editor Visual" renderiza `LandingPageEditor` quando `page_type === 'landing_page'` (linha 437-441)
+- `LandingPageEditor.tsx` — editor de seções com add/remove/reorder e 11 tipos de bloco
+- `LandingSectionEditor.tsx` — editor específico por tipo de seção (hero, badges, form, faq, etc.)
+- Badge "Quiz" / "Landing" nos cards da lista de formulários
+- `saveForm()` já salva `page_type` e `sections` no Supabase
 
-### 2. `src/hooks/useStepForm.ts` (lines 558-574) — Add `custom_fields` to reply-agent-sync payload
+### Frontend (renderização pública)
+- `StepForm.tsx` linha 16-17: importa e renderiza `LandingPageRenderer` quando `page_type === 'landing_page'`
+- 11 componentes de seção em `src/components/landing/`:
+  - `LandingHero`, `LandingTrustBadges`, `LandingProblemsGrid`, `LandingCtaBanner`
+  - `LandingEmbeddedForm`, `LandingBenefits`, `LandingTeam`, `LandingFaq`
+  - `LandingTestimonials`, `LandingTextImage`, `LandingCustomHtml`
+- `LandingPageRenderer.tsx` com lógica de submit (form_leads + conversion_events + webhook + redirect)
 
-Add a `custom_fields` object containing UTM parameters, gclid, page origin, referrer, lead_id, and form name to the `reply-agent-sync` invocation body.
+### Tipos TypeScript
+- `StepFormData` com `page_type` e `sections` em `stepFormTypes.ts`
+- Interface `LandingSection` com 11 tipos de bloco
 
-### 3. `supabase/functions/reply-agent-sync/index.ts` — Full replacement
+## Conclusão
 
-Key changes from the user's provided code:
-- `createContact`: always sends **both** `primary_phone_number` AND `primary_whatsapp_number` with the same normalized number (reverting the previous "only whatsapp" approach)
-- If `whatsapp` differs from `phone`, override only `primary_whatsapp_number`
-- Tags endpoint confirmed as `POST /v1/contacts/{id}/tags` with JSON body
-- SmartFlow uses `FormData` as before
-- Detailed logging preserved
+Não há nada pendente para implementar. O sistema está funcional. Para testar:
 
-### 4. `supabase/config.toml` — Restore verify_jwt settings
-
-The last diff removed the `verify_jwt = false` entries for edge functions. These need to be restored so the functions remain callable without JWT.
+1. Acesse o **Admin → Step Form Builder**
+2. Clique em **"Novo Formulário"**
+3. Escolha **"Landing Page de Conversão"**
+4. O editor de seções aparecerá com hero, badges, formulário e FAQ pré-configurados
+5. Salve e acesse via `/formulario/{slug}`
 
