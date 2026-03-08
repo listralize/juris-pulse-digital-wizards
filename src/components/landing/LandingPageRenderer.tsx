@@ -15,6 +15,11 @@ import { LandingFaq } from './LandingFaq';
 import { LandingTestimonials } from './LandingTestimonials';
 import { LandingTextImage } from './LandingTextImage';
 import { LandingCustomHtml } from './LandingCustomHtml';
+import { LandingCountdown } from './LandingCountdown';
+import { LandingVideo } from './LandingVideo';
+import { LandingNumbers } from './LandingNumbers';
+import { LandingWhatsappCta } from './LandingWhatsappCta';
+import { LandingLogoCarousel } from './LandingLogoCarousel';
 import { StepFormFooter } from '@/components/stepform/StepFormFooter';
 
 interface LandingPageRendererProps {
@@ -28,6 +33,7 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
   const primaryColor = form.styles.primary_color || '#4CAF50';
 
   const sections = ((form.sections || []) as LandingSection[])
+    .filter(s => !s.hidden)
     .sort((a, b) => a.display_order - b.display_order);
 
   const handleFormSubmit = async (data: Record<string, string>) => {
@@ -41,7 +47,6 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
         page_type: 'landing_page',
       };
 
-      // Save to form_leads
       await supabase.from('form_leads').insert({
         session_id: sessionId,
         lead_data: leadData,
@@ -51,7 +56,6 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
         referrer: document.referrer || null,
       });
 
-      // Save to conversion_events
       await supabase.from('conversion_events').insert({
         session_id: sessionId,
         event_type: 'form_submission',
@@ -62,7 +66,6 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
         lead_data: leadData,
       });
 
-      // Webhook
       if (form.webhook_url) {
         try {
           await fetch(form.webhook_url, {
@@ -77,7 +80,6 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
 
       toast({ title: 'Enviado com sucesso!', description: 'Entraremos em contato em breve.' });
 
-      // Redirect
       const redirectUrl = form.redirect_url || '/obrigado';
       if (redirectUrl.startsWith('http')) {
         window.location.href = redirectUrl;
@@ -114,6 +116,11 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
       case 'testimonials': return <LandingTestimonials key={section.id} {...props} />;
       case 'text_image': return <LandingTextImage key={section.id} {...props} />;
       case 'custom_html': return <LandingCustomHtml key={section.id} config={section.config} />;
+      case 'countdown': return <LandingCountdown key={section.id} {...props} />;
+      case 'video': return <LandingVideo key={section.id} {...props} />;
+      case 'numbers': return <LandingNumbers key={section.id} {...props} />;
+      case 'whatsapp_cta': return <LandingWhatsappCta key={section.id} {...props} />;
+      case 'logo_carousel': return <LandingLogoCarousel key={section.id} {...props} />;
       default: return null;
     }
   };
