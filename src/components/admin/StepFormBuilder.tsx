@@ -18,7 +18,7 @@ import { VisualFlowEditor } from './VisualFlowEditor';
 import { SocialProofConfigEditor } from './StepFormConfigEditors';
 import { StepFormPageEditor } from './service-pages/StepFormPageEditor';
 import { StepFormAnalytics } from './StepFormAnalytics';
-import { LandingPageEditor } from './LandingPageEditor';
+import { LandingVisualEditor } from './LandingVisualEditor';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -435,9 +435,12 @@ export const StepFormBuilder: React.FC = () => {
 
           <TabsContent value="visual" className="space-y-6">
             {selectedForm.page_type === 'landing_page' ? (
-              <LandingPageEditor
+              <LandingVisualEditor
                 sections={(selectedForm.sections || []) as any[]}
                 onUpdate={(sections) => setSelectedForm({ ...selectedForm, sections })}
+                primaryColor={selectedForm.styles?.primary_color || '#4CAF50'}
+                backgroundColor={selectedForm.styles?.background_color || '#ffffff'}
+                textColor={selectedForm.styles?.text_color || '#000000'}
               />
             ) : (
               <Card>
