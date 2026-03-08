@@ -1088,7 +1088,7 @@ export const StepFormBuilder: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Nenhum formulário criado ainda
             </p>
-            <Button onClick={createNewForm}>
+            <Button onClick={() => setShowNewFormDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Formulário
             </Button>
