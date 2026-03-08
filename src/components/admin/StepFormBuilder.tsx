@@ -434,61 +434,63 @@ export const StepFormBuilder: React.FC = () => {
           </TabsList>
 
           <TabsContent value="visual" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Editor Visual de Fluxo
-                  {selectedForm.id && (
-                    <Badge variant="outline" className="text-xs">
-                      URL: /form/{selectedForm.slug}
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <VisualFlowEditor
-                  formData={selectedForm}
-                  onUpdate={async (field, value) => {
-                    if (selectedForm?.id) {
-                      try {
-                        // Mapear flowConfig para flow_config
-                        const dbField = field === 'flowConfig' ? 'flow_config' : field;
-                        const { error } = await supabase
-                          .from('step_forms')
-                          .update({ [dbField]: value })
-                          .eq('id', selectedForm.id);
-                        if (error) throw error;
-                        // Recarregar dados atualizados do banco
-                        const { data: updatedData, error: fetchError } = await supabase
-                          .from('step_forms')
-                          .select('*')
-                          .eq('id', selectedForm.id)
-                          .single();
-                        if (fetchError) throw fetchError;
-                        // Mapear flow_config de volta para flowConfig
-                        if ((updatedData as any).flow_config) {
-                          (updatedData as any).flowConfig = (updatedData as any).flow_config;
+            {selectedForm.page_type === 'landing_page' ? (
+              <LandingPageEditor
+                sections={(selectedForm.sections || []) as any[]}
+                onUpdate={(sections) => setSelectedForm({ ...selectedForm, sections })}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Editor Visual de Fluxo
+                    {selectedForm.id && (
+                      <Badge variant="outline" className="text-xs">
+                        URL: /form/{selectedForm.slug}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <VisualFlowEditor
+                    formData={selectedForm}
+                    onUpdate={async (field, value) => {
+                      if (selectedForm?.id) {
+                        try {
+                          const dbField = field === 'flowConfig' ? 'flow_config' : field;
+                          const { error } = await supabase
+                            .from('step_forms')
+                            .update({ [dbField]: value })
+                            .eq('id', selectedForm.id);
+                          if (error) throw error;
+                          const { data: updatedData, error: fetchError } = await supabase
+                            .from('step_forms')
+                            .select('*')
+                            .eq('id', selectedForm.id)
+                            .single();
+                          if (fetchError) throw fetchError;
+                          if ((updatedData as any).flow_config) {
+                            (updatedData as any).flowConfig = (updatedData as any).flow_config;
+                          }
+                          (updatedData as any).page_type = (updatedData as any).page_type || 'quiz';
+                          setSelectedForm(updatedData as StepFormData);
+                          setForms(prevForms => 
+                            prevForms.map(form => 
+                              form.id === selectedForm.id ? (updatedData as StepFormData) : form
+                            )
+                          );
+                        } catch (error) {
+                          console.error('Erro ao salvar:', error);
+                          toast.error('Erro ao salvar alterações');
                         }
-                        (updatedData as any).page_type = (updatedData as any).page_type || 'quiz';
-                        setSelectedForm(updatedData as StepFormData);
-                        // Atualizar também a lista de forms
-                        setForms(prevForms => 
-                          prevForms.map(form => 
-                            form.id === selectedForm.id ? (updatedData as StepFormData) : form
-                          )
-                        );
-                      } catch (error) {
-                        console.error('Erro ao salvar:', error);
-                        toast.error('Erro ao salvar alterações');
+                      } else {
+                        setSelectedForm({ ...selectedForm, [field]: value });
                       }
-                    } else {
-                      // Se não tem ID ainda, apenas atualiza localmente
-                      setSelectedForm({ ...selectedForm, [field]: value });
-                    }
-                  }}
-                />
-              </CardContent>
-            </Card>
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="code" className="space-y-6">
