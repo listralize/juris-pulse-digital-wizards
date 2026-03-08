@@ -101,6 +101,11 @@ const StepForm: React.FC = () => {
     return <StepFormLoader title="Formulário não encontrado" message="Não foi possível carregar este formulário. Verifique o link ou tente novamente." />;
   }
 
+  // Landing page mode
+  if (form.page_type === 'landing_page') {
+    return <LandingPageRenderer form={form} />;
+  }
+
   return (
     <div
       className="min-h-screen py-8 px-4 overflow-hidden pb-24"
