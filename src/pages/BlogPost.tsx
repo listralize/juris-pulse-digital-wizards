@@ -7,6 +7,7 @@ import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import { useSupabaseBlog } from '../hooks/supabase/useSupabaseBlog';
 import Navbar from '../components/navbar';
 import FloatingFooter from '../components/FloatingFooter';
+import { sanitizeHtml } from '../utils/sanitize';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -136,7 +137,7 @@ const BlogPost = () => {
           {/* Content */}
           <div 
             className={`prose prose-lg max-w-none ${isDark ? 'prose-invert' : ''}`}
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
           />
 
           {/* Author Info sem imagem */}

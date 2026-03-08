@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { sanitizeHtml } from '../utils/sanitize';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -91,7 +92,7 @@ export const renderStepElement = (element: any) => {
           {element.content && (
             <div 
               className="text-lg"
-              dangerouslySetInnerHTML={{ __html: element.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(element.content) }}
             />
           )}
         </div>

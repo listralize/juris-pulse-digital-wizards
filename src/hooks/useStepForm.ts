@@ -409,45 +409,30 @@ export const useStepForm = () => {
       const emailForDedup = extractedData.email?.toLowerCase().trim();
       if (emailForDedup) {
         const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-        const { data: dupCheck } = await supabase
+        const { data: deepCheck } = await supabase
           .from('form_leads')
-          .select('id')
+          .select('id, lead_data')
           .eq('form_id', form.slug || form.id || 'stepform')
           .gte('created_at', twoMinAgo)
           .limit(20);
 
-        const isDuplicate = dupCheck?.some(evt => {
-          // form_leads lead_data is always JSONB object
-          return true; // if any lead exists for this form in 2min, check deeper
+        const hasDuplicate = deepCheck?.some(evt => {
+          const ld = evt.lead_data as any;
+          const ldEmail = (ld?.email || ld?.Email || ld?.['e-mail'] || '').toLowerCase().trim();
+          return ldEmail === emailForDedup;
         });
 
-        // More precise: re-query with lead_data filter
-        if (dupCheck && dupCheck.length > 0) {
-          const { data: deepCheck } = await supabase
-            .from('form_leads')
-            .select('id, lead_data')
-            .eq('form_id', form.slug || form.id || 'stepform')
-            .gte('created_at', twoMinAgo)
-            .limit(20);
-
-          const hasDuplicate = deepCheck?.some(evt => {
-            const ld = evt.lead_data as any;
-            const ldEmail = (ld?.email || ld?.Email || ld?.['e-mail'] || '').toLowerCase().trim();
-            return ldEmail === emailForDedup;
-          });
-
-          if (hasDuplicate) {
-            logger.warn('Lead duplicado detectado (mesmo email nos últimos 2 min), ignorando');
-            toast({ title: 'Já recebemos seus dados', description: 'Seu formulário já foi enviado. Nossa equipe entrará em contato em breve.', variant: 'default' });
-            if (slug) localStorage.removeItem(`stepform_progress_${slug}`);
-            setIsSubmitting(false);
-            setTimeout(() => {
-              const redirectUrl = form.redirect_url || '/obrigado';
-              if (redirectUrl.startsWith('http')) window.location.href = redirectUrl;
-              else navigate(redirectUrl);
-            }, 1500);
-            return;
-          }
+        if (hasDuplicate) {
+          logger.warn('Lead duplicado detectado (mesmo email nos últimos 2 min), ignorando');
+          toast({ title: 'Já recebemos seus dados', description: 'Seu formulário já foi enviado. Nossa equipe entrará em contato em breve.', variant: 'default' });
+          if (slug) localStorage.removeItem(`stepform_progress_${slug}`);
+          setIsSubmitting(false);
+          setTimeout(() => {
+            const redirectUrl = form.redirect_url || '/obrigado';
+            if (redirectUrl.startsWith('http')) window.location.href = redirectUrl;
+            else navigate(redirectUrl);
+          }, 1500);
+          return;
         }
       }
 

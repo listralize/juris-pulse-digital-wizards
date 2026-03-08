@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sanitizeHtml } from '../../../utils/sanitize';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
@@ -225,7 +226,7 @@ export const PageBuilder: React.FC<PageBuilderProps> = ({ page, onUpdatePage }) 
           </div>
         );
       case 'text':
-        return <div style={style} dangerouslySetInnerHTML={{ __html: element.content.content }} />;
+        return <div style={style} dangerouslySetInnerHTML={{ __html: sanitizeHtml(element.content.content) }} />;
       case 'image':
         return (
           <div style={style}>
