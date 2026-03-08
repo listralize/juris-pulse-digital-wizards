@@ -18,6 +18,7 @@ import { VisualFlowEditor } from './VisualFlowEditor';
 import { SocialProofConfigEditor } from './StepFormConfigEditors';
 import { StepFormPageEditor } from './service-pages/StepFormPageEditor';
 import { StepFormAnalytics } from './StepFormAnalytics';
+import { LandingPageEditor } from './LandingPageEditor';
 
 // Tipos baseados na estrutura da tabela step_forms
 type StepFormData = {
@@ -29,14 +30,16 @@ type StepFormData = {
   logo_url?: string;
   webhook_url: string;
   redirect_url?: string;
-  steps: any; // JSONB
-  styles: any; // JSONB
-  seo: any; // JSONB
-  footer_config?: any; // JSONB
-  seo_config?: any; // JSONB
-  tracking_config?: any; // JSONB
-  flowConfig?: any; // JSONB para salvar posições e conexões do fluxo visual
+  steps: any;
+  styles: any;
+  seo: any;
+  footer_config?: any;
+  seo_config?: any;
+  tracking_config?: any;
+  flowConfig?: any;
   is_active: boolean;
+  page_type?: 'quiz' | 'landing_page';
+  sections?: any;
   created_at?: string;
   updated_at?: string;
 };
@@ -49,6 +52,7 @@ export const StepFormBuilder: React.FC = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const [leadCounts, setLeadCounts] = useState<{ [key: string]: number }>({});
   const [showImageGallery, setShowImageGallery] = useState(false);
+  const [showNewFormDialog, setShowNewFormDialog] = useState(false);
   const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
   const [trackingConfig, setTrackingConfig] = useState({
     facebook_pixel: false,
@@ -186,10 +190,11 @@ export const StepFormBuilder: React.FC = () => {
       // Mapear flow_config para flowConfig
       const formsWithFlowConfig = (data || []).map(form => ({
         ...form,
+        page_type: (form.page_type || 'quiz') as 'quiz' | 'landing_page',
         flowConfig: form.flow_config
       }));
       
-      setForms(formsWithFlowConfig);
+      setForms(formsWithFlowConfig as StepFormData[]);
     } catch (error) {
       console.error('Erro ao carregar formulários:', error);
       toast.error('Erro ao carregar formulários');
@@ -198,15 +203,23 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
-  const createNewForm = () => {
+  const createNewForm = (pageType: 'quiz' | 'landing_page' = 'quiz') => {
+    const isLanding = pageType === 'landing_page';
     const newForm: StepFormData = {
-      name: 'Novo Formulário',
-      slug: 'novo-formulario',
-      title: 'Formulário Interativo',
-      subtitle: 'Complete as etapas para prosseguir',
+      name: isLanding ? 'Nova Landing Page' : 'Novo Formulário',
+      slug: isLanding ? 'nova-landing-page' : 'novo-formulario',
+      title: isLanding ? 'Landing Page de Conversão' : 'Formulário Interativo',
+      subtitle: isLanding ? 'Conquiste mais clientes' : 'Complete as etapas para prosseguir',
       webhook_url: '',
       redirect_url: '/obrigado',
-      steps: [{
+      page_type: pageType,
+      sections: isLanding ? [
+        { id: 'hero_1', type: 'hero', display_order: 0, config: { headline: 'Precisa de Ajuda Jurídica?', subheadline: 'Atendimento especializado e confidencial', cta_text: 'Fale Conosco Agora', cta_url: '#formulario' } },
+        { id: 'badges_1', type: 'trust_badges', display_order: 1, config: { items: [{ icon: 'shield', text: 'Sigilo Total' }, { icon: 'clock', text: 'Resposta em 24h' }, { icon: 'award', text: '10+ Anos de Experiência' }] } },
+        { id: 'form_1', type: 'embedded_form', display_order: 2, config: { title: 'Fale Conosco', subtitle: 'Preencha o formulário e entraremos em contato', form_fields: [{ name: 'nome', type: 'text', placeholder: 'Seu nome completo', required: true, label: 'Nome' }, { name: 'telefone', type: 'tel', placeholder: '(00) 00000-0000', required: true, label: 'Telefone' }], cta_text: 'Solicitar Atendimento' } },
+        { id: 'faq_1', type: 'faq', display_order: 3, config: { title: 'Perguntas Frequentes', items: [{ question: 'Como funciona o atendimento?', answer: 'Após o contato, nossa equipe analisará seu caso e retornará em até 24 horas.' }] } },
+      ] : [],
+      steps: isLanding ? [] : [{
         id: 'inicio',
         title: 'Bem-vindo',
         type: 'question',
@@ -221,8 +234,8 @@ export const StepFormBuilder: React.FC = () => {
         button_style: 'rounded'
       },
       seo: {
-        meta_title: 'Formulário Interativo',
-        meta_description: 'Complete nosso formulário interativo'
+        meta_title: isLanding ? 'Landing Page de Conversão' : 'Formulário Interativo',
+        meta_description: isLanding ? 'Página de conversão' : 'Complete nosso formulário interativo'
       },
       footer_config: {
         enabled: false,
@@ -232,8 +245,8 @@ export const StepFormBuilder: React.FC = () => {
         font_size: 'text-sm'
       },
       seo_config: {
-        meta_title: 'Formulário Interativo',
-        meta_description: 'Complete nosso formulário interativo',
+        meta_title: '',
+        meta_description: '',
         meta_keywords: ''
       },
       tracking_config: {
@@ -249,6 +262,7 @@ export const StepFormBuilder: React.FC = () => {
     
     setSelectedForm(newForm);
     setIsCreating(true);
+    setShowNewFormDialog(false);
   };
 
   const saveForm = async () => {
@@ -301,7 +315,9 @@ export const StepFormBuilder: React.FC = () => {
           google_ads_conversion_id: trackingConfig.google_ads_conversion_id || null,
           google_ads_conversion_label: trackingConfig.google_ads_conversion_label || null,
         },
-        flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
+        flow_config: selectedForm.flowConfig,
+        page_type: selectedForm.page_type || 'quiz',
+        sections: selectedForm.sections || [],
         is_active: selectedForm.is_active
       };
 
@@ -418,60 +434,63 @@ export const StepFormBuilder: React.FC = () => {
           </TabsList>
 
           <TabsContent value="visual" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Editor Visual de Fluxo
-                  {selectedForm.id && (
-                    <Badge variant="outline" className="text-xs">
-                      URL: /form/{selectedForm.slug}
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <VisualFlowEditor
-                  formData={selectedForm}
-                  onUpdate={async (field, value) => {
-                    if (selectedForm?.id) {
-                      try {
-                        // Mapear flowConfig para flow_config
-                        const dbField = field === 'flowConfig' ? 'flow_config' : field;
-                        const { error } = await supabase
-                          .from('step_forms')
-                          .update({ [dbField]: value })
-                          .eq('id', selectedForm.id);
-                        if (error) throw error;
-                        // Recarregar dados atualizados do banco
-                        const { data: updatedData, error: fetchError } = await supabase
-                          .from('step_forms')
-                          .select('*')
-                          .eq('id', selectedForm.id)
-                          .single();
-                        if (fetchError) throw fetchError;
-                        // Mapear flow_config de volta para flowConfig
-                        if ((updatedData as any).flow_config) {
-                          (updatedData as any).flowConfig = (updatedData as any).flow_config;
+            {selectedForm.page_type === 'landing_page' ? (
+              <LandingPageEditor
+                sections={(selectedForm.sections || []) as any[]}
+                onUpdate={(sections) => setSelectedForm({ ...selectedForm, sections })}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Editor Visual de Fluxo
+                    {selectedForm.id && (
+                      <Badge variant="outline" className="text-xs">
+                        URL: /form/{selectedForm.slug}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <VisualFlowEditor
+                    formData={selectedForm}
+                    onUpdate={async (field, value) => {
+                      if (selectedForm?.id) {
+                        try {
+                          const dbField = field === 'flowConfig' ? 'flow_config' : field;
+                          const { error } = await supabase
+                            .from('step_forms')
+                            .update({ [dbField]: value })
+                            .eq('id', selectedForm.id);
+                          if (error) throw error;
+                          const { data: updatedData, error: fetchError } = await supabase
+                            .from('step_forms')
+                            .select('*')
+                            .eq('id', selectedForm.id)
+                            .single();
+                          if (fetchError) throw fetchError;
+                          if ((updatedData as any).flow_config) {
+                            (updatedData as any).flowConfig = (updatedData as any).flow_config;
+                          }
+                          (updatedData as any).page_type = (updatedData as any).page_type || 'quiz';
+                          setSelectedForm(updatedData as StepFormData);
+                          setForms(prevForms => 
+                            prevForms.map(form => 
+                              form.id === selectedForm.id ? (updatedData as StepFormData) : form
+                            )
+                          );
+                        } catch (error) {
+                          console.error('Erro ao salvar:', error);
+                          toast.error('Erro ao salvar alterações');
                         }
-                        setSelectedForm(updatedData);
-                        // Atualizar também a lista de forms
-                        setForms(prevForms => 
-                          prevForms.map(form => 
-                            form.id === selectedForm.id ? updatedData : form
-                          )
-                        );
-                      } catch (error) {
-                        console.error('Erro ao salvar:', error);
-                        toast.error('Erro ao salvar alterações');
+                      } else {
+                        setSelectedForm({ ...selectedForm, [field]: value });
                       }
-                    } else {
-                      // Se não tem ID ainda, apenas atualiza localmente
-                      setSelectedForm({ ...selectedForm, [field]: value });
-                    }
-                  }}
-                />
-              </CardContent>
-            </Card>
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="code" className="space-y-6">
@@ -983,7 +1002,7 @@ export const StepFormBuilder: React.FC = () => {
             Crie formulários interativos com múltiplas etapas
           </p>
         </div>
-        <Button onClick={createNewForm}>
+        <Button onClick={() => setShowNewFormDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Novo Formulário
         </Button>
@@ -995,9 +1014,14 @@ export const StepFormBuilder: React.FC = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{form.name}</CardTitle>
-                <Badge variant={form.is_active ? 'default' : 'secondary'}>
-                  {form.is_active ? 'Ativo' : 'Inativo'}
-                </Badge>
+                <div className="flex gap-1">
+                  <Badge variant="outline" className="text-xs">
+                    {form.page_type === 'landing_page' ? '🌐 Landing' : '📝 Quiz'}
+                  </Badge>
+                  <Badge variant={form.is_active ? 'default' : 'secondary'}>
+                    {form.is_active ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground">{form.title}</p>
             </CardHeader>
@@ -1073,13 +1097,41 @@ export const StepFormBuilder: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Nenhum formulário criado ainda
             </p>
-            <Button onClick={createNewForm}>
+            <Button onClick={() => setShowNewFormDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Formulário
             </Button>
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog para escolher tipo de formulário */}
+      <Dialog open={showNewFormDialog} onOpenChange={setShowNewFormDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Criar Novo</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">Escolha o tipo de página que deseja criar:</p>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => createNewForm('quiz')}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 hover:border-primary hover:bg-primary/5 transition-colors"
+            >
+              <Target className="w-10 h-10 text-primary" />
+              <span className="font-bold">Quiz Interativo</span>
+              <span className="text-xs text-muted-foreground text-center">Formulário em etapas com perguntas e respostas</span>
+            </button>
+            <button
+              onClick={() => createNewForm('landing_page')}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 hover:border-primary hover:bg-primary/5 transition-colors"
+            >
+              <FormInput className="w-10 h-10 text-primary" />
+              <span className="font-bold">Landing Page</span>
+              <span className="text-xs text-muted-foreground text-center">Página de conversão com seções personalizáveis</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

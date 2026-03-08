@@ -1526,7 +1526,9 @@ export type Database = {
           is_active: boolean
           logo_url: string | null
           name: string
+          page_type: string
           redirect_url: string | null
+          sections: Json | null
           seo: Json
           seo_config: Json | null
           slug: string
@@ -1547,7 +1549,9 @@ export type Database = {
           is_active?: boolean
           logo_url?: string | null
           name: string
+          page_type?: string
           redirect_url?: string | null
+          sections?: Json | null
           seo?: Json
           seo_config?: Json | null
           slug: string
@@ -1568,7 +1572,9 @@ export type Database = {
           is_active?: boolean
           logo_url?: string | null
           name?: string
+          page_type?: string
           redirect_url?: string | null
+          sections?: Json | null
           seo?: Json
           seo_config?: Json | null
           slug?: string

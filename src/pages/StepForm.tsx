@@ -13,6 +13,7 @@ import { StepContent } from '@/components/stepform/StepContent';
 import { StepFormFields } from '@/components/stepform/StepFormFields';
 import { StepOffer } from '@/components/stepform/StepOffer';
 import { StepFormFooter } from '@/components/stepform/StepFormFooter';
+import { LandingPageRenderer } from '@/components/landing/LandingPageRenderer';
 
 // Inject dynamic SEO meta tags from form config
 const useStepFormSEO = (form: any, slug?: string) => {
@@ -98,6 +99,11 @@ const StepForm: React.FC = () => {
 
   if (!form) {
     return <StepFormLoader title="Formulário não encontrado" message="Não foi possível carregar este formulário. Verifique o link ou tente novamente." />;
+  }
+
+  // Landing page mode
+  if (form.page_type === 'landing_page') {
+    return <LandingPageRenderer form={form} />;
   }
 
   return (

@@ -34,6 +34,8 @@ export interface StepFormData {
     };
   };
   is_active: boolean;
+  page_type: 'quiz' | 'landing_page';
+  sections?: LandingSection[];
   flow_config?: {
     edges?: Array<{
       id: string;
@@ -114,4 +116,13 @@ export interface StepFormStep {
       label: string;
     }>;
   };
+}
+
+export interface LandingSection {
+  id: string;
+  type: 'hero' | 'trust_badges' | 'problems_grid' | 'cta_banner'
+    | 'embedded_form' | 'benefits' | 'team' | 'faq' | 'testimonials'
+    | 'text_image' | 'custom_html';
+  config: Record<string, any>;
+  display_order: number;
 }
