@@ -1095,6 +1095,34 @@ export const StepFormBuilder: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog para escolher tipo de formulário */}
+      <Dialog open={showNewFormDialog} onOpenChange={setShowNewFormDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Criar Novo</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">Escolha o tipo de página que deseja criar:</p>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => createNewForm('quiz')}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 hover:border-primary hover:bg-primary/5 transition-colors"
+            >
+              <Target className="w-10 h-10 text-primary" />
+              <span className="font-bold">Quiz Interativo</span>
+              <span className="text-xs text-muted-foreground text-center">Formulário em etapas com perguntas e respostas</span>
+            </button>
+            <button
+              onClick={() => createNewForm('landing_page')}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 hover:border-primary hover:bg-primary/5 transition-colors"
+            >
+              <FormInput className="w-10 h-10 text-primary" />
+              <span className="font-bold">Landing Page</span>
+              <span className="text-xs text-muted-foreground text-center">Página de conversão com seções personalizáveis</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
