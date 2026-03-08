@@ -189,10 +189,11 @@ export const StepFormBuilder: React.FC = () => {
       // Mapear flow_config para flowConfig
       const formsWithFlowConfig = (data || []).map(form => ({
         ...form,
+        page_type: (form.page_type || 'quiz') as 'quiz' | 'landing_page',
         flowConfig: form.flow_config
       }));
       
-      setForms(formsWithFlowConfig);
+      setForms(formsWithFlowConfig as StepFormData[]);
     } catch (error) {
       console.error('Erro ao carregar formulários:', error);
       toast.error('Erro ao carregar formulários');
