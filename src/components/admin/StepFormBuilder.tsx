@@ -457,11 +457,12 @@ export const StepFormBuilder: React.FC = () => {
                         if ((updatedData as any).flow_config) {
                           (updatedData as any).flowConfig = (updatedData as any).flow_config;
                         }
-                        setSelectedForm(updatedData);
+                        (updatedData as any).page_type = (updatedData as any).page_type || 'quiz';
+                        setSelectedForm(updatedData as StepFormData);
                         // Atualizar também a lista de forms
                         setForms(prevForms => 
                           prevForms.map(form => 
-                            form.id === selectedForm.id ? updatedData : form
+                            form.id === selectedForm.id ? (updatedData as StepFormData) : form
                           )
                         );
                       } catch (error) {
