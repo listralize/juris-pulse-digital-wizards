@@ -315,7 +315,9 @@ export const StepFormBuilder: React.FC = () => {
           google_ads_conversion_id: trackingConfig.google_ads_conversion_id || null,
           google_ads_conversion_label: trackingConfig.google_ads_conversion_label || null,
         },
-        flow_config: selectedForm.flowConfig, // Incluir flowConfig no salvamento
+        flow_config: selectedForm.flowConfig,
+        page_type: selectedForm.page_type || 'quiz',
+        sections: selectedForm.sections || [],
         is_active: selectedForm.is_active
       };
 
