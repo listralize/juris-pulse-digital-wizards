@@ -34,6 +34,8 @@ export interface StepFormData {
     };
   };
   is_active: boolean;
+  page_type: 'quiz' | 'landing_page';
+  sections?: LandingSection[];
   flow_config?: {
     edges?: Array<{
       id: string;
