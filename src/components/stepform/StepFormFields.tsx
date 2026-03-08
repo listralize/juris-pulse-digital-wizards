@@ -31,6 +31,7 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
     <form noValidate onSubmit={(e) => {
       e.preventDefault();
       // Validate all required fields before submit
+      // Validate required fields
       const requiredFields = step.formFields?.filter(f => f.required) || [];
       for (const field of requiredFields) {
         const val = formData[field.name] || '';
@@ -41,6 +42,15 @@ export const StepFormFields: React.FC<StepFormFieldsProps> = ({
           }
         } else if (!val.trim()) {
           toast.error(`Preencha o campo obrigatório: ${field.label || field.placeholder || field.name}`);
+          return;
+        }
+      }
+      // Phone fields are ALWAYS required regardless of config
+      const phoneFields = step.formFields?.filter(f => isPhoneField(f) && !f.required) || [];
+      for (const field of phoneFields) {
+        const val = formData[field.name] || '';
+        if (!isValidPhone(val)) {
+          toast.error('Informe um número de telefone válido com DDD');
           return;
         }
       }
