@@ -1014,9 +1014,14 @@ export const StepFormBuilder: React.FC = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{form.name}</CardTitle>
-                <Badge variant={form.is_active ? 'default' : 'secondary'}>
-                  {form.is_active ? 'Ativo' : 'Inativo'}
-                </Badge>
+                <div className="flex gap-1">
+                  <Badge variant="outline" className="text-xs">
+                    {form.page_type === 'landing_page' ? '🌐 Landing' : '📝 Quiz'}
+                  </Badge>
+                  <Badge variant={form.is_active ? 'default' : 'secondary'}>
+                    {form.is_active ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground">{form.title}</p>
             </CardHeader>
