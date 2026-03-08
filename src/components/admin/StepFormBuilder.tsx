@@ -998,7 +998,7 @@ export const StepFormBuilder: React.FC = () => {
             Crie formulários interativos com múltiplas etapas
           </p>
         </div>
-        <Button onClick={createNewForm}>
+        <Button onClick={() => setShowNewFormDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Novo Formulário
         </Button>
