@@ -137,7 +137,7 @@ const BlogPost = () => {
           {/* Content */}
           <div 
             className={`prose prose-lg max-w-none ${isDark ? 'prose-invert' : ''}`}
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
           />
 
           {/* Author Info sem imagem */}

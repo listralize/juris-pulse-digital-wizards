@@ -91,7 +91,7 @@ export const renderStepElement = (element: any) => {
           {element.content && (
             <div 
               className="text-lg"
-              dangerouslySetInnerHTML={{ __html: element.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(element.content) }}
             />
           )}
         </div>

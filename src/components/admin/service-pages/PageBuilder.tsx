@@ -225,7 +225,7 @@ export const PageBuilder: React.FC<PageBuilderProps> = ({ page, onUpdatePage }) 
           </div>
         );
       case 'text':
-        return <div style={style} dangerouslySetInnerHTML={{ __html: element.content.content }} />;
+        return <div style={style} dangerouslySetInnerHTML={{ __html: sanitizeHtml(element.content.content) }} />;
       case 'image':
         return (
           <div style={style}>
