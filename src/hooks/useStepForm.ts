@@ -460,24 +460,24 @@ export const useStepForm = () => {
         status: 'new'
       };
 
-      let savedLead: any = null;
+      // Generate UUID client-side to avoid needing .select() after insert
+      // (RLS blocks SELECT for anonymous users, causing rollback of the entire INSERT)
+      const leadId = crypto.randomUUID();
+
       const insertLead = async () => {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('form_leads')
-          .insert([leadData])
-          .select()
-          .single();
+          .insert([{ id: leadId, ...leadData }]);
         if (error) throw error;
-        return data;
       };
 
       try {
-        savedLead = await insertLead();
+        await insertLead();
       } catch (firstError) {
         logger.error('Primeiro erro ao salvar lead em form_leads:', firstError);
         // Retry once
         try {
-          savedLead = await insertLead();
+          await insertLead();
         } catch (retryError) {
           logger.error('Retry falhou ao salvar lead em form_leads:', retryError);
           // Flag the conversion event so we know form_leads failed
@@ -503,7 +503,9 @@ export const useStepForm = () => {
             conversion_value: 1,
             page_url: window.location.href,
             referrer: document.referrer || null,
-            user_agent: navigator.userAgent
+            user_agent: navigator.userAgent,
+            gclid: gclid,
+            transaction_id: transactionId
           }]);
         if (conversionError) logger.warn('Erro ao salvar evento de conversão:', conversionError);
       } catch (conversionError) {
@@ -525,7 +527,7 @@ export const useStepForm = () => {
           // Enhanced Conversions — usados pelo useStepFormMarketingScripts
           gclid: gclid,
           transactionId: transactionId,
-          leadId: savedLead?.id || null
+          leadId: leadId
         }
       }));
 
@@ -593,7 +595,7 @@ export const useStepForm = () => {
             message: mappedResponses['Mensagem'] || mappedResponses['message'] || mappedResponses['Descrição'] || '',
             form_slug: form.slug || slug || '',
             form_name: form.name || '',
-            lead_id: savedLead?.id || '',
+            lead_id: leadId,
             gclid: gclid || '',
             transaction_id: transactionId,
             automation_id: automationId,
@@ -606,7 +608,7 @@ export const useStepForm = () => {
               ...(gclid ? { gclid } : {}),
               pagina_origem: window.location.href,
               referrer: document.referrer || '',
-              lead_id: savedLead?.id || '',
+              lead_id: leadId,
               formulario: form.name || form.slug || '',
             },
           }
@@ -666,7 +668,7 @@ export const useStepForm = () => {
             urgencia: 'default',
             formulario: form.name,
             data_envio: new Date().toISOString(),
-            lead_id: savedLead?.id,
+            lead_id: leadId,
             form_slug: form.slug
           };
 
@@ -693,7 +695,7 @@ export const useStepForm = () => {
           const { error: queueError } = await supabase
             .from('webhook_queue')
             .insert([{
-              lead_id: savedLead?.id || sessionId,
+              lead_id: leadId,
               webhook_url: form.webhook_url,
               payload: webhookPayload,
               urgency,
