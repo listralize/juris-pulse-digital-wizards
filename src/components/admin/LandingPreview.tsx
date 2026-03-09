@@ -17,6 +17,9 @@ import { LandingVideo } from '@/components/landing/LandingVideo';
 import { LandingNumbers } from '@/components/landing/LandingNumbers';
 import { LandingWhatsappCta } from '@/components/landing/LandingWhatsappCta';
 import { LandingLogoCarousel } from '@/components/landing/LandingLogoCarousel';
+import { LandingPriceTable } from '@/components/landing/LandingPriceTable';
+import { LandingProcessSteps } from '@/components/landing/LandingProcessSteps';
+import { LandingGuarantee } from '@/components/landing/LandingGuarantee';
 
 const LABELS: Record<string, string> = {
   hero: 'Hero', trust_badges: 'Badges', problems_grid: 'Problemas', cta_banner: 'CTA',
@@ -24,6 +27,7 @@ const LABELS: Record<string, string> = {
   testimonials: 'Depoimentos', text_image: 'Texto+Imagem', custom_html: 'HTML',
   countdown: 'Contador', video: 'Vídeo', numbers: 'Números',
   whatsapp_cta: 'WhatsApp', logo_carousel: 'Logos',
+  price_table: 'Preços', process_steps: 'Etapas', guarantee: 'Garantia',
 };
 
 interface LandingPreviewProps {
@@ -61,14 +65,19 @@ export const LandingPreview: React.FC<LandingPreviewProps> = ({
       case 'numbers': return <LandingNumbers {...props} />;
       case 'whatsapp_cta': return <LandingWhatsappCta {...props} />;
       case 'logo_carousel': return <LandingLogoCarousel {...props} />;
+      case 'price_table': return <LandingPriceTable {...props} />;
+      case 'process_steps': return <LandingProcessSteps {...props} />;
+      case 'guarantee': return <LandingGuarantee {...props} />;
       default: return <div className="p-8 text-center text-muted-foreground">Seção: {section.type}</div>;
     }
   };
 
   if (sections.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 rounded-xl border-2 border-dashed border-muted-foreground/20">
-        <p className="text-muted-foreground">Adicione seções para visualizar a página</p>
+      <div className="flex flex-col items-center justify-center h-64 rounded-xl border-2 border-dashed border-muted-foreground/20 gap-3">
+        <div className="text-4xl">🚀</div>
+        <p className="text-muted-foreground font-medium">Adicione seções para construir sua página</p>
+        <p className="text-xs text-muted-foreground">Use o botão "+ Seção" ou um template pronto</p>
       </div>
     );
   }
@@ -90,14 +99,12 @@ export const LandingPreview: React.FC<LandingPreviewProps> = ({
               onSelect(isSelected ? null : section.id);
             }}
           >
-            {/* Hover/selected overlay */}
             <div className={`absolute inset-0 z-10 pointer-events-none transition-all ${
               isSelected
                 ? 'ring-2 ring-primary ring-inset'
                 : 'group-hover:ring-1 group-hover:ring-primary/40 group-hover:ring-inset'
             }`} />
 
-            {/* Label */}
             <div className={`absolute top-2 left-2 z-20 text-xs font-medium px-2 py-0.5 rounded-md transition-opacity ${
               isSelected
                 ? 'bg-primary text-primary-foreground opacity-100'
@@ -106,15 +113,14 @@ export const LandingPreview: React.FC<LandingPreviewProps> = ({
               {LABELS[section.type] || section.type}
             </div>
 
-            {/* Action buttons */}
             <div className={`absolute top-2 right-2 z-20 flex gap-1 transition-opacity ${
               isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}>
               {[
-                { icon: ChevronUp, action: () => onMove(section.id, 'up'), label: 'Mover para cima' },
-                { icon: ChevronDown, action: () => onMove(section.id, 'down'), label: 'Mover para baixo' },
-                { icon: Copy, action: () => onDuplicate(section.id), label: 'Duplicar' },
-                { icon: Trash2, action: () => onDelete(section.id), label: 'Excluir', destructive: true },
+                { icon: ChevronUp, action: () => onMove(section.id, 'up'), destructive: false },
+                { icon: ChevronDown, action: () => onMove(section.id, 'down'), destructive: false },
+                { icon: Copy, action: () => onDuplicate(section.id), destructive: false },
+                { icon: Trash2, action: () => onDelete(section.id), destructive: true },
               ].map(({ icon: Icon, action, destructive }, i) => (
                 <button
                   key={i}
@@ -130,7 +136,6 @@ export const LandingPreview: React.FC<LandingPreviewProps> = ({
               ))}
             </div>
 
-            {/* Actual section content */}
             <div className="pointer-events-none">
               {renderSection(section)}
             </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface LandingNumbersProps {
@@ -13,6 +13,51 @@ interface LandingNumbersProps {
   };
   primaryColor: string;
 }
+
+const AnimatedNumber: React.FC<{ target: string; prefix?: string; suffix?: string; color: string }> = ({
+  target, prefix, suffix, color,
+}) => {
+  const [display, setDisplay] = useState('0');
+  const ref = useRef<HTMLDivElement>(null);
+  const animated = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !animated.current) {
+          animated.current = true;
+          const numericTarget = parseInt(target.replace(/\D/g, ''), 10);
+          if (isNaN(numericTarget)) {
+            setDisplay(target);
+            return;
+          }
+          const duration = 1500;
+          const start = performance.now();
+          const step = (now: number) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+            setDisplay(Math.floor(numericTarget * eased).toLocaleString('pt-BR'));
+            if (progress < 1) requestAnimationFrame(step);
+            else setDisplay(target);
+          };
+          requestAnimationFrame(step);
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return (
+    <div ref={ref} className="text-3xl md:text-5xl font-extrabold" style={{ color }}>
+      {prefix}{display}{suffix}
+    </div>
+  );
+};
 
 export const LandingNumbers: React.FC<LandingNumbersProps> = ({ config, primaryColor }) => {
   const items = config.items || [];
@@ -36,7 +81,7 @@ export const LandingNumbers: React.FC<LandingNumbersProps> = ({ config, primaryC
             {config.title}
           </motion.h2>
         )}
-        <div className={`grid gap-6`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {items.map((item, idx) => (
             <motion.div
               key={idx}
@@ -52,9 +97,7 @@ export const LandingNumbers: React.FC<LandingNumbersProps> = ({ config, primaryC
                 borderColor: style === 'bordered' ? accent + '33' : undefined,
               }}
             >
-              <div className="text-3xl md:text-5xl font-extrabold" style={{ color: accent }}>
-                {item.prefix}{item.number}{item.suffix}
-              </div>
+              <AnimatedNumber target={item.number} prefix={item.prefix} suffix={item.suffix} color={accent} />
               <div className="text-sm md:text-base mt-2 opacity-70">{item.label}</div>
             </motion.div>
           ))}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,9 @@ import { LandingVideo } from './LandingVideo';
 import { LandingNumbers } from './LandingNumbers';
 import { LandingWhatsappCta } from './LandingWhatsappCta';
 import { LandingLogoCarousel } from './LandingLogoCarousel';
+import { LandingPriceTable } from './LandingPriceTable';
+import { LandingProcessSteps } from './LandingProcessSteps';
+import { LandingGuarantee } from './LandingGuarantee';
 import { StepFormFooter } from '@/components/stepform/StepFormFooter';
 
 interface LandingPageRendererProps {
@@ -31,6 +34,36 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const primaryColor = form.styles.primary_color || '#4CAF50';
+
+  // SEO meta injection
+  useEffect(() => {
+    const seo = form.seo_config || form.seo;
+    if (seo?.meta_title) document.title = seo.meta_title;
+
+    const setMeta = (name: string, content: string) => {
+      if (!content) return;
+      let el = document.querySelector(`meta[name="${name}"]`) || document.querySelector(`meta[property="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(name.startsWith('og:') ? 'property' : 'name', name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    if (seo?.meta_description) {
+      setMeta('description', seo.meta_description);
+      setMeta('og:description', seo.meta_description);
+    }
+    if (seo?.meta_title) {
+      setMeta('og:title', seo.meta_title);
+    }
+    if (seo?.meta_keywords) setMeta('keywords', seo.meta_keywords);
+    setMeta('og:type', 'website');
+    setMeta('og:url', window.location.href);
+
+    return () => { document.title = 'Carregando...'; };
+  }, [form.seo_config, form.seo]);
 
   const sections = ((form.sections || []) as LandingSection[])
     .filter(s => !s.hidden)
@@ -121,6 +154,9 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
       case 'numbers': return <LandingNumbers key={section.id} {...props} />;
       case 'whatsapp_cta': return <LandingWhatsappCta key={section.id} {...props} />;
       case 'logo_carousel': return <LandingLogoCarousel key={section.id} {...props} />;
+      case 'price_table': return <LandingPriceTable key={section.id} {...props} />;
+      case 'process_steps': return <LandingProcessSteps key={section.id} {...props} />;
+      case 'guarantee': return <LandingGuarantee key={section.id} {...props} />;
       default: return null;
     }
   };

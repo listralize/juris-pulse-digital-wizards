@@ -64,6 +64,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
           src={config.image_url}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+          fetchPriority="high"
         />
       )}
 
@@ -87,8 +89,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
       >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className={`space-y-6 ${isCentered ? 'max-w-3xl' : ''}`}
         >
@@ -119,6 +120,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
                 className="text-lg px-8 py-6 font-bold shadow-lg"
                 style={{ backgroundColor: primaryColor, color: '#fff' }}
                 onClick={() => handleCta(config.cta_url)}
+                aria-label={config.cta_text}
               >
                 {config.cta_text}
               </Button>
@@ -129,6 +131,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
                 variant="outline"
                 className="text-lg px-8 py-6 font-bold"
                 onClick={() => handleCta(config.cta_secondary_url)}
+                aria-label={config.cta_secondary_text}
               >
                 {config.cta_secondary_text}
               </Button>
@@ -139,8 +142,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
         {layout === 'split' && config.image_url && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex justify-center"
           >
@@ -148,6 +150,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
               src={config.image_url}
               alt={config.headline || 'Hero'}
               className="rounded-2xl shadow-2xl max-w-full h-auto"
+              loading="eager"
+              fetchPriority="high"
             />
           </motion.div>
         )}
