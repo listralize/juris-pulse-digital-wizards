@@ -37,7 +37,7 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
 
   // SEO meta injection
   useEffect(() => {
-    const seo = form.seo_config || form.seo;
+    const seo: any = form.seo_config || form.seo;
     if (seo?.meta_title) document.title = seo.meta_title;
 
     const setMeta = (name: string, content: string) => {
