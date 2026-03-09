@@ -695,7 +695,7 @@ export const useStepForm = () => {
           const { error: queueError } = await supabase
             .from('webhook_queue')
             .insert([{
-              lead_id: savedLead?.id || sessionId,
+              lead_id: leadId,
               webhook_url: form.webhook_url,
               payload: webhookPayload,
               urgency,
