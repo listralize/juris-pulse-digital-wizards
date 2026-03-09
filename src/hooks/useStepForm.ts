@@ -608,7 +608,7 @@ export const useStepForm = () => {
               ...(gclid ? { gclid } : {}),
               pagina_origem: window.location.href,
               referrer: document.referrer || '',
-              lead_id: savedLead?.id || '',
+              lead_id: leadId,
               formulario: form.name || form.slug || '',
             },
           }
