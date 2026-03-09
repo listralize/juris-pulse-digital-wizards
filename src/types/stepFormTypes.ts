@@ -123,7 +123,7 @@ export interface LandingSection {
   type: 'hero' | 'trust_badges' | 'problems_grid' | 'cta_banner'
     | 'embedded_form' | 'benefits' | 'team' | 'faq' | 'testimonials'
     | 'text_image' | 'custom_html' | 'countdown' | 'video' | 'numbers'
-    | 'whatsapp_cta' | 'logo_carousel';
+    | 'whatsapp_cta' | 'logo_carousel' | 'price_table' | 'process_steps' | 'guarantee';
   config: Record<string, any>;
   display_order: number;
   hidden?: boolean;
