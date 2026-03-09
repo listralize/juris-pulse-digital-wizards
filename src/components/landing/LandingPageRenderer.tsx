@@ -73,6 +73,11 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
     setIsSubmitting(true);
     try {
       const sessionId = `lp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const leadId = crypto.randomUUID();
+      const urlParams = new URLSearchParams(window.location.search);
+      const gclid = urlParams.get('gclid') || null;
+      const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const visitorId = localStorage.getItem('visitor_id') || `v_${Date.now()}`;
       const leadData = {
         ...data,
         form_name: form.name,
@@ -81,12 +86,22 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
       };
 
       await supabase.from('form_leads').insert({
+        id: leadId,
         session_id: sessionId,
         lead_data: leadData,
         form_id: form.slug,
         form_name: form.name,
         source_page: window.location.href,
         referrer: document.referrer || null,
+        gclid,
+        transaction_id: transactionId,
+        visitor_id: visitorId,
+        user_agent: navigator.userAgent,
+        utm_source: urlParams.get('utm_source') || null,
+        utm_medium: urlParams.get('utm_medium') || null,
+        utm_campaign: urlParams.get('utm_campaign') || null,
+        utm_term: urlParams.get('utm_term') || null,
+        utm_content: urlParams.get('utm_content') || null,
       });
 
       await supabase.from('conversion_events').insert({
@@ -97,6 +112,11 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
         form_id: form.slug,
         form_name: form.name,
         lead_data: leadData,
+        gclid,
+        transaction_id: transactionId,
+        visitor_id: visitorId,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null,
       });
 
       if (form.webhook_url) {
