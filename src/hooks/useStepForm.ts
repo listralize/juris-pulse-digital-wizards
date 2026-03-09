@@ -503,7 +503,9 @@ export const useStepForm = () => {
             conversion_value: 1,
             page_url: window.location.href,
             referrer: document.referrer || null,
-            user_agent: navigator.userAgent
+            user_agent: navigator.userAgent,
+            gclid: gclid,
+            transaction_id: transactionId
           }]);
         if (conversionError) logger.warn('Erro ao salvar evento de conversão:', conversionError);
       } catch (conversionError) {
