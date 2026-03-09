@@ -66,7 +66,7 @@ export const LandingPriceTable: React.FC<LandingPriceTableProps> = ({ config, pr
               }`}
               style={{
                 borderColor: plan.highlighted ? primaryColor : undefined,
-                ringColor: plan.highlighted ? primaryColor : undefined,
+                boxShadow: plan.highlighted ? `0 0 0 2px ${primaryColor}` : undefined,
                 backgroundColor: plan.highlighted ? primaryColor + '08' : undefined,
               }}
             >
