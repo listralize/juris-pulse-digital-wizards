@@ -595,7 +595,7 @@ export const useStepForm = () => {
             message: mappedResponses['Mensagem'] || mappedResponses['message'] || mappedResponses['Descrição'] || '',
             form_slug: form.slug || slug || '',
             form_name: form.name || '',
-            lead_id: savedLead?.id || '',
+            lead_id: leadId,
             gclid: gclid || '',
             transaction_id: transactionId,
             automation_id: automationId,
