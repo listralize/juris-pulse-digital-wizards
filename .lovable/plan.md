@@ -1,28 +1,29 @@
 
 
-# Fix: Docker Build Failure — package-lock.json out of sync
+# Apply 3 Corrections: Phone Field, Custom Fields, Edge Function
 
-## Problem
-The Coolify deployment fails at `npm ci` because `dompurify`, `@types/dompurify`, and `@types/trusted-types` (a dependency of dompurify) are listed in `package.json` but missing from `package-lock.json`. `npm ci` requires exact sync between the two files.
+## Changes
 
-This happened because Lovable uses `bun` internally (evidenced by `bun.lock` / `bun.lockb`) and doesn't update `package-lock.json` when adding new dependencies. The `dompurify` package was added to `package.json` but never recorded in the npm lock file.
+### 1. `src/components/stepform/PhoneFieldWithDDD.tsx` — Emit onChange on every keystroke
 
-## Fix
+The current code only calls `onChange` in `handleBlur`. If the user clicks "Enviar" without blurring the phone field, `formData` has an empty phone value.
 
-**`Dockerfile`** — Change `npm ci` to `npm install` so it can resolve missing packages:
+Fix: In `handleChange`, extract digits and call `onChange(digits.length > 0 ? '55${digits}' : '')` on every keystroke, keeping the blur handler for formatting only.
 
-```dockerfile
-RUN npm install --ignore-scripts
-```
+### 2. `src/hooks/useStepForm.ts` (lines 558-574) — Add `custom_fields` to reply-agent-sync payload
 
-This is the simplest, most reliable fix. `npm install` will generate/update the lock file in-place during the build, resolving the missing entries. The `--ignore-scripts` flag is kept for security.
+Add a `custom_fields` object containing UTM parameters, gclid, page origin, referrer, lead_id, and form name to the `reply-agent-sync` invocation body.
 
-Alternatively, we could regenerate `package-lock.json` but since Lovable manages dependencies with bun, this mismatch will likely recur. Using `npm install` in the Dockerfile is the permanent solution.
+### 3. `supabase/functions/reply-agent-sync/index.ts` — Full replacement
 
-## Files Changed
-| File | Change |
-|------|--------|
-| `Dockerfile` | `npm ci` → `npm install` (line 14) |
+Key changes from the user's provided code:
+- `createContact`: always sends **both** `primary_phone_number` AND `primary_whatsapp_number` with the same normalized number (reverting the previous "only whatsapp" approach)
+- If `whatsapp` differs from `phone`, override only `primary_whatsapp_number`
+- Tags endpoint confirmed as `POST /v1/contacts/{id}/tags` with JSON body
+- SmartFlow uses `FormData` as before
+- Detailed logging preserved
 
-One line change. No other files affected.
+### 4. `supabase/config.toml` — Restore verify_jwt settings
+
+The last diff removed the `verify_jwt = false` entries for edge functions. These need to be restored so the functions remain callable without JWT.
 
