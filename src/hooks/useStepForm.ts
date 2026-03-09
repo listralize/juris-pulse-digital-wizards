@@ -460,24 +460,24 @@ export const useStepForm = () => {
         status: 'new'
       };
 
-      let savedLead: any = null;
+      // Generate UUID client-side to avoid needing .select() after insert
+      // (RLS blocks SELECT for anonymous users, causing rollback of the entire INSERT)
+      const leadId = crypto.randomUUID();
+
       const insertLead = async () => {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('form_leads')
-          .insert([leadData])
-          .select()
-          .single();
+          .insert([{ id: leadId, ...leadData }]);
         if (error) throw error;
-        return data;
       };
 
       try {
-        savedLead = await insertLead();
+        await insertLead();
       } catch (firstError) {
         logger.error('Primeiro erro ao salvar lead em form_leads:', firstError);
         // Retry once
         try {
-          savedLead = await insertLead();
+          await insertLead();
         } catch (retryError) {
           logger.error('Retry falhou ao salvar lead em form_leads:', retryError);
           // Flag the conversion event so we know form_leads failed
