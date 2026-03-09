@@ -6,7 +6,8 @@ import {
   Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff, Copy,
   Undo2, Redo2, Monitor, Smartphone, Layout, Shield, Grid3X3,
   Megaphone, FormInput, Star, Users, HelpCircle, MessageSquare,
-  Image, Code, Timer, Play, Hash, MessageCircle, ImageIcon
+  Image, Code, Timer, Play, Hash, MessageCircle, ImageIcon,
+  DollarSign, ListOrdered, ShieldCheck, Zap
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { LandingSection } from '@/types/stepFormTypes';
@@ -25,17 +26,54 @@ const SECTION_TYPES: Array<{
   { type: 'video', label: 'Vídeo', icon: Play, description: 'YouTube, Vimeo ou direto', category: 'content' },
   { type: 'custom_html', label: 'HTML Custom', icon: Code, description: 'HTML personalizado', category: 'content' },
   { type: 'team', label: 'Equipe', icon: Users, description: 'Membros da equipe', category: 'content' },
+  { type: 'process_steps', label: 'Etapas', icon: ListOrdered, description: 'Como funciona', category: 'content' },
+  { type: 'faq', label: 'FAQ', icon: HelpCircle, description: 'Perguntas frequentes', category: 'content' },
   { type: 'embedded_form', label: 'Formulário', icon: FormInput, description: 'Captação de leads', category: 'conversion' },
   { type: 'cta_banner', label: 'CTA Banner', icon: Megaphone, description: 'Chamada para ação', category: 'conversion' },
   { type: 'whatsapp_cta', label: 'WhatsApp CTA', icon: MessageCircle, description: 'Botão de WhatsApp', category: 'conversion' },
   { type: 'countdown', label: 'Contador', icon: Timer, description: 'Timer de urgência', category: 'conversion' },
+  { type: 'price_table', label: 'Tabela de Preços', icon: DollarSign, description: 'Planos e valores', category: 'conversion' },
   { type: 'trust_badges', label: 'Badges', icon: Shield, description: 'Selos de confiança', category: 'social_proof' },
   { type: 'benefits', label: 'Benefícios', icon: Star, description: 'Lista de benefícios', category: 'social_proof' },
   { type: 'problems_grid', label: 'Problemas', icon: Grid3X3, description: 'Dores do cliente', category: 'social_proof' },
   { type: 'testimonials', label: 'Depoimentos', icon: MessageSquare, description: 'Social proof', category: 'social_proof' },
   { type: 'numbers', label: 'Números', icon: Hash, description: 'Estatísticas', category: 'social_proof' },
-  { type: 'faq', label: 'FAQ', icon: HelpCircle, description: 'Perguntas frequentes', category: 'content' },
+  { type: 'guarantee', label: 'Garantia', icon: ShieldCheck, description: 'Seção de confiança', category: 'social_proof' },
   { type: 'logo_carousel', label: 'Logos', icon: ImageIcon, description: 'Parceiros/mídia', category: 'social_proof' },
+];
+
+const STARTER_TEMPLATES: Array<{
+  name: string;
+  emoji: string;
+  description: string;
+  sections: Array<{ type: LandingSection['type'] }>;
+}> = [
+  {
+    name: 'Landing Simples',
+    emoji: '🚀',
+    description: 'Hero + Form + CTA',
+    sections: [{ type: 'hero' }, { type: 'trust_badges' }, { type: 'embedded_form' }, { type: 'cta_banner' }],
+  },
+  {
+    name: 'Landing Completa',
+    emoji: '⭐',
+    description: 'Tudo para converter',
+    sections: [
+      { type: 'hero' }, { type: 'trust_badges' }, { type: 'problems_grid' },
+      { type: 'benefits' }, { type: 'process_steps' }, { type: 'testimonials' },
+      { type: 'embedded_form' }, { type: 'faq' }, { type: 'cta_banner' },
+    ],
+  },
+  {
+    name: 'Página de Vendas',
+    emoji: '💰',
+    description: 'Preços + Garantia',
+    sections: [
+      { type: 'hero' }, { type: 'problems_grid' }, { type: 'benefits' },
+      { type: 'price_table' }, { type: 'guarantee' }, { type: 'testimonials' },
+      { type: 'faq' }, { type: 'whatsapp_cta' },
+    ],
+  },
 ];
 
 const getDefaultConfig = (type: LandingSection['type']): Record<string, any> => {
@@ -56,6 +94,28 @@ const getDefaultConfig = (type: LandingSection['type']): Record<string, any> => 
     case 'numbers': return { title: 'Nossos Números', items: [{ number: '500', suffix: '+', label: 'Clientes' }, { number: '10', label: 'Anos' }], style: 'cards' };
     case 'whatsapp_cta': return { title: 'Fale Conosco', phone_number: '', button_text: 'Falar no WhatsApp', style: 'banner' };
     case 'logo_carousel': return { title: 'Parceiros', logos: [], grayscale: true };
+    case 'price_table': return {
+      title: 'Nossos Planos',
+      plans: [
+        { name: 'Básico', price: 'R$ 997', period: 'único', features: ['Consulta inicial', 'Análise do caso'], cta_text: 'Começar', highlighted: false },
+        { name: 'Completo', price: 'R$ 1.997', period: 'único', features: ['Tudo do Básico', 'Acompanhamento completo', 'Suporte prioritário'], cta_text: 'Escolher', highlighted: true },
+      ],
+    };
+    case 'process_steps': return {
+      title: 'Como Funciona',
+      layout: 'vertical',
+      steps: [
+        { number: '01', title: 'Contato Inicial', description: 'Entre em contato conosco' },
+        { number: '02', title: 'Análise do Caso', description: 'Avaliamos sua situação' },
+        { number: '03', title: 'Resolução', description: 'Resolvemos seu problema' },
+      ],
+    };
+    case 'guarantee': return {
+      title: 'Garantia Total',
+      subtitle: 'Trabalhamos com total comprometimento',
+      days: 30,
+      description: 'Se não ficar satisfeito, trabalhamos até resolver',
+    };
     default: return {};
   }
 };
@@ -76,15 +136,30 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [history, setHistory] = useState<LandingSection[][]>([sections]);
   const [historyIdx, setHistoryIdx] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pushHistory = useCallback((newSections: LandingSection[]) => {
-    const newHistory = history.slice(0, historyIdx + 1);
-    newHistory.push(newSections);
-    if (newHistory.length > 30) newHistory.shift();
-    setHistory(newHistory);
-    setHistoryIdx(newHistory.length - 1);
-    onUpdate(newSections);
-  }, [history, historyIdx, onUpdate]);
+  const pushHistory = useCallback((newSections: LandingSection[], immediate = false) => {
+    // Debounce history pushes to avoid flooding on every keystroke
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    const commit = () => {
+      setHistory(prev => {
+        const sliced = prev.slice(0, historyIdx + 1);
+        sliced.push(newSections);
+        if (sliced.length > 30) sliced.shift();
+        return sliced;
+      });
+      setHistoryIdx(prev => Math.min(prev + 1, 30));
+    };
+
+    onUpdate(newSections); // Always update immediately
+
+    if (immediate) {
+      commit();
+    } else {
+      debounceRef.current = setTimeout(commit, 500);
+    }
+  }, [historyIdx, onUpdate]);
 
   const undo = () => {
     if (historyIdx > 0) {
@@ -109,13 +184,25 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
       config: getDefaultConfig(type),
       display_order: sections.length,
     };
-    pushHistory([...sections, newSection]);
+    pushHistory([...sections, newSection], true);
     setSelectedId(newSection.id);
     setAddDialogOpen(false);
   };
 
+  const applyTemplate = (template: typeof STARTER_TEMPLATES[0]) => {
+    const newSections = template.sections.map((s, i) => ({
+      id: `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${i}`,
+      type: s.type,
+      config: getDefaultConfig(s.type),
+      display_order: i,
+    }));
+    pushHistory(newSections, true);
+    setSelectedId(null);
+    setAddDialogOpen(false);
+  };
+
   const removeSection = (id: string) => {
-    pushHistory(sections.filter(s => s.id !== id).map((s, i) => ({ ...s, display_order: i })));
+    pushHistory(sections.filter(s => s.id !== id).map((s, i) => ({ ...s, display_order: i })), true);
     if (selectedId === id) setSelectedId(null);
   };
 
@@ -125,7 +212,7 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
     const arr = [...sections];
     const swap = dir === 'up' ? idx - 1 : idx + 1;
     [arr[idx], arr[swap]] = [arr[swap], arr[idx]];
-    pushHistory(arr.map((s, i) => ({ ...s, display_order: i })));
+    pushHistory(arr.map((s, i) => ({ ...s, display_order: i })), true);
   };
 
   const duplicateSection = (id: string) => {
@@ -137,12 +224,12 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
       config: JSON.parse(JSON.stringify(orig.config)),
       display_order: sections.length,
     };
-    pushHistory([...sections, dup]);
+    pushHistory([...sections, dup], true);
     setSelectedId(dup.id);
   };
 
   const toggleVisibility = (id: string) => {
-    pushHistory(sections.map(s => s.id === id ? { ...s, hidden: !s.hidden } : s));
+    pushHistory(sections.map(s => s.id === id ? { ...s, hidden: !s.hidden } : s), true);
   };
 
   const updateConfig = (id: string, config: Record<string, any>) => {
@@ -167,6 +254,29 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
             <DialogHeader>
               <DialogTitle>Adicionar Seção</DialogTitle>
             </DialogHeader>
+
+            {/* Starter Templates */}
+            {sections.length === 0 && (
+              <div className="space-y-3 pb-4 border-b">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Templates Prontos
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {STARTER_TEMPLATES.map((t) => (
+                    <button
+                      key={t.name}
+                      onClick={() => applyTemplate(t)}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-colors text-center"
+                    >
+                      <span className="text-2xl">{t.emoji}</span>
+                      <div className="text-sm font-medium">{t.name}</div>
+                      <div className="text-xs text-muted-foreground">{t.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {(['content', 'conversion', 'social_proof'] as const).map(cat => (
               <div key={cat} className="space-y-3">
                 <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
@@ -218,11 +328,15 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar */}
         <div className="w-[320px] flex-shrink-0 border-r bg-background flex flex-col overflow-hidden">
-          {/* Section list */}
-          <ScrollArea className={`${selected ? 'h-[200px]' : 'flex-1'} border-b`}>
+          {/* Section list — uses flex-1 with max-height when editing, fills all space otherwise */}
+          <ScrollArea className={`${selected ? 'max-h-[240px] min-h-[120px]' : 'flex-1'} border-b`}>
             <div className="p-2 space-y-1">
               {sorted.length === 0 && (
-                <p className="text-center py-8 text-sm text-muted-foreground">Clique em "+ Seção" para começar</p>
+                <div className="text-center py-8 space-y-2">
+                  <div className="text-3xl">✨</div>
+                  <p className="text-sm text-muted-foreground font-medium">Comece com um template</p>
+                  <p className="text-xs text-muted-foreground">Clique em "+ Seção" para começar</p>
+                </div>
               )}
               {sorted.map((section) => {
                 const meta = sectionMeta(section.type);

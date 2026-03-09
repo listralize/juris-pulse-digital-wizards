@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Plus, Trash2 } from 'lucide-react';
 import type { LandingSection } from '@/types/stepFormTypes';
+import { ImagePickerField } from '@/components/admin/landing/ImagePickerField';
+import { IconPickerField } from '@/components/admin/landing/IconPickerField';
 
 interface SectionConfigPanelProps {
   section: LandingSection;
@@ -17,7 +19,7 @@ interface SectionConfigPanelProps {
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="space-y-1.5">
-    <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+    <Label className="text-xs font-semibold text-muted-foreground">{label}</Label>
     {children}
   </div>
 );
@@ -43,6 +45,53 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
   const addItem = (key: string, item: Record<string, any>) => set(key, [...(c[key] || []), item]);
   const removeItem = (key: string, idx: number) => set(key, (c[key] || []).filter((_: any, i: number) => i !== idx));
 
+  const renderListItems = (
+    key: string,
+    fields: Array<{ name: string; label: string; type?: string }>,
+    defaultItem: Record<string, any>,
+  ) => (
+    <div className="space-y-2">
+      {(c[key] || []).map((item: any, idx: number) => (
+        <div key={idx} className="p-2.5 rounded-lg border space-y-2 bg-muted/30">
+          {fields.map(f => (
+            <Field key={f.name} label={f.label}>
+              {f.type === 'textarea' ? (
+                <Textarea value={item[f.name] || ''} onChange={(e) => setItem(key, idx, f.name, e.target.value)} rows={2} className="text-xs" />
+              ) : f.type === 'image' ? (
+                <ImagePickerField value={item[f.name] || ''} onChange={(v) => setItem(key, idx, f.name, v)} />
+              ) : f.type === 'icon' ? (
+                <IconPickerField value={item[f.name] || ''} onChange={(v) => setItem(key, idx, f.name, v)} />
+              ) : (
+                <Input value={item[f.name] || ''} onChange={(e) => setItem(key, idx, f.name, e.target.value)} className="h-8 text-xs" />
+              )}
+            </Field>
+          ))}
+          <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive" onClick={() => removeItem(key, idx)}>
+            <Trash2 className="w-3 h-3 mr-1" /> Remover
+          </Button>
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={() => addItem(key, defaultItem)}>
+        <Plus className="w-3 h-3 mr-1" /> Adicionar
+      </Button>
+    </div>
+  );
+
+  const renderGenericSection = (contentFields: React.ReactNode, styleFields?: React.ReactNode) => (
+    <>
+      <AccordionItem value="content">
+        <AccordionTrigger className="text-xs font-semibold">Conteúdo</AccordionTrigger>
+        <AccordionContent className="space-y-3">{contentFields}</AccordionContent>
+      </AccordionItem>
+      {styleFields && (
+        <AccordionItem value="style">
+          <AccordionTrigger className="text-xs font-semibold">Estilo</AccordionTrigger>
+          <AccordionContent className="space-y-3">{styleFields}</AccordionContent>
+        </AccordionItem>
+      )}
+    </>
+  );
+
   const renderHero = () => (
     <>
       <AccordionItem value="content">
@@ -52,7 +101,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
           <Field label="Sub-headline"><Input value={c.subheadline || ''} onChange={(e) => set('subheadline', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="Texto"><Textarea value={c.body_text || ''} onChange={(e) => set('body_text', e.target.value)} rows={2} className="text-xs" /></Field>
           <Field label="Badge"><Input value={c.badge_text || ''} onChange={(e) => set('badge_text', e.target.value)} placeholder="Ex: Consulta Gratuita" className="h-8 text-xs" /></Field>
-          <Field label="Imagem URL"><Input value={c.image_url || ''} onChange={(e) => set('image_url', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Imagem"><ImagePickerField value={c.image_url || ''} onChange={(v) => set('image_url', v)} /></Field>
           <Field label="CTA Texto"><Input value={c.cta_text || ''} onChange={(e) => set('cta_text', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="CTA URL"><Input value={c.cta_url || ''} onChange={(e) => set('cta_url', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="CTA Secundário"><Input value={c.cta_secondary_text || ''} onChange={(e) => set('cta_secondary_text', e.target.value)} className="h-8 text-xs" /></Field>
@@ -77,48 +126,9 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
           <ColorField label="Overlay" value={c.overlay_color} onChange={(v) => set('overlay_color', v)} />
           <Field label="Opacidade overlay"><Input type="number" min={0} max={1} step={0.1} value={c.overlay_opacity ?? 0.4}
             onChange={(e) => set('overlay_opacity', parseFloat(e.target.value))} className="h-8 text-xs" /></Field>
-          <Field label="Vídeo de fundo URL"><Input value={c.video_background_url || ''} onChange={(e) => set('video_background_url', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Vídeo de fundo"><ImagePickerField value={c.video_background_url || ''} onChange={(v) => set('video_background_url', v)} /></Field>
         </AccordionContent>
       </AccordionItem>
-    </>
-  );
-
-  const renderListItems = (key: string, fields: Array<{ name: string; label: string; type?: string }>, defaultItem: Record<string, any>) => (
-    <div className="space-y-2">
-      {(c[key] || []).map((item: any, idx: number) => (
-        <div key={idx} className="p-2 rounded-lg border space-y-2 bg-muted/30">
-          {fields.map(f => (
-            <Field key={f.name} label={f.label}>
-              {f.type === 'textarea' ? (
-                <Textarea value={item[f.name] || ''} onChange={(e) => setItem(key, idx, f.name, e.target.value)} rows={2} className="text-xs" />
-              ) : (
-                <Input value={item[f.name] || ''} onChange={(e) => setItem(key, idx, f.name, e.target.value)} className="h-7 text-xs" />
-              )}
-            </Field>
-          ))}
-          <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive" onClick={() => removeItem(key, idx)}>
-            <Trash2 className="w-3 h-3 mr-1" /> Remover
-          </Button>
-        </div>
-      ))}
-      <Button variant="outline" size="sm" className="w-full h-7 text-xs" onClick={() => addItem(key, defaultItem)}>
-        <Plus className="w-3 h-3 mr-1" /> Adicionar
-      </Button>
-    </div>
-  );
-
-  const renderGenericSection = (contentFields: React.ReactNode, styleFields?: React.ReactNode) => (
-    <>
-      <AccordionItem value="content">
-        <AccordionTrigger className="text-xs font-semibold">Conteúdo</AccordionTrigger>
-        <AccordionContent className="space-y-3">{contentFields}</AccordionContent>
-      </AccordionItem>
-      {styleFields && (
-        <AccordionItem value="style">
-          <AccordionTrigger className="text-xs font-semibold">Estilo</AccordionTrigger>
-          <AccordionContent className="space-y-3">{styleFields}</AccordionContent>
-        </AccordionItem>
-      )}
     </>
   );
 
@@ -129,7 +139,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
       case 'trust_badges': return renderGenericSection(
         renderListItems('items', [
           { name: 'text', label: 'Texto' },
-          { name: 'icon', label: 'Ícone (shield/clock/award/check/lock/star)' },
+          { name: 'icon', label: 'Ícone', type: 'icon' },
           { name: 'description', label: 'Descrição' },
         ], { text: 'Novo badge', icon: 'shield' }),
         <>
@@ -155,7 +165,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
           {renderListItems('items', [
             { name: 'title', label: 'Título' },
             { name: 'description', label: 'Descrição' },
-            { name: 'icon', label: 'Ícone (check/star/shield/zap/heart/award)' },
+            { name: 'icon', label: 'Ícone', type: 'icon' },
           ], { title: 'Novo benefício', icon: 'check' })}
         </>,
         <>
@@ -191,7 +201,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
             { name: 'name', label: 'Nome' },
             { name: 'text', label: 'Texto', type: 'textarea' },
             { name: 'role', label: 'Cargo' },
-            { name: 'image', label: 'Foto URL' },
+            { name: 'image', label: 'Foto', type: 'image' },
           ], { name: 'Cliente', text: 'Excelente!', rating: 5 })}
         </>,
         <>
@@ -241,7 +251,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
           {renderListItems('items', [
             { name: 'title', label: 'Título' },
             { name: 'description', label: 'Descrição' },
-            { name: 'icon', label: 'Ícone (alert/x/help/info/ban/shield)' },
+            { name: 'icon', label: 'Ícone', type: 'icon' },
           ], { title: 'Problema', description: 'Descrição', icon: 'alert' })}
         </>,
         <>
@@ -259,7 +269,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
           <Field label="Texto do botão"><Input value={c.button_text || ''} onChange={(e) => set('button_text', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="URL do botão"><Input value={c.button_url || ''} onChange={(e) => set('button_url', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="URL WhatsApp"><Input value={c.whatsapp_url || ''} onChange={(e) => set('whatsapp_url', e.target.value)} className="h-8 text-xs" /></Field>
-          <Field label="Ícone (whatsapp/arrow/sparkles)"><Input value={c.icon || ''} onChange={(e) => set('icon', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Ícone"><IconPickerField value={c.icon || ''} onChange={(v) => set('icon', v)} /></Field>
         </>,
         <>
           <Field label="Estilo">
@@ -288,12 +298,45 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
             <Switch checked={c.phone_mask !== false} onCheckedChange={(v) => set('phone_mask', v)} />
             <Label className="text-xs">Máscara de telefone</Label>
           </div>
-          {renderListItems('form_fields', [
-            { name: 'name', label: 'Nome do campo' },
-            { name: 'label', label: 'Label' },
-            { name: 'type', label: 'Tipo (text/tel/email/textarea/select)' },
-            { name: 'placeholder', label: 'Placeholder' },
-          ], { name: 'campo', type: 'text', placeholder: '', required: true, label: 'Novo campo' })}
+          {/* Form fields with visual editors */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground">Campos do Formulário</Label>
+            {(c.form_fields || []).map((field: any, idx: number) => (
+              <div key={idx} className="p-2.5 rounded-lg border space-y-2 bg-muted/30">
+                <Field label="Label">
+                  <Input value={field.label || ''} onChange={(e) => setItem('form_fields', idx, 'label', e.target.value)} className="h-8 text-xs" />
+                </Field>
+                <Field label="Nome do campo">
+                  <Input value={field.name || ''} onChange={(e) => setItem('form_fields', idx, 'name', e.target.value)} className="h-8 text-xs" />
+                </Field>
+                <Field label="Tipo">
+                  <Select value={field.type || 'text'} onValueChange={(v) => setItem('form_fields', idx, 'type', v)}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Texto</SelectItem>
+                      <SelectItem value="tel">Telefone</SelectItem>
+                      <SelectItem value="email">E-mail</SelectItem>
+                      <SelectItem value="textarea">Área de texto</SelectItem>
+                      <SelectItem value="select">Seleção</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Placeholder">
+                  <Input value={field.placeholder || ''} onChange={(e) => setItem('form_fields', idx, 'placeholder', e.target.value)} className="h-8 text-xs" />
+                </Field>
+                <div className="flex items-center gap-2">
+                  <Switch checked={field.required !== false} onCheckedChange={(v) => setItem('form_fields', idx, 'required', v)} />
+                  <Label className="text-xs">Obrigatório</Label>
+                </div>
+                <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive" onClick={() => removeItem('form_fields', idx)}>
+                  <Trash2 className="w-3 h-3 mr-1" /> Remover
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={() => addItem('form_fields', { name: 'campo', type: 'text', placeholder: '', required: true, label: 'Novo campo' })}>
+              <Plus className="w-3 h-3 mr-1" /> Adicionar campo
+            </Button>
+          </div>
         </>,
         <>
           <Field label="Layout">
@@ -322,7 +365,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
             { name: 'name', label: 'Nome' },
             { name: 'role', label: 'Cargo' },
             { name: 'credentials', label: 'Credenciais' },
-            { name: 'image', label: 'Foto URL' },
+            { name: 'image', label: 'Foto', type: 'image' },
           ], { name: 'Membro', role: 'Cargo' })}
         </>,
         <>
@@ -345,7 +388,7 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
         <>
           <Field label="Título"><Input value={c.title || ''} onChange={(e) => set('title', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="Texto"><Textarea value={c.text || ''} onChange={(e) => set('text', e.target.value)} rows={3} className="text-xs" /></Field>
-          <Field label="Imagem URL"><Input value={c.image_url || ''} onChange={(e) => set('image_url', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Imagem"><ImagePickerField value={c.image_url || ''} onChange={(v) => set('image_url', v)} /></Field>
           <Field label="CTA"><Input value={c.cta_text || ''} onChange={(e) => set('cta_text', e.target.value)} className="h-8 text-xs" /></Field>
           <Field label="CTA URL"><Input value={c.cta_url || ''} onChange={(e) => set('cta_url', e.target.value)} className="h-8 text-xs" /></Field>
         </>,
@@ -465,12 +508,101 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
           </div>
           <Field label="Altura do logo"><Input value={c.logo_height || '48px'} onChange={(e) => set('logo_height', e.target.value)} className="h-8 text-xs" /></Field>
           {renderListItems('logos', [
-            { name: 'image_url', label: 'URL da imagem' },
+            { name: 'image_url', label: 'Imagem', type: 'image' },
             { name: 'alt', label: 'Alt text' },
             { name: 'url', label: 'Link (opcional)' },
           ], { image_url: '', alt: 'Logo' })}
         </>,
         <ColorField label="Cor do fundo" value={c.background_color} onChange={(v) => set('background_color', v)} />
+      );
+
+      case 'price_table': return renderGenericSection(
+        <>
+          <Field label="Título"><Input value={c.title || ''} onChange={(e) => set('title', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Subtítulo"><Input value={c.subtitle || ''} onChange={(e) => set('subtitle', e.target.value)} className="h-8 text-xs" /></Field>
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground">Planos</Label>
+            {(c.plans || []).map((plan: any, idx: number) => (
+              <div key={idx} className="p-2.5 rounded-lg border space-y-2 bg-muted/30">
+                <Field label="Nome"><Input value={plan.name || ''} onChange={(e) => setItem('plans', idx, 'name', e.target.value)} className="h-8 text-xs" /></Field>
+                <Field label="Preço"><Input value={plan.price || ''} onChange={(e) => setItem('plans', idx, 'price', e.target.value)} className="h-8 text-xs" /></Field>
+                <Field label="Período"><Input value={plan.period || ''} onChange={(e) => setItem('plans', idx, 'period', e.target.value)} placeholder="mensal, único" className="h-8 text-xs" /></Field>
+                <Field label="Features (1 por linha)">
+                  <Textarea
+                    value={(plan.features || []).join('\n')}
+                    onChange={(e) => setItem('plans', idx, 'features', e.target.value.split('\n').filter(Boolean))}
+                    rows={3} className="text-xs"
+                  />
+                </Field>
+                <Field label="CTA Texto"><Input value={plan.cta_text || ''} onChange={(e) => setItem('plans', idx, 'cta_text', e.target.value)} className="h-8 text-xs" /></Field>
+                <Field label="CTA URL"><Input value={plan.cta_url || ''} onChange={(e) => setItem('plans', idx, 'cta_url', e.target.value)} className="h-8 text-xs" /></Field>
+                <div className="flex items-center gap-2">
+                  <Switch checked={!!plan.highlighted} onCheckedChange={(v) => setItem('plans', idx, 'highlighted', v)} />
+                  <Label className="text-xs">Destacado</Label>
+                </div>
+                <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive" onClick={() => removeItem('plans', idx)}>
+                  <Trash2 className="w-3 h-3 mr-1" /> Remover
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={() => addItem('plans', { name: 'Plano', price: 'R$ 997', features: ['Recurso 1'], cta_text: 'Começar' })}>
+              <Plus className="w-3 h-3 mr-1" /> Adicionar plano
+            </Button>
+          </div>
+        </>,
+        <>
+          <ColorField label="Cor do fundo" value={c.background_color} onChange={(v) => set('background_color', v)} />
+          <ColorField label="Cor do texto" value={c.text_color} onChange={(v) => set('text_color', v)} />
+        </>
+      );
+
+      case 'process_steps': return renderGenericSection(
+        <>
+          <Field label="Título"><Input value={c.title || ''} onChange={(e) => set('title', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Subtítulo"><Input value={c.subtitle || ''} onChange={(e) => set('subtitle', e.target.value)} className="h-8 text-xs" /></Field>
+          {renderListItems('steps', [
+            { name: 'number', label: 'Número' },
+            { name: 'title', label: 'Título' },
+            { name: 'description', label: 'Descrição' },
+          ], { number: '01', title: 'Nova etapa', description: '' })}
+        </>,
+        <>
+          <Field label="Layout">
+            <Select value={c.layout || 'vertical'} onValueChange={(v) => set('layout', v)}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vertical">Vertical</SelectItem>
+                <SelectItem value="horizontal">Horizontal</SelectItem>
+                <SelectItem value="alternating">Alternado</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <ColorField label="Cor acento" value={c.accent_color} onChange={(v) => set('accent_color', v)} />
+          <ColorField label="Cor do fundo" value={c.background_color} onChange={(v) => set('background_color', v)} />
+        </>
+      );
+
+      case 'guarantee': return renderGenericSection(
+        <>
+          <Field label="Título"><Input value={c.title || ''} onChange={(e) => set('title', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Subtítulo"><Input value={c.subtitle || ''} onChange={(e) => set('subtitle', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Dias de garantia"><Input type="number" value={c.days || 30} onChange={(e) => set('days', parseInt(e.target.value))} className="h-8 text-xs" /></Field>
+          <Field label="Descrição"><Textarea value={c.description || ''} onChange={(e) => set('description', e.target.value)} rows={2} className="text-xs" /></Field>
+          <Field label="Ícone">
+            <Select value={c.icon_type || 'shield'} onValueChange={(v) => set('icon_type', v)}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="shield">Escudo</SelectItem>
+                <SelectItem value="award">Medalha</SelectItem>
+                <SelectItem value="check">Check</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        </>,
+        <>
+          <ColorField label="Cor acento" value={c.accent_color} onChange={(v) => set('accent_color', v)} />
+          <ColorField label="Cor do fundo" value={c.background_color} onChange={(v) => set('background_color', v)} />
+        </>
       );
 
       default: return (
