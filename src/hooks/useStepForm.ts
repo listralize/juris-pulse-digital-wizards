@@ -527,7 +527,7 @@ export const useStepForm = () => {
           // Enhanced Conversions — usados pelo useStepFormMarketingScripts
           gclid: gclid,
           transactionId: transactionId,
-          leadId: savedLead?.id || null
+          leadId: leadId
         }
       }));
 
