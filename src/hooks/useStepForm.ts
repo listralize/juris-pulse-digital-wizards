@@ -668,7 +668,7 @@ export const useStepForm = () => {
             urgencia: 'default',
             formulario: form.name,
             data_envio: new Date().toISOString(),
-            lead_id: savedLead?.id,
+            lead_id: leadId,
             form_slug: form.slug
           };
 
