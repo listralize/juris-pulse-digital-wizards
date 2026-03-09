@@ -1,29 +1,51 @@
 
 
-# Apply 3 Corrections: Phone Field, Custom Fields, Edge Function
+# Auditoria de Leads — Resultado Pós-Fix
 
-## Changes
+## Status: Fix aplicado no código, mas AINDA NÃO EFETIVO em produção
 
-### 1. `src/components/stepform/PhoneFieldWithDDD.tsx` — Emit onChange on every keystroke
+### Evidência dos dados
 
-The current code only calls `onChange` in `handleBlur`. If the user clicks "Enviar" without blurring the phone field, `formData` has an empty phone value.
+| Período | conversion_events | form_leads salvos | Perdidos |
+|---------|------------------|-------------------|----------|
+| 09/Mar (hoje) | 1 (Douglas) | 0 | 1 |
+| 07/Mar | 3 | 2 (Derick - admin) | 1 (Alexsandro - real) |
+| 05/Mar | 1 | 0 | 1 |
 
-Fix: In `handleChange`, extract digits and call `onChange(digits.length > 0 ? '55${digits}' : '')` on every keystroke, keeping the blur handler for formatting only.
+O lead do Douglas (hoje 17:36) ainda **não** foi salvo em form_leads. Isso confirma que ele acessou uma versão cacheada do site (antes do fix ser publicado). O padrão continua: leads de admin (Derick) salvam, leads anônimos reais (Douglas, Alexsandro) não.
 
-### 2. `src/hooks/useStepForm.ts` (lines 558-574) — Add `custom_fields` to reply-agent-sync payload
+### Código verificado — Fix está correto
 
-Add a `custom_fields` object containing UTM parameters, gclid, page origin, referrer, lead_id, and form name to the `reply-agent-sync` invocation body.
+1. **useStepForm.ts**: `crypto.randomUUID()` + insert sem `.select().single()` — correto
+2. **gclid/transaction_id** agora inclusos no insert de conversion_events — correto
+3. **cors.ts**: Headers expandidos — correto
 
-### 3. `supabase/functions/reply-agent-sync/index.ts` — Full replacement
+### Problema restante encontrado
 
-Key changes from the user's provided code:
-- `createContact`: always sends **both** `primary_phone_number` AND `primary_whatsapp_number` with the same normalized number (reverting the previous "only whatsapp" approach)
-- If `whatsapp` differs from `phone`, override only `primary_whatsapp_number`
-- Tags endpoint confirmed as `POST /v1/contacts/{id}/tags` with JSON body
-- SmartFlow uses `FormData` as before
-- Detailed logging preserved
+**LandingPageRenderer.tsx** (landing pages com formulário embutido) também insere em form_leads mas **sem** `gclid`, `transaction_id`, ou `visitor_id`. Embora não use `.select()` (então o INSERT funciona), perde dados de atribuição do Google Ads.
 
-### 4. `supabase/config.toml` — Restore verify_jwt settings
+### Plano de ação
 
-The last diff removed the `verify_jwt = false` entries for edge functions. These need to be restored so the functions remain callable without JWT.
+1. **Publicar o site** para que visitantes reais recebam o código corrigido (o fix está no código mas pode não estar no build publicado ainda)
+2. **Corrigir LandingPageRenderer.tsx** — adicionar `id: crypto.randomUUID()`, `gclid`, `transaction_id`, `visitor_id` e `user_agent` ao insert de form_leads
+3. **Script de recuperação** — criar query para recriar form_leads a partir de conversion_events que não têm correspondência (recuperar os ~1.338 leads perdidos historicamente)
+
+### Arquivos a alterar
+
+| Arquivo | Mudança |
+|---------|---------|
+| `src/components/landing/LandingPageRenderer.tsx` | Adicionar gclid, transaction_id, visitor_id, user_agent ao insert de form_leads |
+
+### Recuperação de dados históricos (SQL)
+
+Executar no SQL Editor para recuperar leads perdidos:
+```sql
+INSERT INTO form_leads (session_id, lead_data, form_id, form_name, source_page, referrer, user_agent, status, created_at)
+SELECT ce.session_id, ce.lead_data, ce.form_id, ce.form_name, ce.page_url, ce.referrer, ce.user_agent, 'new', ce.created_at
+FROM conversion_events ce
+LEFT JOIN form_leads fl ON fl.session_id = ce.session_id
+WHERE ce.event_type = 'form_submission'
+  AND fl.id IS NULL
+  AND ce.lead_data IS NOT NULL;
+```
 
