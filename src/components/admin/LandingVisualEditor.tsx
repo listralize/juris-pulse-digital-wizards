@@ -7,7 +7,7 @@ import {
   Undo2, Redo2, Monitor, Smartphone, Layout, Shield, Grid3X3,
   Megaphone, FormInput, Star, Users, HelpCircle, MessageSquare,
   Image, Code, Timer, Play, Hash, MessageCircle, ImageIcon,
-  DollarSign, ListOrdered, ShieldCheck, Zap
+  DollarSign, ListOrdered, ShieldCheck, Zap, Minus, GitCompareArrows, TextCursorInput
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { LandingSection } from '@/types/stepFormTypes';
@@ -41,6 +41,9 @@ const SECTION_TYPES: Array<{
   { type: 'numbers', label: 'Números', icon: Hash, description: 'Estatísticas', category: 'social_proof' },
   { type: 'guarantee', label: 'Garantia', icon: ShieldCheck, description: 'Seção de confiança', category: 'social_proof' },
   { type: 'logo_carousel', label: 'Logos', icon: ImageIcon, description: 'Parceiros/mídia', category: 'social_proof' },
+  { type: 'divider', label: 'Divisor', icon: Minus, description: 'Espaçador ou linha', category: 'content' },
+  { type: 'comparison', label: 'Comparação', icon: GitCompareArrows, description: 'Antes vs Depois', category: 'social_proof' },
+  { type: 'banner_marquee', label: 'Marquee', icon: TextCursorInput, description: 'Texto rotativo', category: 'conversion' },
 ];
 
 const STARTER_TEMPLATES: Array<{
