@@ -1,29 +1,24 @@
 
+# Auditoria Landing Page Builder — Concluída
 
-# Apply 3 Corrections: Phone Field, Custom Fields, Edge Function
+## Alterações Realizadas
 
-## Changes
+### 1. ✅ Tracking GTM no LandingPageRenderer
+- Adicionado `dataLayer.push` com `transaction_id`, `user_name`, `user_phone`, `user_email` e aliases no `handleFormSubmit`
+- Landing pages agora disparam conversões no Google Ads igual aos StepForms
 
-### 1. `src/components/stepform/PhoneFieldWithDDD.tsx` — Emit onChange on every keystroke
+### 2. ✅ Grids Responsivos Corrigidos (6 componentes)
+- `LandingBenefits`, `LandingProblemsGrid`, `LandingNumbers`, `LandingTestimonials`, `LandingFaq`, `LandingTrustBadges`
+- Substituído `gridTemplateColumns` inline por classes Tailwind responsivas (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`)
 
-The current code only calls `onChange` in `handleBlur`. If the user clicks "Enviar" without blurring the phone field, `formData` has an empty phone value.
+### 3. ✅ Código Duplicado Removido
+- Deletado `LandingPageEditor.tsx` (175 linhas) e `LandingSectionEditor.tsx` (226 linhas)
+- Extraído `landingSectionTypes.ts` (getDefaultSectionConfig compartilhado)
+- Extraído `renderLandingSection.tsx` (renderizador compartilhado)
+- `LandingVisualEditor` e `LandingPreview` agora importam dos utilitários
 
-Fix: In `handleChange`, extract digits and call `onChange(digits.length > 0 ? '55${digits}' : '')` on every keystroke, keeping the blur handler for formatting only.
+### 4. ✅ SEO Melhorado no LandingPageRenderer
+- Adicionado canonical tag e JSON-LD (WebPage schema)
 
-### 2. `src/hooks/useStepForm.ts` (lines 558-574) — Add `custom_fields` to reply-agent-sync payload
-
-Add a `custom_fields` object containing UTM parameters, gclid, page origin, referrer, lead_id, and form name to the `reply-agent-sync` invocation body.
-
-### 3. `supabase/functions/reply-agent-sync/index.ts` — Full replacement
-
-Key changes from the user's provided code:
-- `createContact`: always sends **both** `primary_phone_number` AND `primary_whatsapp_number` with the same normalized number (reverting the previous "only whatsapp" approach)
-- If `whatsapp` differs from `phone`, override only `primary_whatsapp_number`
-- Tags endpoint confirmed as `POST /v1/contacts/{id}/tags` with JSON body
-- SmartFlow uses `FormData` as before
-- Detailed logging preserved
-
-### 4. `supabase/config.toml` — Restore verify_jwt settings
-
-The last diff removed the `verify_jwt = false` entries for edge functions. These need to be restored so the functions remain callable without JWT.
-
+### 5. ✅ Bug de Undo/Redo Corrigido
+- `historyIdx` agora calculado corretamente quando o array é truncado
