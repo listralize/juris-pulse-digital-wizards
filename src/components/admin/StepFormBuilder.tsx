@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette, TrendingUp, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { divorcioLandingTemplate } from '@/data/divorcioLandingTemplate';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGallery } from './ImageGallery';
