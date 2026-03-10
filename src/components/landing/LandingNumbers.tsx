@@ -38,7 +38,7 @@ const AnimatedNumber: React.FC<{ target: string; prefix?: string; suffix?: strin
           const start = performance.now();
           const step = (now: number) => {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+            const eased = 1 - Math.pow(1 - progress, 3);
             setDisplay(Math.floor(numericTarget * eased).toLocaleString('pt-BR'));
             if (progress < 1) requestAnimationFrame(step);
             else setDisplay(target);
@@ -53,7 +53,7 @@ const AnimatedNumber: React.FC<{ target: string; prefix?: string; suffix?: strin
   }, [target]);
 
   return (
-    <div ref={ref} className="text-3xl md:text-5xl font-extrabold" style={{ color }}>
+    <div ref={ref} className="text-4xl md:text-6xl font-extrabold tracking-tight" style={{ color }}>
       {prefix}{display}{suffix}
     </div>
   );
@@ -63,17 +63,16 @@ export const LandingNumbers: React.FC<LandingNumbersProps> = ({ config, primaryC
   const items = config.items || [];
   const cols = config.columns || Math.min(items.length, 4);
   const accent = config.accent_color || primaryColor;
-  const style = config.style || 'cards';
 
   return (
     <section
-      className="py-12 md:py-16 px-4"
+      className="py-14 md:py-20 px-4"
       style={{ backgroundColor: config.background_color || 'transparent', color: config.text_color }}
     >
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-10">
         {config.title && (
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-2xl md:text-3xl font-bold text-center"
@@ -81,24 +80,18 @@ export const LandingNumbers: React.FC<LandingNumbersProps> = ({ config, primaryC
             {config.title}
           </motion.h2>
         )}
-        <div className={`grid gap-6 grid-cols-1 ${cols >= 2 ? 'sm:grid-cols-2' : ''} ${cols >= 3 ? 'md:grid-cols-3' : ''} ${cols >= 4 ? 'lg:grid-cols-4' : ''}`}>
+        <div className={`grid gap-8 grid-cols-2 ${cols >= 3 ? 'md:grid-cols-3' : ''} ${cols >= 4 ? 'lg:grid-cols-4' : ''}`}>
           {items.map((item, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className={`text-center p-6 rounded-2xl ${
-                style === 'cards' ? 'shadow-lg' : style === 'bordered' ? 'border-2' : ''
-              }`}
-              style={{
-                backgroundColor: style === 'cards' ? accent + '0D' : 'transparent',
-                borderColor: style === 'bordered' ? accent + '33' : undefined,
-              }}
+              transition={{ delay: idx * 0.08 }}
+              className="text-center space-y-1"
             >
               <AnimatedNumber target={item.number} prefix={item.prefix} suffix={item.suffix} color={accent} />
-              <div className="text-sm md:text-base mt-2 opacity-70">{item.label}</div>
+              <div className="text-xs md:text-sm opacity-50 uppercase tracking-wide font-medium">{item.label}</div>
             </motion.div>
           ))}
         </div>

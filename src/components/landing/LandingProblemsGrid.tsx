@@ -1,10 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, XCircle, HelpCircle, AlertCircle, Ban, ShieldAlert } from 'lucide-react';
-
-const ICONS: Record<string, React.FC<{ className?: string }>> = {
-  alert: AlertTriangle, x: XCircle, help: HelpCircle, info: AlertCircle, ban: Ban, shield: ShieldAlert,
-};
+import * as LucideIcons from 'lucide-react';
 
 interface LandingProblemsGridProps {
   config: {
@@ -19,31 +15,37 @@ interface LandingProblemsGridProps {
   primaryColor: string;
 }
 
+const getIcon = (name: string) => {
+  const formatted = name.replace(/-./g, x => x[1].toUpperCase()).replace(/^./, x => x.toUpperCase());
+  return (LucideIcons as any)[formatted] || LucideIcons.AlertTriangle;
+};
+
 export const LandingProblemsGrid: React.FC<LandingProblemsGridProps> = ({ config, primaryColor }) => {
   const items = config.items || [];
   const cols = config.columns || Math.min(items.length, 3);
-  const accent = config.accent_color || '#EF4444';
+  const accent = config.accent_color || primaryColor;
 
   return (
-    <section className="py-12 md:py-16 px-4" style={{ backgroundColor: config.background_color || 'transparent', color: config.text_color }}>
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="text-center space-y-3">
+    <section className="py-14 md:py-20 px-4" style={{ backgroundColor: config.background_color || 'transparent', color: config.text_color }}>
+      <div className="max-w-5xl mx-auto space-y-10">
+        <div className="text-center space-y-2">
           {config.title && (
-            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               className="text-2xl md:text-3xl font-bold">{config.title}</motion.h2>
           )}
-          {config.subtitle && <p className="text-lg opacity-80">{config.subtitle}</p>}
+          {config.subtitle && <p className="text-sm opacity-60 max-w-lg mx-auto">{config.subtitle}</p>}
         </div>
-        <div className={`grid gap-4 grid-cols-1 ${cols >= 2 ? 'md:grid-cols-2' : ''} ${cols >= 3 ? 'lg:grid-cols-3' : ''} ${cols >= 4 ? 'xl:grid-cols-4' : ''}`}>
+        <div className={`grid gap-4 grid-cols-1 ${cols >= 2 ? 'md:grid-cols-2' : ''} ${cols >= 3 ? 'lg:grid-cols-3' : ''}`}>
           {items.map((item, idx) => {
-            const Icon = ICONS[item.icon || 'alert'] || AlertTriangle;
+            const Icon = getIcon(item.icon || 'alert-triangle');
             return (
-              <motion.div key={idx} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: idx * 0.08 }}
-                className="p-5 rounded-2xl space-y-2" style={{ backgroundColor: accent + '0A', border: `1px solid ${accent}20` }}>
-                <Icon className="w-6 h-6" style={{ color: accent }} />
-                <h3 className="font-bold">{item.title}</h3>
-                {item.description && <p className="text-sm opacity-70">{item.description}</p>}
+              <motion.div key={idx} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }} transition={{ delay: idx * 0.06 }}
+                className="p-5 rounded-lg space-y-2"
+                style={{ border: `1px solid ${accent}18` }}>
+                <Icon className="w-5 h-5 opacity-70" style={{ color: accent }} />
+                <h3 className="font-semibold text-sm">{item.title}</h3>
+                {item.description && <p className="text-xs opacity-55 leading-relaxed">{item.description}</p>}
               </motion.div>
             );
           })}

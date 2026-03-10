@@ -49,7 +49,6 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
         minHeight: minH,
       }}
     >
-      {/* Video background */}
       {config.video_background_url && (
         <video
           autoPlay muted loop playsInline
@@ -58,7 +57,6 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
         />
       )}
 
-      {/* Full image background */}
       {layout === 'full_image' && config.image_url && !config.video_background_url && (
         <img
           src={config.image_url}
@@ -69,7 +67,6 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
         />
       )}
 
-      {/* Overlay */}
       {(config.overlay_color || config.video_background_url || layout === 'full_image') && (
         <div
           className="absolute inset-0"
@@ -81,23 +78,23 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
       )}
 
       <div
-        className={`relative max-w-6xl mx-auto py-16 md:py-24 ${
+        className={`relative max-w-6xl mx-auto py-20 md:py-28 ${
           isCentered
             ? 'flex flex-col items-center text-center'
-            : 'grid md:grid-cols-2 gap-8 items-center'
+            : 'grid md:grid-cols-2 gap-12 items-center'
         }`}
       >
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className={`space-y-6 ${isCentered ? 'max-w-3xl' : ''}`}
+          transition={{ duration: 0.5 }}
+          className={`space-y-5 ${isCentered ? 'max-w-3xl' : ''}`}
         >
           {config.badge_text && (
             <span
-              className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold"
+              className="inline-block px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase"
               style={{
-                backgroundColor: (config.badge_color || primaryColor) + '22',
+                border: `1px solid ${(config.badge_color || primaryColor)}44`,
                 color: config.badge_color || primaryColor,
               }}
             >
@@ -105,19 +102,21 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
             </span>
           )}
           {config.headline && (
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight">{config.headline}</h1>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold" style={{ lineHeight: 1.08 }}>
+              {config.headline}
+            </h1>
           )}
           {config.subheadline && (
-            <p className="text-lg md:text-xl opacity-90">{config.subheadline}</p>
+            <p className="text-base md:text-lg opacity-70 max-w-xl">{config.subheadline}</p>
           )}
           {config.body_text && (
-            <p className="text-base opacity-80 leading-relaxed">{config.body_text}</p>
+            <p className="text-sm opacity-60 leading-relaxed">{config.body_text}</p>
           )}
-          <div className={`flex gap-3 ${isCentered ? 'justify-center' : ''} flex-wrap`}>
+          <div className={`flex gap-3 pt-2 ${isCentered ? 'justify-center' : ''} flex-wrap`}>
             {config.cta_text && (
               <Button
                 size="lg"
-                className="text-lg px-8 py-6 font-bold shadow-lg"
+                className="px-8 py-6 font-semibold text-base transition-opacity hover:opacity-90"
                 style={{ backgroundColor: primaryColor, color: '#fff' }}
                 onClick={() => handleCta(config.cta_url)}
                 aria-label={config.cta_text}
@@ -129,7 +128,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
               <Button
                 size="lg"
                 variant="outline"
-                className="text-lg px-8 py-6 font-bold"
+                className="px-8 py-6 font-semibold text-base"
+                style={{ borderColor: config.text_color ? config.text_color + '33' : undefined }}
                 onClick={() => handleCta(config.cta_secondary_url)}
                 aria-label={config.cta_secondary_text}
               >
@@ -141,15 +141,15 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ config, primaryColor }
 
         {layout === 'split' && config.image_url && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
             className="flex justify-center"
           >
             <img
               src={config.image_url}
               alt={config.headline || 'Hero'}
-              className="rounded-2xl shadow-2xl max-w-full h-auto"
+              className="rounded-xl max-w-full h-auto"
               loading="eager"
               fetchPriority="high"
             />

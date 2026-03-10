@@ -21,6 +21,7 @@ interface LandingEmbeddedFormProps {
     cta_text?: string;
     background_color?: string;
     text_color?: string;
+    accent_color?: string;
     layout?: 'card' | 'inline' | 'floating';
     success_message?: string;
     phone_mask?: boolean;
@@ -45,6 +46,7 @@ export const LandingEmbeddedForm: React.FC<LandingEmbeddedFormProps> = ({
   const fields = config.form_fields || [];
   const layout = config.layout || 'card';
   const phoneMask = config.phone_mask !== false;
+  const accent = config.accent_color || primaryColor;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,49 +56,49 @@ export const LandingEmbeddedForm: React.FC<LandingEmbeddedFormProps> = ({
 
   if (submitted) {
     return (
-      <section id="formulario" className="py-12 px-4" style={{ backgroundColor: config.background_color || 'transparent', color: config.text_color }}>
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-          className="max-w-lg mx-auto text-center space-y-4 p-8 rounded-2xl" style={{ backgroundColor: primaryColor + '0D' }}>
-          <CheckCircle className="w-16 h-16 mx-auto" style={{ color: primaryColor }} />
-          <h3 className="text-2xl font-bold">{config.success_message || 'Enviado com sucesso!'}</h3>
-          <p className="opacity-70">Entraremos em contato em breve.</p>
+      <section id="formulario" className="py-14 px-4" style={{ backgroundColor: config.background_color || 'transparent', color: config.text_color }}>
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md mx-auto text-center space-y-4 p-8 rounded-lg" style={{ border: `1px solid ${accent}20` }}>
+          <CheckCircle className="w-12 h-12 mx-auto" style={{ color: accent }} />
+          <h3 className="text-xl font-bold">{config.success_message || 'Enviado com sucesso!'}</h3>
+          <p className="text-sm opacity-50">Entraremos em contato em breve.</p>
         </motion.div>
       </section>
     );
   }
 
   return (
-    <section id="formulario" className="py-12 md:py-16 px-4"
+    <section id="formulario" className="py-14 md:py-20 px-4"
       style={{ backgroundColor: config.background_color || 'transparent', color: config.text_color }}>
-      <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
         className={`mx-auto space-y-6 ${
-          layout === 'card' ? 'max-w-xl p-6 md:p-8 rounded-2xl border shadow-xl' :
-          layout === 'floating' ? 'max-w-md p-8 rounded-2xl shadow-2xl border' :
+          layout === 'card' ? 'max-w-lg p-6 md:p-8 rounded-lg' :
+          layout === 'floating' ? 'max-w-md p-8 rounded-lg' :
           'max-w-2xl'
         }`}
         style={
-          layout === 'card' ? { backgroundColor: primaryColor + '05', borderColor: primaryColor + '20' } :
-          layout === 'floating' ? { backgroundColor: '#fff', borderColor: primaryColor + '30' } :
-          undefined
+          layout === 'card' || layout === 'floating'
+            ? { border: `1px solid ${accent}18` }
+            : undefined
         }>
-        {config.title && <h2 className="text-2xl md:text-3xl font-bold text-center">{config.title}</h2>}
-        {config.subtitle && <p className="text-center opacity-80">{config.subtitle}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {config.title && <h2 className="text-xl md:text-2xl font-bold text-center">{config.title}</h2>}
+        {config.subtitle && <p className="text-center text-sm opacity-50">{config.subtitle}</p>}
+        <form onSubmit={handleSubmit} className="space-y-3">
           {fields.map((field, i) => {
             const isTel = field.type === 'tel' || field.name.toLowerCase().includes('telefone') || field.name.toLowerCase().includes('phone');
             return (
               <div key={i}>
-                {field.label && <label className="block text-sm font-medium mb-1.5">{field.label}</label>}
+                {field.label && <label className="block text-xs font-medium mb-1 opacity-70">{field.label}</label>}
                 {field.type === 'select' && field.options ? (
                   <Select value={formData[field.name] || ''} onValueChange={(v) => setFormData(prev => ({ ...prev, [field.name]: v }))}>
-                    <SelectTrigger><SelectValue placeholder={field.placeholder || 'Selecione...'} /></SelectTrigger>
+                    <SelectTrigger className="h-11"><SelectValue placeholder={field.placeholder || 'Selecione...'} /></SelectTrigger>
                     <SelectContent>{field.options.map((opt, j) => <SelectItem key={j} value={opt}>{opt}</SelectItem>)}</SelectContent>
                   </Select>
                 ) : field.type === 'textarea' ? (
                   <Textarea placeholder={field.placeholder} required={field.required}
                     value={formData[field.name] || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
-                    rows={3} className="min-h-[100px]" />
+                    rows={3} className="min-h-[90px] text-sm" />
                 ) : (
                   <Input
                     type={isTel && phoneMask ? 'text' : field.type || 'text'}
@@ -108,14 +110,14 @@ export const LandingEmbeddedForm: React.FC<LandingEmbeddedFormProps> = ({
                       setFormData(prev => ({ ...prev, [field.name]: val }));
                     }}
                     maxLength={isTel && phoneMask ? 16 : undefined}
-                    className="h-12" />
+                    className="h-11 text-sm" />
                 )}
               </div>
             );
           })}
-          <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg font-bold shadow-lg"
-            style={{ backgroundColor: primaryColor, color: '#fff' }}>
-            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+          <Button type="submit" disabled={isSubmitting} className="w-full h-11 font-semibold text-sm transition-opacity hover:opacity-90"
+            style={{ backgroundColor: accent, color: '#fff' }}>
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {config.cta_text || 'Enviar'}
           </Button>
         </form>
