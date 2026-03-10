@@ -1,29 +1,47 @@
 
 
-# Apply 3 Corrections: Phone Field, Custom Fields, Edge Function
+# Diagnóstico: Google Ads Tag Error "Cannot parse target"
 
-## Changes
+## Problema Encontrado
 
-### 1. `src/components/stepform/PhoneFieldWithDDD.tsx` — Emit onChange on every keystroke
+O erro no GTM Tag Assistant diz: **"Cannot parse target: '16884173585'"**
 
-The current code only calls `onChange` in `handleBlur`. If the user clicks "Enviar" without blurring the phone field, `formData` has an empty phone value.
+A causa raiz: o Conversion ID salvo no banco (`16884173585`) está **sem o prefixo `AW-`**. O `gtag()` exige o formato `AW-16884173585` para funcionar. Sem o prefixo, ele não consegue identificar a conta do Google Ads e descarta a conversão.
 
-Fix: In `handleChange`, extract digits and call `onChange(digits.length > 0 ? '55${digits}' : '')` on every keystroke, keeping the blur handler for formatting only.
+Isso afeta duas coisas:
+- `gtag('config', '16884173585')` falha (deveria ser `gtag('config', 'AW-16884173585')`)
+- `send_to: '16884173585/kuptCP-t3q8aEJGWgPM-'` falha (deveria ser `send_to: 'AW-16884173585/kuptCP-t3q8aEJGWgPM-'`)
 
-### 2. `src/hooks/useStepForm.ts` (lines 558-574) — Add `custom_fields` to reply-agent-sync payload
+Adicionalmente, o campo `custom_head_html` do `divorcioform` está **vazio**, então o script do gtag.js nem sequer carrega na página. O código tenta carregá-lo como fallback, mas com o ID errado.
 
-Add a `custom_fields` object containing UTM parameters, gclid, page origin, referrer, lead_id, and form name to the `reply-agent-sync` invocation body.
+## Plano de Correção
 
-### 3. `supabase/functions/reply-agent-sync/index.ts` — Full replacement
+### 1. Corrigir o Conversion ID no banco (SQL migration)
+Atualizar de `16884173585` para `AW-16884173585`:
 
-Key changes from the user's provided code:
-- `createContact`: always sends **both** `primary_phone_number` AND `primary_whatsapp_number` with the same normalized number (reverting the previous "only whatsapp" approach)
-- If `whatsapp` differs from `phone`, override only `primary_whatsapp_number`
-- Tags endpoint confirmed as `POST /v1/contacts/{id}/tags` with JSON body
-- SmartFlow uses `FormData` as before
-- Detailed logging preserved
+```sql
+UPDATE step_forms 
+SET tracking_config = jsonb_set(
+  tracking_config::jsonb, 
+  '{google_ads_conversion_id}', 
+  '"AW-16884173585"'
+)
+WHERE slug = 'divorcioform';
+```
 
-### 4. `supabase/config.toml` — Restore verify_jwt settings
+### 2. Adicionar normalização no código (`useStepFormMarketingScripts.ts`)
+Garantir que o código sempre adiciona o prefixo `AW-` caso esteja ausente, evitando que esse problema se repita:
 
-The last diff removed the `verify_jwt = false` entries for edge functions. These need to be restored so the functions remain callable without JWT.
+```typescript
+// Antes de usar gadsId:
+const rawId = (config.google_ads_conversion_id || '').trim();
+const gadsId = rawId && !rawId.startsWith('AW-') ? `AW-${rawId}` : rawId;
+```
+
+### Arquivos alterados
+
+| Arquivo | Mudança |
+|---------|---------|
+| Nova migration SQL | Corrigir valor no banco para `AW-16884173585` |
+| `src/hooks/useStepFormMarketingScripts.ts` | Auto-prefixar `AW-` se ausente |
 
