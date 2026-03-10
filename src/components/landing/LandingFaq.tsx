@@ -35,7 +35,7 @@ export const LandingFaq: React.FC<LandingFaqProps> = ({ config, primaryColor }) 
           {config.subtitle && <p className="text-lg opacity-80">{config.subtitle}</p>}
         </div>
         {style === 'cards' ? (
-          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          <div className={`grid gap-4 grid-cols-1 ${cols >= 2 ? 'md:grid-cols-2' : ''}`}>
             {items.map((item, idx) => (
               <motion.div key={idx} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: idx * 0.06 }}

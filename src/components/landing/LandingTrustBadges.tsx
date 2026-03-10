@@ -32,7 +32,7 @@ export const LandingTrustBadges: React.FC<LandingTrustBadgesProps> = ({ config, 
       <div className="max-w-6xl mx-auto">
         <div
           className={`flex flex-wrap justify-center ${
-            style === 'card' ? 'grid gap-4' : 'gap-3 md:gap-5'
+            style === 'card' ? `grid gap-4 grid-cols-1 ${cols >= 2 ? 'sm:grid-cols-2' : ''} ${cols >= 3 ? 'md:grid-cols-3' : ''} ${cols >= 4 ? 'lg:grid-cols-4' : ''}` : 'gap-3 md:gap-5'
           }`}
           style={undefined}
         >

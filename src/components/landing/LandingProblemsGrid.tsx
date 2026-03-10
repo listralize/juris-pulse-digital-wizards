@@ -34,7 +34,7 @@ export const LandingProblemsGrid: React.FC<LandingProblemsGridProps> = ({ config
           )}
           {config.subtitle && <p className="text-lg opacity-80">{config.subtitle}</p>}
         </div>
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        <div className={`grid gap-4 grid-cols-1 ${cols >= 2 ? 'md:grid-cols-2' : ''} ${cols >= 3 ? 'lg:grid-cols-3' : ''} ${cols >= 4 ? 'xl:grid-cols-4' : ''}`}>
           {items.map((item, idx) => {
             const Icon = ICONS[item.icon || 'alert'] || AlertTriangle;
             return (

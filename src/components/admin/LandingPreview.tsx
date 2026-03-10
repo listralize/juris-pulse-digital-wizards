@@ -1,25 +1,7 @@
 import React from 'react';
 import { ChevronUp, ChevronDown, Copy, Trash2 } from 'lucide-react';
 import type { LandingSection } from '@/types/stepFormTypes';
-import { LandingHero } from '@/components/landing/LandingHero';
-import { LandingTrustBadges } from '@/components/landing/LandingTrustBadges';
-import { LandingProblemsGrid } from '@/components/landing/LandingProblemsGrid';
-import { LandingCtaBanner } from '@/components/landing/LandingCtaBanner';
-import { LandingEmbeddedForm } from '@/components/landing/LandingEmbeddedForm';
-import { LandingBenefits } from '@/components/landing/LandingBenefits';
-import { LandingTeam } from '@/components/landing/LandingTeam';
-import { LandingFaq } from '@/components/landing/LandingFaq';
-import { LandingTestimonials } from '@/components/landing/LandingTestimonials';
-import { LandingTextImage } from '@/components/landing/LandingTextImage';
-import { LandingCustomHtml } from '@/components/landing/LandingCustomHtml';
-import { LandingCountdown } from '@/components/landing/LandingCountdown';
-import { LandingVideo } from '@/components/landing/LandingVideo';
-import { LandingNumbers } from '@/components/landing/LandingNumbers';
-import { LandingWhatsappCta } from '@/components/landing/LandingWhatsappCta';
-import { LandingLogoCarousel } from '@/components/landing/LandingLogoCarousel';
-import { LandingPriceTable } from '@/components/landing/LandingPriceTable';
-import { LandingProcessSteps } from '@/components/landing/LandingProcessSteps';
-import { LandingGuarantee } from '@/components/landing/LandingGuarantee';
+import { renderLandingSection } from '@/components/landing/renderLandingSection';
 
 const LABELS: Record<string, string> = {
   hero: 'Hero', trust_badges: 'Badges', problems_grid: 'Problemas', cta_banner: 'CTA',
@@ -46,32 +28,6 @@ export const LandingPreview: React.FC<LandingPreviewProps> = ({
   sections, selectedId, onSelect, primaryColor, backgroundColor, textColor,
   onMove, onDuplicate, onDelete,
 }) => {
-  const renderSection = (section: LandingSection) => {
-    const props = { config: section.config, primaryColor };
-    switch (section.type) {
-      case 'hero': return <LandingHero {...props} />;
-      case 'trust_badges': return <LandingTrustBadges {...props} />;
-      case 'problems_grid': return <LandingProblemsGrid {...props} />;
-      case 'cta_banner': return <LandingCtaBanner {...props} />;
-      case 'embedded_form': return <LandingEmbeddedForm {...props} onSubmit={async () => {}} isSubmitting={false} />;
-      case 'benefits': return <LandingBenefits {...props} />;
-      case 'team': return <LandingTeam {...props} />;
-      case 'faq': return <LandingFaq {...props} />;
-      case 'testimonials': return <LandingTestimonials {...props} />;
-      case 'text_image': return <LandingTextImage {...props} />;
-      case 'custom_html': return <LandingCustomHtml config={section.config} />;
-      case 'countdown': return <LandingCountdown {...props} />;
-      case 'video': return <LandingVideo {...props} />;
-      case 'numbers': return <LandingNumbers {...props} />;
-      case 'whatsapp_cta': return <LandingWhatsappCta {...props} />;
-      case 'logo_carousel': return <LandingLogoCarousel {...props} />;
-      case 'price_table': return <LandingPriceTable {...props} />;
-      case 'process_steps': return <LandingProcessSteps {...props} />;
-      case 'guarantee': return <LandingGuarantee {...props} />;
-      default: return <div className="p-8 text-center text-muted-foreground">Seção: {section.type}</div>;
-    }
-  };
-
   if (sections.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 rounded-xl border-2 border-dashed border-muted-foreground/20 gap-3">
@@ -137,7 +93,7 @@ export const LandingPreview: React.FC<LandingPreviewProps> = ({
             </div>
 
             <div className="pointer-events-none">
-              {renderSection(section)}
+              {renderLandingSection(section, { primaryColor })}
             </div>
           </div>
         );

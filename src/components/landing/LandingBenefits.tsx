@@ -78,7 +78,7 @@ export const LandingBenefits: React.FC<LandingBenefitsProps> = ({ config, primar
             })}
           </div>
         ) : (
-          <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          <div className={`grid gap-6 grid-cols-1 ${cols >= 2 ? 'md:grid-cols-2' : ''} ${cols >= 3 ? 'lg:grid-cols-3' : ''} ${cols >= 4 ? 'xl:grid-cols-4' : ''}`}>
             {items.map((item, idx) => {
               const Icon = ICONS[item.icon || 'check'] || Check;
               return (

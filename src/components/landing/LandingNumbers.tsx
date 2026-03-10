@@ -81,7 +81,7 @@ export const LandingNumbers: React.FC<LandingNumbersProps> = ({ config, primaryC
             {config.title}
           </motion.h2>
         )}
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        <div className={`grid gap-6 grid-cols-1 ${cols >= 2 ? 'sm:grid-cols-2' : ''} ${cols >= 3 ? 'md:grid-cols-3' : ''} ${cols >= 4 ? 'lg:grid-cols-4' : ''}`}>
           {items.map((item, idx) => (
             <motion.div
               key={idx}

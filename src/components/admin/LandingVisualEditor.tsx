@@ -108,7 +108,10 @@ export const LandingVisualEditor: React.FC<LandingVisualEditorProps> = ({
         if (sliced.length > 30) sliced.shift();
         return sliced;
       });
-      setHistoryIdx(prev => Math.min(prev + 1, 30));
+      setHistoryIdx(prev => {
+        const maxIdx = Math.min(prev + 1, 29);
+        return maxIdx;
+      });
     };
 
     onUpdate(newSections); // Always update immediately

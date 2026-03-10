@@ -84,7 +84,7 @@ export const LandingTestimonials: React.FC<LandingTestimonialsProps> = ({ config
             ))}
           </div>
         ) : (
-          <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          <div className={`grid gap-6 grid-cols-1 ${cols >= 2 ? 'md:grid-cols-2' : ''} ${cols >= 3 ? 'lg:grid-cols-3' : ''}`}>
             {items.map(renderCard)}
           </div>
         )}
