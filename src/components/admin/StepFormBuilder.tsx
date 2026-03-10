@@ -204,6 +204,16 @@ export const StepFormBuilder: React.FC = () => {
     }
   };
 
+  const createFromTemplate = (template: typeof divorcioLandingTemplate) => {
+    const newForm: StepFormData = {
+      ...template,
+      slug: template.slug + '-' + Date.now().toString(36),
+    } as StepFormData;
+    setSelectedForm(newForm);
+    setIsCreating(true);
+    setShowNewFormDialog(false);
+  };
+
   const createNewForm = (pageType: 'quiz' | 'landing_page' = 'quiz') => {
     const isLanding = pageType === 'landing_page';
     const newForm: StepFormData = {
