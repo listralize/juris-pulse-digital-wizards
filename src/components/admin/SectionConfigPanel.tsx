@@ -606,6 +606,87 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
         </>
       );
 
+      case 'divider': return renderGenericSection(
+        <>
+          <Field label="Estilo">
+            <Select value={c.style || 'line'} onValueChange={(v) => set('style', v)}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="line">Linha</SelectItem>
+                <SelectItem value="space">Espaço</SelectItem>
+                <SelectItem value="wave">Onda</SelectItem>
+                <SelectItem value="diagonal">Diagonal</SelectItem>
+                <SelectItem value="dots">Pontos</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Altura"><Input value={c.height || '40px'} onChange={(e) => set('height', e.target.value)} placeholder="40px" className="h-8 text-xs" /></Field>
+          {c.style !== 'space' && (
+            <>
+              <ColorField label="Cor" value={c.color} onChange={(v) => set('color', v)} />
+              {(c.style === 'line' || !c.style) && (
+                <>
+                  <Field label="Largura da linha"><Input value={c.line_width || '60%'} onChange={(e) => set('line_width', e.target.value)} className="h-8 text-xs" /></Field>
+                  <Field label="Espessura"><Input value={c.line_thickness || '2px'} onChange={(e) => set('line_thickness', e.target.value)} className="h-8 text-xs" /></Field>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={!!c.use_gradient} onCheckedChange={(v) => set('use_gradient', v)} />
+                    <Label className="text-xs">Gradiente suave</Label>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </>
+      );
+
+      case 'comparison': return renderGenericSection(
+        <>
+          <Field label="Título"><Input value={c.title || ''} onChange={(e) => set('title', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Subtítulo"><Input value={c.subtitle || ''} onChange={(e) => set('subtitle', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Coluna Esquerda"><Input value={c.left_title || ''} onChange={(e) => set('left_title', e.target.value)} className="h-8 text-xs" /></Field>
+          <Field label="Coluna Direita"><Input value={c.right_title || ''} onChange={(e) => set('right_title', e.target.value)} className="h-8 text-xs" /></Field>
+          {renderListItems('items', [
+            { name: 'feature', label: 'Item' },
+            { name: 'left_text', label: 'Esquerda (negativo)' },
+            { name: 'right_text', label: 'Direita (positivo)' },
+          ], { feature: 'Item', left_text: 'Sem', right_text: 'Com' })}
+        </>,
+        <Field label="Layout">
+          <Select value={c.layout || 'cards'} onValueChange={(v) => set('layout', v)}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cards">Cards</SelectItem>
+              <SelectItem value="table">Tabela</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+      );
+
+      case 'banner_marquee': return renderGenericSection(
+        <>
+          <Field label="Textos (1 por linha)">
+            <Textarea
+              value={(c.texts || []).join('\n')}
+              onChange={(e) => set('texts', e.target.value.split('\n').filter(Boolean))}
+              rows={3} className="text-xs" placeholder="Texto 1&#10;Texto 2&#10;Texto 3"
+            />
+          </Field>
+          <Field label="Separador"><Input value={c.separator || '★'} onChange={(e) => set('separator', e.target.value)} className="h-8 text-xs" /></Field>
+        </>,
+        <>
+          <Field label="Velocidade">
+            <Slider
+              value={[c.speed || 30]}
+              onValueChange={([v]) => set('speed', v)}
+              min={5} max={50} step={5}
+            />
+          </Field>
+          <Field label="Tamanho do texto"><Input value={c.font_size || '1rem'} onChange={(e) => set('font_size', e.target.value)} className="h-8 text-xs" /></Field>
+          <ColorField label="Cor do fundo" value={c.background_color} onChange={(v) => set('background_color', v)} />
+          <ColorField label="Cor do texto" value={c.text_color} onChange={(v) => set('text_color', v)} />
+        </>
+      );
+
       default: return (
         <div className="p-4 text-center text-sm text-muted-foreground">
           Editor não disponível para este tipo de seção.
@@ -618,36 +699,55 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
     <AccordionItem value="section-style">
       <AccordionTrigger className="text-xs font-semibold">🎨 Estilo da Seção</AccordionTrigger>
       <AccordionContent className="space-y-3">
+        {/* Background */}
+        <Field label="Cor de fundo">
+          <div className="flex gap-2">
+            <input type="color" value={c.section_bg_color || '#ffffff'} onChange={(e) => set('section_bg_color', e.target.value)}
+              className="w-8 h-8 rounded border cursor-pointer" />
+            <Input value={c.section_bg_color || ''} onChange={(e) => set('section_bg_color', e.target.value)} placeholder="Vazio = transparente" className="h-8 text-xs" />
+            {c.section_bg_color && (
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => set('section_bg_color', '')}>✕</Button>
+            )}
+          </div>
+        </Field>
+
+        <Field label="Gradiente CSS">
+          <Input value={c.section_bg_gradient || ''} onChange={(e) => set('section_bg_gradient', e.target.value)}
+            placeholder="linear-gradient(135deg, #667eea, #764ba2)" className="h-8 text-xs" />
+        </Field>
+
         <Field label="Imagem de fundo">
           <ImagePickerField value={c.section_bg_image || ''} onChange={(v) => set('section_bg_image', v)} />
         </Field>
-        {c.section_bg_image && (
-          <>
-            <ColorField label="Cor do overlay" value={c.section_overlay_color} onChange={(v) => set('section_overlay_color', v)} />
-            <Field label="Opacidade do overlay">
-              <div className="flex items-center gap-3">
-                <input
-                  type="range" min={0} max={1} step={0.05}
-                  value={c.section_overlay_opacity ?? 0.5}
-                  onChange={(e) => set('section_overlay_opacity', parseFloat(e.target.value))}
-                  className="flex-1 h-2 accent-primary"
-                />
-                <span className="text-xs text-muted-foreground w-8 text-right">
-                  {Math.round((c.section_overlay_opacity ?? 0.5) * 100)}%
-                </span>
-              </div>
-            </Field>
-          </>
+
+        {/* Overlay — always available */}
+        <ColorField label="Overlay" value={c.section_overlay_color} onChange={(v) => set('section_overlay_color', v)} />
+        {c.section_overlay_color && (
+          <Field label="Opacidade do overlay">
+            <div className="flex items-center gap-3">
+              <Slider
+                value={[c.section_overlay_opacity ?? 0.5]}
+                onValueChange={([v]) => set('section_overlay_opacity', v)}
+                min={0} max={1} step={0.05}
+                className="flex-1"
+              />
+              <span className="text-xs text-muted-foreground w-10 text-right">
+                {Math.round((c.section_overlay_opacity ?? 0.5) * 100)}%
+              </span>
+            </div>
+          </Field>
         )}
+
+        {/* Spacing & Layout */}
         <Field label="Espaçamento vertical">
           <Select value={c.section_padding || 'md'} onValueChange={(v) => set('section_padding', v)}>
             <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Nenhum</SelectItem>
-              <SelectItem value="sm">Pequeno</SelectItem>
-              <SelectItem value="md">Médio (padrão)</SelectItem>
-              <SelectItem value="lg">Grande</SelectItem>
-              <SelectItem value="xl">Extra grande</SelectItem>
+              <SelectItem value="sm">Pequeno (24px)</SelectItem>
+              <SelectItem value="md">Médio (48px)</SelectItem>
+              <SelectItem value="lg">Grande (80px)</SelectItem>
+              <SelectItem value="xl">Extra grande (120px)</SelectItem>
             </SelectContent>
           </Select>
         </Field>
@@ -665,9 +765,36 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
             </SelectContent>
           </Select>
         </Field>
+
+        {/* Text Align */}
+        <Field label="Alinhamento de texto">
+          <Select value={c.section_text_align || 'inherit'} onValueChange={(v) => set('section_text_align', v === 'inherit' ? '' : v)}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="inherit">Padrão</SelectItem>
+              <SelectItem value="left">Esquerda</SelectItem>
+              <SelectItem value="center">Centro</SelectItem>
+              <SelectItem value="right">Direita</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+
+        {/* Border */}
+        <ColorField label="Cor da borda" value={c.section_border_color} onChange={(v) => set('section_border_color', v)} />
+        {c.section_border_color && (
+          <Field label="Espessura da borda">
+            <Input value={c.section_border_width || '1px'} onChange={(e) => set('section_border_width', e.target.value)} className="h-8 text-xs" />
+          </Field>
+        )}
+
+        {/* Toggles */}
         <div className="flex items-center gap-2">
           <Switch checked={!!c.section_rounded} onCheckedChange={(v) => set('section_rounded', v)} />
           <Label className="text-xs">Bordas arredondadas</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch checked={!!c.section_animate} onCheckedChange={(v) => set('section_animate', v)} />
+          <Label className="text-xs">Animação ao entrar na tela</Label>
         </div>
       </AccordionContent>
     </AccordionItem>
