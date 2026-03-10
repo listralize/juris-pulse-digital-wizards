@@ -7,7 +7,7 @@ import {
   Undo2, Redo2, Monitor, Smartphone, Layout, Shield, Grid3X3,
   Megaphone, FormInput, Star, Users, HelpCircle, MessageSquare,
   Image, Code, Timer, Play, Hash, MessageCircle, ImageIcon,
-  DollarSign, ListOrdered, ShieldCheck, Zap, Minus, GitCompareArrows, Marquee
+  DollarSign, ListOrdered, ShieldCheck, Zap, Minus, GitCompareArrows, TextCursorInput
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { LandingSection } from '@/types/stepFormTypes';
