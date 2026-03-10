@@ -26,6 +26,72 @@ interface RenderOptions {
   isSubmitting?: boolean;
 }
 
+const PADDING_MAP: Record<string, string> = {
+  none: '0px',
+  sm: '24px',
+  md: '48px',
+  lg: '80px',
+  xl: '120px',
+};
+
+const MAX_WIDTH_MAP: Record<string, string> = {
+  normal: '72rem',
+  wide: '90rem',
+  full: '100%',
+};
+
+const SectionWrapper: React.FC<{
+  config: Record<string, any>;
+  children: React.ReactNode;
+  sectionKey: string;
+}> = ({ config, children, sectionKey }) => {
+  const bgImage = config.section_bg_image;
+  const overlayColor = config.section_overlay_color;
+  const overlayOpacity = config.section_overlay_opacity ?? 0.5;
+  const padding = config.section_padding || 'md';
+  const minHeight = config.section_min_height || '';
+  const maxWidth = config.section_max_width || 'normal';
+  const rounded = config.section_rounded ?? false;
+
+  const paddingY = PADDING_MAP[padding] || PADDING_MAP.md;
+  const maxW = MAX_WIDTH_MAP[maxWidth] || MAX_WIDTH_MAP.normal;
+
+  const hasCustomStyle = bgImage || overlayColor || minHeight || padding !== 'md' || maxWidth !== 'normal' || rounded;
+  if (!hasCustomStyle) return <>{children}</>;
+
+  return (
+    <div
+      key={sectionKey}
+      className="relative w-full"
+      style={{
+        backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: minHeight || undefined,
+        borderRadius: rounded ? '1rem' : undefined,
+        overflow: rounded ? 'hidden' : undefined,
+      }}
+    >
+      {bgImage && overlayColor && (
+        <div
+          className="absolute inset-0 z-0"
+          style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
+        />
+      )}
+      <div
+        className="relative z-10 mx-auto w-full"
+        style={{
+          paddingTop: paddingY,
+          paddingBottom: paddingY,
+          maxWidth: maxW,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 export const renderLandingSection = (
   section: LandingSection,
   options: RenderOptions,
@@ -33,33 +99,40 @@ export const renderLandingSection = (
   const { primaryColor, onFormSubmit, isSubmitting } = options;
   const props = { config: section.config, primaryColor };
 
+  let content: React.ReactNode = null;
+
   switch (section.type) {
-    case 'hero': return <LandingHero key={section.id} {...props} />;
-    case 'trust_badges': return <LandingTrustBadges key={section.id} {...props} />;
-    case 'problems_grid': return <LandingProblemsGrid key={section.id} {...props} />;
-    case 'cta_banner': return <LandingCtaBanner key={section.id} {...props} />;
-    case 'embedded_form': return (
+    case 'hero': content = <LandingHero {...props} />; break;
+    case 'trust_badges': content = <LandingTrustBadges {...props} />; break;
+    case 'problems_grid': content = <LandingProblemsGrid {...props} />; break;
+    case 'cta_banner': content = <LandingCtaBanner {...props} />; break;
+    case 'embedded_form': content = (
       <LandingEmbeddedForm
-        key={section.id}
         {...props}
         onSubmit={onFormSubmit || (async () => {})}
         isSubmitting={isSubmitting || false}
       />
-    );
-    case 'benefits': return <LandingBenefits key={section.id} {...props} />;
-    case 'team': return <LandingTeam key={section.id} {...props} />;
-    case 'faq': return <LandingFaq key={section.id} {...props} />;
-    case 'testimonials': return <LandingTestimonials key={section.id} {...props} />;
-    case 'text_image': return <LandingTextImage key={section.id} {...props} />;
-    case 'custom_html': return <LandingCustomHtml key={section.id} config={section.config} />;
-    case 'countdown': return <LandingCountdown key={section.id} {...props} />;
-    case 'video': return <LandingVideo key={section.id} {...props} />;
-    case 'numbers': return <LandingNumbers key={section.id} {...props} />;
-    case 'whatsapp_cta': return <LandingWhatsappCta key={section.id} {...props} />;
-    case 'logo_carousel': return <LandingLogoCarousel key={section.id} {...props} />;
-    case 'price_table': return <LandingPriceTable key={section.id} {...props} />;
-    case 'process_steps': return <LandingProcessSteps key={section.id} {...props} />;
-    case 'guarantee': return <LandingGuarantee key={section.id} {...props} />;
+    ); break;
+    case 'benefits': content = <LandingBenefits {...props} />; break;
+    case 'team': content = <LandingTeam {...props} />; break;
+    case 'faq': content = <LandingFaq {...props} />; break;
+    case 'testimonials': content = <LandingTestimonials {...props} />; break;
+    case 'text_image': content = <LandingTextImage {...props} />; break;
+    case 'custom_html': content = <LandingCustomHtml config={section.config} />; break;
+    case 'countdown': content = <LandingCountdown {...props} />; break;
+    case 'video': content = <LandingVideo {...props} />; break;
+    case 'numbers': content = <LandingNumbers {...props} />; break;
+    case 'whatsapp_cta': content = <LandingWhatsappCta {...props} />; break;
+    case 'logo_carousel': content = <LandingLogoCarousel {...props} />; break;
+    case 'price_table': content = <LandingPriceTable {...props} />; break;
+    case 'process_steps': content = <LandingProcessSteps {...props} />; break;
+    case 'guarantee': content = <LandingGuarantee {...props} />; break;
     default: return null;
   }
+
+  return (
+    <SectionWrapper key={section.id} config={section.config} sectionKey={section.id}>
+      {content}
+    </SectionWrapper>
+  );
 };

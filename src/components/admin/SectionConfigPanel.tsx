@@ -613,8 +613,68 @@ export const SectionConfigPanel: React.FC<SectionConfigPanelProps> = ({ section,
     }
   };
 
+  const renderUniversalStyle = () => (
+    <AccordionItem value="section-style">
+      <AccordionTrigger className="text-xs font-semibold">🎨 Estilo da Seção</AccordionTrigger>
+      <AccordionContent className="space-y-3">
+        <Field label="Imagem de fundo">
+          <ImagePickerField value={c.section_bg_image || ''} onChange={(v) => set('section_bg_image', v)} />
+        </Field>
+        {c.section_bg_image && (
+          <>
+            <ColorField label="Cor do overlay" value={c.section_overlay_color} onChange={(v) => set('section_overlay_color', v)} />
+            <Field label="Opacidade do overlay">
+              <div className="flex items-center gap-3">
+                <input
+                  type="range" min={0} max={1} step={0.05}
+                  value={c.section_overlay_opacity ?? 0.5}
+                  onChange={(e) => set('section_overlay_opacity', parseFloat(e.target.value))}
+                  className="flex-1 h-2 accent-primary"
+                />
+                <span className="text-xs text-muted-foreground w-8 text-right">
+                  {Math.round((c.section_overlay_opacity ?? 0.5) * 100)}%
+                </span>
+              </div>
+            </Field>
+          </>
+        )}
+        <Field label="Espaçamento vertical">
+          <Select value={c.section_padding || 'md'} onValueChange={(v) => set('section_padding', v)}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Nenhum</SelectItem>
+              <SelectItem value="sm">Pequeno</SelectItem>
+              <SelectItem value="md">Médio (padrão)</SelectItem>
+              <SelectItem value="lg">Grande</SelectItem>
+              <SelectItem value="xl">Extra grande</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Altura mínima">
+          <Input value={c.section_min_height || ''} onChange={(e) => set('section_min_height', e.target.value)}
+            placeholder="Ex: 60vh, 400px, vazio = auto" className="h-8 text-xs" />
+        </Field>
+        <Field label="Largura máxima">
+          <Select value={c.section_max_width || 'normal'} onValueChange={(v) => set('section_max_width', v)}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="normal">Normal (72rem)</SelectItem>
+              <SelectItem value="wide">Largo (90rem)</SelectItem>
+              <SelectItem value="full">Tela cheia</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <div className="flex items-center gap-2">
+          <Switch checked={!!c.section_rounded} onCheckedChange={(v) => set('section_rounded', v)} />
+          <Label className="text-xs">Bordas arredondadas</Label>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  );
+
   return (
-    <Accordion type="multiple" defaultValue={['content', 'style']} className="w-full">
+    <Accordion type="multiple" defaultValue={['content', 'style', 'section-style']} className="w-full">
+      {renderUniversalStyle()}
       {renderByType()}
     </Accordion>
   );
