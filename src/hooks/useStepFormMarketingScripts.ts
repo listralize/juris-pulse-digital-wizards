@@ -105,7 +105,8 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
       // É o método mais confiável: não depende do GTM e inclui o transaction_id
       // para deduplicação de conversões online/offline (Enhanced Conversions).
       // Configurado no StepFormBuilder → aba Tracking → Google Ads — Conversão Direta.
-      const gadsId = (config.google_ads_conversion_id || '').trim();
+      const rawGadsId = (config.google_ads_conversion_id || '').trim();
+      const gadsId = rawGadsId && !rawGadsId.startsWith('AW-') ? `AW-${rawGadsId}` : rawGadsId;
       const gadsLabel = (config.google_ads_conversion_label || '').trim();
       if (gadsId && gadsLabel) {
         implementGoogleAdsConversion(gadsId, gadsLabel);
