@@ -40,6 +40,29 @@ export const getDefaultSectionConfig = (type: LandingSection['type']): Record<st
       days: 30,
       description: 'Se não ficar satisfeito, trabalhamos até resolver',
     };
+    case 'divider': return {
+      style: 'line',
+      height: '40px',
+      line_width: '60%',
+      use_gradient: true,
+    };
+    case 'comparison': return {
+      title: 'Por que nos escolher?',
+      left_title: 'Sem Advogado',
+      right_title: 'Com Advogado',
+      layout: 'cards',
+      items: [
+        { feature: 'Orientação', left_text: 'Sem suporte jurídico', right_text: 'Orientação especializada' },
+        { feature: 'Prazos', left_text: 'Risco de perder prazos', right_text: 'Controle total de prazos' },
+        { feature: 'Resultado', left_text: 'Resultado incerto', right_text: 'Maiores chances de sucesso' },
+      ],
+    };
+    case 'banner_marquee': return {
+      texts: ['Consulta Gratuita', 'Atendimento 24h', 'Especialistas Certificados'],
+      speed: 30,
+      separator: '★',
+      font_size: '1rem',
+    };
     default: return {};
   }
 };

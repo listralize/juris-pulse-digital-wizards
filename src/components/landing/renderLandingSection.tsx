@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { LandingSection } from '@/types/stepFormTypes';
 import { LandingHero } from './LandingHero';
 import { LandingTrustBadges } from './LandingTrustBadges';
@@ -19,6 +20,9 @@ import { LandingLogoCarousel } from './LandingLogoCarousel';
 import { LandingPriceTable } from './LandingPriceTable';
 import { LandingProcessSteps } from './LandingProcessSteps';
 import { LandingGuarantee } from './LandingGuarantee';
+import { LandingDivider } from './LandingDivider';
+import { LandingComparison } from './LandingComparison';
+import { LandingBannerMarquee } from './LandingBannerMarquee';
 
 interface RenderOptions {
   primaryColor: string;
@@ -46,33 +50,47 @@ const SectionWrapper: React.FC<{
   sectionKey: string;
 }> = ({ config, children, sectionKey }) => {
   const bgImage = config.section_bg_image;
+  const bgColor = config.section_bg_color;
+  const bgGradient = config.section_bg_gradient;
   const overlayColor = config.section_overlay_color;
   const overlayOpacity = config.section_overlay_opacity ?? 0.5;
   const padding = config.section_padding || 'md';
   const minHeight = config.section_min_height || '';
   const maxWidth = config.section_max_width || 'normal';
   const rounded = config.section_rounded ?? false;
+  const textAlign = config.section_text_align;
+  const borderColor = config.section_border_color;
+  const borderWidth = config.section_border_width;
+  const animate = config.section_animate ?? false;
 
   const paddingY = PADDING_MAP[padding] || PADDING_MAP.md;
   const maxW = MAX_WIDTH_MAP[maxWidth] || MAX_WIDTH_MAP.normal;
 
-  const hasCustomStyle = bgImage || overlayColor || minHeight || padding !== 'md' || maxWidth !== 'normal' || rounded;
-  if (!hasCustomStyle) return <>{children}</>;
+  // Compute background
+  let background: string | undefined;
+  if (bgImage) {
+    background = `url(${bgImage}) center/cover no-repeat`;
+  } else if (bgGradient) {
+    background = bgGradient;
+  }
 
-  return (
+  const content = (
     <div
       key={sectionKey}
       className="relative w-full"
       style={{
-        backgroundImage: bgImage ? `url(${bgImage})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background,
+        backgroundColor: !bgImage && !bgGradient && bgColor ? bgColor : undefined,
         minHeight: minHeight || undefined,
         borderRadius: rounded ? '1rem' : undefined,
         overflow: rounded ? 'hidden' : undefined,
+        borderColor: borderColor || undefined,
+        borderWidth: borderColor && borderWidth ? borderWidth : undefined,
+        borderStyle: borderColor ? 'solid' : undefined,
+        textAlign: textAlign as any || undefined,
       }}
     >
-      {bgImage && overlayColor && (
+      {overlayColor && (
         <div
           className="absolute inset-0 z-0"
           style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
@@ -90,6 +108,21 @@ const SectionWrapper: React.FC<{
       </div>
     </div>
   );
+
+  if (animate) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-50px' }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
+        {content}
+      </motion.div>
+    );
+  }
+
+  return content;
 };
 
 export const renderLandingSection = (
@@ -127,6 +160,9 @@ export const renderLandingSection = (
     case 'price_table': content = <LandingPriceTable {...props} />; break;
     case 'process_steps': content = <LandingProcessSteps {...props} />; break;
     case 'guarantee': content = <LandingGuarantee {...props} />; break;
+    case 'divider': content = <LandingDivider {...props} />; break;
+    case 'comparison': content = <LandingComparison {...props} />; break;
+    case 'banner_marquee': content = <LandingBannerMarquee {...props} />; break;
     default: return null;
   }
 
