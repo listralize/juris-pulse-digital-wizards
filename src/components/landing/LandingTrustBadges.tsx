@@ -34,7 +34,7 @@ export const LandingTrustBadges: React.FC<LandingTrustBadgesProps> = ({ config, 
           className={`flex flex-wrap justify-center ${
             style === 'card' ? 'grid gap-4' : 'gap-3 md:gap-5'
           }`}
-          style={style === 'card' ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } : undefined}
+          style={undefined}
         >
           {items.map((item, idx) => {
             const Icon = ICONS[item.icon || 'shield'] || Shield;
