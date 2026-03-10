@@ -254,7 +254,11 @@ export const useStepFormMarketingScripts = (formSlug: string) => {
           // Enhanced Conversions — campos críticos para deduplicação
           transaction_id: transactionId,
           gclid: gclid,
-          // Dados do usuário para Enhanced Conversions for Leads
+          // GTM Data Layer Variables (conforme configurado no GTM: DL - user_name, etc.)
+          user_name: nome,
+          user_email: email,
+          user_phone: telefone,
+          // Aliases para compatibilidade com configurações anteriores
           customer_email: email,
           customer_phone: telefone,
           customer_full_name: nome,

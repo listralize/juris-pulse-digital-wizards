@@ -148,6 +148,7 @@ export const useFormMarketingScripts = (formId: string) => {
         setTimeout(() => {
           (window as any).dataLayer = (window as any).dataLayer || [];
           
+          const ud = event.detail?.userData || {};
           const eventData = {
             event: eventName,
             form_id: formId,
@@ -155,7 +156,11 @@ export const useFormMarketingScripts = (formId: string) => {
             page_url: window.location.href,
             timestamp: new Date().toISOString(),
             domain: window.location.hostname,
-            user_data: event.detail?.userData || {}
+            // GTM Data Layer Variables (conforme configurado no GTM)
+            user_name: ud.nome || ud.name || ud.Nome || '',
+            user_email: ud.email || ud.Email || '',
+            user_phone: ud.telefone || ud.phone || ud.Telefone || '',
+            user_data: ud
           };
           
           (window as any).dataLayer.push(eventData);
