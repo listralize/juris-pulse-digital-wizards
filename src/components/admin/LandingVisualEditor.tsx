@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { LandingSection } from '@/types/stepFormTypes';
+import { getDefaultSectionConfig } from '@/components/landing/landingSectionTypes';
 import { LandingPreview } from './LandingPreview';
 import { SectionConfigPanel } from './SectionConfigPanel';
 
