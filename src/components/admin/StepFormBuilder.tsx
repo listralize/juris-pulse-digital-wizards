@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Save, Eye, Image as ImageIcon, Code2, Edit3, Target, FormInput, Gift, Timer, BarChart3, Palette, TrendingUp, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { divorcioLandingTemplate } from '@/data/divorcioLandingTemplate';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGallery } from './ImageGallery';
@@ -201,6 +202,16 @@ export const StepFormBuilder: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const createFromTemplate = (template: typeof divorcioLandingTemplate) => {
+    const newForm: StepFormData = {
+      ...template,
+      slug: template.slug + '-' + Date.now().toString(36),
+    } as StepFormData;
+    setSelectedForm(newForm);
+    setIsCreating(true);
+    setShowNewFormDialog(false);
   };
 
   const createNewForm = (pageType: 'quiz' | 'landing_page' = 'quiz') => {
@@ -1108,9 +1119,8 @@ export const StepFormBuilder: React.FC = () => {
         </Card>
       )}
 
-      {/* Dialog para escolher tipo de formulário */}
       <Dialog open={showNewFormDialog} onOpenChange={setShowNewFormDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Criar Novo</DialogTitle>
           </DialogHeader>
@@ -1132,6 +1142,22 @@ export const StepFormBuilder: React.FC = () => {
               <span className="font-bold">Landing Page</span>
               <span className="text-xs text-muted-foreground text-center">Página de conversão com seções personalizáveis</span>
             </button>
+          </div>
+
+          <div className="border-t pt-4 mt-2">
+            <p className="text-sm font-semibold mb-3">📋 Templates Prontos</p>
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                onClick={() => createFromTemplate(divorcioLandingTemplate)}
+                className="flex items-center gap-4 p-4 rounded-xl border-2 hover:border-primary hover:bg-primary/5 transition-colors text-left"
+              >
+                <FileText className="w-8 h-8 text-primary shrink-0" />
+                <div>
+                  <span className="font-bold text-sm">Landing Page — Divórcio</span>
+                  <span className="text-xs text-muted-foreground block mt-0.5">14 seções otimizadas para conversão • SEO completo • Dark theme profissional</span>
+                </div>
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
