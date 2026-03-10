@@ -43,7 +43,7 @@ const SECTION_TYPES: Array<{
   { type: 'logo_carousel', label: 'Logos', icon: ImageIcon, description: 'Parceiros/mídia', category: 'social_proof' },
   { type: 'divider', label: 'Divisor', icon: Minus, description: 'Espaçador ou linha', category: 'content' },
   { type: 'comparison', label: 'Comparação', icon: GitCompareArrows, description: 'Antes vs Depois', category: 'social_proof' },
-  { type: 'banner_marquee', label: 'Marquee', icon: Marquee, description: 'Texto rotativo', category: 'conversion' },
+  { type: 'banner_marquee', label: 'Marquee', icon: TextCursorInput, description: 'Texto rotativo', category: 'conversion' },
 ];
 
 const STARTER_TEMPLATES: Array<{
