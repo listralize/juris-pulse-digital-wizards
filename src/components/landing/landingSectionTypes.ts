@@ -63,6 +63,11 @@ export const getDefaultSectionConfig = (type: LandingSection['type']): Record<st
       separator: '★',
       font_size: '1rem',
     };
+    case 'embedded_stepform': return {
+      title: 'Responda e receba orientação',
+      subtitle: 'Leva menos de 1 minuto.',
+      anchor_id: 'formulario',
+    };
     default: return {};
   }
 };
