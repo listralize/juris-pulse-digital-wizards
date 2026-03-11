@@ -30,6 +30,7 @@ const SECTION_TYPES: Array<{
   { type: 'process_steps', label: 'Etapas', icon: ListOrdered, description: 'Como funciona', category: 'content' },
   { type: 'faq', label: 'FAQ', icon: HelpCircle, description: 'Perguntas frequentes', category: 'content' },
   { type: 'embedded_form', label: 'Formulário', icon: FormInput, description: 'Captação de leads', category: 'conversion' },
+  { type: 'embedded_stepform', label: 'Quiz Integrado', icon: FormInput, description: 'Quiz com conversão completa', category: 'conversion' },
   { type: 'cta_banner', label: 'CTA Banner', icon: Megaphone, description: 'Chamada para ação', category: 'conversion' },
   { type: 'whatsapp_cta', label: 'WhatsApp CTA', icon: MessageCircle, description: 'Botão de WhatsApp', category: 'conversion' },
   { type: 'countdown', label: 'Contador', icon: Timer, description: 'Timer de urgência', category: 'conversion' },

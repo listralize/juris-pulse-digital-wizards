@@ -121,7 +121,7 @@ export interface StepFormStep {
 export interface LandingSection {
   id: string;
   type: 'hero' | 'trust_badges' | 'problems_grid' | 'cta_banner'
-    | 'embedded_form' | 'benefits' | 'team' | 'faq' | 'testimonials'
+    | 'embedded_form' | 'embedded_stepform' | 'benefits' | 'team' | 'faq' | 'testimonials'
     | 'text_image' | 'custom_html' | 'countdown' | 'video' | 'numbers'
     | 'whatsapp_cta' | 'logo_carousel' | 'price_table' | 'process_steps' | 'guarantee'
     | 'divider' | 'comparison' | 'banner_marquee';

@@ -5,7 +5,7 @@ import { renderLandingSection } from '@/components/landing/renderLandingSection'
 
 const LABELS: Record<string, string> = {
   hero: 'Hero', trust_badges: 'Badges', problems_grid: 'Problemas', cta_banner: 'CTA',
-  embedded_form: 'Formulário', benefits: 'Benefícios', team: 'Equipe', faq: 'FAQ',
+  embedded_form: 'Formulário', embedded_stepform: 'Quiz Integrado', benefits: 'Benefícios', team: 'Equipe', faq: 'FAQ',
   testimonials: 'Depoimentos', text_image: 'Texto+Imagem', custom_html: 'HTML',
   countdown: 'Contador', video: 'Vídeo', numbers: 'Números',
   whatsapp_cta: 'WhatsApp', logo_carousel: 'Logos',
