@@ -266,6 +266,7 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
           primaryColor,
           onFormSubmit: handleFormSubmit,
           isSubmitting,
+          form,
         })
       )}
       <StepFormFooter footerConfig={form.footer_config} />

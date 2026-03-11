@@ -131,7 +131,7 @@ export const renderLandingSection = (
   section: LandingSection,
   options: RenderOptions,
 ): React.ReactNode => {
-  const { primaryColor, onFormSubmit, isSubmitting } = options;
+  const { primaryColor, onFormSubmit, isSubmitting, form } = options;
   const props = { config: section.config, primaryColor };
 
   let content: React.ReactNode = null;
@@ -148,6 +148,9 @@ export const renderLandingSection = (
         isSubmitting={isSubmitting || false}
       />
     ); break;
+    case 'embedded_stepform': content = form ? (
+      <LandingEmbeddedStepForm {...props} form={form} />
+    ) : null; break;
     case 'benefits': content = <LandingBenefits {...props} />; break;
     case 'team': content = <LandingTeam {...props} />; break;
     case 'faq': content = <LandingFaq {...props} />; break;
