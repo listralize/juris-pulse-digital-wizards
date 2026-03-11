@@ -128,10 +128,14 @@ export const useContactForm = (externalFormConfig?: any) => {
         }
       );
 
+      // ─── GCLID + Transaction ID para Enhanced Conversions ───
+      const urlParams = new URLSearchParams(window.location.search);
+      const gclid = urlParams.get('gclid') || sessionStorage.getItem('_gclid') || '';
+      if (gclid) sessionStorage.setItem('_gclid', gclid);
+      const transactionId = `contact_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+
       // Garantir que dataLayer existe e enviar eventos GTM
-      if (!(window as any).dataLayer) {
-        (window as any).dataLayer = [];
-      }
+      (window as any).dataLayer = (window as any).dataLayer || [];
       
       const baseEventData = {
         form_id: formConfig.id || 'default',
@@ -139,29 +143,67 @@ export const useContactForm = (externalFormConfig?: any) => {
         page_url: window.location.href,
         user_email: submitData.email,
         user_name: submitData.name,
+        user_phone: submitData.phone,
+        customer_email: submitData.email,
+        customer_full_name: submitData.name,
+        customer_phone: submitData.phone,
         service: submitData.service,
+        transaction_id: transactionId,
+        gclid: gclid,
         timestamp: new Date().toISOString()
       };
       
       // Enviar evento "submit" para Google Ads
-      (window as any).dataLayer.push({
-        event: 'submit',
-        ...baseEventData
-      });
+      (window as any).dataLayer.push({ event: 'submit', ...baseEventData });
       
       // Enviar evento "form_submit" para outras tags
-      (window as any).dataLayer.push({
-        event: 'form_submit',
-        ...baseEventData
-      });
-      
-      // Duplicar envios para garantir captura
-      setTimeout(() => {
-        (window as any).dataLayer.push({
-          event: 'submit',
-          ...baseEventData
-        });
-      }, 100);
+      (window as any).dataLayer.push({ event: 'form_submit', ...baseEventData });
+
+      // ─── Google Ads — disparo direto como backup ───
+      try {
+        const { data: mktSettings } = await supabase
+          .from('marketing_settings')
+          .select('form_tracking_config')
+          .limit(1)
+          .single();
+
+        const ftc = mktSettings?.form_tracking_config as any;
+        const rawGadsId = (ftc?.google_ads_conversion_id || '').trim();
+        const gadsId = rawGadsId && !rawGadsId.startsWith('AW-') ? `AW-${rawGadsId}` : rawGadsId;
+        const gadsLabel = (ftc?.google_ads_conversion_label || '').trim();
+
+        if (gadsId && gadsLabel) {
+          const sendTo = `${gadsId}/${gadsLabel}`;
+          const fireConversion = (gtagFn: Function) => {
+            gtagFn('event', 'conversion', {
+              send_to: sendTo,
+              transaction_id: transactionId,
+              value: 1.0,
+              currency: 'BRL',
+            });
+            console.log(`[ContactForm] Google Ads conversion fired: ${sendTo}`);
+          };
+
+          if ((window as any).gtag) {
+            fireConversion((window as any).gtag);
+          } else {
+            const gtagScript = document.createElement('script');
+            gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${gadsId}`;
+            gtagScript.async = true;
+            gtagScript.onload = () => {
+              (window as any).dataLayer = (window as any).dataLayer || [];
+              function gtag(...args: any[]) { (window as any).dataLayer.push(args); }
+              (window as any).gtag = gtag;
+              gtag('js', new Date());
+              gtag('config', gadsId);
+              fireConversion(gtag);
+            };
+            document.head.appendChild(gtagScript);
+          }
+        }
+      } catch (gadsErr) {
+        console.error('[ContactForm] Google Ads direct error:', gadsErr);
+      }
 
       // Disparar evento customizado para scripts de marketing (backup)
       const successEvent = new CustomEvent('formSubmitSuccess', {
