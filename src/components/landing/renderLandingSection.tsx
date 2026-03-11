@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { LandingSection } from '@/types/stepFormTypes';
+import type { LandingSection, StepFormData } from '@/types/stepFormTypes';
 import { LandingHero } from './LandingHero';
 import { LandingTrustBadges } from './LandingTrustBadges';
 import { LandingProblemsGrid } from './LandingProblemsGrid';
 import { LandingCtaBanner } from './LandingCtaBanner';
 import { LandingEmbeddedForm } from './LandingEmbeddedForm';
+import { LandingEmbeddedStepForm } from './LandingEmbeddedStepForm';
 import { LandingBenefits } from './LandingBenefits';
 import { LandingTeam } from './LandingTeam';
 import { LandingFaq } from './LandingFaq';
@@ -28,6 +29,7 @@ interface RenderOptions {
   primaryColor: string;
   onFormSubmit?: (data: Record<string, string>) => Promise<void>;
   isSubmitting?: boolean;
+  form?: StepFormData;
 }
 
 const PADDING_MAP: Record<string, string> = {
