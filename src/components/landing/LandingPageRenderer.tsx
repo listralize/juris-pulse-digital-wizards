@@ -17,6 +17,12 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const primaryColor = form.styles.primary_color || '#4CAF50';
 
+  // Persistir gclid no sessionStorage na primeira visita
+  useEffect(() => {
+    const gclid = new URLSearchParams(window.location.search).get('gclid');
+    if (gclid) sessionStorage.setItem('_gclid', gclid);
+  }, []);
+
   // SEO meta injection
   useEffect(() => {
     const seo: any = form.seo_config || form.seo;
@@ -155,6 +161,71 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
         logger.info('dataLayer.push fired for landing page submit', { transactionId });
       } catch (dlErr) {
         logger.error('dataLayer.push error:', dlErr);
+      }
+
+      // ─── Google Ads — disparo direto como backup (não depende do GTM) ───
+      try {
+        const { data: stepFormRow } = await supabase
+          .from('step_forms')
+          .select('tracking_config')
+          .eq('slug', form.slug)
+          .single();
+
+        const tc = stepFormRow?.tracking_config as any;
+        const rawGadsId = (tc?.google_ads_conversion_id || '').trim();
+        const gadsId = rawGadsId && !rawGadsId.startsWith('AW-') ? `AW-${rawGadsId}` : rawGadsId;
+        const gadsLabel = (tc?.google_ads_conversion_label || '').trim();
+
+        if (gadsId && gadsLabel) {
+          const sendTo = `${gadsId}/${gadsLabel}`;
+          const fireConversion = (gtagFn: Function) => {
+            gtagFn('event', 'conversion', {
+              send_to: sendTo,
+              transaction_id: transactionId,
+              value: 1.0,
+              currency: 'BRL',
+            });
+            logger.info(`[LP] Google Ads conversion fired: ${sendTo} | txn: ${transactionId}`);
+          };
+
+          if ((window as any).gtag) {
+            fireConversion((window as any).gtag);
+          } else {
+            const gtagScript = document.createElement('script');
+            gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${gadsId}`;
+            gtagScript.async = true;
+            gtagScript.onload = () => {
+              (window as any).dataLayer = (window as any).dataLayer || [];
+              function gtag(...args: any[]) { (window as any).dataLayer.push(args); }
+              (window as any).gtag = gtag;
+              gtag('js', new Date());
+              gtag('config', gadsId);
+              fireConversion(gtag);
+            };
+            document.head.appendChild(gtagScript);
+          }
+        }
+      } catch (gadsErr) {
+        logger.error('[LP] Google Ads direct conversion error:', gadsErr);
+      }
+
+      // Disparar evento customizado para handlers de marketing (backup)
+      try {
+        const successEvent = new CustomEvent('stepFormSubmitSuccess', {
+          detail: {
+            formSlug: form.slug,
+            formName: form.name,
+            transactionId,
+            gclid: gclid || '',
+            leadId,
+            sessionId,
+            userData: { email: userEmail, nome: userName, telefone: userPhone },
+            extractedData: { email: userEmail, name: userName, phone: userPhone },
+          },
+        });
+        window.dispatchEvent(successEvent);
+      } catch (evtErr) {
+        logger.error('[LP] stepFormSubmitSuccess dispatch error:', evtErr);
       }
 
       if (form.webhook_url) {
