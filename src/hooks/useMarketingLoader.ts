@@ -48,6 +48,12 @@ export const useMarketingLoader = () => {
         loadGoogleAnalytics(settings.google_analytics_id, settings.google_analytics_custom_code);
       }
 
+      // Load Google Ads global tag from form_tracking_config
+      const trackingConfig = settings.form_tracking_config as Record<string, any> | null;
+      if (trackingConfig?.google_ads_conversion_id) {
+        loadGoogleAdsTag(trackingConfig.google_ads_conversion_id);
+      }
+
       if (settings.custom_head_scripts) {
         injectCustomScripts(settings.custom_head_scripts, 'head');
       }
