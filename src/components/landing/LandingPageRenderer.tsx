@@ -17,6 +17,12 @@ export const LandingPageRenderer: React.FC<LandingPageRendererProps> = ({ form }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const primaryColor = form.styles.primary_color || '#4CAF50';
 
+  // Persistir gclid no sessionStorage na primeira visita
+  useEffect(() => {
+    const gclid = new URLSearchParams(window.location.search).get('gclid');
+    if (gclid) sessionStorage.setItem('_gclid', gclid);
+  }, []);
+
   // SEO meta injection
   useEffect(() => {
     const seo: any = form.seo_config || form.seo;
