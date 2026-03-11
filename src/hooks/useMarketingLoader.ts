@@ -131,6 +131,34 @@ export const useMarketingLoader = () => {
     document.head.appendChild(configScript);
   };
 
+  const loadGoogleAdsTag = (adsId: string) => {
+    // Normalize: ensure AW- prefix
+    const normalizedId = adsId.startsWith('AW-') ? adsId : `AW-${adsId}`;
+
+    // Skip if already loaded (by index.html fallback or prior call)
+    if (document.querySelector(`script[data-marketing="gads"][data-id="${normalizedId}"]`)) return;
+
+    // If gtag.js isn't loaded yet (e.g. GA is disabled), load it
+    if (!document.querySelector(`script[src*="googletagmanager.com/gtag/js"]`)) {
+      const gtagScript = document.createElement('script');
+      gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${normalizedId}`;
+      gtagScript.async = true;
+      gtagScript.setAttribute('data-marketing', 'gads');
+      gtagScript.setAttribute('data-id', normalizedId);
+      document.head.appendChild(gtagScript);
+    }
+
+    // Config the AW- ID (gtag function may already exist from index.html)
+    const configScript = document.createElement('script');
+    configScript.innerHTML = `
+      window.dataLayer=window.dataLayer||[];
+      if(!window.gtag){function gtag(){dataLayer.push(arguments);} window.gtag=gtag;}
+      gtag('config','${normalizedId}');
+    `;
+    configScript.setAttribute('data-marketing', 'gads-config');
+    document.head.appendChild(configScript);
+  };
+
   const injectCustomScripts = (html: string, target: 'head' | 'body') => {
     const container = document.createElement('div');
     container.setAttribute('data-marketing', `custom-${target}`);
