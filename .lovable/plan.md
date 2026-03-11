@@ -1,40 +1,24 @@
 
+# Auditoria Landing Page Builder — Concluída
 
-# Diagnóstico: Google Ads diz "Seu site não tem uma tag do Google"
+## Alterações Realizadas
 
-## Causa Raiz
+### 1. ✅ Tracking GTM no LandingPageRenderer
+- Adicionado `dataLayer.push` com `transaction_id`, `user_name`, `user_phone`, `user_email` e aliases no `handleFormSubmit`
+- Landing pages agora disparam conversões no Google Ads igual aos StepForms
 
-O Google Ads está dizendo que **não encontra a Google Tag (gtag.js) instalada globalmente** no site `stadv.com.br`. O ID é `AW-16884173585`.
+### 2. ✅ Grids Responsivos Corrigidos (6 componentes)
+- `LandingBenefits`, `LandingProblemsGrid`, `LandingNumbers`, `LandingTestimonials`, `LandingFaq`, `LandingTrustBadges`
+- Substituído `gridTemplateColumns` inline por classes Tailwind responsivas (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`)
 
-O problema é simples: o `useMarketingLoader.ts` carrega **GTM** (`GTM-xxx`) e **Google Analytics** (`G-xxx`), mas **nunca carrega a tag do Google Ads** (`AW-xxx`) globalmente. 
+### 3. ✅ Código Duplicado Removido
+- Deletado `LandingPageEditor.tsx` (175 linhas) e `LandingSectionEditor.tsx` (226 linhas)
+- Extraído `landingSectionTypes.ts` (getDefaultSectionConfig compartilhado)
+- Extraído `renderLandingSection.tsx` (renderizador compartilhado)
+- `LandingVisualEditor` e `LandingPreview` agora importam dos utilitários
 
-Atualmente, o código só dispara `gtag('event', 'conversion')` no momento do submit do formulário — mas sem a tag base `gtag('config', 'AW-16884173585')` carregada globalmente em todas as páginas, o Google Ads:
-1. Não detecta a tag no site (erro que você vê no print)
-2. Não consegue atribuir conversões mesmo quando o evento é disparado
-3. Não consegue fazer remarketing/audience building
+### 4. ✅ SEO Melhorado no LandingPageRenderer
+- Adicionado canonical tag e JSON-LD (WebPage schema)
 
-## Correção
-
-### Arquivo: `src/hooks/useMarketingLoader.ts`
-Adicionar carregamento global da tag Google Ads (`AW-`) usando o `google_ads_conversion_id` salvo no `form_tracking_config` da tabela `marketing_settings`. Após carregar GTM e GA, também carregar:
-
-```
-gtag.js?id=AW-16884173585
-gtag('config', 'AW-16884173585');
-```
-
-Isso resolve o erro "Seu site não tem uma tag do Google" e permite que as conversões disparadas nos formulários sejam atribuídas corretamente.
-
-**Mudanças específicas:**
-- Na função `loadFromDatabase()`, após carregar GTM/GA, ler `form_tracking_config.google_ads_conversion_id` dos settings
-- Criar função `loadGoogleAdsTag(adsId)` que injeta `gtag.js` e `gtag('config', 'AW-xxx')` globalmente
-- Reutilizar o `gtag` global se já existir (evitar duplicação com GA)
-
-### Arquivo: `index.html` (opcional mas recomendado)
-Como backup, adicionar a tag do Google diretamente no `<head>` do `index.html` para garantir que esteja presente antes mesmo do React carregar. Isso é exatamente o que o Google Ads pede no print (Opção 2).
-
-| Arquivo | Mudança |
-|---------|---------|
-| `src/hooks/useMarketingLoader.ts` | Adicionar `loadGoogleAdsTag()` que carrega `gtag.js` + `gtag('config', 'AW-xxx')` globalmente |
-| `index.html` | Adicionar tag do Google Ads hardcoded no `<head>` como fallback imediato |
-
+### 5. ✅ Bug de Undo/Redo Corrigido
+- `historyIdx` agora calculado corretamente quando o array é truncado
